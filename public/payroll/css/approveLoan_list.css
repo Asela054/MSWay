@@ -1,0 +1,16 @@
+@charset "utf-8";
+/* CSS Document */
+
+td.details-control{
+	position: relative;
+}
+td.details-control::before {
+	position: absolute;
+	font-family:"Font Awesome 5 Free";
+	font-weight: 900;
+	content: "\f358";
+	cursor: pointer;
+}
+tr.shown td.details-control::before {
+	content: "\f35b";
+}

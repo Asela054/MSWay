@@ -1,0 +1,15 @@
+.filter-btn{
+    margin-top: 6px;
+    min-width: 100px;
+}
+
+div .dt-buttons{
+    float : left;
+}
+
+.dataTables_length{
+    float : left;
+}
+
+table.dataTable thead {background-color:#d5dbec}
+table thead {background-color:#d5dbec}
