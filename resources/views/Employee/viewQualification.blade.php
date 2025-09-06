@@ -607,7 +607,7 @@
 
             </div>
         </div>
-        <div class="container-fluid mt-4">
+        <!-- <div class="container-fluid mt-4">
             <div class="card mb-4">
                 <div class="card-header">Attachments</div>
                 <div class="card-body">
@@ -656,7 +656,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
 
 
     </main>

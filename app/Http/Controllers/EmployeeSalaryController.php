@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\EmployeeSalary;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class EmployeeSalaryController extends Controller
 {
@@ -57,9 +58,25 @@ class EmployeeSalaryController extends Controller
             abort(403);
         }
 
-        $employees = EmployeeSalary::where('emp_id',$id)->get();
- 
-        return view('Employee.viewSalaryDetails',compact('employees','id'));
+        $employees = DB::table('payroll_profiles')
+            ->leftJoin('remuneration_profiles AS rp1', function($join) {
+                $join->on('rp1.payroll_profile_id', '=', 'payroll_profiles.id')
+                     ->where('rp1.remuneration_id', '=', 2);
+            })
+            ->leftJoin('remuneration_profiles AS rp2', function($join) {
+                $join->on('rp2.payroll_profile_id', '=', 'payroll_profiles.id')
+                     ->where('rp2.remuneration_id', '=', 26);
+            })
+            ->select(
+                'payroll_profiles.basic_salary',
+                DB::raw('IFNULL(rp1.new_eligible_amount, 0) as br1'),
+                DB::raw('IFNULL(rp2.new_eligible_amount, 0) as br2'),
+                DB::raw('(payroll_profiles.basic_salary + IFNULL(rp1.new_eligible_amount, 0) + IFNULL(rp2.new_eligible_amount, 0)) as total')
+            )
+            ->where('payroll_profiles.emp_id', $id)
+            ->get();
+
+        return view('Employee.viewSalaryDetails', compact('employees', 'id'));
     }
 
     /**
