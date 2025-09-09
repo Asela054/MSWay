@@ -285,7 +285,7 @@ $(document).ready(function () {
                 "data": {'department':department, 'employee':employee, 'location': location, 'from_date': from_date, 'to_date': to_date},
             },
             columns: [
-                { data: 'emp_name_with_initial', name: 'emp_name_with_initial' },
+                { data: 'employee_display', name: 'employee_display' },
                 { data: 'dep_name', name: 'dep_name' },
                 { data: 'shift_name', name: 'shift_name' },
                 { data: 'onduty_time', name: 'onduty_time' },

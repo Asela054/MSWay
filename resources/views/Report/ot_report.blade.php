@@ -306,7 +306,7 @@
 
                         columns: [
                             { data: 'emp_id' },
-                            { data: 'emp_name_with_initial' },
+                            { data: 'employee_display' },
                             { data: 'date' },
                             { data: 'from' },
                             { data: 'to' },
@@ -380,7 +380,7 @@
 
                         columns: [
                             { data: 'emp_id' },
-                            { data: 'emp_name_with_initial' },
+                            { data: 'employee_display' },
                             { data: 'month' },
                             { data: 'work_days' },
                             { data: 'leave_days' },

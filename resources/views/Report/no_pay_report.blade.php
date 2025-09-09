@@ -252,7 +252,7 @@
 
                         columns: [
                             { data: 'emp_id' },
-                            { data: 'emp_name_with_initial' },
+                            { data: 'employee_display' },
                             { data: 'month' },
                             { data: 'work_days' },
                             { data: 'no_pay_days_data.basic_salary' },

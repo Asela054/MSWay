@@ -294,7 +294,7 @@
                 columns: [
                     { data: 'leavestatus', name: 'leavestatus' },
                     { data: 'emp_id', name: 'emp_id' },
-                    { data: 'emp_name', name: 'emp_name' },
+                    { data: 'employee_display', name: 'employee_display' },
                     { data: 'dep_name', name: 'emp_name' },
                     { data: 'leave_type', name: 'leave_type' },
                     { data: 'leave_from', name: 'leave_from' },

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Shift;
 use App\Employee;
+use App\Helpers\EmployeeHelper;
 use App\ShiftType;
 use App\Branch;
 use Illuminate\Http\Request;
@@ -43,6 +44,7 @@ class ShiftController extends Controller
             ->leftjoin('shift_types', 'shift_types.id', '=',   'employees.emp_shift')
             ->leftjoin('departments', 'employees.emp_department', '=', 'departments.id')
             ->select('employees.emp_id',
+                'employees.calling_name',
                 'employees.emp_first_name',
                 'shift_types.shift_name',
                 'shift_types.onduty_time',
@@ -69,6 +71,17 @@ class ShiftController extends Controller
 
         return Datatables::of($data)
             ->addIndexColumn()
+             ->addColumn('employee_display', function ($row) {
+                   return EmployeeHelper::getDisplayName($row);
+                   
+                })
+                ->filterColumn('employee_display', function($query, $keyword) {
+                    $query->where(function($q) use ($keyword) {
+                        $q->where('employees.emp_name_with_initial', 'like', "%{$keyword}%")
+                        ->orWhere('employees.calling_name', 'like', "%{$keyword}%")
+                        ->orWhere('employees.emp_id', 'like', "%{$keyword}%");
+                    });
+                })
             ->addColumn('action', function($row){
 
                 $btn = ' <button name="edit"

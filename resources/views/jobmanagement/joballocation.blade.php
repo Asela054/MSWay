@@ -16,7 +16,7 @@
                     <div class="row">
                         <div class="col-12">
                             @can('Job-Allocation-create')
-                                <button type="button" class="btn btn-outline-primary btn-sm fa-pull-right" name="create_record" id="create_record"><i class="fas fa-plus mr-2"></i>Add Job Locaton</button>
+                                <button type="button" class="btn btn-outline-primary btn-sm fa-pull-right" name="create_record" id="create_record"><i class="fas fa-plus mr-2"></i>Allocate Employees</button>
                             @endcan
                             </div>
                             <div class="col-12">
@@ -35,7 +35,6 @@
                                                 <th>ID </th>
                                                 <th>Employee Name</th>
                                                 <th>Location Name</th>
-                                                <th>Shift</th>
                                                 <th class="text-right">Action</th>
                                             </tr>
                                         </thead>
@@ -52,10 +51,10 @@
 
     <!-- Modal Area Start -->
     <div class="modal fade" id="formModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header p-2">
-                    <h5 class="modal-title" id="staticBackdropLabel">Add Job Allocation</h5>
+                    <h5 class="modal-title" id="staticBackdropLabel">Add Allocation</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -68,9 +67,9 @@
                                 {{ csrf_field() }}	
                                 <div class="col-4">
                                     <select name="location" id="location" class="form-control form-control-sm " style="width: 100%;" required>
-                                        <option value="">Select Job Location</option>
+                                        <option value="">Select Location</option>
                                         @foreach($locations as $location)
-                                            <option value="{{$location->id}}">{{$location->location_name}}</option>
+                                            <option value="{{$location->id}}">{{$location->location}}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -79,7 +78,6 @@
                                 <thead>
                                     <tr>
                                         <th>Empolyee Name</th>
-                                        <th>Shift</th>
                                         <th style="white-space: nowrap;">Action</th>
                                     </tr>
                                 </thead>
@@ -90,17 +88,8 @@
                                                 class="employee form-control form-control-sm" style="width:100%">
                                                 <option value="">Select Employees</option>
                                                 @foreach($employees as $employee)
-                                                <option value="{{$employee->id}}">
+                                                <option value="{{$employee->emp_id}}">
                                                     {{$employee->emp_name_with_initial}}</option>
-                                                @endforeach
-                                            </select>
-                                        </td>
-                                        <td style="white-space: nowrap;">
-                                            <select name="shift" id="shift"
-                                                class="form-control form-control-sm title" required>
-                                                <option value="">Select Shift</option>
-                                                @foreach($shifts as $shift)
-                                                <option value="{{$shift->id}}">{{$shift->shift_name}}</option>
                                                 @endforeach
                                             </select>
                                         </td>
@@ -128,10 +117,10 @@
 
     <div class="modal fade" id="formModal2" data-backdrop="static" data-keyboard="false" tabindex="-1"
         aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header p-2">
-                    <h5 class="modal-title" id="staticBackdropLabel">Edit Job Allocation</h5>
+                    <h5 class="modal-title" id="staticBackdropLabel">Edit Allocation</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -143,32 +132,23 @@
                             <form method="post" id="formTitleedit" class="form-horizontal">
                                 {{ csrf_field() }}
                                 <div class="row">
-                                    <div class="col-4">
+                                    <div class="col-6">
                                         <select name="editlocation" id="editlocation"
                                             class="form-control form-control-sm " style="width: 100%;" readonly>
-                                            <option value="">Select Job Location</option>
+                                            <option value="">Select Location</option>
                                             @foreach($locations as $location)
-                                            <option value="{{$location->id}}">{{$location->location_name}}
+                                            <option value="{{$location->id}}">{{$location->location}}
                                             </option>
                                             @endforeach
                                         </select>
                                     </div>
-                                    <div class="col-4">
+                                    <div class="col-6">
                                         <select name="editemployee" id="editemployee"
                                             class="form-control form-control-sm" style="width:100%">
                                             <option value="">Select Employees</option>
                                             @foreach($employees as $employee)
-                                            <option value="{{$employee->id}}">
+                                            <option value="{{$employee->emp_id}}">
                                                 {{$employee->emp_name_with_initial}}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="col-4">
-                                        <select name="editshift" id="editshift"
-                                            class="form-control form-control-sm title" required>
-                                            <option value="">Select Shift</option>
-                                            @foreach($shifts as $shift)
-                                            <option value="{{$shift->id}}">{{$shift->shift_name}}</option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -246,9 +226,8 @@
                 },
                 columns: [
                     { data: 'id', name: 'id' },
-                    { data: 'emp_name', name: 'emp_name' },
-                    { data: 'location_name', name: 'location_name' },
-                    { data: 'shift_name', name: 'shift_name' },
+                    { data: 'employee_display', name: 'employee_display' },
+                    { data: 'location', name: 'location' },
                     {
                     data: 'action',
                     name: 'action',
@@ -334,7 +313,6 @@
                     success: function (data) {
                         $('#editlocation').val(data.result.location_id);
                         $('#editemployee').val(data.result.employee_id);
-                        $('#editshift').val(data.result.shiftid);
                         $('#hidden_id').val(id);
                         $('#action_buttonedit').html('Update');
                         $('#action').val('2');
@@ -350,7 +328,6 @@
 
                     var editlocation = $('#editlocation').val();
                     var editemployee = $('#editemployee').val();
-                    var editshift = $('#editshift').val();
                     var hidden_id = $('#hidden_id').val();
 
                     $.ajax({
@@ -360,7 +337,6 @@
                             _token: '{{ csrf_token() }}',
                             editemployee: editemployee,
                             editlocation: editlocation,
-                            editshift: editshift,
                             hidden_id: hidden_id,
                         },
                     dataType: "json",

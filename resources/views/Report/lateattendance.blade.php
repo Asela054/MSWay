@@ -269,7 +269,10 @@ $(document).ready(function () {
             },
             columns: [
                 { data: 'uid' },
-                { data: 'emp_name_with_initial' },
+                { 
+                    data: 'employee_display',
+                    name: 'employee_display' 
+                },
                 { data: 'dept_name' },
                 { data: 'date' },
                 { data: 'check_in_time'},

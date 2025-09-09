@@ -5,7 +5,7 @@
 <main> 
     <div class="page-header shadow">
         <div class="container-fluid">
-            @include('layouts.employee_nav_bar')
+             @include('layouts.production&task_nav_bar')
         </div>
     </div>
     <div class="container-fluid mt-4">
@@ -26,6 +26,8 @@
                                 <tr>
                                     <th>ID</th>
                                     <th>Date</th>
+                                    <th>Machine</th>
+                                    <th>Product</th>
                                     <th class="text-right">Action</th>
                                 </tr>
                             </thead>
@@ -67,18 +69,18 @@
                                         <input type="date" name="production_date" id="production_date"
                                             class="form-control form-control-sm" required />
                                     </div>
-                                </div>
-                                <hr>
-                                <div class="row">    
                                     <div class="col-4">
-                                        <label class="small font-weight-bold text-dark">Machine</label>
-                                        <select name="machine" id="machine" class="form-control form-control-sm" style="width: 100%;" required>
-                                            <option value="">Select Machine</option>
-                                            @foreach ($machines as $machine)
-                                                <option value="{{ $machine->id }}">{{ $machine->machine }}</option>
+                                        <label class="small font-weight-bold text-dark">Shift</label>
+                                        <select name="shift" id="shift" class="form-control form-control-sm">
+                                            <option value="">Please Select</option>
+                                            @foreach($shifttype as $shifttypes)
+                                            <option value="{{$shifttypes->id}}">{{$shifttypes->shift_name}}</option>
                                             @endforeach
                                         </select>
                                     </div>
+                                </div>
+                                <hr>
+                                <div class="row">
                                     <div class="col-4">
                                         <label class="small font-weight-bold text-dark">Product</label>
                                         <select name="product" id="product" class="form-control form-control-sm" style="width: 100%;" required>
@@ -86,6 +88,11 @@
                                             @foreach ($products as $product)
                                                 <option value="{{ $product->id }}">{{ $product->productname }}</option>
                                             @endforeach
+                                        </select>
+                                    </div>    
+                                    <div class="col-4">
+                                        <label class="small font-weight-bold text-dark">Machine</label>
+                                        <select name="machine" id="machine" class="form-control form-control-sm">
                                         </select>
                                     </div>
                                     <div class="col-4">
@@ -108,8 +115,6 @@
                                         <tr>
                                             <th>Emp ID</th>
                                             <th>Employee Name</th>
-                                            <th>Machine</th>
-                                            <th>Product</th>
                                             <th style="white-space: nowrap;">Action</th>
                                         </tr>
                                     </thead>
@@ -200,6 +205,33 @@
                                         <input type="date" name="view_production_date" id="view_production_date"
                                             class="form-control form-control-sm" readonly />
                                     </div>
+                                    <div class="col-6">
+                                        <label class="small font-weight-bold text-dark">Shift</label>
+                                        <select name="view_shift" id="view_shift" class="form-control form-control-sm" disabled>
+                                            <option value="">Please Select</option>
+                                            @foreach($shifttype as $shifttypes)
+                                            <option value="{{$shifttypes->id}}">{{$shifttypes->shift_name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="small font-weight-bold text-dark">Machine</label>
+                                        <select name="view_machine" id="view_machine" class="form-control form-control-sm" style="width: 100%;" disabled>
+                                            <option value="">Select Machine</option>
+                                            @foreach ($machines as $machine)
+                                                <option value="{{ $machine->id }}">{{ $machine->machine }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="small font-weight-bold text-dark">Product</label>
+                                        <select name="view_product" id="view_product" class="form-control form-control-sm" style="width: 100%;" disabled>
+                                            <option value="">Select Product</option>
+                                            @foreach ($products as $product)
+                                                <option value="{{ $product->id }}">{{ $product->productname }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -212,8 +244,6 @@
                                             <tr>
                                                 <th>Emp ID</th>
                                                 <th>Employee Name</th>
-                                                <th>Machine</th>
-                                                <th>Product</th>
                                             </tr>
                                         </thead>
                                         <tbody id="view_tableorderlist"></tbody>
@@ -234,8 +264,8 @@
 @section('script')
 <script>
 $(document).ready(function(){
-    $('#employee_menu_link').addClass('active');
-    $('#employee_menu_link_icon').addClass('active');
+    $('#production_menu_link').addClass('active');
+    $('#production_menu_link_icon').addClass('active');
     $('#dailyprocess').addClass('navbtnactive');
 
     // Modal close handlers
@@ -248,6 +278,49 @@ $(document).ready(function(){
     });
     $('#confirmModal2 .closebtn').click(function(){
         $('#confirmModal2').modal('hide');
+    });
+
+    let machine = $('#machine');
+    let product = $('#product');
+
+    machine.select2({
+        placeholder: 'Select a Machine',
+        width: '100%',
+        allowClear: true,
+        ajax: {
+            url: '{{url("Machine_list_sel2")}}',
+            dataType: 'json',
+            data: function(params) {
+                return {
+                    term: params.term || '',
+                    page: params.page || 1,
+                    product: product.val(),
+                }
+            },
+            cache: true
+        }
+    });
+
+    // Product change handler to refresh machine options
+    product.on('change', function() {
+        machine.val(null).trigger('change');
+        machine.select2({
+            placeholder: 'Select a Machine',
+            width: '100%',
+            allowClear: true,
+            ajax: {
+                url: '{{url("Machine_list_sel2")}}',
+                dataType: 'json',
+                data: function(params) {
+                    return {
+                        term: params.term || '',
+                        page: params.page || 1,
+                        product: product.val(),
+                    }
+                },
+                cache: true
+            }
+        });
     });
 
     // Employee Select2 initialization
@@ -283,6 +356,14 @@ $(document).ready(function(){
             {
                 data: 'date',
                 name: 'date'
+            },
+            {
+                data: 'machine',
+                name: 'machine'
+            },
+            {
+                data: 'productname',
+                name: 'product'
             },
             {
                 data: 'action',
@@ -327,12 +408,7 @@ $(document).ready(function(){
 
         var emp_id = $('#employee').val();
         var selectedText = $('#employee option:selected').text();
-        var machine_id = $('#machine').val();
-        var machine_text = $('#machine option:selected').text();
-        var product_id = $('#product').val();
-        var product_text = $('#product option:selected').text();
 
-        // Check if employee already exists in the list
         var exists = false;
         $('#emplistbody tr').each(function() {
             if ($(this).find('td:first').text() == emp_id) {
@@ -349,15 +425,11 @@ $(document).ready(function(){
         $('#emplistbody').append('<tr class="pointer">' +
             '<td>' + emp_id + '</td>' +
             '<td>' + selectedText + '</td>' +
-            '<td>' + machine_text + '</td>' +
-            '<td>' + product_text + '</td>' +
             '<td class="text-right">' +
                 '<button type="button" onclick="productDelete(this);" class="btn btn-danger btn-sm">' +
                     '<i class="fas fa-trash-alt"></i>' +
                 '</button>' +
             '</td>' +
-            '<td class="d-none">' + machine_id + '</td>' +
-            '<td class="d-none">' + product_id + '</td>' +
             '<td class="d-none">NewData</td>' +
         '</tr>');
 
@@ -385,13 +457,16 @@ $(document).ready(function(){
             $("#emplistbody tr").each(function () {
                 var item = {};
                 $(this).find('td').each(function (col_idx) {
-                    item["col_" + (col_idx + 1)] = $(this).text();
+                    if (col_idx !== 2) {
+                        item["col_" + (col_idx + 1)] = $(this).text();
+                    }
                 });
                 jsonObj.push(item);
             });
 
             var machine = $('#machine').val();
             var product = $('#product').val();
+            var shift = $('#shift').val();
             var date = $('#production_date').val(); 
             var hidden_id = $('#hidden_id').val();
 
@@ -403,6 +478,7 @@ $(document).ready(function(){
                     tableData: jsonObj,
                     machine: machine,
                     product: product,
+                    shift: shift,
                     date: date,
                     hidden_id: hidden_id,
                 },
@@ -460,8 +536,19 @@ $(document).ready(function(){
             },
             success: function (data) {
                 $('#production_date').val(data.result.mainData.date);
-                $('#machine').val(data.result.mainData.machine_id).trigger('change');
-                $('#product').val(data.result.mainData.product_id).trigger('change'); 
+                setTimeout(function() {
+                    var machineId = data.result.mainData.machine_id;
+                    var machineName = data.result.mainData.machine_name || 'Selected Machine'; 
+                    
+                    if (machine.find("option[value='" + machineId + "']").length === 0) {
+                        var newOption = new Option(machineName, machineId, true, true);
+                        machine.append(newOption);
+                    }
+                    machine.val(machineId).trigger('change');
+                }, 500); 
+                
+                $('#product').val(data.result.mainData.product_id).trigger('change');
+                $('#shift').val(data.result.mainData.shift_id).trigger('change'); 
                 $('#emplistbody').html(data.result.requestdata);
                 $('#hidden_id').val(id);
                 $('.modal-title').text('Edit Production Allocation');
@@ -508,13 +595,8 @@ $(document).ready(function(){
 
         var emp_id = $('#employee').val();
         var selectedText = $('#employee option:selected').text();
-        var machine_text = $('#machine option:selected').text();
-        var product_text = $('#product option:selected').text();
-        var machine_id = $('#machine').val();
-        var product_id = $('#product').val();
         var detailid = $('#detailsid').val();
-    
-        // Remove the existing row
+
         $("#emplistbody tr").each(function () {
             var hiddenInputs = $(this).find('input[name="hiddenid"]');
             if (hiddenInputs.length > 0 && hiddenInputs.val() == detailid) {
@@ -522,19 +604,14 @@ $(document).ready(function(){
             }
         });
 
-        // Add updated row
         $('#emplistbody').append('<tr class="pointer">' +
             '<td>' + emp_id + '</td>' +
             '<td>' + selectedText + '</td>' +
-            '<td>' + machine_text + '</td>' +
-            '<td>' + product_text + '</td>' +
             '<td class="text-right">' +
                 '<button type="button" onclick="productDelete(this);" class="btn btn-danger btn-sm">' +
                     '<i class="fas fa-trash-alt"></i>' +
                 '</button>' +
             '</td>' +
-            '<td class="d-none">' + machine_id + '</td>' +
-            '<td class="d-none">' + product_id + '</td>' +
             '<td class="d-none">Updated</td>' +
             '<td class="d-none"><input type="hidden" name="hiddenid" value="' + detailid + '"></td>' +
         '</tr>');
@@ -630,6 +707,9 @@ $(document).ready(function(){
             },
             success: function (data) {
                 $('#view_production_date').val(data.result.mainData.date);
+                $('#view_machine').val(data.result.mainData.machine_id).trigger('change');
+                $('#view_product').val(data.result.mainData.product_id).trigger('change');
+                $('#view_shift').val(data.result.mainData.shift_id).trigger('change');
                 $('#view_tableorderlist').html(data.result.requestdata);
                 $('#viewconfirmModal').modal('show');
             }

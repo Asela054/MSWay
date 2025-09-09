@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Bank;
 use App\Daily_task;
 use App\EmployeeBank;
+use App\Helpers\EmployeeHelper;
 use Illuminate\Http\Request;
 use Validator;
 use DB;
@@ -162,7 +163,15 @@ class EmployeeBankController extends Controller
             abort(403);
         }
         $banks = Bank::whereIn('status', [1,2])->get();
-        return view('Employee.bankReport', compact('banks'));
+
+        if (!Session::has('company_name')) {
+            $company_name = DB::table('companies')->value('name');
+            Session::put('company_name', $company_name);
+        } else {
+            $company_name = Session::get('company_name');
+        }
+
+        return view('Employee.bankReport', compact('banks','company_name'));
     }
 
     public function bank_report_list(Request $request)
@@ -276,6 +285,8 @@ class EmployeeBankController extends Controller
             "bb.code as branch_code",
             "employees.emp_id",
             "employees.emp_name_with_initial",
+            "employees.calling_name",
+            "employees.emp_id",
             "branches.location",
             "departments.name as dept_name"
         );
@@ -298,6 +309,11 @@ class EmployeeBankController extends Controller
                 "branch_code" => $record->branch_code,
                 "emp_id" => $record->emp_id,
                 "emp_name_with_initial" => $record->emp_name_with_initial,
+                "employee_display" => EmployeeHelper::getDisplayName((object)[
+                    'emp_id' => $record->emp_id,
+                    'emp_name_with_initial' => $record->emp_name_with_initial,
+                    'calling_name' => $record->calling_name
+                ]),
                 "location" => $record->location,
                 "dept_name" => $record->dept_name
             );
