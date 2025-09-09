@@ -208,7 +208,7 @@
                     },
                     columns: [
                         { data: 'emp_id', name: 'emp_id' },
-                        { data: 'emp_name_with_initial', name: 'emp_name_with_initial' },
+                        { data: 'employee_display', name: 'employee_display' },
                         { data: 'date', name: 'date' },
                         { data: 'check_in_time', name: 'check_in_time' },
                         { data: 'check_out_time', name: 'check_out_time' },

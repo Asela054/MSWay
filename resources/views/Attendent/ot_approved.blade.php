@@ -293,7 +293,6 @@
                         serverSide: true,
                         ajax: {
                             url: scripturl + '/ot_approved_list.php',
-                            // "url": "{{url('/ot_approved_list')}}",
                             type: "POST",
                             data: {
                                 department:department,
@@ -308,7 +307,7 @@
 
                         columns: [
                             { data: 'emp_id' },
-                            { data: 'emp_name_with_initial' },
+                            { data: 'employee_display' },
                             { data: 'date' },
                             { data: 'from' ,
                                 render: function(data, type, row) {

@@ -294,7 +294,7 @@
                                     :data
                             }},
                         {data: 'id'},
-                        {data: 'emp_name_with_initial'},
+                        {data: 'employee_display'},
                         {data: 'date'},
                         {data: 'check_in_time'},
                         {data: 'check_out_time'},

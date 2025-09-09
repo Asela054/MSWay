@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Joballocation;
+use App\Helpers\EmployeeHelper;
 use App\Jobattendance;
 use Auth;
 use Carbon\Carbon;
@@ -17,39 +18,38 @@ class JobattendanceController extends Controller
 {
     public function index()
     {
-        $employees=DB::table('employees')->select('id','emp_name_with_initial','emp_job_code')->where('deleted',0)->get();
-        $locations=DB::table('job_location')->select('*')->where('status',1)->get();
-        $shifts=DB::table('shift_types')->select('*')->where('deleted',0)->get();
-        return view('jobmanagement.jobattendance',compact('locations','employees','shifts'));
+        $employees=DB::table('employees')->select('id','emp_id','emp_name_with_initial','emp_job_code')->where('deleted',0)->get();
+        $locations=DB::table('branches')->select('*')->get();
+        return view('jobmanagement.jobattendance',compact('locations','employees'));
     }
+
 
     public function getemplist(Request $request)
     {
         $location = $request->input('attlocation');
-        $shift = $request->input('shift');
         $attendancedate = $request->input('attendancedate');
 
-        $shifts = DB::table('shift_types')
-        ->select('shift_types.*')
-        ->where('shift_types.id','=', $shift)
-        ->get(); 
-
-        $todayTimedate = Carbon::parse($attendancedate)->format('Y-m-d');
-        $todayTime = Carbon::parse($shifts[0]->onduty_time)->format('H:i');
-        $offtime = Carbon::parse($shifts[0]->offduty_time)->format('H:i');
-
         $allocation = DB::table('job_allocation')
-        ->leftjoin('employees', 'job_allocation.employee_id', '=', 'employees.id')
-        ->leftjoin('shift_types', 'job_allocation.shiftid', '=', 'shift_types.id')
-        ->select('job_allocation.*','job_allocation.id As allocationid','employees.emp_name_with_initial As emp_name')
-        ->where('job_allocation.status',1, 2)
-        ->where('job_allocation.location_id', $location)
-        ->where('job_allocation.shiftid', $shift)
-        ->get();
+            ->leftjoin('employees', 'job_allocation.employee_id', '=', 'employees.emp_id')
+            ->leftjoin('shift_types', 'employees.emp_shift', '=', 'shift_types.id') // Changed to get shift from employees table
+            ->select(
+                'job_allocation.*',
+                'job_allocation.id as allocationid',
+                'employees.emp_name_with_initial as emp_name',
+                'shift_types.onduty_time',
+                'shift_types.offduty_time'
+            )
+            ->where('job_allocation.status', 1)
+            ->where('job_allocation.location_id', $location)
+            ->get();
 
         $htmlemployee = '';
 
         foreach ($allocation as $row) {
+            $todayTimedate = Carbon::parse($attendancedate)->format('Y-m-d');
+            $todayTime = Carbon::parse($row->onduty_time)->format('H:i');
+            $offtime = Carbon::parse($row->offduty_time)->format('H:i');
+
             $htmlemployee .= '<tr>';
             $htmlemployee .= '<td><select name="employee" id="employee" class="employee form-control form-control-sm"><option value="' . $row->employee_id . '">'. $row->emp_name.'</option></select></td>';  
             $htmlemployee .= '<td> <input type="datetime-local" id="empontime" name="empontime" class="form-control form-control-sm"  value="' .$todayTimedate . 'T' .$todayTime. '" required></td>'; 
@@ -58,7 +58,7 @@ class JobattendanceController extends Controller
             $htmlemployee .= '<td class="d-none"><input type="number" id="allocationid" name="allocationid" value="' . $row->allocationid . '" ></td>';
             $htmlemployee .= '</tr>';
         }
-        return response() ->json(['result'=>  $htmlemployee]);
+        return response()->json(['result' => $htmlemployee]);
     }
 
     public function insert(Request $request)
@@ -69,7 +69,6 @@ class JobattendanceController extends Controller
         }
 
         $location = $request->input('allocation');
-        $shift = $request->input('shift');
         $attendancedate = $request->input('attendancedate');
         $tableData = $request->input('tableData');
 
@@ -82,12 +81,13 @@ class JobattendanceController extends Controller
             $attendance = new Jobattendance();
             $attendance->attendance_date = $attendancedate;
             $attendance->employee_id = $empid;
-            $attendance->shift_id = $shift;
             $attendance->on_time = $ontime;
             $attendance->off_time = $offtime;
             $attendance->location_id = $location;
             $attendance->allocation_id = $allocationid;
             $attendance->status = '1';
+            $attendance->location_status = '1';
+            $attendance->approve_status = '1';
             $attendance->created_by = Auth::id();
             $attendance->updated_by = '0';
             $attendance->save();
@@ -98,14 +98,25 @@ class JobattendanceController extends Controller
     public function attendancelist()
     {
         $allocation = DB::table('job_attendance')
-        ->leftjoin('employees', 'job_attendance.employee_id', '=', 'employees.id')
-        ->leftjoin('job_location', 'job_attendance.location_id', '=', 'job_location.id')
+        ->leftjoin('employees', 'job_attendance.employee_id', '=', 'employees.emp_id')
+        ->leftjoin('branches', 'job_attendance.location_id', '=', 'branches.id')
         ->leftjoin('shift_types', 'job_attendance.shift_id', '=', 'shift_types.id')
-        ->select('job_attendance.*','employees.emp_name_with_initial As emp_name','job_location.location_name','shift_types.shift_name')
+        ->select('job_attendance.*','employees.emp_name_with_initial','employees.calling_name','branches.location','shift_types.shift_name')
         ->whereIn('job_attendance.status', [1, 2])
         ->get();
         return Datatables::of($allocation)
         ->addIndexColumn()
+        ->addColumn('employee_display', function ($row) {
+                   return EmployeeHelper::getDisplayName($row);
+                   
+        })
+        ->filterColumn('employee_display', function($query, $keyword) {
+            $query->where(function($q) use ($keyword) {
+                $q->where('employees.emp_name_with_initial', 'like', "%{$keyword}%")
+                ->orWhere('employees.calling_name', 'like', "%{$keyword}%")
+                ->orWhere('employees.emp_id', 'like', "%{$keyword}%");
+            });
+        })
         ->addColumn('action', function ($row) {
             $btn = '';
                     if(Auth::user()->can('Job-Attendance-edit')){
@@ -137,7 +148,8 @@ class JobattendanceController extends Controller
         }
     }
     
-    public function update(Request $request){
+    public function update(Request $request)
+    {
         $permission = \Auth::user()->can('Job-Attendance-edit');
         if (!$permission) {
             abort(403);
@@ -147,6 +159,7 @@ class JobattendanceController extends Controller
         $attendancedateedit = $request->input('attendancedateedit');
         $empontime = $request->input('empontime');
         $empofftime = $request->input('empofftime');
+        $locationedit = $request->input('locationedit');
         $hidden_id = $request->input('hidden_id');
 
             $data = array(
@@ -154,6 +167,7 @@ class JobattendanceController extends Controller
                 'employee_id' => $editemployee,
                 'on_time' => $empontime,
                 'off_time' => $empofftime,
+                'location_id' => $locationedit,
                 'updated_by' => Auth::id(),
             );
         
@@ -174,4 +188,35 @@ class JobattendanceController extends Controller
 
           return response()->json(['success' => 'Job Attendance is Successfully Deleted']);
     }
+
+    public function single_employee(Request $request)
+    {
+        $permission = Auth::user()->can('Job-Attendance-create');
+        if (!$permission) {
+            abort(403);
+        }
+
+        $empid = $request->input('employee_single');
+        $location = $request->input('locationsingle');
+        $attendancedate = $request->input('singleattendancedate');
+        $ontime = $request->input('singleempontime');
+        $offtime = $request->input('singleempofftime');
+    
+        $attendance = new Jobattendance();
+        $attendance->attendance_date = $attendancedate;
+        $attendance->employee_id = $empid;
+        $attendance->on_time = $ontime;
+        $attendance->off_time = $offtime;
+        $attendance->location_id = $location;
+        $attendance->status = '1';
+        $attendance->location_status = '1';
+        $attendance->approve_status = '0';
+        $attendance->created_by = Auth::id();
+        $attendance->updated_by = '0';
+        $attendance->save();
+        
+        return response()->json(['success' => 'Job Attendance Added successfully.']);
+    }
+
+
 }

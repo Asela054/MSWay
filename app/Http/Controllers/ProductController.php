@@ -44,16 +44,16 @@ class ProductController extends Controller
 
         $form_data = array(
             'productname'   =>  $request->productname,
-            'description'   =>  $request->description,
-            'semi_price'    =>  $request->semi_price,
-            'full_price'    =>  $request->full_price
+            'description'   =>  $request->description
+            // 'semi_price'    =>  $request->semi_price,
+            // 'full_price'    =>  $request->full_price
         );
 
         $product=new Product;
         $product->productname=$request->input('productname');
         $product->description=$request->input('description'); 
-        $product->semi_price=$request->input('semi_price');
-        $product->full_price=$request->input('full_price');
+        $product->semi_price=0;
+        $product->full_price=0;
         $product->status=1;      
         $product->save();
 
@@ -94,9 +94,9 @@ class ProductController extends Controller
 
         $form_data = array(
             'productname'    =>  $request->productname,
-            'description' =>  $request->description,
-            'semi_price'    =>  $request->semi_price,
-            'full_price'    =>  $request->full_price
+            'description' =>  $request->description
+            // 'semi_price'    =>  $request->semi_price,
+            // 'full_price'    =>  $request->full_price
         );
 
         Product::whereId($request->hidden_id)->update($form_data);

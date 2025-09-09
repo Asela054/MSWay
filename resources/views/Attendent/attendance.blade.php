@@ -323,7 +323,10 @@ $(document).ready(function() {
                 { data: 'at_id' },
                 { data: 'uid' },
                 { data: 'date'},
-                { data: 'emp_name_with_initial' },
+                { 
+                    data: 'employee_display',
+                    name: 'employee_display'
+                },
                 { data: 'firsttimestamp' ,
                     render : function ( data, type, row, meta ) {
                         if(row['btn_in']){

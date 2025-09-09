@@ -1,4 +1,4 @@
-<?php $page_stitle = 'Report on Employee Leaves - Multi Offset'; ?>
+<?php $page_stitle = 'Report on Employee Leaves '.$company_name.''; ?>
 @extends('layouts.app')
 
 @section('content')
@@ -183,7 +183,10 @@
 
                     columns: [
                         { data: 'id' },
-                        { data: 'emp_name_with_initial' },
+                        { 
+                            data: 'employee_display',
+                            name: 'employee_display' 
+                        },
                         { data: 'dept_name' },
                         { data: 'leave_from' },
                         { data: 'leave_to' },

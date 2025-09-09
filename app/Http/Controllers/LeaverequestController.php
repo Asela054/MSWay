@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Auth;
 use App\LeaveType;
 use App\Employee;
+use App\Helpers\EmployeeHelper;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\LeaveRequest;
@@ -69,7 +70,8 @@ class LeaverequestController extends Controller
         ->leftjoin('leave_types', 'leaves.leave_type', '=', 'leave_types.id')
         ->select(
             'leave_request.*', 
-            'emp.emp_name_with_initial as emp_name', 
+            'emp.emp_name_with_initial', 
+            'emp.calling_name',
             'departments.name as dep_name', 
             'leaves.leave_type as leave_type_id', 
             'leave_types.leave_type as leave_type_name', 
@@ -93,6 +95,17 @@ class LeaverequestController extends Controller
         $data = $query->get();
         return Datatables::of($data)
         ->addIndexColumn()
+        ->addColumn('employee_display', function ($row) {
+                   return EmployeeHelper::getDisplayName($row);
+                   
+        })
+        ->filterColumn('employee_display', function($query, $keyword) {
+            $query->where(function($q) use ($keyword) {
+                $q->where('e.emp_name_with_initial', 'like', "%{$keyword}%")
+                ->orWhere('e.calling_name', 'like', "%{$keyword}%")
+                ->orWhere('e.emp_id', 'like', "%{$keyword}%");
+            });
+        })
         ->addColumn('leave_category', function($row){
 
             if($row->leave_category == 0.25){

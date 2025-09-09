@@ -302,7 +302,7 @@
                     },
                     columns: [
                         { data: 'emp_id', name: 'emp_id' },
-                        { data: 'emp_name', name: 'emp_name' },
+                        { data: 'employee_display', name: 'employee_display' },
                         { data: 'dep_name', name: 'emp_name' },
                         { data: 'date', name: 'date' },
                         { data: 'start_time', name: 'start_time' },
