@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Session; 
+use Validator;
+
 
 class UserController extends Controller
 {
@@ -25,6 +27,47 @@ class UserController extends Controller
     {
         $roles = Role::pluck('name','name')->all();
         return view('users.create',compact('roles'));
+    }
+
+    public function usercreate(Request $request)
+    {
+        // $rules = array(
+        //     'email' => 'required|string|email|max:255|unique:users',
+        //     'password' => 'string|min:6|confirmed'
+        // );
+
+        // $error = Validator::make($request->all(), $rules);
+
+        // if ($error->fails()) {
+        //     return response()->json(['errors' => $error->errors()->all()]);
+        // }
+        // $user = new User;
+        // $user->emp_id = $request->input('userid');
+        // $user->email = $request->input('email');
+        // $user->password = bcrypt($request['password']);
+        // $user->save();
+
+        // return response()->json(['success' => 'User Login is successfully Created']);
+        $rules = array(
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'string|min:6|confirmed'
+        );
+
+        $error = Validator::make($request->all(), $rules);
+
+        if ($error->fails()) {
+            return response()->json(['errors' => $error->errors()->all()]);
+        }
+        $user = new User;
+        $user->emp_id = $request->input('userid');
+        $user->name = $request->input('name');
+        $user->email = $request->input('email');   
+        $user->company_id = Session::get('emp_company');
+        $user->password = bcrypt($request['password']);
+        $user->save();
+        $user->assignRole('Employee');        
+
+        return response()->json(['success' => 'User Login is successfully Created']);
     }
 
 

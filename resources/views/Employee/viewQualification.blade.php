@@ -57,7 +57,7 @@
                                                             </span>
                                                                 @endif
                                                             </div>
-                                                            <div class="form-group  ">
+                                                            <!-- <div class="form-group  ">
                                                                 <label for="exampleFormControlInput1">
                                                                     Job Title</label>
                                                                 <input class="form-control form-control-sm" id="jobtitle"
@@ -67,6 +67,16 @@
                                                                 <strong>{{ $errors->first('jobtitle') }}</strong>
                                                             </span>
                                                                 @endif
+                                                            </div> -->
+                                                            <div class="form-group  ">
+                                                                <label for="exampleFormControlInput1">Job Title</label>
+                                                                <select name="jobtitle" id="jobtitle" class="form-control form-control-sm">
+                                                                    <option value="">Please Select</option>
+                                                                    @foreach ($jobtitles as $jobtitle){
+                                                                    <option value="{{$jobtitle->title}}">{{$jobtitle->title}}</option>
+                                                                    }
+                                                                    @endforeach
+                                                                </select>
                                                             </div>
                                                             <div class="form-group  ">
                                                                 <label for="exampleFormControlInput1">
@@ -153,46 +163,60 @@
 
                                                 <div class="card-body">
                                                     <div class="datatable table-responsive">
-                                                        <table class="table table-bordered table-hover" id="dataTable"
-                                                               width="100%" cellspacing="0">
+                                                        <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
                                                             <thead>
-                                                            <tr>
-                                                                <th>Company</th>
-                                                                <th>Job Title</th>
-                                                                <th>From</th>
-                                                                <th>To</th>
-                                                                <th>Comments</th>
-                                                                <th>Action</th>
-
-                                                            </tr>
-                                                            </thead>
-
-                                                            <tbody>
-                                                            @foreach($experience as $experiences)
                                                                 <tr>
-                                                                    <td>{{$experiences->emp_company}}</td>
-                                                                    <td>{{$experiences->emp_jobtitle}}</td>
-                                                                    <td>{{$experiences->emp_from_date}}</td>
-                                                                    <td>{{$experiences->emp_to_date}}</td>
-                                                                    <td>{{$experiences->emp_comment}}</td>
-                                                                    <td>
-                                                                        @can('employee-edit')
-                                                                            <button name="expedit" id="{{$experiences->id}}"
-                                                                                    class="expedit btn btn-primary btn-sm mr-1 mt-1"
-                                                                                    type="submit"> <i class="fa fa-pencil-alt"></i>
-                                                                            </button>
-                                                                            <button type="submit" name="expdelete"
-                                                                                    id="{{$experiences->id}}"
-                                                                                    class="expdelete btn btn-danger btn-sm  mr-1 mt-1">
-                                                                                <i class="fa fa-trash"></i>
-                                                                            </button>
-                                                                        @endcan
-                                                                    </td>
+                                                                    <th>Company</th>
+                                                                    <th>Job Title</th>
+                                                                    <th>From</th>
+                                                                    <th>To</th>
+                                                                    <th>Duration</th>
+                                                                    <th>Comments</th>
+                                                                    <th>Action</th>
                                                                 </tr>
-
-                                                            @endforeach
-
-
+                                                            </thead>
+                                                            <tbody>
+                                                                @foreach($experience as $experiences)
+                                                                    <tr>
+                                                                        <td>{{$experiences->emp_company}}</td>
+                                                                        <td>{{$experiences->emp_jobtitle}}</td>
+                                                                        <td>{{$experiences->emp_from_date}}</td>
+                                                                        <td>{{$experiences->emp_to_date}}</td>
+                                                                        <td>
+                                                                            @php
+                                                                                $fromDate = \Carbon\Carbon::parse($experiences->emp_from_date);
+                                                                                $toDate = \Carbon\Carbon::parse($experiences->emp_to_date);
+                                                                                $duration = $fromDate->diffInDays($toDate);
+                                                                                
+                                                                                // Format duration in years, months, days
+                                                                                $years = floor($duration / 365);
+                                                                                $months = floor(($duration % 365) / 30);
+                                                                                $days = $duration % 30;
+                                                                                
+                                                                                $durationText = '';
+                                                                                if ($years > 0) $durationText .= $years . ' year' . ($years > 1 ? 's' : '') . ' ';
+                                                                                if ($months > 0) $durationText .= $months . ' month' . ($months > 1 ? 's' : '') . ' ';
+                                                                                if ($days > 0) $durationText .= $days . ' day' . ($days > 1 ? 's' : '');
+                                                                                
+                                                                                echo trim($durationText) ?: '0 days';
+                                                                            @endphp
+                                                                        </td>
+                                                                        <td>{{$experiences->emp_comment}}</td>
+                                                                        <td>
+                                                                            @can('employee-edit')
+                                                                                <button name="expedit" id="{{$experiences->id}}"
+                                                                                        class="expedit btn btn-primary btn-sm mr-1 mt-1"
+                                                                                        type="submit"> <i class="fa fa-pencil-alt"></i>
+                                                                                </button>
+                                                                                <button type="submit" name="expdelete"
+                                                                                        id="{{$experiences->id}}"
+                                                                                        class="expdelete btn btn-danger btn-sm  mr-1 mt-1">
+                                                                                    <i class="fa fa-trash"></i>
+                                                                                </button>
+                                                                            @endcan
+                                                                        </td>
+                                                                    </tr>
+                                                                @endforeach
                                                             </tbody>
                                                         </table>
                                                     </div>
@@ -607,7 +631,7 @@
 
             </div>
         </div>
-        <div class="container-fluid mt-4">
+        <!-- <div class="container-fluid mt-4">
             <div class="card mb-4">
                 <div class="card-header">Attachments</div>
                 <div class="card-body">
@@ -656,7 +680,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
 
 
     </main>

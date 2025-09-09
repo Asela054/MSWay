@@ -488,7 +488,7 @@
 							</div>
 						</form>
 
-						<div class="card shadow-none mb-3">
+						<!-- <div class="card shadow-none mb-3">
 							<div class="card-body bg-light">
 								<div class="row">
 									<div class="col-12">
@@ -525,7 +525,7 @@
 									</div>
 								</div>
 							</div>
-						</div>
+						</div> -->
 					</div>
 					@include('layouts.employeeRightBar')
 				</div>

@@ -37,6 +37,10 @@
                                         <option @if(old('relationship') == 'Husband') selected @endif value="Husband">Husband</option>
                                         <option @if(old('relationship') == 'Father') selected @endif value="Father">Father</option>
                                         <option @if(old('relationship') == 'Mother') selected @endif value="Mother">Mother</option>
+                                        <option @if(old('relationship') == 'Brother') selected @endif value="Brother">Brother</option>
+                                        <option @if(old('relationship') == 'Sister') selected @endif value="Sister">Sister</option>
+                                        <option @if(old('relationship') == 'Friend') selected @endif value="Friend">Friend</option>
+                                        <option @if(old('relationship') == 'Other') selected @endif value="Other">Other</option>
                                     </select>
                                     @if ($errors->has('relationship')) <p class="text-danger">{{ $errors->first('relationship') }}</p> @endif
                                 </div>
@@ -60,10 +64,10 @@
                         <table class="table table-striped table-bordered table-sm small nowrap" id="dataTable" width="100%" cellspacing="0">
                             <thead>
                                 <tr>
-                                    <th>Name</th>
-                                    <th>Relation</th>
-                                    <th>Date of Birth</th>
-                                    <th class="text-right">Action</th>
+                                    <th>NAME</th>
+                                    <th>RELATION</th>
+                                    <th>DATE OF BIRTH</th>
+                                    <th class="text-right">ACTION</th>
                                 </tr>
                             </thead>                            
                             <tbody>
@@ -83,7 +87,7 @@
                             </tbody>
                         </table>
                         </div>
-                        <hr class="border-dark">
+                        <!-- <hr class="border-dark">
                         <form class="form-horizontal" method="POST" action="{{ route('dependetAttachment') }}" enctype="multipart/form-data">
                             {{ csrf_field() }}
                             <div class="form-row">
@@ -112,7 +116,7 @@
                                 @endcan
                             </div>
                             <input type="hidden" class="form-control" id="id" name="id" value="{{$id}}">
-                        </form>
+                        </form> -->
                     </div>
                     @include('layouts.employeeRightBar')
                 </div>
@@ -154,6 +158,10 @@
                                         <option value="Husband">Husband</option>
                                         <option value="Father">Father</option>
                                         <option value="Mother">Mother</option>
+                                        <option value="Brother">Brother</option>
+                                        <option value="Sister">Sister</option>
+                                        <option value="Friend">Friend</option>
+                                        <option value="Other">Other</option>
                                     </select>
                                 </div>
                                 <div class="col">
