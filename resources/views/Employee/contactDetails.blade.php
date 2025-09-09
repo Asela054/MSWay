@@ -79,7 +79,7 @@
 							</div>
 							<input type="hidden" class="form-control form-control-sm" id="id" name="id" placeholder="First Name" value="{{$employee->id}}">
 						</form>
-						<hr class="border-dark">
+						<!-- <hr class="border-dark">
 						<form class="form-horizontal" method="POST" action="{{ route('contactAttachment') }}" enctype="multipart/form-data">
 							{{ csrf_field() }}
 							<div class="form-row">
@@ -106,7 +106,7 @@
 								<button type="submit" name="action_button" id="action_button" class="btn btn-outline-primary btn-sm px-4"><i class="fas fa-save"></i>&nbsp;Save</button>
 							</div>
 							<input type="hidden" class="form-control form-control-sm" id="id" name="id" value="{{$employee->id}}">
-						</form>
+						</form> -->
 					</div>
 					@include('layouts.employeeRightBar')
 				</div>

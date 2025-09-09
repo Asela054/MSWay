@@ -37,18 +37,10 @@ use Illuminate\Validation\Rule;
 
 class EmployeeController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-
     public function __construct()
     {
         $this->middleware('auth');
     }
-
-
     public function index()
     {
         $permission = Auth::user()->can('employee-list');
@@ -78,102 +70,6 @@ class EmployeeController extends Controller
         return view('Employee.employeeAdd', compact('newid', 'employmentstatus', 'branch', 'device', 'title', 'shift_type', 'company', 'departments'));
     }
 
-    public function employee_list_dt(Request $request)
-    {
-        $permission = Auth::user()->can('employee-list');
-        if (!$permission) {
-            return response()->json(['error' => 'UnAuthorized'], 401);
-        }
-
-        $current_date_time = Carbon::now()->toDateTimeString();
-        $previous_month_date = Carbon::now()->subMonth()->toDateString();
-
-        $department = $request->get('department');
-        $employee = $request->get('employee');
-        $location = $request->get('location');
-        $from_date = $request->get('from_date');
-        $to_date = $request->get('to_date');
-
-        $query =  DB::table('employees')
-            ->leftjoin('employment_statuses', 'employees.emp_status', '=', 'employment_statuses.id')
-            ->leftjoin('job_titles', 'employees.emp_job_code', '=', 'job_titles.id')
-            ->leftjoin('branches', 'employees.emp_location', '=', 'branches.id')
-            ->leftjoin('departments', 'employees.emp_department', '=', 'departments.id')
-            ->select('employees.id' ,'employees.emp_id', 'emp_fp_id', 'emp_etfno', 'emp_name_with_initial', 'emp_join_date', 'employment_statuses.emp_status', 'branches.location', 'job_titles.title', 'departments.name as dep_name','employees.is_resigned' )
-            ->where('deleted', 0)
-            ->where(function($query) use ($previous_month_date, $current_date_time) {
-                $query->where('employees.is_resigned', 0)
-                      ->orWhere(function($query) use ($previous_month_date, $current_date_time) {
-                          $query->where('employees.is_resigned', 1)
-                                ->whereBetween('employees.resignation_date', [$previous_month_date, $current_date_time]);
-                      });
-            });
-
-
-        if($department != ''){
-            $query->where(['departments.id' => $department]);
-        }
-
-        if($employee != ''){
-            $query->where(['employees.emp_id' => $employee]);
-        }
-
-        if($location != ''){
-            $query->where(['employees.emp_location' => $location]);
-        }
-
-        if($from_date != '' && $to_date != ''){
-            $query->whereBetween('employees.emp_join_date', [$from_date, $to_date]);
-        }
-
-        return Datatables::of($query)
-            ->addIndexColumn()
-            ->addColumn('emp_id_link', function ($row){
-                return '<a href="viewEmployee/'.$row->id.'">'.$row->emp_id.'</a>';
-            })
-            ->addColumn('emp_name_link', function ($row){
-                return '<a href="viewEmployee/'.$row->id.'">'.$row->emp_name_with_initial.'</a>';
-            })
-            ->addColumn('emp_status_label', function ($row){
-                return '<span class="text-success"> '.$row->emp_status.' </span>';
-            })
-
-            ->addColumn('action', function($row){
-                $is_resigned=$row->is_resigned;
-
-                $btn = '';
-                if(Auth::user()->can('employee-list')) {
-                    $btn = ' <a style="margin:1px;" data-toggle="tooltip" data-placement="bottom" title="View Employee Details" class="btn btn-outline-dark btn-sm" href="viewEmployee/' . $row->id . '"><i class="far fa-clipboard"></i></a> ';
-                }
-
-                if(Auth::user()->can('finger-print-user-create')) {
-                    $btn .= '<button style="margin:1px;" data-toggle="tooltip" data-placement="bottom" title="Add Employee Fingerprint Details" class="btn btn-outline-primary btn-sm addfp" 
-                        id="' . $row->emp_id . '" name="' . $row->emp_name_with_initial . '"><i class="fas fa-sign-in-alt"></i></button>';
-                }
-
-                if(Auth::user()->can('employee-edit')) {
-                    $btn .= '<button style="margin:1px;" data-toggle="tooltip" data-placement="bottom" title="Add Employee User Login Details" class="btn btn-outline-secondary btn-sm adduserlog" 
-                        id="' . $row->emp_id . '" name="' . $row->emp_name_with_initial . '"><i class="fas fa-user"></i></button>';
-                   
-                    
-                }
-                if(Auth::user()->can('employee-edit') && $is_resigned==0) {
-                       
-                        $btn .= '<button style="margin:1px;" data-toggle="tooltip" data-placement="bottom" title="Resign Employee" class="btn btn-outline-warning btn-sm resign" 
-                            id="' . $row->emp_id . '" name="' . $row->emp_name_with_initial . '"><i class="fas fa-user-times"></i></button>'; 
-                        
-                }
-
-                if(Auth::user()->can('employee-delete')) {
-                    $btn .= '<button style="margin:1px;" data-toggle="tooltip" data-placement="bottom" title="Delete Employee Details" class="btn btn-outline-danger btn-sm delete" id="' . $row->id . '"><i class="far fa-trash-alt"></i></button>';
-                }
-
-                return $btn;
-            })
-            ->rawColumns(['action', 'emp_id_link', 'emp_name_link', 'emp_status_label'])
-            ->make(true);
-    }
-
     public function employeelist()
     {
         $permission = Auth::user()->can('employee-list');
@@ -190,72 +86,12 @@ class EmployeeController extends Controller
         return view('Employee.employeeList', compact('employee', 'device'));
     }
 
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create(Request $request)
-    {
-
-    }
-
-
-    public function usercreate(Request $request)
-    {
-        // $rules = array(
-        //     'email' => 'required|string|email|max:255|unique:users',
-        //     'password' => 'string|min:6|confirmed'
-        // );
-
-        // $error = Validator::make($request->all(), $rules);
-
-        // if ($error->fails()) {
-        //     return response()->json(['errors' => $error->errors()->all()]);
-        // }
-        // $user = new User;
-        // $user->emp_id = $request->input('userid');
-        // $user->email = $request->input('email');
-        // $user->password = bcrypt($request['password']);
-        // $user->save();
-
-        // return response()->json(['success' => 'User Login is successfully Created']);
-        $rules = array(
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'string|min:6|confirmed'
-        );
-
-        $error = Validator::make($request->all(), $rules);
-
-        if ($error->fails()) {
-            return response()->json(['errors' => $error->errors()->all()]);
-        }
-        $user = new User;
-        $user->emp_id = $request->input('userid');
-        $user->name = $request->input('name');
-        $user->email = $request->input('email');   
-        $user->company_id = Session::get('emp_company');
-        $user->password = bcrypt($request['password']);
-        $user->save();
-        $user->assignRole('Employee');        
-
-        return response()->json(['success' => 'User Login is successfully Created']);
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         $permission = Auth::user()->can('employee-create');
         if (!$permission) {
             return response()->json(['error' => 'UnAuthorized'], 401);
         }
-
         $rules = array(
             'emp_id' => 'max:15|unique:employees,emp_id',
             'etfno' => [
@@ -293,13 +129,11 @@ class EmployeeController extends Controller
         if ($error->fails()) {
             return response()->json(['errors' => $error->errors()->all()]);
         }
-
         if ($request->hasFile('photograph')) {
             $image = $request->file('photograph');
             $name = time() . '.' . $image->getClientOriginalExtension();
             $destinationPath = public_path('/images');
             $image->move($destinationPath, $name);
-
 
             $employeepicture = new EmployeePicture;
             $employeepicture->emp_id = $request->input('emp_id');
@@ -307,8 +141,6 @@ class EmployeeController extends Controller
             $employeepicture->save();
 
         }
-
-
         $Employee = new Employee;
         $Employee->emp_id = $request->input('emp_id');
         $Employee->emp_etfno = $request->input('etfno');
@@ -331,11 +163,9 @@ class EmployeeController extends Controller
         $Employee->tp1 = $request->input('telephone');
         $Employee->emp_fullname = $request->input('emp_fullname');
         $Employee->save();
-
         $insertedId = $Employee->id;
 
         //Check that there is a profile ot not then Create Payroll profile
-
         $existingProfile = PayrollProfile::where('emp_id', $insertedId)->first();
         if(!$existingProfile){
             $payrollprofile = new PayrollProfile();
@@ -352,8 +182,6 @@ class EmployeeController extends Controller
             $payrollprofile->updated_by = '0';
             $payrollprofile->save();
         }
-       
-
         return response()->json(['success' => 'Data Added successfully.']);
     }
 
@@ -380,26 +208,17 @@ class EmployeeController extends Controller
         }else{
             $leaves = 14;
         }
-
         // - taken leaves for current year
         // + leaves from previous year
-
         return $leaves;
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param \App\Employee $employee
-     * @return \Illuminate\Http\Response
-     */
     public function show($id)
     {
         $permission = Auth::user()->can('employee-list');
         if (!$permission) {
             abort(403);
         }
-
         $employee = Employee::where('id', $id)->first();
         $branch = Branch::orderBy('id', 'asc')->get();
         $shift_type = ShiftType::where('deleted',0)->orderBy('id', 'asc')->get();
@@ -417,36 +236,13 @@ class EmployeeController extends Controller
           ,'dsdivisions','gsndivision','policestation'));
     }
 
-    public function showcontact($id)
-    {
-        $permission = Auth::user()->can('employee-list');
-        if (!$permission) {
-            abort(403);
-        }
-
-        $employee = DB::table('employees')
-            ->leftjoin('employee_pictures', 'employees.id', '=', 'employee_pictures.emp_id')
-            ->select('employees.*', 'employee_pictures.emp_pic_filename')
-            ->where('id', $id)->first();
-
-        return view('Employee.contactDetails', compact('employee', 'id'));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param \App\Employee $employee
-     * @return \Illuminate\Http\Response
-     */
     public function edit(REQUEST $request)
     {
         $permission = Auth::user()->can('employee-edit');
         if (!$permission) {
             abort(403);
         }
-
         $id = $request->id;
-        
         // Add validation rules
         $validator = Validator::make($request->all(), [
             'emp_id' => 'required|max:15|unique:employees,emp_id,'.$id,
@@ -505,17 +301,14 @@ class EmployeeController extends Controller
         $job_category_id = $request->job_category_id;
         $work_category_id = $request->work_category_id;
         $leave_approve_person = $request->leave_approve_person;
-
         $emergency_contact_person = $request->emergency_contact_person;
         $emergency_contact_tp = $request->emergency_contact_tp;
-
         $dsdivision = $request->dsdivision;
         $gsndivision = $request->gsndivision;
         $gsnname = $request->gsnname;
         $gsncontactno = $request->gsncontactno;
         $policestation = $request->policestation;
         $policecontat = $request->policecontat;
-
         $employee = Employee::find($id);
 
         if($jobstatus != 2){
@@ -525,14 +318,11 @@ class EmployeeController extends Controller
                 Session::flash('error', $errors);
                 return redirect('viewEmployee/' . $id);
             }
-
             if($request->no_of_annual_leaves > 0){
                 $errors[] = 'No of annual leaves allows only for permanent employees';
                 Session::flash('error', $errors);
                 return redirect('viewEmployee/' . $id);
             }
-
-
         }
 
         $employee->emp_id = $emp_id;
@@ -580,17 +370,13 @@ class EmployeeController extends Controller
         }else{
             $employee->is_resigned = 0;
         }
-
         $employee->emp_addressT1 = $request->addressT1;
         $employee->emp_address_T2 = $request->addressT2;
-
         if ($jobstatus == 2) {
             $employee->emp_permanent_date = $dateassign;
         }
         $employee->emp_assign_date = $dateassign;
-
         $employee->save();
-
 
         $jobstatus = new JobStatus;
         $jobstatus->emp_id = $request->input('id');
@@ -605,11 +391,9 @@ class EmployeeController extends Controller
             if ($image->isValid()) {
                 $name = time() . '_' . $id . '.' . $image->getClientOriginalExtension();
                 $destinationPath = public_path('/images');
-                
                 if (!file_exists($destinationPath)) {
                     mkdir($destinationPath, 0755, true);
                 }
-                
                 if ($image->move($destinationPath, $name)) {
                     $employeePic = EmployeePicture::where('emp_id', $id)->first();
                     
@@ -648,70 +432,10 @@ class EmployeeController extends Controller
             }
         }
         Session::flash('success', 'The Employee Details Successfully Updated');
-
         return redirect('viewEmployee/' . $id);
 
     }
 
-
-    public function editcontact(REQUEST $request)
-    {
-        $permission = Auth::user()->can('employee-edit');
-        if ($permission == false) {
-            abort(403);
-        }
-
-        $id = $request->id;
-        $address1 = $request->address1;
-        $address2 = $request->address2;
-        $city = $request->city;
-        $province = $request->province;
-        $postal_code = $request->postal_code;
-        $home_no = $request->home_no;
-        $mobile = $request->mobile;
-        $birthday = $request->birthday;
-        $work_telephone = $request->work_telephone;
-        $work_email = $request->work_email;
-        $other_email = $request->other_email;
-
-        $employee = Employee::find($id);
-
-        $employee->emp_address = $address1;
-        $employee->emp_address_2 = $address2;
-        $employee->emp_city = $city;
-        $employee->emp_province = $province;
-        $employee->emp_postal_code = $postal_code;
-        $employee->emp_home_no = $home_no;
-        $employee->emp_mobile = $mobile;
-        $employee->emp_birthday = $birthday;
-        $employee->emp_work_phone_no = $work_telephone;
-        $employee->emp_email = $work_email;
-        $employee->emp_other_email = $other_email;
-
-        $employee->save();
-        Session::flash('success', 'The Employee Contact Details Successfuly Updated');
-        return redirect('contactDetails/' . $id);
-    }
-
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param \App\Employee $employee
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Employee $employee)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param \App\Employee $employee
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
         $permission = Auth::user()->can('employee-delete');
@@ -725,115 +449,6 @@ class EmployeeController extends Controller
 
         Session::flash('success', 'The Employee Details Successfuly Updated');
     }
-
-    public function exportempoloyee()
-    {
-
-    }
-
-    public function exportempoloyeereport()
-    {
-
-    }
-
-    public function employee_list_sel2(Request $request)
-    {
-        if ($request->ajax())
-        {
-            $page = Input::get('page');
-            $resultCount = 25;
-            $offset = ($page - 1) * $resultCount;
-            $term = Input::get("term");
-
-            $query = DB::table('employees')
-                ->where(function($q) use ($term) {
-                    $q->where('employees.calling_name', 'LIKE', '%' . $term . '%')
-                    ->orWhere('employees.emp_name_with_initial', 'LIKE', '%' . $term . '%');
-                })
-                ->where('deleted', 0)
-                ->where('is_resigned', 0);
-
-            // Add department filter if department parameter is provided and not empty
-            if ($request->has('department') && !empty($request->department)) {
-                $query->where('employees.emp_department', $request->department);
-            }
-
-            $breeds = $query
-                ->select(
-                    DB::raw('DISTINCT employees.emp_id as id'),
-                    DB::raw('CONCAT(employees.emp_name_with_initial, " - ", employees.calling_name) as text')
-                )
-                ->orderBy('employees.emp_name_with_initial')
-                ->skip($offset)
-                ->take($resultCount)
-                ->get();
-
-            $count = Count($breeds); // Get count from the actual results
-
-            $endCount = $offset + $resultCount;
-            $morePages = $endCount < $count;
-
-            $results = [
-                "results" => $breeds,
-                "pagination" => [
-                    "more" => $morePages
-                ]
-            ];
-
-            return response()->json($results);
-        }
-    }
-    public function location_list_sel2(Request $request)
-    {
-        if ($request->ajax())
-        {
-            $page = Input::get('page');
-            $resultCount = 25;
-
-            $offset = ($page - 1) * $resultCount;
-
-            $breeds = \Illuminate\Support\Facades\DB::query()
-                ->where('branches.location', 'LIKE',  '%' . Input::get("term"). '%')
-                ->from('branches')
-                ->orderBy('branches.location')
-                ->skip($offset)
-                ->take($resultCount)
-                ->get([DB::raw('DISTINCT branches.id as id'),DB::raw('branches.location as text')]);
-
-            $count = DB::query()
-                ->where('branches.location', 'LIKE',  '%' . Input::get("term"). '%')
-                ->from('branches')
-                ->orderBy('branches.location')
-                ->skip($offset)
-                ->take($resultCount)
-                ->get([DB::raw('DISTINCT branches.id as id'),DB::raw('branches.location as text')])
-                ->count();
-            $endCount = $offset + $resultCount;
-            $morePages = $endCount < $count;
-
-            $results = array(
-                "results" => $breeds,
-                "pagination" => array(
-                    "more" => $morePages
-                )
-            );
-
-            return response()->json($results);
-        }
-    }
-
-    public function get_dept_emp_list()
-    {
-        $dept_id = Input::get('dept');
-        $emp_list = DB::table('employees')
-            ->where('deleted', 0)
-            ->where('emp_department', $dept_id)
-            ->orderBy('emp_name_with_initial')
-            ->get();
-        return response()->json($emp_list, 200);
-    }
-
-
             
     public function employeeresignation(Request $request){
              
@@ -857,7 +472,6 @@ class EmployeeController extends Controller
         return response()->json(['success' => 'Employee successfully Resigned']);
     
     }
-
     public function getEmployeeJoinDate(Request $request)
     {
         $emp_id = $request->input('id');
