@@ -10,6 +10,7 @@ use DB;
 
 use Illuminate\Http\Request;
 use Validator;
+use Illuminate\Support\Facades\Auth;
 
 class RemunerationController extends Controller
 {
@@ -30,6 +31,11 @@ class RemunerationController extends Controller
      */
     public function index()
     {
+        $user = Auth::user();
+        $permission = $user->can('Facilities-list');
+        if(!$permission) {
+            abort(403);
+        }
         $remuneration = Remuneration::where(['remuneration_cancel'=>0, 'allocation_method'=>'FIXED'])->orderBy('id', 'asc')->get();
 		$eligibleinfo = RemunerationEligibilityDay::orderBy('id', 'asc')->get();
         return view('Payroll.remuneration.remuneration_list',compact('remuneration', 'eligibleinfo'));

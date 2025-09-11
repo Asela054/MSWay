@@ -1,5 +1,3 @@
-<?php
-?>
 @extends('layouts.app')
 
 @section('content')
@@ -913,7 +911,7 @@ $(document).ready( function () {
         $('#nextmonthbdformModal').modal('show');
     });
 
-    showTime();
+    // showTime();
 
     function showTime(){
         var date = new Date();

@@ -820,11 +820,6 @@
                     <li class="nav-item dropdown no-caret mr-3 dropdown-user"><a href="{{ route('register') }}">Register</a>
                     </li>
                 @else
-                    {{-- <li class="nav-item no-caret mr-3">
-                        <a href="https://aws.erav.lk/multioffsetpay" title="Goto Payroll System"
-                           class="text-decoration-none text-dark"><i class="fas fa-book"></i>&nbsp;Payroll</a>
-                    </li> --}}
-
                     <li class="nav-item dropdown no-caret mr-3 dropdown-user">
                         <a class="btn btn-icon btn-transparent-dark dropdown-toggle" id="navbarDropdownUserImage"
                            href="javascript:void(0);" role="button" data-toggle="dropdown" aria-haspopup="true"
