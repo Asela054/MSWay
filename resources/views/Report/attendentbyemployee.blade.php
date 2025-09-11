@@ -307,7 +307,7 @@ $(document).ready(function () {
 
                         html += tr;
                         html += `<td>${emp_data.emp_etfno}</td>`;
-                        html += `<td>${emp_data.emp_name_with_initial}</td>`;
+                        html += `<td>${emp_data.emp_name_with_initial} - ${emp_data.calling_name}</td>`;
                         html += `<td>${emp_data.dept_name}</td>`;
                         html += `<td>${emp_data.date}</td>`;
                         html += `<td>${emp_data.day_type}</td>`;

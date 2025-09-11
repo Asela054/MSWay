@@ -184,6 +184,7 @@ class DepartmentwisereportController extends Controller
             ->select(
                 'employees.id as empid',
                 'employees.emp_name_with_initial as emp_name',
+                'employees.calling_name',
                 DB::raw('SUM(ot_approved.hours) as total_ot'),
                 DB::raw('SUM(ot_approved.double_hours) as total_double_ot')
             );
@@ -252,7 +253,7 @@ class DepartmentwisereportController extends Controller
         foreach ($data as $row) {
             $table .= '<tr>';
             $table .= '<td class="align-middle">' . htmlspecialchars($row->empid) . '</td>';
-            $table .= '<td class="align-middle">' . htmlspecialchars($row->emp_name) . '</td>';
+            $table .= '<td class="align-middle">' . htmlspecialchars($row->emp_name) . ' - ' . htmlspecialchars($row->calling_name) . '</td>';
 
             if ($reporttype == '1' && !empty($selectedmonth)) {
                 $table .= '<td class="align-middle">' . htmlspecialchars($row->total_ot) . '</td>';
@@ -445,6 +446,7 @@ class DepartmentwisereportController extends Controller
                 'departments.id as dept_id',
                 'departments.name as dept_name',
                 'employees.id as empid',
+                'employees.calling_name',
                 'employees.emp_name_with_initial as emp_name',
                 DB::raw('SUM(CASE WHEN leaves.leave_type = 1 THEN leaves.no_of_days ELSE 0 END) as annual_leaves'),
                 DB::raw('SUM(CASE WHEN leaves.leave_type = 2 THEN leaves.no_of_days ELSE 0 END) as casual_leaves'),
@@ -474,6 +476,7 @@ class DepartmentwisereportController extends Controller
             if (!isset($employeeLeaves[$row->empid])) {
                 $employeeLeaves[$row->empid] = [
                     'emp_name' => $row->emp_name,
+                    'calling_name' => $row->calling_name,
                     'dept_name' => $row->dept_name,
                     'leaves' => []
                 ];
@@ -522,7 +525,7 @@ class DepartmentwisereportController extends Controller
             $table .= '<tr>';
             $table .= '<td class="align-middle">' . htmlspecialchars($employee['dept_name']) . '</td>';
             $table .= '<td class="align-middle">' . htmlspecialchars($empid) . '</td>';
-            $table .= '<td class="align-middle">' . htmlspecialchars($employee['emp_name']) . '</td>';
+            $table .= '<td class="align-middle">' . htmlspecialchars($employee['emp_name']) . ' - ' . htmlspecialchars($employee['calling_name']) .'</td>';
             foreach ($monthsInRange as $month) {
                 $yearMonth = date('Y-m', strtotime($month));
                 $annual = isset($employee['leaves'][$yearMonth]['annual']) ? $employee['leaves'][$yearMonth]['annual'] : 0;
@@ -708,6 +711,7 @@ class DepartmentwisereportController extends Controller
             ->select(
                 'employees.emp_id',
                 'employees.emp_name_with_initial',
+                'employees.calling_name',
                 'employees.emp_department',
                 'departments.name as dept_name',
                 DB::raw('YEAR(attendances.date) as year'),
@@ -739,6 +743,7 @@ class DepartmentwisereportController extends Controller
                 $groupedData[$row->emp_id] = [
                     'emp_id' => $row->emp_id,
                     'emp_name_with_initial' => $row->emp_name_with_initial,
+                    'calling_name' => $row->calling_name,
                     'attendance_count' => [],
                 ];
             }
@@ -798,7 +803,7 @@ class DepartmentwisereportController extends Controller
 
             $table .= '<tr>';
             $table .= '<td class="align-middle">' . htmlspecialchars($emp_data['emp_id']) . '</td>';
-            $table .= '<td class="align-middle">' . htmlspecialchars($emp_data['emp_name_with_initial']) . '</td>';
+            $table .= '<td class="align-middle">' . htmlspecialchars($emp_data['emp_name_with_initial']) . ' - ' . htmlspecialchars($emp_data['calling_name']) .'</td>';
 
             if ($reporttype == '1' && !empty($selectedmonth)) {
                 $monthKey = date('Y-m', strtotime($selectedmonth));

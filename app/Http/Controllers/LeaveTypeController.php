@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Validator;
 use DB;
 use Yajra\Datatables\Datatables;
+use App\Helpers\EmployeeHelper;
 
 class LeaveTypeController extends Controller
 {
@@ -381,6 +382,7 @@ class LeaveTypeController extends Controller
             $results = array(
                 "emp_id" => $employee->emp_id,
                 "emp_name_with_initial" => $employee->emp_name_with_initial,
+                 "employee_display" => EmployeeHelper::getDisplayName($employee), 
                 "total_no_of_annual_leaves" => $total_no_of_annual_leaves,
                 "total_no_of_casual_leaves" => $total_no_of_casual_leaves,
                 "total_taken_annual_leaves" => $current_year_taken_a_l,
@@ -398,5 +400,6 @@ class LeaveTypeController extends Controller
         return Datatables::of($final_data)->make(true);
 
     }
+
 
 }

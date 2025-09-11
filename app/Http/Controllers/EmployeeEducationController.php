@@ -6,6 +6,7 @@ use App\EmployeeEducation;
 use App\EmployeeExperience;
 use App\EmployeeSkill;
 use App\EmployeeLanguages;
+use App\JobTitle;
 use Illuminate\Http\Request;
 use Session;
 use Validator;
@@ -111,8 +112,9 @@ class EmployeeEducationController extends Controller
         $experience = EmployeeExperience::where('emp_id',$id)->get();
         $skill = EmployeeSkill::where('emp_id',$id)->get();
         $languages = EmployeeLanguages::where('emp_id',$id)->get();
+        $jobtitles= JobTitle::all();
        
-        return view('Employee.viewQualification',compact('education','experience','skill','languages','id'));
+        return view('Employee.viewQualification',compact('education','experience','skill','languages','id','jobtitles'));
     }
 
     /**

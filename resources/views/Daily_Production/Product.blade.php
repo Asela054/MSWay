@@ -5,7 +5,7 @@
 <main> 
     <div class="page-header shadow">
         <div class="container-fluid">
-            @include('layouts.employee_nav_bar')
+             @include('layouts.production&task_nav_bar')
            
         </div>
     </div>
@@ -29,8 +29,6 @@
                                     <th>ID </th>
                                     <th>Product</th>
                                     <th>Description</th>
-                                    <th>Semi Finished Price</th>
-                                    <th>Full Finished Price</th>
                                     <th class="text-right">Action</th>
                                 </tr>
                             </thead>
@@ -40,9 +38,8 @@
                                     <td>{{$products->id}}</td>
                                     <td>{{$products->productname}}</td>
                                     <td>{{$products->description}}</td>
-                                    <td>{{$products->semi_price}}</td>
-                                    <td>{{$products->full_price}}</td>
                                     <td class="text-right">
+                                            <a href="{{ route('MachineShow',$products->id) }}" title="Machines" class="machines btn btn-outline-info btn-sm" > <i class="fas fa-cogs"></i> </a>
                                             <button name="edit" id="{{$products->id}}" class="edit btn btn-outline-primary btn-sm" type="submit"><i class="fas fa-pencil-alt"></i></button>
                                             <button type="submit" name="delete" id="{{$products->id}}" class="delete btn btn-outline-danger btn-sm"><i class="far fa-trash-alt"></i></button>
                                     </td>
@@ -82,14 +79,14 @@
                                     <label class="small font-weight-bold text-dark">Product Description</label>
                                     <input type="text" name="description" id="description" class="form-control form-control-sm" />
                                 </div>
-                                <div class="form-group mb-1">
+                                <!-- <div class="form-group mb-1">
                                     <label class="small font-weight-bold text-dark">Semi Finished Price</label>
                                     <input type="number" step="any" name="semi_price" id="semi_price" class="form-control form-control-sm" />
                                 </div>
                                 <div class="form-group mb-1">
                                     <label class="small font-weight-bold text-dark">Full Finished Price</label>
                                     <input type="number" step="any" name="full_price" id="full_price" class="form-control form-control-sm" />
-                                </div>
+                                </div> -->
                                 <div class="form-group mt-3">
                                     <button type="submit" name="action_button" id="action_button" class="btn btn-outline-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
                                 </div>
@@ -135,8 +132,8 @@
 <script>
 $(document).ready(function(){
 
-    $('#employee_menu_link').addClass('active');
-    $('#employee_menu_link_icon').addClass('active');
+    $('#production_menu_link').addClass('active');
+    $('#production_menu_link_icon').addClass('active');
     $('#dailyprocess').addClass('navbtnactive');
 
     $('#dataTable').DataTable();

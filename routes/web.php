@@ -53,18 +53,19 @@ Route::get('/getcoparatedashboard_EmployeeChart', 'CorporatedashboardController@
 Route::resource('FingerprintDevice', 'FingerprintDeviceController');
 //Route::post('addFingerprintDevice',['uses' => 'FingerprintDeviceController@store', 'as' => 'addFingerprintDevice']); 
 
+// separate employee module
 Route::get('EmloyeeList',['uses' => 'EmployeeController@employeelist', 'as' => 'EmloyeeList']); 
 Route::get('addEmployee',['uses' => 'EmployeeController@index', 'as' => 'addEmployee']);
-Route::get('employee_list_dt',['uses' => 'EmployeeController@employee_list_dt', 'as' => 'employee_list_dt']);
+// Route::get('employee_list_dt',['uses' => 'EmployeeController@employee_list_dt', 'as' => 'employee_list_dt']);
 Route::post('empoyeeUpdate',['uses' => 'EmployeeController@edit', 'as' => 'empoyeeUpdate']); 
 Route::post('empoyeeRegister',['uses' => 'EmployeeController@store', 'as' => 'empoyeeRegister']); 
-Route::post('addUserLogin',['uses' => 'EmployeeController@usercreate', 'as' => 'addUserLogin']); 
+// Route::post('addUserLogin',['uses' => 'EmployeeController@usercreate', 'as' => 'addUserLogin']); 
 Route::get('EmployeeDestroy/destroy/{id}', 'EmployeeController@destroy');
 Route::get('exportEmpoloyee', 'EmployeeController@exportempoloyee')->name('exportEmpoloyee');
 Route::get('/viewEmployee/{id}',['uses' => 'EmployeeController@show', 'as' => 'viewEmployee']);
-Route::get('/contactDetails/{id}',['uses' => 'EmployeeController@showcontact', 'as' => 'contactDetails']);
-Route::post('contactUpdate',['uses' => 'EmployeeController@editcontact', 'as' => 'contactUpdate']);
-Route::get('/viewEmergencyContacts/{id}',['uses' => 'EmployeeController@showcontact', 'as' => 'viewEmergencyContacts']);
+// Route::get('/contactDetails/{id}',['uses' => 'EmployeeController@showcontact', 'as' => 'contactDetails']);
+// Route::post('contactUpdate',['uses' => 'EmployeeController@editcontact', 'as' => 'contactUpdate']);
+// Route::get('/viewEmergencyContacts/{id}',['uses' => 'EmployeeController@showcontact', 'as' => 'viewEmergencyContacts']);
 
 Route::post('empoyeeAttachment',['uses' => 'EmployeeAttachmentController@create', 'as' => 'empoyeeAttachment']);
 Route::post('contactAttachment',['uses' => 'EmployeeAttachmentController@createcontact', 'as' => 'contactAttachment']);
@@ -231,10 +232,6 @@ Route::get('Branch/destroy/{id}', 'BranchController@destroy');
 
 Route::resource('Attendance', 'AttendanceController');
 Route::get('Attendance',['uses' => 'AttendanceController@index', 'as' => 'Attendance']);
-Route::get('late_attendance_by_time',['uses' => 'AttendanceController@late_attendance_by_time', 'as' => 'late_attendance_by_time']);
-Route::get('late_attendance_by_time_approve',['uses' => 'AttendanceController@late_attendance_by_time_approve', 'as' => 'late_attendance_by_time_approve']);
-Route::get('late_attendances_all',['uses' => 'AttendanceController@late_attendances_all', 'as' => 'late_attendances_all']);
-Route::get('late_attendance_list_approved',['uses' => 'AttendanceController@late_attendance_list_approved', 'as' => 'late_attendance_list_approved']);
 
 // Route::post('late_attendance/destroy/{id}', 'AttendanceController@destroy_late_attendacne');
 
@@ -243,15 +240,10 @@ Route::post('Attendance.delete', 'AttendanceController@delete')->name('Attendanc
 
 
 //incomplete_attendances
-Route::get('incomplete_attendances',['uses' => 'AttendanceController@incomplete_attendances', 'as' => 'incomplete_attendances']);
+Route::get('incomplete_attendances',['uses' => 'IncompleteAttendanceController@incomplete_attendances', 'as' => 'incomplete_attendances']);
+Route::post('get_incomplete_attendance_by_employee_data', 'IncompleteAttendanceController@get_incomplete_attendance_by_employee_data')->name('get_incomplete_attendance_by_employee_data');
+Route::post('mark_as_no_pay', 'IncompleteAttendanceController@mark_as_no_pay')->name('mark_as_no_pay');
 
-Route::get('attendance_by_time_report_list',['uses' => 'AttendanceController@attendance_by_time_report_list', 'as' => 'attendance_by_time_report_list']);
-Route::post('lateAttendance_mark_as_late',['uses' => 'AttendanceController@lateAttendance_mark_as_late', 'as' => 'lateAttendance_mark_as_late']);
-
-Route::get('attendance_by_time_approve_report_list',['uses' => 'AttendanceController@attendance_by_time_approve_report_list', 'as' => 'attendance_by_time_approve_report_list']);
-Route::post('lateAttendance_mark_as_late_approve',['uses' => 'AttendanceController@lateAttendance_mark_as_late_approve', 'as' => 'lateAttendance_mark_as_late_approve']);
-
-Route::get('late_types_sel2',['uses' => 'AttendanceController@late_types_sel2', 'as' => 'late_types_sel2']);
 Route::get('AttendanceEdit',['uses' => 'AttendanceController@attendanceedit', 'as' => 'AttendanceEdit']);
 Route::get('attendance_list_for_edit',['uses' => 'AttendanceController@attendance_list_for_edit', 'as' => 'attendance_list_for_edit']);
 
@@ -262,9 +254,6 @@ Route::post('get_attendance_monthly_summery_by_emp_id',['uses' => 'AttendanceCon
 
 
 Route::get('AttendanceEditBulk',['uses' => 'AttendanceController@AttendanceEditBulk', 'as' => 'AttendanceEditBulk']);
-Route::get('AttendanceApprovel',['uses' => 'AttendanceController@attendanceapprovel', 'as' => 'AttendanceApprovel']);
-Route::get('attendance_list_for_approve',['uses' => 'AttendanceController@attendance_list_for_approve', 'as' => 'attendance_list_for_approve']);
-Route::post('AttendentAprovelBatch', 'AttendanceController@AttendentAprovelBatch')->name('AttendentAprovelBatch');
 
 Route::get('attendance_list_for_bulk_edit',['uses' => 'AttendanceController@attendance_list_for_bulk_edit', 'as' => 'attendance_list_for_bulk_edit']);
 Route::post('AttendanceEditBulkSubmit',['uses' => 'AttendanceController@AttendanceEditBulkSubmit', 'as' => 'AttendanceEditBulkSubmit']);
@@ -274,8 +263,6 @@ Route::post('attendance_update_bulk_submit',['uses' => 'AttendanceController@att
 
 Route::get('/AttendentUpdate', 'AttendanceController@getAttendance');
 Route::get('/AttendentView', 'AttendanceController@getAttendance');
-Route::get('/getAttendanceApprovel', 'AttendanceController@getAttendanceApprovel');
-Route::post('AttendentAprovel', 'AttendanceController@AttendentAprovel')->name('AttendentAprovel');
 
 Route::post('/AttendentUpdateLive', 'AttendanceController@attendentUpdateLive');
 Route::post('/AttendentInsertLive', 'AttendanceController@attendentinsertlive');
@@ -285,23 +272,13 @@ Route::get('/getBranchAttendentChart', 'AttendanceController@getBranchAttendentC
 Route::get('/Attendentdetails/{id}/{date}',['uses' => 'AttendanceController@attendentdetails', 'as' => 'Attendentdetails']);
 
 //get_incomplete_attendance_by_employee_data
-Route::post('get_incomplete_attendance_by_employee_data', 'AttendanceController@get_incomplete_attendance_by_employee_data')->name('get_incomplete_attendance_by_employee_data');
-
-//mark_as_no_pay
-Route::post('mark_as_no_pay', 'AttendanceController@mark_as_no_pay')->name('mark_as_no_pay');
-
 
 
 Route::post('Attendance/update', 'AttendanceController@update')->name('Attendance.update');
 Route::get('Attendance/destroy/{id}', 'AttendanceController@destroy');
-//Route::post('Attendance/getdevicedata', 'AttendanceController@getdevicedata');
-Route::post('/Attendance/getdevicedata', 'AttendanceController@getdevicedata')->name('Attendance.getdevicedata');
 
 //AttendanceDeviceClear
 Route::get('AttendanceDeviceClear', 'AttendanceClearController@attendance_clear_list')->name('AttendanceDeviceClear');
-
-//Attendance.cleardevicedata
-Route::post('/Attendance/cleardevicedata', 'AttendanceController@cleardevicedata')->name('Attendance.cleardevicedata');
 
 //attendance_clear_list
 Route::get('attendance_clear_list_dt',['uses' => 'AttendanceClearController@attendance_clear_list_dt', 'as' => 'attendance_clear_list_dt']);
@@ -364,74 +341,22 @@ Route::get('Leaveleavecreate', 'LeaveController@leaveleavecreate')->name('leavel
 
 Route::get('EmpoloyeeReport',['uses' => 'Report@getemployeelist', 'as' => 'EmpoloyeeReport']);
 Route::get('employee_report_list',['uses' => 'Report@employee_report_list', 'as' => 'employee_report_list']);
-
-Route::get('AttendenceReport', 'Report@empoloyeeattendentall')->name('AttendenceReport');
-Route::get('exportAttendanceReport', 'Report@exportattendances')->name('exportAttendanceReport');  
-Route::get('exportEmployeeReport', 'Report@exportempoloyeereport')->name('exportEmployeeReport');  
-Route::post('attendentfilter', 'Report@attendentfilter')->name('attendentfilter');  
+ 
+Route::get('exportEmployeeReport', 'Report@exportempoloyeereport')->name('exportEmployeeReport'); 
 Route::get('attendentreportbydate', function () {
     return view('Report.attendentreportbydate');
 });
-Route::get('attendetreportbyemployee', 'Report@attendentbyemployee')->name('attendetreportbyemployee'); 
-Route::get('attendance_report_list', 'Report@attendance_report_list')->name('attendance_report_list');
 
-//post get_attendance_by_employee_data
-Route::post('get_attendance_by_employee_data', 'Report@get_attendance_by_employee_data')->name('get_attendance_by_employee_data');
 //get_attendance_by_employee_data_excel
 Route::post('get_attendance_by_employee_data_excel', 'Report@get_attendance_by_employee_data_excel')->name('get_attendance_by_employee_data_excel');
 
 
 
 Route::post('/employee/fetch_data', 'Report@employee_fetch_data')->name('employee.fetch_data');
-Route::get('employee_list_from_attendance_sel2', 'Report@employee_list_from_attendance_sel2')->name('employee_list_from_attendance_sel2');
-Route::get('location_list_from_attendance_sel2', 'Report@location_list_from_attendance_sel2')->name('location_list_from_attendance_sel2');
-Route::post('/employee/fetch_leave_data', 'Report@fetch_leave_data')->name('employee.fetch_leave_data');
-Route::post('/employee/fetch_attend_data', 'Report@fetch_attend_data')->name('employee.fetch_attend_data');
-Route::post('attendentbyemployeefilter', 'Report@attendentbyemployeefilter')->name('attendentbyemployeefilter');  
-Route::post('leavedatafilter', 'Report@leavedatafilter')->name('leavedatafilter');  
-Route::post('atenddatafilter', 'Report@atenddatafilter')->name('atenddatafilter');  
-Route::get('/leaveReport', 'Report@leavereport')->name('leaveReport'); 
-Route::get('/leave_report_list', 'Report@leave_report_list')->name('leave_report_list');
-Route::get('/employee_list_from_leaves_sel2', 'Report@employee_list_from_leaves_sel2')->name('employee_list_from_leaves_sel2');
-Route::get('/attendetreport', 'Report@attendetreport')->name('attendetreport');
-Route::get('/daterange', 'Report@daterange');
-Route::post('/daterange/fetch_data', 'Report@fetch_data')->name('daterange.fetch_data');
 Route::post('/daterange/filter_data', 'Report@filter_data')->name('daterange.filter_data');
-Route::get('LateAttendance',['uses' => 'Report@lateattendent', 'as' => 'LateAttendance']);
-Route::get('late_attendance_report_list',['uses' => 'Report@late_attendance_report_list', 'as' => 'late_attendance_report_list']);
-Route::get('exportLateAttend', 'Report@exportLateattend')->name('exportLateAttend');
 Route::get('/LateAttendentView', 'AttendanceController@getlateAttendance');
-//ot_approve
-Route::get('/ot_approve', 'AttendanceController@ot_approve')->name('ot_approve');
-//get_ot_details post
-Route::post('/get_ot_details', 'AttendanceController@get_ot_details')->name('get_ot_details');
-//ot_approve_post
-Route::post('/ot_approve_post', 'AttendanceController@ot_approve_post')->name('ot_approve_post');
-
-Route::get('ot_report', 'Report@ot_report')->name('ot_report');
-Route::get('ot_report_list',['uses' => 'Report@ot_report_list', 'as' => 'ot_report_list']);
-Route::get('ot_report_list_month',['uses' => 'Report@ot_report_list_month', 'as' => 'ot_report_list_month']);
-//ot_report_list_view_more post
-Route::post('ot_report_list_view_more', 'Report@ot_report_list_view_more')->name('ot_report_list_view_more');
-
-//ot_approved
-Route::get('/ot_approved', 'AttendanceController@ot_approved')->name('ot_approved');
-//ot_approved_list
-Route::get('/ot_approved_list', 'AttendanceController@ot_approved_list')->name('ot_approved_list');
-
-Route::get('/ot_approved_list_monthly', 'AttendanceController@ot_approved_list_monthly')->name('ot_approved_list_monthly');
-
-//ot_approved_delete post
-Route::post('/ot_approved_delete', 'AttendanceController@ot_approved_delete')->name('ot_approved_delete');
-
-
-Route::get('no_pay_report', 'Report@no_pay_report')->name('no_pay_report');
-Route::get('no_pay_report_list_month',['uses' => 'Report@no_pay_report_list_month', 'as' => 'no_pay_report_list_month']);
-Route::post('no_pay_days_data',['uses' => 'Report@no_pay_days_data', 'as' => 'no_pay_days_data']);
 
 Route::get('/copy_att_to_employee_work_rates', 'AttendanceController@copy_att_to_employee_work_rates');
-
-Route::get('/attendance_list_ajax', 'AttendanceController@attendance_list_ajax')->name('attendance_list_ajax');
 
 
 Route::resource('ShiftType', 'ShiftTypeController');
@@ -568,6 +493,7 @@ Route::post('work_hours_save', 'WorkHoursController@work_hours_save')->name('wor
 // Resignation Report
 Route::get('employee_resign_report', 'EmployeeResignController@employee_resign_report')->name('employee_resign_report');
 Route::get('get_resign_employees', 'EmployeeResignController@get_resign_employees')->name('get_resign_employees');
+
 
 // Absent Report
 Route::get('employee_absent_report', 'EmployeeAbsentController@employee_absent_report')->name('employee_absent_report');
@@ -1239,7 +1165,6 @@ Route::post('LeaveDeduction/update', 'LeaveDeductionController@update')->name('L
 Route::get('LeaveDeduction/destroy/{id}', 'LeaveDeductionController@destroy');
 /*--  Leave Deduction----*/
 
-Route::post('/late_attendancedestroy', 'AttendanceController@destroy_late_attendacne')->name('late_attendancedestroy');
 Route::get('/checkloanguranteemployee' ,'EmployeeLoanController@checkloangurante')->name('checkloanguranteemployee');
 
 /*--  Attendance Import----*/
@@ -1302,19 +1227,6 @@ Route::get('/empshiftextendstatus/{id}/{stasus}','ShiftExtendController@status')
 Route::get('employee_list_for_shift', 'ShiftExtendController@employee_list_for_shift')->name('employee_list_for_shift');
 Route::post('/shift_extend_allocate_csv' ,'ShiftExtendController@shift_extend_allocate_csv')->name('shift_extend_allocate_csv');
 
-// NDA Letter Routes
-Route::get('NDAletter', 'NDAletterController@index')->name('NDAletter');
-Route::post('NDAletterinsert', 'NDAletterController@insert')->name('NDAletterinsert');
-Route::get('NDAletterlist', 'NDAletterController@letterlist')->name('NDAletterlist');
-Route::post('NDAletteredit', 'NDAletterController@edit')->name('NDAletteredit');
-Route::get('/NDAletterstatus/{id}/{status}','NDAletterController@status')->name('NDAletterstatus');
-Route::post('NDAletterdelete', 'NDAletterController@delete')->name('NDAletterdelete');
-Route::post('NDAletterprintdata', 'NDAletterPDFController@printdata')->name('NDAletterprintdata');
-Route::get('NDAlettergetdepartmentfilter/{categoryId}', 'NDAletterController@getdepartmentfilter')->name('NDAlettergetdepartmentfilter');
-Route::get('NDAlettergetemployeefilter/{categoryId}', 'NDAletterController@getemployeefilter')->name('NDAlettergetemployeefilter');
-
-Route::get('emp_leave_list',['uses' => 'UserAccountController@leave_list', 'as' => 'emp_leave_list']);
-
 Route::get('department_list_sel3', 'DepartmentController@department_list_sel3')->name('department_list_sel3');
 
 Route::post('/calculate-working-days', 'LeaveController@calculateWorkingDays')->name('calculate-working-days');
@@ -1323,21 +1235,8 @@ Route::post('/exam-subjects','EmployeeexamresultController@getExamSubjects')->na
 
 Route::get('/dashboard/nextmonth-birthday','HomeController@nextmonth_birthday')->name('getdashboard_nextmonth_birthday');
 
-// User account Details
-Route::get('useraccountsummery', 'UserAccountController@useraccountsummery_list')->name('useraccountsummery');
-Route::post('get_employee_monthlysummery', 'UserAccountController@get_employee_monthlysummery')->name('get_employee_monthlysummery');
-Route::get('user_leave_list',['uses' => 'UserAccountController@leave_list_dt', 'as' => 'user_leave_list']);
-Route::get('userlogininformation', 'UserAccountController@userlogininformation_list')->name('userlogininformation');
-Route::get('get_employee_attendance', 'UserAccountController@get_attendance_by_employee_data')->name('get_employee_attendance');
-
-Route::post('/get_employee_salarysheet', 'UserAccountController@downloadSalarySheet')->name('get_employee_salarysheet');
-Route::post('/getEmployeeLeaveStatusSummary', 'UserAccountController@getemployeeleavestatus');
-Route::post('EmployeeLeaveApply',['uses' => 'UserAccountController@leaveapply', 'as' => 'EmployeeLeaveApply']); 
-Route::put('/employees/{id}/update-image', 'UserAccountController@updateImage')->name('employees.update-image');
-
 Route::get('/password-reset', 'Auth\UserPasswordResetController@showForm')->name('password-reset');
 Route::post('/password-reset', 'Auth\UserPasswordResetController@reset')->name('manual.reset.submit');
-
 
 // machine Controller Routes
 Route::resource('Machine', 'MachineController');
@@ -1365,9 +1264,6 @@ Route::post('/productallocationdelete' ,'ProductionEmployeeAllocationController@
 Route::post('/productallocationdeletelist' ,'ProductionEmployeeAllocationController@deletelist')->name('productallocationdeletelist');
 Route::get('/productallocationstatus/{id}/{stasus}','ProductionEmployeeAllocationController@status')->name('productallocationstatus');
 
-// Production ending Controller Routes
-Route::get('productionending', 'ProductionEndingController@index')->name('productionending');
-
 // Employee Assigned Devices Routes
 Route::get('/viewAssignedDevices/{id}',['uses' => 'EmployeeDevicesController@show', 'as' => 'viewAssignedDevices']);
 Route::post('assignedDeviceInsert',['uses' => 'EmployeeDevicesController@create', 'as' => 'assignedDeviceInsert']);
@@ -1389,6 +1285,195 @@ Route::post('end_user_letterprintdata', 'EndUserletterPDFController@printdata')-
 
 /*-- common employee letter routes --*/
 Route::get('employee_list_letter', 'EmployeeletterController@employee_list_letter')->name('employee_list_letter');
+
+// new routes
+
+
+// Attendace Sync Controller Routes
+Route::get('/attendance_list_ajax', 'AttendanceSyncController@attendance_list_ajax')->name('attendance_list_ajax');
+Route::post('/Attendance/getdevicedata', 'AttendanceSyncController@getdevicedata')->name('Attendance.getdevicedata');
+Route::post('/Attendance/cleardevicedata', 'AttendanceSyncController@cleardevicedata')->name('Attendance.cleardevicedata');
+
+
+// Attendance Approval Controller Routes
+Route::get('AttendanceApprovel',['uses' => 'AttendanceApprovalController@attendanceapprovel', 'as' => 'AttendanceApprovel']);
+Route::get('attendance_list_for_approve',['uses' => 'AttendanceApprovalController@attendance_list_for_approve', 'as' => 'attendance_list_for_approve']);
+Route::post('AttendentAprovelBatch', 'AttendanceApprovalController@AttendentAprovelBatch')->name('AttendentAprovelBatch');
+Route::get('/getAttendanceApprovel', 'AttendanceApprovalController@getAttendanceApprovel');
+Route::post('AttendentAprovel', 'AttendanceApprovalController@AttendentAprovel')->name('AttendentAprovel');
+
+
+// Late Attendance Controller Routes
+
+Route::get('late_attendance_by_time',['uses' => 'LateAttendanceController@late_attendance_by_time', 'as' => 'late_attendance_by_time']);
+Route::get('attendance_by_time_report_list',['uses' => 'LateAttendanceController@attendance_by_time_report_list', 'as' => 'attendance_by_time_report_list']);
+Route::get('late_types_sel2',['uses' => 'LateAttendanceController@late_types_sel2', 'as' => 'late_types_sel2']);
+Route::post('lateAttendance_mark_as_late',['uses' => 'LateAttendanceController@lateAttendance_mark_as_late', 'as' => 'lateAttendance_mark_as_late']);
+Route::get('late_attendance_by_time_approve',['uses' => 'LateAttendanceController@late_attendance_by_time_approve', 'as' => 'late_attendance_by_time_approve']);
+Route::get('attendance_by_time_approve_report_list',['uses' => 'LateAttendanceController@attendance_by_time_approve_report_list', 'as' => 'attendance_by_time_approve_report_list']);
+Route::post('lateAttendance_mark_as_late_approve',['uses' => 'LateAttendanceController@lateAttendance_mark_as_late_approve', 'as' => 'lateAttendance_mark_as_late_approve']);
+Route::get('late_attendances_all',['uses' => 'LateAttendanceController@late_attendances_all', 'as' => 'late_attendances_all']);
+Route::get('late_attendance_list_approved',['uses' => 'LateAttendanceController@late_attendance_list_approved', 'as' => 'late_attendance_list_approved']);
+Route::post('/late_attendancedestroy', 'LateAttendanceController@destroy_late_attendacne')->name('late_attendancedestroy');
+
+//OT Approve Controller Routes
+
+Route::get('/ot_approve', 'OTApproveController@ot_approve')->name('ot_approve');
+Route::post('/get_ot_details', 'OTApproveController@get_ot_details')->name('get_ot_details');
+Route::post('/ot_approve_post', 'OTApproveController@ot_approve_post')->name('ot_approve_post');
+Route::get('/ot_approved', 'OTApproveController@ot_approved')->name('ot_approved');
+Route::get('/ot_approved_list', 'OTApproveController@ot_approved_list')->name('ot_approved_list');
+Route::get('/ot_approved_list_monthly', 'OTApproveController@ot_approved_list_monthly')->name('ot_approved_list_monthly');
+Route::post('/ot_approved_delete', 'OTApproveController@ot_approved_delete')->name('ot_approved_delete');
+
+// RPT Attendance Controller
+
+Route::get('attendetreportbyemployee', 'RptAttendanceController@attendentbyemployee')->name('attendetreportbyemployee'); 
+Route::get('AttendenceReport', 'RptAttendanceController@empoloyeeattendentall')->name('AttendenceReport');
+Route::get('exportAttendanceReport', 'RptAttendanceController@exportattendances')->name('exportAttendanceReport'); 
+Route::get('/daterange', 'RptAttendanceController@daterange');
+Route::post('/daterange/fetch_data', 'RptAttendanceController@fetch_data')->name('daterange.fetch_data');
+Route::post('attendentfilter', 'RptAttendanceController@attendentfilter')->name('attendentfilter');  
+Route::get('attendance_report_list', 'RptAttendanceController@attendance_report_list')->name('attendance_report_list');
+Route::post('get_attendance_by_employee_data', 'RptAttendanceController@get_attendance_by_employee_data')->name('get_attendance_by_employee_data');
+Route::get('employee_list_from_attendance_sel2', 'RptAttendanceController@employee_list_from_attendance_sel2')->name('employee_list_from_attendance_sel2');
+Route::get('location_list_from_attendance_sel2', 'RptAttendanceController@location_list_from_attendance_sel2')->name('location_list_from_attendance_sel2');
+Route::post('attendentbyemployeefilter', 'RptAttendanceController@attendentbyemployeefilter')->name('attendentbyemployeefilter');  
+Route::get('/attendetreport', 'RptAttendanceController@attendetreport')->name('attendetreport');
+Route::post('/employee/fetch_attend_data', 'RptAttendanceController@fetch_attend_data')->name('employee.fetch_attend_data');
+Route::post('atenddatafilter', 'RptAttendanceController@atenddatafilter')->name('atenddatafilter');  
+
+
+// RPT Leave Report Controller routes
+Route::get('/leaveReport', 'RptLeaveController@leavereport')->name('leaveReport'); 
+Route::get('/leave_report_list', 'RptLeaveController@leave_report_list')->name('leave_report_list');
+Route::get('/employee_list_from_leaves_sel2', 'RptLeaveController@employee_list_from_leaves_sel2')->name('employee_list_from_leaves_sel2');
+Route::post('/employee/fetch_leave_data', 'RptLeaveController@fetch_leave_data')->name('employee.fetch_leave_data');
+Route::post('leavedatafilter', 'RptLeaveController@leavedatafilter')->name('leavedatafilter');  
+
+
+// RPT Late Attendance Controller Routes
+Route::get('LateAttendance',['uses' => 'RptLateattendanceController@lateattendent', 'as' => 'LateAttendance']);
+Route::get('late_attendance_report_list',['uses' => 'RptLateattendanceController@late_attendance_report_list', 'as' => 'late_attendance_report_list']);
+Route::get('exportLateAttend', 'RptLateattendanceController@exportLateattend')->name('exportLateAttend');
+
+
+// Rpt OT Controller  Routes
+
+Route::get('ot_report', 'RptOTController@ot_report')->name('ot_report');
+Route::get('ot_report_list',['uses' => 'RptOTController@ot_report_list', 'as' => 'ot_report_list']);
+Route::get('ot_report_list_month',['uses' => 'RptOTController@ot_report_list_month', 'as' => 'ot_report_list_month']);
+Route::post('ot_report_list_view_more', 'RptOTController@ot_report_list_view_more')->name('ot_report_list_view_more');
+
+//Rpt Nopay Controller
+
+Route::get('no_pay_report', 'RptNopayController@no_pay_report')->name('no_pay_report');
+Route::get('no_pay_report_list_month',['uses' => 'RptNopayController@no_pay_report_list_month', 'as' => 'no_pay_report_list_month']);
+Route::post('no_pay_days_data',['uses' => 'RptNopayController@no_pay_days_data', 'as' => 'no_pay_days_data']);
+
+// Production ending Controller Routes
+Route::get('productionending', 'ProductionEndingController@index')->name('productionending');
+Route::get('/productionendinglist' ,'ProductionEndingController@productionlist')->name('productionendinglist');
+Route::post('/productionendingfinish' ,'ProductionEndingController@insert')->name('productionendingfinish');
+Route::post('/productionendingcancel' ,'ProductionEndingController@cancelproduction')->name('productionendingcancel');
+Route::get('employee_list_production', 'ProductionEndingController@employee_list_production')->name('employee_list_production');
+Route::get('/employeeproductionreport' ,'ProductionEndingController@employeeproduction')->name('employeeproductionreport');
+
+// NDA Letter Routes
+Route::get('NDAletter', 'NDAletterController@index')->name('NDAletter');
+Route::post('NDAletterinsert', 'NDAletterController@insert')->name('NDAletterinsert');
+Route::get('NDAletterlist', 'NDAletterController@letterlist')->name('NDAletterlist');
+Route::post('NDAletteredit', 'NDAletterController@edit')->name('NDAletteredit');
+Route::get('/NDAletterstatus/{id}/{status}','NDAletterController@status')->name('NDAletterstatus');
+Route::post('NDAletterdelete', 'NDAletterController@delete')->name('NDAletterdelete');
+Route::post('NDAletterprintdata', 'NDAletterPDFController@printdata')->name('NDAletterprintdata');
+Route::get('NDAlettergetdepartmentfilter/{categoryId}', 'NDAletterController@getdepartmentfilter')->name('NDAlettergetdepartmentfilter');
+Route::get('NDAlettergetemployeefilter/{categoryId}', 'NDAletterController@getemployeefilter')->name('NDAlettergetemployeefilter');
+
+// Task Controller Routes
+Route::resource('Task', 'TaskController');
+Route::get('tasks', 'TaskController@index')->name('tasks');
+Route::post('addTask',['uses' => 'TaskController@store', 'as' => 'addTask']); 
+Route::post('Task/update', 'TaskController@update')->name('Task.update');
+Route::get('Task/destroy/{id}', 'TaskController@destroy');
+
+// Task Allocation Controller Routes
+Route::get('taskallocation', 'TaskEmployeeAllocationController@index')->name('taskallocation');
+Route::get('/taskallocationlist' ,'TaskEmployeeAllocationController@requestlist')->name('taskallocationlist');
+Route::post('/taskallocationinsert' ,'TaskEmployeeAllocationController@insert')->name('taskallocationinsert');
+Route::post('/taskallocationedit' ,'TaskEmployeeAllocationController@edit')->name('taskallocationedit');
+Route::post('/taskallocationview' ,'TaskEmployeeAllocationController@view')->name('taskallocationview');
+Route::post('/taskallocationeditdetails' ,'TaskEmployeeAllocationController@editlist')->name('taskallocationeditdetails');
+Route::post('/taskallocationupdate' ,'TaskEmployeeAllocationController@update')->name('taskallocationupdate');
+Route::post('/taskallocationdelete' ,'TaskEmployeeAllocationController@delete')->name('taskallocationdelete');
+Route::post('/taskallocationdeletelist' ,'TaskEmployeeAllocationController@deletelist')->name('taskallocationdeletelist');
+Route::get('/taskallocationstatus/{id}/{stasus}','TaskEmployeeAllocationController@status')->name('taskallocationstatus');
+
+// Location Attendace New Routes
+Route::post('single_employeeattendance', 'JobattendanceController@single_employee')->name('single_employeeattendance'); 
+
+// Location Attendance Approve controller
+
+Route::get('jobattendanceapprove', 'JobAttendaceApproveController@index')->name('jobattendanceapprove');
+Route::post('jobattendanceapprovesave', 'JobAttendaceApproveController@approveattendace')->name('jobattendanceapprovesave');
+
+// Task ending Controller Routes
+Route::get('taskending', 'TaskEndingController@index')->name('taskending');
+Route::get('/taskendinglist' ,'TaskEndingController@tasklist')->name('taskendinglist');
+Route::post('/taskendingfinish' ,'TaskEndingController@insert')->name('taskendingfinish');
+Route::post('/taskendingcancel' ,'TaskEndingController@canceltask')->name('taskendingcancel');
+Route::get('employee_list_task', 'TaskEndingController@employee_list_task')->name('employee_list_task');
+Route::get('/employeetaskreport' ,'TaskEndingController@employeetask')->name('employeetaskreport');
+// Task & Product report Controller Routes
+Route::get('/employeetaskproductreport' ,'EmployeeTaskProductController@employeetaskproduct')->name('employeetaskproductreport');
+
+// Location Attendace New Routes
+Route::post('single_employeeattendance', 'JobattendanceController@single_employee')->name('single_employeeattendance'); 
+
+// Location Attendance Approve controller
+
+Route::get('jobattendanceapprove', 'JobAttendaceApproveController@index')->name('jobattendanceapprove');
+Route::post('jobattendanceapprovesave', 'JobAttendaceApproveController@approveattendace')->name('jobattendanceapprovesave');
+
+/*-- Product Machines Info----*/
+Route::resource('Machine', 'ProductMachineController');
+Route::get('MachineShow/{id}',['uses' => 'ProductMachineController@index', 'as' => 'MachineShow']);
+Route::post('addMachine',['uses' => 'ProductMachineController@store', 'as' => 'addMachine']);
+Route::post('Machine/update', 'ProductMachineController@update')->name('Machine.update');
+Route::get('Machine/destroy/{id}', 'ProductMachineController@destroy');
+Route::get('Machine_list_sel2', 'ProductMachineController@Machine_list_sel2');
+
+// Task & Product report Controller Routes
+Route::get('/employeetaskproductreport' ,'EmployeeTaskProductController@employeetaskproduct')->name('employeetaskproductreport');
+
+Route::get('/productiontaskdashboard' ,'ProductionTaskdashboardController@index')->name('productiontaskdashboard');
+
+//Production an Task Approve controller
+Route::get('/productiontaskapprove' ,'ProductionTaskApproveController@index')->name('productiontaskapprove');
+Route::post('/productiontaskapprovegenerate' ,'ProductionTaskApproveController@generateproductiontask')->name('productiontaskapprovegenerate');
+Route::post('/approveproductiontask' ,'ProductionTaskApproveController@approveproductiontask')->name('approveproductiontask');
+
+Route::resource('LocationOt', 'LocationOtController');
+Route::get('LocationOt',['uses' => 'LocationOtController@index', 'as' => 'LocationOt']);
+Route::get('LocationOtlist', 'LocationOtController@letterlist')->name('LocationOtlist'); 
+Route::post('addLocationOt',['uses' => 'LocationOtController@store', 'as' => 'addLocationOt']); 
+Route::post('LocationOt/update', 'LocationOtController@update')->name('LocationOt.update');
+Route::get('LocationOt/destroy/{id}', 'LocationOtController@destroy');
+/*--  Location Ot ----*/
+
+Route::get('unauthorizejobattendanceapprove', 'JobAttendaceApproveController@unauthorizeattendace')->name('unauthorizejobattendanceapprove');
+
+//Job location allwance Controller Routes
+Route::get('/locationallwanceapprove' ,'JoblocationallwanceController@index')->name('locationallwanceapprove');
+Route::post('/locationallwanceapprovegenerate' ,'JoblocationallwanceController@generatelocationallowance')->name('locationallwanceapprovegenerate');
+Route::post('/approvelocationallowance' ,'JoblocationallwanceController@approvelocationallowance')->name('approvelocationallowance');
+
+Route::get('/getattendancesummarychart' ,'DashboarddetailedController@attendacechart')->name('getattendancesummarychart');
+
+// absent nopay controller 
+Route::get('/absentnopay' ,'DepartmentviseNopayController@index')->name('absentnopay');
+Route::post('/getabsetnopay' ,'DepartmentviseNopayController@getabsetnopay')->name('getabsetnopay');
+Route::post('/applyabsentnopay' ,'DepartmentviseNopayController@applyabsentnopay')->name('applyabsentnopay');
 
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');

@@ -4,14 +4,22 @@
 @section('content')
 
     <main>
-        <div class="page-header shadow">
-            <div class="container-fluid">
-                @include('layouts.attendant&leave_nav_bar')
-               
-            </div>
-        </div>
 
-        <div class="container-fluid mt-4">
+        <div class="page-header shadow">
+             <div class="container-fluid d-none d-sm-block shadow">
+                   @include('layouts.attendant&leave_nav_bar')
+             </div>
+             <div class="container-fluid">
+                 <div class="page-header-content py-3 px-2">
+                     <h1 class="page-header-title ">
+                         <div class="page-header-icon"><i class="fa-light fa-clock"></i></div>
+                         <span>Approved OT</span>
+                     </h1>
+                 </div>
+             </div>
+         </div>
+
+        <div class="container-fluid mt-2 p-0 p-2">
             <div class="card mb-2">
                 <div class="card-body">
                     <form class="form-horizontal" id="formFilter">
@@ -270,30 +278,41 @@
                             }
                         ],
                         // "lengthMenu": [[10, 25, 50, 100, 500, 1000], [10, 25, 50, 100, 500, 1000]],
-                        dom: 'Blfrtip',
-                        buttons: [
-                            {
-                                extend: 'excelHtml5',
-                                text: 'Excel',
-                                className: 'btn btn-default btn-sm',
-                                exportOptions: {
-                                    columns: 'th:not(:last-child)'
+                        dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
+                            "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+                        "buttons": [{
+                                extend: 'csv',
+                                className: 'btn btn-success btn-sm',
+                                title: 'Approved OT  Information',
+                                text: '<i class="fas fa-file-csv mr-2"></i> CSV',
+                            },
+                            { 
+                                extend: 'pdf', 
+                                className: 'btn btn-danger btn-sm', 
+                                title: 'Approved OT Information', 
+                                text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
+                                orientation: 'landscape', 
+                                pageSize: 'legal', 
+                                customize: function(doc) {
+                                    doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
                                 }
                             },
                             {
-                                extend: 'pdfHtml5',
-                                text: 'Print',
-                                className: 'btn btn-default btn-sm',
-                                exportOptions: {
-                                    columns: 'th:not(:last-child)'
-                                }
-                            }
+                                extend: 'print',
+                                title: 'Approved OT  Information',
+                                className: 'btn btn-primary btn-sm',
+                                text: '<i class="fas fa-print mr-2"></i> Print',
+                                customize: function(win) {
+                                    $(win.document.body).find('table')
+                                        .addClass('compact')
+                                        .css('font-size', 'inherit');
+                                },
+                            },
                         ],
                         processing: true,
                         serverSide: true,
                         ajax: {
                             url: scripturl + '/ot_approved_list.php',
-                            // "url": "{{url('/ot_approved_list')}}",
                             type: "POST",
                             data: {
                                 department:department,
@@ -308,7 +327,7 @@
 
                         columns: [
                             { data: 'emp_id' },
-                            { data: 'emp_name_with_initial' },
+                            { data: 'employee_display' },
                             { data: 'date' },
                             { data: 'from' ,
                                 render: function(data, type, row) {
@@ -504,16 +523,14 @@
                 // load_dt('', '', '', '', '');
             });
 
-            $(document).on('click','.delete_btn',function(e){
+            $(document).on('click','.delete_btn',async function(e){
 
                 e.preventDefault();
                 let id = $(this).data('id');
                 let btn = $(this);
+                var r = await Otherconfirmation("You want to remove this ? ");
 
-                if(confirm("Are you sure you want to delete this?")){
-
-                    btn.attr('disabled',true);
-                    btn.html('<i class="fa fa-spinner fa-spin"></i>');
+                if(r == true){
 
                     $.ajaxSetup({
                         headers: {
@@ -527,26 +544,22 @@
                             'id': id
                         },
                         success: function (data) {
-                            btn.attr('disabled',false);
-                            btn.html('<i class="fa fa-trash"></i>');
-                            $('.info_msg').html('<div class="alert alert-success">'+data.msg+'</div>');
-                            load_dt();
+                              const actionObj = {
+                                    icon: 'fas fa-trash-alt',
+                                    title: '',
+                                    message: 'Record Remove Successfully',
+                                    url: '',
+                                    target: '_blank',
+                                    type: 'danger'
+                                };
+                                const actionJSON = JSON.stringify(actionObj, null, 2);
+                                actionreload(actionJSON);
 
-                        },
-                        error: function (data) {
-                            btn.attr('disabled',false);
-                            btn.html('<i class="fa fa-trash"></i>');
-                            console.log(data);
                         }
 
                     });
 
                 }
-                else{
-                    return false;
-                }
-
-
             });
 
         });

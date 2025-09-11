@@ -198,7 +198,7 @@
                     },
                     columns: [
                         { data: 'emp_id', name: 'emp_id' },
-                        { data: 'emp_name_with_initial', name: 'emp_name_with_initial' },
+                        { data: 'employee_display', name: 'employee_display' },
                         { data: 'total_no_of_annual_leaves', name: 'total_no_of_annual_leaves' },
                         { data: 'total_taken_annual_leaves', name: 'total_taken_annual_leaves' },
                         { data: 'available_no_of_annual_leaves', name: 'available_no_of_annual_leaves' },

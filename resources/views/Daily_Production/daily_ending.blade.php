@@ -5,7 +5,7 @@
 <main> 
     <div class="page-header shadow">
         <div class="container-fluid">
-            @include('layouts.employee_nav_bar')
+             @include('layouts.production&task_nav_bar')
            
         </div>
     </div>
@@ -26,23 +26,7 @@
                                     <th class="text-right">Action</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                
-                                <tr>
-                                    <td>1</td>
-                                    <td>Machine 01</td>
-                                    <td>Product 01</td>
-                                    <td>2025-07-30</td>
-                                    <td>Processing</td>
-                                    <td class="text-right">
-                                        
-                                            <button name="edit" id="edit" class="edit btn btn-outline-primary btn-sm" type="submit"><i class="fas fa-pencil-alt"></i></button>
-                                        
-                                            <button type="submit" name="delete" id="delete" class="delete btn btn-outline-danger btn-sm"><i class="far fa-trash-alt"></i></button>
-                                       
-                                    </td>
-                                </tr>
-                                
+                            <tbody>   
                             </tbody>
                         </table>
                         </div>
@@ -76,17 +60,25 @@
                                                 <label class="small font-weight-bold text-dark">Product Type:</label><br>
                                                 <div class="form-check form-check-inline">
                                                     <input class="form-check-input" type="radio" name="product_type" id="semi" value="Semi Completed">
-                                                    <label class="form-check-label small font-weight-bold text-dark" for="semi" required>Semi Completed</label>
+                                                    <label class="form-check-label small font-weight-bold text-dark" for="semi" required>Semi Product</label>
                                                 </div>
                                                 <div class="form-check form-check-inline">
                                                     <input class="form-check-input" type="radio" name="product_type" id="full" value="Full Completed">
-                                                    <label class="form-check-label small font-weight-bold text-dark" for="full" required >Full Completed</label>
+                                                    <label class="form-check-label small font-weight-bold text-dark" for="full" required >Full Product</label>
+                                                </div>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="radio" name="product_type" id="both" value="Semi & Full">
+                                                    <label class="form-check-label small font-weight-bold text-dark" for="both" required >Semi & Full</label>
                                                 </div>
                                             </div>
                                         </div>
-                                     <div class="col-6">
-                                        <label class="small font-weight-bold text-dark">Processed Quntity</label>
-                                        <input type="number" step="any" name="quntity" id="quntity" class="form-control form-control-sm" required />
+                                     <div class="col-3 quantity-field hidden-field" id="semiQtyField">
+                                        <label class="small font-weight-bold text-dark">Semi Quntity</label>
+                                        <input type="number" step="any" name="semiquntity" id="semiquntity" class="form-control form-control-sm" required />
+                                    </div>
+                                     <div class="col-3  quantity-field hidden-field" id="fullQtyField">
+                                        <label class="small font-weight-bold text-dark">Full Quntity</label>
+                                        <input type="number" step="any" name="fullquntity" id="fullquntity" class="form-control form-control-sm" required />
                                     </div>
                                 </div>
                                 <div class="row">
@@ -98,6 +90,7 @@
                                 <br>
                                 <div class="form-group mt-3">
                                     <button type="submit" name="action_button" id="action_button" class="btn btn-outline-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
+                                    <input type="hidden" name="hidden_id" id="hidden_id" />
                                 </div>
                             </form>
                         </div>
@@ -122,8 +115,8 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col">
-                            <span id="form_result"></span>
-                                <form method="post" id="formTitle" class="form-horizontal">
+                            <span id="form_result_cancel"></span>
+                                <form method="post" id="cancelform" class="form-horizontal">
                                 {{ csrf_field() }}	
                                 <div class="row">
                                     <div class="col-12">
@@ -135,39 +128,15 @@
                                 <div class="form-group mt-3">
                                     <button type="submit" name="action_button" id="action_button" class="btn btn-outline-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
                                 </div>
+                                <input type="hidden" name="cancel_id" id="cancel_id" />
                             </form>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+  </div>
 
-
-
-    <div class="modal fade" id="confirmModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-        aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content">
-                <div class="modal-header p-2">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col text-center">
-                            <h4 class="font-weight-normal">Are you sure you want to remove this data?</h4>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer p-2">
-                    <button type="button" name="ok_button" id="ok_button" class="btn btn-danger px-3 btn-sm">OK</button>
-                    <button type="button" class="btn btn-dark px-3 btn-sm" data-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
     <!-- Modal Area End -->     
 </main>
               
@@ -179,83 +148,175 @@
 <script>
 $(document).ready(function(){
 
-    $('#employee_menu_link').addClass('active');
-    $('#employee_menu_link_icon').addClass('active');
+    $('#production_menu_link').addClass('active');
+    $('#production_menu_link_icon').addClass('active');
     $('#dailyprocess').addClass('navbtnactive');
 
-    $('#dataTable').DataTable();
+
+     // DataTable initialization
+    $('#dataTable').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            "url": "{!! route('productionendinglist') !!}",
+        },
+        columns: [{
+                data: 'id',
+                name: 'id'
+            },
+            {
+                data: 'machine_name',
+                name: 'machine_name'
+            },
+            {
+                data: 'product_name',
+                name: 'product_name'
+            },
+            {
+                data: 'date',
+                name: 'date'
+            },
+            {
+            data: 'production_status',
+            name: 'production_status',
+            render: function(data, type, row) {
+                var statusText = '';
+                var statusClass = '';
+                
+                if (data == 1) {
+                    statusText = 'Processing';
+                    statusClass = 'text-warning';
+                } else if (data == 2) {
+                    statusText = 'Completed';
+                    statusClass = 'text-success';
+                } else{
+                    statusText = 'Cancelled';
+                    statusClass = 'text-danger'; 
+                }
+                
+                return '<span class="' + statusClass + '">' + statusText + '</span>';
+            }
+        },
+            {
+                data: 'action',
+                name: 'action',
+                orderable: false,
+                searchable: false,
+                render: function (data, type, row) {
+                    return '<div style="text-align: right;">' + data + '</div>';
+                }
+            },
+        ],
+        "bDestroy": true,
+        "order": [
+            [0, "desc"]
+        ]
+    });
 
 
-
-    $('#edit').click(function () {
+    $(document).on('click', '.edit', function () {
+        var id = $(this).attr('id');
         $('.modal-title').text('Finish Production');
         $('#action_button').val('Add');
         $('#action').val('Add');
         $('#form_result').html('');
+        $('#hidden_id').val(id);
         $('#formModal').modal('show');
     });
 
-    $('#delete').click(function () {
+    $('#formTitle').on('submit', function (event) {
+        event.preventDefault();
+        $.ajax({
+            url:  '{!! route("productionendingfinish") !!}',
+            method: "POST",
+            data: $(this).serialize(),
+            dataType: "json",
+            success: function (data) {
+                var html = '';
+                if (data.errors) {
+                    html = '<div class="alert alert-danger">';
+                    for (var count = 0; count < data.errors.length; count++) {
+                        html += '<p>' + data.errors[count] + '</p>';
+                    }
+                    html += '</div>';
+                }
+                if (data.success) {
+                    html = '<div class="alert alert-success">' + data.success + '</div>';
+                    location.reload()
+                }
+                $('#form_result').html(html);
+            }
+        });
+    });
+
+     $(document).on('click', '.delete', function () {
+        var id = $(this).attr('id');
+        $('#form_result_cancel').html('');
+        $('#cancel_id').val(id);
         $('#cancelformModal').modal('show');
+    });
+    
+    $('#cancelform').on('submit', function (event) {
+        event.preventDefault();
+        $.ajax({
+            url:  '{!! route("productionendingcancel") !!}',
+            method: "POST",
+            data: $(this).serialize(),
+            dataType: "json",
+            success: function (data) {
+                var html = '';
+                if (data.errors) {
+                    html = '<div class="alert alert-danger">';
+                    for (var count = 0; count < data.errors.length; count++) {
+                        html += '<p>' + data.errors[count] + '</p>';
+                    }
+                    html += '</div>';
+                }
+                if (data.success) {
+                    html = '<div class="alert alert-success">' + data.success + '</div>';
+                    location.reload()
+                }
+                $('#form_result_cancel').html(html);
+            }
+        });
     });
 
 
-           
+     $('input[name="product_type"]').change(function () {
+         const selectedValue = $(this).val();
+         handleProductTypeChange(selectedValue);
+     });
 
-            $('#formTitle').on('submit', function (event) {
-                event.preventDefault();
+     function handleProductTypeChange(productType) {
+         // Hide all quantity fields first using Bootstrap classes
+         $('#semiQtyField, #fullQtyField').addClass('d-none').removeClass('d-block');
 
-                var tbody = $("#allocationtbl tbody");
-                if (tbody.children().length > 0) {
-                    var jsonObj = [];
-                    $("#allocationtbl tbody tr").each(function () {
-                        var item = {};
+         // Clear all quantity inputs
+         $('#semiquntity, #fullquntity').val('').removeAttr('required');
 
-                        var empId = $(this).data('empid');
-                        item = {
-                            'col_1': empId,
-                        };
+         // Show relevant fields based on selection
+         switch (productType) {
+             case 'Semi Completed':
+                 $('#semiQtyField').removeClass('d-none').addClass('d-block');
+                 $('#semiquntity').attr('required', 'required');
+                 break;
+             case 'Full Completed':
+                 $('#fullQtyField').removeClass('d-none').addClass('d-block');
+                 $('#fullquntity').attr('required', 'required');
+                 break;
+             case 'Semi & Full':
+                 $('#semiQtyField, #fullQtyField').removeClass('d-none').addClass('d-block');
+                 $('#semiquntity, #fullquntity').attr('required', 'required');
+                 break;
+         }
+     }
 
-                        jsonObj.push(item);
-                    });
-
-
-                    var machine = $('#machine').val();
-                    var product = $('#product').val();
-                    var production_date = $('#production_date').val();
-
-                    $.ajax({
-                        url: '',
-                        method: 'POST',
-                        data: {
-                            _token: '{{ csrf_token() }}',
-                            tableData: jsonObj,
-                            departmentline: departmentline,
-                            linedate: linedate
-                        },
-                        dataType: "json",
-                        success: function (data) {
-                            var html = '';
-                            if (data.errors) {
-                                html = '<div class="alert alert-danger">';
-                                for (var count = 0; count < data.errors.length; count++) {
-                                    html += '<p>' + data.errors[count] + '</p>';
-                                }
-                                html += '</div>';
-                            }
-                            if (data.success) {
-                                html = '<div class="alert alert-success">' + data.success + '</div>';
-                                $('#formTitle')[0].reset();
-                                location.reload()
-                            }
-                            $('#form_result').html(html);
-                        }
-                    });
-
-                }
-            });
+     $('#semiQtyField, #fullQtyField').addClass('d-none');
 
 });
+
+  
+       
 </script>
 
 

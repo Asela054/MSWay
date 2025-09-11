@@ -335,7 +335,7 @@
                     },
                     columns: [
                         { data: 'id', name: 'id' },
-                        { data: 'emp_name', name: 'emp_name' },
+                         { data: 'employee_display', name: 'employee_display' },
                         { data: 'dep_name', name: 'dep_name' },
                         { data: 'leave_category', name: 'leave_category' },
                         { data: 'from_date', name: 'from_date' },

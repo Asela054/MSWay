@@ -1,5 +1,10 @@
 <?php
 
+// Include the EmployeeHelper class
+use App\Helpers\EmployeeHelper;
+
+// Correct path resolution for Laravel - use base path or proper autoloading
+require_once __DIR__ . '/../../app/Helpers/EmployeeHelper.php';
 /*
  * DataTables example server-side processing script.
  *
@@ -40,9 +45,21 @@ $columns = array(
 	array( 'db' => '`u`.`is_holiday`', 'dt' => 'is_holiday', 'field' => 'is_holiday' ),
 	array( 'db' => '`emp`.`emp_shift`', 'dt' => 'emp_shift', 'field' => 'emp_shift' ),
 	array( 'db' => '`emp`.`emp_name_with_initial`', 'dt' => 'emp_name_with_initial', 'field' => 'emp_name_with_initial' ),
+	array( 'db' => '`emp`.`calling_name`', 'dt' => 'calling_name', 'field' => 'calling_name' ),
 	array( 'db' => '`emp`.`emp_department`', 'dt' => 'emp_department', 'field' => 'emp_department' ),
 	array( 'db' => '`bran`.`b_location`', 'dt' => 'b_location', 'field' => 'b_location' ),
-	array( 'db' => '`dep`.`dept_name`', 'dt' => 'dept_name', 'field' => 'dept_name' )
+	array( 'db' => '`dep`.`dept_name`', 'dt' => 'dept_name', 'field' => 'dept_name' ),
+	 array('db' => '`emp`.`emp_id`', 'dt' => 'employee_display', 'field' => 'emp_id', 
+          'formatter' => function($d, $row) {
+              $employee = (object)[
+                  'emp_name_with_initial' => $row['emp_name_with_initial'],
+                  'calling_name' => $row['calling_name'],
+                  'emp_id' => $row['emp_id']
+              ];
+              
+              return EmployeeHelper::getDisplayName($employee);
+          }
+    )
 );
 
 // SQL server connection information

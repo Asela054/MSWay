@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Leave;
 use App\LeaveType;
 use App\Employee;
+use App\Helpers\EmployeeHelper;
 use App\LeaveDetail;
 use App\LeaveRequest;
 use Carbon\Carbon;
@@ -154,7 +155,8 @@ class LeaveController extends Controller
             ->select('leaves.*',
                 'ec.emp_name_with_initial as covering_emp',
                 'leave_types.leave_type',
-                'e.emp_name_with_initial as emp_name',
+                'e.emp_name_with_initial as emp_name_with_initial',
+                'e.calling_name',
                 'departments.name as dep_name'
             )
             // ->whereBetween('leave_types.id', [1, 6])
@@ -180,6 +182,17 @@ class LeaveController extends Controller
 
         return Datatables::of($data)
             ->addIndexColumn()
+            ->addColumn('employee_display', function ($row) {
+                   return EmployeeHelper::getDisplayName($row);
+                   
+                })
+                ->filterColumn('employee_display', function($query, $keyword) {
+                    $query->where(function($q) use ($keyword) {
+                        $q->where('e.emp_name_with_initial', 'like', "%{$keyword}%")
+                        ->orWhere('e.calling_name', 'like', "%{$keyword}%")
+                        ->orWhere('e.emp_id', 'like', "%{$keyword}%");
+                    });
+                })
             ->editColumn('status',function($row){
                 if($row->status == 'Pending'){
                     $btn = ' <badge class="badge badge-primary" ><i class="fas fa-spinner"></i> Pending</badge> ';

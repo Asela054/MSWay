@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\EmployeeTermPayment;
+use App\Helpers\EmployeeHelper;
 use Illuminate\Http\Request;
 use Auth;
 use App\Http\Controllers\Controller;
@@ -64,6 +65,8 @@ class LateminitesApprovelController extends Controller
                 'employees.id as emp_auto_id',
                 'employees.emp_id',
                 'employees.emp_name_with_initial',
+                'employees.calling_name',
+                'employees.emp_join_date',
                 'branches.location',
                 'departments.name as dept_name',
                 'job_categories.late_attend_min'                
@@ -94,6 +97,22 @@ class LateminitesApprovelController extends Controller
 
         foreach ($results as $record) {
 
+        if (empty($record->late_attend_min)) {
+            continue;
+        }
+
+        $joinDate = new DateTime($record->emp_join_date);
+        if ($joinDate >= $startDate && $joinDate <= $endDate) {
+            continue;
+        }
+
+         $employeeObj = (object)[
+            'emp_id' => $record->emp_id,
+            'emp_name_with_initial' => $record->emp_name_with_initial,
+            'calling_name' => $record->calling_name
+        ];
+
+
             $late_day_amount = 0;
             $late_hours_total = 0;
             $nopayAmount = 0;
@@ -101,9 +120,7 @@ class LateminitesApprovelController extends Controller
             $employeeid =  $record->emp_id;
 
             $late_minites_total = (new \App\Employeelateattenadnaceminites)->get_lateminitescount($employeeid, $month ,$closedate);
-
-
-          
+ 
             if(!empty($late_minites_total)){
 
                 $work_days = (new \App\Attendance)->get_work_days($employeeid, $month, $closedate);
@@ -116,9 +133,9 @@ class LateminitesApprovelController extends Controller
                 $late_minites_total = $late_minites_total - $record->late_attend_min;
                 $late_hours_total = $late_minites_total / 60;
                 $nopayamount = (new \App\Employeelateattenadnaceminites)->NopayAmountCal($record->emp_auto_id, $work_days,$leave_days,$no_pay_days,$normal_ot_hours, $double_ot_hours);
-                $nopayAmount = abs($nopayamount['nopay_base_rate']/8);
+                $nopayAmount = $nopayamount['nopay_base_rate']/8;
                 if($late_minites_total > 0){
-                    $late_day_amount = $late_hours_total * $nopayAmount;
+                    $late_day_amount = abs($late_hours_total * $nopayAmount);
                 }
                 else{
                     $late_day_amount = 0;
@@ -129,7 +146,7 @@ class LateminitesApprovelController extends Controller
             if($late_day_amount>0){
                 $data[] = [
                     'emp_id' => $record->emp_id,
-                    'emp_name_with_initial' => $record->emp_name_with_initial,
+                    'emp_name_with_initial' =>EmployeeHelper::getDisplayName($employeeObj),
                     'emp_autoid' => $record->emp_auto_id,
                     'late_hours_total' => number_format($late_hours_total, 2),
                     'nopayAmount' => number_format(abs($nopayAmount), 2),
@@ -149,6 +166,7 @@ class LateminitesApprovelController extends Controller
         }
 
         $dataarry = $request->input('dataarry');
+
         
         $current_date_time = Carbon::now()->toDateTimeString();
 
@@ -161,63 +179,66 @@ class LateminitesApprovelController extends Controller
             $late_day_amount = str_replace([','], '', $row['total_amount']);
             $autoid = $row['autoid'];
 
-            $emplyeeinfo = DB::table('employees')
-                ->select('id')
-                ->where('emp_id', $empid)
-                ->first();
+
+
+
 
             $profiles = DB::table('payroll_profiles')
             ->join('payroll_process_types', 'payroll_profiles.payroll_process_type_id', '=', 'payroll_process_types.id')
-            ->where('payroll_profiles.emp_id', $emplyeeinfo->id)
+            // ->where('payroll_profiles.emp_etfno', $empid)
+            ->where('payroll_profiles.emp_id', $autoid)
             ->select('payroll_profiles.id as payroll_profile_id')
             ->first();
-            
-            if ($profiles) {
-                $remunerationid = 30;
 
-                $paysliplast = DB::table('employee_payslips')
-                    ->select('emp_payslip_no')
-                    ->where('payroll_profile_id', $profiles->payroll_profile_id)
-                    ->where('payslip_cancel', 0)
-                    ->orderBy('id', 'desc')
-                    ->first();
-                
-                if ($paysliplast) {
-                    $emp_payslipno = $paysliplast->emp_payslip_no;
-                    $newpaylispno =  $emp_payslipno +1;
-                }else{
-                    $newpaylispno = 1;
-                }
-            
-                $termpaymentcheck = DB::table('employee_term_payments')
-                    ->select('id')
-                    ->where('payroll_profile_id', $profiles->payroll_profile_id)
-                    ->where('emp_payslip_no', $newpaylispno)
-                    ->where('remuneration_id', $remunerationid)
-                    ->first();
-                
-                if($termpaymentcheck){
-                    DB::table('employee_term_payments')
-                    ->where('id', $termpaymentcheck->id)
-                    ->update([
-                        'payment_amount' => $late_day_amount,
-                        'payment_cancel' => '0',
-                        'updated_by' => Auth::id(),
-                        'updated_at' => $current_date_time
-                    ]);
-                }
-                else{
-                    $termpayment = new EmployeeTermPayment();
-                    $termpayment->remuneration_id = $remunerationid;
-                    $termpayment->payroll_profile_id = $profiles->payroll_profile_id;
-                    $termpayment->emp_payslip_no = $newpaylispno;
-                    $termpayment->payment_amount = $late_day_amount;
-                    $termpayment->payment_cancel = 0;
-                    $termpayment->created_by = Auth::id();
-                    $termpayment->created_at = $current_date_time;
-                    $termpayment->save(); 
-                }
+        if ($profiles) {
+
+            $remunerationid = 25;
+
+            $paysliplast = DB::table('employee_payslips')
+                ->select('emp_payslip_no')
+                ->where('payroll_profile_id', $profiles->payroll_profile_id)
+                ->where('payslip_cancel', 0)
+                ->orderBy('id', 'desc')
+                ->first();
+
+            if ($paysliplast) {
+                $emp_payslipno = $paysliplast->emp_payslip_no;
+                $newpaylispno =  $emp_payslipno +1;
+            }else{
+                $newpaylispno = 1;
             }
+        
+            $termpaymentcheck = DB::table('employee_term_payments')
+                ->select('id')
+                ->where('payroll_profile_id', $profiles->payroll_profile_id)
+                ->where('emp_payslip_no', $newpaylispno)
+                ->where('remuneration_id', $remunerationid)
+                ->first();
+            
+            if($termpaymentcheck){
+                DB::table('employee_term_payments')
+                ->where('id', $termpaymentcheck->id)
+                ->update([
+                    'payment_amount' => $late_day_amount,
+                    'payment_cancel' => '0',
+                    'updated_by' => Auth::id(),
+                    'updated_at' => $current_date_time
+                ]);
+            }
+            else{
+                $termpayment = new EmployeeTermPayment();
+                $termpayment->remuneration_id = $remunerationid;
+                $termpayment->payroll_profile_id = $profiles->payroll_profile_id;
+                $termpayment->emp_payslip_no = $newpaylispno;
+                $termpayment->payment_amount = $late_day_amount;
+                $termpayment->payment_cancel = 0;
+                $termpayment->created_by = Auth::id();
+                $termpayment->created_at = $current_date_time;
+                $termpayment->save(); 
+            }
+        }else{
+            continue;
+        }
 
         }
 

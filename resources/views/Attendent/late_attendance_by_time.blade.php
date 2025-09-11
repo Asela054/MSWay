@@ -290,7 +290,7 @@
                             }
                         },
                         {data: 'uid'},
-                        {data: 'emp_name_with_initial'},
+                        {data: 'employee_display'},
                         {data: 'date'},
                         {data: 'timestamp'},
                         {data: 'lasttimestamp'},

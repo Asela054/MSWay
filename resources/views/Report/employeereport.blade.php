@@ -1,4 +1,4 @@
-<?php $page_stitle = 'Report on Employees - Multi Offset'; ?>
+<?php $page_stitle = 'Report on Employees - '.$company_name.''; ?>
 @extends('layouts.app')
 
 @section('content')
@@ -135,7 +135,7 @@ $(document).ready(function() {
             },
             columns: [
                 { data: 'id' },
-                { data: 'emp_name_with_initial' },
+                { data: 'employee_display' },
                 { data: 'location' },
                 { data: 'dept_name' },
                 { data: 'emp_birthday' },

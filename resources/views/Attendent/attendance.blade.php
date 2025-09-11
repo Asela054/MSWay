@@ -4,12 +4,19 @@
 
 <main>
     <div class="page-header shadow">
-        <div class="container-fluid">
+        <div class="container-fluid d-none d-sm-block shadow">
             @include('layouts.attendant&leave_nav_bar')
-           
         </div>
-    </div>      
-    <div class="container-fluid mt-4">
+        <div class="container-fluid">
+            <div class="page-header-content py-3 px-2">
+                <h1 class="page-header-title ">
+                    <div class="page-header-icon"><i class="fa-light fa-arrows-rotate"></i></div>
+                    <span>Attendance Sync</span>
+                </h1>
+            </div>
+        </div>
+    </div>        
+    <div class="container-fluid mt-2 p-0 p-2">
         <div class="card">
             <div class="card-body p-0 p-2">
                 <div id="message"></div>
@@ -28,19 +35,18 @@
                                     </select>
                                 </div>
                                 <div class="col-8">
-                                    <button type="button" name="getdata" id="getdata" class="btn btn-outline-primary btn-sm getdata px-3"><i class="fas fa-search mr-2"></i>Getdata</button>
+                                    <button type="button" name="getdata" id="getdata" class="btn btn-primary btn-sm getdata px-3"><i class="fas fa-search mr-2"></i>Getdata</button>
 
 
                                     @can('attendance-device-clear')
-                                        <a href="#" id="clear_data" class="btn btn-outline-danger btn-sm pl-2 "><i class="fas fa-trash mr-2"></i>Clear Data</a>
+                                        <a href="#" id="clear_data" class="btn btn-danger btn-sm pl-2 "><i class="fas fa-trash mr-2"></i>Clear Data</a>
                                     @endcan
 
                                 </div>
-
                             </div>
                         </form>
-
                     </div>
+
                     <div class="col-12">
                         <hr class="border-dark">
                         <h3 class="mt-2">Incomplete Data</h3>
@@ -90,7 +96,7 @@
 
                     <div class="col-12">
                         <div class="center-block fix-width scroll-inner">
-                        <table class="table table-striped table-bordered table-sm small nowrap" style="width: 100%" id="attendtable">
+                        <table class="table table-striped table-bordered table-sm small nowrap w-100" id="attendtable">
                             <thead>
                                 <tr>
                                     <th>#</th>
@@ -117,7 +123,7 @@
 
     <!-- Modal Area Start -->
     <div class="modal fade" id="AttendviewModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+       aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header p-2">
@@ -144,8 +150,9 @@
             </div>
         </div>
     </div>
+
     <div class="modal fade" id="confirmModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+       aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content">
                 <div class="modal-header p-2">
@@ -167,8 +174,9 @@
             </div>
         </div>
     </div>
+
     <div class="modal fade" id="getdataModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+       aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content">
                 <div class="modal-header p-2">
@@ -287,43 +295,62 @@ $(document).ready(function() {
         }
     });
 
-    function load_dt(department, employee, location, from_date, to_date){
+     function load_dt(department, employee, location, from_date, to_date,company){
         $('#attendtable').DataTable({
-            "columnDefs": [ {
-                "targets": -1,
-                "orderable": false
-            } ],
-            // "lengthMenu": [[10, 25, 50, 100, 500, 1000], [10, 25, 50, 100, 500, 1000]],
-            dom: 'Blfrtip',
-            buttons: [
-                {
-                    extend: 'excelHtml5',
-                    text: 'Excel',
-                    className: 'btn btn-default btn-sm',
-                    exportOptions: {
-                        // columns: 'th:not(:last-child)'
+            "destroy": true,
+            "processing": true,
+            "serverSide": true,
+            dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+            "buttons": [{
+                    extend: 'csv',
+                    className: 'btn btn-success btn-sm',
+                    title: 'Finger Print Device Details',
+                    text: '<i class="fas fa-file-csv mr-2"></i> CSV',
+                },
+                { 
+                    extend: 'pdf', 
+                    className: 'btn btn-danger btn-sm', 
+                    title: 'Finger Print Device Details', 
+                    text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
+                    orientation: 'landscape', 
+                    pageSize: 'legal', 
+                    customize: function(doc) {
+                        doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
                     }
                 },
                 {
-                    extend: 'pdfHtml5',
-                    text: 'Print',
-                    className: 'btn btn-default btn-sm',
-                    exportOptions: {
-                        //columns: 'th:not(:last-child)'
-                    }
-                }
+                    extend: 'print',
+                    title: 'Finger Print Device Details',
+                    className: 'btn btn-primary btn-sm',
+                    text: '<i class="fas fa-print mr-2"></i> Print',
+                    customize: function(win) {
+                        $(win.document.body).find('table')
+                            .addClass('compact')
+                            .css('font-size', 'inherit');
+                    },
+                },
             ],
-            processing: true,
-            serverSide: true,
+            "order": [
+                [0, "desc"]
+            ],
             ajax: {
-                "url": "{!! route('attendance_list_ajax') !!}",
-                "data": {'department':department, 'employee':employee, 'location': location, 'from_date': from_date, 'to_date': to_date},
+
+                url: scripturl + '/attendace_sync_list.php',
+                        type: 'POST',
+                        data : 
+                        {department :department, 
+                        company :company,
+                        employee :employee, 
+                        location : location,
+                        from_date: from_date,
+                        to_date: to_date},
             },
             columns: [
                 { data: 'at_id' },
                 { data: 'uid' },
                 { data: 'date'},
-                { data: 'emp_name_with_initial' },
+                { data: 'employee_display' },
                 { data: 'firsttimestamp' ,
                     render : function ( data, type, row, meta ) {
                         if(row['btn_in']){
@@ -343,7 +370,6 @@ $(document).ready(function() {
                 },
                 { data: 'lasttimestamp' ,
                     render : function ( data, type, row, meta ) {
-                        if(row['btn_out']){
                             return type === 'display'  ?
                                 ' <button class="btn btn-outline-default btn-sm edit_button text-primary" ' +
                                 'uid="'+row['uid'] +'" ' +
@@ -352,27 +378,23 @@ $(document).ready(function() {
                                 'data-name="'+row['emp_name_with_initial'] +'" '  +
                                 '>Out Time</button> '
                                 : data;
-                        }else{
-                            return type === 'display'  ?
-                                row['lasttimestamp']:data;
-                        }
                     }
                 },
                 { data: 'location' },
                 { data: 'dep_name' },
                 { data: 'uid',
+                  name: 'action',
+                  className: 'text-right',
+                  orderable: false,
+                   searchable: false,
                     render : function ( data, type, row, meta ) {
-                        if(row['btn_delete']){
                             return type === 'display'  ?
-                                ' <button class="btn btn-outline-danger btn-sm delete_button" ' +
+                                ' <button class="btn btn-danger btn-sm delete_button" ' +
                                 'data-uid="'+row['uid'] +'" ' +
                                 'data-date="'+row['date_row'] +'" ' +
                                 'data-type="delete" ' +
-                                '> <i class="fa fa-trash"> </i> </button> '
+                                ' data-toggle="tooltip" title="Remove"> <i class="fa fa-trash"> </i> </button> '
                                 : data;
-                        }else{
-                            return '';
-                        }
                     }
                 }
             ],
@@ -415,72 +437,76 @@ $(document).ready(function() {
         $('#formModaladd #id').val(id);
     });
 
-    $(document).on('click', '.edit_button', function () {
-        id = $(this).attr('uid');
-        date = $(this).attr('data-date');
-        emp_name_with_initial = $(this).attr('data-name');
+    $(document).on('click', '.edit_button', async function () {
+          var r = await Otherconfirmation("You want to Edit this ? ");
+        if (r == true) {
+
+             id = $(this).attr('uid');
+            date = $(this).attr('data-date');
+            emp_name_with_initial = $(this).attr('data-name');
 
 
-        var formdata = {
-            _token: $('input[name=_token]').val(),
-            id: id,
-            date: date
-        };
-        // alert(date);
-        $('#form_result').html('');
-        $.ajax({
-            url: "AttendentUpdate",
-            dataType: "json",
-            data: formdata,
-            success: function (data) {
-                $('.modal-title').text('Add Attendent');
-                $('#AttendviewModal').modal('show');
-                var htmlhead = '';
-                htmlhead += '<tr><td>Emp ID :' + id + '</td><td >Name :' + emp_name_with_initial + '</td><td></td></tr>';
-                htmlhead += '<tr><th></th><th>Timestamp</th><th>Action</th>';
-                var html = '';
-
-                html += '<tr>';
-                html += '<td id="aduserid"> <span style="display: none;">' + id + '</span></td>';
-                //html += '<td ><input size="16" id="formdate" type="date" ><input size="16" id="formtime" type="time" ></td>';
-                html += '<td ><input type="text" id="form_date_time"/> </td>';
-                html += '<td><button type="button" class="btn btn-success btn-xs" id="add">Add</button></td></tr>';
-                for (var count = 0; count < data.length; count++) {
-                    html += '<tr>';
-                    const timestamp = new Date(data[count].timestamp);
-                    const date = data[count].date;
-                    const begining_checkout = data[count].begining_checkout;
-                    const ending_checkin = data[count].ending_checkin;
-                    const checkdate = date.slice(0, -8)
-
-                    var checkbegining_checkout = checkdate + begining_checkout + ':00';
-                    var checkending_checkin = checkdate + ending_checkin + ':00';
-
-                    var setbegining_checkout = new Date(checkbegining_checkout).getTime();
-                    var setcheckending_checkin = new Date(checkending_checkin).getTime();
-                    var settimestamp = timestamp.getTime();
+            var formdata = {
+                _token: $('input[name=_token]').val(),
+                id: id,
+                date: date
+            };
+            // alert(date);
+            $('#form_result').html('');
+            $.ajax({
+                url: "AttendentUpdate",
+                dataType: "json",
+                data: formdata,
+                success: function (data) {
+                    $('.modal-title').text('Add Attendent');
+                    $('#AttendviewModal').modal('show');
+                    var htmlhead = '';
+                    htmlhead += '<tr><td>Emp ID :' + id + '</td><td >Name :' + emp_name_with_initial + '</td><td></td></tr>';
+                    htmlhead += '<tr><th></th><th>Timestamp</th><th>Action</th>';
+                    var html = '';
 
                     html += '<tr>';
-                    if (settimestamp < setbegining_checkout) {
-                        html += '<td> Checkin</td>';
-                    }
-                    if (settimestamp > setbegining_checkout) {
-                        html += '<td> Checkout</td>';
-                    }
+                    html += '<td id="aduserid"> <span style="display: none;">' + id + '</span></td>';
+                    //html += '<td ><input size="16" id="formdate" type="date" ><input size="16" id="formtime" type="time" ></td>';
+                    html += '<td ><input type="text" id="form_date_time"/> </td>';
+                    html += '<td><button type="button" class="btn btn-success btn-xs" id="add">Add</button></td></tr>';
+                    for (var count = 0; count < data.length; count++) {
+                        html += '<tr>';
+                        const timestamp = new Date(data[count].timestamp);
+                        const date = data[count].date;
+                        const begining_checkout = data[count].begining_checkout;
+                        const ending_checkin = data[count].ending_checkin;
+                        const checkdate = date.slice(0, -8)
 
-                    html += '<td  class="timestamp" data-timestamp="timestamp" data-id="' + data[count].id + '">' + data[count].timestamp + '</td>';
+                        var checkbegining_checkout = checkdate + begining_checkout + ':00';
+                        var checkending_checkin = checkdate + ending_checkin + ':00';
+
+                        var setbegining_checkout = new Date(checkbegining_checkout).getTime();
+                        var setcheckending_checkin = new Date(checkending_checkin).getTime();
+                        var settimestamp = timestamp.getTime();
+
+                        html += '<tr>';
+                        if (settimestamp < setbegining_checkout) {
+                            html += '<td> Checkin</td>';
+                        }
+                        if (settimestamp > setbegining_checkout) {
+                            html += '<td> Checkout</td>';
+                        }
+
+                        html += '<td  class="timestamp" data-timestamp="timestamp" data-id="' + data[count].id + '">' + data[count].timestamp + '</td>';
+
+                    }
+                    $('#attendTable thead').html(htmlhead);
+                    $('#attendTable tbody').html(html);
+
+                    $('#form_date_time').datetimepicker({
+                        format:'Y-m-d H:i',
+                        mask:true,
+                    });
 
                 }
-                $('#attendTable thead').html(htmlhead);
-                $('#attendTable tbody').html(html);
-
-                $('#form_date_time').datetimepicker({
-                    format:'Y-m-d H:i',
-                    mask:true,
-                });
-
-            }
-        })
+            })
+        }
     });
 
     $(document).on('click', '#add', function () {
@@ -567,28 +593,33 @@ $(document).ready(function() {
                         _token: '{{csrf_token()}}',
                         sync_date: $('#sync_date').val(),
                     },
-                    success: function(res) {
-                        var html = '';
-                        if (res.errors) {
-                            html = '<div class="alert alert-danger">Error Occurred</div>';
-                            $('#comfirm_users').text('confirm');
-                        }
-                        if (res.status) {
-                            html = '<div class="alert alert-success">Success</div>';
-                            load_dt('', '', '', '', '');
-                        }
-                        $('#msg').html(html);
-                        btn.text('Clear Data');
-                        btn.attr('disabled', false);
+                    success: function(data) {
+                       if (data.errors) {
+                    const actionObj = {
+                        icon: 'fas fa-warning',
+                        title: '',
+                        message: 'Record Error',
+                        url: '',
+                        target: '_blank',
+                        type: 'danger'
+                    };
+                    const actionJSON = JSON.stringify(actionObj, null, 2);
+                    action(actionJSON);
+                }
+                if (data.success) {
+                    const actionObj = {
+                        icon: 'fas fa-save',
+                        title: '',
+                        message: data.success,
+                        url: '',
+                        target: '_blank',
+                        type: 'success'
+                    };
+                    const actionJSON = JSON.stringify(actionObj, null, 2);
+                    $('#formTitle')[0].reset();
+                    actionreload(actionJSON);
+                }
                     },
-                    error: function(data) {
-                        //alert(data);
-                        let html = '<div class="alert alert-danger">Attendance Clear Connection Time Out</div>';
-                        load_dt('', '', '', '', '');
-                        btn.text('Clear Data');
-                        btn.attr('disabled', false);
-                        $('#msg').html(html);
-                    }
                 });
 
             }
@@ -639,12 +670,13 @@ $(document).ready(function() {
     });
 
     //documents .delete_button click event
-    $(document).on('click', '.delete_button', function () {
+    $(document).on('click', '.delete_button', async function () {
         let uid = $(this).data("uid");
         let date = $(this).data("date");
 
-        if (confirm("Are you sure you want to delete this?")) {
-            $.ajax({
+        var r = await Otherconfirmation("You want to remove this ? ");
+        if (r == true) {
+             $.ajax({
                 url: "{{ route('Attendance.delete') }}",
                 method: "POST",
                 data: {
@@ -658,6 +690,8 @@ $(document).ready(function() {
                 }
             });
         }
+       
+        
     });
 
 });

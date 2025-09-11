@@ -316,7 +316,7 @@
       'file' => 
       array (
         'driver' => 'file',
-        'path' => 'D:\\xampp\\htdocs\\Msway_Logistic\\storage\\framework/cache/data',
+        'path' => 'D:\\xampp\\htdocs\\Msway_Logistic\\storage\\framework/cache/data'
       ),
       'memcached' => 
       array (

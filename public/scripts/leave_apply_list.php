@@ -1,5 +1,9 @@
 <?php
+// Include the EmployeeHelper class
+use App\Helpers\EmployeeHelper;
 
+// Correct path resolution for Laravel - use base path or proper autoloading
+require_once __DIR__ . '/../../app/Helpers/EmployeeHelper.php';
 
 // DB table to use
 $table = 'leaves';
@@ -13,12 +17,24 @@ $columns = array(
     array('db' => '`u`.`emp_name_with_initial`', 'dt' => 'emp_name', 'field' => 'emp_name_with_initial'),
     array('db' => '`u`.`leave_type`', 'dt' => 'leave_type', 'field' => 'leave_type'),
     array('db' => '`u`.`covering_emp_name`', 'dt' => 'covering_emp', 'field' => 'covering_emp_name'),
+    array('db' => '`u`.`calling_name`', 'dt' => 'calling_name', 'field' => 'calling_name'),
     array('db' => '`u`.`dep_name`', 'dt' => 'dep_name', 'field' => 'dep_name'),
     array('db' => '`u`.`leave_from`', 'dt' => 'leave_from', 'field' => 'leave_from'),
     array('db' => '`u`.`leave_to`', 'dt' => 'leave_to', 'field' => 'leave_to'),
     array('db' => '`u`.`half_short`', 'dt' => 'half_short', 'field' => 'half_short'),
     array('db' => '`u`.`status`', 'dt' => 'status', 'field' => 'status'),
-    array('db' => '`u`.`reson`', 'dt' => 'reson', 'field' => 'reson')
+    array('db' => '`u`.`reson`', 'dt' => 'reson', 'field' => 'reson'),
+    array('db' => '`u`.`emp_id`', 'dt' => 'employee_display', 'field' => 'emp_id', 
+          'formatter' => function($d, $row) {
+              $employee = (object)[
+                  'emp_name_with_initial' => $row['emp_name_with_initial'],
+                  'calling_name' => $row['calling_name'],
+                  'emp_id' => $row['emp_id']
+              ];
+              
+              return EmployeeHelper::getDisplayName($employee);
+          }
+    )
 );
 
 
@@ -38,6 +54,7 @@ require('ssp.customized.class.php' );
         `leaves`.`id`,
         `leaves`.`emp_id`,
         `e`.`emp_name_with_initial`,
+        `e`.`calling_name`,
         `leave_types`.`leave_type`,
         `ec`.`emp_name_with_initial` AS `covering_emp_name`,
         `departments`.`name` AS `dep_name`,

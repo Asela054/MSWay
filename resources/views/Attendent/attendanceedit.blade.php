@@ -525,6 +525,21 @@
             let area_f = $('#area_f');
             let employee_f = $('#employee_f');
 
+            var canViewEmployee = false;
+            @can('attendance-edit')
+                canViewEmployee = true;
+            @endcan
+
+            var canEditEmployee = false;
+            @can('attendance-edit')
+                canEditEmployee = true;
+            @endcan
+
+            var canDeleteEmployee = false;
+            @can('attendance-delete')
+                canDeleteEmployee = true;
+            @endcan
+
             company_f.select2({
                 placeholder: 'Select...',
                 width: '100%',
@@ -647,55 +662,110 @@
             $('#empty_msg').css('display', 'none');
             $('#attendtable_outer').css('display', 'block');
 
-            function load_dt(){
+            function load_dt(company, location, department, employee, from_date, to_date) {
                 $('#attendtable').DataTable({
                     processing: true,
                     serverSide: true,
                     ajax: {
-                        "url": "{!! route('attendance_list_for_edit') !!}",
-                        "data": {'company':company_f.val(),
-                            'location': location_f.val(),
-                            'department':department_f.val(),
-                            'employee':employee_f.val(),
-                            'from_date': $('#from_date').val(),
-                            'to_date': $('#to_date').val(),
-                        },
+                        url: scripturl + "/attendance_list_for_edit.php",
+                        type: "POST",
+                        data: {
+                            company: company,
+                            location: location,
+                            department: department,
+                            employee: employee,
+                            from_date: from_date,
+                            to_date: to_date,
+                        }
                     },
                     columns: [
-                        { data: 'uid', name: 'uid' },
-                        { data: 'emp_name_with_initial', name: 'emp_name_with_initial' },
-                        { data: 'formatted_date', name: 'formatted_date' },
-                        { data: 'first_time_stamp', name: 'first_time_stamp' },
-                        { data: 'last_time_stamp', name: 'last_time_stamp' },
-                        { data: 'location', name: 'location' },
-                        { data: 'dep_name', name: 'dep_name' },
-                        {data: 'action', name: 'action', orderable: false, searchable: false},
+                        {
+                            "data": "uid",
+                            "name": "uid",
+                        },
+                        {
+                            "data": "employee_display",
+                            "name": "employee_display",
+                        },
+                        {
+                            "data": "date",
+                            "name": "date",
+                        },
+                        {
+                            "data": "first_time_stamp",
+                            "name": "first_time_stamp",
+                        },
+                        {
+                            "data": "last_time_stamp",
+                            "name": "last_time_stamp",
+                        },
+                        {
+                            "data": "location",
+                            "name": "location",
+                        },
+                        {
+                            "data": "dep_name",
+                            "name": "dep_name",
+                        },
+                        {
+                            "data": "id",
+                            "name": "action",
+                            "className": 'text-right',
+                            "orderable": false,
+                            "searchable": false,
+                            "render": function(data, type, full) {
+                                var uid = full['uid'];
+                                var date = full['date'];
+                                var emp_name = full['emp_name_with_initial'];
+                                var button = '';
+
+                                if (canViewEmployee) {
+                                    button += '<button type="button" class="btn btn-outline-dark btn-sm view_button" data-uid="' + uid + '" data-recorddate="' + date + '" data-name="' + emp_name + '" title="View">' +
+                                            '<i class="fas fa-eye"></i>' +
+                                            '</button> ';
+                                }
+
+                                if (canEditEmployee) {
+                                    button += '<button type="button" class="btn btn-outline-primary btn-sm edit_button" data-uid="'+ uid + '" data-date="' + date + '" data-name="' + emp_name + '" title="Edit">' +
+                                            '<i class="fas fa-pencil-alt"></i>' +
+                                            '</button> ';
+                                }
+
+                                if (canDeleteEmployee) {
+                                    button += '<button type="button" class="btn btn-outline-danger btn-sm delete_button" data-uid="' + uid + '" data-date="' + date + '" data-name="' + emp_name + '" title="Delete">' +
+                                            '<i class="fas fa-trash"></i>' +
+                                            '</button>';
+                                }
+
+                                return button;
+                            }
+                        }
                     ],
-                    "bDestroy": true,
-                    "order": [
-                        [2, "desc"]
-                    ]
+                    destroy: true,
+                    order: [[2, "desc"]],
                 });
             }
 
-            //load_dt('', '', '', '', '');
-
             $('#from_date').on('change', function() {
                 let fromDate = $(this).val();
-                $('#to_date').attr('min', fromDate); 
+                $('#to_date').attr('min', fromDate);
             });
 
             $('#to_date').on('change', function() {
                 let toDate = $(this).val();
-                $('#from_date').attr('max', toDate); 
+                $('#from_date').attr('max', toDate);
             });
 
-            $('#formFilter').on('submit',function(e) {
+            $('#formFilter').on('submit', function(e) {
                 e.preventDefault();
-                load_dt();
+                let company = $('#company_f').val();
+                let location = $('#location_f').val();
+                let department = $('#department_f').val();
+                let employee = $('#employee_f').val();
+                let from_date = $('#from_date').val();
+                let to_date = $('#to_date').val();
 
-                $('#empty_msg').css('display', 'none');
-                $('#attendtable_outer').css('display', 'block');
+                load_dt(company, location, department, employee, from_date, to_date);
             });
 
             $('#edit_record_month').click(function () {
@@ -1390,10 +1460,9 @@
             });
 
             $(document).on('click', '.edit_button', function () {
-                id = $(this).attr('uid');
+                let id = $(this).data("uid");
                 date = $(this).attr('data-date');
                 emp_name_with_initial = $(this).attr('data-name');
-
 
                 var formdata = {
                     _token: $('input[name=_token]').val(),
@@ -1527,15 +1596,16 @@
             });
 
             $(document).on('click', '.view_button', function () {
-                id = $(this).attr('uid');
-                date = $(this).attr('data-date');
+                let id = $(this).attr('data-uid');  
+                let recorddate = $(this).attr('data-recorddate');
                 emp_name_with_initial = $(this).attr('data-name');
 
+             
 
                 var formdata = {
                     _token: $('input[name=_token]').val(),
                     id: id,
-                    date: date
+                    date: recorddate
                 };
                 // alert(date);
                 $('#form_result').html('');

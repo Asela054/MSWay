@@ -3,14 +3,21 @@
 @section('content')
 
     <main>
-        <div class="page-header shadow">
-            <div class="container-fluid">
-                @include('layouts.attendant&leave_nav_bar')
-               
-            </div>
-        </div>
+         <div class="page-header shadow">
+             <div class="container-fluid d-none d-sm-block shadow">
+                   @include('layouts.attendant&leave_nav_bar')
+             </div>
+             <div class="container-fluid">
+                 <div class="page-header-content py-3 px-2">
+                     <h1 class="page-header-title ">
+                         <div class="page-header-icon"><i class="fa-light fa-calendar-times"></i></div>
+                         <span>Incomplete Attendance</span>
+                     </h1>
+                 </div>
+             </div>
+         </div>
 
-        <div class="container-fluid mt-4">
+        <div class="container-fluid mt-2 p-0 p-2">
             <div class="card mb-2">
                 <div class="card-body">
                     <form class="form-horizontal" id="formFilter">
@@ -60,11 +67,11 @@
 
             <div class="card">
                 <div class="card-body p-0 p-2">
-                    <div class="info_msg">
+                    {{-- <div class="info_msg">
                         <div class="alert alert-info" role="alert">
                             <span><i class="fa fa-info-circle"></i>  Records for {{date('Y-m-d')}} showing by default </span>
                         </div>
-                    </div>
+                    </div> --}}
                     <div class="response">
                     </div>
                     {{ csrf_field() }}
@@ -191,13 +198,9 @@
                         _token: '{{csrf_token()}}'
                     },
                     success: function (res) {
-
                         element.html('Filter');
                         element.prop('disabled', false);
-
                         $('.response').html(res);
-
-
                     }
                 });
 
@@ -250,19 +253,32 @@
                             _token: '{{csrf_token()}}'
                         },
                         success: function (res) {
-                            if(res.success) {
-                                $('.info_msg').html('<div class="alert alert-success">' + res.success + '</div>');
-                                $('.checkbox_attendance:checked').each(function() {
-                                    $(this).parent().parent().remove();
-                                });
-                            }
 
-                            $(btn).html('<i class="fa fa-spinner fa-spin"></i>');
-                            $(btn).prop('disabled', true);
-                            //scroll to top
-                            $('html, body').animate({
-                                scrollTop: 100
-                            }, 'fast');
+                                if (res.errors) {
+                                const actionObj = {
+                                    icon: 'fas fa-warning',
+                                    title: '',
+                                    message: 'Record Error',
+                                    url: '',
+                                    target: '_blank',
+                                    type: 'danger'
+                                };
+                                const actionJSON = JSON.stringify(actionObj, null, 2);
+                                action(actionJSON);
+                            }
+                            if (res.success) {
+                                const actionObj = {
+                                    icon: 'fas fa-save',
+                                    title: '',
+                                    message: res.success,
+                                    url: '',
+                                    target: '_blank',
+                                    type: 'success'
+                                };
+                                const actionJSON = JSON.stringify(actionObj, null, 2);
+                                $('#formTitle')[0].reset();
+                                actionreload(actionJSON);
+                            }
                         }
                     });
                 } else {
