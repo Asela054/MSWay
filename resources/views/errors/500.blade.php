@@ -2,18 +2,23 @@
 
 @section('content')
 <main>
-                    <div class="container">
-                        <div class="row justify-content-center">
-                            <div class="col-lg-6">
-                                <div class="text-center mt-4">
-                                    <h1 class="display-1">500</h1>
-                                    <p class="lead">Internal Server Error</p>
-                                    <a href="index.html"><i class="fas fa-arrow-left mr-1"></i>Return to Dashboard</a>
-                                </div>
-                            </div>
+    <div class="container-fluid mt-2 p-0 p-2">
+        <div class="card" id="bodycard">
+            <div class="card-body pb-5 d-flex align-items-center justify-content-center flex-column">
+                <div class="row">
+                    <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                        <div class="text-center mt-4">
+                            <h1 class="fa-10x">500</h1>
+                            <i class="fal fa-server fa-8x"></i>
+                            <p class="lead">Internal Server Error</p>
+                            <a href="{{route('home')}}" class="btn btn-primary px-3">Return to Dashboard</a>
                         </div>
                     </div>
-                </main>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
 @endsection
 
 

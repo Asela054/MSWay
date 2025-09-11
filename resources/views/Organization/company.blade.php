@@ -30,25 +30,24 @@
                     </div>
                     <div class="col-12">
                         <div class="center-block fix-width scroll-inner">
-                        <table class="table table-striped table-bordered table-sm small nowrap w-100" id="dataTable">
-                            <thead>
-                                <tr>
-                                    <th>ID </th>
-                                    <th>NAME</th>
-                                    <th>CODE</th>
-                                    <th>ADDRESS</th>
-                                    <th>CONTACT NO</th>
-                                    <th>EPF NO</th>
-                                    <th>ETF NO</th>
-                                    <th>REF NO</th>
-                                    <th>VAT REG NO</th>
-                                    <th>SVAT NO</th>
-                                    <th class="text-right">ACTION</th>
-                                </tr>
-                            </thead>
-                        </table>
+                            <table class="table table-striped table-bordered table-sm small nowrap w-100" id="dataTable">
+                                <thead>
+                                    <tr>
+                                        <th>ID </th>
+                                        <th>NAME</th>
+                                        <th>CODE</th>
+                                        <th>ADDRESS</th>
+                                        <th>CONTACT NO</th>
+                                        <th>EPF NO</th>
+                                        <th>ETF NO</th>
+                                        <th>REF NO</th>
+                                        <th>VAT REG NO</th>
+                                        <th>SVAT NO</th>
+                                        <th class="text-right">ACTION</th>
+                                    </tr>
+                                </thead>
+                            </table>
                         </div>
-                        {{ $company->links() }}
                     </div>
                 </div>    
             </div>

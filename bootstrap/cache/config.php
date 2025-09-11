@@ -316,7 +316,7 @@
       'file' => 
       array (
         'driver' => 'file',
-        'path' => 'C:\\xampp\\htdocs\\MSWay\\storage\\framework/cache/data',
+        'path' => 'D:\\xampp\\htdocs\\Msway_Logistic\\storage\\framework/cache/data'
       ),
       'memcached' => 
       array (
@@ -572,7 +572,7 @@
         'port' => '3306',
         'database' => 'erav_msway',
         'username' => 'root',
-        'password' => '',
+        'password' => 'asela123',
         'unix_socket' => '',
         'charset' => 'utf8mb4',
         'collation' => 'utf8mb4_unicode_ci',
@@ -587,7 +587,7 @@
         'port' => '3306',
         'database' => 'erav_msway',
         'username' => 'root',
-        'password' => '',
+        'password' => 'asela123',
         'charset' => 'utf8',
         'prefix' => '',
         'schema' => 'public',
@@ -600,7 +600,7 @@
         'port' => '3306',
         'database' => 'erav_msway',
         'username' => 'root',
-        'password' => '',
+        'password' => 'asela123',
         'charset' => 'utf8',
         'prefix' => '',
       ),
@@ -681,7 +681,7 @@
     array (
       'enabled' => true,
       'driver' => 'file',
-      'path' => 'C:\\xampp\\htdocs\\MSWay\\storage\\debugbar',
+      'path' => 'D:\\xampp\\htdocs\\Msway_Logistic\\storage\\debugbar',
       'connection' => NULL,
       'provider' => '',
     ),
@@ -761,10 +761,10 @@
     'orientation' => 'portrait',
     'defines' => 
     array (
-      'font_dir' => 'C:\\xampp\\htdocs\\MSWay\\storage\\fonts/',
-      'font_cache' => 'C:\\xampp\\htdocs\\MSWay\\storage\\fonts/',
-      'temp_dir' => 'C:\\Users\\Artemis\\AppData\\Local\\Temp',
-      'chroot' => 'C:\\xampp\\htdocs\\MSWay',
+      'font_dir' => 'D:\\xampp\\htdocs\\Msway_Logistic\\storage\\fonts/',
+      'font_cache' => 'D:\\xampp\\htdocs\\Msway_Logistic\\storage\\fonts/',
+      'temp_dir' => 'C:\\Users\\asela\\AppData\\Local\\Temp',
+      'chroot' => 'D:\\xampp\\htdocs\\Msway_Logistic',
       'enable_font_subsetting' => false,
       'pdf_backend' => 'CPDF',
       'default_media_type' => 'screen',
@@ -794,7 +794,7 @@
         'host' => 'localhost',
         'port' => 11211,
       ),
-      'dir' => 'C:\\xampp\\htdocs\\MSWay\\storage\\cache',
+      'dir' => 'D:\\xampp\\htdocs\\Msway_Logistic\\storage\\cache',
     ),
     'properties' => 
     array (
@@ -860,7 +860,7 @@
       ),
       'store' => 
       array (
-        'path' => 'C:\\xampp\\htdocs\\MSWay\\storage\\exports',
+        'path' => 'D:\\xampp\\htdocs\\Msway_Logistic\\storage\\exports',
         'returnInfo' => false,
       ),
       'pdf' => 
@@ -870,15 +870,15 @@
         array (
           'DomPDF' => 
           array (
-            'path' => 'C:\\xampp\\htdocs\\MSWay\\vendor/dompdf/dompdf/',
+            'path' => 'D:\\xampp\\htdocs\\Msway_Logistic\\vendor/dompdf/dompdf/',
           ),
           'tcPDF' => 
           array (
-            'path' => 'C:\\xampp\\htdocs\\MSWay\\vendor/tecnick.com/tcpdf/',
+            'path' => 'D:\\xampp\\htdocs\\Msway_Logistic\\vendor/tecnick.com/tcpdf/',
           ),
           'mPDF' => 
           array (
-            'path' => 'C:\\xampp\\htdocs\\MSWay\\vendor/mpdf/mpdf/',
+            'path' => 'D:\\xampp\\htdocs\\Msway_Logistic\\vendor/mpdf/mpdf/',
           ),
         ),
       ),
@@ -1046,12 +1046,12 @@
       'local' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\xampp\\htdocs\\MSWay\\storage\\app',
+        'root' => 'D:\\xampp\\htdocs\\Msway_Logistic\\storage\\app',
       ),
       'public' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\xampp\\htdocs\\MSWay\\storage\\app/public',
+        'root' => 'D:\\xampp\\htdocs\\Msway_Logistic\\storage\\app/public',
         'url' => 'http://localhost/Msway_Logistic//storage',
         'visibility' => 'public',
       ),
@@ -1105,7 +1105,7 @@
       'theme' => 'default',
       'paths' => 
       array (
-        0 => 'C:\\xampp\\htdocs\\MSWay\\resources\\views/vendor/mail',
+        0 => 'D:\\xampp\\htdocs\\Msway_Logistic\\resources\\views/vendor/mail',
       ),
     ),
   ),
@@ -1185,7 +1185,7 @@
     'lifetime' => 120,
     'expire_on_close' => false,
     'encrypt' => false,
-    'files' => 'C:\\xampp\\htdocs\\MSWay\\storage\\framework/sessions',
+    'files' => 'D:\\xampp\\htdocs\\Msway_Logistic\\storage\\framework/sessions',
     'connection' => NULL,
     'table' => 'sessions',
     'store' => NULL,
@@ -1214,8 +1214,8 @@
   array (
     'paths' => 
     array (
-      0 => 'C:\\xampp\\htdocs\\MSWay\\resources\\views',
+      0 => 'D:\\xampp\\htdocs\\Msway_Logistic\\resources\\views',
     ),
-    'compiled' => 'C:\\xampp\\htdocs\\MSWay\\storage\\framework\\views',
+    'compiled' => 'D:\\xampp\\htdocs\\Msway_Logistic\\storage\\framework\\views',
   ),
 );
