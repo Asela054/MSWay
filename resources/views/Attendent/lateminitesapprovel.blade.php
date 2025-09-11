@@ -3,13 +3,20 @@
 @section('content')
 
 <main>
-    <div class="page-header shadow">
-        <div class="container-fluid">
+      <div class="page-header shadow">
+        <div class="container-fluid d-none d-sm-block shadow">
             @include('layouts.attendant&leave_nav_bar')
-           
         </div>
-    </div>
-    <div class="container-fluid mt-4">
+        <div class="container-fluid">
+            <div class="page-header-content py-3 px-2">
+                <h1 class="page-header-title ">
+                    <div class="page-header-icon"><i class="fa-light fa-clock"></i></div>
+                    <span>Late Deduction Approval</span>
+                </h1>
+            </div>
+        </div>
+    </div>  
+    <div class="container-fluid mt-2 p-0 p-2">
         <div class="card mb-2">
             <div class="card-body">
                 <form class="form-horizontal" id="formFilter">
@@ -55,7 +62,7 @@
                                 </div>
                             </div>
                             <div class="col-6 text-right">
-                                <button id="approve_att" class="btn btn-primary btn-sm">Approve All</button>
+                                <button id="approve_att" class="btn btn-primary btn-sm"><i class="fa-light fa-light fa-clipboard-check"></i>&nbsp;Approve All</button>
                             </div>
                         </div>
 
@@ -83,7 +90,7 @@
         </div>
     </div>
 
-    <div class="modal fade" id="approveconfirmModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+    {{-- <div class="modal fade" id="approveconfirmModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
         aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-md">
             <div class="modal-content">
@@ -107,7 +114,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
 
 
     <!-- Modal Area End -->
@@ -204,10 +211,43 @@ $(document).ready(function () {
                     $('#attendtable').DataTable({
                         destroy: true,
                         responsive: true,
+                         dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
+                                "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+                            "buttons": [{
+                                    extend: 'csv',
+                                    className: 'btn btn-success btn-sm',
+                                    title: 'Late Deduction Approval Information',
+                                    text: '<i class="fas fa-file-csv mr-2"></i> CSV',
+                                },
+                                { 
+                                    extend: 'pdf', 
+                                    className: 'btn btn-danger btn-sm', 
+                                    title: 'Late Deduction Approval Information', 
+                                    text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
+                                    orientation: 'landscape', 
+                                    pageSize: 'legal', 
+                                    customize: function(doc) {
+                                        doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+                                    }
+                                },
+                                {
+                                    extend: 'print',
+                                    title: 'Late Deduction Approval  Information',
+                                    className: 'btn btn-primary btn-sm',
+                                    text: '<i class="fas fa-print mr-2"></i> Print',
+                                    customize: function(win) {
+                                        $(win.document.body).find('table')
+                                            .addClass('compact')
+                                            .css('font-size', 'inherit');
+                                    },
+                                },
+                            ],
                         columnDefs: [{
                             orderable: false,
                             targets: [0, 6]
                         }, ]
+
+                      
                     });
                     $('#btn-filter').html('Filter').prop('disabled', false);
                 }
@@ -217,66 +257,84 @@ $(document).ready(function () {
 
     var selectedRowIdsapprove = [];
 
-    $('#approve_att').click(function () {
-        selectedRowIdsapprove = [];
-        $('#attendtable tbody .selectCheck:checked').each(function () {
-            var rowData = $('#attendtable').DataTable().row($(this).closest('tr')).data();
+        $('#approve_att').click(async function () {
+            var r = await Otherconfirmation("You want to Edit this ? ");
+            if (r == true) {
 
-            if (rowData) {
-                selectedRowIdsapprove.push({
-                    empid: rowData[1],
-                    emp_name: rowData[2], 
-                    late_hourstotal: rowData[3],
-                    nopayamount: rowData[4], 
-                    total_amount: rowData[5], 
-                    autoid: rowData[6], 
+                selectedRowIdsapprove = [];
+                $('#attendtable tbody .selectCheck:checked').each(function () {
+                    var rowData = $('#attendtable').DataTable().row($(this).closest('tr')).data();
+
+                    if (rowData) {
+                        selectedRowIdsapprove.push({
+                            empid: rowData[1],
+                            emp_name: rowData[2],
+                            late_hourstotal: rowData[3],
+                            nopayamount: rowData[4],
+                            total_amount: rowData[5],
+                            autoid: rowData[6],
+                        });
+                    }
                 });
+
+                if (selectedRowIdsapprove.length > 0) {
+                    console.log(selectedRowIdsapprove);
+
+
+                    $.ajaxSetup({
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        }
+                    })
+
+                    var department = $('#department').val();
+                    var company = $('#company').val();
+                    var month = $('#month').val();
+                    var closedate = $('#closedate').val();
+
+                    $.ajax({
+                        url: '{!! route("approvelatemintes") !!}',
+                        type: 'POST',
+                        dataType: "json",
+                        data: {
+                            dataarry: selectedRowIdsapprove,
+                            department: department,
+                            month: month,
+                            closedate: closedate
+                        },
+                        success: function (data) {
+                          if (data.errors) {
+                                const actionObj = {
+                                    icon: 'fas fa-warning',
+                                    title: '',
+                                    message: 'Record Error',
+                                    url: '',
+                                    target: '_blank',
+                                    type: 'danger'
+                                };
+                                const actionJSON = JSON.stringify(actionObj, null, 2);
+                                action(actionJSON);
+                            }
+                            if (data.success) {
+                                const actionObj = {
+                                    icon: 'fas fa-save',
+                                    title: '',
+                                    message: data.success,
+                                    url: '',
+                                    target: '_blank',
+                                    type: 'success'
+                                };
+                                const actionJSON = JSON.stringify(actionObj, null, 2);
+                                actionreload(actionJSON);
+                            }
+
+                        }
+                    })
+                } else {
+
+                    alert('Select Rows to Final Approve!!!!');
+                }
             }
-        });
-
-        if (selectedRowIdsapprove.length > 0) {
-        console.log(selectedRowIdsapprove);
-            $('#approveconfirmModal').modal('show');
-        } else {
-            
-            alert('Select Rows to Final Approve!!!!');
-        }
-    });
-
-    $('#approve_button').click(function () {
-            $('#approve_button').html('<i class="fa fa-spinner fa-spin mr-2"></i> Processing').prop('disabled', true);
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            })
-
-            var department = $('#department').val();
-            var company = $('#company').val();
-            var month = $('#month').val();
-            var closedate = $('#closedate').val();
-
-            $.ajax({
-                url: '{!! route("approvelatemintes") !!}',
-                type: 'POST',
-                dataType: "json",
-                data: {
-                    dataarry: selectedRowIdsapprove,
-                    department: department,
-                    month: month,
-                    closedate: closedate
-                },
-                success: function (data) {
-                    $('#approve_button').html('Approve').prop('disabled', false);
-                    setTimeout(function () {
-                        $('#approveconfirmModal').modal('hide');
-                        location.reload();
-                    }, 500);
-
-                    $('#selectAll').prop('checked', false);
-                   
-                }
-            })
         });
 
 

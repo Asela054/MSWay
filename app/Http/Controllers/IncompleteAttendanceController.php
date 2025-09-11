@@ -149,8 +149,14 @@ class IncompleteAttendanceController extends Controller
                     
                     <div class="col-md-4"> 
                     </div>
-                    
-                </div>';
+                </div>
+                <div class="row mt-1"> 
+                    <div class="col-md-12"> 
+                        <button type="button" class="btn btn-primary btn-sm float-right" id="btn_mark_as_no_pay">Mark as NO Pay Leave</button>
+                    </div>  
+
+                </div>
+                <br>';
         $html .= '<table class="table table-sm table-hover" id="attendance_report_table">';
         $html .= '<thead>';
         $html .= '<tr>';
@@ -213,13 +219,7 @@ class IncompleteAttendanceController extends Controller
         }
 
         $html .= '</tbody>';
-        $html .= '</table>
-
-                <div class="row mt-3"> 
-                    <div class="col-md-12"> 
-                        <button type="button" class="btn btn-primary btn-sm float-right" id="btn_mark_as_no_pay">Mark as NO Pay Leave</button>
-                    </div>  
-                </div>';
+        $html .= '</table>';
 
         //return json response
         echo $html;
