@@ -4,13 +4,20 @@
 
     <main>
         <div class="page-header shadow">
-            <div class="container-fluid">
+            <div class="container-fluid d-none d-sm-block shadow">
                 @include('layouts.attendant&leave_nav_bar')
-               
+            </div>
+            <div class="container-fluid">
+                <div class="page-header-content py-3 px-2">
+                    <h1 class="page-header-title ">
+                        <div class="page-header-icon"><i class="fa-light fa-calendar-minus"></i></div>
+                        <span>Leave Deduction Approval</span>
+                    </h1>
+                </div>
             </div>
         </div>
 
-        <div class="container-fluid mt-4">
+        <div class="container-fluid mt-2 p-0 p-2">
             <div class="card mb-2">
                 <div class="card-body">
                     <form class="form-horizontal" id="formFilter">
@@ -78,7 +85,7 @@
                                     </div>
                                 </div>
                                 <div class="col-6 text-right">
-                                    <button id="approve" class="btn btn-primary btn-sm px-3">Approve All</button>
+                                    <button id="approve" class="btn btn-primary btn-sm px-3"><i class="fa-light fa-light fa-clipboard-check"></i>&nbsp;Approve All</button>
                                 </div>
                             </div>
                             
@@ -108,34 +115,6 @@
 
         </div>
     </main>
-
-
-    <div class="modal fade" id="approveconfirmModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-        aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-md">
-            <div class="modal-content">
-                <div class="modal-header p-2">
-                    <h5 class="modal-title" id="staticBackdropLabel">Approve Meal Allowance </h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col text-center">
-                            <h4 class="font-weight-normal">Are you sure you want to Approve this data?</h4>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer p-2">
-                    <button type="button" name="approve_button" id="approve_button"
-                        class="btn btn-warning px-3 btn-sm">Approve</button>
-                    <button type="button" class="btn btn-dark px-3 btn-sm" data-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
 
 @endsection
 
@@ -252,6 +231,37 @@
                     $('#dataTable').DataTable({
                         destroy: true,
                         responsive: true,
+                         dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
+                                "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+                            "buttons": [{
+                                    extend: 'csv',
+                                    className: 'btn btn-success btn-sm',
+                                    title: 'Leave Deduction Approval Information',
+                                    text: '<i class="fas fa-file-csv mr-2"></i> CSV',
+                                },
+                                { 
+                                    extend: 'pdf', 
+                                    className: 'btn btn-danger btn-sm', 
+                                    title: 'Leave Deduction Approval Information', 
+                                    text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
+                                    orientation: 'landscape', 
+                                    pageSize: 'legal', 
+                                    customize: function(doc) {
+                                        doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+                                    }
+                                },
+                                {
+                                    extend: 'print',
+                                    title: 'Leave Deduction Approval  Information',
+                                    className: 'btn btn-primary btn-sm',
+                                    text: '<i class="fas fa-print mr-2"></i> Print',
+                                    customize: function(win) {
+                                        $(win.document.body).find('table')
+                                            .addClass('compact')
+                                            .css('font-size', 'inherit');
+                                    },
+                                },
+                            ],
                         columnDefs: [{
                             orderable: false,
                             targets: [0, 7]
@@ -263,67 +273,86 @@
 
         var selectedRowIdsapprove = [];
 
-        $('#approve').click(function () {
-                    selectedRowIdsapprove = [];
-                    $('#dataTable tbody .selectCheck:checked').each(function () {
-                        var rowData = $('#dataTable').DataTable().row($(this).closest('tr')).data();
+        $('#approve').click(async function () {
+            var r = await Otherconfirmation("You want to Edit this ? ");
+            if (r == true) {
+                selectedRowIdsapprove = [];
+                $('#dataTable tbody .selectCheck:checked').each(function () {
+                    var rowData = $('#dataTable').DataTable().row($(this).closest('tr')).data();
 
-                        if (rowData) {
-                            selectedRowIdsapprove.push({
-                                empid: rowData[1],
-                                emp_name: rowData[2], 
-                                Absent_Days: rowData[3],
-                                total_amount: rowData[4], 
-                                monthly_remain: rowData[5], 
-                                payroll_Profile: rowData[6],
-                                remuneration_id: rowData[7]
-                            });
-                        }
-                    });
-
-                    if (selectedRowIdsapprove.length > 0) {
-                     console.log(selectedRowIdsapprove);
-                        $('#approveconfirmModal').modal('show');
-                    } else {
-                        
-                        alert('Select Rows to Final Approve!!!!');
+                    if (rowData) {
+                        selectedRowIdsapprove.push({
+                            empid: rowData[1],
+                            emp_name: rowData[2],
+                            Absent_Days: rowData[3],
+                            total_amount: rowData[4],
+                            monthly_remain: rowData[5],
+                            payroll_Profile: rowData[6],
+                            remuneration_id: rowData[7]
+                        });
                     }
-        });
+                });
 
-        $('#approve_button').click(function () {
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                if (selectedRowIdsapprove.length > 0) {
+                    console.log(selectedRowIdsapprove);
+
+                    $.ajaxSetup({
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        }
+                    })
+
+                    var selected_month = $('#selectedmonth').val();
+                    var department = $('#department').val();
+                    var from_date = $('#from_date').val();
+                    var to_date = $('#to_date').val();
+
+                    $.ajax({
+                        url: '{!! route("holidaydeductionapprove") !!}',
+                        type: 'POST',
+                        dataType: "json",
+                        data: {
+                            dataarry: selectedRowIdsapprove,
+                            selectedmonth: selected_month,
+                            from_date: from_date,
+                            to_date: to_date
+                        },
+                        success: function (data) {
+                              if (data.errors) {
+                                const actionObj = {
+                                    icon: 'fas fa-warning',
+                                    title: '',
+                                    message: 'Record Error',
+                                    url: '',
+                                    target: '_blank',
+                                    type: 'danger'
+                                };
+                                const actionJSON = JSON.stringify(actionObj, null, 2);
+                                action(actionJSON);
+                            }
+                            if (data.success) {
+                                const actionObj = {
+                                    icon: 'fas fa-save',
+                                    title: '',
+                                    message: data.success,
+                                    url: '',
+                                    target: '_blank',
+                                    type: 'success'
+                                };
+                                const actionJSON = JSON.stringify(actionObj, null, 2);
+                                actionreload(actionJSON);
+                            }
+                        }
+                    })
+
+
+                } else {
+
+                    alert('Select Rows to Final Approve!!!!');
                 }
-            })
 
-            var selected_month = $('#selectedmonth').val();
-            var department = $('#department').val();
-            var from_date = $('#from_date').val();
-            var to_date = $('#to_date').val();
-            
-            $.ajax({
-                url: '{!! route("holidaydeductionapprove") !!}',
-                type: 'POST',
-                dataType: "json",
-                data: {
-                    dataarry: selectedRowIdsapprove,
-                    selectedmonth: selected_month,
-                    from_date:from_date,
-                    to_date:to_date
-                },
-                success: function (data) {
-                    setTimeout(function () {
-                        $('#approveconfirmModal').modal('hide');
-                        location.reload();
-                    }, 500);
-
-                    $('#selectAll').prop('checked', false);
-                   
-                }
-            })
+            }
         });
-
 
         $('#selectAll').click(function (e) {
             $('#dataTable').closest('table').find('td input:checkbox').prop('checked', this.checked);

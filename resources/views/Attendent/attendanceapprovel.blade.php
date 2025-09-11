@@ -3,13 +3,20 @@
 @section('content')
 
 <main>
-    <div class="page-header shadow">
-        <div class="container-fluid">
-            @include('layouts.attendant&leave_nav_bar')
-           
-        </div>
-    </div>
-    <div class="container-fluid mt-4">
+       <div class="page-header shadow">
+             <div class="container-fluid d-none d-sm-block shadow">
+                   @include('layouts.attendant&leave_nav_bar')
+             </div>
+             <div class="container-fluid">
+                 <div class="page-header-content py-3 px-2">
+                     <h1 class="page-header-title ">
+                         <div class="page-header-icon"><i class="fa-light fa-calendar-check"></i></div>
+                         <span>Attendance Approve</span>
+                     </h1>
+                 </div>
+             </div>
+         </div>
+    <div class="container-fluid mt-2 p-0 p-2">
         <div class="card mb-2">
             <div class="card-body">
                 <form class="form-horizontal" id="formFilter">
@@ -48,7 +55,7 @@
                     <div class="col-12">
                         <div class="message"></div>
                         <div class="d-flex justify-content-end mb-2">
-                            <button id="approve_att" class="btn btn-primary btn-sm">Approve All</button>
+                            <button id="approve_att" class="btn btn-primary btn-sm"><i class="fa-light fa-light fa-clipboard-check"></i>&nbsp;Approve All</button>
                         </div>
                         <div class="table-responsive table_outer">
                             <table class="table table-striped table-bordered table-sm small" id="attendtable">
@@ -179,13 +186,43 @@ $(document).ready(function () {
         $('#approve_att').css('display', 'block');
 
         $('#attendtable').DataTable({
-            "columnDefs": [ {
-                "targets": -1,
-                "orderable": false,
-                "searchable": false,
-            } ],
-            processing: true,
-            serverSide: true,
+           "destroy": true,
+            "processing": true,
+            "serverSide": true,
+            dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+            "buttons": [{
+                    extend: 'csv',
+                    className: 'btn btn-success btn-sm',
+                    title: 'Attendance Approve Information',
+                    text: '<i class="fas fa-file-csv mr-2"></i> CSV',
+                },
+                { 
+                    extend: 'pdf', 
+                    className: 'btn btn-danger btn-sm', 
+                    title: 'Attendance Approve Information', 
+                    text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
+                    orientation: 'landscape', 
+                    pageSize: 'legal', 
+                    customize: function(doc) {
+                        doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+                    }
+                },
+                {
+                    extend: 'print',
+                    title: 'Attendance Approve  Information',
+                    className: 'btn btn-primary btn-sm',
+                    text: '<i class="fas fa-print mr-2"></i> Print',
+                    customize: function(win) {
+                        $(win.document.body).find('table')
+                            .addClass('compact')
+                            .css('font-size', 'inherit');
+                    },
+                },
+            ],
+            "order": [
+                [0, "desc"]
+            ],
             ajax: {
                 "url": "{{url('/attendance_list_for_approve')}}",
                 "data": {'company':company, 'department':department, 'month':month, 'closedate':closedate},
@@ -234,15 +271,16 @@ $(document).ready(function () {
                 // load_dt('', '', '');
     });
 
-    $(document).on('click', '#approve_att', function (e) {
+    $(document).on('click', '#approve_att',async function (e) {
         e.preventDefault();
         let department = $('#department').val();
         let company = $('#company').val();
         let month = $('#month').val();
         let closedate = $('#closedate').val();
 
-        //js confirm alert
-        if (confirm("Are you sure you want to approve this attendance?")) {
+         var r = await Otherconfirmation("You want to Edit this ? ");
+
+        if (r == true) {
             $('#approve_att').html('<i class="fa fa-spinner fa-spin mr-2"></i> Processing').prop('disabled', true);
             $.ajax({
                 url: "AttendentAprovelBatch",
@@ -255,12 +293,31 @@ $(document).ready(function () {
                     _token: $('input[name=_token]').val(),
                 },
                 success: function (data) {
-                    $('.message').html("<div class='alert alert-success'>"+data.msg+"</div>");
-                    $('#attendtable').DataTable().clear().destroy();
-
-                    $('.table_outer').css('display', 'none');
-                    $('#approve_att').html('Approve All').prop('disabled', false);
-                    $('#approve_att').css('display', 'none');
+                  
+                    if (data.errors) {
+                        const actionObj = {
+                            icon: 'fas fa-warning',
+                            title: '',
+                            message: 'Record Error',
+                            url: '',
+                            target: '_blank',
+                            type: 'danger'
+                        };
+                        const actionJSON = JSON.stringify(actionObj, null, 2);
+                        action(actionJSON);
+                    }
+                    if (data.success) {
+                        const actionObj = {
+                            icon: 'fas fa-save',
+                            title: '',
+                            message: data.success,
+                            url: '',
+                            target: '_blank',
+                            type: 'success'
+                        };
+                        const actionJSON = JSON.stringify(actionObj, null, 2);
+                        actionreload(actionJSON);
+                    }
                 }
             });
 
