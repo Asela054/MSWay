@@ -69,7 +69,8 @@
                         <div class="col">
                             <span id="form_result"></span>
                             <form method="post" id="formTitle">
-                                {{ csrf_field() }}	
+                                {{ csrf_field() }}
+                                	
                                 <div class="form-row mb-1">
                                     <div class="col-9">
                                         <label class="small font-weight-bolder">Name*</label>

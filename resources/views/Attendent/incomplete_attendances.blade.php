@@ -10,7 +10,7 @@
              <div class="container-fluid">
                  <div class="page-header-content py-3 px-2">
                      <h1 class="page-header-title ">
-                         <div class="page-header-icon"><i class="fa-light fa-calendar-times"></i></div>
+                         <div class="page-header-icon"><i class="fa-light fa-calendar-pen"></i></div>
                          <span>Incomplete Attendance</span>
                      </h1>
                  </div>
@@ -21,6 +21,7 @@
             <div class="card mb-2">
                 <div class="card-body">
                     <form class="form-horizontal" id="formFilter">
+
                         <div class="form-row mb-1">
                             <div class="col-md-2">
                                 <label class="small font-weight-bold text-dark">Company</label>
@@ -42,7 +43,7 @@
                                 <select name="employee" id="employee" class="form-control form-control-sm">
                                 </select>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <label class="small font-weight-bold text-dark">Date : From - To</label>
                                 <div class="input-group input-group-sm mb-3">
                                     <input type="date" id="from_date" name="from_date" class="form-control form-control-sm border-right-0" placeholder="yyyy-mm-dd"
@@ -55,7 +56,7 @@
                                     >
                                 </div>
                             </div>
-                            <div class="col">
+                            <div class="col-md-2">
                                 <br>
                                 <button type="submit" class="btn btn-primary btn-sm filter-btn" id="btn-filter"> Filter</button>
                             </div>
@@ -67,18 +68,48 @@
 
             <div class="card">
                 <div class="card-body p-0 p-2">
-                    {{-- <div class="info_msg">
-                        <div class="alert alert-info" role="alert">
-                            <span><i class="fa fa-info-circle"></i>  Records for {{date('Y-m-d')}} showing by default </span>
+                    <div class="col-12">
+                        
+                        <div class="row mt-1">
+                            <div class="col-6 mb-2">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input checkallocate" id="selectAll">
+                                    <label class="form-check-label" for="selectAll">Select All Records</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <button type="button" class="btn btn-primary btn-sm float-right"
+                                    id="btn_mark_as_no_pay">Mark as NO Pay Leave</button>
+                            </div>
                         </div>
-                    </div> --}}
-                    <div class="response">
+                        <br>
+                        <div class="col-12">
+                            <div class="center-block fix-width scroll-inner">
+                                <table class="table table-striped table-bordered table-sm small nowrap w-100"
+                                    id="attendance_report_table">
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th>ETF NO</th>
+                                            <th>NAME</th>
+                                            <th>DEPARTMENT</th>
+                                            <th>DATE</th>
+                                            <th>CHECK IN TIME</th>
+                                            <th>CHECK OUT TIME</th>
+                                            <th>WORK HOURS</th>
+                                            <th>LOCATION</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="response">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        {{ csrf_field() }}
                     </div>
-                    {{ csrf_field() }}
                 </div>
             </div>
         </div>
-
     </main>
 
 @endsection
@@ -276,7 +307,6 @@
                                     type: 'success'
                                 };
                                 const actionJSON = JSON.stringify(actionObj, null, 2);
-                                $('#formTitle')[0].reset();
                                 actionreload(actionJSON);
                             }
                         }
@@ -290,6 +320,9 @@
 
             });
 
+             $('#selectAll').click(function (e) {
+                $('#attendance_report_table').closest('table').find('td input:checkbox').prop('checked', this.checked);
+            });
         });
     </script>
 

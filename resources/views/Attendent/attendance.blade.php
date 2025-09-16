@@ -10,7 +10,7 @@
         <div class="container-fluid">
             <div class="page-header-content py-3 px-2">
                 <h1 class="page-header-title ">
-                    <div class="page-header-icon"><i class="fa-light fa-arrows-rotate"></i></div>
+                    <div class="page-header-icon"><i class="fa-light fa-calendar-pen"></i></div>
                     <span>Attendance Sync</span>
                 </h1>
             </div>
@@ -21,11 +21,12 @@
             <div class="card-body p-0 p-2">
                 <div id="message"></div>
                 <div class="row">
-                    <div class="col-12">
+                    <div class="col-sm-12 col-md-12">
                         <form class="form" method="POST">
                             {{ csrf_field() }}
                             <div class="form-row mb-1">
-                                <div class="col-2">
+                                <div class="col-sm-4 col-md-2">
+                                    <label class="small font-weight-bold text-dark">Location*</label>
                                     <select name="device" id="device" class="form-control form-control-sm" required>
                                         <option value="">Location</option>
                                         @foreach($device as $devices)
@@ -34,9 +35,9 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="col-8">
-                                    <button type="button" name="getdata" id="getdata" class="btn btn-primary btn-sm getdata px-3"><i class="fas fa-search mr-2"></i>Getdata</button>
-
+                                <div class="col-sm-8 col-md-8">
+                                     <label class="small font-weight-bold text-dark">&nbsp;</label><br>
+                                    <button type="button" name="getdata" id="getdata" class="btn btn-primary btn-sm getdata"><i class="fas fa-search mr-2"></i>Getdata</button>
 
                                     @can('attendance-device-clear')
                                         <a href="#" id="clear_data" class="btn btn-danger btn-sm pl-2 "><i class="fas fa-trash mr-2"></i>Clear Data</a>
@@ -100,14 +101,14 @@
                             <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>Employee ID</th>
-                                    <th>Date</th>
-                                    <th>Name</th>
-                                    <th>Check In</th>
-                                    <th>Check Out</th>
-                                    <th>Location</th>
-                                    <th>Department</th>
-                                    <th>Action</th>
+                                    <th>EMPLOYEE ID</th>
+                                    <th>DATE</th>
+                                    <th>NAME</th>
+                                    <th>CHECK IN</th>
+                                    <th>CHECK OUT</th>
+                                    <th>LOCATION</th>
+                                    <th>DEPARTMENT</th>
+                                    <th>ACTION</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -151,30 +152,6 @@
         </div>
     </div>
 
-    <div class="modal fade" id="confirmModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-       aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content">
-                <div class="modal-header p-2">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col text-center">
-                            <h4 class="font-weight-normal">Are you sure you want to remove this data?</h4>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer p-2">
-                    <button type="button" name="ok_button" id="ok_button" class="btn btn-danger px-3 btn-sm">OK</button>
-                    <button type="button" class="btn btn-dark px-3 btn-sm" data-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div class="modal fade" id="getdataModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
        aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">
@@ -190,14 +167,14 @@
                             <h4 class="font-weight-normal">If you need to download data, please confirm?</h4>
                         </div>
                         <div class="col1 mb-3">
-                            <label>Date: </label>
-                            <input type="date" class="form-control form-control-sm" id="sync_date"/>
+                            <label>Date*</label>
+                            <input type="date" class="form-control form-control-sm" id="sync_date"  required/>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer p-2">
-                    <button type="button" name="comfirm_button" id="comfirm_button" class="btn btn-danger px-3 btn-sm">Confirm</button>
-                    <button type="button" class="btn btn-dark px-3 btn-sm" data-dismiss="modal">Cancel</button>
+                    <button type="button" name="comfirm_button" id="comfirm_button" class="btn btn-primary px-3 btn-sm">Confirm</button>
+                    <button type="button" class="btn btn-danger px-3 btn-sm" data-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </div>
@@ -305,13 +282,13 @@ $(document).ready(function() {
             "buttons": [{
                     extend: 'csv',
                     className: 'btn btn-success btn-sm',
-                    title: 'Finger Print Device Details',
+                    title: 'Attendance Sync Details',
                     text: '<i class="fas fa-file-csv mr-2"></i> CSV',
                 },
                 { 
                     extend: 'pdf', 
                     className: 'btn btn-danger btn-sm', 
-                    title: 'Finger Print Device Details', 
+                    title: 'Attendance Sync Details', 
                     text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
                     orientation: 'landscape', 
                     pageSize: 'legal', 
@@ -321,7 +298,7 @@ $(document).ready(function() {
                 },
                 {
                     extend: 'print',
-                    title: 'Finger Print Device Details',
+                    title: 'Attendance Sync Details',
                     className: 'btn btn-primary btn-sm',
                     text: '<i class="fas fa-print mr-2"></i> Print',
                     customize: function(win) {
@@ -393,7 +370,7 @@ $(document).ready(function() {
                                 'data-uid="'+row['uid'] +'" ' +
                                 'data-date="'+row['date_row'] +'" ' +
                                 'data-type="delete" ' +
-                                ' data-toggle="tooltip" title="Remove"> <i class="fa fa-trash"> </i> </button> '
+                                ' data-toggle="tooltip" title="Remove"> <i class="far fa-trash-alt"> </i> </button> '
                                 : data;
                     }
                 }
@@ -569,10 +546,14 @@ $(document).ready(function() {
         var device = $('#device').val();
         if (device != '') {
             $('#getdataModal').modal('show');
-
-
         } else {
-            alert('Select Location');
+            Swal.fire({
+            position: "top-end",
+            icon: 'warning',
+            title: 'Please select a Location First',
+            showConfirmButton: false,
+            timer: 2500
+              });
         }
 
     });

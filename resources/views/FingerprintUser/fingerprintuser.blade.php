@@ -10,22 +10,24 @@
         <div class="container-fluid">
             <div class="page-header-content py-3 px-2">
                 <h1 class="page-header-title ">
-                    <div class="page-header-icon"><i class="fa-light fa-fingerprint"></i></div>
+                    <div class="page-header-icon"><i class="fa-light fa-calendar-pen"></i></div>
                     <span>FingerPrint User</span>
                 </h1>
             </div>
         </div>
     </div>  
+
     <div class="container-fluid mt-2 p-0 p-2">
         <div class="card">
             <div class="card-body p-0 p-2">
                 <div class="row">
-                    <div class="col-10">
+                    <div class="col-sm-8 col-md-10">
                         <form class="form" method="POST">
                             {{ csrf_field() }}
-                            <div class="form-row">
-                                <div class="col-3">
-                                    <label class="small font-weight-bold text-dark">Location</label>
+                            <div class="form-row mb-1">
+
+                                <div class="col-sm-6 col-md-3">
+                                    <label class="small font-weight-bold text-dark">Location*</label>
                                     <select name="device" id="device" class="form-control form-control-sm" required>
                                         <option value="">Select</option>
                                         @foreach($device as $devices)
@@ -34,35 +36,36 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="col-2">
+                                <div class="col-sm-6 col-md-3">
                                     <label class="small font-weight-bold text-dark">&nbsp;</label><br>
-                                    @can('finger-print-user-create')
+                                 
                                         <button type="button" name="getuserdata" id="getuserdata" class="btn btn-primary btn-sm getuserdata"><i class="fas fa-search mr-2"></i>Get data</button>
-                                    @endcan
+                                  
                                 </div>
                             </div>
                         </form>
                     </div>
-                    <div class="col-2">
+                    <div class="col-sm-4 col-md-2">
                         <br>
                         <a href="exportFPUser" class="btn btn-success btn-sm fa-pull-right"><i class="fas fa-file-excel mr-2"></i>Export data</a>
                     </div>
                     <div class="col-12">
                         <hr class="border-dark">
                     </div>
+                    
                     <div class="col-12">
                         <div class="center-block fix-width scroll-inner">
                         <table class="table table-striped table-bordered table-sm small nowrap w-100" id="fpusertable">
                             <thead>
                                 <tr>
                                     <th>ID </th>
-                                    <th>User ID</th>
-                                    <th>Name</th>
-                                    <th>Card No</th>
-                                    <th>Role</th>
-                                    <th>Password</th>
-                                    <th>Location</th>
-                                    <th class="text-right">Action</th>
+                                    <th>USER ID</th>
+                                    <th>NAME</th>
+                                    <th>CARD NO</th>
+                                    <th>ROLE</th>
+                                    <th>PASSWORD</th>
+                                    <th>LOCATION</th>
+                                    <th class="text-right">ACTION</th>
                                 </tr>
                             </thead>
                         </table>
@@ -76,7 +79,7 @@
     <!-- Modal Area Start -->
     <div class="modal fade" id="formModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
     aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header p-2">
                     <h5 class="modal-title" id="staticBackdropLabel">Add Location</h5>
@@ -90,40 +93,53 @@
                             <span id="form_result"></span>
                             <form method="post" id="formTitle" class="form-horizontal">
                                 {{ csrf_field() }}	
-                                <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">ID</label>
-                                    <input type="text" name="id" id="id" class="form-control form-control-sm" />
+
+                                <div class="form-row mb-1">
+                                    <div class="col-sm-8 col-md-4">
+                                        <label class="small font-weight-bold text-dark">ID*</label>
+                                        <input type="text" name="id" id="id" class="form-control form-control-sm" required/>
+                                    </div>
+                                    <div class="col-sm-8 col-md-8">
+                                        <label class="small font-weight-bold text-dark">Name*</label>
+                                        <input type="text" name="name" id="name" class="form-control form-control-sm" required/>
+                                    </div>
                                 </div>
-                                <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">Name</label>
-                                    <input type="text" name="name" id="name" class="form-control form-control-sm" />
+
+                                <div class="form-row mb-1">
+                                    <div class="col-sm-8 col-md-6">
+                                        <label class="small font-weight-bold text-dark">Card No*</label>
+                                        <input type="text" name="cardno" id="cardno"
+                                            class="form-control form-control-sm" required/>
+                                    </div>
+                                    <div class="col-sm-8 col-md-6">
+                                        <label class="small font-weight-bold text-dark">Role*</label>
+                                        <select name="role" id="role" class="form-control form-control-sm" required>
+                                            <option value="">Please Select</option>
+                                            @foreach($title as $titles)
+                                            <option value="{{$titles->id}}">{{$titles->title}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                 </div>
-                                <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">cardno</label>
-                                    <input type="text" name="cardno" id="cardno" class="form-control form-control-sm" />
+
+                                <div class="form-row mb-1">
+                                    <div class="col-sm-8 col-md-6">
+                                        <label class="small font-weight-bold text-dark">Password*</label>
+                                        <input type="text" name="password" id="password"
+                                            class="form-control form-control-sm" required/>
+                                    </div>
+                                    <div class="col-sm-8 col-md-6">
+                                        <label class="small font-weight-bold text-dark">FP Location*</label>
+                                        <select name="devices" id="devices"
+                                            class="form-control form-control-sm shipClass" required>
+                                            <option value="">Please Select</option>
+                                            @foreach($device as $devices)
+                                            <option value="{{$devices->ip}}">{{$devices->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                 </div>
-                                <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">Role</label>
-                                    <select name="role" id="role" class="form-control form-control-sm">
-                                        <option value="">Please Select</option>
-                                        @foreach($title as $titles)
-                                        <option value="{{$titles->id}}">{{$titles->title}}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">password</label>
-                                    <input type="text" name="password" id="password" class="form-control form-control-sm" />
-                                </div>
-                                <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">FP Location</label>
-                                    <select name="devices" id="devices" class="form-control form-control-sm shipClass">
-                                        <option value="">Please Select</option>
-                                        @foreach($device as $devices)
-                                        <option value="{{$devices->ip}}">{{$devices->name}}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
+
                                 <div class="form-group mt-3">
                                     <button type="submit" name="action_button" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
                                 </div>
@@ -132,30 +148,6 @@
                             </form>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="confirmModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-    aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content">
-                <div class="modal-header p-2">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col text-center">
-                            <h4 class="font-weight-normal">Are you sure you want to remove this data?</h4>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer p-2">
-                    <button type="button" name="ok_button" id="ok_button" class="btn btn-danger px-3 btn-sm">OK</button>
-                    <button type="button" class="btn btn-dark px-3 btn-sm" data-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </div>
@@ -178,8 +170,8 @@
                     </div>
                 </div>
                 <div class="modal-footer p-2">
-                    <button type="button" name="comfirm_users" id="comfirm_users" class="btn btn-danger px-3 btn-sm">Confirm</button>
-                    <button type="button" class="btn btn-dark px-3 btn-sm" data-dismiss="modal">Cancel</button>
+                    <button type="button" name="comfirm_users" id="comfirm_users" class="btn btn-primary px-3 btn-sm">Confirm</button>
+                    <button type="button" class="btn btn-danger px-3 btn-sm" data-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </div>
@@ -315,6 +307,23 @@ $(document).ready(function() {
         $('#formModal').modal('show');
     });
 
+    $(document).on('click', '.getuserdata', function () {
+        var device = $('#device').val();
+        if (device != '') {
+            $('#getuserdataModal').modal('show');
+        } 
+         else {
+        Swal.fire({
+            position: "top-end",
+            icon: 'warning',
+            title: 'Please select a Location First',
+            showConfirmButton: false,
+            timer: 2500
+        });
+    }
+
+    });
+
     $('#formTitle').on('submit', function (event) {
         event.preventDefault();
         var action_url = '';
@@ -419,20 +428,6 @@ $(document).ready(function() {
 
     });
 
-});
-
-$(document).on('click', '.getuserdata', function () {
-
-
-
-    var device = $('#device').val();
-    if (device != '') {
-        $('#getuserdataModal').modal('show');
-
-
-    } else {
-        alert('Select Location');
-    }
 });
 
 $('#comfirm_users').click(function () {
