@@ -10,7 +10,7 @@
         <div class="container-fluid">
             <div class="page-header-content py-3 px-2">
                 <h1 class="page-header-title ">
-                    <div class="page-header-icon"><i class="fa-light fa-fingerprint"></i></div>
+                    <div class="page-header-icon"><i class="fa-light fa-calendar-pen"></i></div>
                     <span>FingerPrint Device</span>
                 </h1>
             </div>
@@ -22,9 +22,7 @@
             <div class="card-body p-0 p-2">
                 <div class="row">
                     <div class="col-12">
-                        @can('finger-print-device-create')
                             <button type="button" class="btn btn-primary btn-sm fa-pull-right" name="create_record" id="create_record"><i class="fas fa-plus mr-2"></i>Add Device</button>
-                        @endcan
                     </div>
                     <div class="col-12">
                         <hr class="border-dark">
@@ -34,15 +32,15 @@
                         <table class="table table-striped table-bordered table-sm small nowrap w-100" id="divicestable">
                             <thead>
                                 <tr>
-                                    <th>Id </th>
+                                    <th>ID</th>
                                     <th>IP</th>
-                                    <th>Name</th>
-                                    <th>Serial No</th>
-                                    <th>EMI No</th>
-                                    <th>Connection No</th>
-                                    <th>Location</th>
-                                    <th>Status</th>
-                                    <th class="text-right">Action</th>
+                                    <th>NAME</th>
+                                    <th>SERIAL NO</th>
+                                    <th>EMI NO</th>
+                                    <th>CONNECTION NO</th>
+                                    <th>LOCATION</th>
+                                    <th>STATUS</th>
+                                    <th class="text-right">ACTION</th>
 
                                 </tr>
                             </thead>
@@ -57,7 +55,7 @@
     <!-- Modal Area Start -->
     <div class="modal fade" id="formModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
       aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header p-2">
                     <h5 class="modal-title" id="staticBackdropLabel">Add Location</h5>
@@ -71,44 +69,58 @@
                             <span id="form_result"></span>
                             <form method="post" id="formTitle" class="form-horizontal">
                                 {{ csrf_field() }}	
-                                <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">IP</label>
-                                    <input type="text" name="ip" id="ip" class="form-control form-control-sm" />
-                                </div>
-                                <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">Name</label>
-                                    <input type="text" name="name" id="name" class="form-control form-control-sm" />
-                                </div>
-                                <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">Location</label>
-                                    <select name="location" id="location" class="form-control form-control-sm">
-                                        <option value="">Select</option>
-                                        @foreach($location as $locations)
-                                        <option value="{{$locations->id}}">{{$locations->location}}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">Sno</label>
-                                    <input type="text" name="sno" id="sno" class="form-control form-control-sm" />
-                                </div>
-                                <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">EMI</label>
-                                    <input type="text" name="emi" id="emi" class="form-control form-control-sm" />
-                                </div>
-                                <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">Connection No</label>
-                                    <input type="text" name="connectionno" id="connectionno" class="form-control form-control-sm" />
-                                </div>
-                                <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">Status</label><br>
-                                    <div class="custom-control custom-radio custom-control-inline">
-                                        <input type="radio" id="status1" name="status" class="custom-control-input" value="1" checked>
-                                        <label class="custom-control-label" for="status1">Active</label>
+                                <div class="form-row mb-1">
+                                    <div class="col-sm-8 col-md-6">
+                                        <label class="small font-weight-bold text-dark">IP*</label>
+                                        <input type="text" name="ip" id="ip" class="form-control form-control-sm" required/>
                                     </div>
-                                    <div class="custom-control custom-radio custom-control-inline">
-                                        <input type="radio" id="status2" name="status" class="custom-control-input" value="0">
-                                        <label class="custom-control-label" for="status2">Deactive</label>
+                                    <div class="col-sm-4 col-md-6">
+                                        <label class="small font-weight-bold text-dark">Name*</label>
+                                        <input type="text" name="name" id="name" class="form-control form-control-sm" required/>
+                                    </div>
+                                </div>
+
+                                <div class="form-row mb-1">
+                                    <div class="col-sm-6 col-md-4">
+                                        <label class="small font-weight-bold text-dark">Location*</label>
+                                        <select name="location" id="location" class="form-control form-control-sm"
+                                            required>
+                                            <option value="">Select</option>
+                                            @foreach($location as $locations)
+                                            <option value="{{$locations->id}}">{{$locations->location}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-6 col-md-4">
+                                        <label class="small font-weight-bold text-dark">Sno*</label>
+                                        <input type="text" name="sno" id="sno" class="form-control form-control-sm"
+                                            required />
+                                    </div>
+                                    <div class="col-sm-6 col-md-4">
+                                        <label class="small font-weight-bold text-dark">EMI*</label>
+                                        <input type="text" name="emi" id="emi" class="form-control form-control-sm"
+                                            required />
+                                    </div>
+                                </div>
+
+                                <div class="form-row mb-1">
+                                    <div class="col-sm-6 col-md-4">
+                                        <label class="small font-weight-bold text-dark">Connection No*</label>
+                                        <input type="text" name="connectionno" id="connectionno"
+                                            class="form-control form-control-sm" required />
+                                    </div>
+                                    <div class="col-sm-6 col-md-4">
+                                        <label class="small font-weight-bold text-dark">Status*</label><br>
+                                        <div class="custom-control custom-radio custom-control-inline">
+                                            <input type="radio" id="status1" name="status" class="custom-control-input"
+                                                value="1" checked required>
+                                            <label class="custom-control-label" for="status1">Active</label>
+                                        </div>
+                                        <div class="custom-control custom-radio custom-control-inline">
+                                            <input type="radio" id="status2" name="status" class="custom-control-input"
+                                                value="0">
+                                            <label class="custom-control-label" for="status2">Deactive</label>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="form-group mt-3">

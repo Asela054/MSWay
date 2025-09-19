@@ -12,7 +12,7 @@
              <div class="container-fluid">
                  <div class="page-header-content py-3 px-2">
                      <h1 class="page-header-title ">
-                         <div class="page-header-icon"><i class="fa-light fa-clock"></i></div>
+                         <div class="page-header-icon"><i class="fa-light fa-calendar-pen"></i></div>
                          <span>Approved OT</span>
                      </h1>
                  </div>
@@ -44,18 +44,6 @@
                                 <select name="employee" id="employee" class="form-control form-control-sm">
                                 </select>
                             </div>
-{{--                            <div class="col-md-3">--}}
-{{--                                <label class="small font-weight-bold text-dark">Type</label>--}}
-{{--                                <select name="type" id="type" class="form-control form-control-sm">--}}
-{{--                                    <option value="Daily">Daily</option>--}}
-{{--                                    <option value="Monthly">Monthly</option>--}}
-{{--                                </select>--}}
-{{--                            </div>--}}
-
-{{--                            <div class="col-md-3 div_month">--}}
-{{--                                <label class="small font-weight-bold text-dark">Month</label>--}}
-{{--                                <input type="month" name="month" id="month" class="form-control-sm form-control">--}}
-{{--                            </div>--}}
 
                             <div class="col-md-3 mt-3 div_date_range">
                                 <label class="small font-weight-bold text-dark">Date : From - To</label>
@@ -63,9 +51,6 @@
                                     <input type="date" id="from_date" name="from_date" class="form-control form-control-sm border-right-0"
                                            placeholder="yyyy-mm-dd"
                                     >
-                                    {{--                                    <div class="input-group-prepend">--}}
-                                    {{--                                        <span class="input-group-text" id="inputGroup-sizing-sm"><i class="far fa-calendar"></i></span>--}}
-                                    {{--                                    </div>--}}
                                     <input type="date" id="to_date" name="to_date" class="form-control" placeholder="yyyy-mm-dd">
                                 </div>
                             </div>
@@ -75,36 +60,39 @@
                                 <button type="button" class="btn btn-danger btn-sm filter-btn float-right" id="btn-clear"><i class="far fa-trash-alt"></i>&nbsp;&nbsp;Clear</button>
                             </div>
                         </div>
-
                     </form>
                 </div>
             </div>
 
             <div class="card">
                 <div class="card-body p-0 p-2">
-                    <div class="info_msg"></div>
-                    <div class="daily_table">
-                        <table class="table table-striped table-bordered table-sm small" id="ot_report_dt">
-                            <thead>
-                            <tr id="dt_head">
-                            </tr>
-                            </thead>
-                            <tbody>
-                            </tbody>
-                        </table>
-                    </div>
+                     <div class="col-12">
+                         <div class="center-block fix-width scroll-inner">
 
-                    <div class="month_table">
-                        <table class="table table-striped table-bordered table-sm small" id="ot_report_monthly_dt">
-                            <thead>
-                            <tr id="dt_head_month">
-                            </tr>
-                            </thead>
-                            <tbody>
-                            </tbody>
-                        </table>
-                    </div>
+                             <div class="daily_table">
+                                 <table class="table table-striped table-bordered table-sm small nowrap w-100" id="ot_report_dt">
+                                     <thead>
+                                         <tr id="dt_head">
+                                         </tr>
+                                     </thead>
+                                     <tbody>
+                                     </tbody>
+                                 </table>
+                             </div>
+                             <div class="month_table">
+                                 <table class="table table-striped table-bordered table-sm small nowrap w-100"
+                                     id="ot_report_monthly_dt">
+                                     <thead>
+                                         <tr id="dt_head_month">
+                                         </tr>
+                                     </thead>
+                                     <tbody>
+                                     </tbody>
+                                 </table>
+                             </div>
 
+                         </div>
+                     </div>
                     {{ csrf_field() }}
                 </div>
             </div>
@@ -257,18 +245,18 @@
                     $('.month_table').css('display','none');
                     $('.daily_table').css('display','block');
 
-                    $('#dt_head').html('<th>ETF No</th> ' +
-                        '<th>Emp Name</th>' +
-                        '<th>Date</th> ' +
-                        '<th>From</th> ' +
-                        '<th>To</th>' +
-                        '<th>OT Time</th>' +
-                        '<th>D/OT Time</th> ' +
-                        '<th>T/OT Time</th> ' +
-                        '<th>Is Holiday</th> ' +
-                        '<th>Location</th> ' +
-                        '<th>Department</th> ' +
-                        '<th> Action </th> ' );
+                    $('#dt_head').html('<th>ETF NO</th> ' +
+                        '<th>EMP NAME</th>' +
+                        '<th>DATE</th> ' +
+                        '<th>FROM</th> ' +
+                        '<th>TO</th>' +
+                        '<th>OT TIME</th>' +
+                        '<th>D/OT TIME</th> ' +
+                        '<th>T/OT TIME</th> ' +
+                        '<th>IS HOLIDAY</th> ' +
+                        '<th>LOCATION</th> ' +
+                        '<th>DEPARTMENT</th> ' +
+                        '<th>ACTION</th> ' );
 
                     $('#ot_report_dt').DataTable({
                         "columnDefs": [
@@ -390,7 +378,7 @@
                                     var button = '';
 
                                     if (canDeleteEmployee) {
-                                        button += '<a href="javascript:void(0)" data-toggle="tooltip" data-id="' + full['id'] + '" data-original-title="Delete" class="delete_btn btn btn-danger btn-sm"><i class="fa fa-trash"></i> </a>';
+                                        button += '<a href="javascript:void(0)" data-toggle="tooltip" data-id="' + full['id'] + '" data-original-title="Delete" class="delete_btn btn btn-danger btn-sm" data-toggle="tooltip" title="Remove"><i class="far fa-trash-alt"></i> </a>';
                                     }
 
                                     return button;

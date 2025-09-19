@@ -21,31 +21,30 @@
             <div class="card-body">
                 <form class="form-horizontal" id="formFilter">
                     <div class="form-row mb-1">
-                        <div class="col">
+                        <div class="col-md-3">
                             <label class="small font-weight-bold text-dark">Company</label>
                             <select name="company" id="company" class="form-control form-control-sm" required>
                             </select>
                         </div>
-                        <div class="col">
+                        <div class="col-md-3">
                             <label class="small font-weight-bold text-dark">Department</label>
                             <select name="department" id="department" class="form-control form-control-sm" required>
                             </select>
                         </div>
-                        <div class="col">
+                        <div class="col-md-2">
                             <label class="small font-weight-bold text-dark">Month</label>
                             <input type="month" id="month" name="month" class="form-control form-control-sm" placeholder="yyyy-mm" required>
                         </div>
-                        <div class="col">
+                        <div class="col-md-2">
                             <label class="small font-weight-bold text-dark">Close Date</label>
                             <input type="date" id="closedate" name="closedate" class="form-control form-control-sm" required>
                         </div>
-                        <div class="col">
+                        <div class="col-md-2">
                             <br>
                             <button type="submit" class="btn btn-primary btn-sm filter-btn" id="btn-filter"><i class="fas fa-search mr-2"></i>Filter</button>
                             <button type="button" class="btn btn-danger btn-sm filter-btn" id="btn-clear"><i class="far fa-trash-alt"></i>&nbsp;&nbsp;Clear</button>
                         </div>
                     </div>
-
                 </form>
             </div>
         </div>
@@ -57,19 +56,19 @@
                         <div class="d-flex justify-content-end mb-2">
                             <button id="approve_att" class="btn btn-primary btn-sm"><i class="fa-light fa-light fa-clipboard-check"></i>&nbsp;Approve All</button>
                         </div>
-                        <div class="table-responsive table_outer">
-                            <table class="table table-striped table-bordered table-sm small" id="attendtable">
+                        <div class="center-block fix-width scroll-inner">
+                            <table class="table table-striped table-bordered table-sm small nowrap w-100" id="attendtable">
                                 <thead>
                                 <tr>
-                                    <th>Employee ID</th>
-                                    <th>Employee Name</th>
-                                    <th>Work Month</th>
-                                    <th>Department</th>
-                                    <th>Company</th>
-                                    <th>Working Week Days</th>
-                                    <th>Working Hours</th>
-                                    <th>Leave Days</th>
-                                    <th>No Pay Days</th>
+                                    <th>EMPLOYEE ID</th>
+                                    <th>EMPLOYEE NAME</th>
+                                    <th>WORK MONTH</th>
+                                    <th>DEPARTMENT</th>
+                                    <th>COMPANY</th>
+                                    <th>WORKING WEEK DAYS</th>
+                                    <th>WORKING HOURS</th>
+                                    <th>LEAVE DAYS</th>
+                                    <th>NO PAY DAYS</th>
                                     {{-- <th>Last Time Stamp</th> --}}
                                     {{-- <th>Action</th> --}}
                                 </tr>
@@ -128,17 +127,10 @@ $(document).ready(function () {
     $('#attendant_menu_link_icon').addClass('active');
     $('#attendantmaster').addClass('navbtnactive');
 
-    $('.table_outer').css('display', 'none');
-    $('#approve_att').css('display', 'none');
+    // $('.table_outer').css('display', 'none');
+    // $('#approve_att').css('display', 'none');
 
-    let msg = '<div class="alert alert-info alert-dismissible fade show" role="alert">' +
-        'Please select Department, Month and filter to load records.' +
-        '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
-        '<span aria-hidden="true">&times;</span>' +
-        '</button>' +
-        '</div>';
 
-    $('.main_card').append(msg);
 
     let company = $('#company');
     let department = $('#department');
@@ -266,9 +258,6 @@ $(document).ready(function () {
                 $('#company').val('').trigger('change');   
                 $('#department').val('').trigger('change');
                 $('#month').val('');
-                                  
-
-                // load_dt('', '', '');
     });
 
     $(document).on('click', '#approve_att',async function (e) {

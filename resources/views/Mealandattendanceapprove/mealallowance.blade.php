@@ -10,7 +10,7 @@
             <div class="container-fluid">
                 <div class="page-header-content py-3 px-2">
                     <h1 class="page-header-title ">
-                        <div class="page-header-icon"><i class="fa-light fa-calendar-minus"></i></div>
+                        <div class="page-header-icon"><i class="fa-light fa-calendar-pen"></i></div>
                         <span>Salary Adjustments Approval</span>
                     </h1>
                 </div>
@@ -22,18 +22,18 @@
                 <div class="card-body">
                     <form class="form-horizontal" id="formFilter">
                         <div class="form-row mb-1">
-                            <div class="col-2">
+                            <div class="col-md-2">
                                 <label class="small font-weight-bold text-dark">Company</label>
                                 <select name="company" id="company" class="form-control form-control-sm" required>
                                 </select>
                             </div>
-                            <div class="col-2">
+                            <div class="col-md-2">
                                 <label class="small font-weight-bold text-dark">Department</label>
                                 <select name="department" id="department" class="form-control form-control-sm" required>
                                    
                                 </select>
                             </div>
-                            <div class="col-2">
+                            <div class="col-md-2">
                                 <label class="small font-weight-bold text-dark">Add/Deduct Type</label>
                                 <select id="remuneration_name" name="remuneration_name" class="form-control form-control-sm" required>
                                 <option value="">Select Remuneration</option>
@@ -51,7 +51,7 @@
                                     <option value="2">Date Range Wise</option>
                                 </select>
                             </div>
-                            <div class="col-md-3" id="div_date_range">
+                            <div class="col-md-2" id="div_date_range">
                                 <label class="small font-weight-bold text-dark">Date : From - To</label>
                                 <div class="input-group input-group-sm mb-3">
                                     <input type="date" id="from_date" name="from_date" class="form-control form-control-sm border-right-0"
@@ -63,7 +63,7 @@
                                 <label class="small font-weight-bold text-dark">Month</label>
                                 <input type="month" id="selectedmonth" name="selectedmonth" class="form-control form-control-sm" placeholder="yyyy-mm-dd">
                             </div>
-                            <div class="col">
+                            <div class="col-md-2">
                                 <br>
                                 <button type="submit" class="btn btn-primary btn-sm filter-btn px-3" id="btn-filter"><i class="fas fa-search mr-2"></i>Filter</button>
                             </div>
@@ -75,7 +75,7 @@
             <div class="card mb-2">
                 <div class="card-body">
                     <div class="row">
-                            <div class="col-12">
+                            <div class="col-md-12">
                                 <div class="row align-items-center mb-4">
                                     <div class="col-6 mb-2">
                                         <div class="form-check">
@@ -94,15 +94,15 @@
                                         <thead>
                                             <tr>
                                                 <th></th>
-                                                <th>Emp ID </th>
-                                                <th>Empolyee Name</th>
-                                                <th>Total Working Days</th>
-                                                <th>Allowance Amount</th>
-                                                <th>Total Amount</th>
-                                                <th>Remaining Amount</th>
-                                                <th class="d-none">Payroll profile</th>
-                                                <th class="d-none">Type</th>
-                                                <th class="d-none">Remunition</th>
+                                                <th>EMP ID </th>
+                                                <th>EMPLOYEE NAME</th>
+                                                <th>TOTAL WORKING DAYS</th>
+                                                <th>ALLOWANCE AMOUNT</th>
+                                                <th>TOTAL AMOUNT</th>
+                                                <th>REMAINING AMOUNT</th>
+                                                <th class="d-none">PAYROLL PROFILE</th>
+                                                <th class="d-none">TYPE</th>
+                                                <th class="d-none">REMUNITION</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -354,7 +354,13 @@
                         })
 
                     } else {
-                        alert('Select Rows to Final Approve!!!!');
+                        Swal.fire({
+                        position: "top-end",
+                        icon: 'warning',
+                        title: 'Select Rows to Final Approve!',
+                        showConfirmButton: false,
+                        timer: 2500
+                        });
                     }
             }
                     

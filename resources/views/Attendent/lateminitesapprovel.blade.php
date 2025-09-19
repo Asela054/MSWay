@@ -10,7 +10,7 @@
         <div class="container-fluid">
             <div class="page-header-content py-3 px-2">
                 <h1 class="page-header-title ">
-                    <div class="page-header-icon"><i class="fa-light fa-clock"></i></div>
+                    <div class="page-header-icon"><i class="fa-light fa-calendar-pen"></i></div>
                     <span>Late Deduction Approval</span>
                 </h1>
             </div>
@@ -21,25 +21,25 @@
             <div class="card-body">
                 <form class="form-horizontal" id="formFilter">
                     <div class="form-row mb-1">
-                        <div class="col">
+                        <div class="col-md-3">
                             <label class="small font-weight-bold text-dark">Company</label>
                             <select name="company" id="company" class="form-control form-control-sm" required>
                             </select>
                         </div>
-                        <div class="col">
+                        <div class="col-md-3">
                             <label class="small font-weight-bold text-dark">Department</label>
                             <select name="department" id="department" class="form-control form-control-sm" required>
                             </select>
                         </div>
-                        <div class="col">
+                        <div class="col-md-2">
                             <label class="small font-weight-bold text-dark">Month</label>
                             <input type="month" id="month" name="month" class="form-control form-control-sm" placeholder="yyyy-mm" required>
                         </div>
-                        <div class="col">
+                        <div class="col-md-2">
                             <label class="small font-weight-bold text-dark">Close Date</label>
                             <input type="date" id="closedate" name="closedate" class="form-control form-control-sm" required>
                         </div>
-                        <div class="col">
+                        <div class="col-md-2">
                             <br>
                             <button type="submit" class="btn btn-primary btn-sm filter-btn" id="btn-filter"><i class="fas fa-search mr-2"></i>Filter</button>
                             <button type="button" class="btn btn-danger btn-sm filter-btn" id="btn-clear"><i class="far fa-trash-alt"></i>&nbsp;&nbsp;Clear</button>
@@ -52,7 +52,7 @@
         <div class="card">
             <div class="card-body p-0 p-2 main_card">
                 <div class="row">
-                    <div class="col-12">
+                    <div class="col-md-12">
 
                         <div class="row align-items-center mb-4">
                             <div class="col-6 mb-2">
@@ -71,12 +71,12 @@
                                 <thead>
                                 <tr>
                                     <th></th>
-                                    <th>Employee ID</th>
-                                    <th>Employee Name</th>
-                                    <th>Late minites Total</th>
-                                    <th>Nopay Amout</th>
-                                    <th>Total Amount</th>
-                                    <th class="d-none">Employee auto ID</th>
+                                    <th>EMPLOYEE ID</th>
+                                    <th>EMPLOYEE NAME</th>
+                                    <th>LATE MINITES TOTAL</th>
+                                    <th>NOPAY AMOUNT</th>
+                                    <th>TOTAL AMOUNT</th>
+                                    <th class="d-none">EMPLOYEE auto ID</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -332,7 +332,13 @@ $(document).ready(function () {
                     })
                 } else {
 
-                    alert('Select Rows to Final Approve!!!!');
+                    Swal.fire({
+                        position: "top-end",
+                        icon: 'warning',
+                        title: 'Select Rows to Final Approve!',
+                        showConfirmButton: false,
+                        timer: 2500
+                        });
                 }
             }
         });

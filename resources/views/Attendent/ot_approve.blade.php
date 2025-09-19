@@ -11,7 +11,7 @@
              <div class="container-fluid">
                  <div class="page-header-content py-3 px-2">
                      <h1 class="page-header-title ">
-                         <div class="page-header-icon"><i class="fa-light fa-file-signature"></i></div>
+                         <div class="page-header-icon"><i class="fa-light fa-calendar-pen"></i></div>
                          <span>OT Approve</span>
                      </h1>
                  </div>
@@ -22,6 +22,7 @@
             <div class="card mb-2">
                 <div class="card-body">
                     <form class="form-horizontal" id="formFilter">
+                        
                         <div class="form-row mb-1">
                             <div class="col-md-3">
                                 <label class="small font-weight-bold text-dark">Company</label>
@@ -72,13 +73,43 @@
 
             <div class="card">
                 <div class="card-body p-0 p-2">
-                    <div class="info_msg"></div>
-                    <div class="response">
-                        <div class="alert alert-info" role="alert">
-                            <span> Please select a date period to continue</span>
+                    <div class="row mt-1">
+                        <div class="col-6 mb-2">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input checkallocate" id="selectAll">
+                                <label class="form-check-label" for="selectAll">Select All Records</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <button type="button" class="btn btn-primary btn-sm float-right" id="btn_approve_ot"><i
+                                    class="fa-light fa-light fa-clipboard-check"></i>&nbsp;Approve OT</button><br>
                         </div>
                     </div>
-
+                    <br>
+                    <div class="col-12">
+                        <div class="center-block fix-width scroll-inner">
+                            <table class="table table-striped table-bordered table-sm small nowrap" id="ot_table">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>EMP ID</th>
+                                        <th>ETF NO</th>
+                                        <th>EMPLOYEE</th>
+                                        <th>DATE</th>
+                                        <th>DAY</th>
+                                        <th>FROM</th>
+                                        <th>TO</th>
+                                        <th>OT TIME</th>
+                                        <th>D/OT TIME</th>
+                                        <th>T/OT TIME</th>
+                                        <th>IS HOLIDAY</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="response">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -199,31 +230,7 @@
                         btn.prop('disabled', false);
 
                         let ot_data = res.ot_data;
-                        
-                        // Create the table structure
-                        let ot_data_html = '<div class="form-group mt-3 ">';
-                        ot_data_html += '<button type="button" class="btn btn-primary btn-sm float-right" id="btn_approve_ot"><i class="fa-light fa-light fa-clipboard-check"></i>&nbsp;Approve OT</button><br>';
-                        ot_data_html += '</div>';
-                        
-                        ot_data_html += '<div class="center-block fix-width scroll-inner">';
-                        ot_data_html += '<table class="table table-striped table-bordered table-sm small nowrap" id="ot_table">';
-                        ot_data_html += '<thead>';
-                        ot_data_html += '<tr>';
-                        ot_data_html += '<th><label> <input type="checkbox" name="selectAll" id="selectAllDomainList" /> Check All </label></th>';
-                        ot_data_html += '<th>Emp ID</th>';
-                        ot_data_html += '<th>ETF NO</th>';
-                        ot_data_html += '<th>Employee</th>';
-                        ot_data_html += '<th>Date</th>';
-                        ot_data_html += '<th>Day</th>';
-                        ot_data_html += '<th>From</th>';
-                        ot_data_html += '<th>To</th>';
-                        ot_data_html += '<th>OT Time</th>';
-                        ot_data_html += '<th>D/OT Time</th>';
-                        ot_data_html += '<th>T/OT Time</th>';
-                        ot_data_html += '<th>Is Holiday</th>';
-                        ot_data_html += '</tr>';
-                        ot_data_html += '</thead>';
-                        ot_data_html += '<tbody>';
+                        let ot_data_html = '';
                         
                         if(ot_data.length > 0) {
                             ot_data.forEach(function(key, data) {
@@ -265,9 +272,6 @@
                             });
                         }
                         
-                        ot_data_html += '</tbody>';
-                        ot_data_html += '</table>';
-                        ot_data_html += '</div>';
                         
                         $('.response').html(ot_data_html);
                         
@@ -313,10 +317,6 @@
                         $('.date_time').datetimepicker({
                             format:'Y-m-d H:i',
                             mask:false,
-                        });
-                        
-                        $(':checkbox[name=selectAll]').click(function () {
-                            $(':checkbox.cb').prop('checked', this.checked);
                         });
                     },
                     error: function(xhr, status, error) {
@@ -458,148 +458,12 @@
                 // load_dt('', '', '', '', '');
             });
 
+             $('#selectAll').click(function (e) {
+                $('#ot_table').closest('table').find('td input:checkbox').prop('checked', this.checked);
+            });
         });
 
 
-
-                    // function load_table(){
-            //     let department = $('#department').val();
-            //     let employee = $('#employee').val();
-            //     let location = $('#location').val();
-            //     let from_date = $('#from_date').val();
-            //     let to_date = $('#to_date').val();
-
-            //     $('.response').html('');
-            //     let btn = $('#btn-filter');
-            //     btn.attr('disabled',true);
-            //     btn.html('<i class="fa fa-spinner fa-spin"></i>');
-
-            //     $.ajax({
-            //         url: "{{ route('get_ot_details') }}",
-            //         method: "POST",
-            //         data: {
-            //             department: department,
-            //             employee: employee,
-            //             location: location,
-            //             from_date: from_date,
-            //             to_date: to_date,
-            //             _token: '{{csrf_token()}}'
-            //         },
-            //         success: function (res) {
-            //             // console.log(res);
-            //             btn.html('Filter');
-            //             btn.prop('disabled', false);
-
-            //             let ot_data = res.ot_data;
-
-            //             let ot_data_html = '<div class="alert alert-info">';
-            //             ot_data_html += '<span> Please check each rows and click Approve button in bottom of the table.</span>';
-            //             ot_data_html += '</div>';
-
-            //             ot_data_html = '<div class="center-block fix-width scroll-inner">';
-            //             ot_data_html += '<table class="table table-striped table-bordered table-sm small nowrap" id="ot_table">';
-            //             ot_data_html += '<thead>';
-            //             ot_data_html += '<tr>';
-            //             ot_data_html += '<th><label> <input type="checkbox" name="selectAll" id="selectAllDomainList" /> Check All </label></th>';
-            //             ot_data_html += '<th>Emp ID</th>';
-            //             ot_data_html += '<th>ETF NO</th>';
-            //             ot_data_html += '<th>Employee</th>';
-            //             ot_data_html += '<th>Date</th>';
-            //             ot_data_html += '<th>Day</th>';
-            //             //ot_data_html += '<th>Type</th>';
-            //             ot_data_html += '<th>From</th>';
-            //             ot_data_html += '<th>To</th>';
-            //             ot_data_html += '<th>OT Time</th>';
-            //             ot_data_html += '<th>D/OT Time</th>';
-            //             ot_data_html += '<th>T/OT Time</th>';
-            //             ot_data_html += '<th>Is Holiday</th>';
-            //             ot_data_html += '</tr>';
-            //             ot_data_html += '</thead>';
-            //             ot_data_html += '<tbody>';
-
-
-            //             if(ot_data.length > 0) {
-            //                 ot_data.forEach(function(key, data) {
-            //                     let is_approved = key.is_approved;
-            //                     //iterate through key
-                                
-            //                     let obj = key.ot_breakdown;
-
-            //                     let is_holiday = obj.is_holiday;
-
-            //                     if(is_holiday == 1) {
-            //                         is_holiday = 'Yes';
-            //                     } else {
-            //                         is_holiday = 'No';
-            //                     }
-
-            //                     let from_input = '<input type="datetime-local" class="form-control form-control-sm" placeholder="YYYY-MM-DD HH:MM" value="'+ obj.from_24+'" readonly>';
-            //                     let to_input = '<input type="datetime-local" class="form-control form-control-sm" placeholder="YYYY-MM-DD HH:MM" value="'+obj.to_24+'" readonly>';
-            //                     let hours_input = '<input type="number" class="form-control form-control-sm" value="'+obj.hours+'" step=".01" readonly>';
-            //                     let double_hours_input = '<input type="number" class="form-control form-control-sm" value="'+obj.double_hours+'" step=".01" readonly>';
-            //                     let triple_hours_input = '<input type="number" class="form-control form-control-sm" value="'+obj.triple_hours +'" step=".01" readonly>';
-            //                     //let one_point_five_hours_input = '<input type="number" class="form-control form-control-sm" value="'+obj.one_point_five_ot_hours+'" step=".01">';
-
-            //                     let h_class = '';
-            //                     let h_label = 'Evening';
-            //                     if(obj.is_morning){
-            //                         h_class = 'bg-teal-light';
-            //                         h_label = 'Morning';
-            //                     }
-
-            //                     ot_data_html += '<tr class="'+h_class+'" >';
-
-            //                     if(is_approved == false){
-            //                         ot_data_html += '<td><input type="checkbox" class="cb" ' +
-            //                             'data-emp_id="'+obj.emp_id+'" ' +
-            //                             'data-date="'+obj.date+'" ' +
-            //                             ' /></td>';
-            //                     }else{
-            //                         ot_data_html += '<td> <i class="fa fa-check text-success"> </i> </td>';
-            //                     }
-
-            //                     ot_data_html += '<td>'+obj.emp_id+'</td>';
-            //                     ot_data_html += '<td>'+obj.etf_no+'</td>';
-            //                     ot_data_html += '<td>'+obj.name+'</td>';
-            //                     ot_data_html += '<td>'+obj.date+'</td>';
-            //                     ot_data_html += '<td>'+obj.day_name+'</td>';
-            //                     //ot_data_html += '<td>'+h_label+'</td>';
-            //                     ot_data_html += '<td>'+from_input+'</td>';
-            //                     ot_data_html += '<td>'+to_input+'</td>';
-            //                     ot_data_html += '<td>'+ hours_input +'</td>';
-            //                     ot_data_html += '<td>'+ double_hours_input +'</td>';
-            //                     ot_data_html += '<td>'+ triple_hours_input+'</td>';
-            //                     ot_data_html += '<td>'+is_holiday+'</td>';
-            //                     ot_data_html += '</tr>';
-            //                 });
-            //             }
-
-            //             ot_data_html += '</tbody>';
-            //             ot_data_html += '</table>' +
-            //                 '<div class="form-group mt-3 ">' +
-            //                 '<button type="button" class="btn btn-primary btn-sm float-right" id="btn_approve_ot">Approve</button><br>' +
-            //                 '</div>';
-            //             ot_data_html += '</div>';
-
-            //             $('.response').html(ot_data_html);
-
-            //             $('#ot_table').DataTable();
-            //             btn.html('Filter');
-            //             btn.prop('disabled', false);
-
-            //             $('.date_time').datetimepicker({
-            //                 format:'Y-m-d H:i',
-            //                 mask:false,
-            //             });
-
-            //             $(':checkbox[name=selectAll]').click(function () {
-            //                 $(':checkbox').prop('checked', this.checked);
-            //             });
-
-            //         }
-
-            //     });
-            // }
     </script>
 
 @endsection
