@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use Illuminate\Http\Request;
 use Validator;
+use Illuminate\Support\Facades\Auth;
 
 class EmployeeLoanInstallmentController extends Controller
 {
@@ -38,6 +39,11 @@ class EmployeeLoanInstallmentController extends Controller
      */
     public function index()
     {
+		$user = Auth::user();
+        $permission = $user->can('Loans-Settlement-list');
+        if(!$permission) {
+            abort(403);
+        }
         $branch=Company::orderBy('id', 'asc')->get(); // Branch::orderBy('id', 'asc')->get();
 		/*
 		$employee_loans = DB::table('employee_loans')

@@ -19,6 +19,7 @@ use DB;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Validator;
+use Illuminate\Support\Facades\Auth;
 
 class OtherFacilityPaymentController extends Controller
 {
@@ -39,6 +40,11 @@ class OtherFacilityPaymentController extends Controller
      */
     public function index()
     {
+		$user = Auth::user();
+        $permission = $user->can('Other-facilities-list');
+        if(!$permission) {
+            abort(403);
+        }
         $remuneration = OtherFacility::where(['facility_cancel'=>0])->orderBy('id', 'asc')->get();
 		$employee_list=DB::select("SELECT payroll_profiles.id AS payroll_profile_id, employees.emp_name_with_initial AS emp_first_name FROM payroll_profiles INNER JOIN employees ON payroll_profiles.emp_id=employees.id");// WHERE payroll_profiles.employee_executive_level=1
 		return view('Payroll.termPayment.facilityPayment_list',compact('remuneration', 'employee_list'));

@@ -14,6 +14,7 @@ use DB;
 use Illuminate\Http\Request;
 //use Illuminate\Validation\Rule;
 use Validator;
+use Illuminate\Support\Facades\Auth;
 
 class PaymentPeriodController extends Controller
 {
@@ -33,6 +34,11 @@ class PaymentPeriodController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index(){
+        $user = Auth::user();
+        $permission = $user->can('Salary-schedule-list');
+        if(!$permission) {
+            abort(403);
+        }
         $payroll_process_type=DB::select("SELECT payroll_process_types.id AS payroll_process_type_id, payroll_process_types.process_name, IFNULL(drv_info.payment_period_id, '') AS payment_period_id, IFNULL(drv_info.payment_period_fr, '') AS payment_period_fr, IFNULL(drv_info.payment_period_to, '') AS payment_period_to FROM payroll_process_types LEFT OUTER JOIN (SELECT drv_list.id AS payment_period_id, drv_list.payroll_process_type_id, drv_list.payment_period_fr, drv_list.payment_period_to FROM (SELECT id, payroll_process_type_id, payment_period_fr, payment_period_to FROM payment_periods) AS drv_list INNER JOIN (SELECT max(`id`) AS last_id, `payroll_process_type_id` FROM `payment_periods` group by `payroll_process_type_id`) AS drv_key ON drv_list.id=drv_key.last_id) AS drv_info ON payroll_process_types.id=drv_info.payroll_process_type_id");
 		return view('Payroll.paymentPeriod.paymentPeriod_list',compact('payroll_process_type'));
     }

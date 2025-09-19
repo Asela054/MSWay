@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use PDF;
 use Validator;
+use Illuminate\Support\Facades\Auth;
 
 class EmployeeTermPaymentController extends Controller
 {
@@ -41,6 +42,11 @@ class EmployeeTermPaymentController extends Controller
      */
     public function index()
     {
+		$user = Auth::user();
+        $permission = $user->can('Salaryaddition-list');
+        if(!$permission) {
+            abort(403);
+        }
         $branch=Company::orderBy('id', 'asc')->get(); // Branch::orderBy('id', 'asc')->get();
 		$remuneration=Remuneration::where(['remuneration_cancel'=>0, 'allocation_method'=>'TERMS'])->orderBy('id', 'asc')->get();
 		

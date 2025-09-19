@@ -891,7 +891,8 @@ td.actlist_col .opts_held{
 
 #facilityDropdown{font-size:14px;}
 #facilityDropdown.dropdown-toggle::after{margin-top:1px;}
-#addNewFacility{min-width:300px; left:-30px !Important; border:2px solid #f0e68c;}
+/* #addNewFacility{min-width:300px; left:-30px !Important; border:2px solid #f0e68c;} */
+#addNewFacility{min-width:300px; left:-30px !Important; border:2px solid #1AC6D9;}
 
 /*--datatable-scroll--*/
 .dt_scroll_bars .dataTables_wrapper.dt-bootstrap4{

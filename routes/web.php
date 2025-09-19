@@ -59,7 +59,7 @@ Route::get('addEmployee',['uses' => 'EmployeeController@index', 'as' => 'addEmpl
 // Route::get('employee_list_dt',['uses' => 'EmployeeController@employee_list_dt', 'as' => 'employee_list_dt']);
 Route::post('empoyeeUpdate',['uses' => 'EmployeeController@edit', 'as' => 'empoyeeUpdate']); 
 Route::post('empoyeeRegister',['uses' => 'EmployeeController@store', 'as' => 'empoyeeRegister']); 
-// Route::post('addUserLogin',['uses' => 'EmployeeController@usercreate', 'as' => 'addUserLogin']); 
+Route::post('addUserLogin',['uses' => 'EmployeeController@usercreate', 'as' => 'addUserLogin']); 
 Route::get('EmployeeDestroy/destroy/{id}', 'EmployeeController@destroy');
 Route::get('exportEmpoloyee', 'EmployeeController@exportempoloyee')->name('exportEmpoloyee');
 Route::get('/viewEmployee/{id}',['uses' => 'EmployeeController@show', 'as' => 'viewEmployee']);
@@ -1207,6 +1207,7 @@ Route::get('useraccountsummery', 'UserAccountController@useraccountsummery_list'
 Route::post('get_employee_monthlysummery', 'UserAccountController@get_employee_monthlysummery')->name('get_employee_monthlysummery');
 Route::get('user_leave_list',['uses' => 'UserAccountController@leave_list_dt', 'as' => 'user_leave_list']);
 Route::get('userlogininformation', 'UserAccountController@userlogininformation_list')->name('userlogininformation');
+Route::get('get_employee_attendance', 'UserAccountController@get_attendance_by_employee_data')->name('get_employee_attendance');
 
 Route::post('/get_employee_salarysheet', 'UserAccountController@downloadSalarySheet')->name('get_employee_salarysheet');
 Route::post('/getEmployeeLeaveStatusSummary', 'UserAccountController@getemployeeleavestatus');

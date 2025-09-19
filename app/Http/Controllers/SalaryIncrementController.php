@@ -17,6 +17,7 @@ use DB;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Validator;
+use Illuminate\Support\Facades\Auth;
 
 class SalaryIncrementController extends Controller
 {
@@ -37,6 +38,11 @@ class SalaryIncrementController extends Controller
      */
     public function index()
     {
+		$user = Auth::user();
+        $permission = $user->can('Salary-increment-list');
+        if(!$permission) {
+            abort(403);
+        }
         $remuneration = Remuneration::where(['remuneration_cancel'=>0, 'allocation_method'=>'FIXED'])->orderBy('id', 'asc')->get();
 		return view('Payroll.salaryIncrement.salaryIncrement_list',compact('remuneration'));
     }
