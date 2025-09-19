@@ -33,6 +33,7 @@ use Illuminate\Http\Request;
 use PDF; 
 
 use Validator;
+use Illuminate\Support\Facades\Auth;
 
 class EmployeePayslipController extends Controller
 {
@@ -53,6 +54,11 @@ class EmployeePayslipController extends Controller
      */
     public function index()
     {
+		$user = Auth::user();
+        $permission = $user->can('Salary-preperation-list');
+        if(!$permission) {
+            abort(403);
+        }
         $branch=Company::orderBy('id', 'asc')->get(); // Branch::orderBy('id', 'asc')->get();
 		$payroll_process_type=PayrollProcessType::orderBy('id', 'asc')->get();
 		

@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 use Validator;
 use Carbon\Carbon;
 use Session;
+use Illuminate\Support\Facades\Auth;
 
 class EmployeeLoanController extends Controller
 {
@@ -37,6 +38,11 @@ class EmployeeLoanController extends Controller
      */
     public function index()
     {
+        $user = Auth::user();
+        $permission = $user->can('Loans-list');
+        if(!$permission) {
+            abort(403);
+        }
         $companyId = Session::get('company_id');
         $branch=Company::where('id', $companyId)->orderBy('id', 'asc')->get(); // Branch::orderBy('id', 'asc')->get();
 		

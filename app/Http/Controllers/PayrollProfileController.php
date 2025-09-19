@@ -17,6 +17,7 @@ use DB;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Validator;
+use Illuminate\Support\Facades\Auth;
 
 class PayrollProfileController extends Controller
 {
@@ -37,6 +38,11 @@ class PayrollProfileController extends Controller
      */
     public function index()
     {
+		$user = Auth::user();
+        $permission = $user->can('Payrollprofile-list');
+        if(!$permission) {
+            abort(403);
+        }
         $branch=Company::orderBy('id', 'asc')->get(); // Branch::orderBy('id', 'asc')->get();
 		$payroll_process_type=PayrollProcessType::orderBy('id', 'asc')->get();
 		//$payroll_acts=PayrollAct::orderBy('id', 'asc')->get();//

@@ -16,6 +16,7 @@ use DB;
 use Illuminate\Http\Request;
 use Validator;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class EmployeeLoanApprovalController extends Controller
 {
@@ -47,6 +48,11 @@ class EmployeeLoanApprovalController extends Controller
                     ->select('employees.*', 'payroll_profiles.id as payroll_profile_id', 'payroll_process_types.process_name', 'payroll_profiles.basic_salary', 'companies.name as location')
                     ->get();
 		*/
+        $user = Auth::user();
+        $permission = $user->can('Loans-status');
+        if(!$permission) {
+            abort(403);
+        }
         return view('Payroll.employeeLoan.approveLoan_list');
     }
 

@@ -34,23 +34,11 @@
                                         <th>NAME</th>
                                         <th>TYPE</th>
                                         <th>EPF PAYABLE</th>
+                                        <th>OT APPRICABLE</th>
+                                        <th>NOPAY APPRICABLE</th>
                                         <th class="actlist_col text-right">ACTION</th>
                                     </tr>
                                 </thead>
-
-                                <tbody>
-                                    @foreach($remuneration as $remunerations)
-                                    <tr>
-                                        <td>{{$remunerations->remuneration_name}}</td>
-                                        <td>{{$remunerations->remuneration_type}}</td>
-                                        <td>{{$remunerations->epf_payable}}</td>
-                                        <td class="actlist_col masked_col"
-                                            data-refopt="{{$remunerations->advanced_option_id}}">
-                                            {{$remunerations->id}}
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
                             </table>
                         </div>
                     </div>
@@ -248,28 +236,105 @@
         $('#policymanagement').addClass('navbtnactive');
 
         var remunerationTable = $("#titletable").DataTable({
-            "columnDefs": [{
-                "targets": 2,
-                render: function (data, type, row) {
-                    return (data == 1) ? 'Y' : 'N';
-                }
-            }, {
-                "targets": 3,
-                "className": 'actlist_col text-right',
-                "orderable": false,
-                render: function (data, type, row) {
-                    return '<button name="edit" data-refid="' + data +
-                        '" class="edit btn btn-primary btn-sm mr-1" type="submit" data-toggle="tooltip" title="Edit">' +
-                        '<i class="fas fa-pencil-alt"></i></button>' +
-                        '<button type="submit" name="delete" data-refid="' + data +
-                        '" class="delete btn btn-danger btn-sm" data-toggle="tooltip" title="Remove">' +
-                        '<i class="fas fa-trash-alt"></i></button>';
-                }
-            }],
-            "createdRow": function (row, data, dataIndex) {
-                $('td', row).eq(3).removeClass('masked_col');
-                $(row).attr('id', 'row-' + data[3]); //$( row ).data( 'refid', data[3] );
+            "destroy": true,
+            "processing": true,
+            "serverSide": true,
+            dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+            "buttons": [{
+                    extend: 'csv',
+                    className: 'btn btn-success btn-sm',
+                    title: 'Customer  Information',
+                    text: '<i class="fas fa-file-csv mr-2"></i> CSV',
+                },
+                { 
+                    extend: 'pdf', 
+                    className: 'btn btn-danger btn-sm', 
+                    title: 'Location Information', 
+                    text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
+                    orientation: 'landscape', 
+                    pageSize: 'legal', 
+                    customize: function(doc) {
+                        doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+                    }
+                },
+                {
+                    extend: 'print',
+                    title: 'Customer  Information',
+                    className: 'btn btn-primary btn-sm',
+                    text: '<i class="fas fa-print mr-2"></i> Print',
+                    customize: function(win) {
+                        $(win.document.body).find('table')
+                            .addClass('compact')
+                            .css('font-size', 'inherit');
+                    },
+                },
+                // 'copy', 'csv', 'excel', 'pdf', 'print'
+            ],
+            "order": [
+                [0, "desc"]
+            ],
+            ajax: {
+                url: scripturl + "/remunerationlist.php",
+                type: "POST",
+                data: {},
             },
+            "columns": [
+                { 
+                    data: 'remuneration_name', 
+                    name: 'remuneration_name'
+                },
+                { 
+                    data: 'remuneration_type', 
+                    name: 'remuneration_type'
+                },
+                {
+                    "targets": -1,
+                    "className": 'text-center',
+                    "data": null,
+                    "render": function(data, type, full) {
+                        return (full['epf_payable'] == 1) ? 'Y' : 'N';
+                    }
+                }, 
+                {
+                    "targets": -1,
+                    "className": 'text-center',
+                    "data": null,
+                    "render": function(data, type, full) {
+                        return (full['ot_applicable'] == 1) ? 'Y' : 'N';
+                    }
+                }, 
+                {
+                    "targets": -1,
+                    "className": 'text-center',
+                    "data": null,
+                    "render": function(data, type, full) {
+                        return (full['nopay_applicable'] == 1) ? 'Y' : 'N';
+                    }
+                }, 
+                {
+                    "targets": -1,
+                    "className": 'actlist_col text-right',
+                    "data": null,
+                    "orderable": false,
+                    render: function (data, type, full) {
+                        return '<button name="edit" data-refid="' + full['id'] +
+                            '" class="edit btn btn-primary btn-sm mr-1" type="submit" data-toggle="tooltip" title="Edit">' +
+                            '<i class="fas fa-pencil-alt"></i></button>' +
+                            '<button type="submit" name="delete" data-refid="' + full['id'] +
+                            '" class="delete btn btn-danger btn-sm" data-toggle="tooltip" title="Remove">' +
+                            '<i class="fas fa-trash-alt"></i></button>';
+                    }
+                }
+            ],
+            columnDefs: [
+                {
+                    targets: 5, // Target the first column (index 0)
+                    createdCell: function (td, cellData, rowData, row, col) {
+                        $(td).attr('data-refopt', rowData.advanced_option_id);
+                    }
+                }
+            ],
             drawCallback: function(settings) {
                 $('[data-toggle="tooltip"]').tooltip();
             }
