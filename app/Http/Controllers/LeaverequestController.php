@@ -152,16 +152,16 @@ class LeaverequestController extends Controller
 
             if (Auth::user()->can('LeaveRequest-Approve')) {
                 if($row->request_approve_status == 0){
-                    $btn .= '<button type="submit" name="approve" id="'.$row->id.'" class="approve btn btn-outline-warning btn-sm" style="margin:1px;" >
+                    $btn .= '<button type="submit" name="approve" id="'.$row->id.'" class="approve btn btn-warning btn-sm" style="margin:1px;" data-toggle="tooltip" title="Approve" >
                     <i class="fas fa-check"></i></button>';  
                 }
             }
             if (Auth::user()->can('LeaveRequest-edit')) {
-                $btn .= ' <button name="edit" id="'.$row->id.'" class="edit btn btn-outline-primary btn-sm" style="margin:1px;" type="submit"><i class="fas fa-pencil-alt"></i></button>';
+                $btn .= ' <button name="edit" id="'.$row->id.'" class="edit btn btn-primary btn-sm" style="margin:1px;" type="submit" data-toggle="tooltip" title="Edit"><i class="fas fa-pencil-alt"></i></button>';
             }
 
             if (Auth::user()->can('LeaveRequest-delete')) {
-                $btn .= '<button type="submit" name="delete" id="'.$row->id.'" class="delete btn btn-outline-danger btn-sm" style="margin:1px;" ><i class="far fa-trash-alt"></i></button>';
+                $btn .= '<button type="submit" name="delete" id="'.$row->id.'" class="delete btn btn-danger btn-sm" style="margin:1px;" data-toggle="tooltip" title="Remove"><i class="far fa-trash-alt"></i></button>';
             }
 
             return $btn;

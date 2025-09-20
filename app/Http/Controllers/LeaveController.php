@@ -210,19 +210,19 @@ class LeaveController extends Controller
                 if($row->status == 'Pending'){
                     $btn = ' <button id="view" name="view" data-id="'.$row->id.'"
                                                 data-empid="'.$row->emp_id.'"
-                                                class="view btn btn-outline-primary btn-sm"
-                                                type="submit"> <i class="fas fa-pencil-alt"></i></button>';
+                                                class="view btn btn-primary btn-sm"
+                                                type="submit" data-toggle="tooltip" title="Approve"> <i class="fas fa-pencil-alt"></i></button>';
                 }else if($row->status == 'Approved'){
                     $btn = ' <button id="view" name="view" data-id="'.$row->id.'"
                                                 data-empid="'.$row->emp_id.'"
-                                                class="view btn btn-outline-primary btn-sm"
-                                                type="submit"><i class="fas fa-pencil-alt"></i></button>';
+                                                class="view btn btn-primary btn-sm"
+                                                type="submit" data-toggle="tooltip" title="Approve"><i class="fas fa-pencil-alt"></i></button>';
 
                 }else if($row->status == 'Rejected'){
                     $btn = ' <button id="view" name="view" data-id="'.$row->id.'"
                                                 data-empid="'.$row->emp_id.'"
-                                                class="view btn btn-outline-primary btn-sm"
-                                                type="submit"><i class="fas fa-pencil-alt"></i></button>';
+                                                class="view btn btn-primary btn-sm"
+                                                type="submit" data-toggle="tooltip" title="Approve"><i class="fas fa-pencil-alt"></i></button>';
                 }else{
                     $btn = '';
                 }
