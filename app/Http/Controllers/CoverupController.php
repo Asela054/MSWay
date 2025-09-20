@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Coverup_detail;
 use App\Employee;
+use App\Helpers\EmployeeHelper;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -52,7 +53,7 @@ class CoverupController extends Controller
             ->join('employees as e', 'coverup_details.emp_id', '=', 'e.emp_id')
             ->leftjoin('branches', 'e.emp_location', '=', 'branches.id')
             ->leftjoin('departments', 'e.emp_department', '=', 'departments.id')
-            ->select('coverup_details.*', 'e.emp_name_with_initial as emp_name', 'departments.name as dep_name');
+            ->select('coverup_details.*', 'e.emp_name_with_initial','e.calling_name', 'departments.name as dep_name');
 
         if($department != ''){
             $query->where(['departments.id' => $department]);
@@ -70,13 +71,24 @@ class CoverupController extends Controller
 
         return Datatables::of($data)
             ->addIndexColumn()
+              ->addColumn('employee_display', function ($row) {
+                   return EmployeeHelper::getDisplayName($row);
+                   
+            })
+                ->filterColumn('employee_display', function($query, $keyword) {
+                $query->where(function($q) use ($keyword) {
+                    $q->where('e.emp_name_with_initial', 'like', "%{$keyword}%")
+                    ->orWhere('e.calling_name', 'like', "%{$keyword}%")
+                    ->orWhere('e.emp_id', 'like', "%{$keyword}%");
+                });
+            })
             ->addColumn('action', function($row){
                 $btn = '';
 
                 $permission = Auth::user()->can('Coverup-edit');
                 if ($permission) {
                     $btn = ' <button name="edit" id="'.$row->id.'"
-                            class="edit btn btn-outline-primary btn-sm" style="margin:1px;" type="submit">
+                            class="edit btn btn-primary btn-sm" style="margin:1px;" type="submit" data-toggle="tooltip" title="Edit">
                             <i class="fas fa-pencil-alt"></i>
                         </button> ';
                 }
@@ -84,7 +96,7 @@ class CoverupController extends Controller
                 $permission = Auth::user()->can('Coverup-delete');
                 if ($permission) {
                     $btn .= '<button type="submit" name="delete" id="'.$row->id.'"
-                            class="delete btn btn-outline-danger btn-sm" style="margin:1px;" ><i
+                            class="delete btn btn-danger btn-sm" style="margin:1px;" data-toggle="tooltip" title="Remove"><i
                             class="far fa-trash-alt"></i></button>';
                 }
 

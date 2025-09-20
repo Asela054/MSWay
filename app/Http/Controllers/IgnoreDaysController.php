@@ -70,7 +70,7 @@ class IgnoreDaysController extends Controller
             ]);
         }
 
-        return response()->json(['success' => true, 'message' => 'Data Added successfully.']);
+         return response()->json(['success' => 'Ignore Day Added successfully.']);
     }
 
 

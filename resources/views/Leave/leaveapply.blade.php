@@ -3,15 +3,23 @@
 @section('content')
 
     <main>
-        <div class="page-header shadow">
-            <div class="container-fluid">
-                @include('layouts.attendant&leave_nav_bar')
-               
-            </div>
-        </div>
-        <div class="container-fluid mt-4">
-            <div class="card mb-2">
-                <div class="card-body">
+         <div class="page-header shadow">
+             <div class="container-fluid d-none d-sm-block shadow">
+                 @include('layouts.attendant&leave_nav_bar')
+             </div>
+             <div class="container-fluid">
+                 <div class="page-header-content py-3 px-2">
+                     <h1 class="page-header-title ">
+                         <div class="page-header-icon"><i class="fa-light fa-calendar-pen"></i></div>
+                         <span>Leave Apply</span>
+                     </h1>
+                 </div>
+             </div>
+         </div>
+
+        <div class="container-fluid mt-2 p-0 p-2">
+            <div class="card mb-2 ">
+                <div class="card-body p-0 p-2">
                     <form class="form-horizontal" id="formFilter">
                         <div class="form-row mb-1">
                             <div class="col-md-2">
@@ -34,7 +42,7 @@
                                 <select name="employee" id="employee_f" class="form-control form-control-sm">
                                 </select>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label class="small font-weight-bold text-dark">Date : From - To</label>
                                 <div class="input-group input-group-sm mb-3">
                                     <input type="date" id="from_date" name="from_date" class="form-control form-control-sm border-right-0" placeholder="yyyy-mm-dd">
@@ -44,7 +52,8 @@
                                     <input type="date" id="to_date" name="to_date" class="form-control" placeholder="yyyy-mm-dd">
                                 </div>
                             </div>
-                            <div class="col-md-12">
+                             <div class="col-md-1">
+                                 <br>
                                 <button type="submit" class="btn btn-primary btn-sm filter-btn float-right" id="btn-filter"> Filter</button>
                             </div>
                         </div>
@@ -56,7 +65,7 @@
                 <div class="card-body p-0 p-2">
                     <div class="row">
                         <div class="col-12">
-                            <button type="button" class="btn btn-outline-primary btn-sm fa-pull-right"
+                            <button type="button" class="btn btn-primary btn-sm fa-pull-right"
                                     name="create_record" id="create_record"><i class="fas fa-plus mr-2"></i>Add Leave
                             </button>
                         </div>
@@ -65,20 +74,20 @@
                         </div>
                         <div class="col-12">
                             <div class="center-block fix-width scroll-inner">
-                            <table class="table table-striped table-bordered table-sm small nowrap" style="width: 100%" id="divicestable">
+                            <table class="table table-striped table-bordered table-sm small nowrap display" style="width: 100%" id="divicestable">
                                 <thead>
                                 <tr>
-                                    <th>Id</th>
-                                    <th>Employee</th>
-                                    <th>Department</th>
-                                    <th>Leave Type</th>
-                                    <th>Leave Type *</th>
-                                    <th>Leave From</th>
-                                    <th>Leave To</th>
-                                    <th class="nowrap">Reason</th>
-                                    <th>Covering Person</th>
-                                    <th>Status</th>
-                                    <th class="text-right">Action</th>
+                                    <th>ID</th>
+                                    <th>EMPLOYEE</th>
+                                    <th>DEPARTMENT</th>
+                                    <th>LEAVE TYPE</th>
+                                    <th>LEAVE TYPE *</th>
+                                     <th>LEAVE FROM</th>
+                                    <th>LEAVE TO</th>
+                                    <th class="nowrap">REASON</th>
+                                    <th>COVERING PERSON</th>
+                                    <th>STATUS</th>
+                                    <th class="text-right">ACTION</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -109,8 +118,7 @@
                             <form method="post" id="formTitle" class="form-horizontal">
                                 {{ csrf_field() }}
                                 <div class="form-row mb-1">
-
-                                    <div class="col">
+                                    <div class="col-sm-12 col-md-6">
                                         <label class="small font-weight-bold text-dark">Leave Type</label>
                                         <select name="leavetype" id="leavetype"
                                                 class="form-control form-control-sm">
@@ -121,7 +129,7 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                    <div class="col">
+                                    <div class="col-sm-12 col-md-6">
                                         <label class="small font-weight-bold text-dark">Select Employee</label>
                                         <select name="employee" id="employee" class="form-control form-control-sm">
                                             <option value="">Select</option>
@@ -130,7 +138,7 @@
                                     </div>
                                 </div>
                                 <div class="form-row mb-1">
-                                    <div class="col-6">
+                                    <div class="col-sm-12 col-md-6">
                                         <table class="table table-sm small">
                                             <thead>
                                                 <tr>
@@ -163,7 +171,7 @@
                                         </table>
                                         <span id="leave_msg"></span>
                                     </div>
-                                    <div class="col-6">
+                                    <div class="col-sm-12 col-md-6">
                                         <table class="table table-sm small">
                                             <thead>
                                                 <tr>
@@ -174,78 +182,75 @@
                                                 </tr>
                                             </thead>
                                             <tbody id="requestbody">
-                                               
                                             </tbody>
                                         </table>
                                     </div>
                                 </div>
-                                    <div class="form-row mb-1">
-                                        <div class="col-6">
-                                            <label class="small font-weight-bold text-dark">Covering Employee</label>
-                                            <select name="coveringemployee" id="coveringemployee"
-                                                    class="form-control form-control-sm">
-                                                <option value="">Select</option>
-                                            </select>
-                                        </div>
+
+                                <div class="form-row mb-1">
+                                    <div class="col-sm-12 col-md-6">
+                                        <label class="small font-weight-bold text-dark">Covering Employee</label>
+                                        <select name="coveringemployee" id="coveringemployee"
+                                            class="form-control form-control-sm">
+                                            <option value="">Select</option>
+                                        </select>
                                     </div>
-                                    <div class="form-row mb-1">
-                                        <div class="col-3">
-                                            <label class="small font-weight-bold text-dark">From</label>
-                                            <input type="date" name="fromdate" id="fromdate"
-                                                   class="form-control form-control-sm" placeholder="YYYY-MM-DD"/>
-                                        </div>
-                                        <div class="col-3">
-                                            <label class="small font-weight-bold text-dark">To</label>
-                                            <input type="date" name="todate" id="todate"
-                                                   class="form-control form-control-sm" placeholder="YYYY-MM-DD"/>
-                                        </div>
+                                </div>
+                                <div class="form-row mb-1">
+                                    <div class="col-sm-6 col-md-3">
+                                        <label class="small font-weight-bold text-dark">From</label>
+                                        <input type="date" name="fromdate" id="fromdate"
+                                            class="form-control form-control-sm" placeholder="YYYY-MM-DD" />
                                     </div>
+                                    <div class="col-sm-6 col-md-3">
+                                        <label class="small font-weight-bold text-dark">To</label>
+                                        <input type="date" name="todate" id="todate"
+                                            class="form-control form-control-sm" placeholder="YYYY-MM-DD" />
+                                    </div>
+                                </div>
                                 
                                 <div class="row">
-                                        <div class="col-6">
-                                            <label class="small font-weight-bold text-dark">Half Day/ Short <span id="half_short_span"></span> </label>
-                                            <select name="half_short" id="half_short"
-                                                    class="form-control form-control-sm">
-                                                <option value="0.00">Select</option>
-                                                <option value="0.25">Short Leave</option>
-                                                <option value="0.5">Half Day</option>
-                                                <option value="1.00">Full Day</option>
-                                            </select>
+                                    <div class="col-sm-12 col-md-6">
+                                        <label class="small font-weight-bold text-dark">Half Day/ Short <span
+                                                id="half_short_span"></span> </label>
+                                        <select name="half_short" id="half_short" class="form-control form-control-sm">
+                                            <option value="0.00">Select</option>
+                                            <option value="0.25">Short Leave</option>
+                                            <option value="0.5">Half Day</option>
+                                            <option value="1.00">Full Day</option>
+                                        </select>
                                     </div>
-                                        <div class="col-6">
-                                            <label class="small font-weight-bold text-dark">No of Days</label>
-                                            <input type="number" step="0.01" name="no_of_days" id="no_of_days"
-                                                   class="form-control form-control-sm" required/>
-                                        </div>
+                                    <div class="col-sm-12 col-md-6">
+                                        <label class="small font-weight-bold text-dark">No of Days</label>
+                                        <input type="number" step="0.01" name="no_of_days" id="no_of_days"
+                                            class="form-control form-control-sm" required />
+                                    </div>
                                 </div>
-                             
                                 <div class="row">
-                                        <div class="col-6">
-                                            <label class="small font-weight-bold text-dark">Reason</label>
-                                            <input type="text" name="reson" id="reson"
-                                                   class="form-control form-control-sm"/>
+                                    <div class="col-sm-12 col-md-6">
+                                        <label class="small font-weight-bold text-dark">Reason</label>
+                                        <input type="text" name="reson" id="reson"
+                                            class="form-control form-control-sm" />
                                     </div>
-                   
-                                        <div class="col-6">
-                                            <label class="small font-weight-bold text-dark">Approve Person</label>
-                                            <select name="approveby" id="approveby"
-                                                    class="form-control form-control-sm">
-                                                <option value="">Select</option>
-                                                 @foreach($employees as $employee)
-                                                <option value="{{$employee->emp_id}}">{{$employee->emp_name_with_initial}}
-                                                </option>
+                                    <div class="col-sm-12 col-md-6">
+                                        <label class="small font-weight-bold text-dark">Approve Person</label>
+                                        <select name="approveby" id="approveby" class="form-control form-control-sm">
+                                            <option value="">Select</option>
+                                            @foreach($employees as $employee)
+                                            <option value="{{$employee->emp_id}}">{{$employee->emp_name_with_initial}}
+                                            </option>
                                             @endforeach
-                                            </select>
-                                        </div>
+                                        </select>
+                                    </div>
                                 </div>
+
                                 <div class="form-group d-none">
                                     <label class="small font-weight-bold text-dark">Email Body</label>
                                     <textarea id="emailBody" class="form-control" rows="10"></textarea>
                                 </div>
 
                                 <div class="form-group mt-3">
-
-                                    <input type="submit" id="action_button" class="btn btn-outline-primary btn-sm fa-pull-right px-4" value="Add"/>
+                                    <input type="submit" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-4" value="Add"/>
                                 </div>
                                 <input type="hidden" name="companyemail" id="companyemail"/>
                                 <input type="hidden" name="employeeemail" id="employeeemail"/>
@@ -264,31 +269,6 @@
         </div>
     </div>
 
-        
-        <div class="modal fade" id="confirmModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-             aria-labelledby="staticBackdropLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-sm">
-                <div class="modal-content">
-                    <div class="modal-header p-2">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col text-center">
-                                <h4 class="font-weight-normal">Are you sure you want to remove this data?</h4>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer p-2">
-                        <button type="button" name="ok_button" id="ok_button" class="btn btn-danger px-3 btn-sm">OK
-                        </button>
-                        <button type="button" class="btn btn-dark px-3 btn-sm" data-dismiss="modal">Cancel</button>
-                    </div>
-                </div>
-            </div>
-        </div>
         <!-- Modal Area End -->
     </main>
 
@@ -428,86 +408,45 @@
                 }
             });
 
-
-            // function load_dt(department, employee, location, from_date, to_date){
-            //     $('#divicestable').DataTable({
-            //         dom: 'lBfrtip',
-            //         buttons: [
-            //             {
-            //                 extend: 'excelHtml5',
-            //                 text: 'Excel',
-            //                 className: 'btn btn-default',
-            //                 exportOptions: {
-            //                     columns: 'th:not(:last-child)'
-            //                 }
-            //             },
-            //             {
-            //                 extend: 'pdfHtml5',
-            //                 text: 'Print',
-            //                 className: 'btn btn-default',
-            //                 exportOptions: {
-            //                     columns: 'th:not(:last-child)'
-            //                 }
-            //             }
-            //         ],
-            //         processing: true,
-            //         serverSide: true,
-            //         ajax: {
-            //             "url": "{!! route('leave_list_dt') !!}",
-            //             "data": {'department':department, 'employee':employee, 'location': location, 'from_date': from_date, 'to_date': to_date},
-            //         },
-            //         columns: [
-            //             { data: 'emp_id', name: 'emp_id' },
-            //             { data: 'emp_name', name: 'emp_name' },
-            //             { data: 'dep_name', name: 'emp_name' },
-            //             { data: 'leave_type', name: 'leave_type' },
-            //             { data: 'half_or_short', name: 'half_or_short' },
-            //             { data: 'leave_from', name: 'leave_from' },
-            //             { data: 'leave_to', name: 'leave_to' },
-            //             { 
-            //                 data: 'reson', 
-            //                 name: 'reson',
-            //                 render: function(data, type, row) {
-            //                     if (type === 'display' && data && data.length > 30) {
-            //                         return data.substr(0, 30) + '...';
-            //                     }
-            //                     return data;
-            //                 }
-            //             },
-            //             { data: 'covering_emp', name: 'covering_emp' },
-            //             { data: 'status', name: 'status' },
-            //             { data: 'action', name: 'action', orderable: false, searchable: false},
-            //         ],
-            //         "bDestroy": true,
-            //         "order": [
-            //             [3, "desc"]
-            //         ]
-            //     });
-            // }
             function load_dt(department, employee, location, from_date, to_date){
                 $('#divicestable').DataTable({
-                    // lengthMenu: [[10, 25, 50, 100, 500, -1], [10, 25, 50, 100, 500, "All"]],
-                    dom: 'lBfrtip',
-                    buttons: [
-                        {
-                            extend: 'excelHtml5',
-                            text: 'Excel',
-                            className: 'btn btn-default',
-                            exportOptions: {
-                                columns: 'th:not(:last-child)'
-                            }
-                        },
-                        {
-                            extend: 'pdfHtml5',
-                            text: 'Print',
-                            className: 'btn btn-default',
-                            exportOptions: {
-                                columns: 'th:not(:last-child)'
-                            }
-                        }
-                    ],
-                    processing: true,
-                    serverSide: true,
+                        "destroy": true,
+                        "processing": true,
+                        "serverSide": true,
+                        dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
+                            "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+                        "buttons": [{
+                                extend: 'csv',
+                                className: 'btn btn-success btn-sm',
+                                title: 'Leave Details',
+                                text: '<i class="fas fa-file-csv mr-2"></i> CSV',
+                            },
+                            { 
+                                extend: 'pdf', 
+                                className: 'btn btn-danger btn-sm', 
+                                title: 'Leave Details', 
+                                text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
+                                orientation: 'landscape', 
+                                pageSize: 'legal', 
+                                customize: function(doc) {
+                                    doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+                                }
+                            },
+                            {
+                                extend: 'print',
+                                title: 'Leave Details',
+                                className: 'btn btn-primary btn-sm',
+                                text: '<i class="fas fa-print mr-2"></i> Print',
+                                customize: function(win) {
+                                    $(win.document.body).find('table')
+                                        .addClass('compact')
+                                        .css('font-size', 'inherit');
+                                },
+                            },
+                        ],
+                        "order": [
+                            [0, "desc"]
+                        ],
                     ajax: {
                          url: scripturl + '/leave_apply_list.php',
                          type: 'POST',
@@ -560,11 +499,11 @@
                                 var buttons = '';
 
                                 if (canleaveedit) {
-                                    buttons += '<button name="edit" id="'+ row.id +'"class="edit btn btn-outline-primary btn-sm" style="margin:1px;" type="submit"><i class="fas fa-pencil-alt"></i></button>';
+                                    buttons += '<button name="edit" id="'+ row.id +'"class="edit btn btn-primary btn-sm" style="margin:1px;" type="submit" data-toggle="tooltip" title="Edit"><i class="fas fa-pencil-alt"></i></button>';
                                 }
 
                                 if (leavedelete) {
-                                    buttons += '<button type="submit" name="delete" id="'+ row.id +'"class="delete btn btn-outline-danger btn-sm" style="margin:1px;" ><i class="far fa-trash-alt"></i></button>';
+                                    buttons += '<button type="submit" name="delete" id="'+ row.id +'"class="delete btn btn-danger btn-sm" style="margin:1px;" data-toggle="tooltip" title="Remove"><i class="far fa-trash-alt"></i></button>';
                                 }
 
                                 return buttons;
@@ -647,7 +586,6 @@
                         },
                         error: function(xhr) {
                             console.error(xhr.responseText);
-                            alert('Error calculating working days');
                         }
                     });
                 }
@@ -686,11 +624,6 @@
                         $('#med_total').html(data.total_no_of_med_leaves);
                         $('#med_taken').html(data.total_taken_med_leaves);
                         $('#med_available').html(data.available_no_of_med_leaves);
-
-                        let msg = '' +
-                            '<div class="alert alert-warning text-sm" style="padding: 3px;"> ' +
-                                data.leave_msg +
-                            '</div>'
 
                         if(data.leave_msg != ''){
                             $('#leave_msg').html(msg);
@@ -827,15 +760,19 @@
                     data: $(this).serialize(),
                     dataType: "json",
                     success: function (data) {
-
-                        var html = '';
-                        if (data.errors) {
-                            html = '<div class="alert alert-danger">';
-                            for (var count = 0; count < data.errors.length; count++) {
-                                html += '<p>' + data.errors[count] + '</p>';
+                            if (data.errors) {
+                                const actionObj = {
+                                    icon: 'fas fa-warning',
+                                    title: '',
+                                    message: 'Record Error',
+                                    url: '',
+                                    target: '_blank',
+                                    type: 'danger'
+                                };
+                                const actionJSON = JSON.stringify(actionObj, null, 2);
+                                action(actionJSON);
                             }
-                            html += '</div>';
-                        }
+                        
                        if (data.success) {
                             const emailBody = generateEmailBody();
                             
@@ -871,19 +808,24 @@
                                 form.appendChild(input);
                             });
 
-                            // First show the initial success message
-                            var html = '<div class="alert alert-success">' + data.success + '</div>';
-                            $('#form_result').html(html).show();
-                            $('#formTitle')[0].reset();
-
                             // Add to document and submit
                             document.body.appendChild(iframe);
                             document.body.appendChild(form);
                             form.submit();
 
-                              html = '<div class="alert alert-success">' + data.success + '</div>';
-                            $('#formTitle')[0].reset();
-                            setTimeout(function() { $('#formModal').modal('hide'); }, 1000);
+                               if (data.success) {
+                                const actionObj = {
+                                    icon: 'fas fa-save',
+                                    title: '',
+                                    message: data.success,
+                                    url: '',
+                                    target: '_blank',
+                                    type: 'success'
+                                };
+                                const actionJSON = JSON.stringify(actionObj, null, 2);
+                                $('#formTitle')[0].reset();
+                                actionreload(actionJSON);
+                            }
 
                         }
                         $('#form_result').html(html);
@@ -892,69 +834,73 @@
             });
 
 
-            $(document).on('click', '.edit', function () {
-                var id = $(this).attr('id');
-                $('#form_result').html('');
-                $.ajax({
-                    url: "LeaveApply/" + id + "/edit",
-                    dataType: "json",
-                    success: function (data) {
-                        $('#leavetype').val(data.result.leave_type);
+            $(document).on('click', '.edit',async function () {
+                var r = await Otherconfirmation("You want to Edit this ? ");
+                if (r == true) {
+                    var id = $(this).attr('id');
+                    $('#form_result').html('');
+                    $.ajax({
+                        url: "LeaveApply/" + id + "/edit",
+                        dataType: "json",
+                        success: function (data) {
+                            $('#leavetype').val(data.result.leave_type);
 
-                        let empOption = $("<option selected></option>").val(data.result.emp_id).text(data.result.employee.emp_name_with_initial);
-                        $('#employee').append(empOption).trigger('change');
+                            let empOption = $("<option selected></option>").val(data.result.emp_id).text(data.result.employee.emp_name_with_initial);
+                            $('#employee').append(empOption).trigger('change');
 
-                        let coveringemployeeOption = $("<option selected></option>").val(data.result.emp_covering).text(data.result.covering_employee.emp_name_with_initial);
-                        $('#coveringemployee').append(coveringemployeeOption).trigger('change');
+                            let coveringemployeeOption = $("<option selected></option>").val(data.result.emp_covering).text(data.result.covering_employee.emp_name_with_initial);
+                            $('#coveringemployee').append(coveringemployeeOption).trigger('change');
 
-                        let approvebyOption = $("<option selected></option>").val(data.result.leave_approv_person).text(data.result.approve_by.emp_name_with_initial);
-                        $('#approveby').append(approvebyOption).trigger('change');
+                            let approvebyOption = $("<option selected></option>").val(data.result.leave_approv_person).text(data.result.approve_by.emp_name_with_initial);
+                            $('#approveby').append(approvebyOption).trigger('change');
 
-                        $('#employee').val(data.result.emp_id);
-                        $('#fromdate').val(data.result.leave_from);
-                        $('#todate').val(data.result.leave_to);
-                        $('#half_short').val(data.result.half_short);
-                        $('#no_of_days').val(data.result.no_of_days);
-                        $('#reson').val(data.result.reson);
-                        $('#comment').val(data.result.comment);
-                        $('#coveringemployee').val(data.result.emp_covering);
-                        $('#approveby').val(data.result.leave_approv_person);
-                        $('#available_leave').val(data.result.total_leave);
-                        $('#assign_leave').val(data.result.assigned_leave);
-                        $('#leavecat').val(data.result.leave_category);
-                        $('#hidden_id').val(id);
-                        $('.modal-title').text('Edit Leave');
-                        $('#action_button').val('Edit');
-                        $('#action').val('Edit');
-                        $('#formModal').modal('show');
-                    }
-                })
+                            $('#employee').val(data.result.emp_id);
+                            $('#fromdate').val(data.result.leave_from);
+                            $('#todate').val(data.result.leave_to);
+                            $('#half_short').val(data.result.half_short);
+                            $('#no_of_days').val(data.result.no_of_days);
+                            $('#reson').val(data.result.reson);
+                            $('#comment').val(data.result.comment);
+                            $('#coveringemployee').val(data.result.emp_covering);
+                            $('#approveby').val(data.result.leave_approv_person);
+                            $('#available_leave').val(data.result.total_leave);
+                            $('#assign_leave').val(data.result.assigned_leave);
+                            $('#leavecat').val(data.result.leave_category);
+                            $('#hidden_id').val(id);
+                            $('.modal-title').text('Edit Leave');
+                            $('#action_button').val('Edit');
+                            $('#action').val('Edit');
+                            $('#formModal').modal('show');
+                        }
+                    })
+                }
             });
 
             var user_id;
 
-            $(document).on('click', '.delete', function () {
-                user_id = $(this).attr('id');
-                $('#confirmModal').modal('show');
-            });
-
-            $('#ok_button').click(function () {
-                $.ajax({
+            $(document).on('click', '.delete',async function () {
+               var r = await Otherconfirmation("You want to remove this ? ");
+                if (r == true) {
+                     $.ajax({
                     url: "LeaveApply/destroy/" + user_id,
                     beforeSend: function () {
                         $('#ok_button').text('Deleting...');
                     },
                     success: function (data) {
-                        setTimeout(function () {
-                            $('#confirmModal').modal('hide');
-                            $('#divicestable').DataTable().ajax.reload();
-                            alert('Data Deleted');
-                        }, 2000);
-                        location.reload();
-                    }
-                })
+                            const actionObj = {
+                            icon: 'fas fa-trash-alt',
+                            title: '',
+                            message: 'Record Remove Successfully',
+                            url: '',
+                            target: '_blank',
+                            type: 'danger'
+                        };
+                        const actionJSON = JSON.stringify(actionObj, null, 2);
+                        actionreload(actionJSON);
+                        }
+                  })
+                }
             });
-
         });
 
         $(document).on('click', '.addrequest', function () {
@@ -1005,7 +951,7 @@
 
         }
       
-     function generateEmailBody() {
+    function generateEmailBody() {
             let body = "LEAVE APPLICATION DETAILS<br>";
             body += "=========================<br><br>";
             
@@ -1069,10 +1015,7 @@
             
             $('#emailBody').val(body);
             return body;
-        }
-
-
-
+    }
     </script>
 
 @endsection
