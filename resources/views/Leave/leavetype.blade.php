@@ -243,12 +243,16 @@ $(document).ready(function(){
                     $('#ok_button').text('Deleting...');
                 },
                 success: function (data) {
-                    setTimeout(function () {
-                        $('#confirmModal').modal('hide');
-                        $('#user_table').DataTable().ajax.reload();
-                        alert('Data Deleted');
-                    }, 2000);
-                    location.reload();
+                    const actionObj = {
+                        icon: 'fas fa-trash-alt',
+                        title: '',
+                        message: 'Record Remove Successfully',
+                        url: '',
+                        target: '_blank',
+                        type: 'danger'
+                    };
+                    const actionJSON = JSON.stringify(actionObj, null, 2);
+                    actionreload(actionJSON);
                 }
             })
         }

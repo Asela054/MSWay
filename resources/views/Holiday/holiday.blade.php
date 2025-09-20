@@ -4,35 +4,40 @@
 
 <main>
     <div class="page-header shadow">
-        <div class="container-fluid">
-            @include('layouts.attendant&leave_nav_bar')
-           
-        </div>
-    </div>
+             <div class="container-fluid d-none d-sm-block shadow">
+                 @include('layouts.attendant&leave_nav_bar')
+             </div>
+             <div class="container-fluid">
+                 <div class="page-header-content py-3 px-2">
+                     <h1 class="page-header-title ">
+                         <div class="page-header-icon"><i class="fa-light fa-calendar-pen"></i></div>
+                         <span>Holidays</span>
+                     </h1>
+                 </div>
+             </div>
+         </div>
 
-    <div class="container-fluid mt-2">
+    <div class="container-fluid mt-2 p-0 p-2">
         <div class="card">
             <div class="card-body p-0 p-2">
                 <div class="row">
                     <div class="col-12">
-                        @can('holiday-create')
-                            <button type="button" class="btn btn-outline-primary btn-sm fa-pull-right" name="create_record" id="create_record"><i class="fas fa-plus mr-2"></i>Add Holidays</button>
-                        @endcan
+                            <button type="button" class="btn btn-primary btn-sm fa-pull-right" name="create_record" id="create_record"><i class="fas fa-plus mr-2"></i>Add Holidays</button>
                     </div>
                     <div class="col-12">
                         <hr class="border-dark">
                     </div>
                     <div class="col-12">
                         <div class="center-block fix-width scroll-inner">
-                        <table class="table table-striped table-bordered table-sm small nowrap" style="width: 100%" id="jobtable">
+                        <table class="table table-striped table-bordered table-sm small nowrap display" style="width: 100%" id="jobtable">
                             <thead>
                                 <tr>
-                                    <th>Holiday Name </th>
-                                    <th>Holiday Type</th>
-                                    <th>Half Day/ Short</th>
-                                    <th>Date</th> 
-                                    <th>Work Level</th> 
-                                    <th class="text-right">Action</th>   
+                                    <th>HOLIDAY NAME</th>
+                                    <th>HOLIDAY TYPE</th>
+                                    <th>HALF DAY / SHORT</th>
+                                    <th>DATE</th> 
+                                    <th>WORK LEVEL</th> 
+                                    <th class="text-right">ACTION</th>   
                                 </tr>
                             </thead>                            
                             <tbody>
@@ -55,10 +60,10 @@
                                     <td>{{$holidays->level}}</td>
                                     <td class="text-right">
                                         @can('holiday-edit')
-                                            <button name="edit" id="{{$holidays->id}}" class="edit btn btn-outline-primary btn-sm" type="submit"><i class="fas fa-pencil-alt"></i></button>
+                                            <button name="edit" id="{{$holidays->id}}" class="edit btn btn-primary btn-sm" type="submit" data-toggle="tooltip" title="Edit"><i class="fas fa-pencil-alt"></i></button>
                                         @endcan
                                         @can('holiday-delete')
-                                            <button type="submit" name="delete" id="{{$holidays->id}}" class="delete btn btn-outline-danger btn-sm"><i class="far fa-trash-alt"></i></button>
+                                            <button type="submit" name="delete" id="{{$holidays->id}}" class="delete btn btn-danger btn-sm" data-toggle="tooltip" title="Remove"><i class="far fa-trash-alt"></i></button>
                                         @endcan
                                     </td>
                                 </tr>
@@ -135,7 +140,7 @@
                                     </select>
                                 </div>
                                 <div class="form-group mt-3">
-                                    <button type="submit" name="action_button" id="action_button" class="btn btn-outline-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
+                                    <button type="submit" name="action_button" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
                                 </div>
                                 <input type="hidden" name="action" id="action" value="Add" />
                                 <input type="hidden" name="hidden_id" id="hidden_id" />
@@ -146,29 +151,7 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="confirmModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-    aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content">
-                <div class="modal-header p-2">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col text-center">
-                            <h4 class="font-weight-normal">Are you sure you want to remove this data?</h4>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer p-2">
-                    <button type="button" name="ok_button" id="ok_button" class="btn btn-danger px-3 btn-sm">OK</button>
-                    <button type="button" class="btn btn-dark px-3 btn-sm" data-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
+
     <!-- Modal Area End -->
 </main>
               
@@ -291,7 +274,42 @@ $(document).ready(function(){
     });
 
     $(document).ready(function () {
-        $('#jobtable').DataTable();
+        $('#jobtable').DataTable({
+              dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
+              "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+          "buttons": [{
+                  extend: 'csv',
+                  className: 'btn btn-success btn-sm',
+                  title: 'Holiday Details',
+                  text: '<i class="fas fa-file-csv mr-2"></i> CSV',
+              },
+              {
+                  extend: 'pdf',
+                  className: 'btn btn-danger btn-sm',
+                  title: 'Holiday Details',
+                  text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
+                  orientation: 'landscape',
+                  pageSize: 'legal',
+                  customize: function (doc) {
+                      doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+                  }
+              },
+              {
+                  extend: 'print',
+                  title: 'Holiday Details',
+                  className: 'btn btn-primary btn-sm',
+                  text: '<i class="fas fa-print mr-2"></i> Print',
+                  customize: function (win) {
+                      $(win.document.body).find('table')
+                          .addClass('compact')
+                          .css('font-size', 'inherit');
+                  },
+              },
+          ],
+          "order": [
+              [0, "desc"]
+          ]
+        });
     });
 
     $('#create_record').click(function () {
@@ -331,97 +349,113 @@ $(document).ready(function(){
             data: $(this).serialize(),
             dataType: "json",
             success: function (data) {
-
-                var html = '';
-                if (data.errors) {
-                    html = '<div class="alert alert-danger">';
-                    for (var count = 0; count < data.errors.length; count++) {
-                        html += '<p>' + data.errors[count] + '</p>';
-                    }
-                    html += '</div>';
+                 if (data.errors) {
+                    const actionObj = {
+                        icon: 'fas fa-warning',
+                        title: '',
+                        message: 'Record Error',
+                        url: '',
+                        target: '_blank',
+                        type: 'danger'
+                    };
+                    const actionJSON = JSON.stringify(actionObj, null, 2);
+                    action(actionJSON);
                 }
                 if (data.success) {
-                    html = '<div class="alert alert-success">' + data.message + '</div>';
+                    const actionObj = {
+                        icon: 'fas fa-save',
+                        title: '',
+                        message: data.success,
+                        url: '',
+                        target: '_blank',
+                        type: 'success'
+                    };
+                    const actionJSON = JSON.stringify(actionObj, null, 2);
                     $('#formTitle')[0].reset();
-                    //$('#titletable').DataTable().ajax.reload();
-                    location.reload()
+                    actionreload(actionJSON);
                 }
-                $('#form_result').html(html);
             }
         });
     });
 
-    $(document).on('click', '.edit', function () {
-        $('#action_button').html('Edit');
-        $('#action').val('Edit');
+    $(document).on('click', '.edit',async function () {
+        var r = await Otherconfirmation("You want to Edit this ? ");
+        if (r == true) {
 
-        var id = $(this).attr('id');
-        $('#form_result').html('');
-        $.ajax({
-            url: "Holiday/" + id + "/edit",
-            dataType: "json",
-            success: function (data) {
-                $('#holiday_name').val(data.result.holiday_name);
-                $('#holiday_type').val(data.result.holiday_type);
+            $('#action_button').html('Edit');
+            $('#action').val('Edit');
 
-                let half_short = data.result.half_short;
-                if(half_short == '1' ){
-                    half_short = '1.00';
+            var id = $(this).attr('id');
+            $('#form_result').html('');
+            $.ajax({
+                url: "Holiday/" + id + "/edit",
+                dataType: "json",
+                success: function (data) {
+                    $('#holiday_name').val(data.result.holiday_name);
+                    $('#holiday_type').val(data.result.holiday_type);
+
+                    let half_short = data.result.half_short;
+                    if (half_short == '1') {
+                        half_short = '1.00';
+                    }
+
+                    $('#half_short').val(half_short);
+
+                    if (data.result.half_short == 0.25 || data.result.half_short == 0.5) {
+                        // $('.half_short_time').html(`
+                        //     <div class="form-group mb-1">
+                        //         <label class="small font-weight-bold text-dark">Start Time</label>
+                        //         <input type="time" name="start_time" id="start_time" class="form-control form-control-sm" value="` + data.result.start_time + `" />
+                        //     </div>
+                        //     <div class="form-group mb-1">
+                        //         <label class="small font-weight-bold text-dark">End Time</label>
+                        //         <input type="time" name="end_time" id="end_time" class="form-control form-control-sm" value="` + data.result.end_time + `" />
+                        //     </div>
+                        // `);
+                    } else {
+                        $('.half_short_time').html('');
+                    }
+
+                    $('#date').val(data.result.date);
+                    $('#work_level').val(data.result.work_level);
+                    $('#hidden_id').val(id);
+
+                    $('.modal-title').text('Edit Holiday');
+                    $('#action_button').val('Edit');
+                    $('#action').val('Edit');
+                    $('#formModal').modal('show');
                 }
-
-                $('#half_short').val(half_short);
-
-                if(data.result.half_short == 0.25 || data.result.half_short == 0.5) {
-                    // $('.half_short_time').html(`
-                    //     <div class="form-group mb-1">
-                    //         <label class="small font-weight-bold text-dark">Start Time</label>
-                    //         <input type="time" name="start_time" id="start_time" class="form-control form-control-sm" value="` + data.result.start_time + `" />
-                    //     </div>
-                    //     <div class="form-group mb-1">
-                    //         <label class="small font-weight-bold text-dark">End Time</label>
-                    //         <input type="time" name="end_time" id="end_time" class="form-control form-control-sm" value="` + data.result.end_time + `" />
-                    //     </div>
-                    // `);
-                }else{
-                    $('.half_short_time').html('');
-                }
-
-                $('#date').val(data.result.date);
-                $('#work_level').val(data.result.work_level);
-                $('#hidden_id').val(id);
-
-                $('.modal-title').text('Edit Holiday');
-                $('#action_button').val('Edit');
-                $('#action').val('Edit');
-                $('#formModal').modal('show');
-            }
-        })
+            })
+        }
     });
 
     var user_id;
 
-    $(document).on('click', '.delete', function () {
+    $(document).on('click', '.delete', async function () {
         user_id = $(this).attr('id');
-        $('#confirmModal').modal('show');
-    });
+        var r = await Otherconfirmation("You want to remove this ? ");
+        if (r == true) {
+            $.ajax({
+                url: "Holiday/destroy/" + user_id,
+                beforeSend: function () {
+                    $('#ok_button').text('Deleting...');
+                },
+                success: function (data) {
+                     const actionObj = {
+                        icon: 'fas fa-trash-alt',
+                        title: '',
+                        message: 'Record Remove Successfully',
+                        url: '',
+                        target: '_blank',
+                        type: 'danger'
+                    };
+                    const actionJSON = JSON.stringify(actionObj, null, 2);
+                    actionreload(actionJSON);
+                }
+            })
+        }
 
-    $('#ok_button').click(function () {
-        $.ajax({
-            url: "Holiday/destroy/" + user_id,
-            beforeSend: function () {
-                $('#ok_button').text('Deleting...');
-            },
-            success: function (data) {
-                setTimeout(function () {
-                    $('#confirmModal').modal('hide');
-                    $('#user_table').DataTable().ajax.reload();
-                    alert('Data Deleted');
-                }, 2000);
-                location.reload()
-            }
-        })
     });
-
 });
 </script>
 

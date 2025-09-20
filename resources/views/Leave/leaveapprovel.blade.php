@@ -382,20 +382,31 @@ $(document).ready(function () {
 
             },
             success: function (data) {
-                var html = '';
                 if (data.errors) {
-                    html = '<div class="alert alert-danger">';
-                    for (var count = 0; count < data.errors.length; count++) {
-                        html += '<p>' + data.errors[count] + '</p>';
-                    }
-                    html += '</div>';
+                    const actionObj = {
+                        icon: 'fas fa-warning',
+                        title: '',
+                        message: 'Record Error',
+                        url: '',
+                        target: '_blank',
+                        type: 'danger'
+                    };
+                    const actionJSON = JSON.stringify(actionObj, null, 2);
+                    action(actionJSON);
                 }
                 if (data.success) {
-                    $('#message').html("<div class='alert alert-success'> "+ data.success +" </div>");
-                    $('#confirmModal').modal('hide');
-                    $('#divicestable').DataTable().ajax.reload(null, false);
+                    const actionObj = {
+                        icon: 'fas fa-save',
+                        title: '',
+                        message: data.success,
+                        url: '',
+                        target: '_blank',
+                        type: 'success'
+                    };
+                    const actionJSON = JSON.stringify(actionObj, null, 2);
+                    actionreload(actionJSON);
                 }
-                $('#form_result').html(html);
+                 location.reload()
             }
         });
     });
@@ -420,76 +431,115 @@ $(document).ready(function () {
             },
             success: function (data) {
 
-                var html = '';
                 if (data.errors) {
-                    html = '<div class="alert alert-danger">';
-                    for (var count = 0; count < data.errors.length; count++) {
-                        html += '<p>' + data.errors[count] + '</p>';
-                    }
-                    html += '</div>';
+                    const actionObj = {
+                        icon: 'fas fa-warning',
+                        title: '',
+                        message: 'Record Error',
+                        url: '',
+                        target: '_blank',
+                        type: 'danger'
+                    };
+                    const actionJSON = JSON.stringify(actionObj, null, 2);
+                    action(actionJSON);
                 }
                 if (data.success) {
-                    $('#message').html("<div class='alert alert-danger'>Leave Not Approved</div>");
-                    location.reload()
+                    const actionObj = {
+                        icon: 'fas fa-save',
+                        title: '',
+                        message: data.success,
+                        url: '',
+                        target: '_blank',
+                        type: 'success'
+                    };
+                    const actionJSON = JSON.stringify(actionObj, null, 2);
+                    actionreload(actionJSON);
                 }
-                $('#form_result').html(html);
             }
         });
     });
 
     var selectedRowIdsapprove = [];
 
-    $('#allapproveel').click(function () {
-        selectedRowIdsapprove = [];
-        $('#divicestable tbody .selectCheck:checked').each(function () {
-            var rowData = $('#divicestable').DataTable().row($(this).closest('tr')).data();
+        $('#allapproveel').click(async function () {
+            var r = await Otherconfirmation("You want to Edit this ? ");
+            if (r == true) {
+                selectedRowIdsapprove = [];
+                $('#divicestable tbody .selectCheck:checked').each(function () {
+                    var rowData = $('#divicestable').DataTable().row($(this).closest('tr')).data();
 
-            if (rowData) {
-                selectedRowIdsapprove.push({
-                    empid: rowData.emp_id,     
-                    emp_name: rowData.emp_name, 
-                    laeaveid: rowData.id     
+                    if (rowData) {
+                        selectedRowIdsapprove.push({
+                            empid: rowData.emp_id,
+                            emp_name: rowData.employee_display,
+                            laeaveid: rowData.id
+                        });
+                    }
                 });
+
+                if (selectedRowIdsapprove.length > 0) {
+                    console.log(selectedRowIdsapprove);
+
+                    $.ajaxSetup({
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        }
+                    })
+
+                    let comment = $("#allcomment").val();
+                    let status = $("input[name='allstatus']:checked").val();
+                    $.ajax({
+                        url: '{!! route("leaveapprove_batch") !!}',
+                        type: 'POST',
+                        dataType: "json",
+                        data: {
+                            dataarry: selectedRowIdsapprove,
+                            comment: comment,
+                            status: status
+                        },
+                        success: function (data) {
+                            if (data.errors) {
+                                const actionObj = {
+                                    icon: 'fas fa-warning',
+                                    title: '',
+                                    message: 'Record Error',
+                                    url: '',
+                                    target: '_blank',
+                                    type: 'danger'
+                                };
+                                const actionJSON = JSON.stringify(actionObj, null, 2);
+                                action(actionJSON);
+                            }
+                            if (data.success) {
+                                const actionObj = {
+                                    icon: 'fas fa-save',
+                                    title: '',
+                                    message: data.success,
+                                    url: '',
+                                    target: '_blank',
+                                    type: 'success'
+                                };
+                                const actionJSON = JSON.stringify(actionObj, null, 2);
+                                actionreload(actionJSON);
+                            }
+                             location.reload()
+
+                        }
+                    })
+                } else {
+
+                    Swal.fire({
+                        position: "top-end",
+                        icon: 'warning',
+                        title: 'Select Rows to Final Approve!',
+                        showConfirmButton: false,
+                        timer: 2500
+                    });
+                }
             }
+
         });
-        if (selectedRowIdsapprove.length > 0) {
-            console.log(selectedRowIdsapprove);
-            $('#approveconfirmModal').modal('show');
-        } else {
-            
-            alert('Select Rows to Final Approve!!!!');
-        }
-    });
 
-    $('#approveall').click(function () {
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            })
-
-            let comment = $("#allcomment").val();
-             let status = $("input[name='allstatus']:checked").val();
-            $.ajax({
-                url: '{!! route("leaveapprove_batch") !!}',
-                type: 'POST',
-                dataType: "json",
-                data: {
-                    dataarry: selectedRowIdsapprove,
-                    comment: comment,
-                    status:status
-                },
-                success: function (data) {
-                    setTimeout(function () {
-                        $('#approveconfirmModal').modal('hide');
-                        location.reload();
-                    }, 500);
-
-                    $('#selectAll').prop('checked', false);
-                   
-                }
-            })
-        });
 
     $('#selectAll').click(function (e) {
             $('#divicestable').closest('table').find('td input:checkbox').prop('checked', this.checked);
