@@ -108,7 +108,7 @@
   @endif
 
   <div class="dropdown">
-    <a  role="button" data-toggle="dropdown" class="btn navbtncolor" data-target="#" href="#" id="dailyprocess">
+    <a  role="button" data-toggle="dropdown" class="btn navbtncolor" href="#" id="dailyprocess">
       Daily Production Process <span class="caret"></span></a>
         <ul class="dropdown-menu multi-level dropdownmenucolor" role="menu" aria-labelledby="dropdownMenu">
           

@@ -47,12 +47,6 @@ class ExamsubjectController extends Controller
                 $btn = '';
                 $btn .= ' <button name="edit" id="'.$row->id.'" class="edit btn btn-primary btn-sm" type="submit"><i class="fas fa-pencil-alt"></i></button>';
                 
-                if($row->status == 1){
-                    $btn .= ' <a href="'.route('examsubjectstatus', ['id' => $row->id, 'stasus' => 2]) .'" onclick="return deactive_confirm()" target="_self" class="btn btn-success btn-sm mr-1 "><i class="fas fa-check"></i></a>';
-                }else{
-                    $btn .= '&nbsp;<a href="'.route('examsubjectstatus', ['id' => $row->id, 'stasus' => 1]) .'" onclick="return active_confirm()" target="_self" class="btn btn-warning btn-sm mr-1 "><i class="fas fa-times"></i></a>';
-                }
-                
                 $btn .= ' <button name="delete" id="'.$row->id.'" class="delete btn btn-danger btn-sm"><i class="far fa-trash-alt"></i></button>';
                 return $btn;
             })
@@ -88,33 +82,25 @@ class ExamsubjectController extends Controller
     }
 
     public function delete(Request $request){
-        $id = Request('id');
+        $id = $request->input('id');
+        
+        if (!$id) {
+            return response()->json(['error' => 'ID not provided'], 400);
+        }
+        
         $current_date_time = Carbon::now()->toDateTimeString();
         $form_data = array(
-            'status' =>  '3',
+            'status' => '3',
             'updated_by' => Auth::id(),
             'updated_at' => $current_date_time,
         );
-        Examsubject::findOrFail($id)->update($form_data);
-
-        return response()->json(['success' => 'Exam Subject is successfully Deleted']);
-    }
-
-    public function status($id,$statusid){
-        if($statusid == 1){
-            $form_data = array(
-                'status' =>  '1',
-                'updated_by' => Auth::id(),
-            );
-            Examsubject::findOrFail($id)->update($form_data);
-            return redirect()->route('examsubjects');
-        } else{
-            $form_data = array(
-                'status' =>  '2',
-                'updated_by' => Auth::id(),
-            );
-            Examsubject::findOrFail($id)->update($form_data);
-            return redirect()->route('examsubjects');
+        
+        $updated = Examsubject::findOrFail($id)->update($form_data);
+        
+        if ($updated) {
+            return response()->json(['success' => 'Exam Subject is successfully Deleted']);
+        } else {
+            return response()->json(['error' => 'Failed to delete record'], 500);
         }
     }
 }
