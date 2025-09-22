@@ -10,7 +10,7 @@
         <div class="container-fluid">
             <div class="page-header-content py-3 px-2">
                 <h1 class="page-header-title ">
-                    <div class="page-header-icon"><i class="fas fa-user-tie"></i></div>
+                    <div class="page-header-icon"><i class="fa-light fa-users-gear"></i></div>
                     <span>Job Title</span>
                 </h1>
             </div>

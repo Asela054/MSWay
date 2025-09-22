@@ -6,10 +6,17 @@
     <div class="page-header shadow">
         <div class="container-fluid">
             @include('layouts.employee_nav_bar')
-           
+        </div>
+        <div class="container-fluid">
+            <div class="page-header-content py-3 px-2">
+                <h1 class="page-header-title ">
+                    <div class="page-header-icon"><i class="fa-light fa-users-gear"></i></div>
+                    <span>Employee Dashboard</span>
+                </h1>
+            </div>
         </div>
     </div>
-    <div class="container-fluid mt-4">
+    <div class="container-fluidmt-2 p-0 p-2">
         <div class="card">
             <div class="card-body p-0 p-2">
                 <div class="row">

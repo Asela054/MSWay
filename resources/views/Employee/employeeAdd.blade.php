@@ -2,13 +2,20 @@
 
 @section('content')
 <main>
-    <div class="page-header shadow">
-        <div class="container-fluid">
-            @include('layouts.employee_nav_bar')
-           
+    <<div class="page-header shadow">
+            <div class="container-fluid">
+                @include('layouts.employee_nav_bar')
+            </div>
+            <div class="container-fluid">
+                <div class="page-header-content py-3 px-2">
+                    <h1 class="page-header-title ">
+                        <div class="page-header-icon"><i class="fa-light fa-users-gear"></i></div>
+                        <span>Employee Details</Details></span>
+                    </h1>
+                </div>
+            </div>
         </div>
-    </div>
-    <div class="container-fluid mt-4">
+    <div class="container-fluid mt-2 p-0 p-2">
         <div class="card mb-2">
             <div class="card-body">
                 <form class="form-horizontal" id="formFilter">
@@ -42,8 +49,8 @@
                             </div>
                         </div>
                         <div class="col-md-12">
-                            <button type="submit" class="btn btn-primary btn-sm filter-btn float-right ml-2" id="btn-filter"><i class="fas fa-search mr-2"></i>Filter</button>
-                            <button type="button" class="btn btn-danger btn-sm filter-btn float-right" id="btn-clear"><i class="far fa-trash-alt"></i>&nbsp;&nbsp;Clear</button>
+                            <button type="submit" class="btn btn-primary btn-sm filter-btn float-right ml-2" id="btn-filter">Filter</button>
+                            <button type="button" class="btn btn-danger btn-sm filter-btn float-right" id="btn-clear">Clear</button>
                         </div>
                     </div>
 
@@ -54,10 +61,8 @@
             <div class="card-body p-0 p-2">
                 <div class="row">
                     <div class="col-12">
-                        @can('employee-create')
-                            <button type="button" class="btn btn-outline-success btn-sm fa-pull-right ml-2" name="upload_record" id="upload_record"><i class="fas fa-upload mr-2"></i>Upload Employee</button>
-                            <button type="button" class="btn btn-outline-primary btn-sm fa-pull-right" name="create_record" id="create_record"><i class="fas fa-plus mr-2"></i>Add Employee</button>
-                        @endcan
+                            <button type="button" class="btn btn-success btn-sm fa-pull-right ml-2" name="upload_record" id="upload_record"><i class="fas fa-upload mr-2"></i>Upload Employee</button>
+                            <button type="button" class="btn btn-primary btn-sm fa-pull-right" name="create_record" id="create_record"><i class="fas fa-plus mr-2"></i>Add Employee</button>
                     </div>
                     <div class="col-12">
                         <hr class="border-dark">
@@ -67,16 +72,16 @@
                         <table class="table table-striped table-bordered table-sm small nowrap" style="width: 100%" id="emptable">
                             <thead>
                                 <tr>
-                                    <th>Emp ID</th>
-                                    <th>Name</th>
-                                    <th>NIC No</th>
-                                    <th>ETF No</th>
-                                    <th>Department</th>
-                                    <th>Join date</th>
-                                    <th>Position</th>
-                                    <th>Job Category</th>
-                                    <th class="text-center">Status</th>
-                                    <th class="text-right">Actions</th>
+                                    <th>EMP ID</th>
+                                    <th>NAME</th>
+                                    <th>NIC NO</th>
+                                    <th>ETF NO</th>
+                                    <th>DEPARTMENT</th>
+                                    <th>JOIN DATE</th>
+                                    <th>POSITION</th>
+                                    <th>JOB CATEGORY</th>
+                                    <th class="text-center">STATUS</th>
+                                    <th class="text-right">ACTION</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -351,10 +356,10 @@
                                     </div>
                                 </div>
                                 <div class="form-group mt-3">
-                                    <button type="submit" name="action_button" id="action_button" class="btn btn-outline-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
+                                    <button type="submit" name="action_button" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
                                 </div>
                                 <input type="hidden" name="action" id="action" value="Add" />
-                                <button type="reset" class="btn btn-outline-primary btn-sm"><i class="far fa-trash-alt"></i>&nbsp;Clear</button>   
+                                <button type="reset" class="btn btn-primary btn-sm"><i class="far fa-trash-alt"></i>&nbsp;Clear</button>   
                                 <input type="hidden" name="hidden_id" id="hidden_id" />
                             </form>
                         </div>
@@ -408,38 +413,15 @@
                                     @endif
                                 </div>
                                 <div class="form-group mt-3">
-                                    <button type="submit" name="action_button" id="action_button" class="btn btn-outline-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
+                                    <button type="submit" name="action_button" id="userlog_action_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
                                 </div>
-                                <input type="hidden" id="userid" name="userid">
-                                <input type="hidden" id="name" name="name">
-                                <input type="hidden" name="action" id="action" />
-                                <input type="hidden" name="hidden_id" id="hidden_id" />
+                                <input type="hidden" id="userlog_userid" name="userid">
+                                <input type="hidden" id="userlog_name" name="name">
+                                <input type="hidden" name="action" id="userlog_action" />
+                                <input type="hidden" name="hidden_id" id="userlog_hidden_id" />
                             </form>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="modal fade" id="confirmModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-    aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content">
-                <div class="modal-header p-2">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col text-center">
-                            <h4 class="font-weight-normal">Are you sure you want to remove this data?</h4>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer p-2">
-                    <button type="button" name="ok_button" id="ok_button" class="btn btn-danger px-3 btn-sm">OK</button>
-                    <button type="button" class="btn btn-dark px-3 btn-sm" data-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </div>
@@ -466,11 +448,11 @@
                                 </div>
                                 <div class="form-group mb-1">
                                     <label class="small font-weight-bold text-dark">Emp Id: </label>
-                                    <input type="text" name="userid" id="userid" class="form-control form-control-sm" readonly />
+                                    <input type="text" name="userid" id="fp_userid" class="form-control form-control-sm" readonly />
                                 </div>
                                 <div class="form-group mb-1">
                                     <label class="small font-weight-bold text-dark">name: </label>
-                                    <input type="text" name="name" id="name" class="form-control form-control-sm" />
+                                    <input type="text" name="name" id="fp_name" class="form-control form-control-sm" />
                                 </div>
                                 <div class="form-group mb-1">
                                     <label class="small font-weight-bold text-dark">cardno: </label>
@@ -498,10 +480,10 @@
                                     </select>
                                 </div>
                                 <div class="form-group mt-3">
-                                    <button type="submit" name="action_button" id="action_button" class="btn btn-outline-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
+                                    <button type="submit" name="action_button" id="fp_action_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
                                 </div>
-                                <input type="hidden" name="action" id="action" />
-                                <input type="hidden" name="hidden_id" id="hidden_id" />
+                                <input type="hidden" name="action" id="fp_action" />
+                                <input type="hidden" name="hidden_id" id="fp_hidden_id" />
                             </form>
                         </div>
                     </div>
@@ -537,34 +519,10 @@
 						<textarea class="form-control form-control-sm" id="resignremark" name="resignremark"></textarea>
                     </div>
                     <div class="form-group mt-3">
-                        <button type="button" name="resign_button" id="resign_button" class="btn btn-outline-primary btn-sm fa-pull-right px-4 resign_button"><i class="fas fa-plus"></i>&nbsp;approve</button>
+                        <button type="button" name="resign_button" id="resign_button" class="btn btn-primary btn-sm fa-pull-right px-4 resign_button"><i class="fas fa-plus"></i>&nbsp;approve</button>
                     </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
-      
-<div class="modal fade" id="confirmModal2" data-backdrop="static" data-keyboard="false" tabindex="-1"
-aria-labelledby="staticBackdropLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content">
-            <div class="modal-header p-2">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col text-center">
-                        <h4 class="font-weight-normal">Are you sure you want to Confirm this data?</h4>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer p-2">
-                <button type="button" name="ok_button2" id="ok_button2" class="btn btn-danger px-3 btn-sm">OK</button>
-                <button type="button" class="btn btn-dark px-3 btn-sm" data-dismiss="modal">Cancel</button>
             </div>
         </div>
     </div>
@@ -602,12 +560,12 @@ aria-labelledby="staticBackdropLabel" aria-hidden="true">
                                     </div>
                                 </div>
                                 <div class="form-group mt-3">
-                                    <button type="submit" name="action_button" id="action_button" class="btn btn-success btn-sm">
+                                    <button type="submit" name="action_button" id="csv_action_button" class="btn btn-success btn-sm">
                                         <i class="fas fa-upload mr-2"></i>Import CSV
                                     </button>                               
                                  </div>
-                                <input type="hidden" name="action" id="action" value="Upload" />
-                                <input type="hidden" name="hidden_id" id="hidden_id" />
+                                <input type="hidden" name="action" id="csv_action" value="Upload" />
+                                <input type="hidden" name="hidden_id" id="csv_hidden_id" />
                             </form>
                         </div>
                     </div>
@@ -635,26 +593,6 @@ $(document).ready(function () {
     let department_f = $('#department_f');
     let employee_f = $('#employee_f');
     let location_f = $('#location_f');
-
-    var canViewEmployee = false;
-    @can('employee-list')
-        canViewEmployee = true;
-    @endcan
-
-    var canFingerprint = false;
-    @can('finger-print-user-create')
-        canFingerprint = true;
-    @endcan
-
-    var canEditEmployee = false;
-    @can('employee-edit')
-        canEditEmployee = true;
-    @endcan
-
-    var canDeleteEmployee = false;
-    @can('employee-delete')
-        canDeleteEmployee = true;
-    @endcan
 
     company_f.select2({
         placeholder: 'Select a Company',
@@ -732,29 +670,43 @@ $(document).ready(function () {
 
     function load_dt(department, employee, location, from_date, to_date){
         $('#emptable').DataTable({
-            lengthMenu: [[10, 25, 50, 100, 500, -1], [10, 25, 50, 100, 500, "All"]],
-            pageLength: 50,
-            dom: 'lBfrtip',
-            buttons: [
-                {
-                    extend: 'excelHtml5',
-                    text: 'Excel',
-                    className: 'btn btn-default',
-                    exportOptions: {
-                        columns: 'th:not(:last-child)'
+            "destroy": true,
+            "processing": true,
+            "serverSide": true,
+            dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+            "buttons": [{
+                    extend: 'csv',
+                    className: 'btn btn-success btn-sm',
+                    title: 'Employee Details',
+                    text: '<i class="fas fa-file-csv mr-2"></i> CSV',
+                },
+                { 
+                    extend: 'pdf', 
+                    className: 'btn btn-danger btn-sm', 
+                    title: 'Employee Details', 
+                    text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
+                    orientation: 'landscape', 
+                    pageSize: 'legal', 
+                    customize: function(doc) {
+                        doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
                     }
                 },
                 {
-                    extend: 'pdfHtml5',
-                    text: 'Print',
-                    className: 'btn btn-default',
-                    exportOptions: {
-                        columns: 'th:not(:last-child)'
-                    }
-                }
+                    extend: 'print',
+                    title: 'Employee Details',
+                    className: 'btn btn-primary btn-sm',
+                    text: '<i class="fas fa-print mr-2"></i> Print',
+                    customize: function(win) {
+                        $(win.document.body).find('table')
+                            .addClass('compact')
+                            .css('font-size', 'inherit');
+                    },
+                },
             ],
-            processing: true,
-            serverSide: true,
+            "order": [
+                [0, "desc"]
+            ],
             ajax: {
                 url: scripturl + "/employee_list.php",
                 type: "POST",
@@ -780,11 +732,11 @@ $(document).ready(function () {
                 {
                     "targets": -1,
                     "className": '',
-                    "data": 'emp_name_with_initial',
-                    "name": 'emp_name_with_initial',
+                    "data": 'employee_display', 
+                    "name": 'employee_display',
                     "render": function(data, type, full) {
                         var linkColor = full['is_resigned'] == 1 ? 'style="color: red;"' : '';
-                        return '<a href="viewEmployee/'+full['id']+'" '+linkColor+'>'+data+'</a>';
+                        return '<a href="viewEmployee/'+full['id']+'" '+linkColor+'>'+(data || '')+'</a>';
                     }
                 },
                 { 
@@ -834,23 +786,23 @@ $(document).ready(function () {
                         var is_resigned = row.is_resigned;
                         var buttons = '';
 
-                        if (canViewEmployee && is_resigned == 0) {
+                        if (is_resigned == 0) {
                             buttons += '<a style="margin:1px;" data-toggle="tooltip" data-placement="bottom" title="View Employee Details" class="btn btn-outline-dark btn-sm" href="viewEmployee/' + row.id + '"><i class="far fa-clipboard"></i></a>';
                         }
 
-                        if (canFingerprint && is_resigned == 0) {
-                            buttons += '<button style="margin:1px;" data-toggle="tooltip" data-placement="bottom" title="Add Employee Fingerprint Details" class="btn btn-outline-primary btn-sm addfp" id="' + row.emp_id + '" name="' + row.emp_name_with_initial + '"><i class="fas fa-sign-in-alt"></i></button>';
+                        if (is_resigned == 0) {
+                            buttons += '<button style="margin:1px;" data-toggle="tooltip" data-placement="bottom" title="Add Employee Fingerprint Details" class="btn btn-outline-primary btn-sm addfp" id="' + row.emp_id + '" name="' + (row.emp_name_with_initial || '') + '"><i class="fas fa-sign-in-alt"></i></button>';
                         }
 
-                        if (canEditEmployee && is_resigned == 0) {
-                            buttons += '<button style="margin:1px;" data-toggle="tooltip" data-placement="bottom" title="Add Employee User Login Details" class="btn btn-outline-secondary btn-sm adduserlog" id="' + row.emp_id + '" name="' + row.emp_name_with_initial + '"><i class="fas fa-user"></i></button>';
+                        if (is_resigned == 0) {
+                            buttons += '<button style="margin:1px;" data-toggle="tooltip" data-placement="bottom" title="Add Employee User Login Details" class="btn btn-outline-secondary btn-sm adduserlog" id="' + row.emp_id + '" name="' + (row.emp_name_with_initial || '') + '"><i class="fas fa-user"></i></button>';
                         }
 
-                        if (canEditEmployee && is_resigned == 0) {
-                            buttons += '<button style="margin:1px;" data-toggle="tooltip" data-placement="bottom" title="Resign Employee" class="btn btn-outline-warning btn-sm resign" id="' + row.emp_id + '" name="' + row.emp_name_with_initial + '"><i class="fas fa-user-times"></i></button>';
+                        if (is_resigned == 0) {
+                            buttons += '<button style="margin:1px;" data-toggle="tooltip" data-placement="bottom" title="Resign Employee" class="btn btn-outline-warning btn-sm resign" id="' + row.emp_id + '" name="' + (row.emp_name_with_initial || '') + '"><i class="fas fa-user-times"></i></button>';
                         }
 
-                        if (canDeleteEmployee && is_resigned == 0) {
+                        if (is_resigned == 0) {
                             buttons += '<button style="margin:1px;" data-toggle="tooltip" data-placement="bottom" title="Delete Employee Details" class="btn btn-outline-danger btn-sm delete" id="' + row.id + '"><i class="far fa-trash-alt"></i></button>';
                         }
 
@@ -861,7 +813,7 @@ $(document).ready(function () {
             order: [[0, "asc"]],
             destroy: true
         });
-    }
+    }    
 
     load_dt('', '', '', '', '');
 
@@ -887,7 +839,7 @@ $(document).ready(function () {
     });
 
     document.getElementById('btn-clear').addEventListener('click', function() {
-    document.getElementById('formFilter').reset();
+        document.getElementById('formFilter').reset();
 
         $('#company_f').val('').trigger('change');   
         $('#location_f').val('').trigger('change');
@@ -896,9 +848,8 @@ $(document).ready(function () {
         $('#from_date').val('');                     
         $('#to_date').val('');                       
 
-        // load_dt('', '', '', '', '');
+        load_dt('', '', '', '', '');
     });
-
 
 });
 $(document).ready(function () {
@@ -978,8 +929,8 @@ $(document).ready(function () {
 
     $('#upload_record').click(function() {
         $('.modal-title').text('Upload Employees Record');
-        $('#action_button').html('Import');
-        $('#action').val('Upload');
+        $('#csv_action_button').html('Import');
+        $('#csv_action').val('Upload');
         $('#form_result1').html('');
         $('#formTitle1')[0].reset();
 
@@ -988,91 +939,95 @@ $(document).ready(function () {
 
     $('#formTitle1').on('submit', function(event) {
         event.preventDefault();
-        var formData = new FormData(this); 
-        var fileInput = $('#import_csv')[0].files[0];
-
-        if (!fileInput || fileInput.type !== 'text/csv') {
-            alert('Please upload a valid CSV file.');
-            return;
-        }
-
-        $.ajax({
-            url: "{{ route('import') }}",
-            method: "POST",
-            data: formData,
-            processData: false, 
-            contentType: false, 
-            dataType: "json",
-            success: function(data) {
-                var html = '';
-                if (data.errors) {
-                    html = '<div class="alert alert-danger">';
-                    for (var count = 0; count < data.errors.length; count++) {
-                        html += '<p>' + data.errors[count] + '</p>';
+        if ($('#csv_action').val() == 'Upload') {
+            var formData = new FormData(this); 
+            var fileInput = $('#import_csv')[0].files[0];
+            if (!fileInput || fileInput.type !== 'text/csv') {
+                alert('Please upload a valid CSV file.');
+                return;
+            }
+            $('#csv_action_button').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i>Importing...');
+            $.ajax({
+                url: "{{ route('import') }}",
+                method: "POST",
+                data: formData,
+                processData: false, 
+                contentType: false, 
+                dataType: "json",
+                success: function(data) {
+                    var html = '';
+                    if (data.errors) {
+                        html = '<div class="alert alert-danger">';
+                        html += '<h6><i class="fas fa-exclamation-triangle mr-2"></i>CSV Import Errors:</h6>';
+                        html += '<ul class="mb-0">';
+                        for (var count = 0; count < data.errors.length; count++) {
+                            html += '<li>' + data.errors[count] + '</li>';
+                        }
+                        html += '</ul>';
+                        html += '</div>';
+                    }
+                    if (data.success) {
+                        html = '<div class="alert alert-success">';
+                        html += '<i class="fas fa-check-circle mr-2"></i>' + data.success;
+                        html += '</div>';
+                        $('#formTitle1')[0].reset();
+                        setTimeout(function() {
+                            location.reload();
+                        }, 2000);
+                    }
+                    $('#form_result1').html(html);
+                    $('#csv_action_button').prop('disabled', false).html('<i class="fas fa-upload mr-2"></i>Import CSV');
+                },
+                error: function(xhr, status, error) {
+                    var html = '<div class="alert alert-danger">';
+                    html += '<i class="fas fa-exclamation-triangle mr-2"></i>';
+                    if (xhr.responseJSON && xhr.responseJSON.errors) {
+                        html += 'CSV Import Errors:<ul class="mb-0 mt-2">';
+                        xhr.responseJSON.errors.forEach(function(error) {
+                            html += '<li>' + error + '</li>';
+                        });
+                        html += '</ul>';
+                    } else {
+                        html += 'An unexpected error occurred. Please try again.';
                     }
                     html += '</div>';
+                    $('#form_result1').html(html);
+                    $('#csv_action_button').prop('disabled', false).html('<i class="fas fa-upload mr-2"></i>Import CSV');
                 }
-                if (data.success) {
-                    html = '<div class="alert alert-success">' + data.success + '</div>';
-                    $('#formTitle1')[0].reset();
-                    location.reload();
-                }
-                $('#form_result1').html(html);
-            },
-            error: function(xhr, status, error) {
-                $('#form_result1').html('<div class="alert alert-danger">An unexpected error occurred. Please try again.</div>');
-            }
-        });
+            });
+        }
     });
 
-
-
-    /*
-
- $(document).on('click', '.edit', function(){
-  var id = $(this).attr('id');
-  $('#form_result').html('');
-  $.ajax({
-   url :"/EmploymentStatus/"+id+"/edit",
-   dataType:"json",
-   success:function(data)
-   {
-    $('#ip').val(data.result.ip);
-    $('#name').val(data.result.name);
-    $('#location').val(data.result.location);
-    $('#hidden_id').val(id);
-    $('.modal-title').text('Edit Fingerprint Device');
-    $('#action_button').val('Edit');
-    $('#action').val('Edit');
-    $('#empModal').modal('show');
-   }
-  })
- });
-*/
     var user_id;
 
-    $(document).on('click', '.delete', function () {
-        user_id = $(this).attr('id');
-        $('#confirmModal').modal('show');
-    });
+    $(document).on('click', '.delete', async function () {
+        var r = await Otherconfirmation("You want to remove this employee? ");
+        if (r == true) {
+            user_id = $(this).attr('id');
 
-    $('#ok_button').click(function () {
-        $.ajax({
-            url: "EmployeeDestroy/destroy/" + user_id,
-            beforeSend: function () {
-                $('#ok_button').text('Deleting...');
-            },
-            success: function (data) {
-                setTimeout(function () {
-                    $('#confirmModal').modal('hide');
-                    $('#user_table').DataTable().ajax.reload();
-                    alert('Data Deleted');
-                }, 2000);
-                location.reload();
-            }
-        })
+            $.ajax({
+                url: "EmployeeDestroy/destroy/" + user_id,
+                beforeSend: function () {
+                    // Optional: Show loading state
+                },
+                success: function (data) {
+                    const actionObj = {
+                        icon: 'fas fa-trash-alt',
+                        title: '',
+                        message: 'Employee Record Deleted Successfully',
+                        url: '',
+                        target: '_blank',
+                        type: 'danger'
+                    };
+                    const actionJSON = JSON.stringify(actionObj, null, 2);
+                    actionreload(actionJSON);
+                },
+                error: function(xhr, status, error) {
+                    console.log('Error:', error);
+                }
+            })
+        }
     });
-
 
     //userlog 
 
@@ -1082,9 +1037,9 @@ $(document).ready(function () {
         $('#userlogform #id').val($(this).attr('data-id'));
         var id = $(this).attr('id');
         var name = $(this).attr('name');
-        $('#userid').val(id);
-        $('#name').val(name);
-        $('#action').val('Add');
+        $('#userlog_userid').val(id);
+        $('#userlog_name').val(name);
+        $('#userlog_action').val('Add');
         $('#userlogform_result').html('');
 
         $('#userlogModal').modal('show');
@@ -1094,7 +1049,7 @@ $(document).ready(function () {
         event.preventDefault();
         var action_url = '';
 
-        if ($('#action').val() == 'Add') {
+        if ($('#userlog_action').val() == 'Add') {
             action_url = "{{ route('addUserLogin') }}";
         }
 
@@ -1134,10 +1089,10 @@ $(document).ready(function () {
         emp_id = $(this).attr('id');
         name = $(this).attr('name');
 
-        $('#action_button').val('Add');
+        $('#fp_action').val('Add');
         $('#fpform #id').val(emp_id);
-        $('#fpform  #userid').val(emp_id);
-        $('#fpform  #name').val(name);
+        $('#fp_userid').val(emp_id);
+        $('#fp_name').val(name);
 
         $('#action').val('Add');
         $('#fpform_result').html('');
@@ -1149,7 +1104,7 @@ $(document).ready(function () {
         event.preventDefault();
         var action_url = '';
 
-        if ($('#action').val() == 'Add') {
+        if ($('#fp_action').val() == 'Add') {
             action_url = "{{ route('addFingerprintUser') }}";
         }
 
@@ -1209,15 +1164,63 @@ $(document).ready(function () {
         });
     });
     
-    $(document).on('click', '.resign_button', function () {
-        var checkresignationdate=$('#resigndate').val()
-        if(checkresignationdate==''){
-        alert('Please Select Date');
+    $(document).on('click', '.resign_button', async function () {
+        var checkresignationdate = $('#resigndate').val()
+        if(checkresignationdate == '') {
+            alert('Please Select Date');
+        } else {
+            var r = await Otherconfirmation("You want to resign this employee? ");
+            if (r == true) {
+                var resignationdate = $('#resigndate').val();
+                var resignationremark = $('#resignremark').val();
+                
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    }
+                })
+                
+                $.ajax({
+                    url: '{!! route("employeeresignation") !!}',
+                    type: 'POST',
+                    dataType: "json",
+                    data: {
+                        recordID: user_id,
+                        resignationdate: resignationdate,
+                        resignationremark: resignationremark,
+                    },
+                    beforeSend: function () {
+                        // Optional: Show loading state
+                    },
+                    success: function (data) {
+                        if (data.success) {
+                            const actionObj = {
+                                icon: 'fas fa-user-times',
+                                title: '',
+                                message: 'Employee Resignation Processed Successfully',
+                                url: '',
+                                target: '_blank',
+                                type: 'warning'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            actionreload(actionJSON);
+                            
+                            $('#resignationformModal').modal('hide');
+                        } else if (data.errors) {
+                            var html = '<div class="alert alert-danger">';
+                            for (var count = 0; count < data.errors.length; count++) {
+                                html += '<p>' + data.errors[count] + '</p>';
+                            }
+                            html += '</div>';
+                            $('#resignform_result').html(html);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.log('Error:', error);
+                    }
+                })
+            }
         }
-        else{
-            $('#confirmModal2').modal('show');
-        }
-       
     });
 
     $('#ok_button2').click(function () {
