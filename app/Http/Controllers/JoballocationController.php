@@ -75,10 +75,10 @@ class JoballocationController extends Controller
         ->addColumn('action', function ($row) {
             $btn = '';
                     if(Auth::user()->can('Job-Allocation-edit')){
-                            $btn .= ' <button name="edit" id="'.$row->id.'" class="edit btn btn-outline-primary btn-sm" type="submit"><i class="fas fa-pencil-alt"></i></button>'; 
+                            $btn .= ' <button name="edit" id="'.$row->id.'" class="edit btn btn-primary btn-sm" type="submit" data-toggle="tooltip" title="Edit"><i class="fas fa-pencil-alt"></i></button>'; 
                     }
                     if(Auth::user()->can('Job-Allocation-delete')){
-                        $btn .= ' <button name="delete" id="'.$row->id.'" class="delete btn btn-outline-danger btn-sm"><i class="far fa-trash-alt"></i></button>';
+                        $btn .= ' <button name="delete" id="'.$row->id.'" class="delete btn btn-danger btn-sm" data-toggle="tooltip" title="Remove"><i class="far fa-trash-alt"></i></button>';
                     }
             return $btn;
         })

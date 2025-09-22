@@ -3,28 +3,25 @@
 @section('content')
 
 <main> 
-    <div class="page-header shadow">
-        <div class="container-fluid">
-             @include('layouts.attendant&leave_nav_bar')
-           
+   <div class="page-header shadow">
+            <div class="container-fluid d-none d-sm-block shadow">
+                @include('layouts.attendant&leave_nav_bar')
+            </div>
+            <div class="container-fluid">
+                <div class="page-header-content py-3 px-2">
+                    <h1 class="page-header-title ">
+                        <div class="page-header-icon"><i class="fa-light fa-calendar-pen"></i></div>
+                        <span>Location Allowance Approval</span>
+                    </h1>
+                </div>
+            </div>
         </div>
-    </div>
-    <div class="container-fluid mt-4">
+    <div class="container-fluid mt-2 p-0 p-2">
         <div class="card mb-2">
-                <div class="card-body">
+                <div class="card-body p-0 p-2">
                     <form class="form-horizontal" id="formFilter">
                         <div class="form-row mb-1">
-                           {{-- <div class="col-md-3">
-                                <label class="small font-weight-bold text-dark">Location</label>
-                                <select name="location" id="location" class="form-control form-control-sm">
-                                    <option value="">Select Location</option>
-                                     @foreach($locations as $location)
-                                        <option value="{{$location->id}}">{{$location->location}}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div> --}}
-                            <div class="col-md-4">
+                            <div class="col-sm-12 col-md-4">
                                 <label class="small font-weight-bold text-dark">Employee</label>
                                 <select name="employee" id="employee_f" class="form-control form-control-sm">
                                     <option value="">Select Employee</option>
@@ -33,7 +30,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-sm-12 col-md-4">
                                 <label class="small font-weight-bold text-dark">Date : From - To</label>
                                 <div class="input-group input-group-sm mb-3">
                                     <input type="date" id="from_date" name="from_date" class="form-control form-control-sm border-right-0" placeholder="yyyy-mm-dd" required>
@@ -43,7 +40,7 @@
                                     <input type="date" id="to_date" name="to_date" class="form-control" placeholder="yyyy-mm-dd" required>
                                 </div>
                             </div>
-                           <div class="col-md-4">
+                           <div class="col-sm-12 col-md-4">
                                 <button type="submit" class="btn btn-primary btn-sm filter-btn float-right" id="btn-filter" style="margin-top: 25px;"> Filter</button>
                             </div>
                         </div>
@@ -73,11 +70,11 @@
                             <thead>
                                 <tr>
                                     <th></th>
-                                    <th>Employee ID</th>
-                                    <th>Employee</th>
-                                    <th>Location Visit Count</th>
-                                    <th>Allowance Amount</th>
-                                    <th class="d-none">Employee auto id</th>
+                                    <th>EMPLOYEE ID</th>
+                                    <th>EMPLOYEE</th>
+                                    <th>LOCATION VISIT COUNT</th>
+                                    <th>ALLOWANCE AMOUNT</th>
+                                    <th class="d-none">EMPLOYEE AUTO ID</th>
                                 </tr>
                             </thead>
                             <tbody>   
@@ -89,33 +86,6 @@
             </div>
         </div>
     </div>
-
-       <div class="modal fade" id="approveconfirmModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-        aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-md">
-            <div class="modal-content">
-                <div class="modal-header p-2">
-                    <h5 class="modal-title" id="staticBackdropLabel">Approve  Location Allowance </h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col text-center">
-                            <h4 class="font-weight-normal">Are you sure you want to Approve this data?</h4>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer p-2">
-                    <button type="button" name="approve_button" id="approve_button"
-                        class="btn btn-warning px-3 btn-sm">Approve</button>
-                    <button type="button" class="btn btn-dark px-3 btn-sm" data-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
 </main>
               
 @endsection
@@ -130,14 +100,47 @@ $(document).ready(function(){
     $('#attendant_menu_link_icon').addClass('active');
     $('#jobmanegment').addClass('navbtnactive');
 
-    let employee_f = $('#employee_f');
-       employee_f.select2();
 
         function load_dt(employee, from_date, to_date) {
             $('#dataTable').DataTable({
-                lengthMenu: [[10, 25, 50, 100, 500, -1], [10, 25, 50, 100, 500, "All"]],
-                processing: true,
-                serverSide: true,
+               "destroy": true,
+                    "processing": true,
+                    "serverSide": true,
+                    dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
+                        "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+                    "buttons": [{
+                            extend: 'csv',
+                            className: 'btn btn-success btn-sm',
+                            title: 'Location Allowance Approve  Information',
+                            text: '<i class="fas fa-file-csv mr-2"></i> CSV',
+                        },
+                        { 
+                            extend: 'pdf', 
+                            className: 'btn btn-danger btn-sm', 
+                            title: 'Location Allowance Approve Information', 
+                            text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
+                            orientation: 'landscape', 
+                            pageSize: 'legal', 
+                            customize: function(doc) {
+                                doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+                            }
+                        },
+                        {
+                            extend: 'print',
+                            title: 'Location Allowance Approve  Information',
+                            className: 'btn btn-primary btn-sm',
+                            text: '<i class="fas fa-print mr-2"></i> Print',
+                            customize: function(win) {
+                                $(win.document.body).find('table')
+                                    .addClass('compact')
+                                    .css('font-size', 'inherit');
+                            },
+                        },
+                        // 'copy', 'csv', 'excel', 'pdf', 'print'
+                    ],
+                    "order": [
+                        [1, "desc"]
+                    ],
                 ajax: {
                     url:  "{{url('/locationallwanceapprovegenerate')}}",
                     type: 'POST',
@@ -167,10 +170,6 @@ $(document).ready(function(){
                         name: 'emp_auto_id',
                         visible: false
                     }
-                ],
-                "bDestroy": true,
-                "order": [
-                    [1, "desc"] 
                 ]
             });
         }
@@ -186,68 +185,84 @@ $(document).ready(function(){
 
          var selectedRowIdsapprove = [];
 
-    $('#approve_att').click(function () {
-        selectedRowIdsapprove = [];
-        $('#dataTable tbody .selectCheck:checked').each(function () {
-            var rowData = $('#dataTable').DataTable().row($(this).closest('tr')).data();
+    $('#approve_att').click(async function () {
+        var r = await Otherconfirmation("You want to Edit this ? ");
+        if (r == true) {
+            selectedRowIdsapprove = [];
+            $('#dataTable tbody .selectCheck:checked').each(function () {
+                var rowData = $('#dataTable').DataTable().row($(this).closest('tr')).data();
+                if (rowData) {
+                    selectedRowIdsapprove.push({
+                        empid: rowData.emp_id,
+                        emp_name: rowData.emp_name_with_initial,
+                        visit_count: rowData.visit_count,
+                        allowance_amount: rowData.allowance_amount,
+                        emp_auto_id: rowData.emp_auto_id
+                    });
+                }
+            });
+            if (selectedRowIdsapprove.length > 0) {
+                console.log(selectedRowIdsapprove);
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    }
+                })
 
-            if (rowData) {
-                selectedRowIdsapprove.push({
-                    empid: rowData.emp_id, 
-                    emp_name: rowData.emp_name_with_initial, 
-                    visit_count: rowData.visit_count, 
-                    allowance_amount: rowData.allowance_amount, 
-                    emp_auto_id: rowData.emp_auto_id
+                var employee_f = $('#employee_f').val();
+                var from_date = $('#from_date').val();
+                var to_date = $('#to_date').val();
+
+                $.ajax({
+                    url: '{!! route("approvelocationallowance") !!}',
+                    type: 'POST',
+                    dataType: "json",
+                    data: {
+                        dataarry: selectedRowIdsapprove,
+                        employee_f: employee_f,
+                        from_date: from_date,
+                        to_date: to_date
+                    },
+                    success: function (data) {
+                        if (data.errors) {
+                            const actionObj = {
+                                icon: 'fas fa-warning',
+                                title: '',
+                                message: 'Record Error',
+                                url: '',
+                                target: '_blank',
+                                type: 'danger'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            action(actionJSON);
+                        }
+                        if (data.success) {
+                            const actionObj = {
+                                icon: 'fas fa-save',
+                                title: '',
+                                message: data.success,
+                                url: '',
+                                target: '_blank',
+                                type: 'success'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            actionreload(actionJSON);
+                        }
+                    }
+                })
+
+            } else {
+                Swal.fire({
+                    position: "top-end",
+                    icon: 'warning',
+                    title: 'Select Rows to Final Approve!',
+                    showConfirmButton: false,
+                    timer: 2500
                 });
             }
-        });
-
-        if (selectedRowIdsapprove.length > 0) {
-        console.log(selectedRowIdsapprove);
-            $('#approveconfirmModal').modal('show');
-        } else {
-            
-            alert('Select Rows to Final Approve!!!!');
         }
     });
-
-    $('#approve_button').click(function () {
-            $('#approve_button').html('<i class="fa fa-spinner fa-spin mr-2"></i> Processing').prop('disabled', true);
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            })
-
-            var employee_f = $('#employee_f').val();
-             var from_date = $('#from_date').val();
-              var to_date = $('#to_date').val();
-
-            $.ajax({
-                url: '{!! route("approvelocationallowance") !!}',
-                type: 'POST',
-                dataType: "json",
-                data: {
-                    dataarry: selectedRowIdsapprove,
-                    employee_f: employee_f,
-                    from_date: from_date,
-                    to_date: to_date
-                },
-                success: function (data) {
-                    $('#approve_button').html('Approve').prop('disabled', false);
-                    setTimeout(function () {
-                        $('#approveconfirmModal').modal('hide');
-                        location.reload();
-                    }, 500);
-
-                    $('#selectAll').prop('checked', false);
-                   
-                }
-            })
-    });
-
-
-
+    
     $('#selectAll').click(function (e) {
         $('#dataTable').closest('table').find('td input:checkbox').prop('checked', this.checked);
     });

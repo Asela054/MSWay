@@ -177,6 +177,21 @@
     <script>
         $(document).ready(function () {
 
+             var canleaverequestapprove = false;
+            @can('LeaveRequest-Approve')
+            canleaverequestapprove = true;
+            @endcan
+
+            var leaverequestedit = false;
+            @can('LeaveRequest-edit')
+            leaverequestedit = true;
+            @endcan
+
+            var leaverequestdelete = false;
+            @can('LeaveRequest-delete')
+                leaverequestdelete = true;
+            @endcan
+
             $('#attendant_menu_link').addClass('active');
             $('#attendant_menu_link_icon').addClass('active');
             $('#leavemaster').addClass('navbtnactive');
@@ -303,22 +318,77 @@
                             [0, "desc"]
                         ],
                     ajax: {
-                        "url": "{!! route('leaverequest_list') !!}",
-                        "data": {'department':department, 'employee':employee, 'from_date': from_date, 'to_date': to_date},
+                         url: scripturl + '/leave_request_list.php',
+                        type: 'POST',
+                        data : {'department':department, 'employee':employee, 'from_date': from_date, 'to_date': to_date},
                     },
                     columns: [
                         { data: 'id', name: 'id' },
                         { data: 'employee_display', name: 'employee_display' },
                         { data: 'dep_name', name: 'dep_name' },
-                        { data: 'leave_category', name: 'leave_category' },
+                        { 
+                            data: 'leave_category', name: 'leave_category', render: function(data, type, row) {
+                                if (data == 1) {
+                                    return "Full Day";
+                                } else if (data == 0.50) {
+                                    return "Half Day";
+                                } else if (data == 0.25) {
+                                    return "Short Leave";
+                                } else {
+                                    return "";
+                                }
+                            }
+                        },
                         { data: 'from_date', name: 'from_date' },
                         { data: 'to_date', name: 'to_date' },
                         { data: 'reason', name: 'reason'},
-                        { data: 'approvestatus', name: 'approvestatus' },
+                        { 
+                            data: 'approvestatus', name: 'approvestatus', render: function(data, type, row) {
+                                if (data == 0) {
+                                    return "Not Approved";
+                                } else {
+                                    return "Approved";
+                                }
+                            }
+                        },
                         { data: 'leave_type', name: 'leave_type' },
-                        { data: 'half_or_short', name: 'half_or_short' },
+                        { 
+                            data: 'half_short', name: 'half_short', render: function(data, type, row) {
+                                if (data == 1) {
+                                    return "Full Day";
+                                } else if (data == 0.50) {
+                                    return "Half Day";
+                                } else if (data == 0.25) {
+                                    return "Short Leave";
+                                } else {
+                                    return "";
+                                }
+                            }
+                        },
                         { data: 'leave_status', name: 'leave_status' },
-                        { data: 'action', name: 'action', orderable: false, searchable: false},
+                         {
+                        data: 'id',
+                        name: 'action',
+                        className: 'text-right',
+                        orderable: false,
+                        searchable: false,
+                        render: function(data, type, row) {
+                            var buttons = '';
+
+                            if (canleaverequestapprove && row.approvestatus == 0 ) {
+                                buttons += '<button type="submit" name="approve" id="'+row.id+'" class="approve btn btn-warning btn-sm" style="margin:1px;" data-toggle="tooltip" title="Approve" ><i class="fas fa-check"></i></button>';
+                            }
+
+                            if (leaverequestedit) {
+                                buttons += '<button name="edit" id="'+row.id+'" class="edit btn btn-primary btn-sm" style="margin:1px;" type="submit" data-toggle="tooltip" title="Edit"><i class="fas fa-pencil-alt"></i></button>';
+                            }
+                            if (leaverequestdelete) {
+                                buttons += '<button type="submit" name="delete" id="'+row.id+'" class="delete btn btn-danger btn-sm" style="margin:1px;" data-toggle="tooltip" title="Remove" ><i class="far fa-trash-alt"></i></button>';
+                            }
+
+                            return buttons;
+                        }
+                    }
                     ],
                     "bDestroy": true,
                     "order": [

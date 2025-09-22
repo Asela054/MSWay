@@ -5,53 +5,53 @@
 
     <main>
         <div class="page-header shadow">
-            <div class="container-fluid">
+            <div class="container-fluid d-none d-sm-block shadow">
                 @include('layouts.attendant&leave_nav_bar')
+            </div>
+            <div class="container-fluid">
+                <div class="page-header-content py-3 px-2">
+                    <h1 class="page-header-title ">
+                        <div class="page-header-icon"><i class="fa-light fa-calendar-pen"></i></div>
+                        <span>Location Attendance</span>
+                    </h1>
+                </div>
             </div>
         </div>
 
-        <div class="container-fluid mt-4">
+
+        <div class="container-fluid mt-2 p-0 p-2">
             <div class="card mb-2">
-                <div class="card-body">
+                <div class="card-body  p-0 p-2">
                     <div class="row">
                         <div class="col-12">
-                          @can('Job-Attendance-create')
                                 <div class="d-flex flex-wrap justify-content-end mb-2">
-                                    <button type="button" class="btn btn-outline-primary btn-sm px-3 mr-2 mb-2" name="create_record" id="create_record">
+                                    <button type="button" class="btn btn-primary btn-sm px-3 mr-2 mb-2" name="create_record" id="create_record">
                                         <i class="fas fa-plus mr-2 d-none d-sm-inline"></i>
                                         <span class="d-none d-sm-inline">Attendance of a Location</span>
                                         <i class="fas fa-map-marker-alt d-sm-none"></i>
                                     </button>
-                                    
-                                    <button type="button" class="btn btn-outline-success btn-sm px-3 mr-2 mb-2" name="create_record_employee" id="create_record_employee">
+                                    <button type="button" class="btn btn-success btn-sm px-3 mr-2 mb-2" name="create_record_employee" id="create_record_employee">
                                         <i class="fas fa-plus mr-2 d-none d-sm-inline"></i>
                                         <span class="d-none d-sm-inline">Attendance of a Employee</span>
                                         <i class="fas fa-user d-sm-none"></i>
                                     </button>
-
                                 </div>
-                            @endcan
                             </div>
                             <div class="col-12">
                                 <hr class="border-dark">
                             </div>
                             <div class="col-12">
-                                {{-- <div class="custom-control custom-checkbox ml-2 mb-2">
-                                    <input type="checkbox" class="custom-control-input checkallocate" id="selectAll">
-                                    <label class="custom-control-label" for="selectAll">Select All Records</label>
-                                </div> --}}
                                 <div class="center-block fix-width scroll-inner">
-                                    <table class="table table-striped table-bordered table-sm small nowrap display"
-                                        style="width: 100%" id="dataTable">
+                                    <table class="table table-striped table-bordered table-sm small nowrap display" style="width: 100%" id="dataTable">
                                         <thead>
                                             <tr>
                                                 <th>ID </th>
-                                                <th>Employee Name</th>
-                                                <th>Date</th>
-                                                <th>Location Name</th>
-                                                <th>On Time</th>
-                                                <th>Off Time</th>
-                                                <th class="text-right">Action</th>
+                                                <th>EMPLOYEE NAME</th>
+                                                <th>DATE</th>
+                                                <th>LOCATION NAME</th>
+                                                <th>ON TIME</th>
+                                                <th>OFF TIME</th>
+                                                <th class="text-right">ACTION</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -84,7 +84,7 @@
                             <form method="post" id="formTitle" class="form-horizontal">
                                 {{ csrf_field() }}	
                                 <div class="row">
-                                    <div class="col-4">
+                                    <div class="col-sm-12 col-md-4">
                                         <label class="small font-weight-bold text-dark">Location</label>
                                         <select name="location" id="location"
                                             class="form-control form-control-sm " style="width: 100%;" required>
@@ -95,34 +95,35 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                    <div class="col-4">
+                                    <div class="col-sm-12 col-md-4">
                                         <label class="small font-weight-bold text-dark">Date</label>
                                         <input type="date" class="form-control form-control-sm"
                                             name="attendancedate" id="attendancedate">
                                     </div>
-                                    <div class="col-4">
+                                    <div class="col-sm-12 col-md-4">
                                         <button style="margin-top:30px;" type="button" name="searchbtn" id="searchbtn"
                                             class="btn btn-primary btn-sm "><i class="fas fa-search"></i>&nbsp;Search</button>
                                     </div>
                                 </div>
                                 <br>
-
-                                <table class="table table-striped table-bordered table-sm small nowrap display" id="allocationtbl" style="width:100%;">
-                                <thead>
-                                    <tr>
-                                        <th>Empolyee Name</th>
-                                        <th>On Time</th>
-                                        <th>Off Time</th>
-                                        <th style="white-space: nowrap;">Action</th>
-                                        <th class="d-none">allocation id</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="emplistbody">
-                                    
-                                </tbody>
-                            </table>
+                                <div class="center-block fix-width scroll-inner">
+                                    <table class="table table-striped table-bordered table-sm small nowrap display"
+                                        id="allocationtbl" style="width:100%;">
+                                        <thead>
+                                            <tr>
+                                                <th style="white-space: nowrap;">Empolyee Name</th>
+                                                <th>On Time</th>
+                                                <th>Off Time</th>
+                                                <th style="white-space: nowrap;">Action</th>
+                                                <th class="d-none">allocation id</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="emplistbody">
+                                        </tbody>
+                                    </table>
+                                </div>
                                 <div class="form-group mt-3">
-                                    <button type="submit" name="action_button" id="action_button" class="btn btn-outline-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
+                                    <button type="submit" name="action_button" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
                                 </div>
                             </form>
                         </div>
@@ -150,7 +151,7 @@
                             <form method="post" id="formTitleedit" class="form-horizontal">
                                 {{ csrf_field() }}
                                 <div class="row">
-                                    <div class="col-4">
+                                    <div class="col-sm-12 col-md-4">
                                         <label class="small font-weight-bold text-dark">Employees</label>
                                             <select name="employee" id="employee" class="form-control form-control-sm" style="width:100%" disabled>
                                                 <option value="">Select Employees</option>
@@ -160,12 +161,12 @@
                                         @endforeach
                                     </select>
                                     </div>
-                                    <div class="col-4">
+                                    <div class="col-sm-12 col-md-4">
                                         <label class="small font-weight-bold text-dark">Date</label>
                                         <input type="date" class="form-control form-control-sm"
                                             name="attendancedateedit" id="attendancedateedit" disabled>
                                     </div>
-                                    <div class="col-4">
+                                    <div class="col-sm-12 col-md-4">
                                         <label class="small font-weight-bold text-dark">Location</label>
                                         <select name="locationedit" id="locationedit"
                                             class="form-control form-control-sm " style="width: 100%;" required>
@@ -178,18 +179,18 @@
                                     </div>
 
                                     
-                                    <div class="col-4">
+                                    <div class="col-sm-12 col-md-4">
                                         <label class="small font-weight-bold text-dark">On Time</label>
                                         <input type="datetime-local" id="empontime" name="empontime" class="form-control form-control-sm"   required>
                                     </div>
-                                    <div class="col-4">
+                                    <div class="col-sm-12 col-md-4">
                                         <label class="small font-weight-bold text-dark">Off Time</label>
                                         <input type="datetime-local" id="empofftime" name="empofftime" class="form-control form-control-sm"  required>
                                     </div>
                                 </div>
                                 <br>
                                 <div class="form-group mt-3">
-                                    <button type="submit" name="action_buttonedit" id="action_buttonedit" class="btn btn-outline-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Update</button>
+                                    <button type="submit" name="action_buttonedit" id="action_buttonedit" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Update</button>
                                 </div>
                                 <input type="hidden" name="action" id="action" value="1" />
                                 <input type="hidden" name="hidden_id" id="hidden_id" />
@@ -200,8 +201,6 @@
             </div>
         </div>
     </div>
-
-
 
     {{-- Single Employee Attendance Model --}}
 
@@ -221,14 +220,14 @@
                             <form method="post" id="formTitlesingle" class="form-horizontal">
                                 {{ csrf_field() }}	
                                 <div class="row">
-                                      <div class="col-6">
+                                      <div class="col-sm-12 col-md-6">
                                         <label class="small font-weight-bold text-dark">Employee</label>
                                         <select name="employee_single" id="employee_single"
                                             class="form-control form-control-sm " style="width: 100%;" required>
                                             <option value="">Select Location</option>
                                         </select>
                                     </div>
-                                    <div class="col-6">
+                                    <div class="col-sm-12 col-md-6">
                                         <label class="small font-weight-bold text-dark">Location</label>
                                         <select name="locationsingle" id="locationsingle"
                                             class="form-control form-control-sm " style="width: 100%;" required>
@@ -241,20 +240,20 @@
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-4">
+                                    <div class="col-sm-12 col-md-4">
                                         <label class="small font-weight-bold text-dark">Date</label>
                                         <input type="date" class="form-control form-control-sm" name="singleattendancedate" id="singleattendancedate">
                                     </div>
 
-                                    <div class="col-8">
+                                    <div class="col-sm-12 col-md-8">
                                         <div class="row">
-                                            <div class="col-6">
+                                            <div class="col-sm-12 col-md-6">
                                                 <label class="small font-weight-bold text-dark">On Time</label>
                                                 <input type="datetime-local" id="singleempontime" name="singleempontime" class="form-control form-control-sm"
                                                     required>
                                             </div>
 
-                                            <div class="col-6">
+                                            <div class="col-sm-12 col-md-6">
                                                 <label class="small font-weight-bold text-dark">Off Time</label>
                                                 <input type="datetime-local" id="singleempofftime" name="singleempofftime" class="form-control form-control-sm"
                                                     required>
@@ -263,7 +262,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group mt-3">
-                                    <button type="submit" name="action_button" id="action_button" class="btn btn-outline-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
+                                    <button type="submit" name="action_button" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
                                 </div>
                             </form>
                         </div>
@@ -273,33 +272,6 @@
         </div>
     </div>
 
-    <div class="modal fade" id="confirmModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-        aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content">
-                <div class="modal-header p-2">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col text-center">
-                            <h4 class="font-weight-normal">Are you sure you want to remove this data?</h4>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer p-2">
-                    <button type="button" name="ok_button" id="ok_button" class="btn btn-danger px-3 btn-sm">OK</button>
-                    <button type="button" class="btn btn-dark px-3 btn-sm" data-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-
-
 
 @endsection
 
@@ -307,6 +279,13 @@
 
     <script>
         $(document).ready(function () {
+
+            @can('Job-Attendance-edit')
+                canEditattendace = true;
+            @endcan
+            @can('Job-Attendance-delete')
+                candeleteattendace = true;
+            @endcan
 
             $('#attendant_menu_link').addClass('active');
             $('#attendant_menu_link_icon').addClass('active');
@@ -348,10 +327,47 @@
             });
 
             $('#dataTable').DataTable({
-                processing: true,
-                serverSide: true,
+               "destroy": true,
+                    "processing": true,
+                    "serverSide": true,
+                    dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
+                        "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+                    "buttons": [{
+                            extend: 'csv',
+                            className: 'btn btn-success btn-sm',
+                            title: 'Location Attendance  Information',
+                            text: '<i class="fas fa-file-csv mr-2"></i> CSV',
+                        },
+                        { 
+                            extend: 'pdf', 
+                            className: 'btn btn-danger btn-sm', 
+                            title: 'Location Attendance  Information', 
+                            text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
+                            orientation: 'landscape', 
+                            pageSize: 'legal', 
+                            customize: function(doc) {
+                                doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+                            }
+                        },
+                        {
+                            extend: 'print',
+                            title: 'Location Attendance   Information',
+                            className: 'btn btn-primary btn-sm',
+                            text: '<i class="fas fa-print mr-2"></i> Print',
+                            customize: function(win) {
+                                $(win.document.body).find('table')
+                                    .addClass('compact')
+                                    .css('font-size', 'inherit');
+                            },
+                        },
+                        // 'copy', 'csv', 'excel', 'pdf', 'print'
+                    ],
+                    "order": [
+                        [0, "desc"]
+                    ],
                 ajax: {
-                    "url": "{!! route('jobattendancelist') !!}",
+                     url: scripturl + '/location_attendance_list.php',
+                     type: 'POST',
                    
                 },
                 columns: [
@@ -362,14 +378,24 @@
                     { data: 'on_time', name: 'on_time' },
                     { data: 'off_time', name: 'off_time' },
                     {
-                    data: 'action',
-                    name: 'action',
-                    orderable: false,
-                    searchable: false,
-                    render: function (data, type, row) {
-                        return '<div style="text-align: right;">' + data + '</div>';
-                    }
-                },
+                        data: 'id',
+                        name: 'action',
+                        className: 'text-right',
+                        orderable: false,
+                        searchable: false,
+                        render: function(data, type, row) {
+                            var is_resigned = row.is_resigned;
+                            var buttons = '';
+
+                            if (canEditattendace) {
+                                buttons += '<button name="edit" id="' + row.id +'" class="edit btn btn-primary btn-sm" type="submit"  data-toggle="tooltip" title="Edit"><i class="fas fa-pencil-alt"></i></button>&nbsp;';
+                            }
+                            if (candeleteattendace) {
+                                buttons += '<button name="delete" id="' + row.id +'" class="delete btn btn-danger btn-sm" data-toggle="tooltip" title="Remove"><i class="far fa-trash-alt"></i></button>';
+                            }
+                            return buttons;
+                        }
+                    },
                 ],
                 "bDestroy": true,
                 "order": [
@@ -436,28 +462,41 @@
                         },
                     dataType: "json",
                     success: function (data) {
-                        var html = '';
                         if (data.errors) {
-                            html = '<div class="alert alert-danger">';
-                            for (var count = 0; count < data.errors.length; count++) {
-                                html += '<p>' + data.errors[count] + '</p>';
-                            }
-                            html += '</div>';
+                            const actionObj = {
+                                icon: 'fas fa-warning',
+                                title: '',
+                                message: 'Record Error',
+                                url: '',
+                                target: '_blank',
+                                type: 'danger'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            action(actionJSON);
                         }
                         if (data.success) {
-                            html = '<div class="alert alert-success">' + data.success + '</div>';
+                            const actionObj = {
+                                icon: 'fas fa-save',
+                                title: '',
+                                message: data.success,
+                                url: '',
+                                target: '_blank',
+                                type: 'success'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
                             $('#formTitle')[0].reset();
-                            location.reload()
+                            actionreload(actionJSON);
                         }
-                        $('#form_result').html(html);
                     }
                 });
 
                 }
             });
 
-            $(document).on('click', '.edit', function () {
-                var id = $(this).attr('id');
+            $(document).on('click', '.edit',async function () {
+                 var r = await Otherconfirmation("You want to Edit this ? ");
+                if (r == true) {
+                      var id = $(this).attr('id');
                
                 $('#form_result').html('');
                 $.ajaxSetup({
@@ -482,6 +521,7 @@
                         $('#formModal2').modal('show');
                     }
                 })
+                }
             });
 
             $('#formTitleedit').on('submit', function (event) {
@@ -510,20 +550,31 @@
                         },
                     dataType: "json",
                     success: function (data) {
-                        var html = '';
-                        if (data.errors) {
-                            html = '<div class="alert alert-danger">';
-                            for (var count = 0; count < data.errors.length; count++) {
-                                html += '<p>' + data.errors[count] + '</p>';
-                            }
-                            html += '</div>';
+                         if (data.errors) {
+                            const actionObj = {
+                                icon: 'fas fa-warning',
+                                title: '',
+                                message: 'Record Error',
+                                url: '',
+                                target: '_blank',
+                                type: 'danger'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            action(actionJSON);
                         }
                         if (data.success) {
-                            html = '<div class="alert alert-success">' + data.success + '</div>';
-                            $('#formTitleedit')[0].reset();
-                            location.reload()
+                            const actionObj = {
+                                icon: 'fas fa-save',
+                                title: '',
+                                message: data.success,
+                                url: '',
+                                target: '_blank',
+                                type: 'success'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                             $('#formTitleedit')[0].reset();
+                            actionreload(actionJSON);
                         }
-                        $('#form_result2').html(html);
                     }
                 });
             });
@@ -568,20 +619,31 @@
                         },
                     dataType: "json",
                     success: function (data) {
-                        var html = '';
-                        if (data.errors) {
-                            html = '<div class="alert alert-danger">';
-                            for (var count = 0; count < data.errors.length; count++) {
-                                html += '<p>' + data.errors[count] + '</p>';
-                            }
-                            html += '</div>';
+                         if (data.errors) {
+                            const actionObj = {
+                                icon: 'fas fa-warning',
+                                title: '',
+                                message: 'Record Error',
+                                url: '',
+                                target: '_blank',
+                                type: 'danger'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            action(actionJSON);
                         }
                         if (data.success) {
-                            html = '<div class="alert alert-success">' + data.success + '</div>';
-                            $('#formTitleedit')[0].reset();
-                            location.reload()
+                            const actionObj = {
+                                icon: 'fas fa-save',
+                                title: '',
+                                message: data.success,
+                                url: '',
+                                target: '_blank',
+                                type: 'success'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                             $('#formTitlesingle')[0].reset();
+                            actionreload(actionJSON);
                         }
-                        $('#form_resultsingle').html(html);
                     }
                 });
             });
@@ -589,35 +651,42 @@
 
             var user_id;
 
-            $(document).on('click', '.delete', function () {
-                user_id = $(this).attr('id');
-                $('#confirmModal').modal('show');
-            });
-          
-            $('#ok_button').click(function () {
-                $.ajaxSetup({
+            $(document).on('click', '.delete',async function () {
+                var r = await Otherconfirmation("You want to remove this ? ");
+                if (r == true) {
+                    user_id = $(this).attr('id');
+                    $.ajaxSetup({
                         headers: {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                         }
                     })
-                $.ajax({
-                    url: '{!! route("jobattendancedelete") !!}',
+                    $.ajax({
+                        url: '{!! route("jobattendancedelete") !!}',
                         type: 'POST',
                         dataType: "json",
-                        data: {id: user_id },
-                    beforeSend: function () {
-                        $('#ok_button').text('Deleting...');
-                    },
-                    success: function (data) {
-                        setTimeout(function () {
-                            $('#confirmModal').modal('hide');
-                            $('#dataTable').DataTable().ajax.reload();
-                        }, 2000);
-                        location.reload()
-                    }
-                })
-            });
+                        data: {
+                            id: user_id
+                        },
+                        beforeSend: function () {
+                            $('#ok_button').text('Deleting...');
+                        },
+                        success: function (data) {
+                           const actionObj = {
+                                icon: 'fas fa-trash-alt',
+                                title: '',
+                                message: 'Record Remove Successfully',
+                                url: '',
+                                target: '_blank',
+                                type: 'danger'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            actionreload(actionJSON);
+                        }
+                    })
+                }
 
+            });
+          
               // select all record 
         $('#selectAll').click(function (e) {
             $('#dataTable').closest('table').find('td input:checkbox').prop('checked', this.checked);
@@ -625,13 +694,6 @@
 
         });
 
-          function deactive_confirm() {
-        return confirm("Are you sure you want to deactive this?");
-    }
-
-    function active_confirm() {
-        return confirm("Are you sure you want to active this?");
-    }
     function productDelete(ctl) {
     	$(ctl).parents("tr").remove();
     }

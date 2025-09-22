@@ -86,17 +86,10 @@ class JoblocationController extends Controller
         ->addColumn('action', function ($row) {
             $btn = '';
                     if(Auth::user()->can('Job-Location-edit')){
-                            $btn .= ' <button name="edit" id="'.$row->id.'" class="edit btn btn-outline-primary btn-sm" type="submit"><i class="fas fa-pencil-alt"></i></button>'; 
-                    }
-                    if(Auth::user()->can('Job-Location-status')){
-                        if($row->status == 1){
-                            $btn .= ' <a href="'.route('joblocationsstatus', ['id' => $row->id, 'status' => 2]) .'" onclick="return deactive_confirm()" target="_self" class="btn btn-outline-success btn-sm mr-1 "><i class="fas fa-check"></i></a>';
-                        }else{
-                            $btn .= '&nbsp;<a href="'.route('joblocationsstatus', ['id' => $row->id, 'status' => 1]) .'" onclick="return active_confirm()" target="_self" class="btn btn-outline-warning btn-sm mr-1 "><i class="fas fa-times"></i></a>';
-                        }
+                            $btn .= ' <button name="edit" id="'.$row->id.'" class="edit btn btn-primary btn-sm" type="submit" data-toggle="tooltip" title="Edit"><i class="fas fa-pencil-alt"></i></button>'; 
                     }
                     if(Auth::user()->can('Job-Location-delete')){
-                        $btn .= ' <button name="delete" id="'.$row->id.'" class="delete btn btn-outline-danger btn-sm"><i class="far fa-trash-alt"></i></button>';
+                        $btn .= ' <button name="delete" id="'.$row->id.'" class="delete btn btn-danger btn-sm" data-toggle="tooltip" title="Remove"><i class="far fa-trash-alt"></i></button>';
                     }
             return $btn;
         })
