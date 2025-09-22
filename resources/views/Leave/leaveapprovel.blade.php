@@ -3,16 +3,23 @@
 @section('content')
 
 <main>
-    <div class="page-header shadow">
-        <div class="container-fluid">
-            @include('layouts.attendant&leave_nav_bar')
-           
+   <div class="page-header shadow">
+            <div class="container-fluid d-none d-sm-block shadow">
+                @include('layouts.attendant&leave_nav_bar')
+            </div>
+            <div class="container-fluid">
+                <div class="page-header-content py-3 px-2">
+                    <h1 class="page-header-title ">
+                        <div class="page-header-icon"><i class="fa-light fa-calendar-pen"></i></div>
+                        <span>Leave Approvel</span>
+                    </h1>
+                </div>
+            </div>
         </div>
-    </div>
                     
-    <div class="container-fluid mt-4">
+    <div class="container-fluid mt-2 p-0 p-2">
         <div class="card mb-2">
-            <div class="card-body">
+            <div class="card-body p-0 p-2">
                 <form class="form-horizontal" id="formFilter">
                     <div class="form-row mb-1">
                         <div class="col-md-2">
@@ -55,7 +62,6 @@
         </div>
         <div class="card">
             <div class="card-body p-0 p-2">
-                <div id="message"></div>
                 <div class="row">
                     <div class="col-12">
                         <div class="row align-items-center mb-4">
@@ -74,17 +80,17 @@
                             <thead>
                                 <tr>
                                     <th></th>
-                                    <th>Emp Id </th>
-                                    <th>Name With Initial </th>
-                                    <th>Department </th>
-                                    <th>Leave Type</th>
-                                    <th>Leave From</th>
-                                    <th>Leave To</th>
-                                    <th>Reason</th>
-                                    <th>Covering By</th>
-                                    <th>Status</th>
-                                    <th class="text-right">Action</th>
-                                    <th class="d-none">Id</th>
+                                    <th>EMP ID</th>
+                                    <th>NAME WITH INITIAL</th>
+                                    <th>DEPARTMENT </th>
+                                    <th>LEAVE TYPE</th>
+                                    <th>LEAVE FROM</th>
+                                    <th>LEAVE TO</th>
+                                    <th class="nowrap">REASON</th>
+                                    <th>COVERING BY</th>
+                                    <th>STATUS</th>
+                                    <th class="text-right">ACTION</th>
+                                    <th class="d-none">ID</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -265,28 +271,40 @@
 
         function load_dt(department, employee, location, from_date, to_date){
             $('#divicestable').DataTable({
-                dom: 'lBfrtip',
-                buttons: [
-                    {
-                        extend: 'excelHtml5',
-                        text: 'Excel',
-                        className: 'btn btn-sm btn-primary',
-                        exportOptions: {
-                            columns: 'th:not(:last-child)'
-                        }
-                    },
-                    {
-                        extend: 'pdfHtml5',
-                        text: 'Print',
-                        className: 'btn btn-default',
-                        exportOptions: {
-                            columns: 'th:not(:last-child)'
-                        }
-                    }
-                ],
-                processing: true,
-                serverSide: true,
-                stateSave: true,
+                "destroy": true,
+                        "processing": true,
+                        "serverSide": true,
+                        dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
+                            "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+                        "buttons": [{
+                                extend: 'csv',
+                                className: 'btn btn-success btn-sm',
+                                title: 'Leave Approve Details',
+                                text: '<i class="fas fa-file-csv mr-2"></i> CSV',
+                            },
+                            { 
+                                extend: 'pdf', 
+                                className: 'btn btn-danger btn-sm', 
+                                title: 'Leave Approve Details', 
+                                text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
+                                orientation: 'landscape', 
+                                pageSize: 'legal', 
+                                customize: function(doc) {
+                                    doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+                                }
+                            },
+                            {
+                                extend: 'print',
+                                title: 'Leave Approve Details',
+                                className: 'btn btn-primary btn-sm',
+                                text: '<i class="fas fa-print mr-2"></i> Print',
+                                customize: function(win) {
+                                    $(win.document.body).find('table')
+                                        .addClass('compact')
+                                        .css('font-size', 'inherit');
+                                },
+                            },
+                        ],
                 ajax: {
                     "url": "{!! route('leave_approve_list_dt') !!}",
                     "data": {'department':department, 'employee':employee, 'location': location, 'from_date': from_date, 'to_date': to_date},
@@ -302,7 +320,7 @@
                     { data: 'reson', name: 'reson' },
                     { data: 'covering_emp', name: 'covering_emp' },
                     { data: 'status', name: 'status' },
-                    { data: 'action', name: 'action', orderable: false, searchable: false},
+                    { data: 'action', name: 'action',  className: 'text-right', orderable: false, searchable: false},
                     { data: 'id', name: 'id' },
                 ],
                 columnDefs: [
@@ -364,20 +382,31 @@ $(document).ready(function () {
 
             },
             success: function (data) {
-                var html = '';
                 if (data.errors) {
-                    html = '<div class="alert alert-danger">';
-                    for (var count = 0; count < data.errors.length; count++) {
-                        html += '<p>' + data.errors[count] + '</p>';
-                    }
-                    html += '</div>';
+                    const actionObj = {
+                        icon: 'fas fa-warning',
+                        title: '',
+                        message: 'Record Error',
+                        url: '',
+                        target: '_blank',
+                        type: 'danger'
+                    };
+                    const actionJSON = JSON.stringify(actionObj, null, 2);
+                    action(actionJSON);
                 }
                 if (data.success) {
-                    $('#message').html("<div class='alert alert-success'> "+ data.success +" </div>");
-                    $('#confirmModal').modal('hide');
-                    $('#divicestable').DataTable().ajax.reload(null, false);
+                    const actionObj = {
+                        icon: 'fas fa-save',
+                        title: '',
+                        message: data.success,
+                        url: '',
+                        target: '_blank',
+                        type: 'success'
+                    };
+                    const actionJSON = JSON.stringify(actionObj, null, 2);
+                    actionreload(actionJSON);
                 }
-                $('#form_result').html(html);
+                 location.reload()
             }
         });
     });
@@ -402,76 +431,115 @@ $(document).ready(function () {
             },
             success: function (data) {
 
-                var html = '';
                 if (data.errors) {
-                    html = '<div class="alert alert-danger">';
-                    for (var count = 0; count < data.errors.length; count++) {
-                        html += '<p>' + data.errors[count] + '</p>';
-                    }
-                    html += '</div>';
+                    const actionObj = {
+                        icon: 'fas fa-warning',
+                        title: '',
+                        message: 'Record Error',
+                        url: '',
+                        target: '_blank',
+                        type: 'danger'
+                    };
+                    const actionJSON = JSON.stringify(actionObj, null, 2);
+                    action(actionJSON);
                 }
                 if (data.success) {
-                    $('#message').html("<div class='alert alert-danger'>Leave Not Approved</div>");
-                    location.reload()
+                    const actionObj = {
+                        icon: 'fas fa-save',
+                        title: '',
+                        message: data.success,
+                        url: '',
+                        target: '_blank',
+                        type: 'success'
+                    };
+                    const actionJSON = JSON.stringify(actionObj, null, 2);
+                    actionreload(actionJSON);
                 }
-                $('#form_result').html(html);
             }
         });
     });
 
     var selectedRowIdsapprove = [];
 
-    $('#allapproveel').click(function () {
-        selectedRowIdsapprove = [];
-        $('#divicestable tbody .selectCheck:checked').each(function () {
-            var rowData = $('#divicestable').DataTable().row($(this).closest('tr')).data();
+        $('#allapproveel').click(async function () {
+            var r = await Otherconfirmation("You want to Edit this ? ");
+            if (r == true) {
+                selectedRowIdsapprove = [];
+                $('#divicestable tbody .selectCheck:checked').each(function () {
+                    var rowData = $('#divicestable').DataTable().row($(this).closest('tr')).data();
 
-            if (rowData) {
-                selectedRowIdsapprove.push({
-                    empid: rowData.emp_id,     
-                    emp_name: rowData.emp_name, 
-                    laeaveid: rowData.id     
+                    if (rowData) {
+                        selectedRowIdsapprove.push({
+                            empid: rowData.emp_id,
+                            emp_name: rowData.employee_display,
+                            laeaveid: rowData.id
+                        });
+                    }
                 });
+
+                if (selectedRowIdsapprove.length > 0) {
+                    console.log(selectedRowIdsapprove);
+
+                    $.ajaxSetup({
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        }
+                    })
+
+                    let comment = $("#allcomment").val();
+                    let status = $("input[name='allstatus']:checked").val();
+                    $.ajax({
+                        url: '{!! route("leaveapprove_batch") !!}',
+                        type: 'POST',
+                        dataType: "json",
+                        data: {
+                            dataarry: selectedRowIdsapprove,
+                            comment: comment,
+                            status: status
+                        },
+                        success: function (data) {
+                            if (data.errors) {
+                                const actionObj = {
+                                    icon: 'fas fa-warning',
+                                    title: '',
+                                    message: 'Record Error',
+                                    url: '',
+                                    target: '_blank',
+                                    type: 'danger'
+                                };
+                                const actionJSON = JSON.stringify(actionObj, null, 2);
+                                action(actionJSON);
+                            }
+                            if (data.success) {
+                                const actionObj = {
+                                    icon: 'fas fa-save',
+                                    title: '',
+                                    message: data.success,
+                                    url: '',
+                                    target: '_blank',
+                                    type: 'success'
+                                };
+                                const actionJSON = JSON.stringify(actionObj, null, 2);
+                                actionreload(actionJSON);
+                            }
+                             location.reload()
+
+                        }
+                    })
+                } else {
+
+                    Swal.fire({
+                        position: "top-end",
+                        icon: 'warning',
+                        title: 'Select Rows to Final Approve!',
+                        showConfirmButton: false,
+                        timer: 2500
+                    });
+                }
             }
+
         });
-        if (selectedRowIdsapprove.length > 0) {
-            console.log(selectedRowIdsapprove);
-            $('#approveconfirmModal').modal('show');
-        } else {
-            
-            alert('Select Rows to Final Approve!!!!');
-        }
-    });
 
-    $('#approveall').click(function () {
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            })
-
-            let comment = $("#allcomment").val();
-             let status = $("input[name='allstatus']:checked").val();
-            $.ajax({
-                url: '{!! route("leaveapprove_batch") !!}',
-                type: 'POST',
-                dataType: "json",
-                data: {
-                    dataarry: selectedRowIdsapprove,
-                    comment: comment,
-                    status:status
-                },
-                success: function (data) {
-                    setTimeout(function () {
-                        $('#approveconfirmModal').modal('hide');
-                        location.reload();
-                    }, 500);
-
-                    $('#selectAll').prop('checked', false);
-                   
-                }
-            })
-        });
 
     $('#selectAll').click(function (e) {
             $('#divicestable').closest('table').find('td input:checkbox').prop('checked', this.checked);
