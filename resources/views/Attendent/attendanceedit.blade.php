@@ -4,14 +4,21 @@
 
     <main>
         <div class="page-header shadow">
-            <div class="container-fluid">
+            <div class="container-fluid d-none d-sm-block shadow">
                 @include('layouts.attendant&leave_nav_bar')
-               
+            </div>
+            <div class="container-fluid">
+                <div class="page-header-content py-3 px-2">
+                    <h1 class="page-header-title ">
+                        <div class="page-header-icon"><i class="fa-light fa-calendar-pen"></i></div>
+                        <span>Attendance Add</span>
+                    </h1>
+                </div>
             </div>
         </div>
-        <div class="container-fluid mt-4">
+        <div class="container-fluid mt-2 p-0 p-2">
             <div class="card mb-2">
-                <div class="card-body">
+                <div class="card-body p-0 p-2">
                     <form class="form-horizontal" id="formFilter">
                         <div class="form-row mb-1">
                             <div class="col-md-3">
@@ -54,41 +61,43 @@
                 <div class="card-body p-0 p-2">
                     <div class="row">
                         <div class="col-12">
-                            <button type="button" class="btn btn-outline-primary btn-sm fa-pull-right px-3 mr-2" name="create_record" id="create_record"><i class="fas fa-plus mr-2"></i>Add - Single Date</button>
-                            <button type="button" class="btn btn-outline-success btn-sm fa-pull-right px-3 mr-2" name="edit_record_month" id="edit_record_month"><i class="fas fa-pencil-alt mr-2"></i>Add - Month</button>
-                            <button type="button" class="btn btn-outline-dark btn-sm fa-pull-right px-3 mr-2" name="create_record_dept_wise" id="create_record_dept_wise"><i class="fas fa-plus mr-2"></i>Add - Department Wise</button>
-                            <button type="button" class="btn btn-outline-primary btn-sm fa-pull-right px-3 mr-2" name="create_record_upload" id="create_record_upload"><i class="fa fa-upload mr-2"></i>Upload Attendance TXT</button>
-                            <button type="button" class="btn btn-outline-success btn-sm fa-pull-right px-3 mr-2" name="csv_upload_record" id="csv_upload_record"><i class="fas fa-upload mr-2"></i>Upload CSV</button>
+                            <div class="d-flex flex-wrap justify-content-end mb-2">
+                                <button type="button" class="btn btn-primary btn-sm px-3 mb-2 mr-2" name="create_record" id="create_record">
+                                    <i class="fas fa-plus mr-2"></i>Add - Single Date
+                                </button>
+                                <button type="button" class="btn btn-success btn-sm px-3 mb-2 mr-2" name="edit_record_month" id="edit_record_month">
+                                    <i class="fas fa-pencil-alt mr-2"></i>Add - Month
+                                </button>
+                                <button type="button" class="btn btn-primary btn-sm px-3 mb-2 mr-2" name="create_record_dept_wise" id="create_record_dept_wise">
+                                    <i class="fas fa-plus mr-2"></i>Add - Department Wise
+                                </button>
+                                <button type="button" class="btn btn-success btn-sm px-3 mb-2 mr-2" name="csv_upload_record" id="csv_upload_record">
+                                    <i class="fas fa-upload mr-2"></i>Upload CSV
+                                </button>
+                                <button type="button" class="btn btn-primary btn-sm px-3 mb-2" name="create_record_upload" id="create_record_upload">
+                                    <i class="fa fa-upload mr-2"></i>Upload Attendance TXT
+                                </button>
+                            </div>
                         </div>
                         <div class="col-12">
                             <hr class="border-dark">
-                        </div>
-                        <div class="col-12">
-                            <div id="response"></div>
-                        </div>
-                        <div class="col-md-12">
-                            <div class=" text-center" id="empty_msg">
-                                <div class="alert alert-info"> <span> Filter Company and Department to view attendance </span> </div>
-                            </div>
                         </div>
                         <div class="col-12" id="attendtable_outer">
                             <div class="center-block fix-width scroll-inner">
                             <table class="table table-striped table-bordered table-sm small nowrap" style="width: 100%" id="attendtable">
                                 <thead>
                                 <tr>
-                                    <th>Employee ID</th>
-                                    <th>Name</th>
-                                    <th>Date</th>
-                                    <th>Check In</th>
-                                    <th>Check Out</th>
-                                    <th>Location</th>
-                                    <th>Department</th>
-                                    <th class="text-right">Action</th>
+                                    <th>EMPLOYEE ID</th>
+                                    <th>NAME</th>
+                                    <th>DATE</th>
+                                    <th>CHECK IN</th>
+                                    <th>CHECK OUT</th>
+                                    <th>LOCATION</th>
+                                    <th>DEPARTMENT</th>
+                                    <th class="text-right">ACTION</th>
                                 </tr>
                                 </thead>
-
                                 <tbody>
-
                                 </tbody>
                             </table>
                             </div>
@@ -117,27 +126,27 @@
                                 <form method="post" id="formAdd" class="form-horizontal">
                                     {{ csrf_field() }}
                                     <div class="form-row mb-1">
-                                        <div class="col">
-                                            <label class="small font-weight-bold text-dark">Employee</label>
-                                            <select name="employee" id="employee_single" class="form-control form-control-sm">
+                                        <div class="col-sm-12 col-md-12">
+                                            <label class="small font-weight-bold text-dark">Employee*</label>
+                                            <select name="employee" id="employee_single" class="form-control form-control-sm" required>
                                                 <option value="">Select...</option>
                                             </select>
                                         </div>
                                     </div>
                                     <div class="form-row mb-1">
-                                        <div class="col">
-                                            <label class="small font-weight-bold text-dark">In Time</label>
-                                            <input type="datetime-local" name="in_time_s" id="in_time_s" class="form-control form-control-sm" placeholder="YYYY-MM-DD HH:MM" />
+                                        <div class="col-sm-12 col-md-6">
+                                            <label class="small font-weight-bold text-dark">In Time*</label>
+                                            <input type="datetime-local" name="in_time_s" id="in_time_s" class="form-control form-control-sm" placeholder="YYYY-MM-DD HH:MM" required/>
                                         </div>
 
-                                        <div class="col">
-                                            <label class="small font-weight-bold text-dark">Out Time</label>
-                                            <input type="datetime-local" name="out_time_s" id="out_time_s" class="form-control form-control-sm" placeholder="YYYY-MM-DD HH:MM" />
+                                        <div class="col-sm-12 col-md-6">
+                                            <label class="small font-weight-bold text-dark">Out Time*</label>
+                                            <input type="datetime-local" name="out_time_s" id="out_time_s" class="form-control form-control-sm" placeholder="YYYY-MM-DD HH:MM" required/>
                                         </div>
 
                                     </div>
                                     <div class="form-group mt-3">
-                                        <button type="submit" name="action_button" id="action_button" class="btn btn-outline-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
+                                        <button type="submit" name="action_button" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
                                     </div>
                                     <input type="hidden" name="action" id="action" value="Add" />
                                     <input type="hidden" name="hidden_id" id="hidden_id" />
@@ -166,29 +175,29 @@
                             <div class="row">
                                 <div class="col">
                                     <div class="form-row mb-1">
-                                        <div class="col-md-3">
+                                        <div class="col-sm-12 col-md-3">
                                             <label class="small font-weight-bold text-dark">Company <span class="text-danger">*</span> </label>
                                             <select name="company" id="company_dept_wise" class="form-control form-control-sm">
                                             </select>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-sm-12 col-md-3">
                                             <label class="small font-weight-bold text-dark">Location <span class="text-danger">*</span> </label>
                                             <select name="location" id="location_dept_wise" class="form-control form-control-sm" >
                                             </select>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-sm-12 col-md-3">
                                             <label class="small font-weight-bold text-dark">Department <span class="text-danger">*</span> </label>
                                             <select name="department" id="department_dept_wise" class="form-control form-control-sm" >
                                             </select>
                                         </div>
 
-                                        <div class="col-md-3">
+                                        <div class="col-sm-12 col-md-3">
                                             <label class="small font-weight-bold text-dark">Date <span class="text-danger">*</span></label>
                                             <input type="date" id="date_dept_wise" name="date" class="form-control form-control-sm" />
                                         </div>
-                                        <div class="col-md-12">
+                                        <div class="col-sm-12 col-md-12">
                                             <label class="small font-weight-bold text-dark">&nbsp; </label> <br>
-                                            <button type="button" name="action_button" id="btn-dept_wise" class="btn btn-outline-primary btn-sm fa-pull-right px-4"><i class="fas fa-search"></i>&nbsp;Find</button>
+                                            <button type="button" name="action_button" id="btn-dept_wise" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-search"></i>&nbsp;Find</button>
                                         </div>
                                     </div>
 
@@ -196,15 +205,15 @@
                             </div>
 
                             <div class="row">
-                                <div class="col">
+                                <div class="col-sm-12 col-md-12">
                                     <div class="table-responsive mt-2">
                                         <table class="table table-sm table-bordered table-striped table-hover" id="table_dept_wise">
                                             <thead>
                                             <tr>
-                                                <th>Emp Id</th>
-                                                <th>Employee</th>
-                                                <th>In Time</th>
-                                                <th>Out Time</th>
+                                                <th>EMP ID</th>
+                                                <th>EMPLOYEE</th>
+                                                <th>IN TIME</th>
+                                                <th>OUT TIME</th>
                                             </tr>
                                             </thead>
                                             <tbody>
@@ -213,17 +222,14 @@
                                     </div>
                                 </div>
                             </div>
-
                             <div class="row">
                                 <div class="col">
                                     <div class="form-group mt-3">
-                                        <button type="submit" name="action_button" id="btn-save_dept_wise" class="btn btn-outline-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
+                                        <button type="submit" name="action_button" id="btn-save_dept_wise" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
                                     </div>
                                 </div>
                             </div>
-
                         </form>
-
                     </div>
                 </div>
             </div>
@@ -280,52 +286,8 @@
                 </div>
             </div>
         </div>
-        <div class="modal fade" id="confirmModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-             aria-labelledby="staticBackdropLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-sm">
-                <div class="modal-content">
-                    <div class="modal-header p-2">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col text-center">
-                                <h4 class="font-weight-normal">Are you sure you want to remove this data?</h4>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer p-2">
-                        <button type="button" name="ok_button" id="ok_button" class="btn btn-danger px-3 btn-sm">OK</button>
-                        <button type="button" class="btn btn-dark px-3 btn-sm" data-dismiss="modal">Cancel</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="modal fade" id="getdataModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-             aria-labelledby="staticBackdropLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-sm">
-                <div class="modal-content">
-                    <div class="modal-header p-2">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col text-center">
-                                <h4 class="font-weight-normal">Please check the devices connection and confirm?</h4>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer p-2">
-                        <button type="button" name="comfirm_button" id="comfirm_button" class="btn btn-danger px-3 btn-sm">Confirm</button>
-                        <button type="button" class="btn btn-dark px-3 btn-sm" data-dismiss="modal">Cancel</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+
+    
         <!-- Modal Area End -->
 
         <div class="modal fade" id="monthAtModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
@@ -345,15 +307,15 @@
                             <div class="row">
                                 <div class="col">
                                     <div class="form-row mb-1">
-                                        <div class="col">
-                                            <label class="small font-weight-bold text-dark">Employee</label>
-                                            <select name="employee" id="employee_m" class="form-control form-control-sm">
+                                        <div class="col-sm-12 col-md-6">
+                                            <label class="small font-weight-bold text-dark">Employee *</label>
+                                            <select name="employee" id="employee_m" class="form-control form-control-sm" required>
                                                 <option value="">Select...</option>
                                             </select>
                                         </div>
-                                        <div class="col">
-                                            <label class="small font-weight-bold text-dark">Month</label>
-                                            <input type="month" id="month_m" name="month" class="form-control form-control-sm" min="2021-01" value="{{Date('Y-m')}}" />
+                                        <div class="col-sm-12 col-md-6">
+                                            <label class="small font-weight-bold text-dark">Month*</label>
+                                            <input type="month" id="month_m" name="month" class="form-control form-control-sm" min="2021-01" value="{{Date('Y-m')}}" required/>
                                         </div>
                                     </div>
 
@@ -368,9 +330,9 @@
                                             <thead>
                                             <tr>
                                                 <th>#</th>
-                                                <th>Day</th>
-                                                <th>In Time</th>
-                                                <th>Out Time</th>
+                                                <th>DAY</th>
+                                                <th>IN TIME</th>
+                                                <th>OUT TIME</th>
                                             </tr>
                                             </thead>
                                             <tbody>
@@ -383,7 +345,7 @@
                             <div class="row">
                                 <div class="col">
                                     <div class="form-group mt-3">
-                                        <button type="submit" name="action_button" id="btn-save" class="btn btn-outline-primary btn-sm fa-pull-right px-4"><i class="fas fa-pencil-alt"></i>&nbsp;Update </button>
+                                        <button type="submit" name="action_button" id="btn-save" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-pencil-alt"></i>&nbsp;Update </button>
                                     </div>
                                 </div>
                             </div>
@@ -413,12 +375,12 @@
                             <div class="row">
                                 <div class="col">
                                     <div class="form-row mb-1">
-                                        <div class="col">
-                                            <label class="small font-weight-bold text-dark">Date</label>
+                                        <div class="col-sm-12 col-md-4">
+                                            <label class="small font-weight-bold text-dark">Date*</label>
                                             <input required type="date" id="date_u" name="date" class="form-control form-control-sm" value="{{Date('Y-m-d')}}" />
                                         </div>
-                                        <div class="col">
-                                            <label class="small font-weight-bold text-dark">Select Machine</label>
+                                        <div class="col-sm-12 col-md-4">
+                                            <label class="small font-weight-bold text-dark">Machine* </label>
                                             <select id="machine" name="machine" class="form-control form-control-sm" required>
                                                 <option value="">Select Machine</option>
                                                 @foreach($fingerprints as $fingerprint)
@@ -426,26 +388,24 @@
                                                 @endforeach
                                             </select>
                                         </div>
-                                        <div class="col">
-                                            <label class="small font-weight-bold text-dark">TXT File</label>
+                                        <div class="col-sm-12 col-md-4">
+                                            <label class="small font-weight-bold text-dark">TXT File*</label>
                                             <input required type="file" id="txt_file_u" name="txt_file_u" class="form-control form-control-sm" accept="text/plain"/>
                                         </div>
                                     </div>
 
                                 </div>
                             </div>
-
                             <div class="row">
                                 <div class="col">
                                     <div class="loading"></div>
 
                                 </div>
                             </div>
-
                             <div class="row">
                                 <div class="col">
                                     <div class="form-group mt-3">
-                                        <button type="submit" name="action_button" id="btn-upload" class="btn btn-outline-primary btn-sm fa-pull-right px-4"><i class="fas fa-upload"></i>&nbsp;Upload </button>
+                                        <button type="submit" name="action_button" id="btn-upload" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-upload"></i>&nbsp;Upload </button>
                                     </div>
                                 </div>
                             </div>
@@ -664,8 +624,40 @@
 
             function load_dt(company, location, department, employee, from_date, to_date) {
                 $('#attendtable').DataTable({
-                    processing: true,
-                    serverSide: true,
+                    "destroy": true,
+                    "processing": true,
+                    "serverSide": true,
+                    dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
+                        "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+                    "buttons": [{
+                            extend: 'csv',
+                            className: 'btn btn-success btn-sm',
+                            title: 'Attendance  Information',
+                            text: '<i class="fas fa-file-csv mr-2"></i> CSV',
+                        },
+                        { 
+                            extend: 'pdf', 
+                            className: 'btn btn-danger btn-sm', 
+                            title: 'Attendance  Information', 
+                            text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
+                            orientation: 'landscape', 
+                            pageSize: 'legal', 
+                            customize: function(doc) {
+                                doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+                            }
+                        },
+                        {
+                            extend: 'print',
+                            title: 'Attendance   Information',
+                            className: 'btn btn-primary btn-sm',
+                            text: '<i class="fas fa-print mr-2"></i> Print',
+                            customize: function(win) {
+                                $(win.document.body).find('table')
+                                    .addClass('compact')
+                                    .css('font-size', 'inherit');
+                            },
+                        },
+                    ],
                     ajax: {
                         url: scripturl + "/attendance_list_for_edit.php",
                         type: "POST",
@@ -720,20 +712,20 @@
                                 var button = '';
 
                                 if (canViewEmployee) {
-                                    button += '<button type="button" class="btn btn-outline-dark btn-sm view_button" data-uid="' + uid + '" data-recorddate="' + date + '" data-name="' + emp_name + '" title="View">' +
+                                    button += '<button type="button" class="btn btn-dark btn-sm view_button" data-uid="' + uid + '" data-recorddate="' + date + '" data-name="' + emp_name + '" title="View" data-toggle="tooltip">' +
                                             '<i class="fas fa-eye"></i>' +
                                             '</button> ';
                                 }
 
                                 if (canEditEmployee) {
-                                    button += '<button type="button" class="btn btn-outline-primary btn-sm edit_button" data-uid="'+ uid + '" data-date="' + date + '" data-name="' + emp_name + '" title="Edit">' +
+                                    button += '<button type="button" class="btn btn-primary btn-sm edit_button" data-uid="'+ uid + '" data-date="' + date + '" data-name="' + emp_name + '" data-toggle="tooltip" title="Edit">' +
                                             '<i class="fas fa-pencil-alt"></i>' +
                                             '</button> ';
                                 }
 
                                 if (canDeleteEmployee) {
-                                    button += '<button type="button" class="btn btn-outline-danger btn-sm delete_button" data-uid="' + uid + '" data-date="' + date + '" data-name="' + emp_name + '" title="Delete">' +
-                                            '<i class="fas fa-trash"></i>' +
+                                    button += '<button type="button" class="btn btn-danger btn-sm delete_button" data-uid="' + uid + '" data-date="' + date + '" data-name="' + emp_name + '" data-toggle="tooltip" title="Delete">' +
+                                            '<i class="fas fa-trash-alt"></i>' +
                                             '</button>';
                                 }
 
@@ -897,37 +889,42 @@
                                 }
 
                             });
-
-                            // $('.in_date_time').datetimepicker({
-                            //     format:'Y-m-d H:i',
-                            //     mask:false,
-                            // });
-
-                            // $('.out_date_time').datetimepicker({
-                            //     format:'Y-m-d H:i',
-                            //     mask:false,
-                            // });
-
                             save_btn.html(btn_prev_text);
                             save_btn.prop("disabled", false);
 
                         }else {
-                            var html = '';
-                            if (res.errors) {
-                                html = '<div class="alert alert-danger">';
-                                for (var count = 0; count < res.errors.length; count++) {
-                                    html +=   res.errors[count]+'<br>' ;
-                                }
-                                html += '</div>';
-                            }
-                            $('#bulk_response').html(html);
+                           
+                          if (res.errors) {
+                            const actionObj = {
+                                icon: 'fas fa-warning',
+                                title: '',
+                                message: 'Record Error',
+                                url: '',
+                                target: '_blank',
+                                type: 'danger'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            action(actionJSON);
+                        }
+
 
                             save_btn.prop("disabled", false);
                             save_btn.html(btn_prev_text);
                         }
                     },
                     error: function(res) {
-                        alert(data);
+                           if (data.errors) {
+                            const actionObj = {
+                                icon: 'fas fa-warning',
+                                title: '',
+                                message: 'Record Error',
+                                url: '',
+                                target: '_blank',
+                                type: 'danger'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            action(actionJSON);
+                        }
                     }
                 });
 
@@ -959,7 +956,6 @@
                 e.preventDefault();
                 let save_btn=$("#btn-save");
                 let btn_prev_text = save_btn.html();
-                //save_btn.prop("disabled", true);
                 save_btn.html('<i class="fa fa-spinner fa-spin"></i> loading...' );
                 let formData = new FormData($('#formMonth')[0]);
                 let url_text = '{{ url("/attendance_update_bulk_submit") }}';
@@ -976,35 +972,31 @@
                     data: formData,
                     success: function(res) {
                         if (res.status == 1) {
-                            $('#bulk_response').html("<div class='alert alert-success'>"+res.msg+"</div>");
-
-                            save_btn.html(btn_prev_text);
-                            save_btn.prop("disabled", false);
-                            $('#table_month').DataTable().clear().draw();
-                            $("#formMonth")[0].reset();
-                            $('#employee_m').val('').trigger('change');
-                            $('#attendtable').DataTable().ajax.reload();
-                            //scroll monthAtModal
-                            $('#monthAtModal').scrollTop(0);
-
-
-                            //wait 2 seconds
-                            setTimeout(function(){
-                                $('#monthAtModal').modal('hide');
-                            }, 2000);
+                             const actionObj = {
+                                icon: 'fas fa-save',
+                                title: '',
+                                message: res.status,
+                                url: '',
+                                target: '_blank',
+                                type: 'success'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            $('#formTitle')[0].reset();
+                            actionreload(actionJSON);
 
                         }else {
 
-                            var html = '';
-                            if (res.errors) {
-                                html = '<div class="alert alert-danger">';
-                                for (var count = 0; count < res.errors.length; count++) {
-                                    html +=   res.errors[count]+'<br>' ;
-                                }
-                                html += '</div>';
-                            }
+                            const actionObj = {
+                                icon: 'fas fa-warning',
+                                title: '',
+                                message: 'Record Error',
+                                url: '',
+                                target: '_blank',
+                                type: 'danger'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            action(actionJSON);
 
-                            $('#bulk_response').html(html);
 
                             save_btn.prop("disabled", false);
                             save_btn.html(btn_prev_text);
@@ -1139,77 +1131,6 @@
                 }
             } );
 
-            // function fill_dept_wise_table(company, area, location, dept, date){
-            //     let f_in_date = date;
-
-            //     //get department employee list
-            //     $.ajax({
-            //         url: '{{url("get_dept_emp_list")}}',
-            //         type: 'POST',
-            //         data: {
-            //             _token: '{{csrf_token()}}',
-            //             company: company,
-            //             area: area,
-            //             location: location,
-            //             dept: dept,
-            //             date: date
-            //         },
-            //         dataType: 'json',
-            //         success: function(res) {
-            //             let t = $('#table_dept_wise').DataTable({
-            //                 "pageLength":50,
-            //                 "bDestroy": true,
-            //             });
-            //             t.clear();
-
-            //             for(let i = 0; i < res.length; i++)
-            //             {
-            //                 t.row.add([
-            //                     res[i].emp_id,
-            //                     res[i].emp_name_with_initial,
-            //                     '<div class="input-group">' +
-            //                     '<input type="text" class="form-control form-control-sm date" value="'+f_in_date+'" name="in_date[]" />' +
-            //                     '<input type="text" class="form-control form-control-sm in_time" name="in_time[]" /> ' +
-            //                     '</div>'+
-            //                     '<input type="hidden" value="'+res[i].emp_id+'" name="emp_id[]" /> ',
-            //                     '<div class="input-group">' +
-            //                     '<input type="text" class="form-control form-control-sm date" value="'+f_in_date+'" name="out_date[]" /> '+
-            //                     '<input type="text" class="form-control form-control-sm out_time" name="out_time[]" /> ' +
-            //                     '</div>'
-            //                 ]).node().id = res[i].emp_id;
-            //                 t.draw( false );
-            //             }
-            //             $('#btn-dept_wise').html('Find');
-            //             $('#btn-dept_wise').attr('disabled', false);
-
-            //             $('.in_time').datetimepicker({
-            //                 format:'H:i',
-            //                 timepicker:true,
-            //                 datepicker:false,
-            //                 mask:true,
-            //             });
-
-            //             $('.out_time').datetimepicker({
-            //                 format:'H:i',
-            //                 timepicker:true,
-            //                 datepicker:false,
-            //                 mask:true,
-            //             });
-
-            //             $('.date').datetimepicker({
-            //                 format:'Y-m-d',
-            //                 mask:true,
-            //                 timepicker:false,
-            //                 datepicker:true,
-            //             });
-            //         },
-            //         error: function(res) {
-            //             alert(res);
-            //         }
-            //     });
-
-            // }
-
             function fill_dept_wise_table(company, area, location, dept, date) {
                 let f_in_date = date;
 
@@ -1253,14 +1174,6 @@
                             tbody.append(newRow);
                         }
 
-                        // // Initialize date time pickers
-                        // $('.date').datetimepicker({
-                        //     format: 'Y-m-d H:i',
-                        //     mask: true,
-                        // });
-                    },
-                    error: function(res) {
-                        alert(res);
                     }
                 });
             }
@@ -1284,35 +1197,31 @@
                     processData: false,
                     data: formData,
                     success: function(res) {
-                        if (res.status == 1) {
-                            $('#dept_wise_response').html("<div class='alert alert-success'>"+res.msg+"</div>");
-                            //save_btn.prop("disabled", false);
-                            save_btn.html('Add' );
-                            save_btn.prop("disabled", false);
-                            $('#table_dept_wise').DataTable().clear().draw();
-                            $("#form_dept_wise")[0].reset();
-                            $('#DepartmentAtModal').modal('hide');
+                         if (res.status == 1) {
+                             const actionObj = {
+                                icon: 'fas fa-save',
+                                title: '',
+                                message: res.status,
+                                url: '',
+                                target: '_blank',
+                                type: 'success'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            $('#formTitle')[0].reset();
+                            actionreload(actionJSON);
+
                         }else {
-
-                            var html = '';
-                            if (res.errors) {
-                                html = '<div class="alert alert-danger">';
-                                for (var count = 0; count < res.errors.length; count++) {
-                                    html +=   res.errors[count]+'<br>' ;
-                                }
-                                html += '</div>';
-                            }
-
-                            $('#dept_wise_response').html(html);
-
-                            save_btn.prop("disabled", false);
-                            save_btn.html('Add' );
+                            const actionObj = {
+                                icon: 'fas fa-warning',
+                                title: '',
+                                message: 'Record Error',
+                                url: '',
+                                target: '_blank',
+                                type: 'danger'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            action(actionJSON);
                         }
-                    },
-                    error: function(res) {
-                        alert(data);
-                        save_btn.prop("disabled", false);
-                        save_btn.html('Add' );
                     }
                 });
             });
@@ -1323,14 +1232,6 @@
                 $('#form_result').html('');
 
                 $('#AttendaddModal').modal('show');
-
-                // $('#in_time_s').datetimepicker({
-                //     format:'Y-m-d H:i'
-                // });
-
-                // $('#out_time_s').datetimepicker({
-                //     format:'Y-m-d H:i'
-                // });
 
             });
             $('#formModaladd #uid').change(function () {
@@ -1357,29 +1258,39 @@
                     data: $(this).serialize(),
                     dataType: "json",
                     success: function (data) {
-
-                        var html = '';
                         if (data.errors) {
-                            html = '<div class="alert alert-danger">';
-                            for (var count = 0; count < data.errors.length; count++) {
-                                html += '<p>' + data.errors[count] + '</p>';
-                            }
-                            html += '</div>';
+                            const actionObj = {
+                                icon: 'fas fa-warning',
+                                title: '',
+                                message: 'Record Error',
+                                url: '',
+                                target: '_blank',
+                                type: 'danger'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            action(actionJSON);
                         }
                         if (data.success) {
-                            html = '<div class="alert alert-success">' + data.success + '</div>';
-                            $('#formAdd')[0].reset();
-                            $('#attendtable').DataTable().ajax.reload();
-                            setTimeout(function() { $('#AttendaddModal').modal('hide'); }, 1000);
+                            const actionObj = {
+                                icon: 'fas fa-save',
+                                title: '',
+                                message: data.success,
+                                url: '',
+                                target: '_blank',
+                                type: 'success'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            $('#formTitle')[0].reset();
+                            actionreload(actionJSON);
                         }
-                        $('#form_result').html(html);
                     }
                 });
             });
 
-            $(document).on('click', '.edit', function () {
-                var aid = $(this).attr('id');
-                // alert(aid);
+            $(document).on('click', '.edit',async function () {
+                    var r = await Otherconfirmation("You want to Edit this ? ");
+                if (r == true) {
+                     var aid = $(this).attr('id');
                 $('#form_result').html('');
                 $.ajax({
                     url: "/Attendance/" + aid + "/edit",
@@ -1396,31 +1307,37 @@
                         $('#formModaladd').modal('show');
                     }
                 })
+                }
             });
 
             var user_id;
 
-            $(document).on('click', '.delete', function () {
-                user_id = $(this).attr('id');
-                $('#confirmModal').modal('show');
-            });
-
-            $('#ok_button').click(function () {
-                $.ajax({
+            $(document).on('click', '.delete',async function () {
+                 var r = await Otherconfirmation("You want to remove this ? ");
+                if (r == true) {
+                    user_id = $(this).attr('id');
+                    $.ajax({
                     url: "Attendance/destroy/" + user_id,
                     beforeSend: function () {
                         $('#ok_button').text('Deleting...');
                     },
                     success: function (data) {
-                        setTimeout(function () {
-                            $('#confirmModal').modal('hide');
-                            $('#user_table').DataTable().ajax.reload();
-                            alert('Data Deleted');
-                        }, 2000);
-                        location.reload();
+                         const actionObj = {
+                                icon: 'fas fa-trash-alt',
+                                title: '',
+                                message: 'Record Remove Successfully',
+                                url: '',
+                                target: '_blank',
+                                type: 'danger'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            actionreload(actionJSON);
                     }
                 })
+                }
             });
+
+
 
             $(document).on('click', '.getdata', function () {
 
@@ -1429,7 +1346,13 @@
                     $('#getdataModal').modal('show');
 
                 } else {
-                    alert('Select Location');
+                    Swal.fire({
+                        position: "top-end",
+                        icon: 'warning',
+                        title: 'Select Location',
+                        showConfirmButton: false,
+                        timer: 2500
+                        });
                 }
 
             });
@@ -1450,70 +1373,81 @@
                         $('#comfirm_button').text('Procesing...');
                     },
                     success: function (data) {
-                        setTimeout(function () {
-                            $('#confirmModal').modal('hide');
-
-                        }, 100);
-                        location.reload();
+                        if (data.success) {
+                            const actionObj = {
+                                icon: 'fas fa-save',
+                                title: '',
+                                message: data.success,
+                                url: '',
+                                target: '_blank',
+                                type: 'success'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            actionreload(actionJSON);
+                        }
                     }
                 })
             });
 
-            $(document).on('click', '.edit_button', function () {
-                let id = $(this).data("uid");
-                date = $(this).attr('data-date');
-                emp_name_with_initial = $(this).attr('data-name');
+            $(document).on('click', '.edit_button', async function () {
+                var r = await Otherconfirmation("You want to Edit this ? ");
+                if (r == true) {
+                    let id = $(this).data("uid");
+                    date = $(this).attr('data-date');
+                    emp_name_with_initial = $(this).attr('data-name');
 
-                var formdata = {
-                    _token: $('input[name=_token]').val(),
-                    id: id,
-                    date: date
-                };
-                // alert(date);
-                $('#form_result').html('');
-                $.ajax({
-                    url: "AttendentUpdate",
-                    dataType: "json",
-                    data: formdata,
-                    success: function (data) {
-                        $('#AttendeditModal').modal('show');
-                        var htmlhead = '';
-                        htmlhead += '<tr><td>Emp ID :' + id + '</td><td colspan="2">Name :' + emp_name_with_initial + '</td></tr>';
-                        htmlhead += '<tr> <th> Type </th> <th>Date & Time</th><th class="text-right">Action</th>';
-                        var html = '';
-
-                        html += '<tr>';
-                        html += '<td id="aduserid" colspan="3"><span style="display: none;">' + id + '</span></td>';
-                        html += '</tr>';
-                        for (var count = 0; count < data.length; count++) {
-                            html += '<tr>';
-                            const timestamp = new Date(data[count].timestamp);
-                            const date = data[count].date;
-                            const begining_checkout = data[count].begining_checkout;
-                            const ending_checkin = data[count].ending_checkin;
-                            const checkdate = date.slice(0, -8)
-
-                            var checkbegining_checkout = checkdate + begining_checkout + ':00';
-                            var checkending_checkin = checkdate + ending_checkin + ':00';
-
-                            var setbegining_checkout = new Date(checkbegining_checkout).getTime();
-                            var setcheckending_checkin = new Date(checkending_checkin).getTime();
-                            var settimestamp = timestamp.getTime();
+                    var formdata = {
+                        _token: $('input[name=_token]').val(),
+                        id: id,
+                        date: date
+                    };
+                    // alert(date);
+                    $('#form_result').html('');
+                    $.ajax({
+                        url: "AttendentUpdate",
+                        dataType: "json",
+                        data: formdata,
+                        success: function (data) {
+                            $('#AttendeditModal').modal('show');
+                            var htmlhead = '';
+                            htmlhead += '<tr><td>Emp ID :' + id + '</td><td colspan="2">Name :' + emp_name_with_initial + '</td></tr>';
+                            htmlhead += '<tr> <th> Type </th> <th>Date & Time</th><th class="text-right">Action</th>';
+                            var html = '';
 
                             html += '<tr>';
-                            if (settimestamp < setbegining_checkout) {
-                                html += '<td> Checkin</td>';
-                            }else{
-                                html += '<td> Checkout</td>';
+                            html += '<td id="aduserid" colspan="3"><span style="display: none;">' + id + '</span></td>';
+                            html += '</tr>';
+                            for (var count = 0; count < data.length; count++) {
+                                html += '<tr>';
+                                const timestamp = new Date(data[count].timestamp);
+                                const date = data[count].date;
+                                const begining_checkout = data[count].begining_checkout;
+                                const ending_checkin = data[count].ending_checkin;
+                                const checkdate = date.slice(0, -8)
+
+                                var checkbegining_checkout = checkdate + begining_checkout + ':00';
+                                var checkending_checkin = checkdate + ending_checkin + ':00';
+
+                                var setbegining_checkout = new Date(checkbegining_checkout).getTime();
+                                var setcheckending_checkin = new Date(checkending_checkin).getTime();
+                                var settimestamp = timestamp.getTime();
+
+                                html += '<tr>';
+                                if (settimestamp < setbegining_checkout) {
+                                    html += '<td> Checkin</td>';
+                                } else {
+                                    html += '<td> Checkout</td>';
+                                }
+
+                                html += '<td contenteditable class="timestamp" data-timestamp="timestamp" data-id="' + data[count].id + '">' + data[count].timestamp + '</td>';
+                                html += '<td class="text-right"><button type="button" class="btn btn-outline-danger btn-sm addelete" id="' + data[count].id + '"><i class="far fa-trash-alt"></i></button></td></tr>';
                             }
-
-                            html += '<td contenteditable class="timestamp" data-timestamp="timestamp" data-id="' + data[count].id + '">' + data[count].timestamp + '</td>';
-                            html += '<td class="text-right"><button type="button" class="btn btn-outline-danger btn-sm addelete" id="' + data[count].id + '"><i class="far fa-trash-alt"></i></button></td></tr>';
+                            $('#attendTable thead').html(htmlhead);
+                            $('#attendTable tbody').html(html);
                         }
-                        $('#attendTable thead').html(htmlhead);
-                        $('#attendTable tbody').html(html);
-                    }
-                })
+                    })
+                }
+
             });
 
             $(document).on('click', '#add', function () {
@@ -1533,9 +1467,30 @@
                             _token: _token
                         },
                         success: function (data) {
-                            $('#message').html(data);
-                            $('#AttendeditModal').modal('hide');
-                            location.reload();
+                            if (data.errors) {
+                                        const actionObj = {
+                                            icon: 'fas fa-warning',
+                                            title: '',
+                                            message: 'Record Error',
+                                            url: '',
+                                            target: '_blank',
+                                            type: 'danger'
+                                        };
+                                        const actionJSON = JSON.stringify(actionObj, null, 2);
+                                        action(actionJSON);
+                                    }
+                                    if (data.success) {
+                                        const actionObj = {
+                                            icon: 'fas fa-save',
+                                            title: '',
+                                            message: data.success,
+                                            url: '',
+                                            target: '_blank',
+                                            type: 'success'
+                                        };
+                                        const actionJSON = JSON.stringify(actionObj, null, 2);
+                                        actionreload(actionJSON);
+                                    }
                         }
                     });
                 } else {
@@ -1563,21 +1518,40 @@
                             _token: _token
                         },
                         success: function (data) {
-                            $('#message').html(data);
-                            $('#AttendeditModal').modal('hide');
-                            /// location.reload();
+                            if (data.errors) {
+                                        const actionObj = {
+                                            icon: 'fas fa-warning',
+                                            title: '',
+                                            message: 'Record Error',
+                                            url: '',
+                                            target: '_blank',
+                                            type: 'danger'
+                                        };
+                                        const actionJSON = JSON.stringify(actionObj, null, 2);
+                                        action(actionJSON);
+                                    }
+                                    if (data.success) {
+                                        const actionObj = {
+                                            icon: 'fas fa-save',
+                                            title: '',
+                                            message: data.success,
+                                            url: '',
+                                            target: '_blank',
+                                            type: 'success'
+                                        };
+                                        const actionJSON = JSON.stringify(actionObj, null, 2);
+                                        actionreload(actionJSON);
+                                    }
                         }
                     })
-                } else {
-                    $('#message').html("<div class='alert alert-danger'>Enter some value</div>");
                 }
             });
 
-            $(document).on('click', '.addelete', function () {
-                var id = $(this).attr("id");
-                var _token = $('input[name="_token"]').val();
-
-                if (confirm("Are you sure you want to delete this records?")) {
+            $(document).on('click', '.addelete',async function () {
+                var r = await Otherconfirmation("You want to remove this ? ");
+                if (r == true) {
+                    var id = $(this).attr("id");
+                    var _token = $('input[name="_token"]').val();
                     $.ajax({
                         url: "AttendentDeleteLive",
                         method: "POST",
@@ -1586,13 +1560,20 @@
                             _token: _token
                         },
                         success: function (data) {
-                            let html = '<div class="alert alert-success">' + data + '</div>';
-                            $('#response').html(html)
-                            $('#attendtable').DataTable().ajax.reload();
-                            $('#AttendeditModal').modal('hide');
+                           const actionObj = {
+                                icon: 'fas fa-trash-alt',
+                                title: '',
+                                message: 'Record Remove Successfully',
+                                url: '',
+                                target: '_blank',
+                                type: 'danger'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            actionreload(actionJSON);
                         }
                     });
                 }
+
             });
 
             $(document).on('click', '.view_button', function () {
@@ -1652,11 +1633,11 @@
                 });
             });
 
-            $(document).on('click', '.delete_button', function () {
-                let uid = $(this).data("uid");
-                let date = $(this).data("date");
-
-                if (confirm("Are you sure you want to delete this?")) {
+            $(document).on('click', '.delete_button',async function () {
+                 var r = await Otherconfirmation("You want to remove this ? ");
+                if (r == true) {
+                    let uid = $(this).data("uid");
+                    let date = $(this).data("date");
                     $.ajax({
                         url: "{{ route('Attendance.delete') }}",
                         method: "POST",
@@ -1666,11 +1647,19 @@
                             date: date
                         },
                         success: function (data) {
-                            $('#attendtable').DataTable().ajax.reload(null, false);
-                            $('#response').html('<div class="alert alert-success">' + data.msg + '</div>');
+                            const actionObj = {
+                                icon: 'fas fa-trash-alt',
+                                title: '',
+                                message: 'Record Remove Successfully',
+                                url: '',
+                                target: '_blank',
+                                type: 'danger'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            actionreload(actionJSON);
                         }
                     });
-                }
+                } 
             });
 
 
@@ -1700,38 +1689,29 @@
                     data: formData,
                     success: function(res) {
                         if (res.status == 1) {
-                            $('#upload_response').html("<div class='alert alert-success'>"+res.msg+"</div>");
-
-                            save_btn.html(btn_prev_text);
-                            save_btn.prop("disabled", false);
-                            $("#formUpload")[0].reset();
-                            //scroll monthAtModal
-                            $('#uploadAtModal').scrollTop(0);
-
-                            //wait 2 seconds
-                            setTimeout(function(){
-                                $('#uploadAtModal').modal('hide');
-                            }, 2000);
+                           const actionObj = {
+                                icon: 'fas fa-save',
+                                title: '',
+                                message: data.success,
+                                url: '',
+                                target: '_blank',
+                                type: 'success'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            actionreload(actionJSON);
 
                         }else {
-
-                            var html = '';
-                            if (res.errors) {
-                                html = '<div class="alert alert-danger">';
-                                for (var count = 0; count < res.errors.length; count++) {
-                                    html +=   res.errors[count]+'<br>' ;
-                                }
-                                html += '</div>';
-                            }
-
-                            $('#upload_response').html(html);
-
-                            save_btn.prop("disabled", false);
-                            save_btn.html(btn_prev_text);
+                           const actionObj = {
+                                icon: 'fas fa-warning',
+                                title: '',
+                                message: 'Record Error',
+                                url: '',
+                                target: '_blank',
+                                type: 'danger'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            action(actionJSON);
                         }
-                    },
-                    error: function(res) {
-                        alert(data);
                     }
                 });
             });
@@ -1752,7 +1732,13 @@
                 var fileInput = $('#import_csv')[0].files[0];
 
                 if (!fileInput || fileInput.type !== 'text/csv') {
-                    alert('Please upload a valid CSV file.');
+                     Swal.fire({
+                        position: "top-end",
+                        icon: 'warning',
+                        title: 'Please upload a valid CSV file!',
+                        showConfirmButton: false,
+                        timer: 2500
+                        });
                     return;
                 }
 
@@ -1760,27 +1746,34 @@
                     url: "{{ route('importAttendance') }}",
                     method: "POST",
                     data: formData,
-                    processData: false, 
-                    contentType: false, 
+                    processData: false,
+                    contentType: false,
                     dataType: "json",
-                    success: function(data) {
-                        var html = '';
+                    success: function (data) {
                         if (data.errors) {
-                            html = '<div class="alert alert-danger">';
-                            for (var count = 0; count < data.errors.length; count++) {
-                                html += '<p>' + data.errors[count] + '</p>';
-                            }
-                            html += '</div>';
+                            const actionObj = {
+                                icon: 'fas fa-warning',
+                                title: '',
+                                message: 'Record Error',
+                                url: '',
+                                target: '_blank',
+                                type: 'danger'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            action(actionJSON);
                         }
                         if (data.success) {
-                            html = '<div class="alert alert-success">' + data.success + '</div>';
-                            $('#formTitle1')[0].reset();
-                            location.reload();
+                            const actionObj = {
+                                icon: 'fas fa-save',
+                                title: '',
+                                message: data.success,
+                                url: '',
+                                target: '_blank',
+                                type: 'success'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            actionreload(actionJSON);
                         }
-                        $('#form_result1').html(html);
-                    },
-                    error: function(xhr, status, error) {
-                        $('#form_result1').html('<div class="alert alert-danger">An unexpected error occurred. Please try again.</div>');
                     }
                 });
             });
