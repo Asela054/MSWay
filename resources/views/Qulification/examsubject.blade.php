@@ -10,7 +10,7 @@
             <div class="container-fluid">
             <div class="page-header-content py-3 px-2">
                 <h1 class="page-header-title ">
-                    <div class="page-header-icon"><i class="fas fa-book-open"></i></div>
+                    <div class="page-header-icon"><i class="fa-light fa-users-gear"></i></div>
                     <span>Exam Subjects</span>
                 </h1>
             </div>
@@ -130,9 +130,9 @@
     <script>
         $(document).ready(function(){
 
-            $('#employee_link').addClass('active');
-            $('#employee_link_icon').addClass('active');
-            $("#employeemaster").addClass('navbtnactive');
+            $('#employee_menu_link').addClass('active');
+            $('#employee_menu_link_icon').addClass('active');
+            $('#employeemaster').addClass('navbtnactive');
             
             // Initialize O/L DataTable
             $('#olDataTable').DataTable({
@@ -275,7 +275,7 @@
                 }
 
                 $.ajax({
-                     url: action_url,
+                    url: action_url,
                     method: "POST",
                     data: $(this).serialize(),
                     dataType: "json",
@@ -376,7 +376,6 @@
                         data: {id: user_id},
                         dataType: 'json',
                         beforeSend: function () {
-                            // You can add loading state here if needed
                         },
                         success: function (data) {
                             const actionObj = {

@@ -1,5 +1,11 @@
 <?php
 
+// Include the EmployeeHelper class
+use App\Helpers\EmployeeHelper;
+
+// Correct path resolution for Laravel - use base path or proper autoloading
+require_once __DIR__ . '/../../app/Helpers/EmployeeHelper.php';
+
 require('config.php');
 require('ssp.customized.class.php');
 
@@ -9,12 +15,6 @@ $primaryKey = 'id';
 $columns = array(
     array('db' => 'employees.id', 'dt' => 'id', 'field' => 'id'),
     array('db' => 'employees.emp_id', 'dt' => 'emp_id', 'field' => 'emp_id'),
-    array(
-            'db' => 'CONCAT(employees.emp_name_with_initial, " - ", employees.calling_name)', 
-            'dt' => 'emp_name_with_initial', 
-            'field' => 'emp_name_with_initial',
-            'as' => 'emp_name_with_initial'
-        ),
     array('db' => 'employees.emp_national_id', 'dt' => 'emp_national_id', 'field' => 'emp_national_id'),
     array('db' => 'employees.emp_etfno', 'dt' => 'emp_etfno', 'field' => 'emp_etfno'),
     array('db' => 'departments.name', 'dt' => 'name', 'field' => 'name'),
@@ -24,6 +24,19 @@ $columns = array(
     array('db' => 'employment_statuses.emp_status', 'dt' => 'emp_status', 'field' => 'emp_status'),
     array('db' => 'branches.location', 'dt' => 'location', 'field' => 'location'),
     array('db' => 'employees.is_resigned', 'dt' => 'is_resigned', 'field' => 'is_resigned'),
+    array('db' => 'employees.emp_name_with_initial', 'dt' => 'emp_name_with_initial', 'field' => 'emp_name_with_initial'),
+    array('db' => 'employees.calling_name', 'dt' => 'calling_name', 'field' => 'calling_name'),
+    array('db' => 'employees.emp_id', 'dt' => 'employee_display', 'field' => 'emp_id', 
+          'formatter' => function($d, $row) {
+              $employee = (object)[
+                  'emp_name_with_initial' => $row['emp_name_with_initial'],
+                  'calling_name' => $row['calling_name'],
+                  'emp_id' => $row['emp_id']
+              ];
+              
+              return EmployeeHelper::getDisplayName($employee);
+          }
+    )
 );
 
 $sql_details = array(
