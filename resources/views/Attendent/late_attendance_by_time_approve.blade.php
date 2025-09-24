@@ -5,15 +5,23 @@
 
     <main>
         <div class="page-header shadow">
-            <div class="container-fluid">
-                @include('layouts.attendant&leave_nav_bar')
-               
-            </div>
-        </div>
+             <div class="container-fluid d-none d-sm-block shadow">
+                   @include('layouts.attendant&leave_nav_bar')
+             </div>
+             <div class="container-fluid">
+                 <div class="page-header-content py-3 px-2">
+                     <h1 class="page-header-title ">
+                         <div class="page-header-icon"><i class="fa-light fa-calendar-pen"></i></div>
+                         <span>Late Attendance Approve</span>
+                     </h1>
+                 </div>
+             </div>
+         </div>
 
-        <div class="container-fluid mt-4">
+
+        <div class="container-fluid mt-2 p-0 p-2">
             <div class="card mb-2">
-                <div class="card-body">
+                <div class="card-body p-0 p-2">
                     <div class="message"></div>
                     <form class="form-horizontal" id="formFilter">
                         <div class="form-row mb-1">
@@ -49,37 +57,51 @@
                 </div>
             </div>
 
-            <div class="card">
-                <div class="card-body p-0 p-2 main_card">
-                    <div class="table_outer">
-                        <table class="table table-striped table-bordered table-sm small" id="attendreporttable">
-                            <thead>
-                            <tr>
-                                <th></th>
-                                <th>ID</th>
-                                <th>Name with Initial</th>
-                                <th>Date</th>
-                                <th>Checkin Time</th>
-                                <th>CheckOut Time</th>
-                                <th>Working Hours</th>
-                                <th>Location</th>
-                                <th>Department</th>
-                                <th>Is Approved?</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-
-                            </tbody>
-                        </table>
+            <div class="card mb-2">
+                <div class="card-body p-0 p-2 ">
+                     <div class="row">
+                        <div class="col-md-12">
+                            <div class="row align-items-center mb-4">
+                                <div class="col-6 mb-2">
+                                    {{-- <div class="form-check">
+                                        <input type="checkbox" class="form-check-input checkallocate" id="selectAll">
+                                        <label class="form-check-label" for="selectAll">Select All Records</label>
+                                    </div> --}}
+                                </div>
+                                <div class="col-6 text-right">
+                                    <button id="approve" class="btn btn-primary float-right mt-2 btn-sm"> Approve Late Attendance</button>
+                                </div>
+                            </div>
+                            <div class="center-block fix-width scroll-inner">
+                                <table class="table table-striped table-bordered table-sm small nowrap w-100"
+                                    id="attendreporttable">
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th>ID</th>
+                                            <th>EMPLOYEE</th>
+                                            <th>DATE</th>
+                                            <th>CHECK IN TIME</th>
+                                            <th>CHECK OUT TIME</th>
+                                            <th>WORKING HOURS</th>
+                                            <th>LOCATION</th>
+                                            <th>DEPARTMENT</th>
+                                            <th>IS APPROVED ?</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
-                    <button id="approve" class="btn btn-outline-primary float-right mt-2 btn-sm"> Approve</button>
                     {{ csrf_field() }}
                 </div>
             </div>
 
              <!-- approve modal -->
             <div class="modal fade" id="approveModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div class="modal-dialog" role="document">
+                <div class="modal-dialog modal-dialog-centered" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title" id="exampleModalLabel">Approve Late Attendances</h5>
@@ -102,7 +124,7 @@
                             </form>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Close</button>
                             <button type="button" class="btn btn-primary btn-sm" id="btn-approve">Approve</button>
                         </div>
                     </div>
@@ -122,17 +144,6 @@
             $('#attendant_menu_link').addClass('active');
             $('#attendant_menu_link_icon').addClass('active');
             $('#attendantmaster').addClass('navbtnactive');
-
-            let msg = '<div class="alert alert-info alert-dismissible fade show" role="alert">' +
-                'Please select a date and filter to load records.' +
-                '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
-                '<span aria-hidden="true">&times;</span>' +
-                '</button>' +
-                '</div>';
-
-            $('.table_outer').css('display', 'none');
-            $('#approve').css('display', 'none');
-            $('.main_card').append(msg);
 
             let selected_cb = [];
 
@@ -227,44 +238,41 @@
             //load_dt('','','','');
 
             function load_dt(department, company, location, date) {
-
-                $('.alert').remove();
-                $('.table_outer').css('display', 'block');
-                $('#approve').css('display', 'block');
-
                 $('#attendreporttable').DataTable({
-                    "columnDefs": [
-                        {
-                            "targets": 1,
-                            "orderable": false
+                    "destroy": true,
+                    "processing": true,
+                    "serverSide": true,
+                    dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
+                        "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+                    "buttons": [{
+                            extend: 'csv',
+                            className: 'btn btn-success btn-sm',
+                            title: 'Late Attendance Approve Information',
+                            text: '<i class="fas fa-file-csv mr-2"></i> CSV',
                         },
-                        {
-                            "targets": -2,
-                            "orderable": false
-                        }
-                    ],
-                    "lengthMenu": [[10, 25, 50, 100, 500, 1000], [10, 25, 50, 100, 500, 1000]],
-                    dom: 'Blfrtip',
-                    buttons: [
-                        {
-                            extend: 'excelHtml5',
-                            text: 'Excel',
-                            className: 'btn btn-default btn-sm',
-                            exportOptions: {
-                                columns: 'th:not(:last-child)'
+                        { 
+                            extend: 'pdf', 
+                            className: 'btn btn-danger btn-sm', 
+                            title: 'Late Attendance Approve Information', 
+                            text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
+                            orientation: 'landscape', 
+                            pageSize: 'legal', 
+                            customize: function(doc) {
+                                doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
                             }
                         },
                         {
-                            extend: 'pdfHtml5',
-                            text: 'Print',
-                            className: 'btn btn-default btn-sm',
-                            exportOptions: {
-                                columns: 'th:not(:last-child)'
-                            }
-                        }
+                            extend: 'print',
+                            title: 'Late Attendance Approve  Information',
+                            className: 'btn btn-primary btn-sm',
+                            text: '<i class="fas fa-print mr-2"></i> Print',
+                            customize: function(win) {
+                                $(win.document.body).find('table')
+                                    .addClass('compact')
+                                    .css('font-size', 'inherit');
+                            },
+                        },
                     ],
-                    processing: true,
-                    serverSide: true,
                     ajax: {
                         "url": "{{url('/attendance_by_time_approve_report_list')}}",
                         "data": {
@@ -349,9 +357,11 @@
                 //show_selected_po_nos(selected_cb)
             });
 
-            $(document).on('click', '#approve', function (e) {
+            $(document).on('click', '#approve',async function (e) {
                 e.preventDefault();
-                $('.message_modal').html('');
+                  var r = await Otherconfirmation("You want to Approve this ? ");
+                if (r == true) {
+                     $('.message_modal').html('');
 
                 $('#approveModal').modal('show');
 
@@ -365,7 +375,15 @@
                     let leave_type = $('#leave_type').val();
 
                     if(leave_type == ''){
-                        $('#leave_type').after('<span class="error_msg" style="color:red;">Please select leave type.</span>');
+                         Swal.fire({
+                        position: "top-end",
+                        icon: 'warning',
+                        title: 'Please select leave type!',
+                        showConfirmButton: false,
+                        timer: 2500
+                        });
+
+
                         return false;
                     }
 
@@ -381,12 +399,28 @@
                         },
                         success: function (data) {
                             if(data.status == true){
-                                $('.message_modal').html("<div class='alert alert-success'>"+data.msg+"</div>");
-                                $('#attendreporttable').DataTable().ajax.reload();
-                                selected_cb = [];
+                                 const actionObj = {
+                                            icon: 'fas fa-save',
+                                            title: '',
+                                            message:'Late Attendance Approved',
+                                            url: '',
+                                            target: '_blank',
+                                            type: 'success'
+                                        };
+                                        const actionJSON = JSON.stringify(actionObj, null, 2);
+                                        actionreload(actionJSON);
                                 $('#approveModal').modal('hide');
                             }else{
-                                $('.message_modal').html("<div class='alert alert-danger'>"+data.msg+"</div>");
+                               const actionObj = {
+                                            icon: 'fas fa-warning',
+                                            title: '',
+                                            message: 'Record Error',
+                                            url: '',
+                                            target: '_blank',
+                                            type: 'danger'
+                                        };
+                                        const actionJSON = JSON.stringify(actionObj, null, 2);
+                                        action(actionJSON);
                             }
 
                             save_btn.prop("disabled", false);
@@ -395,7 +429,7 @@
                     });
 
                 });
-
+                }
             });
 
             function removeA(arr, id) {

@@ -4,37 +4,43 @@
 
     <main>
         <div class="page-header shadow">
-            <div class="container-fluid">
+            <div class="container-fluid d-none d-sm-block shadow">
                 @include('layouts.attendant&leave_nav_bar')
-               
+            </div>
+            <div class="container-fluid">
+                <div class="page-header-content py-3 px-2">
+                    <h1 class="page-header-title ">
+                        <div class="page-header-icon"><i class="fa-light fa-calendar-pen"></i></div>
+                        <span>Attendance Edit</span>
+                    </h1>
+                </div>
             </div>
         </div>
-        <div class="container-fluid mt-4">
+        <div class="container-fluid mt-2 p-0 p-2">
             <div class="card mb-2">
-                <div class="card-body">
+                <div class="card-body p-0 p-2">
                     <form class="form-horizontal" id="formFilter">
                         <div class="form-row mb-1">
-                            <div class="col">
-                                <label class="small font-weight-bold text-dark">Company</label>
+                            <div class="col-md-2">
+                                <label class="small font-weight-bold text-dark">Company*</label>
                                 <select name="company" id="company" class="form-control form-control-sm" required>
                                 </select>
                             </div>
-                            <div class="col">
-                                <label class="small font-weight-bold text-dark">Department</label>
+                            <div class="col-md-2">
+                                <label class="small font-weight-bold text-dark">Department*</label>
                                 <select name="department" id="department" class="form-control form-control-sm" required>
                                 </select>
                             </div>
-                            <div class="col">
-                                <label class="small font-weight-bold text-dark">Date</label>
+                            <div class="col-md-3">
+                                <label class="small font-weight-bold text-dark">Date*</label>
                                 <input type="date" id="filter_date" name="date" class="form-control form-control-sm" placeholder="yyyy-mm-dd" required>
                             </div>
-                            <div class="col">
+                            <div class="col-md-2">
                                 <label class="small font-weight-bold text-dark">Employee</label>
                                 <select name="employee" id="employee_main" class="form-control form-control-sm">
                                 </select>
                             </div>
-
-                            <div class="col">
+                            <div class="col-md-3">
                                 <br>
                                 <button type="submit" class="btn btn-primary btn-sm filter-btn" id="btn-filter"> Filter</button>
                             </div>
@@ -47,24 +53,24 @@
                 <div class="card-body p-0 p-2">
                     <div class="row">
                         <div class="col-sm-12">
-                            <button type="button" class="btn btn-outline-success btn-sm fa-pull-right px-3 mr-2" name="edit_record_month" id="edit_record_month"><i class="fas fa-pencil-alt mr-2"></i>Edit - Month</button>
+                            <button type="button" class="btn btn-success btn-sm fa-pull-right px-3 mr-2" name="edit_record_month" id="edit_record_month"><i class="fas fa-pencil-alt mr-2"></i>Edit - Month</button>
+                            <button id="approve_att" class="btn btn-primary btn-sm fa-pull-right px-3 mr-2"><i class="fas fa-save mr-2"></i> Update Attendance</button><br>
                         </div>
                         <div class="col-12">
                             <hr class="border-dark">
                         </div>
                         <div class="col-12">
-                            <div class="message"></div>
-                            <div class="table-responsive">
-                                <table class="table table-striped table-bordered table-sm small" id="attendtable">
+                            <div class="center-block fix-width scroll-inner">
+                                <table class="table table-striped table-bordered table-sm small nowrap" style="width: 100%" id="attendtable">
                                     <thead>
                                     <tr>
-                                        <th>Employee ID</th>
-                                        <th>Employee Name</th>
-                                        <th>Work Month</th>
-                                        <th>Department</th>
-                                        <th>Company</th>
-                                        <th>Check In Time</th>
-                                        <th>Check Out Time</th>
+                                        <th>EMPLOYEE ID</th>
+                                        <th>EMPLOYEE NAME</th>
+                                        <th>WORK MONTH</th>
+                                        <th>DEPARTMENT</th>
+                                        <th>COMPANY</th>
+                                        <th>CHECK IN TIME</th>
+                                        <th>CHECK OUT TIME</th>
                                     </tr>
                                     </thead>
 
@@ -73,9 +79,6 @@
                                     </tbody>
                                 </table>
                             </div>
-
-                            <button id="approve_att" class="btn btn-primary btn-sm float-right mt-2"> Update</button>
-
                         </div>
                     </div>
                 </div>
@@ -101,14 +104,14 @@
                         <div class="row">
                             <div class="col">
                                 <div class="form-row mb-1">
-                                    <div class="col">
-                                        <label class="small font-weight-bold text-dark">Employee</label>
+                                    <div class="col-sm-12 col-md-6">
+                                        <label class="small font-weight-bold text-dark">Employee*</label>
                                         <select name="employee" id="employee_m" class="form-control form-control-sm">
                                             <option value="">Select...</option>
                                         </select>
                                     </div>
-                                    <div class="col">
-                                        <label class="small font-weight-bold text-dark">Month</label>
+                                    <div class="col-sm-12 col-md-6">
+                                        <label class="small font-weight-bold text-dark">Month*</label>
                                         <input type="month" id="month_m" name="month" class="form-control form-control-sm" min="2021-01" value="{{Date('Y-m')}}" />
                                     </div>
                                 </div>
@@ -138,7 +141,7 @@
                         <div class="row">
                             <div class="col">
                                 <div class="form-group mt-3">
-                                    <button type="submit" name="action_button" id="btn-save" class="btn btn-outline-primary btn-sm fa-pull-right px-4"><i class="fas fa-pencil-alt"></i>&nbsp;Update </button>
+                                    <button type="submit" name="action_button" id="btn-save" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-pencil-alt"></i>&nbsp;Update </button>
                                 </div>
                             </div>
                         </div>
@@ -244,53 +247,120 @@
             load_dt('');
             function load_dt(company,department, date, employee) {
                 $('#attendtable').DataTable({
-                    processing: true,
-                    serverSide: true,
+                    "destroy": true,
+                    "processing": true,
+                    "serverSide": true,
+                    dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
+                        "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+                    "buttons": [{
+                            extend: 'csv',
+                            className: 'btn btn-success btn-sm',
+                            title: 'Attendance Edit  Information',
+                            text: '<i class="fas fa-file-csv mr-2"></i> CSV',
+                        },
+                        { 
+                            extend: 'pdf', 
+                            className: 'btn btn-danger btn-sm', 
+                            title: 'Attendance Edit Information', 
+                            text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
+                            orientation: 'landscape', 
+                            pageSize: 'legal', 
+                            customize: function(doc) {
+                                doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+                            }
+                        },
+                        {
+                            extend: 'print',
+                            title: 'Attendance   Information',
+                            className: 'btn btn-primary btn-sm',
+                            text: '<i class="fas fa-print mr-2"></i> Print',
+                            customize: function(win) {
+                                $(win.document.body).find('table')
+                                    .addClass('compact')
+                                    .css('font-size', 'inherit');
+                            },
+                        },
+                    ],
                     ajax: {
-                        "url": "{{url('/attendance_list_for_bulk_edit')}}",
-                        "data": {'company':company, 'department':department, 'date':date, 'employee':employee},
+                        url: scripturl + "/attendance_list_for_bulk_edit.php", 
+                        type: "POST",
+                        data: {
+                            company: company,
+                            department: department,
+                            date: date,
+                            employee: employee
+                        }
                     },
-                    columns: [
-                        { data: 'uid' },
-                        { data: 'employee_display' },
-                        { data: 'month' },
-                        { data: 'dept_name' },
-                        { data: 'location' },
-                        { data: 'firsttimestamp' ,
-                            render : function ( data, type, row, meta ) {
-                                return type === 'display'  ?
-                                    '<input type="datetime-local" class="form-control form-control-sm time_in" ' +
-                                    'data-id="'+row['id']+'" ' +
-                                    'data-uid="'+row['uid']+'" ' +
-                                    'data-date="'+row['date']+'" ' +
-                                    'data-dept_id="'+row['dept_id']+'" ' +
-                                    'data-time_type="first_time" ' +
-                                    'data-timestamp="'+row['firsttimestamp']+'" ' +
-                                    'value="'+row['firsttimestamp']+'" ' +
-                                    'placeholder="YYYY-MM-DD HH:MM" ' +
-                                    '/>'
+                   columns: [
+                        { 
+                            "data": "uid",
+                            "name": "uid", 
+                        },
+                        { 
+                            "data": "employee_display",
+                            "name": "employee_display", 
+                        },
+                        { 
+                            "data": "month",
+                            "name": "month",
+                         },
+                        { 
+                            "data": "dept_name",
+                            "name": "dept_name",
+                         },
+                        { 
+                            "data": "location",
+                            "name": "location",
+                         },
+                        {
+                            "data": 'firsttimestamp',
+                            "name": 'firsttimestamp',
+                            render: function (data, type, row) {
+                                let firstTime = row['firsttimestamp'] ? row['firsttimestamp'] : '';
+                                return type === 'display' ?
+                                    `<input type="datetime-local" class="form-control form-control-sm time_in" 
+                                        data-id="${row['id']}" 
+                                        data-uid="${row['uid']}" 
+                                        data-date="${row['date']}" 
+                                        data-dept_id="${row['dept_id']}" 
+                                        data-time_type="first_time" 
+                                        data-timestamp="${row['firsttimestamp'] || ''}" 
+                                        value="${firstTime}" 
+                                        placeholder="YYYY-MM-DD HH:MM" />`
                                     : data;
-                            }},
-                        { data: 'lasttimestamp' ,
-                            render : function ( data, type, row, meta ) {
-
-                                if(row['lasttimestamp'] != row['firsttimestamp']){
-
-                                    return type === 'display'  ?
-                                        '<input type="datetime-local" class="form-control form-control-sm time_out" ' +
-                                        'data-id="'+row['id']+'" ' +
-                                        'data-uid="'+row['uid']+'" ' +
-                                        'data-date="'+row['date']+'" ' +
-                                        'data-dept_id="'+row['dept_id']+'" ' +
-                                        'data-time_type="last_time" ' +
-                                        'data-timestamp="'+row['lasttimestamp']+'" ' +
-                                        'value="'+row['lasttimestamp']+'" ' +
-                                        'placeholder="YYYY-MM-DD HH:MM"' +
-                                        '/>'
+                            }
+                        },
+                        {
+                            data: 'lasttimestamp',
+                            render: function (data, type, row) {
+                                let lastTime = row['lasttimestamp'] ? row['lasttimestamp'] : '';
+                                if (row['lasttimestamp'] !== row['firsttimestamp'] && row['lasttimestamp'] !== null) {
+                                    return type === 'display' ?
+                                        `<input type="datetime-local" class="form-control form-control-sm time_out" 
+                                            data-id="${row['id']}" 
+                                            data-uid="${row['uid']}" 
+                                            data-date="${row['date']}" 
+                                            data-dept_id="${row['dept_id']}" 
+                                            data-time_type="last_time" 
+                                            data-timestamp="${row['lasttimestamp'] || ''}" 
+                                            value="${lastTime}" 
+                                            placeholder="YYYY-MM-DD HH:MM" />`
+                                        : data;
+                                } else {
+                                    return type === 'display' ?
+                                        `<input type="datetime-local" class="form-control form-control-sm time_out" 
+                                            data-id="${row['id']}" 
+                                            data-uid="${row['uid']}" 
+                                            data-date="${row['date']}" 
+                                            data-dept_id="${row['dept_id']}" 
+                                            data-time_type="last_time" 
+                                            data-timestamp="" 
+                                            value="" 
+                                            placeholder="YYYY-MM-DD HH:MM" />`
                                         : data;
                                 }
                             }
-                        },
+                        }
                     ],
                     "bDestroy": true,
                     "order": [[ 6, "desc" ]],
@@ -396,61 +466,47 @@
 
             });
 
-            // $("table").on('focusout', "input[type=text]", function () {
-            //     $(this).parent().parent().css('background-color', '#f7c8c8');
-            //     $(this).parent().parent().addClass('changed');
-            //
-            //     let b = {};
-            //     b["time_stamp"] = $(this).val();
-            //     b["existing_time_stamp"] = $(this).data('timestamp');
-            //     b["time_type"] = $(this).data('time_type');
-            //     b["id"] = $(this).data('id');
-            //     b["uid"] = $(this).data('uid');
-            //     b["date"] = $(this).data('date');
-            //     b["dept_id"] = $(this).data('dept_id');
-            //
-            //     //changed_records.push(b);
-            //     //check if the record is already in the array
-            //     let found = false;
-            //     for(let i=0; i<changed_records.length; i++){
-            //         if(changed_records[i]['id'] == b['id']){
-            //             found = true;
-            //             break;
-            //         }
-            //     }
-            //
-            //     if(!found){
-            //         changed_records.push(b);
-            //     }else{
-            //         //update the time stamp
-            //         for(let i=0; i<changed_records.length; i++){
-            //             if(changed_records[i]['id'] == b['id']){
-            //                 changed_records[i]['time_stamp'] = b['time_stamp'];
-            //                 break;
-            //             }
-            //         }
-            //     }
-            //
-            // });
 
-            $(document).on('click', '#approve_att', function (e) {
-                e.preventDefault();
-                $.ajax({
-                    url: "AttendanceEditBulkSubmit",
-                    method: "POST",
-                    data: {
-                        'changed_records_in': changed_records_in,
-                        'changed_records_out': changed_records_out,
-                        _token: $('input[name=_token]').val(),
-                    },
-                    success: function (data) {
-                        $('.message').html("<div class='alert alert-success'>"+data.msg+"</div>");
-                        $('#attendtable').DataTable().ajax.reload();
-                        changed_records_in = [];
-                        changed_records_out = [];
-                    }
-                });
-
+            $(document).on('click', '#approve_att', async function (e) {
+                var r = await Otherconfirmation("You want to Approve this ? ");
+                if (r == true) {
+                    e.preventDefault();
+                    $.ajax({
+                        url: "AttendanceEditBulkSubmit",
+                        method: "POST",
+                        data: {
+                            'changed_records_in': changed_records_in,
+                            'changed_records_out': changed_records_out,
+                            _token: $('input[name=_token]').val(),
+                        },
+                        success: function (data) {
+                            if (data.errors) {
+                                const actionObj = {
+                                    icon: 'fas fa-warning',
+                                    title: '',
+                                    message: 'Record Error',
+                                    url: '',
+                                    target: '_blank',
+                                    type: 'danger'
+                                };
+                                const actionJSON = JSON.stringify(actionObj, null, 2);
+                                action(actionJSON);
+                            }
+                            if (data.success) {
+                                const actionObj = {
+                                    icon: 'fas fa-save',
+                                    title: '',
+                                    message: data.success,
+                                    url: '',
+                                    target: '_blank',
+                                    type: 'success'
+                                };
+                                const actionJSON = JSON.stringify(actionObj, null, 2);
+                                actionreload(actionJSON);
+                            }
+                        }
+                    });
+                }
             });
 
             function check_changed_text_boxes(){
@@ -649,12 +705,12 @@
                 return new Date(year, month, 0).getDate();
             }
 
-            $('#formMonth').on('submit',function(e) {
+            $('#formMonth').on('submit', function (e) {
                 e.preventDefault();
-                let save_btn=$("#btn-save");
+                let save_btn = $("#btn-save");
                 let btn_prev_text = save_btn.html();
                 //save_btn.prop("disabled", true);
-                save_btn.html('<i class="fa fa-spinner fa-spin"></i> loading...' );
+                save_btn.html('<i class="fa fa-spinner fa-spin"></i> loading...');
                 let formData = new FormData($('#formMonth')[0]);
                 let url_text = '{{ url("/attendance_update_bulk_submit") }}';
                 $.ajaxSetup({
@@ -668,50 +724,37 @@
                     contentType: false,
                     processData: false,
                     data: formData,
-                    success: function(res) {
+                    success: function (res) {
                         if (res.status == 1) {
-                            $('#bulk_response').html("<div class='alert alert-success'>"+res.msg+"</div>");
+                            const actionObj = {
+                                icon: 'fas fa-save',
+                                title: '',
+                                message: 'Attendance Updated',
+                                url: '',
+                                target: '_blank',
+                                type: 'success'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            actionreload(actionJSON);
 
-                            save_btn.html(btn_prev_text);
-                            save_btn.prop("disabled", false);
-                            $('#table_month').DataTable().clear().draw();
-                            $("#formMonth")[0].reset();
-                            $('#employee_m').val('').trigger('change');
-                            $('#attendtable').DataTable().ajax.reload();
-                            //scroll monthAtModal
-                            $('#monthAtModal').scrollTop(0);
-
-
-                            //wait 2 seconds
-                            setTimeout(function(){
-                                $('#monthAtModal').modal('hide');
-                            }, 2000);
-
-                        }else {
-
-                            var html = '';
-                            if (res.errors) {
-                                html = '<div class="alert alert-danger">';
-                                for (var count = 0; count < res.errors.length; count++) {
-                                    html +=   res.errors[count]+'<br>' ;
-                                }
-                                html += '</div>';
-                            }
-
-                            $('#bulk_response').html(html);
-
-                            save_btn.prop("disabled", false);
-                            save_btn.html(btn_prev_text);
+                        } else {
+                            const actionObj = {
+                                icon: 'fas fa-warning',
+                                title: '',
+                                message: 'Record Error',
+                                url: '',
+                                target: '_blank',
+                                type: 'danger'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            action(actionJSON);
                         }
                     },
-                    error: function(res) {
-                        alert(data);
-                    }
+
                 });
             });
 
-
-        });
+    });
 
 
 

@@ -4,14 +4,21 @@
 
 <main> 
     <div class="page-header shadow">
-        <div class="container-fluid">
-            @include('layouts.attendant&leave_nav_bar')
-           
+            <div class="container-fluid d-none d-sm-block shadow">
+                @include('layouts.attendant&leave_nav_bar')
+            </div>
+            <div class="container-fluid">
+                <div class="page-header-content py-3 px-2">
+                    <h1 class="page-header-title ">
+                        <div class="page-header-icon"><i class="fa-light fa-calendar-pen"></i></div>
+                        <span>Location Attendance Approve</span>
+                    </h1>
+                </div>
+            </div>
         </div>
-    </div>
-    <div class="container-fluid mt-4">
+    <div class="container-fluid mt-2 p-0 p-2">
         <div class="card mb-2">
-                <div class="card-body">
+                <div class="card-body p-0 p-2">
                     <form class="form-horizontal" id="formFilter">
                         <div class="form-row mb-1">
                             <div class="col-md-3">
@@ -68,14 +75,14 @@
                                 <thead>
                                     <tr>
                                         <th></th>
-                                        <th>Emp ID</th>
-                                        <th>Employee</th>
-                                        <th>Location</th>
-                                        <th>Date</th>
-                                        <th>On Time</th>
-                                        <th>Off Time</th>
-                                        <th class="d-none">location id</th>
-                                        <th class="d-none" >Reason</th>
+                                        <th>EMP ID</th>
+                                        <th>EMPLOYEE</th>
+                                        <th>LOCATION</th>
+                                        <th>DATE</th>
+                                        <th>ON TIME</th>
+                                        <th>OFF TIME</th>
+                                        <th class="d-none">LOCATION ID</th>
+                                        <th class="d-none" >REASON</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -88,32 +95,6 @@
         </div>
 
 
-    </div>
-
-    <div class="modal fade" id="approveconfirmModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-        aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-md">
-            <div class="modal-content">
-                <div class="modal-header p-2">
-                    <h5 class="modal-title" id="staticBackdropLabel">Approve Location Attendance </h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col text-center">
-                            <h4 class="font-weight-normal">Are you sure you want to Approve this data?</h4>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer p-2">
-                    <button type="button" name="approve_button" id="approve_button"
-                        class="btn btn-warning px-3 btn-sm">Approve</button>
-                    <button type="button" class="btn btn-dark px-3 btn-sm" data-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </div>
     </div>
 
 </main>
@@ -151,9 +132,44 @@ $(document).ready(function(){
 
         function load_dt(location, employee,from_date, to_date){
            $('#dataTable').DataTable({
-                lengthMenu: [[10, 25, 50, 100, 500, -1], [10, 25, 50, 100, 500, "All"]],
-                processing: true,
-                serverSide: true,
+                  "destroy": true,
+                    "processing": true,
+                    "serverSide": true,
+                    dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
+                        "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+                    "buttons": [{
+                            extend: 'csv',
+                            className: 'btn btn-success btn-sm',
+                            title: 'Location Attendance Approve  Information',
+                            text: '<i class="fas fa-file-csv mr-2"></i> CSV',
+                        },
+                        { 
+                            extend: 'pdf', 
+                            className: 'btn btn-danger btn-sm', 
+                            title: 'Location Attendance Approve Information', 
+                            text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
+                            orientation: 'landscape', 
+                            pageSize: 'legal', 
+                            customize: function(doc) {
+                                doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+                            }
+                        },
+                        {
+                            extend: 'print',
+                            title: 'Location Attendance Approve  Information',
+                            className: 'btn btn-primary btn-sm',
+                            text: '<i class="fas fa-print mr-2"></i> Print',
+                            customize: function(win) {
+                                $(win.document.body).find('table')
+                                    .addClass('compact')
+                                    .css('font-size', 'inherit');
+                            },
+                        },
+                        // 'copy', 'csv', 'excel', 'pdf', 'print'
+                    ],
+                    "order": [
+                        [1, "desc"]
+                    ],
                 ajax: {
                     url: scripturl + '/attendance_approve_list.php',
                     type: 'POST',
@@ -194,10 +210,6 @@ $(document).ready(function(){
                           visible: false
                     }
                 ],
-                "bDestroy": true,
-                "order": [
-                    [1, "desc"]
-                ]
             });
         }
 
@@ -216,76 +228,90 @@ $(document).ready(function(){
 
            var selectedRowIdsapprove = [];
 
-    $('#approve_att').click(function () {
-        selectedRowIdsapprove = [];
-        $('#dataTable tbody .approve-checkbox:checked').each(function () {
-            var rowData = $('#dataTable').DataTable().row($(this).closest('tr')).data();
-            
-            if (rowData) {
-                selectedRowIdsapprove.push({
-                    id: rowData.id, // Using the ID from the first column
-                    empid: rowData.employee_id, // From column 2
-                    emp_name: rowData.employee_display, // From column 3
-                    date: rowData.date, // From column 5
-                    on_time: rowData.on_time, // From column 6
-                    off_time: rowData.off_time, // From column 7
-                    location_id: rowData.location_id,
-                    reason: rowData.reason // From column 8 (if visible)
+    $('#approve_att').click(async function () {
+        var r = await Otherconfirmation("You want to Edit this ? ");
+        if (r == true) {
+
+            selectedRowIdsapprove = [];
+            $('#dataTable tbody .approve-checkbox:checked').each(function () {
+                var rowData = $('#dataTable').DataTable().row($(this).closest('tr')).data();
+
+                if (rowData) {
+                    selectedRowIdsapprove.push({
+                        id: rowData.id, // Using the ID from the first column
+                        empid: rowData.employee_id, // From column 2
+                        emp_name: rowData.employee_display, // From column 3
+                        date: rowData.date, // From column 5
+                        on_time: rowData.on_time, // From column 6
+                        off_time: rowData.off_time, // From column 7
+                        location_id: rowData.location_id,
+                        reason: rowData.reason // From column 8 (if visible)
+                    });
+                }
+            });
+            if (selectedRowIdsapprove.length > 0) {
+                console.log(selectedRowIdsapprove);
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    }
+                });
+
+                var location = $('#location').val();
+                var attendace_type = $('#attendace_type').val();
+                var from_date = $('#from_date').val();
+                var to_date = $('#to_date').val();
+
+                $.ajax({
+                    url: '{!! route("jobattendanceapprovesave") !!}',
+                    type: 'POST',
+                    dataType: "json",
+                    data: {
+                        records: selectedRowIdsapprove,
+                        location: location,
+                        attendace_type: attendace_type,
+                        from_date: from_date,
+                        to_date: to_date
+                    },
+                    success: function (data) {
+                        if (data.errors) {
+                            const actionObj = {
+                                icon: 'fas fa-warning',
+                                title: '',
+                                message: 'Record Error',
+                                url: '',
+                                target: '_blank',
+                                type: 'danger'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            action(actionJSON);
+                        }
+                        if (data.success) {
+                            const actionObj = {
+                                icon: 'fas fa-save',
+                                title: '',
+                                message: data.success,
+                                url: '',
+                                target: '_blank',
+                                type: 'success'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            actionreload(actionJSON);
+                        }
+                    }
+                });
+
+            } else {
+                Swal.fire({
+                    position: "top-end",
+                    icon: 'warning',
+                    title: 'Select Rows to Final Approve!',
+                    showConfirmButton: false,
+                    timer: 2500
                 });
             }
-        });
-
-        if (selectedRowIdsapprove.length > 0) {
-            console.log(selectedRowIdsapprove);
-            $('#approveconfirmModal').modal('show');
-        } else {
-            alert('Please select rows to approve!');
         }
     });
-
-$('#approve_button').click(function () {
-    $('#approve_button').html('<i class="fa fa-spinner fa-spin mr-2"></i> Processing').prop('disabled', true);
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-    });
-
-    var location = $('#location').val();
-    var attendace_type = $('#attendace_type').val();
-    var from_date = $('#from_date').val();
-    var to_date = $('#to_date').val();
-
-    $.ajax({
-        url: '{!! route("jobattendanceapprovesave") !!}',
-        type: 'POST',
-        dataType: "json",
-        data: {
-            records: selectedRowIdsapprove,
-            location: location,
-            attendace_type: attendace_type,
-            from_date: from_date,
-            to_date: to_date
-        },
-        success: function (data) {
-            $('#approve_button').html('Approve').prop('disabled', false);
-            
-            if (data.success) {
-                setTimeout(function () {
-                    $('#approveconfirmModal').modal('hide');
-                    // Refresh the DataTable instead of full page reload
-                    $('#dataTable').DataTable().ajax.reload(null, false);
-                }, 500);
-            } else {
-                alert('Error: ' + data.message);
-            }
-        },
-        error: function (xhr, status, error) {
-            $('#approve_button').html('Approve').prop('disabled', false);
-            alert('Error: ' + error);
-        }
-    });
-});
 
     $('#selectAll').click(function (e) {
         $('#dataTable').closest('table').find('td input:checkbox').prop('checked', this.checked);

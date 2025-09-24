@@ -306,11 +306,28 @@
                             },
                         ],
                 ajax: {
-                    "url": "{!! route('leave_approve_list_dt') !!}",
-                    "data": {'department':department, 'employee':employee, 'location': location, 'from_date': from_date, 'to_date': to_date},
+                    url: scripturl + '/leave_approve_list.php',
+                    type: "POST",
+                    data : {'department':department, 'employee':employee, 'location': location, 'from_date': from_date, 'to_date': to_date},
                 },
                 columns: [
-                    { data: 'leavestatus', name: 'leavestatus' },
+                    { 
+                        data: 'status', 
+                        name: 'status',
+                        render: function(data) {
+                            if (data === 'Approved') {
+                                return '<i class="fas fa-check-circle text-success"></i>';
+                            } else if (data === 'Rejected') {
+                                return '<i class="fas fa-times-circle text-danger"></i>';
+                            } else if (data === 'Rejected') {
+                                return '<span class="badge badge-danger">Rejected</span>';
+                            } else {
+                                return '<input type="checkbox" class="row-checkbox selectCheck removeIt">';
+                            }
+                        },
+                        orderable: false, 
+                        searchable: false 
+                    },
                     { data: 'emp_id', name: 'emp_id' },
                     { data: 'employee_display', name: 'employee_display' },
                     { data: 'dep_name', name: 'emp_name' },
@@ -319,8 +336,36 @@
                     { data: 'leave_to', name: 'leave_to' },
                     { data: 'reson', name: 'reson' },
                     { data: 'covering_emp', name: 'covering_emp' },
-                    { data: 'status', name: 'status' },
-                    { data: 'action', name: 'action',  className: 'text-right', orderable: false, searchable: false},
+                    { 
+                        data: 'status', 
+                        name: 'status',
+                        render: function(data) {
+                            if (data === 'Pending') {
+                                return '<span class="badge badge-primary">Pending</span>';
+                            } else if (data === 'Approved') {
+                                return '<span class="badge badge-success">Approved</span>';
+                            } else if (data === 'Rejected') {
+                                return '<span class="badge badge-danger">Rejected</span>';
+                            } else {
+                                return '';
+                            }
+                        },
+                        orderable: false, 
+                        searchable: false 
+                    },
+                     { 
+                        data: null, 
+                        name: 'action',
+                        render: function(data, type, row) {
+                            if (row.status === 'Pending' || row.status === 'Approved' || row.status === 'Rejected') {
+                                return '<button id="view" name="view" data-id="' + row.id + '" data-empid="' + row.emp_id + '" class="view btn btn-primary btn-sm" type="submit" data-toggle="tooltip" title="Approve"><i class="fas fa-pencil-alt"></i></button>';
+                            } else {
+                                return '';
+                            }
+                        },
+                        orderable: false, 
+                        searchable: false 
+                    },
                     { data: 'id', name: 'id' },
                 ],
                 columnDefs: [

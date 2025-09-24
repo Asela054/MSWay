@@ -727,7 +727,7 @@ class LateAttendanceController extends Controller
                         name="delete_button"
                         title="Delete"
                         data-id="' . $row->id . '"  
-                        class="view_button btn btn-danger btn-sm delete_button"><i class="fas fa-trash"></i></button> ';
+                        class="view_button btn btn-danger btn-sm delete_button" data-toggle="tooltip" title="Remove"><i class="fas fa-trash-alt" ></i></button> ';
                 }
 
                 return $btn;

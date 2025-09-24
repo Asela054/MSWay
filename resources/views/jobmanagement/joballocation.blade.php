@@ -5,37 +5,38 @@
 
     <main>
         <div class="page-header shadow">
-            <div class="container-fluid">
+            <div class="container-fluid d-none d-sm-block shadow">
                 @include('layouts.attendant&leave_nav_bar')
+            </div>
+            <div class="container-fluid">
+                <div class="page-header-content py-3 px-2">
+                    <h1 class="page-header-title ">
+                        <div class="page-header-icon"><i class="fa-light fa-calendar-pen"></i></div>
+                        <span>Allocation</span>
+                    </h1>
+                </div>
             </div>
         </div>
 
-        <div class="container-fluid mt-4">
+        <div class="container-fluid mt-2 p-0 p-2">
             <div class="card mb-2">
-                <div class="card-body">
+                <div class="card-body p-0 p-2">
                     <div class="row">
                         <div class="col-12">
-                            @can('Job-Allocation-create')
-                                <button type="button" class="btn btn-outline-primary btn-sm fa-pull-right" name="create_record" id="create_record"><i class="fas fa-plus mr-2"></i>Allocate Employees</button>
-                            @endcan
+                                <button type="button" class="btn btn-primary btn-sm fa-pull-right" name="create_record" id="create_record"><i class="fas fa-plus mr-2"></i>Allocate Employees</button>
                             </div>
                             <div class="col-12">
                                 <hr class="border-dark">
                             </div>
                             <div class="col-12">
-                                {{-- <div class="custom-control custom-checkbox ml-2 mb-2">
-                                    <input type="checkbox" class="custom-control-input checkallocate" id="selectAll">
-                                    <label class="custom-control-label" for="selectAll">Select All Records</label>
-                                </div> --}}
                                 <div class="center-block fix-width scroll-inner">
-                                    <table class="table table-striped table-bordered table-sm small nowrap display"
-                                        style="width: 100%" id="dataTable">
+                                    <table class="table table-striped table-bordered table-sm small nowrap display" style="width: 100%" id="dataTable">
                                         <thead>
                                             <tr>
                                                 <th>ID </th>
-                                                <th>Employee Name</th>
-                                                <th>Location Name</th>
-                                                <th class="text-right">Action</th>
+                                                <th>EMPLOYEE NAME</th>
+                                                <th>LOCATION NAME</th>
+                                                <th class="text-right">ACTION</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -47,6 +48,7 @@
                 </div>
             </div>
         </div>
+
     </main>
 
     <!-- Modal Area Start -->
@@ -65,7 +67,7 @@
                             <span id="form_result"></span>
                             <form method="post" id="formTitle" class="form-horizontal">
                                 {{ csrf_field() }}	
-                                <div class="col-4">
+                                <div class="col-sm-12 col-md-6">
                                     <select name="location" id="location" class="form-control form-control-sm " style="width: 100%;" required>
                                         <option value="">Select Location</option>
                                         @foreach($locations as $location)
@@ -105,7 +107,7 @@
                                 </tbody>
                             </table>
                                 <div class="form-group mt-3">
-                                    <button type="submit" name="action_button" id="action_button" class="btn btn-outline-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
+                                    <button type="submit" name="action_button" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
                                 </div>
                             </form>
                         </div>
@@ -132,7 +134,8 @@
                             <form method="post" id="formTitleedit" class="form-horizontal">
                                 {{ csrf_field() }}
                                 <div class="row">
-                                    <div class="col-6">
+                                    <div class="col-sm-12 col-md-6">
+                                         <label class="small font-weight-bold text-dark">Location</label>
                                         <select name="editlocation" id="editlocation"
                                             class="form-control form-control-sm " style="width: 100%;" readonly>
                                             <option value="">Select Location</option>
@@ -141,8 +144,9 @@
                                             </option>
                                             @endforeach
                                         </select>
-                                    </div>
-                                    <div class="col-6">
+                                    </div><br>
+                                    <div class="col-sm-12 col-md-6">
+                                         <label class="small font-weight-bold text-dark">Employee</label>
                                         <select name="editemployee" id="editemployee"
                                             class="form-control form-control-sm" style="width:100%">
                                             <option value="">Select Employees</option>
@@ -156,7 +160,7 @@
                                 <br>
                                 <div class="form-group mt-3">
                                     <button type="submit" name="action_buttonedit" id="action_buttonedit"
-                                        class="btn btn-outline-primary btn-sm fa-pull-right px-4"><i
+                                        class="btn btn-primary btn-sm fa-pull-right px-4"><i
                                             class="fas fa-plus"></i>&nbsp;Add</button>
                                 </div>
                                 <input type="hidden" name="action" id="action" value="1" />
@@ -164,30 +168,6 @@
                             </form>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="confirmModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-        aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content">
-                <div class="modal-header p-2">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col text-center">
-                            <h4 class="font-weight-normal">Are you sure you want to remove this data?</h4>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer p-2">
-                    <button type="button" name="ok_button" id="ok_button" class="btn btn-danger px-3 btn-sm">OK</button>
-                    <button type="button" class="btn btn-dark px-3 btn-sm" data-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </div>
@@ -213,13 +193,48 @@
                 $('#action').val('Add');
                 $('#form_result').html('');
                 $('#formTitle')[0].reset();
-
                 $('#formModal').modal('show');
             });
 
             $('#dataTable').DataTable({
-                processing: true,
-                serverSide: true,
+              "destroy": true,
+                "processing": true,
+                "serverSide": true,
+                dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+                "buttons": [{
+                        extend: 'csv',
+                        className: 'btn btn-success btn-sm',
+                        title: 'Job Allocation  Information',
+                        text: '<i class="fas fa-file-csv mr-2"></i> CSV',
+                    },
+                    { 
+                        extend: 'pdf', 
+                        className: 'btn btn-danger btn-sm', 
+                        title: 'Job Allocation Information', 
+                        text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
+                        orientation: 'landscape', 
+                        pageSize: 'legal', 
+                        customize: function(doc) {
+                            doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+                        }
+                    },
+                    {
+                        extend: 'print',
+                        title: 'Job Allocation  Information',
+                        className: 'btn btn-primary btn-sm',
+                        text: '<i class="fas fa-print mr-2"></i> Print',
+                        customize: function(win) {
+                            $(win.document.body).find('table')
+                                .addClass('compact')
+                                .css('font-size', 'inherit');
+                        },
+                    },
+                    // 'copy', 'csv', 'excel', 'pdf', 'print'
+                ],
+                "order": [
+                    [0, "desc"]
+                ],
                 ajax: {
                     "url": "{!! route('joballocationslist') !!}",
                    
@@ -238,10 +253,6 @@
                     }
                 },
                 ],
-                "bDestroy": true,
-                "order": [
-                    [0, "desc"]
-                ]
             });
 
             $('#formTitle').on('submit', function (event) {
@@ -276,28 +287,40 @@
                         },
                     dataType: "json",
                     success: function (data) {
-                        var html = '';
-                        if (data.errors) {
-                            html = '<div class="alert alert-danger">';
-                            for (var count = 0; count < data.errors.length; count++) {
-                                html += '<p>' + data.errors[count] + '</p>';
-                            }
-                            html += '</div>';
-                        }
-                        if (data.success) {
-                            html = '<div class="alert alert-success">' + data.success + '</div>';
-                            $('#formTitle')[0].reset();
-                            location.reload()
-                        }
-                        $('#form_result').html(html);
+                             if (data.errors) {
+                                 const actionObj = {
+                                     icon: 'fas fa-warning',
+                                     title: '',
+                                     message: 'Record Error',
+                                     url: '',
+                                     target: '_blank',
+                                     type: 'danger'
+                                 };
+                                 const actionJSON = JSON.stringify(actionObj, null, 2);
+                                 action(actionJSON);
+                             }
+                             if (data.success) {
+                                 const actionObj = {
+                                     icon: 'fas fa-save',
+                                     title: '',
+                                     message: data.success,
+                                     url: '',
+                                     target: '_blank',
+                                     type: 'success'
+                                 };
+                                 const actionJSON = JSON.stringify(actionObj, null, 2);
+                                 actionreload(actionJSON);
+                             }
                     }
                 });
 
                 }
             });
 
-            $(document).on('click', '.edit', function () {
-                var id = $(this).attr('id');
+            $(document).on('click', '.edit',async function () {
+                var r = await Otherconfirmation("You want to Edit this ? ");
+                if (r == true) {
+                     var id = $(this).attr('id');
                
                 $('#form_result').html('');
                 $.ajaxSetup({
@@ -319,6 +342,7 @@
                         $('#formModal2').modal('show');
                     }
                 })
+                }
             });
 
             $('#formTitleedit').on('submit', function (event) {
@@ -341,20 +365,30 @@
                         },
                     dataType: "json",
                     success: function (data) {
-                        var html = '';
-                        if (data.errors) {
-                            html = '<div class="alert alert-danger">';
-                            for (var count = 0; count < data.errors.length; count++) {
-                                html += '<p>' + data.errors[count] + '</p>';
-                            }
-                            html += '</div>';
-                        }
-                        if (data.success) {
-                            html = '<div class="alert alert-success">' + data.success + '</div>';
-                            $('#formTitleedit')[0].reset();
-                            location.reload()
-                        }
-                        $('#form_result2').html(html);
+                         if (data.errors) {
+                                 const actionObj = {
+                                     icon: 'fas fa-warning',
+                                     title: '',
+                                     message: 'Record Error',
+                                     url: '',
+                                     target: '_blank',
+                                     type: 'danger'
+                                 };
+                                 const actionJSON = JSON.stringify(actionObj, null, 2);
+                                 action(actionJSON);
+                             }
+                             if (data.success) {
+                                 const actionObj = {
+                                     icon: 'fas fa-save',
+                                     title: '',
+                                     message: data.success,
+                                     url: '',
+                                     target: '_blank',
+                                     type: 'success'
+                                 };
+                                 const actionJSON = JSON.stringify(actionObj, null, 2);
+                                 actionreload(actionJSON);
+                             }
                     }
                 });
             });
@@ -376,44 +410,42 @@
 
             var user_id;
 
-            $(document).on('click', '.delete', function () {
-                user_id = $(this).attr('id');
-                $('#confirmModal').modal('show');
-            });
-          
-            $('#ok_button').click(function () {
-                $.ajaxSetup({
+            $(document).on('click', '.delete',async function () {
+                 var r = await Otherconfirmation("You want to remove this ? ");
+                if (r == true) {
+                     user_id = $(this).attr('id');
+                     $.ajaxSetup({
                         headers: {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                         }
+                        })
+                    $.ajax({
+                        url: '{!! route("joballocationdelete") !!}',
+                            type: 'POST',
+                            dataType: "json",
+                            data: {id: user_id },
+                        beforeSend: function () {
+                            $('#ok_button').text('Deleting...');
+                        },
+                        success: function (data) {
+                             const actionObj = {
+                                icon: 'fas fa-trash-alt',
+                                title: '',
+                                message: 'Record Remove Successfully',
+                                url: '',
+                                target: '_blank',
+                                type: 'danger'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            actionreload(actionJSON);
+                        }
                     })
-                $.ajax({
-                    url: '{!! route("joballocationdelete") !!}',
-                        type: 'POST',
-                        dataType: "json",
-                        data: {id: user_id },
-                    beforeSend: function () {
-                        $('#ok_button').text('Deleting...');
-                    },
-                    success: function (data) {
-                        setTimeout(function () {
-                            $('#confirmModal').modal('hide');
-                            $('#dataTable').DataTable().ajax.reload();
-                        }, 2000);
-                        location.reload()
-                    }
-                })
+                }
+               
             });
-
+          
+           
         });
-
-          function deactive_confirm() {
-        return confirm("Are you sure you want to deactive this?");
-    }
-
-    function active_confirm() {
-        return confirm("Are you sure you want to active this?");
-    }
     function productDelete(ctl) {
     	$(ctl).parents("tr").remove();
     }
