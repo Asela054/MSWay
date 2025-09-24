@@ -842,42 +842,66 @@
 				},
 				success: function (data) {
 					//alert(JSON.stringify(data));
-					if (data.result == 'error') {
-						$(payslip).prop('checked', !$(payslip).prop('checked'));
-						alert('Something wrong. Payslip cannot be processed at the moment\r\n' + data
-							.msg);
-					} else {
-						var selected_tr = empTable.row('#row-' + workinfo.payroll_profile_id + '');
-						workinfo.id = data.employee_payslip_id;
-						workinfo.payslip_cancel = ($(payslip).is(":checked") ? 0 : 1);
-						/*
-						$(payslip).prop('disabled', false);
-						$(payslip).data('refid', data.employee_payslip_id);
-						*/
-						empTable.row(selected_tr).data(workinfo).draw(false);
+					if (data.errors) {
+                        const actionObj = {
+                            icon: 'fas fa-warning',
+                            title: 'Record Error',
+                            message: data.errors,
+                            url: '',
+                            target: '_blank',
+                            type: 'danger'
+                        };
+                        const actionJSON = JSON.stringify(actionObj, null, 2);
+                        action(actionJSON);
 
-						/*
-						var selected_tr=empTable.row('#row-'+$(loanref).data('refloan')+'');
-						var rowNode=selected_tr.node();
-						var new_val=parseFloat($( rowNode ).find('td').eq(5).html())+data.payment_value;
-						
-						$( rowNode ).find('td').eq(5).html( new_val );
-						*/
+						$(payslip).prop('checked', false);
+						$(payslip).prop('disabled', false);
+                    }
+					else{
+						if (data.result == 'error') {
+							$(payslip).prop('checked', !$(payslip).prop('checked'));
+							Swal.fire({
+								icon: 'error',
+								title: 'Something wrong.',
+								text: 'Payslip cannot be processed at the moment. ' + data.msg
+							});
+							// alert('Something wrong. Payslip cannot be processed at the moment\r\n' + data.msg);
+						} else {
+							var selected_tr = empTable.row('#row-' + workinfo.payroll_profile_id + '');
+							workinfo.id = data.employee_payslip_id;
+							workinfo.payslip_cancel = ($(payslip).is(":checked") ? 0 : 1);
+							/*
+							$(payslip).prop('disabled', false);
+							$(payslip).data('refid', data.employee_payslip_id);
+							*/
+							empTable.row(selected_tr).data(workinfo).draw(false);
+
+							/*
+							var selected_tr=empTable.row('#row-'+$(loanref).data('refloan')+'');
+							var rowNode=selected_tr.node();
+							var new_val=parseFloat($( rowNode ).find('td').eq(5).html())+data.payment_value;
+							
+							$( rowNode ).find('td').eq(5).html( new_val );
+							*/
+						}
 					}
 				}
 			});
 		}
 
-		$(document).on('click', '.actbtn_delete', function () {
+		$(document).on('click', '.actbtn_delete', async function () {
 			var _token = $('#frmSearch input[name="_token"]').val();
 			var empid = $(this).data('empid'); //emp-id
 			var delete_payslip = empTable.row('#row-' + empid + '');
 			var paidinfo = delete_payslip.data();
 
-			var confres = confirm("Are you sure you want to delete " + paidinfo.emp_first_name);
+			var r = await Otherconfirmation("You want to delete this "+paidinfo.emp_first_name+"? ");
+            if (r == true) {
+				// var confres = confirm("Are you sure you want to delete " + paidinfo.emp_first_name);
 
-			if (confres) {
-				deletePayslip($(this), paidinfo, _token);
+				// if (confres) {
+					deletePayslip($(this), paidinfo, _token);
+				// }
 			}
 		});
 
@@ -897,8 +921,13 @@
 				success: function (data) {
 					//alert(JSON.stringify(data));
 					if (data.result == 'error') {
-						alert('Something wrong. Payslip cannot be processed at the moment\r\n' + data
-							.msg);
+						// alert('Something wrong. Payslip cannot be processed at the moment\r\n' + data
+						// 	.msg);
+						Swal.fire({
+							icon: 'error',
+							title: 'Something wrong.',
+							text: 'Payslip cannot be processed at the moment. ' + data.msg
+						});
 					} else {
 						var selected_tr = empTable.row('#row-' + paidinfo.payroll_profile_id + '');
 						paidinfo.id = data.employee_payslip_id; //''

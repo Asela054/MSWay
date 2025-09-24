@@ -59,6 +59,11 @@ class RemunerationController extends Controller
      */
     public function store(Request $request)
     {
+        $user = Auth::user();
+        $permission = $user->can('Facilities-create');
+        if(!$permission) {
+            return response()->json(['errors' => array('You do not have permission to create remuneration.')]);
+        }
         try{
 			return DB::transaction(function() use ($request) {
 				$rules = array(
@@ -142,10 +147,12 @@ class RemunerationController extends Controller
 				}
 				
 		
-				return response()->json(['success' => 'Remuneration Added Successfully.', 'new_obj'=>$new_remuneration]);
+				// return response()->json(['result'=>'success', 'msg'=> 'Remuneration Added Successfully.', 'new_obj'=>$new_remuneration]);
+                return response()->json(['success' => 'Remuneration Added Successfully.', 'new_obj'=>$new_remuneration]);
 			});
 		}catch(\Exception $e){
-			return response()->json(array('result'=>'error', 'msg'=>$e->getMessage()));
+			// return response()->json(array('result'=>'error', 'msg'=>$e->getMessage()));
+            return response()->json(['errors' => array($e->getMessage())]);
 		}
     }
 
@@ -189,6 +196,12 @@ class RemunerationController extends Controller
      */
     public function update(Request $request, Remuneration $remuneration)
     {
+        $user = Auth::user();
+        $permission = $user->can('Facilities-edit');
+        if(!$permission) {
+            return response()->json(['errors' => array('You do not have permission to update remuneration.')]);
+        }
+
         $rules = array(
             'remuneration_name' => 'required'
         );
@@ -242,6 +255,11 @@ class RemunerationController extends Controller
      */
     public function destroy($id)
     {
+        $user = Auth::user();
+        $permission = $user->can('Facilities-delete');
+        if(!$permission) {
+            return response()->json(['errors' => array('You do not have permission to remove remuneration.')]);
+        }
         /*
 		$data = Remuneration::findOrFail($id);
         $data->delete();

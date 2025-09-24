@@ -416,32 +416,45 @@
                 },
                 success: function (data) {
                     //alert(JSON.stringify(data));
-                    if (data.result == 'error') {
-                        $(loanref).prop('checked', !$(loanref).prop('checked'));
-                        var msg = 'Something wrong. Loan installment status cannot be changed at the moment. ' + data.msg;
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: msg
-                        });
-                    } else {
-                        $(loanref).prop('disabled', false);
-                        $(loanref).data('refid', data.installment_id);
+                    if (data.errors) {
+                        const actionObj = {
+                            icon: 'fas fa-warning',
+                            title: 'Record Error',
+                            message: data.errors,
+                            url: '',
+                            target: '_blank',
+                            type: 'danger'
+                        };
+                        const actionJSON = JSON.stringify(actionObj, null, 2);
+                        action(actionJSON);
+                    }
+                    else{
+                        if (data.result == 'error') {
+                            $(loanref).prop('checked', !$(loanref).prop('checked'));
+                            var msg = 'Something wrong. Loan installment status cannot be changed at the moment. ' + data.msg;
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: msg
+                            });
+                        } else {
+                            $(loanref).prop('disabled', false);
+                            $(loanref).data('refid', data.installment_id);
 
-                        var selected_tr = empTable.row('#row-' + $(loanref).data('refloan') + '');
-                        var rowNode = selected_tr.node();
-                        var new_val = data
-                        .payment_value; //parseFloat($( rowNode ).find('td').eq(5).html())+data.payment_value;
+                            var selected_tr = empTable.row('#row-' + $(loanref).data('refloan') + '');
+                            var rowNode = selected_tr.node();
+                            var new_val = data
+                            .payment_value; //parseFloat($( rowNode ).find('td').eq(5).html())+data.payment_value;
 
-                        $(rowNode).find('td').eq(5).html(parseFloat(new_val).toFixed(2));
+                            $(rowNode).find('td').eq(5).html(parseFloat(new_val).toFixed(2));
 
-                        var d = selected_tr.data();
-                        var loan_tot = parseFloat(d
-                        .loan_amount); //d[4]//console.log("1="+loan_tot+"--"+d[3]+"--"+d[2]+"--"+d[1]);
-                        var loan_settle = parseFloat($(rowNode).find('td').eq(5)
-                    .html()); //console.log("2="+loan_settle);
-                        var loan_bal = loan_tot - loan_settle; //console.log("3="+loan_bal);
-                        $(rowNode).find('td').eq(6).html(parseFloat(loan_bal).toFixed(2));
+                            var d = selected_tr.data();
+                            var loan_tot = parseFloat(d
+                            .loan_amount); //d[4]//console.log("1="+loan_tot+"--"+d[3]+"--"+d[2]+"--"+d[1]);
+                            var loan_settle = parseFloat($(rowNode).find('td').eq(5).html()); //console.log("2="+loan_settle);
+                            var loan_bal = loan_tot - loan_settle; //console.log("3="+loan_bal);
+                            $(rowNode).find('td').eq(6).html(parseFloat(loan_bal).toFixed(2));
+                        }
                     }
                 }
             })

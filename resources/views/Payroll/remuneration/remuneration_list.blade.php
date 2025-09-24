@@ -398,16 +398,16 @@
                 data: $(this).serialize(),
                 dataType: "json",
                 success: function (data) {
-
-                    if (data.result == 'error') {
-                        alert(data.msg);
-                    }
+                    // console.log('new_obj:', data.new_obj);
+                    // if (data.result == 'error') {
+                    //     alert(data.msg);
+                    // }
 
                     if (data.errors) {
                         const actionObj = {
                             icon: 'fas fa-warning',
-                            title: '',
-                            message: 'Record Error',
+                            title: 'Record Error',
+                            message: data.errors,
                             url: '',
                             target: '_blank',
                             type: 'danger'
@@ -418,7 +418,7 @@
                     if (data.success) {
                         const actionObj = {
                             icon: 'fas fa-save',
-                            title: '',
+                            title: 'Record Success',
                             message: data.success,
                             url: '',
                             target: '_blank',
@@ -428,18 +428,24 @@
                         action(actionJSON);
 
                         if ($("#action").val() == "Add") {
-                            var rowNode = remunerationTable.row.add([
-                                data.new_obj.remuneration_name,
-                                data.new_obj.remuneration_type,
-                                data.new_obj.epf_payable,
-                                data.new_obj.id
-                            ]).draw(false).node();
+                            // var rowNode = remunerationTable.row.add([
+                            //     data.new_obj.remuneration_name,
+                            //     data.new_obj.remuneration_type,
+                            //     data.new_obj.epf_payable,
+                            //     data.new_obj.id
+                            // ]).draw(false).node();
+                            var rowData = {
+                                remuneration_name: data.new_obj.remuneration_name,
+                                remuneration_type: data.new_obj.remuneration_type,
+                                epf_payable: data.new_obj.epf_payable,
+                                id: data.new_obj.id
+                                // Add other properties that match your column data names
+                            };
+                            
+                            var rowNode = remunerationTable.row.add(rowData).draw(false).node();
 
                             if (data.new_obj.advanced_option_id > 0) {
-                                $("#frm_more_sect_bg_title").html(data.new_obj
-                                    .remuneration_name +
-                                    ' - ( Important: <strong>update payment value</strong> )'
-                                    );
+                                $("#frm_more_sect_bg_title").html(data.new_obj.remuneration_name + ' - ( Important: <strong>update payment value</strong> )');
 
                                 $('#remuneration_criteria option').hide();
                                 criteriaTable.$('tr').hide();
@@ -493,7 +499,7 @@
                                 .remuneration_name);
                         }
                     }
-                    $('#form_result').html(html);
+                    // $('#form_result').html(html);
                 }
             });
         });
@@ -640,16 +646,32 @@
                         $('#ok_button').text('Deleting...');
                     },
                     success: function (data) {
-                        const actionObj = {
-                            icon: 'fas fa-trash-alt',
-                            title: '',
-                            message: 'Record Remove Successfully',
-                            url: '',
-                            target: '_blank',
-                            type: 'danger'
-                        };
-                        const actionJSON = JSON.stringify(actionObj, null, 2);
-                        actionreload(actionJSON);
+                        if (data.errors) {
+                            // Handle server-side errors (including permission denied)
+                            const actionObj = {
+                                icon: 'fas fa-warning',
+                                title: 'Permission Denied',
+                                message: data.errors,
+                                url: '',
+                                target: '_blank',
+                                type: 'danger'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            action(actionJSON);
+                        } 
+                        if (data.result == 'success') {
+                            // Success case
+                            const actionObj = {
+                                icon: 'fas fa-trash-alt',
+                                title: '',
+                                message: 'Record Remove Successfully',
+                                url: '',
+                                target: '_blank',
+                                type: 'danger'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            actionreload(actionJSON);
+                        }
                     }
                 })
             }

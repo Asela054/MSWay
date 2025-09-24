@@ -14,6 +14,7 @@ use PDF;
 use Carbon\Carbon;
 
 use Validator;
+use Illuminate\Support\Facades\Auth;
 
 class EmployeePayrollReport extends Controller
 {
@@ -29,6 +30,12 @@ class EmployeePayrollReport extends Controller
 	
 	public function reportSixMonth()
     {
+		$user = Auth::user();
+        $permission = $user->can('Sixmonths-report');
+        if(!$permission) {
+            abort(403);
+        }
+
         $branch=Company::orderBy('id', 'asc')->get(); // Branch::orderBy('id', 'asc')->get();
 		$payroll_process_type=PayrollProcessType::orderBy('id', 'asc')->get();
 		$payment_period=PaymentPeriod::orderBy('id', 'desc')->get();
@@ -142,6 +149,12 @@ class EmployeePayrollReport extends Controller
 	
 	public function reportAddition()
     {
+		$user = Auth::user();
+        $permission = $user->can('Addition-report');
+        if(!$permission) {
+            abort(403);
+        }
+
         $branch=Company::orderBy('id', 'asc')->get(); // Branch::orderBy('id', 'asc')->get();
 		$department=DB::select("select id, company_id, name from departments");
 		$payroll_process_type=PayrollProcessType::orderBy('id', 'asc')->get();
@@ -153,6 +166,12 @@ class EmployeePayrollReport extends Controller
 	
 	public function reportHeldSalaries()
     {
+		$user = Auth::user();
+        $permission = $user->can('Salary-sheet-heldpayment-report');
+        if(!$permission) {
+            abort(403);
+        }
+
         $branch=Company::orderBy('id', 'asc')->get(); // Branch::orderBy('id', 'asc')->get();
 		$department=DB::select("select id, company_id, name from departments");
 		$payroll_process_type=PayrollProcessType::orderBy('id', 'asc')->get();
@@ -352,6 +371,12 @@ class EmployeePayrollReport extends Controller
 	
 	public function reportEmpOT()
     {
+		$user = Auth::user();
+        $permission = $user->can('OT-Report');
+        if(!$permission) {
+            abort(403);
+        }
+
         $branch=Company::orderBy('id', 'asc')->get(); // Branch::orderBy('id', 'asc')->get();
 		$department=DB::select("select id, company_id, name from departments");
 		$payroll_process_type=PayrollProcessType::orderBy('id', 'asc')->get();

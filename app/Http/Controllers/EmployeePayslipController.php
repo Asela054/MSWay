@@ -203,6 +203,12 @@ class EmployeePayslipController extends Controller
 	}
 	
 	public function freeze(Request $request){
+		$user = Auth::user();
+        $permission = $user->can('Salary-preperation-create');
+        if(!$permission) {
+            return response()->json(['errors' => array('You do not have permission to create salary.')]);
+        }
+
 		try{
 			return DB::transaction(function() use ($request){
 				if($request->ajax()){
@@ -684,6 +690,12 @@ class EmployeePayslipController extends Controller
 	}
 	
 	public function holdPayment(Request $request){
+		$user = Auth::user();
+        $permission = $user->can('Paysliplist-status');
+        if(!$permission) {
+            return response()->json(['errors' => array('You do not have permission to hold payslip.')]);
+        }
+
 		try{
 			return DB::transaction(function() use ($request) {
 				if($request->ajax()){
@@ -739,6 +751,12 @@ class EmployeePayslipController extends Controller
 	}
 	
 	public function approvePayment(Request $request){
+		$user = Auth::user();
+        $permission = $user->can('Paysliplist-create');
+        if(!$permission) {
+            return response()->json(['errors' => array('You do not have permission to create payslip.')]);
+        }
+
 		if($request->ajax()){
 			$restype = 'error';
 			$feedback_msg = '';
@@ -790,6 +808,12 @@ class EmployeePayslipController extends Controller
 	
 	public function reportEpfEtf()
     {
+		$user = Auth::user();
+        $permission = $user->can('EPF-ETF-Report');
+        if(!$permission) {
+            abort(403);
+        }
+
         $branch=Company::orderBy('id', 'asc')->get(); // Branch::orderBy('id', 'asc')->get();
 		$department=DB::select("select id, company_id, name from departments");
 		$payroll_process_type=PayrollProcessType::orderBy('id', 'asc')->get();
@@ -805,6 +829,12 @@ class EmployeePayslipController extends Controller
     }
 	public function reportPayRegister()
     {
+		$user = Auth::user();
+        $permission = $user->can('Pay-Register-Report');
+        if(!$permission) {
+            abort(403);
+        }
+
         $branch=Company::orderBy('id', 'asc')->get(); // Branch::orderBy('id', 'asc')->get();
 		$department=DB::select("select id, company_id, name from departments");
 		$payroll_process_type=PayrollProcessType::orderBy('id', 'asc')->get();
@@ -813,6 +843,11 @@ class EmployeePayslipController extends Controller
     }
 	public function reportSalarySheet()
     {
+		$user = Auth::user();
+        $permission = $user->can('Salary-Sheet-report');
+        if(!$permission) {
+            abort(403);
+        }
         $branch=Company::orderBy('id', 'asc')->get(); // Branch::orderBy('id', 'asc')->get();
 		$department=DB::select("select id, company_id, name from departments");
 		$payroll_process_type=PayrollProcessType::orderBy('id', 'asc')->get();

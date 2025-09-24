@@ -59,6 +59,12 @@ class PaymentPeriodController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request){
+        $user = Auth::user();
+        $permission = $user->can('Salary-schedule-create');
+        if(!$permission) {
+            return response()->json(['errors' => array('You do not have permission to create salary schedule.')]);
+        }
+
 		$data = $request->all();
 		
 		$rules = array(

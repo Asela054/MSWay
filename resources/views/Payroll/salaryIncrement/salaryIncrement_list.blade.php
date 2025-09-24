@@ -291,6 +291,18 @@
                         //     //alert('Data Deleted');
                         // }, 2000);
                         //location.reload()
+                        if (data.errors) {
+                            const actionObj = {
+                                icon: 'fas fa-warning',
+                                title: 'Record Error',
+                                message: data.errors,
+                                url: '',
+                                target: '_blank',
+                                type: 'danger'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            action(actionJSON);
+                        }
                         if (data.result == 'success') {
                             const actionObj = {
                                 icon: 'fas fa-trash-alt',

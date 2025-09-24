@@ -182,6 +182,11 @@ class EmployeeLoanInstallmentController extends Controller
      */
     public function update_without_loan_complete(Request $request, EmployeeLoanInstallment $loan)
     {
+		$user = Auth::user();
+        $permission = $user->can('Loans-Settlement-edit');
+        if(!$permission) {
+            return response()->json(['errors' => array('You do not have permission to update loan settlement.')]);
+        }
         /**/
 		$rules = array(
             'new_installment_amount' => 'required'
@@ -218,6 +223,12 @@ class EmployeeLoanInstallmentController extends Controller
 	
 	public function update(Request $request, EmployeeLoanInstallment $loan)
     {
+		$user = Auth::user();
+        $permission = $user->can('Loans-Settlement-edit');
+        if(!$permission) {
+            return response()->json(['errors' => array('You do not have permission to update loan settlement.')]);
+        }
+
         try{
 			return DB::transaction(function() use ($request){
 				/**/
@@ -308,6 +319,12 @@ class EmployeeLoanInstallmentController extends Controller
 	*/
 	
 	public function freeze(Request $request){
+		$user = Auth::user();
+        $permission = $user->can('Loans-Settlement-status');
+        if(!$permission) {
+            return response()->json(['errors' => array('You do not have permission to change status loan settlement.')]);
+        }
+		
 		try{
 			return DB::transaction(function() use ($request){
 				if($request->ajax()){
