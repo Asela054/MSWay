@@ -84,6 +84,11 @@ class PayrollProfileController extends Controller
      */
     public function store(Request $request)
     {
+		$user = Auth::user();
+        $permission = $user->can('Payrollprofile-create');
+        if(!$permission) {
+			return response()->json(['errors' => array('You do not have permission to create payroll profile.')]);
+        }
         /*
 		'emp_etfno' => 'required',
 		*/
@@ -254,6 +259,12 @@ class PayrollProfileController extends Controller
      */
     public function update(Request $request, PayrollProfile $payrollProfile)
     {
+		$user = Auth::user();
+        $permission = $user->can('Payrollprofile-edit');
+        if(!$permission) {
+			return response()->json(['errors' => array('You do not have permission to update payroll profile.')]);
+        }
+
         $rules = array(
             'payroll_act_id' => 'required',
 			'basic_salary' => 'required'

@@ -503,59 +503,75 @@
 					var act_finalize = false;
 					var head_obj = null;
 
-					if (data.result == 'error') {
-						if (batch_cnt == 0) {
-							$(payslip).prop('checked', !$(payslip).prop('checked'));
-							Swal.fire({
-								icon: 'question',
-								title: 'Something wrong',
-								text: data.resmsg
-							});
+					if (data.errors) {
+						// Handle server-side errors (including permission denied)
+						const actionObj = {
+							icon: 'fas fa-warning',
+							title: 'Permission Denied',
+							message: data.errors,
+							url: '',
+							target: '_blank',
+							type: 'danger'
+						};
+						const actionJSON = JSON.stringify(actionObj, null, 2);
+						action(actionJSON);
 
-							// alert('Something wrong.\r\n' + data.resmsg);
+						$(payslip).prop('checked', !$(payslip).prop('checked'));
+						$(payslip).prop('disabled', false);
+					} 
+					else{
+						if (data.result == 'error') {
+							if (batch_cnt == 0) {
+								$(payslip).prop('checked', !$(payslip).prop('checked'));
+								Swal.fire({
+									icon: 'question',
+									title: 'Something wrong',
+									text: data.resmsg
+								});
+
+								// alert('Something wrong.\r\n' + data.resmsg);
+							} else {
+								Swal.fire({
+									icon: 'question',
+									title: 'Payment update error.',
+									text: 'Please reload the page to abort process. ' + data.resmsg
+								});
+								// alert('Please reload the page to abort process.\r\n' +
+								// 	data.resmsg);
+								/*
+								$(payslip).addClass('check_inactive');
+								*/
+							}
+
 						} else {
-							Swal.fire({
-								icon: 'question',
-								title: 'Payment update error.',
-								text: 'Please reload the page to abort process. ' + data.resmsg
-							});
-							// alert('Please reload the page to abort process.\r\n' +
-							// 	data.resmsg);
+							$(payslip).prop('disabled', false);
+
+							if (batch_cnt > 0) {
+								$(payslip).prop('checked', !$(payslip).prop('checked'));
+							}
+
+
+						}
+
+						if ((batch_cnt - batch_inv) == 0) {
+							act_finalize = true;
+							head_obj = $('#chk_approve').parent();
+						}
+
+						if (act_finalize) {
+							if ($(head_obj).hasClass('masked_obj')) {
+								$(head_obj).removeClass('masked_obj');
+							}
 							/*
-							$(payslip).addClass('check_inactive');
+							var objs_visible=$('input.finalize[type=checkbox]').length;
+							var chk_selected=((objs_visible>0)&&($('input.finalize[type=checkbox]:checked').length==objs_visible));
+							$('#chk_approve').prop('checked', chk_selected);
 							*/
 						}
 
-					} else {
-						$(payslip).prop('disabled', false);
-
-						if (batch_cnt > 0) {
-							$(payslip).prop('checked', !$(payslip).prop('checked'));
-						}
-
-
+						empTable.draw(false); //update-chk-approve-checked-value
+						batchUpdate(par_checked, (batch_cnt - 1));
 					}
-
-
-					if ((batch_cnt - batch_inv) == 0) {
-						act_finalize = true;
-						head_obj = $('#chk_approve').parent();
-					}
-
-					if (act_finalize) {
-						if ($(head_obj).hasClass('masked_obj')) {
-							$(head_obj).removeClass('masked_obj');
-						}
-						/*
-						var objs_visible=$('input.finalize[type=checkbox]').length;
-						var chk_selected=((objs_visible>0)&&($('input.finalize[type=checkbox]:checked').length==objs_visible));
-						$('#chk_approve').prop('checked', chk_selected);
-						*/
-					}
-
-					empTable.draw(false); //update-chk-approve-checked-value
-					batchUpdate(par_checked, (batch_cnt - 1));
-
 				}
 			});
 
@@ -590,32 +606,50 @@
 				},
 				success: function (data) {
 					//alert(JSON.stringify(data));
-					if (data.result == 'error') {
-						$(payslip).prop('checked', !$(payslip).prop('checked'));
-						// alert('Something wrong.\r\n' + data.resmsg);
-						Swal.fire({
-							icon: 'question',
-							title: 'Something wrong.',
-							text: data.resmsg
-						});
-					} else {
+					if (data.errors) {
+						// Handle server-side errors (including permission denied)
+						const actionObj = {
+							icon: 'fas fa-warning',
+							title: 'Permission Denied',
+							message: data.errors,
+							url: '',
+							target: '_blank',
+							type: 'danger'
+						};
+						const actionJSON = JSON.stringify(actionObj, null, 2);
+						action(actionJSON);
+
+						$(payslip).prop('checked', !($(payslip).is(":checked")));
 						$(payslip).prop('disabled', false);
-
-						/*
-						var selected_tr=empTable.row('#row-'+$(loanref).data('refloan')+'');
-						var rowNode=selected_tr.node();
-						var new_val=parseFloat($( rowNode ).find('td').eq(5).html())+data.payment_value;
-						
-						$( rowNode ).find('td').eq(5).html( new_val );
-						*/
-
-						var btnObj = $(payslip).next();
-						if ($(btnObj).hasClass('opts_held')) {
-							$(btnObj).prop('disabled', !($(payslip).is(":checked")))
+					} 
+					else{
+						if (data.result == 'error') {
+							$(payslip).prop('checked', !$(payslip).prop('checked'));
+							// alert('Something wrong.\r\n' + data.resmsg);
+							Swal.fire({
+								icon: 'question',
+								title: 'Something wrong.',
+								text: data.resmsg
+							});
 						} else {
-							$('<button type="button" class="btn btn-transparent-dark btn-icon opts_held" data-payid="' +
-									reginfo + '"><i class="fas fa-list-alt"></i></button>')
-								.insertAfter($(payslip));
+							$(payslip).prop('disabled', false);
+
+							/*
+							var selected_tr=empTable.row('#row-'+$(loanref).data('refloan')+'');
+							var rowNode=selected_tr.node();
+							var new_val=parseFloat($( rowNode ).find('td').eq(5).html())+data.payment_value;
+							
+							$( rowNode ).find('td').eq(5).html( new_val );
+							*/
+
+							var btnObj = $(payslip).next();
+							if ($(btnObj).hasClass('opts_held')) {
+								$(btnObj).prop('disabled', !($(payslip).is(":checked")))
+							} else {
+								$('<button type="button" class="btn btn-transparent-dark btn-icon opts_held" data-payid="' +
+										reginfo + '"><i class="fas fa-list-alt"></i></button>')
+									.insertAfter($(payslip));
+							}
 						}
 					}
 				}

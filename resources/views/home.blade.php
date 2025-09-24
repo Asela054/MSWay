@@ -75,36 +75,40 @@
                     <div class="col pt-sm-0 pt-3">
                         <div class="card h-100 mt-sm-0 mt-3">
                             <div class="card-body p-3">
-                                <h5 class="title-style"><span>LEAVE INFORMATION</span></h5>
+                                <h5 class="title-style"><span>{{strtoupper(date('F / Y'))}} LEAVE INFORMATION</span></h5>
                                 <div class="center-block fix-width scroll-inner">
                                     <table class="table shadow-none table-sm mt-3 border-bottom small w-100">
                                         <tbody>
+                                            @foreach($leavedatalist as $leavelist)
+                                                @php
+                                                    $employeePicture = $leavelist->emp_pic_picture;
+                                                    $imagePath = '';
+                                                    if (file_exists(public_path("images/{$employeePicture}"))) {
+                                                        $imagePath = asset("images/{$employeePicture}");
+                                                    } else {
+                                                        $employeeGender = \App\Employee::where('emp_id', $leavelist->emp_id)->pluck('emp_gender')->first();
+                                                        if(empty($employeeGender)){
+                                                            $employeeGender = "Male";
+                                                        }
+                                                        $imagePath = $employeeGender == "Male" 
+                                                            ? asset("images/man.png") 
+                                                            : asset("images/girl.png");
+                                                    }
+                                                @endphp
                                             <tr>
                                                 <td style='width: 2.5rem;' nowrap>
                                                     <img style="height: 2.5rem;width: 2.5rem;margin-right: 1rem;border-radius: 100%;" src="images/man.png" alt="Employee Photo"/>
                                                 </td>
                                                 <td nowrap>
-                                                    R. D. CHATHURANGA<br>
-                                                    <small class="text-muted">WHARF</small>
+                                                    {{$leavelist->emp_name_with_initial}}<br>
+                                                    <small class="text-muted">{{$leavelist->department}}</small>
                                                 </td>
-                                                <td nowrap class="align-text-top">Annual Leave</td>
-                                                <td nowrap class="align-text-top">Full Day</td>
-                                                <td nowrap class="align-text-top">2025-08-28</td>
-                                                <td nowrap class="align-text-top">Leave</td>
+                                                <td nowrap class="align-text-top">{{$leavelist->leave_type}}</td>
+                                                <td nowrap class="align-text-top">{{$leavelist->leave_from}}</td>
+                                                <td nowrap class="align-text-top">{{$leavelist->no_of_days}}</td>
+                                                <td nowrap class="align-text-top">{{$leavelist->reson}}</td>
                                             </tr>
-                                            <tr>
-                                                <td nowrap>
-                                                    <img style="height: 2.5rem;width: 2.5rem;margin-right: 1rem;border-radius: 100%;" src="images/man.png" alt="Employee Photo"/>
-                                                </td>
-                                                <td nowrap>
-                                                    R. D. CHATHURANGA<br>
-                                                    <small class="text-muted">WHARF</small>
-                                                </td>
-                                                <td nowrap class="align-text-top">Annual Leave</td>
-                                                <td nowrap class="align-text-top">Full Day</td>
-                                                <td nowrap class="align-text-top">2025-08-28</td>
-                                                <td nowrap class="align-text-top">Leave</td>
-                                            </tr>
+                                            @endforeach
                                         </tbody>
                                     </table>
                                 </div>
@@ -565,12 +569,13 @@ const months = [
 const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
 // Event data
-const events = [
-    { date: "09-02-2025", name: "Team Meeting - 10:00 AM", color: "#5d4697" },
-    { date: "09-02-2025", name: "Lunch with Client - 1:00 PM", color: "#ff69b4" },
-    { date: "09-11-2025", name: "Project Deadline", color: "gray" },
-    { date: "09-20-2025", name: "Birthday Party", color: "#ff69b4" }
-];
+// const events = [
+//     { date: "09-02-2025", name: "Team Meeting - 10:00 AM", color: "#5d4697" },
+//     { date: "09-02-2025", name: "Lunch with Client - 1:00 PM", color: "#ff69b4" },
+//     { date: "09-11-2025", name: "Project Deadline", color: "gray" },
+//     { date: "09-20-2025", name: "Birthday Party", color: "#ff69b4" }
+// ];
+const events = {!! json_encode($events, JSON_PRETTY_PRINT | JSON_HEX_TAG) !!};
 
 function renderCalendar(month, year) {
     const firstDay = new Date(year, month, 1).getDay();
@@ -632,16 +637,16 @@ function renderEvents(date) {
     let eventsHtml = "";
 
     if (todaysEvents.length > 0) {
-        eventsHtml += `
-            <div class="event-item">
-                <span class="dot" style="background-color: #5d4697;"></span>
-                <span>Team Meeting - 10:00 AM</span>
-            </div>
-            <div class="event-item">
-                <span class="dot" style="background-color: #ff69b4;"></span>
-                <span>Lunch with Client - 1:00 PM</span>
-            </div>
-        `;
+        // console.log(todaysEvents);
+        
+        todaysEvents.forEach(event => {
+            eventsHtml += `
+                <div class="event-item">
+                    <span class="dot" style="background-color: ${event.color};"></span>
+                    <span>${event.name}</span>
+                </div>
+            `;
+        });
     } else {
         eventsHtml = `<p class="no-events">No events for this day.</p>`;
     }

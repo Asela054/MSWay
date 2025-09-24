@@ -516,7 +516,8 @@
                 data: $(this).serialize(),
                 dataType: "json",
                 success: function (data) { //alert(JSON.stringify(data));
-
+                    console.log(data);
+                    
                     var html = '';
                     // if (data.errors) {
                     //     html = '<div class="alert alert-danger">';
@@ -529,7 +530,7 @@
                         const actionObj = {
                             icon: 'fas fa-warning',
                             title: '',
-                            message: 'Record Error',
+                            message: data.errors,
                             url: '',
                             target: '_blank',
                             type: 'danger'
@@ -620,7 +621,7 @@
                         const actionObj = {
                             icon: 'fas fa-warning',
                             title: '',
-                            message: 'Record Error',
+                            message: data.errors,
                             url: '',
                             target: '_blank',
                             type: 'danger'
@@ -768,7 +769,7 @@
                             const actionObj = {
                                 icon: 'fas fa-warning',
                                 title: '',
-                                message: 'Record Error',
+                                message: data.errors,
                                 url: '',
                                 target: '_blank',
                                 type: 'danger'

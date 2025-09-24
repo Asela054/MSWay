@@ -73,6 +73,12 @@ class EmployeeTermPaymentController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request){
+		$user = Auth::user();
+        $permission = $user->can('Salaryaddition-create');
+        if(!$permission) {
+            return response()->json(['errors' => array('You do not have permission to create salary additions / deductions.')]);
+        }
+
         $rules = array(
             'remuneration_id' => 'required', 
 			'eligible_amount' => 'required'
@@ -203,6 +209,11 @@ class EmployeeTermPaymentController extends Controller
      */
     public function update(Request $request, EmployeeTermPayment $loan)
     {
+		$user = Auth::user();
+        $permission = $user->can('Salaryaddition-edit');
+        if(!$permission) {
+            return response()->json(['errors' => array('You do not have permission to ipdate salary additions / deductions.')]);
+        }
         
 		$rules = array(
             'new_allocated_amount' => 'required'
@@ -251,6 +262,12 @@ class EmployeeTermPaymentController extends Controller
 	/**/
 	
 	public function freeze(Request $request){
+		$user = Auth::user();
+        $permission = $user->can('Salaryaddition-status');
+        if(!$permission) {
+            return response()->json(['errors' => array('You do not have permission to change status salary additions / deductions.')]);
+        }
+
 		if($request->ajax()){
 			$employeePayslip = EmployeePayslip::where(['payroll_profile_id'=>$request->payroll_profile_id])
 								->latest()
@@ -359,6 +376,12 @@ class EmployeeTermPaymentController extends Controller
 	}
 	
 	public function uploadFromFile(Request $request){
+		$user = Auth::user();
+        $permission = $user->can('Salaryaddition-create');
+        if(!$permission) {
+            return response()->json(['errors' => array('You do not have permission to create salary additions / deductions.')]);
+        }
+		
 		$actmsg = '';
 		
 		try{

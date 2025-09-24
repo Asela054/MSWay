@@ -47,7 +47,7 @@
 	</div>
 
 	<div id="confirmModal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-		<div class="modal-dialog">
+		<div class="modal-dialog modal-dialog-centered">
 			<form id="frmConfirm" method="post">
 				{{ csrf_field() }}
 				<div class="modal-content">
@@ -359,7 +359,7 @@
                         const actionObj = {
                             icon: 'fas fa-warning',
                             title: '',
-                            message: 'Record Error',
+                            message: data.errors,
                             url: '',
                             target: '_blank',
                             type: 'danger'

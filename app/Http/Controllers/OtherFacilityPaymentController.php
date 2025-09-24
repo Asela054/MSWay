@@ -78,6 +78,12 @@ class OtherFacilityPaymentController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request){
+		$user = Auth::user();
+        $permission = $user->can('Other-facilities-create');
+        if(!$permission) {
+            return response()->json(['errors' => array('You do not have permission to create other facilities.')]);
+        }
+
 		$data = $request->all();
 		
 		$rules = array(
@@ -161,6 +167,11 @@ class OtherFacilityPaymentController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function destroy($id){
+		$user = Auth::user();
+        $permission = $user->can('Other-facilities-delete');
+        if(!$permission) {
+            return response()->json(['errors' => array('You do not have permission to remove other facilities.')]);
+        }
         /*
 		$data = OtherFacilityPayment::findOrFail($id);
         $data->delete();
@@ -177,6 +188,12 @@ class OtherFacilityPaymentController extends Controller
 	
 	
 	public function freeze(Request $request){
+		$user = Auth::user();
+        $permission = $user->can('Other-facilities-status');
+        if(!$permission) {
+            return response()->json(['errors' => array('You do not have permission to change status other facilities.')]);
+        }
+
 		if($request->ajax()){
 			$affectedRows=0;
 			$affectedMode=1;//accept-changes
@@ -199,6 +216,12 @@ class OtherFacilityPaymentController extends Controller
 	*/
 	
 	public function uploadFromFile(Request $request){
+		$user = Auth::user();
+        $permission = $user->can('Other-facilities-create');
+        if(!$permission) {
+            abort(403);
+        }
+
 		$actmsg = '';
 		
 		try{

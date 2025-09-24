@@ -7,6 +7,7 @@ use App\RemunerationProfile;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Validator;
+use Illuminate\Support\Facades\Auth;
 
 class RemunerationProfileController extends Controller
 {
@@ -51,6 +52,12 @@ class RemunerationProfileController extends Controller
      */
     public function store(Request $request)
     {
+        $user = Auth::user();
+        $permission = $user->can('Payrollprofile-create');
+        if(!$permission) {
+            return response()->json(['errors' => array('You do not have permission to create payroll profile remunerations.')]);
+        }
+
         $rules = array(
 			'payroll_profile_id' => 'required',
             'new_eligible_amount' => 'required'
@@ -131,6 +138,12 @@ class RemunerationProfileController extends Controller
      */
     public function update(Request $request, RemunerationProfile $remuneration)
     {
+        $user = Auth::user();
+        $permission = $user->can('Payrollprofile-edit');
+        if(!$permission) {
+            return response()->json(['errors' => array('You do not have permission to update payroll profile remunerations.')]);
+        }
+
         $rules = array(
             'new_eligible_amount' => 'required'
         );
@@ -164,6 +177,11 @@ class RemunerationProfileController extends Controller
      */
     public function destroy($id)
     {
+        $user = Auth::user();
+        $permission = $user->can('Payrollprofile-delete');
+        if(!$permission) {
+            return response()->json(['errors' => array('You do not have permission to remove payroll profile remunerations.')]);
+        }
         /*
 		$data = RemunerationProfile::findOrFail($id);
         $data->delete();

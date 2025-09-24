@@ -8,6 +8,7 @@ use DB;
 
 use Illuminate\Http\Request;
 use Validator;
+use Illuminate\Support\Facades\Auth;
 
 class OtherFacilityController extends Controller
 {
@@ -49,6 +50,12 @@ class OtherFacilityController extends Controller
      */
     public function store(Request $request)
     {
+        $user = Auth::user();
+        $permission = $user->can('Other-facilities-create');
+        if(!$permission) {
+            return response()->json(['errors' => array('You do not have permission to create other facilities.')]);
+        }
+
 		$data = $request->all();
 		
 		$rules = array(

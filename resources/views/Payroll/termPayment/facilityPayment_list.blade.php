@@ -432,7 +432,7 @@
                         const actionObj = {
                             icon: 'fas fa-warning',
                             title: '',
-                            message: 'Record Error',
+                            message: data.errors,
                             url: '',
                             target: '_blank',
                             type: 'danger'
@@ -486,7 +486,7 @@
                         const actionObj = {
                             icon: 'fas fa-warning',
                             title: '',
-                            message: 'Record Error',
+                            message: data.errors,
                             url: '',
                             target: '_blank',
                             type: 'danger'
@@ -601,53 +601,70 @@
                     var act_finalize = false;
                     var head_obj = null;
 
-                    if (data.result == 'error') {
-                        if (batch_cnt == 0) {
-                            $(paymentref).prop('checked', !$(paymentref).prop('checked'));
-                            Swal.fire({
-                                icon: 'question',
-                                title: 'Something wrong.',
-                                text: 'Payment status cannot be approved at the moment'
-                            });
+                    if (data.errors) {
+                        const actionObj = {
+                            icon: 'fas fa-warning',
+                            title: 'Record Error',
+                            message: data.errors,
+                            url: '',
+                            target: '_blank',
+                            type: 'danger'
+                        };
+                        const actionJSON = JSON.stringify(actionObj, null, 2);
+                        action(actionJSON);
+
+                        $(paymentref).prop('checked', false);
+                        $(paymentref).prop('disabled', false);
+                    }
+                    else{
+                        if (data.result == 'error') {
+                            if (batch_cnt == 0) {
+                                $(paymentref).prop('checked', !$(paymentref).prop('checked'));
+                                Swal.fire({
+                                    icon: 'question',
+                                    title: 'Something wrong.',
+                                    text: 'Payment status cannot be approved at the moment'
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'question',
+                                    title: 'Payment update error.',
+                                    text: 'Please reload the page to abort process.'
+                                });
+                                /*
+                                $(paymentref).addClass('check_inactive');
+                                */
+                            }
+
                         } else {
-                            Swal.fire({
-                                icon: 'question',
-                                title: 'Payment update error.',
-                                text: 'Please reload the page to abort process.'
-                            });
+                            $(paymentref).prop('disabled', false);
+                            $(paymentref).data('refid', data.payment_id);
+
+                            if (batch_cnt > 0) {
+                                $(paymentref).prop('checked', !$(paymentref).prop('checked'));
+                            }
+                        }
+
+
+                        if ((batch_cnt - batch_inv) == 0) {
+                            act_finalize = true;
+                            head_obj = $('#chk_approve').parent();
+                        }
+
+                        if (act_finalize) {
+                            if ($(head_obj).hasClass('masked_obj')) {
+                                $(head_obj).removeClass('masked_obj');
+                            }
                             /*
-                            $(paymentref).addClass('check_inactive');
+                            var objs_visible=$('input.finalize[type=checkbox]').length;
+                            var chk_selected=((objs_visible>0)&&($('input.finalize[type=checkbox]:checked').length==objs_visible));
+                            $('#chk_approve').prop('checked', chk_selected);
                             */
                         }
 
-                    } else {
-                        $(paymentref).prop('disabled', false);
-                        $(paymentref).data('refid', data.payment_id);
-
-                        if (batch_cnt > 0) {
-                            $(paymentref).prop('checked', !$(paymentref).prop('checked'));
-                        }
+                        empTable.draw(); //update-chk-approve-checked-value
+                        batchUpdate(par_checked, (batch_cnt - 1));
                     }
-
-
-                    if ((batch_cnt - batch_inv) == 0) {
-                        act_finalize = true;
-                        head_obj = $('#chk_approve').parent();
-                    }
-
-                    if (act_finalize) {
-                        if ($(head_obj).hasClass('masked_obj')) {
-                            $(head_obj).removeClass('masked_obj');
-                        }
-                        /*
-                        var objs_visible=$('input.finalize[type=checkbox]').length;
-                        var chk_selected=((objs_visible>0)&&($('input.finalize[type=checkbox]:checked').length==objs_visible));
-                        $('#chk_approve').prop('checked', chk_selected);
-                        */
-                    }
-
-                    empTable.draw(); //update-chk-approve-checked-value
-                    batchUpdate(par_checked, (batch_cnt - 1));
                 }
             });
         }
@@ -673,6 +690,18 @@
                         //     //alert('Data Deleted');
                         // }, 2000);
                         //location.reload()
+                        if (data.errors) {
+                            const actionObj = {
+                                icon: 'fas fa-warning',
+                                title: 'Record Error',
+                                message: data.errors,
+                                url: '',
+                                target: '_blank',
+                                type: 'danger'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            action(actionJSON);
+                        }
                         if (data.result == 'success') {
                             const actionObj = {
                                 icon: 'fas fa-trash-alt',

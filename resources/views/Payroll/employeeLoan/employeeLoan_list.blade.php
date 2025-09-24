@@ -571,7 +571,7 @@
                         const actionObj = {
                             icon: 'fas fa-warning',
                             title: '',
-                            message: 'Record Error',
+                            message: data.errors,
                             url: '',
                             target: '_blank',
                             type: 'danger'
@@ -679,6 +679,18 @@
                         //     //alert('Data Deleted');
                         // }, 2000);
                         //location.reload()
+                        if (data.errors) {
+                            const actionObj = {
+                                icon: 'fas fa-warning',
+                                title: '',
+                                message: data.errors,
+                                url: '',
+                                target: '_blank',
+                                type: 'danger'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            action(actionJSON);
+                        }
                         if (data.result == 'success') {
                             remunerationTable.row('#row-' + remuneration_id + '').remove().draw();
                             
@@ -693,7 +705,7 @@
                             const actionJSON = JSON.stringify(actionObj, null, 2);
                             $('#formTitle')[0].reset();
                             actionreload(actionJSON);
-                        } else {
+                        } else if (data.result == 'error') {
                             var msg = "Loan cannot be deleted at the moment." + data.more_info;
 
                             const actionObj = {
@@ -733,6 +745,18 @@
                 },
                 success: function (data) {
                     //alert(JSON.stringify(data));
+                    if (data.errors) {
+                        const actionObj = {
+                            icon: 'fas fa-warning',
+                            title: '',
+                            message: data.errors,
+                            url: '',
+                            target: '_blank',
+                            type: 'danger'
+                        };
+                        const actionJSON = JSON.stringify(actionObj, null, 2);
+                        action(actionJSON);
+                    }
                     if (data.result == 'error') {
                         $(loanref).prop('checked', !$(loanref).prop('checked'));
                         Swal.fire({

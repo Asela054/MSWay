@@ -75,6 +75,12 @@ class EmployeeLoanController extends Controller
      */
     public function store(Request $request)
     {
+        $user = Auth::user();
+        $permission = $user->can('Loans-create');
+        if(!$permission) {
+            return response()->json(['errors' => array('You do not have permission to create loan.')]);
+        }
+
         $rules = array(
             'loan_name' => 'required',
 			'payroll_profile_id' => 'required',
@@ -173,6 +179,12 @@ class EmployeeLoanController extends Controller
      */
     public function update(Request $request, EmployeeLoan $loan)
     {
+        $user = Auth::user();
+        $permission = $user->can('Loans-edit');
+        if(!$permission) {
+            return response()->json(['errors' => array('You do not have permission to update loan.')]);
+        }
+
         $rules = array(
             'loan_name' => 'required',
 			'loan_duration' => 'required',
@@ -218,6 +230,12 @@ class EmployeeLoanController extends Controller
      */
     public function destroy($id)
     {
+        $user = Auth::user();
+        $permission = $user->can('Loans-delete');
+        if(!$permission) {
+            return response()->json(['errors' => array('You do not have permission to remove loan.')]);
+        }
+
         /*
 		$data = EmployeeLoan::findOrFail($id);
         $data->delete();
@@ -243,6 +261,12 @@ class EmployeeLoanController extends Controller
 	
 	
 	public function freeze(Request $request){
+        $user = Auth::user();
+        $permission = $user->can('Loans-edit');
+        if(!$permission) {
+            return response()->json(['errors' => array('You do not have permission to update loan.')]);
+        }
+
 		if($request->ajax()){
 			$form_data = array(
 				'loan_freeze' =>  $request->loan_freeze,

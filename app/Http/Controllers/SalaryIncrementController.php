@@ -119,6 +119,11 @@ class SalaryIncrementController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function destroy($id){
+		$user = Auth::user();
+        $permission = $user->can('Salary-increment-delete');
+        if(!$permission) {
+            return response()->json(['errors' => array('You do not have permission to remove salary increments.')]);
+        }
         /*
 		$data = SalaryIncrement::findOrFail($id);
         $data->delete();
@@ -139,6 +144,12 @@ class SalaryIncrementController extends Controller
 	*/
 	
 	public function uploadFromFile(Request $request){
+		$user = Auth::user();
+        $permission = $user->can('Salary-increment-create');
+        if(!$permission) {
+            abort(403);
+        }
+
 		$actmsg = '';
 		
 		try{

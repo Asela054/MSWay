@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Validator;
+use Illuminate\Support\Facades\Auth;
 
 class PaySlipBank extends Controller
 {
@@ -564,6 +565,12 @@ class PaySlipBank extends Controller
 
     public function reportSalarySheetBankSlip()
     {
+		$user = Auth::user();
+        $permission = $user->can('Salary-sheet-bankslip-report');
+        if(!$permission) {
+            abort(403);
+        }
+
         $branch = Company::orderBy('id', 'asc')->get(); // Branch::orderBy('id', 'asc')->get();
         $payroll_process_type = PayrollProcessType::orderBy('id', 'asc')->get();
         $payment_period = PaymentPeriod::orderBy('id', 'desc')->get();

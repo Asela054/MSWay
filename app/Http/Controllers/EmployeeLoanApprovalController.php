@@ -154,48 +154,48 @@ class EmployeeLoanApprovalController extends Controller
                     'secondary_emp.emp_name_with_initial as secondary_emp_name',
                     'secondary_emp.emp_join_date as secondary_emp_join_date'
                 )
-    ->leftJoin('employees as primary_emp', 'employee_loans.primery_guarantor', '=', 'primary_emp.emp_id')
-    ->leftJoin('employees as secondary_emp', 'employee_loans.secondary_guarantor', '=', 'secondary_emp.emp_id')
-    ->where('employee_loans.id', $id)
-    ->get();
+            ->leftJoin('employees as primary_emp', 'employee_loans.primery_guarantor', '=', 'primary_emp.emp_id')
+            ->leftJoin('employees as secondary_emp', 'employee_loans.secondary_guarantor', '=', 'secondary_emp.emp_id')
+            ->where('employee_loans.id', $id)
+            ->get();
 
-    $loan = $data->first();
+            $loan = $data->first();
 
-    $empidprimary = $loan->primery_guarantor;
-    $primaryJoinDate = $loan->primary_emp_join_date;
-    $empidsecondary = $loan->secondary_guarantor;
-    $secondaryJoinDate = $loan->secondary_emp_join_date;
+            $empidprimary = $loan->primery_guarantor;
+            $primaryJoinDate = $loan->primary_emp_join_date;
+            $empidsecondary = $loan->secondary_guarantor;
+            $secondaryJoinDate = $loan->secondary_emp_join_date;
 
-    // check loans for the primary
+            // check loans for the primary
 
-     $primary = DB::table('employee_loans')
-     ->select('id', 'loan_type', 'loan_name', 'payroll_profile_id')
-     ->where('primery_guarantor', $empidprimary)
-     ->where('id', '!=', $id)
-     ->where(function ($query) {
-         $query->where('loan_cancel', 0)
-             ->where('loan_complete', 0);
-     })->get();
+            $primary = DB::table('employee_loans')
+            ->select('id', 'loan_type', 'loan_name', 'payroll_profile_id')
+            ->where('primery_guarantor', $empidprimary)
+            ->where('id', '!=', $id)
+            ->where(function ($query) {
+                $query->where('loan_cancel', 0)
+                    ->where('loan_complete', 0);
+            })->get();
 
-     if ($primary->isNotEmpty() && !empty($primaryJoinDate)) {
-       
+            if ($primary->isNotEmpty() && !empty($primaryJoinDate)) {
+            
 
-        if ( Carbon::parse($primaryJoinDate)->diffInYears($currentDate) >= 5) 
-        {
-           
-            $primaryResult = 0; 
-        }else{
-            $primaryResult = 1;
-        }
+                if ( Carbon::parse($primaryJoinDate)->diffInYears($currentDate) >= 5) 
+                {
+                
+                    $primaryResult = 0; 
+                }else{
+                    $primaryResult = 1;
+                }
 
 
-    }else{
-        $primaryResult = 0; 
-    }
+            }else{
+                $primaryResult = 0; 
+            }
 
-      // check loans for the secondary
+        // check loans for the secondary
 
-     $secondary = DB::table('employee_loans')
+        $secondary = DB::table('employee_loans')
              ->select('id', 'loan_type', 'loan_name', 'payroll_profile_id')
              ->where('secondary_guarantor', $empidsecondary)
              ->where('id', '!=', $id)
@@ -235,6 +235,11 @@ class EmployeeLoanApprovalController extends Controller
      */
     public function update(Request $request, EmployeeLoan $loan)
     {
+        $user = Auth::user();
+        $permission = $user->can('Loans-edit');
+        if(!$permission) {
+            return response()->json(['errors' => array('You do not have permission to update loan.')]);
+        }
         /*
 		approve or reject loan using modal popup buttons
 		1-approve // update loan_approved = 1
