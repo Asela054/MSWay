@@ -885,9 +885,9 @@ td.actlist_col .opts_held{
 	margin-right:-10px;
 }
 
-#emptable tbody tr td{
+/* #emptable tbody tr td{
 	line-height:28px;
-}
+} */
 
 #facilityDropdown{font-size:14px;}
 #facilityDropdown.dropdown-toggle::after{margin-top:1px;}

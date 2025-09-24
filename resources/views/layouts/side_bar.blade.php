@@ -378,7 +378,7 @@
                             <nav class="sidenav-menu-nested nav">
                                 <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ url('ReportPayRegister') }}" id="payregister">Pay Register</a>
                                 <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ url('ReportEmpOvertime') }}" id="otreport">OT Report</a>
-                                <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ url('ReportEpfEtf') }}" id="epfetf">EPF and ETF</a>
+                                <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ url('ReportEpfEtf') }}" id="epfetf">EPF & ETF Report</a>
                                 <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ url('ReportSalarySheet') }}" id="salarysheet">Salary Sheet</a>
                                 <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ url('ReportSalarySheetBankSlip') }}" id="salarysheetbank">Salary Sheet - Bank Slip</a>
                                 <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ url('ReportHeldSalaries') }}" id="salaryheld">Salary Sheet - Held Payments</a>
@@ -386,7 +386,7 @@
                                 <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ url('ReportAddition') }}" id="additionreport">Additions Report</a>
                             </nav>
                         </div>
-                        <a href="javascript:void(0);" data-toggle="collapse" data-target="#collapsePayStatement" aria-expanded="false" aria-controls="collapsePayStatement" class="py-1">
+                        {{-- <a href="javascript:void(0);" data-toggle="collapse" data-target="#collapsePayStatement" aria-expanded="false" aria-controls="collapsePayStatement" class="py-1">
                             <span class="links_name">Statements <i class="fas fa-angle-down"></i></span>
                         </a>
                         <div class="collapse" id="collapsePayStatement" data-parent="#accordionSubPayroll">
@@ -398,7 +398,7 @@
                                 <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ url('EmpSalaryJournalVoucher') }}">Employee Salary (Journal Voucher)</a>
                                 <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ url('EmpEpfEtfJournalVoucher') }}">EPF and ETF (Journal Voucher)</a>
                             </nav>
-                        </div>
+                        </div> --}}
                     </nav>
                 </div>
             </li>

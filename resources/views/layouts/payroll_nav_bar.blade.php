@@ -29,7 +29,7 @@
     <ul class="dropdown-menu multi-level dropdownmenucolor" role="menu" aria-labelledby="dropdownMenu">
       <li><a class="dropdown-item" href="{{ url('ReportPayRegister') }}" id="payregister">Pay Register</a></li>
       <li><a class="dropdown-item" href="{{ url('ReportEmpOvertime') }}" id="otreport">OT Report</a></li>
-      <li><a class="dropdown-item" href="{{ url('ReportEpfEtf') }}" id="epfetf">EPF and ETF</a></li>
+      <li><a class="dropdown-item" href="{{ url('ReportEpfEtf') }}" id="epfetf">EPF & ETF Report</a></li>
       <li><a class="dropdown-item" href="{{ url('ReportSalarySheet') }}" id="salarysheet">Salary Sheet</a></li>
       <li><a class="dropdown-item" href="{{ url('ReportSalarySheetBankSlip') }}" id="salarysheetbank">Salary Sheet -
           Bank Slip</a></li>
@@ -39,7 +39,7 @@
       <li><a class="dropdown-item" href="{{ url('ReportAddition') }}" id="additionreport">Additions Report</a></li>
     </ul>
   </div>
-  <div class="dropdown">
+  {{-- <div class="dropdown">
     <a role="button" data-toggle="dropdown" class="btn navbtncolor" href="javascript:void(0);" id="payrollststement">
       Statements <span class="caret"></span></a>
     <ul class="dropdown-menu multi-level dropdownmenucolor" role="menu" aria-labelledby="dropdownMenu">
@@ -52,5 +52,5 @@
       </li>
       <li><a class="dropdown-item" href="{{ url('EmpEpfEtfJournalVoucher') }}">EPF and ETF (Journal Voucher)</a></li>
     </ul>
-  </div>
+  </div> --}}
 </div>
