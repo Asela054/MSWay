@@ -27,6 +27,16 @@
         @if($user->can('employee-shift-extend-list'))
         <a role="button" class="btn navbtncolor" href="{{ route('empshiftextend') }}" id="employeeshift_extend_link">Employee Shift Extend Assign <span class="caret"></span></a>
         @endif
+
+         @if($user->can('employee-roster'))
+        <a role="button" class="btn navbtncolor" href="{{ route('Roster') }}" id="employeeshift_extend_link">Month Shifts <span class="caret"></span></a>
+        @endif
+        @if($user->can('employee-roster-view'))
+        <a role="button" class="btn navbtncolor" href="{{ route('rosterview') }}" id="employeeshift_extend_link">Month Shifts View <span class="caret"></span></a>
+        @endif
+
+
+       
       </div>
   @endif
 </div>
