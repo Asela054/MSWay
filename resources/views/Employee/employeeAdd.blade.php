@@ -2,19 +2,19 @@
 
 @section('content')
 <main>
-    <<div class="page-header shadow">
+    <div class="page-header shadow">
             <div class="container-fluid">
-                @include('layouts.employee_nav_bar')
+            @include('layouts.employee_nav_bar')
             </div>
             <div class="container-fluid">
                 <div class="page-header-content py-3 px-2">
                     <h1 class="page-header-title ">
                         <div class="page-header-icon"><i class="fa-light fa-users-gear"></i></div>
-                        <span>Employee Details</Details></span>
+                        <span>Employee Details</span>
                     </h1>
                 </div>
             </div>
-        </div>
+    </div>    
     <div class="container-fluid mt-2 p-0 p-2">
         <div class="card mb-2">
             <div class="card-body">
