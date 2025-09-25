@@ -1476,6 +1476,18 @@ Route::get('/absentnopay' ,'DepartmentviseNopayController@index')->name('absentn
 Route::post('/getabsetnopay' ,'DepartmentviseNopayController@getabsetnopay')->name('getabsetnopay');
 Route::post('/applyabsentnopay' ,'DepartmentviseNopayController@applyabsentnopay')->name('applyabsentnopay');
 
+
+// roster managment
+Route::get('Roster',['uses' => 'EmployeeRosterController@fullroster', 'as' => 'Roster']);
+Route::get('rosterview',['uses' => 'EmployeeRosterController@rosterView', 'as' => 'rosterview']);
+Route::get('/get-employees-by-department', 'EmployeeRosterController@employee_list');
+Route::get('get-roster-data', 'EmployeeRosterController@getRosterData');
+Route::get('/getrostershifts', 'EmployeeRosterController@getshifts');
+Route::post('fullrosterstore', 'EmployeeRosterDetailsController@fullrosterstore')->name('fullrosterstore');
+
+Route::get('get-view-roster-data', 'EmployeeRosterDetailsController@getViewRosterData');
+
+
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');
     Artisan::call('config:clear');

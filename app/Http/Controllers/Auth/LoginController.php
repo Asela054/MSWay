@@ -46,7 +46,8 @@ class LoginController extends Controller
         } 
         else{
             return '/login';
-        }         
+        }   
+              
 
         // Share with all views
         if($employeeData){                
