@@ -35,9 +35,10 @@
                                                 </span>
                                             @endif
                                             <div class="form-group">
-                                                <div class="custom-control">
-                                                    <input class="control-input" type="checkbox" name="remember" id="rememberPasswordCheck" {{ old('remember') ? 'checked' : '' }}> 
-                                                    <label class="control-label" for="rememberPasswordCheck">Remember password</label></div>
+                                                <div class="custom-control custom-checkbox mt-2">
+                                                    <input type="checkbox" class="custom-control-input" name="remember" id="rememberPasswordCheck" {{ old('remember') ? 'checked' : '' }}>
+                                                    <label class="custom-control-label" for="rememberPasswordCheck">Remember password</label>
+                                                </div>
                                             </div>
                                             <div class="form-group text-right mt-4 mb-0">
                                                 <button type="submit" class="btn btn-primary btn-sm px-3">Login</button>

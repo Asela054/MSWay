@@ -262,6 +262,7 @@ class HomeController extends Controller
             ->select('emp_name_with_initial', 'emp_birthday')
             ->where('is_resigned', 0)
             ->where('deleted', 0)
+            ->whereNotNull('emp_birthday')
             ->get();
 
         $holidays = DB::table('holidays')
