@@ -105,6 +105,9 @@ class JobCategoryController extends Controller
 
     public function update(Request $request, JobCategory $jobcategory)
     {
+        $user = auth()->user();
+        $permission = $user->can('company-edit');
+
         $user = Auth::user();
         $permission = $user->can('company-edit');
         if(!$permission) {
@@ -152,11 +155,8 @@ class JobCategoryController extends Controller
 
     public function destroy($id)
     {
-        $user = Auth::user();
+        $user = auth()->user();
         $permission = $user->can('company-delete');
-        if(!$permission) {
-            return response()->json(['errors' => array('You do not have permission to remove job category.')]);
-        }
 
         $data = JobCategory::findOrFail($id);
         $data->delete();

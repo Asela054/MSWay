@@ -33,11 +33,8 @@ class LeaveDeductionController extends Controller
 
     public function store(Request $request)
     {
-        $user = Auth::user();
+        $user = auth()->user();
         $permission = $user->can('Leave-Deduction-create');
-        if(!$permission) {
-            return response()->json(['errors' => array('You do not have permission to create leave deduction.')]);
-        }
 
 
         $holidaydeduction = new HolidayDeduction;
@@ -94,11 +91,8 @@ class LeaveDeductionController extends Controller
 
     public function update(Request $request, HolidayDeduction $holidaydeduction)
     {
-        $user = Auth::user();
+        $user = auth()->user();
         $permission = $user->can('Leave-Deduction-edit');
-        if(!$permission) {
-            return response()->json(['errors' => array('You do not have permission to update leave deduction.')]);
-        }
 
         $form_data = array(
             'job_id' => $request->job_category,
@@ -115,11 +109,8 @@ class LeaveDeductionController extends Controller
 
     public function destroy($id)
     {
-        $user = Auth::user();
+        $user = auth()->user();
         $permission = $user->can('Leave-Deduction-delete');
-        if(!$permission) {
-            return response()->json(['errors' => array('You do not have permission to remove leave deduction.')]);
-        }
 
         $data = HolidayDeduction::findOrFail($id);
         $data->delete();

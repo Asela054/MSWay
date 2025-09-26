@@ -34,11 +34,8 @@ class SalaryAdjustmentController extends Controller
 
     public function store(Request $request)
     {
-        $user = Auth::user();
+        $user = auth()->user();
         $permission = $user->can('SalaryAdjustment-create');
-        if(!$permission) {
-            return response()->json(['errors' => array('You do not have permission to create salary adjustment.')]);
-        }
 
 
         $salaryadjustment = new SalaryAdjustment;
@@ -105,11 +102,8 @@ class SalaryAdjustmentController extends Controller
 
     public function update(Request $request, SalaryAdjustment $salaryadjustment)
     {
-        $user = Auth::user();
+        $user = auth()->user();
         $permission = $user->can('SalaryAdjustment-edit');
-        if(!$permission) {
-            return response()->json(['errors' => array('You do not have permission to update salary adjustment.')]);
-        }
 
         $form_data = array(
             'emp_id' => $request->employee,
@@ -146,11 +140,8 @@ class SalaryAdjustmentController extends Controller
 
     public function destroy($id)
     {
-        $user = Auth::user();
+        $user = auth()->user();
         $permission = $user->can('SalaryAdjustment-delete');
-        if(!$permission) {
-            return response()->json(['errors' => array('You do not have permission to remove salary adjustment.')]);
-        }
 
         $data = SalaryAdjustment::findOrFail($id);
         $data->delete();

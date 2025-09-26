@@ -50,10 +50,10 @@ class BranchController extends Controller
     public function store(Request $request)
     {
 
-        $user = Auth::user();
+        $user = auth()->user();
         $permission = $user->can('location-create');
         if(!$permission) {
-            return response()->json(['errors' => array('You do not have permission to create branch.')]);
+            return response()->json(['error' => 'Unauthorized'], 403);
         }
 
         $rules = array(
@@ -70,12 +70,12 @@ class BranchController extends Controller
             return response()->json(['errors' => $error->errors()->all()]);
         }
 
-        $branch=new Branch;
-        $branch->location=$request->input('location');       
-        $branch->contactno=$request->input('contactno');       
-        $branch->epf=$request->input('epf');
-        $branch->etf=$request->input('etf');
-        $branch->save();
+    $branch=new Branch;
+       $branch->location=$request->input('location');       
+       $branch->contactno=$request->input('contactno');       
+       $branch->epf=$request->input('epf');
+       $branch->etf=$request->input('etf');
+       $branch->save();
        
         return response()->json(['success' => 'branch Added successfully.']);
     }
@@ -121,10 +121,10 @@ class BranchController extends Controller
      */
     public function update(Request $request, Branch $branch)
     {
-        $user = Auth::user();
+        $user = auth()->user();
         $permission = $user->can('location-edit');
         if(!$permission) {
-            return response()->json(['errors' => array('You do not have permission to update branch.')]);
+            return response()->json(['error' => 'Unauthorized'], 403);
         }
 
         $rules = array(
@@ -158,11 +158,10 @@ class BranchController extends Controller
      */
     public function destroy($id)
     {
-
-        $user = Auth::user();
+        $user = auth()->user();
         $permission = $user->can('location-delete');
         if(!$permission) {
-            return response()->json(['errors' => array('You do not have permission to remove branch.')]);
+            return response()->json(['error' => 'Unauthorized'], 403);
         }
 
         $data = Branch::findOrFail($id);

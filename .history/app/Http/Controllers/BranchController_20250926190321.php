@@ -121,10 +121,16 @@ class BranchController extends Controller
      */
     public function update(Request $request, Branch $branch)
     {
+        $user = auth()->user();
+        $permission = $user->can('location-edit');
+        if(!$permission) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
         $user = Auth::user();
         $permission = $user->can('location-edit');
         if(!$permission) {
-            return response()->json(['errors' => array('You do not have permission to update branch.')]);
+            return response()->json(['errors' => array('You do not have permission to update b.')]);
         }
 
         $rules = array(
@@ -158,11 +164,10 @@ class BranchController extends Controller
      */
     public function destroy($id)
     {
-
-        $user = Auth::user();
+        $user = auth()->user();
         $permission = $user->can('location-delete');
         if(!$permission) {
-            return response()->json(['errors' => array('You do not have permission to remove branch.')]);
+            return response()->json(['error' => 'Unauthorized'], 403);
         }
 
         $data = Branch::findOrFail($id);

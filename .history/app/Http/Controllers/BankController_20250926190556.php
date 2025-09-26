@@ -112,6 +112,12 @@ class BankController extends Controller
         $user = Auth::user();
         $permission = $user->can('bank-delete');
         if(!$permission) {
+            return response()->json(['error' => 'UnAuthorized'], 401);
+        }
+
+        $user = Auth::user();
+        $permission = $user->can('bank-delete');
+        if(!$permission) {
             return response()->json(['errors' => array('You do not have permission to remove bank.')]);
         }
 
