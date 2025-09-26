@@ -6,13 +6,22 @@
 
 <main>
     <div class="page-header shadow">
+        <div class="container-fluid d-none d-sm-block shadow">
+             @include('layouts.shift_nav_bar')
+        </div>
         <div class="container-fluid">
-            @include('layouts.shift_nav_bar')
-           
+            <div class="page-header-content py-3 px-2">
+                <h1 class="page-header-title ">
+                    <div class="page-header-icon"><i class="fa-light fa-business-time"></i></div>
+                    <span>Monthly Shift Roster</span>
+                </h1>
+            </div>
         </div>
     </div>
-    <div class="container-fluid mt-4">
-<h2>Monthly Shift Roster</h2>
+      <div class="container-fluid mt-2 p-0 p-2">
+        <div class="card">
+            <div class="card-body p-0 p-2">
+
 
 
  <form class="form-horizontal" id="formFilter">
@@ -50,8 +59,11 @@
                     <br>
                     <button type="submit" class="btn btn-sm btn-primary">Save Roster</button>
                 </form>
+                </div>
+            </div>
+        </div>
 
-    </div>
+  
 
 </main>
               
