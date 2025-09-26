@@ -76,14 +76,14 @@
                         <div class="card h-100 mt-sm-0 mt-3">
                             <div class="card-body p-3">
                                 <h5 class="title-style"><span>{{strtoupper(date('F / Y'))}} LEAVE INFORMATION</span></h5>
-                                <div class="center-block fix-width scroll-inner">
+                                <div class="center-block fix-width scroll-inner" style="max-height: 600px;overflow-y: auto;padding-right: 5px;">
                                     <table class="table shadow-none table-sm mt-3 border-bottom small w-100">
                                         <tbody>
                                             @foreach($leavedatalist as $leavelist)
                                                 @php
-                                                    $employeePicture = $leavelist->emp_pic_picture;
+                                                    $employeePicture = $leavelist->emp_pic_filename;
                                                     $imagePath = '';
-                                                    if (file_exists(public_path("images/{$employeePicture}"))) {
+                                                    if (file_exists(public_path("images/{$employeePicture}")) && !empty($employeePicture)) {
                                                         $imagePath = asset("images/{$employeePicture}");
                                                     } else {
                                                         $employeeGender = \App\Employee::where('emp_id', $leavelist->emp_id)->pluck('emp_gender')->first();
@@ -97,7 +97,7 @@
                                                 @endphp
                                             <tr>
                                                 <td style='width: 2.5rem;' nowrap>
-                                                    <img style="height: 2.5rem;width: 2.5rem;margin-right: 1rem;border-radius: 100%;" src="images/man.png" alt="Employee Photo"/>
+                                                    <img style="height: 2.5rem;width: 2.5rem;margin-right: 1rem;border-radius: 100%;" src="{{$imagePath}}" alt="Employee Photo"/>
                                                 </td>
                                                 <td nowrap>
                                                     {{$leavelist->emp_name_with_initial}}<br>

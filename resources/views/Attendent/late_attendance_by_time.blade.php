@@ -370,13 +370,15 @@
 
                 e.preventDefault();
                 let save_btn = $(this);
+                let late_type = $('#late_type').val();
 
-                 var r = await Otherconfirmation("You want to Edit this ? ");
+                var r = await Otherconfirmation("You want to Edit this ? ");
                 if (r == true) {
                     save_btn.prop("disabled", true);
                     save_btn.html('<i class="fa fa-spinner fa-spin"></i> loading...' );
                     $.ajax({
                         url: "lateAttendance_mark_as_late",
+                        late_type: late_type,
                         method: "POST",
                         data: {
                             'selected_cb': selected_cb,
