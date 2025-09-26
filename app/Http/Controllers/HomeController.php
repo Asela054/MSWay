@@ -253,9 +253,10 @@ class HomeController extends Controller
                 'leaves.no_of_days',
                 'leaves.reson',
                 'employees.emp_name_with_initial',
-                'employee_pictures.emp_pic_picture',
+                'employee_pictures.emp_pic_filename',
                 'departments.name as department'
             )
+            ->orderBy('leaves.leave_from', 'DESC')
             ->get();
 
         $employeesbday = DB::table('employees')
@@ -1257,34 +1258,46 @@ public function thismonth_birthday() {
 
     public function getAttendentChart(Request $request)
     {
-        // $data = DB::table('attendances')
-        //     ->join('employees', 'attendances.emp_id', '=', 'employees.emp_id')
-        //     ->select('attendances.date', DB::raw('COUNT(DISTINCT attendances.uid) as count'))
-        //     ->where('employees.deleted', 0)
-        //     ->groupBy('attendances.date')
-        //     ->limit(30)
-        //     ->orderBy('attendances.date', 'desc')
-        //     ->get();
-        $data = DB::select("
-            WITH RECURSIVE date_series AS (
-                SELECT CURDATE() as date
-                UNION ALL
-                SELECT DATE_SUB(date, INTERVAL 1 DAY)
-                FROM date_series
-                WHERE date > DATE_SUB(CURDATE(), INTERVAL 30 DAY)
-            )
-            SELECT 
-                ds.date,
-                COALESCE(COUNT(DISTINCT a.uid), 0) as count
-            FROM date_series ds
-            LEFT JOIN attendances a ON DATE(a.date) = ds.date 
-                AND a.deleted_at IS NULL
-            LEFT JOIN employees e ON e.emp_id = a.emp_id 
-                AND e.deleted = 0
-            GROUP BY ds.date
-            ORDER BY ds.date DESC
-        ");
-        return response()->json($data);
+        // 1. Define the Date Range (Last 30 Days)
+        $endDate = Carbon::now()->startOfDay();
+        $startDate = Carbon::now()->subDays(29)->startOfDay();
 
+        // 2. Query Attendance Data for the Range
+        $attendanceData = DB::table('attendances as a')
+            ->selectRaw('DATE(a.date) as date, COUNT(DISTINCT a.uid) as count')
+            ->leftJoin('employees as e', function ($join) {
+                $join->on('e.emp_id', '=', 'a.emp_id')
+                    ->where('e.deleted', 0);
+            })
+            ->whereBetween('a.date', [$startDate, $endDate])
+            ->whereNull('a.deleted_at')
+            ->groupBy(DB::raw('DATE(a.date)'))
+            ->get()
+            ->keyBy('date'); // Index the collection by the date string
+
+        // 3. Generate the Date Series and Merge (filling in 0 for missing days)
+        $dailyCounts = collect();
+        $currentDate = $endDate->copy();
+
+        // Iterate backwards from today to the start date
+        while ($currentDate->gte($startDate)) {
+            $dateString = $currentDate->toDateString();
+            
+            // Get the attendance object for the date
+            $attendanceObject = $attendanceData->get($dateString); 
+            
+            // **FIXED LINE:** Access the 'count' property using object syntax (->)
+            // Check if the object exists and then access its 'count' property, otherwise default to 0
+            $count = $attendanceObject ? $attendanceObject->count : 0; 
+
+            $dailyCounts->push([
+                'date' => $dateString,
+                'count' => (int)$count,
+            ]);
+            
+            $currentDate->subDay();
+        }
+
+        return response()->json($dailyCounts);
     }
 }
