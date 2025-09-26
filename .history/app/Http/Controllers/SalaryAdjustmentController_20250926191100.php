@@ -149,7 +149,7 @@ class SalaryAdjustmentController extends Controller
         $user = Auth::user();
         $permission = $user->can('SalaryAdjustment-delete');
         if(!$permission) {
-            return response()->json(['errors' => array('You do not have permission to remove salary adjustment.')]);
+            return response()->json(['errors' => array('You do not have permission to remove remuneration.')]);
         }
 
         $data = SalaryAdjustment::findOrFail($id);

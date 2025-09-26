@@ -117,10 +117,17 @@ class CompanyController extends Controller
      */
     public function update(Request $request, Company $company)
     {
-        $user = Auth::user();
+        $user = auth()->user();
         $permission = $user->can('company-edit');
+
         if(!$permission) {
-            return response()->json(['errors' => array('You do not have permission to update company.')]);
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+         $user = Auth::user();
+        $permission = $user->can('Facilities-edit');
+        if(!$permission) {
+            return response()->json(['errors' => array('You do not have permission to update remuneration.')]);
         }
 
         $rules = array(
@@ -168,10 +175,11 @@ class CompanyController extends Controller
      */
     public function destroy($id)
     {
-        $user = Auth::user();
+        $user = auth()->user();
         $permission = $user->can('company-delete');
+
         if(!$permission) {
-            return response()->json(['errors' => array('You do not have permission to remove company.')]);
+            return response()->json(['error' => 'Unauthorized'], 403);
         }
 
         $data = Company::findOrFail($id);

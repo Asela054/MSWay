@@ -94,6 +94,9 @@ class LeaveDeductionController extends Controller
 
     public function update(Request $request, HolidayDeduction $holidaydeduction)
     {
+        $user = auth()->user();
+        $permission = $user->can('Leave-Deduction-edit');
+
         $user = Auth::user();
         $permission = $user->can('Leave-Deduction-edit');
         if(!$permission) {
@@ -115,11 +118,8 @@ class LeaveDeductionController extends Controller
 
     public function destroy($id)
     {
-        $user = Auth::user();
+        $user = auth()->user();
         $permission = $user->can('Leave-Deduction-delete');
-        if(!$permission) {
-            return response()->json(['errors' => array('You do not have permission to remove leave deduction.')]);
-        }
 
         $data = HolidayDeduction::findOrFail($id);
         $data->delete();

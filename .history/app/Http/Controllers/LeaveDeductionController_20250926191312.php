@@ -115,6 +115,9 @@ class LeaveDeductionController extends Controller
 
     public function destroy($id)
     {
+        $user = auth()->user();
+        $permission = $user->can('Leave-Deduction-delete');
+
         $user = Auth::user();
         $permission = $user->can('Leave-Deduction-delete');
         if(!$permission) {

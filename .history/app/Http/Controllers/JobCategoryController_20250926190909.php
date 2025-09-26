@@ -152,6 +152,7 @@ class JobCategoryController extends Controller
 
     public function destroy($id)
     {
+
         $user = Auth::user();
         $permission = $user->can('company-delete');
         if(!$permission) {

@@ -168,6 +168,13 @@ class CompanyController extends Controller
      */
     public function destroy($id)
     {
+        $user = auth()->user();
+        $permission = $user->can('company-delete');
+
+        if(!$permission) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
         $user = Auth::user();
         $permission = $user->can('company-delete');
         if(!$permission) {

@@ -36,6 +36,12 @@ class BankController extends Controller
         $user = Auth::user();
         $permission = $user->can('bank-create');
         if(!$permission) {
+            return response()->json(['error' => 'UnAuthorized'], 401);
+        }
+
+        $user = Auth::user();
+        $permission = $user->can('bank-create');
+        if(!$permission) {
             return response()->json(['errors' => array('You do not have permission to create bank.')]);
         }
 
@@ -79,7 +85,7 @@ class BankController extends Controller
         $user = Auth::user();
         $permission = $user->can('bank-edit');
         if(!$permission) {
-            return response()->json(['errors' => array('You do not have permission to update bank.')]);
+            return response()->json(['error' => 'UnAuthorized'], 401);
         }
 
         $rules = array(
@@ -112,7 +118,7 @@ class BankController extends Controller
         $user = Auth::user();
         $permission = $user->can('bank-delete');
         if(!$permission) {
-            return response()->json(['errors' => array('You do not have permission to remove bank.')]);
+            return response()->json(['error' => 'UnAuthorized'], 401);
         }
 
         $data = Bank::findOrFail($id);
