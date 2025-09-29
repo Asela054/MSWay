@@ -91,8 +91,8 @@ class ShiftController extends Controller
                                         data-onduty_time="'.$row->onduty_time.'"
                                         data-offduty_time="'.$row->offduty_time.'"
                                         data-shift_type_id="'.$row->shift_type_id.'"
-                                        class="edit btn btn-outline-primary btn-sm" type="submit"><i class="fas fa-pencil-alt"></i></button> ';
-                $btn .= '<button type="submit" name="delete" data-id="'.$row->emp_id.'" class="delete btn btn-outline-danger btn-sm"><i class="far fa-trash-alt"></i></button>';
+                                        class="edit btn btn-primary btn-sm" type="submit"><i class="fas fa-pencil-alt"></i></button> ';
+                $btn .= '<button type="submit" name="delete" data-id="'.$row->emp_id.'" class="delete btn btn-danger btn-sm"><i class="far fa-trash-alt"></i></button>';
 
                 return $btn;
             })

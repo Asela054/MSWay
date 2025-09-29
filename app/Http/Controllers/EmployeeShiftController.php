@@ -89,21 +89,21 @@ class EmployeeShiftController extends Controller
                 $user = Auth::user();
 
 
-                        $btn .= ' <button name="view" id="'.$row->id.'" class="view btn btn-outline-secondary btn-sm" type="submit"><i class="fas fa-eye"></i></button>';
+                        $btn .= ' <button name="view" id="'.$row->id.'" class="view btn btn-secondary btn-sm" type="submit"><i class="fas fa-eye"></i></button>';
 
                         if($user->can('employee-shift-allocation-edit')){
-                            $btn .= ' <button name="edit" id="'.$row->id.'" class="edit btn btn-outline-primary btn-sm" type="submit"><i class="fas fa-pencil-alt"></i></button>';
+                            $btn .= ' <button name="edit" id="'.$row->id.'" class="edit btn btn-primary btn-sm" type="submit"><i class="fas fa-pencil-alt"></i></button>';
                         }
 
                         if($user->can('employee-shift-allocation-status')){
                             if($row->status == 1){
-                                $btn .= ' <a href="'.route('employeeshiftstatus', ['id' => $row->id, 'stasus' => 2]) .'" onclick="return deactive_confirm()" target="_self" class="btn btn-outline-success btn-sm mr-1 "><i class="fas fa-check"></i></a>';
+                                $btn .= ' <a href="'.route('employeeshiftstatus', ['id' => $row->id, 'stasus' => 2]) .'" onclick="return deactive_confirm()" target="_self" class="btn btn-success btn-sm mr-1 "><i class="fas fa-check"></i></a>';
                             }else{
-                                $btn .= '&nbsp;<a href="'.route('employeeshiftstatus', ['id' => $row->id, 'stasus' => 1]) .'" onclick="return active_confirm()" target="_self" class="btn btn-outline-warning btn-sm mr-1 "><i class="fas fa-times"></i></a>';
+                                $btn .= '&nbsp;<a href="'.route('employeeshiftstatus', ['id' => $row->id, 'stasus' => 1]) .'" onclick="return active_confirm()" target="_self" class="btn btn-warning btn-sm mr-1 "><i class="fas fa-times"></i></a>';
                             }
                         }
                         if($user->can('employee-shift-allocation-delete')){
-                            $btn .= ' <button name="delete" id="'.$row->id.'" class="delete btn btn-outline-danger btn-sm"><i class="far fa-trash-alt"></i></button>';
+                            $btn .= ' <button name="delete" id="'.$row->id.'" class="delete btn btn-danger btn-sm"><i class="far fa-trash-alt"></i></button>';
                         }
               
                 return $btn;

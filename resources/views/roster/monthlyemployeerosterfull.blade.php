@@ -56,8 +56,9 @@
                         <thead></thead>
                         <tbody></tbody>
                     </table>
+                    </div>
                     <br>
-                    <button type="submit" class="btn btn-sm btn-primary">Save Roster</button>
+                    <button type="submit" class="btn btn-sm btn-primary float-right">Save Roster</button>
                 </form>
                 </div>
             </div>
@@ -99,7 +100,7 @@ $(document).ready(function() {
     fetch('getrostershifts')
         .then(response => response.json())
         .then(data => {
-            shiftOptions = [{ id: '', code: '' }, ...data];
+            shiftOptions = [{ id: '', code: 'NA' }, ...data];
         })
         .catch(error => {
             console.error('Error loading shift options:', error);
@@ -161,13 +162,15 @@ $(document).ready(function() {
             let row = `<tr><td>${emp.id}</td><td class="name-col">${emp.name}</td>`;
             for (let d = 1; d <= daysInMonth; d++) {
                 const existingShift = (existingData[emp.id] && existingData[emp.id][d]) || '';
-                row += `<td style="padding: 0px;">
-                    <select name="shifts[${emp.id}][${d}]" style="width: 55px;">
+               row += `<td style="padding: 0px;">
+                    <select name="shifts[${emp.id}][${d}]" class="form-control form-control-sm " style="width: 55px;">
+                        
                         ${shiftOptions.map(opt =>
                             `<option value="${opt.id}" ${opt.id == existingShift ? 'selected' : ''}>${opt.code}</option>`
                         ).join('')}
                     </select>
                 </td>`;
+
             }
             row += `</tr>`;
             tbody.innerHTML += row;
@@ -222,6 +225,13 @@ $(document).ready(function() {
             $('#info_msg').html(
                 '<div class="alert alert-success"><p>' + result.message + '</p></div>'
             );
+
+            // Hide after 5 seconds
+            setTimeout(() => {
+                $('#info_msg').fadeOut('slow', function () {
+                    $(this).html('').show(); // clear content and reset visibility
+                });
+            }, 1000);
         })
         .catch(error => {
             console.error('Error:', error);
