@@ -48,9 +48,14 @@
                                     <input type="date" id="to_date" name="to_date" class="form-control" placeholder="yyyy-mm-dd" required>
                                 </div>
                             </div>
-                            <div class="col-md-12">
-                                <button type="submit" class="btn btn-primary btn-sm filter-btn float-right ml-2" id="btn-filter"><i class="fas fa-search mr-2"></i>Filter</button>
-                                <button type="button" class="btn btn-danger btn-sm filter-btn float-right" id="btn-clear"><i class="far fa-trash-alt"></i>&nbsp;&nbsp;Clear</button>
+                            <div class="col-md-8 ">
+                                <br>
+                                <div class="d-flex flex-wrap justify-content-end mb-2">
+                                    <button type="submit" class="btn btn-primary btn-sm filter-btn float-right ml-2"
+                                        id="btn-filter"><i class="fas fa-search mr-2"></i>Filter</button>&nbsp;&nbsp;
+                                    <button type="button" class="btn btn-danger btn-sm filter-btn float-right"
+                                        id="btn-clear"><i class="far fa-trash-alt"></i>&nbsp;&nbsp;Clear</button>
+                                </div>
                             </div>
                         </div>
 
