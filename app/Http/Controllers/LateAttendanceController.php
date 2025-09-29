@@ -796,6 +796,11 @@ class LateAttendanceController extends Controller
                 $leaves = Leave::findOrFail($id_leave);
                 $leaves->delete();
 
+                $deletedCount = DB::table('employee_late_attendance_minites')
+                    ->where('attendance_date', $date)
+                    ->where('emp_id', $empid)
+                    ->delete();
+
                 $lateattendance->delete();
 
                 $message = "Record deleted";
