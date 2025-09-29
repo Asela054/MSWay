@@ -42,7 +42,7 @@
                             </div>
                             <div class="col-md-3">
                                 <br>
-                                <button type="submit" class="btn btn-primary btn-sm filter-btn" id="btn-filter"> Filter</button>
+                                <button type="submit" class="btn btn-primary btn-sm filter-btn" id="btn-filter"><i class="fas fa-search mr-2"></i> Filter</button>
                             </div>
                         </div>
 

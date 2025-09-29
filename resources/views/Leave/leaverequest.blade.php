@@ -544,6 +544,7 @@
             $(document).on('click', '.approve',async function () {
                var r = await Otherconfirmation("You want to remove this ? ");
                 if (r == true) {
+                       user_id = $(this).attr('id');
                         $.ajaxSetup({
                             headers: {
                                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')

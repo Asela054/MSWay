@@ -49,10 +49,14 @@
                                 </div>
                             </div>
 
-                            <div class="col">
+                            <div class="col-md-2">
                                 <br>
-                                <button type="submit" class="btn btn-primary btn-sm filter-btn float-right ml-2" id="btn-filter"><i class="fas fa-search mr-2"></i>Filter</button>
-                                <button type="button" class="btn btn-danger btn-sm filter-btn float-right" id="btn-clear"><i class="far fa-trash-alt"></i>&nbsp;&nbsp;Clear</button>
+                                <div class="d-flex flex-wrap justify-content-end mb-2">
+                                    <button type="submit" class="btn btn-primary btn-sm filter-btn float-right ml-2"
+                                        id="btn-filter"><i class="fas fa-search mr-2"></i>Filter</button>&nbsp;
+                                    <button type="button" class="btn btn-danger btn-sm filter-btn float-right"
+                                        id="btn-clear"><i class="far fa-trash-alt"></i>&nbsp;&nbsp;Clear</button>
+                                </div>
                             </div>
                         </div>
 

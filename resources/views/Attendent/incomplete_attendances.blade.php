@@ -58,7 +58,7 @@
                             </div>
                             <div class="col-md-2">
                                 <br>
-                                <button type="submit" class="btn btn-primary btn-sm filter-btn" id="btn-filter"> Filter</button>
+                                <button type="submit" class="btn btn-primary btn-sm filter-btn" id="btn-filter"><i class="fas fa-search mr-2"></i> Filter</button>
                             </div>
                         </div>
 
@@ -320,8 +320,31 @@
 
             });
 
-             $('#selectAll').click(function (e) {
-                $('#attendance_report_table').closest('table').find('td input:checkbox').prop('checked', this.checked);
+            $('#selectAll').click(function (e) {
+                var isChecked = this.checked;
+                
+                // Update all checkboxes
+                $('#attendance_report_table').closest('table').find('td input.checkbox_attendance').prop('checked', isChecked);
+                
+                // Handle row coloring for all checkboxes
+                $('#attendance_report_table').closest('table').find('td input.checkbox_attendance').each(function() {
+                    if (isChecked) {
+                        // Change row background color when selected
+                        $(this).closest('tr').css('background-color', '#f7c8c8');
+                    } else {
+                        // Reset row background color when deselected
+                        $(this).closest('tr').css('background-color', '');
+                    }
+                });
+            });
+
+            // Individual checkbox handler
+            $('body').on('click', '.checkbox_attendance', function (){
+                if($(this).is(':checked')){
+                    $(this).closest('tr').css('background-color', '#f7c8c8');
+                } else {
+                    $(this).closest('tr').css('background-color', '');
+                }
             });
         });
     </script>
