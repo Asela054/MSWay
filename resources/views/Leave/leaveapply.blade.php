@@ -814,7 +814,7 @@
                                 'contbody': emailBody
                             };
 
-                            Create a temporary iframe
+                            // Create a temporary iframe
                             var iframe = document.createElement('iframe');
                             iframe.name = 'emailIframe';
                             iframe.style.display = 'none';
