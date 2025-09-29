@@ -753,25 +753,51 @@
                     action_url = "{{ route('LeaveApply.update') }}";
                 }
 
+                // Collect table data as array
+                    var leaveBalanceData = [];
+                    
+                    // Get all rows from the table body
+                    $('table.table tbody tr').each(function() {
+                        var row = $(this);
+                        var leaveType = row.find('td:first span').text().trim();
+                        var total = row.find('td:nth-child(2) span').text().trim();
+                        var taken = row.find('td:nth-child(3) span').text().trim();
+                        var available = row.find('td:nth-child(4) span').text().trim();
+                        
+                        leaveBalanceData.push({
+                            leave_type: leaveType,
+                            total: total,
+                            taken: taken,
+                            available: available
+                        });
+                    });
+
+                    // Get form data
+                    var formData = $(this).serializeArray();
+                    
+                    // Add table data to form data
+                    formData.push({
+                        name: 'leave_balance_data',
+                        value: JSON.stringify(leaveBalanceData)
+                    });
 
                 $.ajax({
                     url: action_url,
                     method: "POST",
-                    data: $(this).serialize(),
+                    data: formData,
                     dataType: "json",
                     success: function (data) {
-                            if (data.errors) {
-                                const actionObj = {
-                                    icon: 'fas fa-warning',
-                                    title: '',
-                                    message: 'Record Error',
-                                    url: '',
-                                    target: '_blank',
-                                    type: 'danger'
-                                };
-                                const actionJSON = JSON.stringify(actionObj, null, 2);
-                                action(actionJSON);
-                            }
+                           if (data.errors) {
+                            const combinedErrors = data.errors.join('<br><br>');
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Leave Balance Errors',
+                            html: combinedErrors,
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#d33'
+                        });
+                        }
                         
                        if (data.success) {
                             const emailBody = generateEmailBody();
@@ -788,7 +814,7 @@
                                 'contbody': emailBody
                             };
 
-                            // Create a temporary iframe
+                            Create a temporary iframe
                             var iframe = document.createElement('iframe');
                             iframe.name = 'emailIframe';
                             iframe.style.display = 'none';

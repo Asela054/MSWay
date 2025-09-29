@@ -103,6 +103,11 @@
             $('#attendant_menu_link_icon').addClass('active');
             $('#attendantmaster').addClass('navbtnactive');
 
+             var canDeletelateattendance = false;
+            @can('late-attendance-delete')
+                canDeletelateattendance = true;
+            @endcan
+
             let late_id = 0;
 
             let company = $('#company');
@@ -221,8 +226,15 @@
                         },
                     ],
                     ajax: {
-                        "url": "{!! route('late_attendance_list_approved') !!}",
-                        "data": {'department':department, 'employee':employee, 'location': location, 'from_date': from_date, 'to_date': to_date},
+                         url: scripturl +"/late_attendance_list.php", 
+                          type: "POST",
+                           data : function(d) {
+                                d.department = $('#department').val();
+                                d.employee = $('#employee').val();
+                                d.location = $('#location').val();
+                                d.from_date = $('#from_date').val();
+                                d.to_date = $('#to_date').val();
+                            }
                     },
                     columns: [
                         { data: 'emp_id', name: 'emp_id' },
@@ -233,11 +245,28 @@
                         { data: 'working_hours', name: 'working_hours' },
                         { data: 'location', name: 'location' },
                         { data: 'dep_name', name: 'dep_name' },
-                        {data: 'action', name: 'action', orderable: false, searchable: false},
+                         {
+                            "data": "id",
+                            "name": "action",
+                            "className": 'text-right',
+                            "orderable": false,
+                            "searchable": false,
+                            "render": function(data, type, full) {
+                                var id = full['id'];
+                                var button = '';
+
+                                if (canDeletelateattendance) {
+                                    button += '<button type="button"  name="delete_button" title="Delete" data-id="'  + id +'" class="view_button btn btn-danger btn-sm delete_button" data-toggle="tooltip" title="Remove">'+
+                                       '<i class="fas fa-trash-alt" ></i></button>';
+                                }
+
+                                return button;
+                            }
+                        }
                     ],
                     "bDestroy": true,
                     "order": [
-                        [3, "desc"]
+                        [2, "desc"]
                     ]
                 });
 

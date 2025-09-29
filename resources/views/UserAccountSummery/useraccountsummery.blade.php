@@ -330,7 +330,7 @@
                             {{ csrf_field() }}
                             <div class="form-row mb-1">
                                 <div class="col">
-                                    <table class="table table-sm small">
+                                    <table class="table table-sm small" id="leavebalancetable">
                                         <thead>
                                             <tr>
                                                 <th>Leave Type</th>
@@ -817,6 +817,34 @@
                 action_url = "{{ route('LeaveApply.update') }}";
             }
 
+             // Collect table data as array
+                    var leaveBalanceData = [];
+                    
+                    // Get all rows from the table body
+                    $('#leavebalancetable tbody tr').each(function() {
+                        var row = $(this);
+                        var leaveType = row.find('td:first span').text().trim();
+                        var total = row.find('td:nth-child(2) span').text().trim();
+                        var taken = row.find('td:nth-child(3) span').text().trim();
+                        var available = row.find('td:nth-child(4) span').text().trim();
+                        
+                        leaveBalanceData.push({
+                            leave_type: leaveType,
+                            total: total,
+                            taken: taken,
+                            available: available
+                        });
+                    });
+
+                    // Get form data
+                    var formData = $(this).serializeArray();
+                    
+                    // Add table data to form data
+                    formData.push({
+                        name: 'leave_balance_data',
+                        value: JSON.stringify(leaveBalanceData)
+                    });
+
 
             $.ajax({
                 url: action_url,
@@ -827,11 +855,15 @@
 
                     var html = '';
                     if (data.errors) {
-                        html = '<div class="alert alert-danger">';
-                        for (var count = 0; count < data.errors.length; count++) {
-                            html += '<p>' + data.errors[count] + '</p>';
-                        }
-                        html += '</div>';
+                        const combinedErrors = data.errors.join('<br><br>');
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Leave Balance Errors',
+                            html: combinedErrors,
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#d33'
+                        });
                     }
                     if (data.success) {
                         const emailBody = generateEmailBody();
