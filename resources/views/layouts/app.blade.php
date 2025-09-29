@@ -894,7 +894,7 @@
                     <footer class="footer mt-auto footer-light">
                         <div class="container-fluid">
                             <div class="row">
-                                <div class="col-md-6 small">Copyright &copy;  ShapeUP HRM <?php echo date('Y') ?>
+                                <div class="col-md-6 small">Copyright &copy;  ShapeUP HRM V3.0 <?php echo date('Y') ?>
                                     Made  by <a href="https://www.erav.lk" target="_blank">eRAV
                                         technologies</a>
                                 </div>
