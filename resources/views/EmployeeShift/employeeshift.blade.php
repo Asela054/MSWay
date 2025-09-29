@@ -38,7 +38,6 @@
                                     <tr>
                                         <th>ID </th>
                                         <th>Date</th>
-                                        {{-- <th>Date To</th> --}}
                                         <th>Shift</th>
                                         <th class="text-right">Action</th>
                                     </tr>
@@ -404,22 +403,20 @@
                 [0, "desc"]
             ],
             ajax: {
-                "url": "{!! route('employeeshiftlist') !!}",
-
+                url: scripturl + "/employeeshiftlist.php",
+                type: "POST",
+                data: {},
             },
-            columns: [{
-                    data: 'id',
+            columns: [
+                { 
+                    data: 'id', 
                     name: 'id'
                 },
-                {
-                    data: 'date_from',
+                { 
+                    data: 'date_from', 
                     name: 'date_from'
                 },
-                // {
-                //     data: 'date_to',
-                //     name: 'date_to'
-                // },
-                {
+               {
                     data: 'shift_id',
                     name: 'shift_id',
                     render: function(data, type, row) {
@@ -432,20 +429,36 @@
                         }
                     }
                 },
+                
                 {
-                    data: 'action',
+                    data: 'id',
                     name: 'action',
+                    className: 'text-right',
                     orderable: false,
                     searchable: false,
-                    render: function (data, type, row) {
-                        return '<div style="text-align: right;">' + data + '</div>';
+                    render: function(data, type, row) {
+                        var buttons = '';
+                        // View button
+                        buttons += '<button name="view" id="'+row.id+'" class="view btn btn-secondary btn-sm mr-1" type="button"><i class="fas fa-eye"></i></button>';
+                        // Edit button
+                        buttons += '<button name="edit" id="'+row.id+'" class="edit btn btn-primary btn-sm mr-1" type="button" data-toggle="tooltip" title="Edit"><i class="fas fa-pencil-alt"></i></button>';
+                        // Delete button
+                        buttons += '<button type="button" name="delete" id="'+row.id+'" class="delete btn btn-danger btn-sm mr-1" data-toggle="tooltip" title="Remove"><i class="far fa-trash-alt"></i></button>';
+                        // Status toggle button
+                        if (row.status == 1) {
+                            buttons += '<a href="/employeeshiftstatus/'+row.id+'/2" onclick="return deactive_confirm()" class="btn btn-success btn-sm mr-1" data-toggle="tooltip" title="Active"><i class="fas fa-check"></i></a>';
+                        } else {
+                            buttons += '<a href="/employeeshiftstatus/'+row.id+'/1" onclick="return active_confirm()" class="btn btn-warning btn-sm mr-1" data-toggle="tooltip" title="Inactive"><i class="fas fa-times"></i></a>';
+                        }
+
+                        return buttons;
                     }
-                },
+
+                }
             ],
-            "bDestroy": true,
-            "order": [
-                [0, "desc"]
-            ]
+            drawCallback: function(settings) {
+                $('[data-toggle="tooltip"]').tooltip();
+            }
         });
 
         $('#create_record').click(function () {

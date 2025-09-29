@@ -62,7 +62,7 @@
                     </div>
                     <div class="col-12">
                         <div class="center-block fix-width scroll-inner">
-                        <table class="table table-striped table-bordered table-hover nowrap" style="width: 100%" id="dataTable">
+                         <table class="table table-striped table-bordered table-sm small nowrap w-100" id="dataTable">
                             <thead>
                                 <tr>
                                     <th>Employee Name </th>
@@ -255,7 +255,7 @@ $(document).ready(function () {
 
     function load_dt(department, employee, location, from_date, to_date){
         $('#dataTable').DataTable({
-             "destroy": true,
+          "destroy": true,
         "processing": true,
         "serverSide": true,
         dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
@@ -293,22 +293,62 @@ $(document).ready(function () {
         "order": [
             [0, "desc"]
         ],
-            ajax: {
-                "url": "{!! route('shift_list_dt') !!}",
-                "data": {'department':department, 'employee':employee, 'location': location, 'from_date': from_date, 'to_date': to_date},
-            },
+        ajax: {
+             url: scripturl + "/shift_list.php",
+            type: "POST",
+            data: {},
+        },
             columns: [
-                { data: 'employee_display', name: 'employee_display' },
-                { data: 'dep_name', name: 'dep_name' },
-                { data: 'shift_name', name: 'shift_name' },
-                { data: 'onduty_time', name: 'onduty_time' },
-                { data: 'offduty_time', name: 'offduty_time' },
-                { data: 'action', name: 'action', orderable: false, searchable: false},
-            ],
-            "bDestroy": true,
-            "order": [
-                [3, "desc"]
-            ]
+            { 
+                data: 'emp_name_with_initial', 
+                name: 'emp_name_with_initial'
+            },
+            { 
+                data: 'departmentname', 
+                name: 'departmentname'
+            },
+            { 
+                data: 'shift_name', 
+                name: 'shift_name'
+            },
+            { 
+                data: 'onduty_time', 
+                name: 'onduty_time'
+            },
+            { 
+                data: 'offduty_time', 
+                name: 'offduty_time'
+            },
+            {
+                data: 'id',
+                name: 'action',
+                className: 'text-right',
+                orderable: false,
+                searchable: false,
+                render: function(data, type, row) {
+                    var is_resigned = row.is_resigned;
+                    var buttons = '';
+
+                   
+                   buttons += '<button name="edit" id="'+row.emp_id+'" ' +
+    'data-id="'+row.emp_id+'" ' +
+    'data-emp_name_with_initial="'+row.emp_name_with_initial+'" ' +
+    'data-shift_name="'+row.shift_name+'" ' +
+    'data-onduty_time="'+row.onduty_time+'" ' +
+    'data-offduty_time="'+row.offduty_time+'" ' +
+    'data-shift_type_id="'+row.shift_type_id+'" ' +
+    'class="edit btn btn-primary btn-sm mr-1" type="button" data-toggle="tooltip" title="Edit">' +
+    '<i class="fas fa-pencil-alt"></i></button>';
+
+                    buttons += '<button type="submit" name="delete" id="'+row.emp_id+'" class="delete btn btn-danger btn-sm" data-toggle="tooltip" title="Remove"><i class="far fa-trash-alt"></i></button>';
+
+                    return buttons;
+                }
+            }
+        ],
+          drawCallback: function(settings) {
+            $('[data-toggle="tooltip"]').tooltip();
+        }
         });
     }
 

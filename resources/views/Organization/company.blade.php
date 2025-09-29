@@ -341,31 +341,42 @@ $(document).ready(function(){
             data: $(this).serialize(),
             dataType: "json",
             success: function (data) {//alert(data);        
-                if (data.errors) {
-                    const actionObj = {
-                        icon: 'fas fa-warning',
-                        title: '',
-                        message: 'Record Error',
-                        url: '',
-                        target: '_blank',
-                        type: 'danger'
-                    };
-                    const actionJSON = JSON.stringify(actionObj, null, 2);
-                    action(actionJSON);
-                }
-                if (data.success) {
-                    const actionObj = {
-                        icon: 'fas fa-save',
-                        title: '',
-                        message: data.success,
-                        url: '',
-                        target: '_blank',
-                        type: 'success'
-                    };
-                    const actionJSON = JSON.stringify(actionObj, null, 2);
-                    $('#formTitle')[0].reset();
-                    actionreload(actionJSON);
-                }
+                .then(response => {
+    if (!response.ok) throw new Error('Network response was not ok');
+    return response.json();
+})
+.then(data => {
+    if (data.errors) {
+        const actionObj = {
+            icon: 'fas fa-warning',
+            title: '',
+            message: 'Record Error',
+            url: '',
+            target: '_blank',
+            type: 'danger'
+        };
+        const actionJSON = JSON.stringify(actionObj, null, 2);
+        action(actionJSON);
+    }
+
+    if (data.success) {
+        const actionObj = {
+            icon: 'fas fa-save',
+            title: '',
+            message: data.success,
+            url: '',
+            target: '_blank',
+            type: 'success'
+        };
+        const actionJSON = JSON.stringify(actionObj, null, 2);
+        document.getElementById('formTitle').reset();
+        actionreload(actionJSON);
+    }
+})
+.catch(error => {
+    console.error('Error:', error);
+    alert('Something went wrong!');
+});
             }
         });
     });
