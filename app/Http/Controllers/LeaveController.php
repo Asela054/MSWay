@@ -640,7 +640,7 @@ class LeaveController extends Controller
             
             // Casual leave calculation
             if ($years_of_service == 0) {
-            $casual_leaves = number_format((7 / 12) * $months_of_service, 2);
+            $casual_leaves = number_format((6 / 12) * $months_of_service, 2);
             } else {
                 $casual_leaves = 7;
             }
@@ -704,6 +704,38 @@ class LeaveController extends Controller
         $from = \Carbon\Carbon::createFromFormat('Y-m-d', $request->todate);
         $diff_days = $to->diffInDays($from);
         $half_short = $request->input('half_short');
+
+        // Process leave balance data from frontend
+            $leaveBalanceData = [];
+            $balanceErrors = [];
+
+            if ($request->has('leave_balance_data')) {
+                $leaveBalanceData = json_decode($request->leave_balance_data, true);
+                
+                // Validate if the applied leave doesn't exceed available balance
+             
+
+                    foreach ($leaveBalanceData as $balance) {
+                        if ($balance['leave_type'] === 'Annual' && $request->leavetype == 1) {
+                            $availableAnnual = (float) $balance['available'];
+                            if ($diff_days > $availableAnnual) {
+                                $balanceErrors[] = "Applied annual leave days ($diff_days) exceed available balance ($availableAnnual days)";
+                            }
+                        }
+                        
+                        if ($balance['leave_type'] === 'Casual' && $request->leavetype == 2) {
+                            $availableCasual = (float) $balance['available'];
+                            if ($diff_days > $availableCasual) {
+                                $balanceErrors[] = "Applied casual leave days ($diff_days) exceed available balance ($availableCasual days)";
+                            }
+                        }
+                
+           } 
+        }
+
+            if (!empty($balanceErrors)) {
+                    return response()->json(['errors' => $balanceErrors]);
+                }
 
         $leave = new Leave;
         $leave->emp_id = $request->input('employee');

@@ -235,7 +235,7 @@
                 }
             });
 
-            //load_dt('','','','');
+            load_dt('','','','');
 
             function load_dt(department, company, location, date) {
                 $('#attendreporttable').DataTable({
