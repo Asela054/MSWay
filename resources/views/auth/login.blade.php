@@ -7,7 +7,7 @@
                         <div class="row justify-content-center">
                             <div class="col-lg-4">
                                 <div class="card shadow-lg border-0 rounded-lg mt-5">
-                                    <div class="card-header justify-content-center"><img src="{{url('/public/images/hrm.png')}}" class="img-fluid" alt=""></div>
+                                    <img src="{{url('/public/images/hrm.png')}}" class="card-img-top" alt="">
                                     <div class="card-body">
                                         <form class="form-horizontal" method="POST" action="{{ route('login') }}" autocomplete="off">
                                             {{ csrf_field() }}
