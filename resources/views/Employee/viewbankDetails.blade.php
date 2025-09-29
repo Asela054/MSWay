@@ -3,11 +3,18 @@
 @section('content')
     <main>
         <div class="page-header shadow">
-            <div class="container-fluid">
-                @include('layouts.employee_nav_bar')
-               
+            <div class="container-fluid d-none d-sm-block shadow">
+            @include('layouts.employee_nav_bar')
             </div>
-        </div>
+            <div class="container-fluid">
+                <div class="page-header-content py-3 px-2">
+                    <h1 class="page-header-title ">
+                        <div class="page-header-icon"><i class="fa-light fa-users-gear"></i></div>
+                        <span>Bank Details</span>
+                    </h1>
+                </div>
+            </div>
+        </div>    
         <div class="container-fluid mt-4">
             <div class="row">
                 <div class="col-lg-9">
@@ -65,7 +72,7 @@
                                     <div class="form-group col">
                                         @can('employee-edit')
                                             <button type="submit" class="btn btn-primary btn-sm">Save</button>
-                                            <button type="reset" class="btn btn-success btn-sm">Clear</button>
+                                            <button type="reset" class="btn btn-danger btn-sm">Clear</button>
                                         @endcan
                                     </div>
                                 </form>
@@ -83,12 +90,12 @@
                                            cellspacing="0">
                                         <thead>
                                         <tr>
-                                            <th>Bank Name</th>
-                                            <th>Bank Code</th>
-                                            <th>Branch Name</th>
-                                            <th>Branch Code</th>
-                                            <th>Account No</th>
-                                            <th class="text-right">Action</th>
+                                            <th>BANK</th>
+                                            <th>BANK CODE</th>
+                                            <th>BRANCH</th>
+                                            <th>BRANCH CODE</th>
+                                            <th>ACCOUNT NO</th>
+                                            <th class="text-right">ACTION</th>
                                         </tr>
                                         </thead>
 
@@ -103,7 +110,7 @@
                                                 <td class="text-right">
                                                     @can('employee-edit')
                                                         <button type="submit" name="delete" id="{{$employeebanks->id}}"
-                                                            class="delete btn btn-outline-danger btn-sm"><i
+                                                            class="delete btn btn-danger btn-sm"><i
                                                                 class="far fa-trash-alt"></i></button>
                                                     @endcan
                                                 </td>
@@ -163,7 +170,7 @@
             $('#employee_menu_link').addClass('active');
             $('#employee_menu_link_icon').addClass('active');
             $('#employeeinformation').addClass('navbtnactive');
-            $('#view_bank_link').addClass('navbtnactive');
+            $('#view_bank_link').addClass('active');
 
             let bank_name = $('#bank_name');
             let branch_name = $('#branch_name');

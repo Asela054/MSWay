@@ -3,11 +3,19 @@
 @section('content')
 
 <main>
-    <div class="page-header page-header-light bg-white shadow">
-        <div class="container-fluid">
+    <div class="page-header shadow">
+            <div class="container-fluid d-none d-sm-block shadow">
             @include('layouts.employee_nav_bar')
-        </div>
-    </div>
+            </div>
+            <div class="container-fluid">
+                <div class="page-header-content py-3 px-2">
+                    <h1 class="page-header-title ">
+                        <div class="page-header-icon"><i class="fa-light fa-users-gear"></i></div>
+                        <span>View Exam Result</span>
+                    </h1>
+                </div>
+            </div>
+        </div>    
     <div class="container-fluid mt-3">
         <div class="card">
             <div class="card-body p-0 p-2">
@@ -110,13 +118,13 @@
                                 <table class="table table-striped table-bordered table-sm small" id="tableresult">
                                     <thead>
                                         <tr>
-                                            <th>Subject</th>
-                                            <th>Grade</th>
-                                            <th>School</th>
-                                            <th>Medium</th>
-                                            <th>Year</th>
-                                            <th>Center No</th>
-                                            <th>Index No</th>
+                                            <th>SUBJECT</th>
+                                            <th>GRADE</th>
+                                            <th>SCHOOL</th>
+                                            <th>MEDIUM</th>
+                                            <th>YEAR</th>
+                                            <th>CENTER NO</th>
+                                            <th>INDEX NO</th>
                                             <th class="d-none">SubjectID</th>
                                             <th class="d-none">MediumID</th>
                                         </tr>
@@ -125,8 +133,7 @@
                                 </table>
                                 <div class="form-group mt-2">
                                     <button type="button" name="btncreateorder" id="btncreateorder"
-                                        class="btn btn-outline-primary btn-sm fa-pull-right px-4"><i
-                                            class="fas fa-plus"></i>&nbsp;Save</button>
+                                        class="btn btn-primary btn-sm fa-pull-right px-4">Save</button>
                                 </div>
                             </div>
                         </div>
@@ -140,15 +147,15 @@
                                     style="width: 100%" id="dataTable">
                                     <thead>
                                         <tr>
-                                            <th>Exam</th>
-                                            <th>Subject</th>
-                                            <th>Grade</th>
-                                            <th>School</th>
-                                            <th>Medium</th>
-                                            <th>Year</th>
-                                            <th>Center No</th>
-                                            <th>Index No</th>
-                                            <th class="text-right">Action</th>
+                                            <th>EXAM</th>
+                                            <th>SUBJECT</th>
+                                            <th>GRADE</th>
+                                            <th>SCHOOL</th>
+                                            <th>MEDIUM</th>
+                                            <th>YEAR</th>
+                                            <th>CENTER NO</th>
+                                            <th>INDEX NO</th>
+                                            <th class="text-right">ACTION</th>
                                         </tr>
                                     </thead>
                                     <tbody></tbody>
@@ -240,7 +247,7 @@ aria-labelledby="staticBackdropLabel" aria-hidden="true">
                
             <div class="form-group mt-3">
                 <button type="submit" name="action_button" id="action_button" 
-                class="btn btn-outline-primary btn-sm fa-pull-right px-4">
+                class="btn btn-primary btn-sm fa-pull-right px-4">
                     <i class="fas fa-plus"></i>&nbsp;Update</button>
             </div>
         </form>
@@ -282,7 +289,7 @@ $(document).ready(function(){
     $('#employee_menu_link').addClass('active');
     $('#employee_menu_link_icon').addClass('active');
     $('#employeeinformation').addClass('navbtnactive');
-    $('#view_examresult_link').addClass('navbtnactive');
+    $('#view_examresult_link').addClass('active');
 
     $("#subject").select2();
     $("#editsubject").select2();

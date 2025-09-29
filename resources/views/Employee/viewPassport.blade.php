@@ -9,11 +9,18 @@
 @section('content')
     <main>
         <div class="page-header shadow">
-            <div class="container-fluid">
-                @include('layouts.employee_nav_bar')
-               
+            <div class="container-fluid d-none d-sm-block shadow">
+            @include('layouts.employee_nav_bar')
             </div>
-        </div>
+            <div class="container-fluid">
+                <div class="page-header-content py-3 px-2">
+                    <h1 class="page-header-title ">
+                        <div class="page-header-icon"><i class="fa-light fa-users-gear"></i></div>
+                        <span>Passport</span>
+                    </h1>
+                </div>
+            </div>
+        </div>    
         <div class="container-fluid mt-4">
             <div class="row">
                 <div class="col-lg-9">
@@ -117,7 +124,7 @@
                                     <div class="form-group col-lg-8">
                                         @can('employee-edit')
                                             <button type="submit" class="btn btn-primary btn-sm">Save</button>
-                                            <button type="reset" class="btn btn-success btn-sm">Clear</button>
+                                            <button type="reset" class="btn btn-danger btn-sm">Clear</button>
                                         @endcan
                                     </div>
                                 </form>
@@ -139,14 +146,14 @@
                         <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
                             <thead>
                             <tr>
-                                <th>Issued Date</th>
-                                <th>Expire Date</th>
-                                <th>Comments</th>
-                                <th>Passport Type</th>
-                                <th>Passport Status</th>
-                                <th>Review</th>
+                                <th>ISSUE DATE</th>
+                                <th>EXPIRY DATE</th>
+                                <th>COMMENTS</th>
+                                <th>PASSPORT TYPE</th>
+                                <th>STATUS</th>
+                                <th>REVIEW</th>
                                 <th>EPF #</th>
-                                <th class="text-right">Action</th>
+                                <th class="text-right">ACTION</th>
                             </tr>
                             </thead>
 
@@ -188,7 +195,7 @@
         $('#employee_menu_link').addClass('active');
         $('#employee_menu_link_icon').addClass('active');
         $('#employeeinformation').addClass('navbtnactive');
-        $('#view_passport_link').addClass('navbtnactive');
+        $('#view_passport_link').addClass('active');
 
         $('#issue_date').datepicker({
             format: "yyyy/mm/dd",

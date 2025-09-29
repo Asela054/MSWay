@@ -3,11 +3,18 @@
 @section('content')
     <main>
         <div class="page-header shadow">
-            <div class="container-fluid">
-                @include('layouts.employee_nav_bar')
-               
+            <div class="container-fluid d-none d-sm-block shadow">
+            @include('layouts.employee_nav_bar')
             </div>
-        </div>
+            <div class="container-fluid">
+                <div class="page-header-content py-3 px-2">
+                    <h1 class="page-header-title ">
+                        <div class="page-header-icon"><i class="fa-light fa-users-gear"></i></div>
+                        <span>Qualification</span>
+                    </h1>
+                </div>
+            </div>
+        </div>    
         <div class="container-fluid mt-4">
             <div class="row">
                 <div class="col-lg-9">
@@ -21,7 +28,7 @@
                                             Work Experience
                                             @can('employee-edit')
                                                 <button type="button" name="create_work" id="create_work"
-                                                    class="btn btn-success btn-sm">Add
+                                                    class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add
                                                 </button>
                                             @endcan
                                         </div>
@@ -120,7 +127,7 @@
                                                                 <input type="hidden" name="hidden_id" id="hidden_id"/>
                                                                 @can('employee-edit')
                                                                     <input type="submit" name="action_button"
-                                                                       id="action_button" class="btn btn-warning float-right btn-sm"
+                                                                       id="action_button" class="btn btn-primary btn-sm fa-pull-right px-4"
                                                                        value="Add"/>
                                                                 @endcan
                                                             </div>
@@ -166,13 +173,13 @@
                                                         <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
                                                             <thead>
                                                                 <tr>
-                                                                    <th>Company</th>
-                                                                    <th>Job Title</th>
-                                                                    <th>From</th>
-                                                                    <th>To</th>
-                                                                    <th>Duration</th>
-                                                                    <th>Comments</th>
-                                                                    <th>Action</th>
+                                                                    <th>COMPANY</th>
+                                                                    <th>JOB TITLE</th>
+                                                                    <th>FROM</th>
+                                                                    <th>TO</th>
+                                                                    <th>DURATION</th>
+                                                                    <th>COMMENTS</th>
+                                                                    <th>ACTION</th>
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
@@ -232,7 +239,7 @@
                                             Higher Education
                                             @can('employee-edit')
                                                 <button type="button" name="create_education" id="create_education"
-                                                        class="btn btn-success btn-sm">Add
+                                                        class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add
                                                 </button>
                                             @endcan
                                         </div>
@@ -358,7 +365,7 @@
                                                                     <input type="hidden" name="edu_hidden_id"
                                                                            id="edu_hidden_id"/>
                                                                     <input type="submit" name="eduaction_button"
-                                                                           id="eduaction_button" class="btn btn-warning float-right  btn-sm"
+                                                                           id="eduaction_button" class="btn btn-primary btn-sm fa-pull-right px-4"
                                                                            value="Add"/>
                                                                 @endcan
                                                             </div>
@@ -407,12 +414,12 @@
                                                                width="100%" cellspacing="0">
                                                             <thead>
                                                             <tr>
-                                                                <th>Level</th>
-                                                                <th>Institute</th>
-                                                                <th>Course Name</th>
-                                                                <th>Year</th>
-                                                                <th>Score</th>
-                                                                <th>Action</th>
+                                                                <th>LEVEL</th>
+                                                                <th>INSTITUTE</th>
+                                                                <th>COURSE NAME </th>
+                                                                <th>YEAR</th>
+                                                                <th>SCORE</th>
+                                                                <th>ACTION</th>
 
                                                             </tr>
                                                             </thead>
@@ -458,7 +465,7 @@
                                             Skill
                                             @can('employee-edit')
                                                 <button type="button" name="create_skill" id="create_skill"
-                                                        class="btn btn-success btn-sm">Add
+                                                        class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add
                                                 </button>
                                             @endcan
                                         </div>
@@ -533,7 +540,7 @@
                                                                     <input type="hidden" name="skill_hidden_id"
                                                                            id="skill_hidden_id"/>
                                                                     <input type="submit" name="skillaction_button"
-                                                                           id="skillaction_button" class="btn btn-warning float-right  btn-sm"
+                                                                           id="skillaction_button" class="btn btn-primary btn-sm fa-pull-right px-4"
                                                                            value="Add"/>
                                                                 @endcan
                                                             </div>
@@ -579,10 +586,10 @@
                                                                width="100%" cellspacing="0">
                                                             <thead>
                                                             <tr>
-                                                                <th>Skill</th>
-                                                                <th>Experience</th>
-                                                                <th>Comments</th>
-                                                                <th class="text-right">Action</th>
+                                                                <th>SKILL</th>
+                                                                <th>EXPERIENCE</th>
+                                                                <th>COMMENT</th>
+                                                                <th class="text-right">ACTION</th>
 
                                                             </tr>
                                                             </thead>
@@ -694,7 +701,7 @@
             $('#employee_menu_link').addClass('active');
             $('#employee_menu_link_icon').addClass('active');
             $('#employeeinformation').addClass('navbtnactive');
-            $('#view_qualification_link').addClass('navbtnactive');
+            $('#view_qualification_link').addClass('active');
 
 
             $('#create_work').click(function () {

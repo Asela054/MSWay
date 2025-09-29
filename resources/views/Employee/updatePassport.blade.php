@@ -8,6 +8,19 @@
 @endsection
 @section('content')
     <main>
+        <div class="page-header shadow">
+            <div class="container-fluid d-none d-sm-block shadow">
+            @include('layouts.employee_nav_bar')
+            </div>
+            <div class="container-fluid">
+                <div class="page-header-content py-3 px-2">
+                    <h1 class="page-header-title ">
+                        <div class="page-header-icon"><i class="fa-light fa-users-gear"></i></div>
+                        <span>Passport Update</span>
+                    </h1>
+                </div>
+            </div>
+        </div>    
 
         <div class="container-fluid mt-3">
             <div class="row">
@@ -116,7 +129,7 @@
                                     <div class="form-group col-lg-8">
                                         <input type="hidden" name="emp_id" value="{{$passport->emp_id}}"/>
                                         <button type="submit" class="btn btn-primary btn-sm">Update</button>
-                                        <button type="reset" class="btn btn-warning btn-sm">Clear</button>
+                                        <button type="reset" class="btn btn-danger btn-sm">Clear</button>
                                     </div>
                                 </form>
                             </div>

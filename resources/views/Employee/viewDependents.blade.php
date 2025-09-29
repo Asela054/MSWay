@@ -4,11 +4,18 @@
 
 <main>
     <div class="page-header shadow">
-        <div class="container-fluid">
+            <div class="container-fluid d-none d-sm-block shadow">
             @include('layouts.employee_nav_bar')
-           
-        </div>
-    </div>
+            </div>
+            <div class="container-fluid">
+                <div class="page-header-content py-3 px-2">
+                    <h1 class="page-header-title ">
+                        <div class="page-header-icon"><i class="fa-light fa-users-gear"></i></div>
+                        <span>Dependents</span>
+                    </h1>
+                </div>
+            </div>
+    </div>    
     <div class="container-fluid mt-4">
         <div class="card">
             <div class="card-body p-0 p-2">
@@ -53,8 +60,8 @@
                             </div>
                             <div class="form-group mt-3 text-right">
                                 @can('employee-edit')
-                                    <button type="submit" name="action_button" id="action_button" class="btn btn-outline-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
-                                    <button type="reset" class="btn btn-outline-danger btn-sm mr-2"><i class="far fa-trash-alt"></i>&nbsp;Clear</button>
+                                    <button type="submit" name="action_button" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
+                                    <button type="reset" class="btn btn-danger btn-sm mr-2"><i class="far fa-trash-alt"></i>&nbsp;Clear</button>
                                 @endcan
                             </div>
                             <input type="hidden" class="form-control form-control-sm" id="emp_id" name="emp_id" value="{{$id}}">
@@ -78,8 +85,8 @@
                                     <td>{{$dependents->emp_dep_birthday}}</td>
                                     <td class="text-right">
                                         @can('employee-edit')
-                                            <a href="#" class="btn btn-outline-primary btn-sm btn-edit mr-1 mt-1" data-id="{{$dependents->id}}"><i class="fas fa-pencil-alt"></i></a>
-                                            <a href="#" class="btn btn-outline-danger btn-sm btn-delete mr-1 mt-1" data-id="{{$dependents->id}}"><i class="far fa-trash-alt"></i></a>
+                                            <a href="#" class="btn btn-primary btn-sm btn-edit mr-1 mt-1" data-id="{{$dependents->id}}"><i class="fas fa-pencil-alt"></i></a>
+                                            <a href="#" class="btn btn-danger btn-sm btn-delete mr-1 mt-1" data-id="{{$dependents->id}}"><i class="far fa-trash-alt"></i></a>
                                         @endcan
                                     </td>
                                 </tr>
@@ -212,7 +219,7 @@ $('#dataTable').DataTable();
     $('#employee_menu_link').addClass('active');
     $('#employee_menu_link_icon').addClass('active');
     $('#employeeinformation').addClass('navbtnactive');
-	$('#view_dependent_link').addClass('navbtnactive');
+	$('#view_dependent_link').addClass('active');
 
 $("#birthday").datetimepicker({
     pickTime: false,

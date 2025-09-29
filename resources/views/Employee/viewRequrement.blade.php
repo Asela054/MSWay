@@ -3,11 +3,18 @@
 @section('content')
     <main>
         <div class="page-header shadow">
-            <div class="container-fluid">
-                @include('layouts.employee_nav_bar')
-               
+            <div class="container-fluid d-none d-sm-block shadow">
+            @include('layouts.employee_nav_bar')
             </div>
-        </div>
+            <div class="container-fluid">
+                <div class="page-header-content py-3 px-2">
+                    <h1 class="page-header-title ">
+                        <div class="page-header-icon"><i class="fa-light fa-users-gear"></i></div>
+                        <span>Employee Requrement</span>
+                    </h1>
+                </div>
+            </div>
+        </div>    
         <div class="container-fluid mt-4">
             <div class="row">
                 <div class="col-lg-9">
@@ -107,7 +114,7 @@
 
                                         <div class="form-group mt-3">
                                             @can('employee-edit')
-                                                <button type="submit" name="" id="" class="btn btn-outline-primary btn-sm fa-pull-right px-4"><i class="fas fa-save"></i>&nbsp;Save</button>
+                                                <button type="submit" name="" id="" class="btn btn-primary btn-sm fa-pull-right px-4">Save</button>
                                             @endcan
                                         </div>
                                         <input type="hidden" class="form-control" id="id" name="id" value="{{$id}}">
@@ -135,7 +142,7 @@
         $('#employee_menu_link').addClass('active');
         $('#employee_menu_link_icon').addClass('active');
         $('#employeeinformation').addClass('navbtnactive');
-        $('#view_emprequment_link').addClass('navbtnactive');
+        $('#view_emprequment_link').addClass('active');
 
         $('#first_interwer').select2();
         $('#second_interwer').select2();
