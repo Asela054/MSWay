@@ -3,11 +3,18 @@
 @section('content')
     <main>
         <div class="page-header shadow">
-            <div class="container-fluid">
-                @include('layouts.employee_nav_bar')
-               
+            <div class="container-fluid d-none d-sm-block shadow">
+            @include('layouts.employee_nav_bar')
             </div>
-        </div>
+            <div class="container-fluid">
+                <div class="page-header-content py-3 px-2">
+                    <h1 class="page-header-title ">
+                        <div class="page-header-icon"><i class="fa-light fa-users-gear"></i></div>
+                        <span>Employee Files</span>
+                    </h1>
+                </div>
+            </div>
+        </div>    
         <div class="container-fluid mt-4">
             {{-- Show global success/error messages --}}
             @if (session('success'))
@@ -71,7 +78,7 @@
                                         </div>
                                         <div class="form-group mt-3">
                                             @can('employee-edit')
-                                                <button type="submit" name="" id="" class="btn btn-outline-primary btn-sm fa-pull-right px-4"><i class="fas fa-save"></i>&nbsp;Save</button>
+                                                <button type="submit" name="" id="" class="btn btn-primary btn-sm fa-pull-right px-4">Save</button>
                                             @endcan
                                         </div>
                                         <input type="hidden" class="form-control" id="id" name="id" value="{{$id}}">
@@ -88,13 +95,13 @@
                             <div class="card mb-2">
                                 <div class="card-body">
                                     <div class="center-block fix-width scroll-inner">
-                                     <table class="table table-striped nowrap" style="width: 100%">
+                                     <table class="table table-striped table-bordered table-sm small nowrap" style="width: 100%">
                                          <thead>
                                             <tr>
-                                                <th>File Name</th>
-                                                <th>File Type</th>
-                                                <th>Comment</th>
-                                                <th class="text-right">Action</th>
+                                                <th>FILE NAME</th>
+                                                <th>FILE TYPE</th>
+                                                <th>COMMENT</th>
+                                                <th class="text-right">ACTION</th>
                                             </tr>
                                          </thead>
                                          <tbody>
@@ -177,7 +184,7 @@
         $('#employee_menu_link').addClass('active');
         $('#employee_menu_link_icon').addClass('active');
         $('#employeeinformation').addClass('navbtnactive');
-        $('#view_empfile_link').addClass('navbtnactive');
+        $('#view_empfile_link').addClass('active');
 
             let delete_id = 0;
             $(document).on('click', '.btn-delete', function () {
