@@ -163,7 +163,7 @@ $(document).ready(function() {
             for (let d = 1; d <= daysInMonth; d++) {
                 const existingShift = (existingData[emp.id] && existingData[emp.id][d]) || '';
                row += `<td style="padding: 0px;">
-                    <select name="shifts[${emp.id}][${d}]" class="form-control form-control-sm " style="width: 55px;">
+                    <select name="shifts[${emp.id}][${d}]" class="form-control form-control-sm ${existingShift ? 'border border-primary' : ''}" style="width: 55px;">
                         
                         ${shiftOptions.map(opt =>
                             `<option value="${opt.id}" ${opt.id == existingShift ? 'selected' : ''}>${opt.code}</option>`
@@ -185,6 +185,7 @@ $(document).ready(function() {
         const month = $('#month').val();
         const shifts = {};
 
+        // Build shifts payload
         for (const [key, value] of formData.entries()) {
             if (key.startsWith("shifts") && value !== "") {
                 const matches = key.match(/shifts\[(\d+)\]\[(\d+)\]/);
@@ -208,7 +209,11 @@ $(document).ready(function() {
         const payload = Object.values(shifts).flat();
         const csrfToken = $('meta[name="csrf-token"]').attr('content');
 
-        fetch('{{ url("/fullrosterstore") }}', {
+        // Dynamic action (optional, like your formTitle)
+        let action_url = "{{ url('/fullrosterstore') }}";
+        
+
+        fetch(action_url, {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': csrfToken,
@@ -217,27 +222,49 @@ $(document).ready(function() {
             },
             body: JSON.stringify({ shifts: payload })
         })
-        .then(response => {
-            if (!response.ok) throw new Error('Network response was not ok');
-            return response.json();
-        })
-        .then(result => {
-            $('#info_msg').html(
-                '<div class="alert alert-success"><p>' + result.message + '</p></div>'
-            );
-
-            // Hide after 5 seconds
-            setTimeout(() => {
-                $('#info_msg').fadeOut('slow', function () {
-                    $(this).html('').show(); // clear content and reset visibility
-                });
-            }, 1000);
+        .then(response => response.json())
+        .then(data => {
+            if (data.errors) {
+                const actionObj = {
+                    icon: 'fas fa-warning',
+                    title: '',
+                    message: 'Record Error',
+                    url: '',
+                    target: '_blank',
+                    type: 'danger'
+                };
+                const actionJSON = JSON.stringify(actionObj, null, 2);
+                action(actionJSON);
+            }
+            if (data.success) {
+                const actionObj = {
+                    icon: 'fas fa-save',
+                    title: '',
+                    message: data.success,
+                    url: '',
+                    target: '_blank',
+                    type: 'success'
+                };
+                const actionJSON = JSON.stringify(actionObj, null, 2);
+                $('#shiftForm')[0].reset();
+                actionreload(actionJSON);
+            }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Something went wrong!');
+            const actionObj = {
+                icon: 'fas fa-times',
+                title: '',
+                message: 'Something went wrong!',
+                url: '',
+                target: '_blank',
+                type: 'danger'
+            };
+            const actionJSON = JSON.stringify(actionObj, null, 2);
+            action(actionJSON);
         });
     });
+
 
 });
 </script>
