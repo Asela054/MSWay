@@ -94,18 +94,18 @@ class DepartmentwisereportController extends Controller
         $table = '<table id="ot_report_dt" class="table table-striped table-bordered table-sm small text-center">';
         $table .= '<thead>';
         $table .= '<tr>';
-        $table .= '<th rowspan="3" class="align-middle">Department</th>';
+        $table .= '<th rowspan="3" class="align-middle">DEPARTMENT</th>';
 
         if ($reporttype == '1' && !empty($selectedmonth)) {
             $monthName = date('F Y', strtotime($selectedmonth . '-01'));
-            $table .= '<th colspan="2" class="align-middle">Total OT Hours for ' . $monthName . '</th>';
+            $table .= '<th colspan="2" class="align-middle">TOTAL OT HOURS FOR ' . $monthName . '</th>';
         } elseif ($reporttype == '2' && !empty($from_date) && !empty($to_date)) {
             $monthsInRange = $this->getMonthsInRange($from_date, $to_date);
             $monthCount = count($monthsInRange);
-            $table .= '<th colspan="' . ($monthCount * 2) . '" class="align-middle">Total OT Hours</th>';
+            $table .= '<th colspan="' . ($monthCount * 2) . '" class="align-middle">TOTAL OT HOURS</th>';
         }
 
-        $table .= '<th rowspan="3" class="align-middle">Action</th>';
+        $table .= '<th rowspan="3" class="align-middle">ACTION</th>';
         $table .= '</tr>';
 
         if ($reporttype == '1' && !empty($selectedmonth)) {
@@ -113,8 +113,8 @@ class DepartmentwisereportController extends Controller
             $table .= '<th colspan="2" class="align-middle">' . $monthName . '</th>';
             $table .= '</tr>';
             $table .= '<tr>';
-            $table .= '<th>Normal OT</th>';
-            $table .= '<th>Double OT</th>';
+            $table .= '<th>NORMAL OT</th>';
+            $table .= '<th>DOUBLE OT</th>';
             $table .= '</tr>';
         } elseif ($reporttype == '2' && !empty($from_date) && !empty($to_date)) {
             $table .= '<tr>';
@@ -125,8 +125,8 @@ class DepartmentwisereportController extends Controller
             $table .= '</tr>';
             $table .= '<tr>';
             foreach ($monthsInRange as $month) {
-                $table .= '<th>Normal OT</th>';
-                $table .= '<th>Double OT</th>';
+                $table .= '<th>NORMAL OT</th>';
+                $table .= '<th>DOUBLE OT</th>';
             }
             $table .= '</tr>';
         }
@@ -157,7 +157,7 @@ class DepartmentwisereportController extends Controller
                     $table .= "<td>$total_double_ot</td>";
                 }
             }
-            $table .= "<td><button id='{$dept_id}' class='btn btn-primary btn-sm view_more'><i class='fas fa-eye'></i></button></td>";
+            $table .= "<td><button id='{$dept_id}' class='btn btn-primary btn-sm view_more'  data-toggle='tooltip' title='View More'><i class='fas fa-eye'></i></button></td>";
             $table .= "</tr>";
         }
 
@@ -208,16 +208,16 @@ class DepartmentwisereportController extends Controller
 
         // First header row
         $table .= '<tr>';
-        $table .= '<th rowspan="3" class="align-middle">Emp ID</th>';
-        $table .= '<th rowspan="3" class="align-middle">Employee</th>';
+        $table .= '<th rowspan="3" class="align-middle">EMP ID</th>';
+        $table .= '<th rowspan="3" class="align-middle">EMPLOYEE</th>';
 
         if ($reporttype == '1' && !empty($selectedmonth)) {
             $monthName = date('F Y', strtotime($selectedmonth . '-01'));
-            $table .= '<th colspan="2" class="align-middle">Total OT Hours for ' . $monthName . '</th>';
+            $table .= '<th colspan="2" class="align-middle">TOTAL OT HOURS FOR ' . $monthName . '</th>';
         } elseif ($reporttype == '2' && !empty($from_date) && !empty($to_date)) {
             $monthsInRange = $this->getMonthsInRange($from_date, $to_date);
             $monthCount = count($monthsInRange);
-            $table .= '<th colspan="' . ($monthCount * 2) . '" class="align-middle">Total OT Hours</th>';
+            $table .= '<th colspan="' . ($monthCount * 2) . '" class="align-middle">TOTAL OT HOURS</th>';
         }
 
         $table .= '</tr>';
@@ -228,8 +228,8 @@ class DepartmentwisereportController extends Controller
             $table .= '<th colspan="2" class="align-middle">' . $monthName . '</th>';
             $table .= '</tr>';
             $table .= '<tr>';
-            $table .= '<th>Normal OT</th>';
-            $table .= '<th>Double OT</th>';
+            $table .= '<th>NORMAL OT</th>';
+            $table .= '<th>DOUBLE OT</th>';
             $table .= '</tr>';
         } elseif ($reporttype == '2' && !empty($from_date) && !empty($to_date)) {
             $table .= '<tr>';
@@ -240,8 +240,8 @@ class DepartmentwisereportController extends Controller
             $table .= '</tr>';
             $table .= '<tr>';
             foreach ($monthsInRange as $month) {
-                $table .= '<th>Normal OT</th>';
-                $table .= '<th>Double OT</th>';
+                $table .= '<th>NORMAL OT</th>';
+                $table .= '<th>DOUBLE OT</th>';
             }
             $table .= '</tr>';
         }
@@ -347,17 +347,17 @@ class DepartmentwisereportController extends Controller
 
         $table = '<table class="table table-striped table-bordered table-sm small text-center" id="leave_report">';
         $table .= '<thead><tr>';
-        $table .= '<th rowspan="3" class="align-middle">Department</th>';
+        $table .= '<th rowspan="3" class="align-middle">DEPARTMENT</th>';
 
         if ($reporttype == '1' && !empty($selectedmonth)) {
             $monthName = date('F Y', strtotime($selectedmonth . '-01'));
-            $table .= '<th colspan="4" class="align-middle">Total Leaves for ' . $monthName . '</th>';
+            $table .= '<th colspan="4" class="align-middle">TOTAL LEAVES FOR ' . $monthName . '</th>';
         } elseif ($reporttype == '2' && !empty($from_date) && !empty($to_date)) {
             $monthsInRange = $this->getMonthsInRange($from_date, $to_date);
             $monthCount = count($monthsInRange);
-            $table .= '<th colspan="' . ($monthCount * 4) . '" class="align-middle">Total Leaves</th>';
+            $table .= '<th colspan="' . ($monthCount * 4) . '" class="align-middle">TOTAL LEAVES</th>';
         }
-        $table .= '<th rowspan="3" class="align-middle">Action</th>';
+        $table .= '<th rowspan="3" class="align-middle">ACTION</th>';
         $table .= '</tr>';
 
         if ($reporttype == '1' && !empty($selectedmonth)) {
@@ -365,10 +365,10 @@ class DepartmentwisereportController extends Controller
             $table .= '<th colspan="4" class="align-middle">' . $monthName . '</th>';
             $table .= '</tr>';
             $table .= '<tr>';
-            $table .= '<th>Annual Leaves</th>';
-            $table .= '<th>Casual Leaves</th>';
-            $table .= '<th>No Pay Leaves</th>';
-            $table .= '<th>Medical Leaves</th>';
+            $table .= '<th>ANNUAL LEAVES</th>';
+            $table .= '<th>CASUAL LEAVES</th>';
+            $table .= '<th>NO PAY LEAVES</th>';
+            $table .= '<th>MEDICAL LEAVES</th>';
             $table .= '</tr>';
         } elseif ($reporttype == '2' && !empty($from_date) && !empty($to_date)) {
             $table .= '<tr>';
@@ -379,10 +379,10 @@ class DepartmentwisereportController extends Controller
             $table .= '</tr>';
             $table .= '<tr>';
             foreach ($monthsInRange as $month) {
-                $table .= '<th>Annual Leaves</th>';
-                $table .= '<th>Casual Leaves</th>';
-                $table .= '<th>No Pay Leaves</th>';
-                $table .= '<th>Medical Leaves</th>';
+                $table .= '<th>ANNUAL LEAVES</th>';
+                $table .= '<th>CASUAL LEAVES</th>';
+                $table .= '<th>NO PAY LEAVES</th>';
+                $table .= '<th>MEDICAL LEAVES</th>';
             }
             $table .= '</tr>';
         }
@@ -419,7 +419,7 @@ class DepartmentwisereportController extends Controller
                 }
             }
 
-            $table .= "<td class='align-middle'><button id='{$dept_id}' class='btn btn-primary btn-sm view_more'><i class='fas fa-eye'></i></button></td>";
+            $table .= "<td class='align-middle'><button id='{$dept_id}' class='btn btn-primary btn-sm view_more' data-toggle='tooltip' title='View More'><i class='fas fa-eye'></i></button></td>";
             $table .= "</tr>";
         }
 
@@ -500,9 +500,9 @@ class DepartmentwisereportController extends Controller
         $table = '<table class="table table-striped table-bordered table-sm small text-center" id="leave_reportemployee" style="width:100%">';
         $table .= '<thead>';
         $table .= '<tr>';
-        $table .= '<th rowspan="2" class="align-middle">Department</th>';
-        $table .= '<th rowspan="2" class="align-middle">Emp ID</th>';
-        $table .= '<th rowspan="2" class="align-middle">Employee</th>';
+        $table .= '<th rowspan="2" class="align-middle">DEPARTMENT</th>';
+        $table .= '<th rowspan="2" class="align-middle">EMP ID</th>';
+        $table .= '<th rowspan="2" class="align-middle">EMPLOYEE</th>';
 
         foreach ($monthsInRange as $month) {
             $monthFormatted = date('F Y', strtotime($month . '-01'));
@@ -512,10 +512,10 @@ class DepartmentwisereportController extends Controller
         $table .= '<tr>';
 
         foreach ($monthsInRange as $month) {
-            $table .= '<th class="align-middle">Annual</th>';
-            $table .= '<th class="align-middle">Casual</th>';
-            $table .= '<th class="align-middle">No Pay</th>';
-            $table .= '<th class="align-middle">Medical</th>';
+            $table .= '<th class="align-middle">ANNUAL</th>';
+            $table .= '<th class="align-middle">CASUAL</th>';
+            $table .= '<th class="align-middle">NOPAY</th>';
+            $table .= '<th class="align-middle">MEDICAL</th>';
         }
         $table .= '</tr>';
         $table .= '</thead>';
@@ -626,18 +626,18 @@ class DepartmentwisereportController extends Controller
         $table = '<table id="ot_report_dt" class="table table-striped table-bordered table-sm small text-center">';
         $table .= '<thead>';
         $table .= '<tr>';
-        $table .= '<th rowspan="3" class="align-middle">Department</th>';
+        $table .= '<th rowspan="3" class="align-middle">DEPARTMENT</th>';
 
         if ($reporttype == '1' && !empty($selectedmonth)) {
             $monthName = date('F Y', strtotime($selectedmonth . '-01'));
-            $table .= '<th class="align-middle">Total Attendance for ' . $monthName . '</th>';
+            $table .= '<th class="align-middle">TOTAL ATTENDANCE FOR ' . $monthName . '</th>';
         } elseif ($reporttype == '2' && !empty($from_date) && !empty($to_date)) {
             $monthsInRange = $this->getMonthsInRange($from_date, $to_date);
             $monthCount = count($monthsInRange);
-            $table .= '<th colspan="' . ($monthCount * 1) . '" class="align-middle">Total Attendance</th>';
+            $table .= '<th colspan="' . ($monthCount * 1) . '" class="align-middle">TOTAL ATTENDANCE</th>';
         }
 
-        $table .= '<th rowspan="3" class="align-middle">Action</th>';
+        $table .= '<th rowspan="3" class="align-middle">ACTION</th>';
         $table .= '</tr>';
 
         if ($reporttype == '1' && !empty($selectedmonth)) {
@@ -645,7 +645,7 @@ class DepartmentwisereportController extends Controller
             $table .= '<th class="align-middle">' . $monthName . '</th>';
             $table .= '</tr>';
             $table .= '<tr>';
-            $table .= '<th>Attendance</th>';
+            $table .= '<th>ATTENDANCE</th>';
             $table .= '</tr>';
         } elseif ($reporttype == '2' && !empty($from_date) && !empty($to_date)) {
             $table .= '<tr>';
@@ -656,7 +656,7 @@ class DepartmentwisereportController extends Controller
             $table .= '</tr>';
             $table .= '<tr>';
             foreach ($monthsInRange as $month) {
-                $table .= '<th>Attendance</th>';
+                $table .= '<th>ATTENDANCE</th>';
             }
             $table .= '</tr>';
         }
@@ -683,7 +683,7 @@ class DepartmentwisereportController extends Controller
                     $table .= "<td>$attendance_count</td>";
                 }
             }
-            $table .= "<td><button id='{$dept_id}' class='btn btn-primary btn-sm view_more'><i class='fas fa-eye'></i></button></td>";
+            $table .= "<td><button id='{$dept_id}' class='btn btn-primary btn-sm view_more' data-toggle='tooltip' title='View More'><i class='fas fa-eye'></i></button></td>";
             $table .= "</tr>";
         }
 
@@ -759,16 +759,16 @@ class DepartmentwisereportController extends Controller
 
         // First header row
         $table .= '<tr>';
-        $table .= '<th rowspan="3" class="align-middle">Emp ID</th>';
-        $table .= '<th rowspan="3" class="align-middle">Employee</th>';
+        $table .= '<th rowspan="3" class="align-middle">EMP ID</th>';
+        $table .= '<th rowspan="3" class="align-middle">EMPLOYEE</th>';
 
         if ($reporttype == '1' && !empty($selectedmonth)) {
             $monthName = date('F Y', strtotime($selectedmonth . '-01'));
-            $table .= '<th class="align-middle">Total Attendance for ' . $monthName . '</th>';
+            $table .= '<th class="align-middle">TOTAL ATTENDANCE FOR  ' . $monthName . '</th>';
         } elseif ($reporttype == '2' && !empty($from_date) && !empty($to_date)) {
             $monthsInRange = $this->getMonthsInRange($from_date, $to_date);
             $monthCount = count($monthsInRange);
-            $table .= '<th colspan="' . ($monthCount * 1) . '" class="align-middle">Total Attendance</th>';
+            $table .= '<th colspan="' . ($monthCount * 1) . '" class="align-middle">TOTAL ATTENDANCE</th>';
         }
 
         $table .= '</tr>';
@@ -779,7 +779,7 @@ class DepartmentwisereportController extends Controller
             $table .= '<th class="align-middle">' . $monthName . '</th>';
             $table .= '</tr>';
             $table .= '<tr>';
-            $table .= '<th>Attendance</th>';
+            $table .= '<th>ATTENDANCE</th>';
             $table .= '</tr>';
         } elseif ($reporttype == '2' && !empty($from_date) && !empty($to_date)) {
             $table .= '<tr>';
@@ -790,7 +790,7 @@ class DepartmentwisereportController extends Controller
             $table .= '</tr>';
             $table .= '<tr>';
             foreach ($monthsInRange as $month) {
-                $table .= '<th>Attendance</th>';
+                $table .= '<th>ATTENDANCE</th>';
             }
             $table .= '</tr>';
         }

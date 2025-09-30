@@ -4,16 +4,23 @@
 @section('content')
 
     <main>
-        <div class="page-header shadow">
-            <div class="container-fluid">
-                @include('layouts.reports_nav_bar')
-               
+            <div class="page-header">
+                <div class="container-fluid d-none d-sm-block shadow">
+                    @include('layouts.reports_nav_bar')
+                </div>
+                <div class="container-fluid">
+                    <div class="page-header-content py-3 px-2">
+                        <h1 class="page-header-title ">
+                            <div class="page-header-icon"><i class="fa-light fa-file-contract"></i></div>
+                            <span>Department-Wise O.T. Report</span>
+                        </h1>
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <div class="container-fluid mt-4">
+        <div class="container-fluid mt-2 p-0 p-2">
             <div class="card mb-2">
-                <div class="card-body">
+                <div class="card-body p-0 p-2">
                     <form class="form-horizontal" id="formFilter">
                         <div class="form-row mb-1">
                             <div class="col-md-3">
@@ -27,7 +34,7 @@
                                 </select>
                             </div>
     
-                            <div class="col-3">
+                            <div class="col-md-3">
                                 <label class="small font-weight-bold text-dark">Department</label>
                                 <select name="department" id="department" class="form-control form-control-sm">
                                     <option value="">Please Select</option>
@@ -57,9 +64,9 @@
                     
                                 </div>
                             </div>
-                            <div class="col">
+                            <div class="col-md-1">
                                 <br>
-                                <button type="submit" class="btn btn-primary btn-sm filter-btn" id="btn-filter"> Filter</button>
+                                <button type="submit" class="btn btn-primary btn-sm filter-btn" id="btn-filter"><i class="fas fa-search mr-2"></i>Filter</button>
                             </div>
                         </div>
 
@@ -70,10 +77,8 @@
             <div class="card">
                 <div class="card-body p-0 p-2 main_card">
                     <div class="table_outer">
-                        <div class="daily_table table-responsive" id="tableContainer">
-                          
+                        <div class="daily_table table-responsive center-block fix-width scroll-inner" id="tableContainer">
                         </div>
-
                 </div>
             </div>
         </div>
@@ -152,11 +157,6 @@
                         success: function(response) {
                             $('#tableContainer').html(response.table);
                             $('#ot_report_dt').DataTable({});
-                        },
-                        error: function(xhr, status, error) {
-                            alert('Error generating the report');
-                            console.error("Error: " + error);
-                            console.error("Response: " + xhr.responseText);
                         }
                     });
             });
@@ -179,8 +179,6 @@
                             $('#view_more_modal .modal-body').html(response.table);
                             $('#view_more_modal').modal('show');
                             $('#empotview').DataTable({});
-                        } else {
-                            alert('No data found');
                         }
                     }
                 });
