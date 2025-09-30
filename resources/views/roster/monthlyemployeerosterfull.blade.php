@@ -151,9 +151,9 @@ $(document).ready(function() {
         thead.innerHTML = '';
         tbody.innerHTML = '';
 
-        let headerRow = `<tr><th>No</th><th>Name of Employee</th>`;
+        let headerRow = `<tr><th nowrap>No</th><th nowrap>Name of Employee</th>`;
         for (let d = 1; d <= daysInMonth; d++) {
-            headerRow += `<th>${d}</th>`;
+            headerRow += `<th class="text-center">${d}</th>`;
         }
         headerRow += `</tr>`;
         thead.innerHTML = headerRow;
@@ -163,7 +163,7 @@ $(document).ready(function() {
             for (let d = 1; d <= daysInMonth; d++) {
                 const existingShift = (existingData[emp.id] && existingData[emp.id][d]) || '';
                row += `<td style="padding: 0px;">
-                    <select name="shifts[${emp.id}][${d}]" class="form-control form-control-sm ${existingShift ? 'border border-primary' : ''}" style="width: 55px;">
+                    <select name="shifts[${emp.id}][${d}]" class="form-control form-control-sm shiftcode ${existingShift ? 'border border-primary' : ''}" style="width: 60px;">
                         
                         ${shiftOptions.map(opt =>
                             `<option value="${opt.id}" ${opt.id == existingShift ? 'selected' : ''}>${opt.code}</option>`
@@ -174,6 +174,14 @@ $(document).ready(function() {
             }
             row += `</tr>`;
             tbody.innerHTML += row;
+        });
+
+        $('.shiftcode').on('change', function() {
+            if ($(this).val()) {console.log($(this).val());
+                $(this).addClass('bg-success text-light');
+            } else {
+                $(this).removeClass('bg-success text-light');
+            }
         });
     }
 
@@ -265,7 +273,7 @@ $(document).ready(function() {
         });
     });
 
-
+    
 });
 </script>
 
