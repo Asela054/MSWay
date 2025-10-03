@@ -51,7 +51,7 @@
                 <div id="info_msg"></div>
 
                 <form id="shiftForm">
-                    <div class="center-block fix-width scroll-inner">
+                    <div class="center-block fix-width scroll-inner my-2">
                     <table class="table table-striped table-bordered table-sm small nowrap" style="width: 100%" id="shiftTable">
                         <thead></thead>
                         <tbody></tbody>
