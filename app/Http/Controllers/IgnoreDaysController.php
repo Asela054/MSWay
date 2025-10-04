@@ -73,8 +73,6 @@ class IgnoreDaysController extends Controller
          return response()->json(['success' => 'Ignore Day Added successfully.']);
     }
 
-
-
     public function destroy($id)
     {
         $user = Auth::user();

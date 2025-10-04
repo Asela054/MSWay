@@ -61,6 +61,11 @@ class AttendanceController extends Controller
      */
     public function store(Request $request)
     {
+        $user = Auth::user();
+        $permission = $user->can('attendance-create');
+        if (!$permission) {
+            return response()->json(['error' => 'UnAuthorized'], 401);
+        }
         $rules = array(
             'employee' => 'required',
             'in_time_s' => 'required',
@@ -132,6 +137,12 @@ class AttendanceController extends Controller
      */
     public function edit($id)
     {
+        $user = Auth::user();
+        $permission = $user->can('attendance-edit');
+        if (!$permission) {
+            abort(403);
+        }
+
         if (request()->ajax()) {
             $data = Attendance::findOrFail($id);
             return response()->json(['result' => $data]);
@@ -452,6 +463,11 @@ class AttendanceController extends Controller
 
     public function attendentUpdateLive(Request $request)
     {
+        $user = Auth::user();
+        $permission = $user->can('attendance-edit');
+        if (!$permission) {
+            return response()->json(['error' => 'UnAuthorized'], 401);
+        }
         if ($request->ajax()) {
             $data = array(
                 'timestamp' => $request->timestamp,
@@ -1057,6 +1073,11 @@ class AttendanceController extends Controller
 
     public function attendance_add_bulk_submit(Request $request)
     {
+         $user = Auth::user();
+        $permission = $user->can('attendance-edit');
+        if (!$permission) {
+            return response()->json(['error' => 'UnAuthorized'], 401);
+        }
 
         $rules = array(
             'employee' => 'required',
@@ -1127,6 +1148,12 @@ class AttendanceController extends Controller
 
     public function attendance_add_dept_wise_submit(Request $request)
     {
+
+        $user = Auth::user();
+        $permission = $user->can('attendance-edit');
+        if (!$permission) {
+            return response()->json(['error' => 'UnAuthorized'], 401);
+        }
 
         $rules = array(
             'department' => 'required',
@@ -1265,14 +1292,14 @@ class AttendanceController extends Controller
         return response()->json([
             'success' => true,
             'status' => $status,
-            'msg' => 'Deleted']);
+            'msg' => 'Attendance Deleted']);
 
     }
 
     public function attendance_clear_list_dt(Request $request)
     {
         $user = Auth::user();
-        $permission = $user->can('attendance-');
+        $permission = $user->can('attendance-delete');
         if (!$permission) {
             return response()->json(['error' => 'You do not have permission.']);
         }
@@ -1336,7 +1363,7 @@ class AttendanceController extends Controller
     public function attendance_upload_txt_submit(Request $request)
     {
         $user = Auth::user();
-        $permission = $user->can('attendance-edit');
+        $permission = $user->can('attendance-create');
         if (!$permission) {
             return response()->json(['error' => 'UnAuthorized'], 401);
         }

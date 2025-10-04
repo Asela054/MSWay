@@ -16,16 +16,25 @@ class JobAttendaceApproveController extends Controller
 {
      public function index()
     {
+          $permission = \Auth::user()->can('Job-Attendance-Approve-list');
+        if (!$permission) {
+            abort(403);
+        }
         $locations=DB::table('branches')->select('*')->get();
         return view('jobmanagement.locationattendace_approve',compact('locations'));
     }
 
      public function unauthorizeattendace()
     {
+          $permission = \Auth::user()->can('Job-Attendance-Approve-list');
+        if (!$permission) {
+            abort(403);
+        }
         $locations=DB::table('branches')->select('*')->get();
         return view('jobmanagement.unauthorizelocationattendace_approve',compact('locations'));
     }
-    public function approveattendace(Request $request){
+    public function approveattendace(Request $request)
+    {
 
         $permission = \Auth::user()->can('MealAllowanceApprove-approve');
         if (!$permission) {

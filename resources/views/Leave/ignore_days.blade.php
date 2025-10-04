@@ -48,9 +48,9 @@
                                 </td>
                                     <td>{{$ignore_days->date}}</td>
                                     <td class="text-right">
-                                        @can('IgnoreDay-delete')
+                                       
                                             <button type="submit" name="delete" id="{{$ignore_days->id}}" class="delete btn btn-danger btn-sm" data-toggle="tooltip" title="Remove"><i class="far fa-trash-alt"></i></button>
-                                        @endcan
+                                        
                                     </td>
                                 </tr>
                                 @endforeach
@@ -81,11 +81,11 @@
                             <form method="post" id="formTitle" class="form-horizontal">
                                 {{ csrf_field() }}
                                 <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">Month</label>
+                                    <label class="small font-weight-bolder text-dark">Month</label>
                                     <input type="month" id="month" name="month" class="form-control form-control-sm" placeholder="yyyy-mm" required>
                                 </div>
                                 <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">Dates</label>
+                                    <label class="small font-weight-bolder text-dark">Dates</label>
                                     <div id="date-picker-container">
                                     </div>
                                 </div>
@@ -122,42 +122,41 @@
     $('#leavemaster').addClass('navbtnactive');
 
     $('#jobtable').DataTable({
-              dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
-              "<'row'<'col-sm-5'i><'col-sm-7'p>>",
-          "buttons": [{
-                  extend: 'csv',
-                  className: 'btn btn-success btn-sm',
-                  title: 'Ignore Days Details',
-                  text: '<i class="fas fa-file-csv mr-2"></i> CSV',
-              },
-              {
-                  extend: 'pdf',
-                  className: 'btn btn-danger btn-sm',
-                  title: 'Ignore Days Details',
-                  text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
-                  orientation: 'landscape',
-                  pageSize: 'legal',
-                  customize: function (doc) {
-                      doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
-                  }
-              },
-              {
-                  extend: 'print',
-                  title: 'Ignore Days Details',
-                  className: 'btn btn-primary btn-sm',
-                  text: '<i class="fas fa-print mr-2"></i> Print',
-                  customize: function (win) {
-                      $(win.document.body).find('table')
-                          .addClass('compact')
-                          .css('font-size', 'inherit');
-                  },
-              },
-          ],
-          "order": [
-              [1, "desc"]
-          ]
-        });
-    
+        dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
+            "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+        "buttons": [{
+                extend: 'csv',
+                className: 'btn btn-success btn-sm',
+                title: 'Ignore Days Details',
+                text: '<i class="fas fa-file-csv mr-2"></i> CSV',
+            },
+            {
+                extend: 'pdf',
+                className: 'btn btn-danger btn-sm',
+                title: 'Ignore Days Details',
+                text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
+                orientation: 'landscape',
+                pageSize: 'legal',
+                customize: function (doc) {
+                    doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+                }
+            },
+            {
+                extend: 'print',
+                title: 'Ignore Days Details',
+                className: 'btn btn-primary btn-sm',
+                text: '<i class="fas fa-print mr-2"></i> Print',
+                customize: function (win) {
+                    $(win.document.body).find('table')
+                        .addClass('compact')
+                        .css('font-size', 'inherit');
+                },
+            },
+        ],
+        "order": [
+            [1, "desc"]
+        ]
+    });
 
 
 

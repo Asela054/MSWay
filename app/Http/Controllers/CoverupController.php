@@ -85,20 +85,14 @@ class CoverupController extends Controller
             ->addColumn('action', function($row){
                 $btn = '';
 
-                $permission = Auth::user()->can('Coverup-edit');
-                if ($permission) {
                     $btn = ' <button name="edit" id="'.$row->id.'"
                             class="edit btn btn-primary btn-sm" style="margin:1px;" type="submit" data-toggle="tooltip" title="Edit">
                             <i class="fas fa-pencil-alt"></i>
                         </button> ';
-                }
-
-                $permission = Auth::user()->can('Coverup-delete');
-                if ($permission) {
+               
                     $btn .= '<button type="submit" name="delete" id="'.$row->id.'"
                             class="delete btn btn-danger btn-sm" style="margin:1px;" data-toggle="tooltip" title="Remove"><i
                             class="far fa-trash-alt"></i></button>';
-                }
 
                 return $btn;
             })
@@ -142,6 +136,10 @@ class CoverupController extends Controller
 
     public function edit($id)
     {
+        $permission = Auth::user()->can('Coverup-edit');
+        if (!$permission) {
+            return response()->json(['error' => 'UnAuthorized'], 401);
+        }
         if (request()->ajax()) {
             $data = Coverup_detail::with('employee')
                 ->with('covering_employee')
@@ -159,6 +157,11 @@ class CoverupController extends Controller
      */
     public function update(Request $request, Coverup_detail $coverup_detail)
     {
+        $permission = Auth::user()->can('Coverup-edit');
+        if (!$permission) {
+            return response()->json(['error' => 'UnAuthorized'], 401);
+        }
+
         if ($request->has('start_time') && $request->has('end_time')) {
             try {
                 $request->merge([
