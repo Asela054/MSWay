@@ -17,42 +17,6 @@
             </div>
         </div>
     <div class="container-fluid mt-2 p-0 p-2">
-        <div class="card mb-2">
-                <div class="card-body p-0 p-2">
-                    <form class="form-horizontal" id="formFilter">
-                        <div class="form-row mb-1">
-                            <div class="col-md-3">
-                                <label class="small font-weight-bold text-dark">Location</label>
-                                <select name="location" id="location" class="form-control form-control-sm">
-                                    <option value="">Select Location</option>
-                                     @foreach($locations as $location)
-                                        <option value="{{$location->id}}">{{$location->location}}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="small font-weight-bold text-dark">Employee</label>
-                                <select name="employee" id="employee_f" class="form-control form-control-sm">
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="small font-weight-bold text-dark">Date : From - To</label>
-                                <div class="input-group input-group-sm mb-3">
-                                    <input type="date" id="from_date" name="from_date" class="form-control form-control-sm border-right-0" placeholder="yyyy-mm-dd">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text" id="inputGroup-sizing-sm"> </span>
-                                    </div>
-                                    <input type="date" id="to_date" name="to_date" class="form-control" placeholder="yyyy-mm-dd">
-                                </div>
-                            </div>
-                          <div class="col-md-3">
-                                <button type="submit" class="btn btn-primary btn-sm filter-btn float-right" id="btn-filter" style="margin-top: 25px;"> Filter</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
 
         <div class="card">
             <div class="card-body p-0 p-2">
@@ -66,8 +30,17 @@
                                 </div>
                             </div>
                             <div class="col-6 text-right">
-                                <button id="approve_att" class="btn btn-primary btn-sm">Approve All</button>
+                                <button id="approve_att" class="btn btn-primary btn-sm px-3"><i class="fa-light fa-light fa-clipboard-check"></i>&nbsp;&nbsp;Approve All</button>
                             </div>
+                             <div class="col-12">
+                                    <hr class="border-dark">
+                                </div>
+                             <div class="col-md-12">
+                                    <button class="btn btn-warning btn-sm filter-btn float-right px-3" type="button"
+                                        data-toggle="offcanvas" data-target="#offcanvasRight"
+                                        aria-controls="offcanvasRight"><i class="fas fa-filter mr-1"></i> Filter
+                                        Records</button>
+                                </div>
                         </div>
                         <div class="center-block fix-width scroll-inner">
                             <table class="table table-striped table-bordered table-sm small nowrap" style="width: 100%"
@@ -93,6 +66,66 @@
                 </div>
             </div>
         </div>
+
+          <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+              <div class="offcanvas-header">
+                  <h2 class="offcanvas-title font-weight-bolder" id="offcanvasRightLabel">Records Filter Options</h2>
+                  <button type="button" class="btn-close" data-dismiss="offcanvas" aria-label="Close">
+                      <span aria-hidden="true" class="h1 font-weight-bolder">&times;</span>
+                  </button>
+              </div>
+              <div class="offcanvas-body">
+                  <ul class="list-unstyled">
+                      <form class="form-horizontal" id="formFilter">
+                          <li class="mb-3">
+                              <div class="col-md-12">
+                                  <label class="small font-weight-bolder text-dark">Location</label>
+                                  <select name="location" id="location" class="form-control form-control-sm">
+                                      <option value="">Select Location</option>
+                                      @foreach($locations as $location)
+                                      <option value="{{$location->id}}">{{$location->location}}
+                                      </option>
+                                      @endforeach
+                                  </select>
+                              </div>
+                          </li>
+                          <li class="mb-3">
+                              <div class="col-md-12">
+                                  <label class="small font-weight-bolder text-dark">Employee</label>
+                                  <select name="employee" id="employee_f" class="form-control form-control-sm">
+                                  </select>
+                              </div>
+                          </li>
+                          <li class="mb-3">
+                              <div class="col-md-12">
+                                  <label class="small font-weight-bolder text-dark"> From Date* </label>
+                                  <input type="date" id="from_date" name="from_date"
+                                      class="form-control form-control-sm" placeholder="yyyy-mm-dd"
+                                      value="{{date('Y-m-d') }}" required>
+                              </div>
+                          </li>
+                          <li class="mb-3">
+                              <div class="col-md-12">
+                                  <label class="small font-weight-bolder text-dark"> To Date*</label>
+                                  <input type="date" id="to_date" name="to_date" class="form-control form-control-sm"
+                                      placeholder="yyyy-mm-dd" value="{{date('Y-m-d') }}" required>
+                              </div>
+                          </li>
+                          <li>
+                              <div class="col-md-12 d-flex justify-content-between">
+                                  <button type="submit" class="btn btn-primary btn-md filter-btn px-3" id="btn-filter">
+                                      <i class="fas fa-search mr-2"></i>Search
+                                  </button>
+                                  <button type="button" class="btn btn-danger btn-md filter-btn px-3" id="btn-reset">
+                                      <i class="fas fa-redo mr-1"></i> Reset
+                                  </button>
+                              </div>
+                          </li>
+                      </form>
+                  </ul>
+              </div>
+          </div>
+
     </div>
 </main>
               
@@ -218,6 +251,7 @@ $(document).ready(function(){
             let to_date = $('#to_date').val();
 
             load_dt(location, employee, from_date, to_date);
+             closeOffcanvasSmoothly();
         });
 
 
@@ -312,6 +346,14 @@ $(document).ready(function(){
     $('#selectAll').click(function (e) {
         $('#dataTable').closest('table').find('td input:checkbox').prop('checked', this.checked);
     });
+    
+    $('#btn-reset').on('click', function () {
+                 $('#formFilter')[0].reset();
+                 $('#company').val(null).trigger('change');
+                 $('#department').val(null).trigger('change');
+                 $('#employee_f').val(null).trigger('change');
+                 $('#location').val(null).trigger('change');
+             });
 });
 </script>
 

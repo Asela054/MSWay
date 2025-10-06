@@ -68,6 +68,7 @@
                             <form method="post" id="formTitle" class="form-horizontal">
                                 {{ csrf_field() }}	
                                 <div class="col-sm-12 col-md-6">
+                                    <label class="small font-weight-bolderer text-dark">Location*</label>
                                     <select name="location" id="location" class="form-control form-control-sm " style="width: 100%;" required>
                                         <option value="">Select Location</option>
                                         @foreach($locations as $location)
@@ -135,7 +136,7 @@
                                 {{ csrf_field() }}
                                 <div class="row">
                                     <div class="col-sm-12 col-md-6">
-                                         <label class="small font-weight-bold text-dark">Location</label>
+                                         <label class="small font-weight-bolder text-dark">Location</label>
                                         <select name="editlocation" id="editlocation"
                                             class="form-control form-control-sm " style="width: 100%;" readonly>
                                             <option value="">Select Location</option>
@@ -146,7 +147,7 @@
                                         </select>
                                     </div><br>
                                     <div class="col-sm-12 col-md-6">
-                                         <label class="small font-weight-bold text-dark">Employee</label>
+                                         <label class="small font-weight-bolder text-dark">Employee</label>
                                         <select name="editemployee" id="editemployee"
                                             class="form-control form-control-sm" style="width:100%">
                                             <option value="">Select Employees</option>

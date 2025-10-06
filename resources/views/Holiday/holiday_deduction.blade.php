@@ -71,7 +71,7 @@
 
                                 <div class="form-row mb-2">
                                     <div class="col-sm-12 col-md-6">
-                                        <label class="small font-weight-bold text-dark">Job Category</label>
+                                        <label class="small font-weight-bolder text-dark">Job Category*</label>
                                         <select id="job_category" name="job_category" class="form-control form-control-sm" required>
                                         <option value="">Select Job Category</option>
                                         @foreach ($job_categories as $job_category){
@@ -82,7 +82,7 @@
                                     </div>
 
                                     <div class="col-sm-12 col-md-6">
-                                        <label class="small font-weight-bold text-dark">Addition/Deduction Type</label>
+                                        <label class="small font-weight-bolder text-dark">Addition/Deduction Type*</label>
                                         <select id="remuneration_name" name="remuneration_name" class="form-control form-control-sm" required>
                                         <option value="">Select Remuneration</option>
                                         @foreach ($remunerations as $remuneration){
@@ -95,11 +95,11 @@
                                 
                                 <div class="form-row mb-2">
                                     <div class="col-sm-12 col-md-6">
-                                        <label class="small font-weight-bold text-dark">Day Count</label>
+                                        <label class="small font-weight-bolder text-dark">Day Count*</label>
                                         <input type="number" name="day_count" id="day_count" class="form-control form-control-sm" required />
                                     </div>
                                     <div class="col-sm-12 col-md-6">
-                                        <label class="small font-weight-bold text-dark">Amount</label>
+                                        <label class="small font-weight-bolder text-dark">Amount*</label>
                                         <input type="number" name="amount" step="0.01" id="amount" class="form-control form-control-sm" required />
                                     </div>
                                 </div>
@@ -165,7 +165,11 @@ $(document).ready(function(){
                 [0, "desc"]
             ],
             ajax: {
-                "url": "{!! route('HolidayDeductionlist') !!}",
+                url: scripturl + '/holidaydeduction_list.php',
+                type: 'POST',
+                data: function (d) {
+                        return d;
+                    }
 
             },
             columns: [{
@@ -184,8 +188,8 @@ $(document).ready(function(){
                     data: 'day_count',
                     name: 'day_count'
                 },
-                {
-                    data: 'amount',
+                { 
+                    data: 'amount', 
                     name: 'amount'
                 },
                 {
@@ -195,7 +199,14 @@ $(document).ready(function(){
                     orderable: false,
                     searchable: false,
                     render: function (data, type, row) {
-                        return '<div style="text-align: right;">' + data + '</div>';
+                        var buttons = '';
+
+                        buttons += '<button name="edit" id="'+row.id+'" class="edit btn btn-primary btn-sm mr-1" type="submit" data-toggle="tooltip" title="Edit"><i class="fas fa-pencil-alt"></i></button>';
+
+                        buttons += '<button name="delete" id="'+row.id+'" class="delete btn btn-danger btn-sm" data-toggle="tooltip" title="Remove"><i class="far fa-trash-alt"></i></button>';
+                    
+
+                    return buttons;
                     }
                 },
             ],

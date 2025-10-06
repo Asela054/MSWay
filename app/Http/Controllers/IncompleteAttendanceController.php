@@ -163,11 +163,11 @@ class IncompleteAttendanceController extends Controller
                     $tr = '<tr>';
 
                     $html .= $tr;
-                    $html .= '<td> 
-                                <input type="checkbox" class="checkbox_attendance" name="checkbox[]" value="' . $attendance['etf_no'] . '"
+                    $html .= '<td> <div class="custom-control">
+                                <input type="checkbox" class="custom-checkbox checkbox_attendance" name="checkbox[]" value="' . $attendance['etf_no'] . '"
                                     data-etf_no="' . $attendance['etf_no'] . '" 
                                     data-date = "' . $attendance['date'] . '" 
-                                />
+                                /></div>
                                 </td>';
 
                     $first_time = date('H:i', strtotime($attendance['timestamp']));
@@ -195,6 +195,12 @@ class IncompleteAttendanceController extends Controller
 
       public function mark_as_no_pay(Request $request)
     {
+
+        $user = Auth::user();
+        $permission = $user->can('incomplete-attendance-list');
+        if (!$permission) {
+            return response()->json(['error' => 'UnAuthorized'], 401);
+        }
 
         $checked = $request->checked;
 

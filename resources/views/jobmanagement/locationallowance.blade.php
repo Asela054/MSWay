@@ -17,43 +17,21 @@
             </div>
         </div>
     <div class="container-fluid mt-2 p-0 p-2">
-        <div class="card mb-2">
-                <div class="card-body p-0 p-2">
-                    <form class="form-horizontal" id="formFilter">
-                        <div class="form-row mb-1">
-                            <div class="col-sm-12 col-md-4">
-                                <label class="small font-weight-bold text-dark">Employee</label>
-                                <select name="employee" id="employee_f" class="form-control form-control-sm">
-                                    <option value="">Select Employee</option>
-                                    @foreach($employees as $employee)
-                                        <option value="{{$employee->emp_id}}">{{$employee->emp_name_with_initial}} - {{$employee->calling_name}}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-sm-12 col-md-4">
-                                <label class="small font-weight-bold text-dark">Date : From - To</label>
-                                <div class="input-group input-group-sm mb-3">
-                                    <input type="date" id="from_date" name="from_date" class="form-control form-control-sm border-right-0" placeholder="yyyy-mm-dd" required>
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text" id="inputGroup-sizing-sm"> </span>
-                                    </div>
-                                    <input type="date" id="to_date" name="to_date" class="form-control" placeholder="yyyy-mm-dd" required>
-                                </div>
-                            </div>
-                           <div class="col-sm-12 col-md-4">
-                                <button type="submit" class="btn btn-primary btn-sm filter-btn float-right" id="btn-filter" style="margin-top: 25px;"> Filter</button>
-                            </div>
-                        </div>
-
-                    </form>
-                </div>
-            </div>
-
         <div class="card">
             <div class="card-body p-0 p-2">
                 <div class="row">
                     <div class="col-12">
                         <div class="row align-items-center mb-4">
+                             <div class="col-md-12">
+                                    <button class="btn btn-warning btn-sm filter-btn float-right px-3" type="button"
+                                        data-toggle="offcanvas" data-target="#offcanvasRight"
+                                        aria-controls="offcanvasRight"><i class="fas fa-filter mr-1"></i> Filter
+                                        Records</button>
+                                </div>
+                                 <div class="col-12">
+                                    <hr class="border-dark">
+                                </div>
+
                             <div class="col-6 mb-2">
                                 <div class="form-check">
                                     <input type="checkbox" class="form-check-input checkallocate" id="selectAll">
@@ -61,7 +39,7 @@
                                 </div>
                             </div>
                             <div class="col-6 text-right">
-                                <button id="approve_att" class="btn btn-primary btn-sm">Approve All</button>
+                                <button id="approve_att" class="btn btn-primary btn-sm px-3"><i class="fa-light fa-light fa-clipboard-check"></i>&nbsp;&nbsp;Approve All</button>
                             </div>
                         </div>
 
@@ -85,6 +63,58 @@
                 </div>
             </div>
         </div>
+
+
+        <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+            <div class="offcanvas-header">
+                <h2 class="offcanvas-title font-weight-bolder" id="offcanvasRightLabel">Records Filter Options</h2>
+                <button type="button" class="btn-close" data-dismiss="offcanvas" aria-label="Close">
+                    <span aria-hidden="true" class="h1 font-weight-bolder">&times;</span>
+                </button>
+            </div>
+            <div class="offcanvas-body">
+                <ul class="list-unstyled">
+                    <form class="form-horizontal" id="formFilter">
+                        <li class="mb-3">
+                            <div class="col-md-12">
+                                <label class="small font-weight-bolder text-dark">Employee</label>
+                                <select name="employee" id="employee_f" class="form-control form-control-sm">
+                                    <option value="">Select Employee</option>
+                                    @foreach($employees as $employee)
+                                        <option value="{{$employee->emp_id}}">{{$employee->emp_name_with_initial}} - {{$employee->calling_name}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </li>
+                        <li class="mb-3">
+                            <div class="col-md-12">
+                                <label class="small font-weight-bolder text-dark"> From Date* </label>
+                                <input type="date" id="from_date" name="from_date" class="form-control form-control-sm"
+                                    placeholder="yyyy-mm-dd" value="{{date('Y-m-d') }}" required>
+                            </div>
+                        </li>
+                        <li class="mb-3">
+                            <div class="col-md-12">
+                                <label class="small font-weight-bolder text-dark"> To Date*</label>
+                                <input type="date" id="to_date" name="to_date" class="form-control form-control-sm"
+                                    placeholder="yyyy-mm-dd" value="{{date('Y-m-d') }}" required>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="col-md-12 d-flex justify-content-between">
+                                <button type="submit" class="btn btn-primary btn-md filter-btn px-3" id="btn-filter">
+                                    <i class="fas fa-search mr-2"></i>Search
+                                </button>
+                                <button type="button" class="btn btn-danger btn-md filter-btn px-3" id="btn-reset">
+                                    <i class="fas fa-redo mr-1"></i> Reset
+                                </button>
+                            </div>
+                        </li>
+                    </form>
+                </ul>
+            </div>
+        </div>
+
     </div>
 </main>
               
@@ -100,6 +130,8 @@ $(document).ready(function(){
     $('#attendant_menu_link_icon').addClass('active');
     $('#jobmanegment').addClass('navbtnactive');
 
+
+    showInitialMessage()
 
         function load_dt(employee, from_date, to_date) {
             $('#dataTable').DataTable({
@@ -181,6 +213,7 @@ $(document).ready(function(){
             let to_date = $('#to_date').val();
 
             load_dt(employee, from_date, to_date);
+             closeOffcanvasSmoothly();
         });
 
          var selectedRowIdsapprove = [];
@@ -268,6 +301,20 @@ $(document).ready(function(){
     });
 
 });
+
+function showInitialMessage() {
+        $('#dataTable tbody').html(
+            '<tr>' +
+            '<td colspan="6" class="text-center py-5">' + // Changed colspan to 9 to match your columns
+            '<div class="d-flex flex-column align-items-center">' +
+            '<i class="fas fa-filter fa-3x text-muted mb-3"></i>' +
+            '<h4 class="text-muted mb-2">No Records Found</h4>' +
+            '<p class="text-muted">Use the filter options to get records</p>' +
+            '</div>' +
+            '</td>' +
+            '</tr>'
+        );
+        }
 </script>
 
 

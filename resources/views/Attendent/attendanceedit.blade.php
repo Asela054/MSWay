@@ -17,76 +17,47 @@
             </div>
         </div>
         <div class="container-fluid mt-2 p-0 p-2">
-            <div class="card mb-2">
-                <div class="card-body p-0 p-2">
-                    <form class="form-horizontal" id="formFilter">
-                        <div class="form-row mb-1">
-                            <div class="col-md-3">
-                                <label class="small font-weight-bold text-dark">Company <span class="text-danger">*</span> </label>
-                                <select name="company" id="company_f" class="form-control form-control-sm" required>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="small font-weight-bold text-dark">Location <span class="text-danger">*</span></label>
-                                <select name="location" id="location_f" class="form-control form-control-sm" required >
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="small font-weight-bold text-dark">Department</label>
-                                <select name="department" id="department_f" class="form-control form-control-sm" >
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="small font-weight-bold text-dark">Employee</label>
-                                <select name="employee" id="employee_f" class="form-control form-control-sm">
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="small font-weight-bold text-dark">Date : From - To <span class="text-danger">*</span></label>
-                                <div class="input-group input-group-sm mb-3">
-                                    <input type="date" id="from_date" name="from_date" class="form-control form-control-sm border-right-0" required placeholder="yyyy-mm-dd">
-                                    <input type="date" id="to_date" name="to_date" class="form-control" placeholder="yyyy-mm-dd" required>
-                                </div>
-                            </div>
-                            <div class="col-md-8 ">
-                                <br>
-                                <div class="d-flex flex-wrap justify-content-end mb-2">
-                                    <button type="submit" class="btn btn-primary btn-sm filter-btn float-right ml-2"
-                                        id="btn-filter"><i class="fas fa-search mr-2"></i>Filter</button>&nbsp;&nbsp;
-                                    <button type="button" class="btn btn-danger btn-sm filter-btn float-right"
-                                        id="btn-clear"><i class="far fa-trash-alt"></i>&nbsp;&nbsp;Clear</button>
-                                </div>
-                            </div>
-                        </div>
-
-                    </form>
-                </div>
-            </div>
             <div class="card">
                 <div class="card-body p-0 p-2">
                     <div class="row">
-                        <div class="col-12">
-                            <div class="d-flex flex-wrap justify-content-end mb-2">
-                                <button type="button" class="btn btn-primary btn-sm px-3 mb-2 mr-2" name="create_record" id="create_record">
-                                    <i class="fas fa-plus mr-2"></i>Add - Single Date
-                                </button>
-                                <button type="button" class="btn btn-success btn-sm px-3 mb-2 mr-2" name="edit_record_month" id="edit_record_month">
-                                    <i class="fas fa-pencil-alt mr-2"></i>Add - Month
-                                </button>
-                                <button type="button" class="btn btn-primary btn-sm px-3 mb-2 mr-2" name="create_record_dept_wise" id="create_record_dept_wise">
-                                    <i class="fas fa-plus mr-2"></i>Add - Department Wise
-                                </button>
-                                <button type="button" class="btn btn-success btn-sm px-3 mb-2 mr-2" name="csv_upload_record" id="csv_upload_record">
-                                    <i class="fas fa-upload mr-2"></i>Upload CSV
-                                </button>
-                                <button type="button" class="btn btn-primary btn-sm px-3 mb-2" name="create_record_upload" id="create_record_upload">
-                                    <i class="fa fa-upload mr-2"></i>Upload Attendance TXT
-                                </button>
+                        <div class="col-sm-12 col-md-12">
+                                <div class="d-flex flex-wrap justify-content-end mb-2">
+                                    <div class="col-sm-12 col-md-auto mb-2 mr-md-2">
+                                        <button type="button" class="btn btn-primary btn-sm px-3 w-100" name="create_record" id="create_record">
+                                            <i class="fas fa-plus mr-2"></i>Add - Single Date
+                                        </button>
+                                    </div>
+                                    <div class="col-sm-12 col-md-auto mb-2 mr-md-2">
+                                        <button type="button" class="btn btn-success btn-sm px-3 w-100" name="edit_record_month" id="edit_record_month">
+                                            <i class="fas fa-pencil-alt mr-2"></i>Add - Month
+                                        </button>
+                                    </div>
+                                    <div class="col-sm-12 col-md-auto mb-2 mr-md-2">
+                                        <button type="button" class="btn btn-primary btn-sm px-3 w-100" name="create_record_dept_wise" id="create_record_dept_wise">
+                                            <i class="fas fa-plus mr-2"></i>Add - Department Wise
+                                        </button>
+                                    </div>
+                                    <div class="col-sm-12 col-md-auto mb-2 mr-md-2">
+                                        <button type="button" class="btn btn-success btn-sm px-3 w-100" name="csv_upload_record" id="csv_upload_record">
+                                            <i class="fas fa-upload mr-2"></i>Upload CSV
+                                        </button>
+                                    </div>
+                                    <div class="col-sm-12 col-md-auto mb-2">
+                                        <button type="button" class="btn btn-primary btn-sm px-3 w-100" name="create_record_upload" id="create_record_upload">
+                                            <i class="fa fa-upload mr-2"></i>Upload Attendance TXT
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="col-12">
+                        <div class="col-md-12">
                             <hr class="border-dark">
                         </div>
+                        <div class="col-md-12">
+                                    <button class="btn btn-warning btn-sm filter-btn float-right px-3" type="button"
+                                        data-toggle="offcanvas" data-target="#offcanvasRight"
+                                        aria-controls="offcanvasRight"><i class="fas fa-filter mr-1"></i> Filter
+                                        Options</button>
+                                </div><br><br>
                         <div class="col-12" id="attendtable_outer">
                             <div class="center-block fix-width scroll-inner">
                             <table class="table table-striped table-bordered table-sm small nowrap" style="width: 100%" id="attendtable">
@@ -110,6 +81,7 @@
                     </div>
                 </div>
             </div>
+             @include('layouts.filter_menu_offcanves')
         </div>
 
 
@@ -484,26 +456,11 @@
 
             $('#attendtable_outer').css('display', 'none');
 
-            let company_f = $('#company_f');
-            let department_f = $('#department_f');
-            let location_f = $('#location_f');
+             let company_f = $('#company');
+            let department_f = $('#department');
+            let location_f = $('#location');
+            let employee_f = $('#employee');
             let area_f = $('#area_f');
-            let employee_f = $('#employee_f');
-
-            var canViewEmployee = false;
-            @can('attendance-edit')
-                canViewEmployee = true;
-            @endcan
-
-            var canEditEmployee = false;
-            @can('attendance-edit')
-                canEditEmployee = true;
-            @endcan
-
-            var canDeleteEmployee = false;
-            @can('attendance-delete')
-                canDeleteEmployee = true;
-            @endcan
 
             company_f.select2({
                 placeholder: 'Select...',
@@ -716,23 +673,17 @@
                                 var emp_name = full['emp_name_with_initial'];
                                 var button = '';
 
-                                if (canViewEmployee) {
                                     button += '<button type="button" class="btn btn-dark btn-sm view_button" data-uid="' + uid + '" data-recorddate="' + date + '" data-name="' + emp_name + '" title="View" data-toggle="tooltip">' +
                                             '<i class="fas fa-eye"></i>' +
                                             '</button> ';
-                                }
-
-                                if (canEditEmployee) {
+                              
                                     button += '<button type="button" class="btn btn-primary btn-sm edit_button" data-uid="'+ uid + '" data-date="' + date + '" data-name="' + emp_name + '" data-toggle="tooltip" title="Edit">' +
                                             '<i class="fas fa-pencil-alt"></i>' +
                                             '</button> ';
-                                }
-
-                                if (canDeleteEmployee) {
+                               
                                     button += '<button type="button" class="btn btn-danger btn-sm delete_button" data-uid="' + uid + '" data-date="' + date + '" data-name="' + emp_name + '" data-toggle="tooltip" title="Delete">' +
                                             '<i class="fas fa-trash-alt"></i>' +
                                             '</button>';
-                                }
 
                                 return button;
                             }
@@ -755,14 +706,15 @@
 
             $('#formFilter').on('submit', function(e) {
                 e.preventDefault();
-                let company = $('#company_f').val();
-                let location = $('#location_f').val();
-                let department = $('#department_f').val();
-                let employee = $('#employee_f').val();
+                let company = $('#company').val();
+                let location = $('#location').val();
+                let department = $('#department').val();
+                let employee = $('#employee').val();
                 let from_date = $('#from_date').val();
                 let to_date = $('#to_date').val();
 
                 load_dt(company, location, department, employee, from_date, to_date);
+                closeOffcanvasSmoothly();
             });
 
             $('#edit_record_month').click(function () {
@@ -789,19 +741,6 @@
                 {
                     fill_month_table(month_id);
                 }
-            });
-
-            document.getElementById('btn-clear').addEventListener('click', function() {
-            document.getElementById('formFilter').reset();
-
-                $('#company_f').val('').trigger('change');   
-                $('#location_f').val('').trigger('change');
-                $('#department_f').val('').trigger('change');
-                $('#employee_f').val('').trigger('change');
-                $('#from_date').val('');                     
-                $('#to_date').val('');                       
-
-                // load_dt('', '', '', '', '');
             });
 
             function fill_month_table(month_id){
@@ -1285,7 +1224,6 @@
                                 type: 'success'
                             };
                             const actionJSON = JSON.stringify(actionObj, null, 2);
-                            $('#formTitle')[0].reset();
                             actionreload(actionJSON);
                         }
                     }
@@ -1445,7 +1383,7 @@
                                 }
 
                                 html += '<td contenteditable class="timestamp" data-timestamp="timestamp" data-id="' + data[count].id + '">' + data[count].timestamp + '</td>';
-                                html += '<td class="text-right"><button type="button" class="btn btn-outline-danger btn-sm addelete" id="' + data[count].id + '"><i class="far fa-trash-alt"></i></button></td></tr>';
+                                html += '<td class="text-right"><button type="button" class="btn btn-danger btn-sm addelete" id="' + data[count].id + '"><i class="far fa-trash-alt"></i></button></td></tr>';
                             }
                             $('#attendTable thead').html(htmlhead);
                             $('#attendTable tbody').html(html);

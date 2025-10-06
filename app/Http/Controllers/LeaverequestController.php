@@ -33,7 +33,7 @@ class LeaverequestController extends Controller
             abort(403);
         }
 
-        $employee=$request->input('employee');
+        $employee=$request->input('employee_f');
         $fromdate=$request->input('fromdate');
         $todate=$request->input('todate');
         $half_short=$request->input('half_short');
@@ -53,122 +53,6 @@ class LeaverequestController extends Controller
         $request->save();
 
         return response()->json(['success' => 'Leave Request Details Successfully Insert']);
-
-    }
-
-    public function leavereuest_list(Request $request){
-
-        $department = $request->get('department');
-        $employee = $request->get('employee');
-        $from_date = $request->get('from_date');
-        $to_date = $request->get('to_date');
-
-        $query =  DB::table('leave_request')
-        ->join('employees as emp', 'leave_request.emp_id', '=', 'emp.emp_id')
-        ->leftjoin('departments', 'emp.emp_department', '=', 'departments.id')
-        ->leftjoin('leaves', 'leave_request.id', '=', 'leaves.request_id')
-        ->leftjoin('leave_types', 'leaves.leave_type', '=', 'leave_types.id')
-        ->select(
-            'leave_request.*', 
-            'emp.emp_name_with_initial', 
-            'emp.calling_name',
-            'departments.name as dep_name', 
-            'leaves.leave_type as leave_type_id', 
-            'leave_types.leave_type as leave_type_name', 
-            'leaves.status as leave_status',
-            'leaves.half_short as half_short'
-        )
-        ->where('leave_request.status', 1);
-
-        if($department != ''){
-            $query->where(['departments.id' => $department]);
-        }
-
-        if($employee != ''){
-            $query->where(['emp.emp_id' => $employee]);
-        }
-
-        if($from_date != '' && $to_date != ''){
-            $query->whereBetween('leave_request.from_date', [$from_date, $to_date]);
-        }
-
-        $data = $query->get();
-        return Datatables::of($data)
-        ->addIndexColumn()
-        ->addColumn('employee_display', function ($row) {
-                   return EmployeeHelper::getDisplayName($row);
-                   
-        })
-        ->filterColumn('employee_display', function($query, $keyword) {
-            $query->where(function($q) use ($keyword) {
-                $q->where('e.emp_name_with_initial', 'like', "%{$keyword}%")
-                ->orWhere('e.calling_name', 'like', "%{$keyword}%")
-                ->orWhere('e.emp_id', 'like', "%{$keyword}%");
-            });
-        })
-        ->addColumn('leave_category', function($row){
-
-            if($row->leave_category == 0.25){
-                return 'Short Leave';
-            }elseif($row->leave_category == 0.5){
-                return 'Half Day';
-            }
-            else{
-                return 'Full Day';
-            }
-            return '';
-        })
-        ->addColumn('approvestatus', function($row){
-
-            if($row->request_approve_status == 0){
-                return 'Not Approved';
-            }
-            else{
-                return 'Approved';
-            }
-            return '';
-        })
-        ->addColumn('leave_type', function($row) {
-            return $row->leave_type_name ?? ' ';
-        })
-        ->addColumn('half_or_short', function($row){
-
-            if($row->half_short == 0.25){
-                return 'Short Leave';
-            }
-
-            if($row->half_short == 0.5){
-                return 'Half Day';
-            }
-
-            if($row->half_short == 1){
-                return 'Full Day';
-            }
-            return '';
-        })
-        ->addColumn('action', function($row){
-            $btn = '';
-
-
-            if (Auth::user()->can('LeaveRequest-Approve')) {
-                if($row->request_approve_status == 0){
-                    $btn .= '<button type="submit" name="approve" id="'.$row->id.'" class="approve btn btn-warning btn-sm" style="margin:1px;" data-toggle="tooltip" title="Approve" >
-                    <i class="fas fa-check"></i></button>';  
-                }
-            }
-            if (Auth::user()->can('LeaveRequest-edit')) {
-                $btn .= ' <button name="edit" id="'.$row->id.'" class="edit btn btn-primary btn-sm" style="margin:1px;" type="submit" data-toggle="tooltip" title="Edit"><i class="fas fa-pencil-alt"></i></button>';
-            }
-
-            if (Auth::user()->can('LeaveRequest-delete')) {
-                $btn .= '<button type="submit" name="delete" id="'.$row->id.'" class="delete btn btn-danger btn-sm" style="margin:1px;" data-toggle="tooltip" title="Remove"><i class="far fa-trash-alt"></i></button>';
-            }
-
-            return $btn;
-        })
-        ->rawColumns(['action','approvestatus','leave_type','leave_category','half_or_short'])
-        ->make(true);
-
 
     }
 
@@ -192,7 +76,12 @@ class LeaverequestController extends Controller
 
     public function update(Request $request){
 
-        $employee=$request->input('employee');
+        $permission = \Auth::user()->can('LeaveRequest-edit');
+        if (!$permission) {
+            abort(403);
+        }
+
+        $employee=$request->input('employee_f');
         $fromdate=$request->input('fromdate');
         $todate=$request->input('todate');
         $half_short=$request->input('half_short');
@@ -215,6 +104,11 @@ class LeaverequestController extends Controller
 
     public function delete(Request $request)
     {
+        $permission = \Auth::user()->can('LeaveRequest-delete');
+        if (!$permission) {
+            abort(403);
+        }
+
         $id = Request('id');
         $form_data = array(
             'status' =>  '3',
@@ -263,6 +157,11 @@ class LeaverequestController extends Controller
 
     public function approve(Request $request)
     {
+        $permission = \Auth::user()->can('LeaveRequest-Approve');
+        if (!$permission) {
+            abort(403);
+        }
+
         $id = Request('id');
         $form_data = array(
             'request_approve_status' =>  '1',
