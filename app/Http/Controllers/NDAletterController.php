@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Session;
 use Datatables;
+use App\Helpers\EmployeeHelper;
 
 class NDAletterController extends Controller
 {
@@ -87,21 +88,32 @@ class NDAletterController extends Controller
         ->leftjoin('companies', 'nda_letter.company_id', '=', 'companies.id')
         ->leftjoin('departments', 'nda_letter.department_id', '=', 'departments.id')
         ->leftjoin('employees', 'nda_letter.employee_id', '=', 'employees.id')
-        ->select('nda_letter.*','employees.emp_name_with_initial As emp_name', 'employees.emp_id As emp_id', 'companies.name As companyname','departments.name As department')
+        ->select('nda_letter.*','employees.emp_name_with_initial','employees.calling_name', 'employees.emp_id As emp_id', 'companies.name As companyname','departments.name As department')
         ->whereIn('nda_letter.status', [1, 2])
         ->get();
         return Datatables::of($letters)
         ->addIndexColumn()
+         ->addColumn('employee_display', function ($row) {
+                   return EmployeeHelper::getDisplayName($row);
+                   
+        })
+        ->filterColumn('employee_display', function($query, $keyword) {
+            $query->where(function($q) use ($keyword) {
+                $q->where('employees.emp_name_with_initial', 'like', "%{$keyword}%")
+                ->orWhere('employees.calling_name', 'like', "%{$keyword}%")
+                ->orWhere('employees.emp_id', 'like', "%{$keyword}%");
+            });
+        })
         ->addColumn('action', function ($row) {
             $btn = '';
                     if(Auth::user()->can('NDA-letter-edit')){
-                        $btn .= ' <button name="edit" id="'.$row->id.'" class="edit btn btn-outline-primary btn-sm" type="submit"><i class="fas fa-pencil-alt"></i></button>'; 
+                        $btn .= ' <button name="edit" id="'.$row->id.'" class="edit btn btn-primary btn-sm" type="submit"><i class="fas fa-pencil-alt"></i></button>'; 
                     }
                     
                     if(Auth::user()->can('NDA-letter-delete')){
-                        $btn .= ' <button name="delete" id="'.$row->id.'" class="delete btn btn-outline-danger btn-sm"><i class="far fa-trash-alt"></i></button>';
+                        $btn .= ' <button name="delete" id="'.$row->id.'" class="delete btn btn-danger btn-sm"><i class="far fa-trash-alt"></i></button>';
                     }
-                    $btn .= ' <button name="print" id="'.$row->id.'" class="print btn btn-outline-info btn-sm"><i class="fas fa-print"></i></button>';
+                    $btn .= ' <button name="print" id="'.$row->id.'" class="print btn btn-info btn-sm"><i class="fas fa-print"></i></button>';
             return $btn;
         })
        
