@@ -1228,50 +1228,50 @@ class AttendanceController extends Controller
      * @throws \Exception
      */
  
-    public function get_attendance_monthly_summery_by_emp_id()
-    {
+    // public function get_attendance_monthly_summery_by_emp_id()
+    // {
 
-        $emp_id = request('emp_id');
-        $month = request('month');
+    //     $emp_id = request('emp_id');
+    //     $month = request('month');
 
-        $employee = DB::table('employees')
-            ->where('emp_id', $emp_id)
-            ->select('emp_id', 'emp_name_with_initial', 'emp_etfno')->get();
+    //     $employee = DB::table('employees')
+    //         ->where('emp_id', $emp_id)
+    //         ->select('emp_id', 'emp_name_with_initial', 'emp_etfno')->get();
 
-        $working_week_days_arr = (new \App\Attendance)->get_working_week_days($emp_id, $month);
-        $work_days = $working_week_days_arr['no_of_working_workdays'];
-        $working_work_days_breakdown = $working_week_days_arr['working_work_days_breakdown'];
-        $leave_deductions = $working_week_days_arr['leave_deductions'];
+    //     $working_week_days_arr = (new \App\Attendance)->get_working_week_days($emp_id, $month);
+    //     $work_days = $working_week_days_arr['no_of_working_workdays'];
+    //     $working_work_days_breakdown = $working_week_days_arr['working_work_days_breakdown'];
+    //     $leave_deductions = $working_week_days_arr['leave_deductions'];
 
-        $working_week_days_confirmed = (new \App\Attendance)->get_working_week_days_confirmed($emp_id, $month);
+    //     $working_week_days_confirmed = (new \App\Attendance)->get_working_week_days_confirmed($emp_id, $month);
 
-        $leave_days = (new \App\Attendance)->get_leave_days($emp_id, $month);
+    //     $leave_days = (new \App\Leave)->get_leave_days($emp_id, $month);
 
-        $no_pay_days = (new \App\Attendance)->get_no_pay_days($emp_id, $month);
+    //     $no_pay_days = (new \App\Leave)->get_no_pay_days($emp_id, $month);
 
-        $normal_ot_hours = (new \App\OtApproved)->get_ot_hours_monthly($emp_id, $month);
+    //     $normal_ot_hours = (new \App\OtApproved)->get_ot_hours_monthly($emp_id, $month);
 
-        $double_ot_hours = (new \App\OtApproved)->get_double_ot_hours_monthly($emp_id, $month);
+    //     $double_ot_hours = (new \App\OtApproved)->get_double_ot_hours_monthly($emp_id, $month);
 
-        $attendances = (new \App\Attendance)->get_attendance_details($emp_id, $month);
+    //     $attendances = (new \App\Attendance)->get_attendance_details($emp_id, $month);
 
-        $data = array(
-            'employee' => $employee,
-            'work_days' => $work_days,
-            'working_work_days_breakdown' => $working_work_days_breakdown,
-            'leave_deductions' => $leave_deductions,
-            'leave_days' => $leave_days,
-            'no_pay_days' => $no_pay_days,
-            'normal_ot_hours' => $normal_ot_hours,
-            'double_ot_hours' => $double_ot_hours,
-            'attendances' => $attendances,
-            'working_week_days_confirmed' => $working_week_days_confirmed['no_of_days']
-        );
+    //     $data = array(
+    //         'employee' => $employee,
+    //         'work_days' => $work_days,
+    //         'working_work_days_breakdown' => $working_work_days_breakdown,
+    //         'leave_deductions' => $leave_deductions,
+    //         'leave_days' => $leave_days,
+    //         'no_pay_days' => $no_pay_days,
+    //         'normal_ot_hours' => $normal_ot_hours,
+    //         'double_ot_hours' => $double_ot_hours,
+    //         'attendances' => $attendances,
+    //         'working_week_days_confirmed' => $working_week_days_confirmed['no_of_days']
+    //     );
 
-        return response()->json($data);
+    //     return response()->json($data);
 
 
-    }
+    // }
 
   
     //delete

@@ -116,13 +116,13 @@ class AttendanceApprovalController extends Controller
             })
             ->addColumn('leave_days', function ($row) use ($month, $closedate) {
                 if ($row->attendance_id) {
-                    return $leave_days = (new \App\Attendance)->get_leave_days($row->emp_id, $month, $closedate);
+                    return $leave_days = (new \App\Leave)->get_leave_days($row->emp_id, $month, $closedate);
                 }
                 return 0;
             })
             ->addColumn('no_pay_days', function ($row) use ($month, $closedate) {
                 if ($row->attendance_id) {
-                    return $no_pay_days = (new \App\Attendance)->get_no_pay_days($row->emp_id, $month, $closedate);
+                    return $no_pay_days = (new \App\Leave)->get_no_pay_days($row->emp_id, $month, $closedate);
                 }
                 return 0;
                
@@ -391,8 +391,8 @@ class AttendanceApprovalController extends Controller
                 $confirmed_wd = $working_week_days_confirmed['no_of_days'];
             }
 
-            $leave_days = (new \App\Attendance)->get_leave_days($record->emp_id, $month , $closedate);
-            $no_pay_days = (new \App\Attendance)->get_no_pay_days($record->emp_id, $month, $closedate);
+            $leave_days = (new \App\Leave)->get_leave_days($record->emp_id, $month , $closedate);
+            $no_pay_days = (new \App\Leave)->get_no_pay_days($record->emp_id, $month, $closedate);
 
             $normal_ot_hours = (new \App\OtApproved)->get_ot_hours_monthly($record->emp_id, $month, $closedate);
 

@@ -62,4 +62,5 @@ class OtApproved extends Model
 
         return $status;
     }
+    
 }

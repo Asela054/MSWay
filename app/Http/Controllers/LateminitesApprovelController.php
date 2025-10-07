@@ -124,8 +124,8 @@ class LateminitesApprovelController extends Controller
             if(!empty($late_minites_total)){
 
                 $work_days = (new \App\Attendance)->get_work_days($employeeid, $month, $closedate);
-                $leave_days = (new \App\Attendance)->get_leave_days($employeeid, $month,$closedate);
-                $no_pay_days = (new \App\Attendance)->get_no_pay_days($employeeid, $month,$closedate);
+                $leave_days = (new \App\Leave)->get_leave_days($employeeid, $month,$closedate);
+                $no_pay_days = (new \App\Leave)->get_no_pay_days($employeeid, $month,$closedate);
                 $normal_ot_hours = (new \App\OtApproved)->get_ot_hours_monthly($employeeid, $month ,$closedate);
                 $double_ot_hours = (new \App\OtApproved)->get_double_ot_hours_monthly($employeeid, $month ,$closedate);
 

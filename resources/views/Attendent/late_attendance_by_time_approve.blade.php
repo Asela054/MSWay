@@ -365,7 +365,7 @@
                                  const actionObj = {
                                             icon: 'fas fa-save',
                                             title: '',
-                                            message:'Late Attendance Approved',
+                                            message: data.status,
                                             url: '',
                                             target: '_blank',
                                             type: 'success'

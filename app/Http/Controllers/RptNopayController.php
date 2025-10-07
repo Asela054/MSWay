@@ -16,7 +16,8 @@ use App\Http\Controllers\Controller;
 
 class RptNopayController extends Controller
 {
-    public function no_pay_report(){
+    public function no_pay_report()
+    {
         $permission = Auth::user()->can('no-pay-report');
         if(!$permission){
             abort(403);
@@ -200,14 +201,14 @@ class RptNopayController extends Controller
                 return $work_days;
             })
             ->addColumn('leave_days', function($row) use ($month,$closedate){
-                $leave_days = (new \App\Attendance)->get_leave_days($row->emp_id, $month,$closedate);
+                $leave_days = (new \App\Leave)->get_leave_days($row->emp_id, $month,$closedate);
                 return $leave_days;
             })
             ->addColumn('no_pay_days_data', function ($row) use ($month,$closedate) {
-                $no_pay_days = (new \App\Attendance)->get_no_pay_days($row->emp_id, $month,$closedate);
+                $no_pay_days = (new \App\Leave)->get_no_pay_days($row->emp_id, $month,$closedate);
 
                 $work_days = (new \App\Attendance)->get_work_days($row->emp_id, $month,$closedate);
-                $leave_days = (new \App\Attendance)->get_leave_days($row->emp_id, $month,$closedate);
+                $leave_days = (new \App\Leave)->get_leave_days($row->emp_id, $month,$closedate);
 
                 $ot_hours = (new \App\Attendance)->get_ot_hours($row->emp_id, $month);
                 $normal_rate_otwork_hrs = $ot_hours['normal_rate_otwork_hrs'];
@@ -244,7 +245,7 @@ class RptNopayController extends Controller
             })
 
             ->addColumn('view_no_pay_days_btn', function ($row) use ($month,$closedate) {
-                $no_pay_days = (new \App\Attendance)->get_no_pay_days($row->emp_id, $month,$closedate);
+                $no_pay_days = (new \App\Leave)->get_no_pay_days($row->emp_id, $month,$closedate);
 
                 $view_no_pay_days_btn = $no_pay_days;
 
@@ -290,7 +291,7 @@ class RptNopayController extends Controller
          $closedate = date('Y-m-t', strtotime($month));
         $closedate = \Carbon\Carbon::parse($month)->endOfMonth()->format('Y-m-d');
 
-        $no_pay_days = (new \App\Attendance)->get_no_pay_days($emp_id, $month,$closedate);
+        $no_pay_days = (new \App\Leave)->get_no_pay_days($emp_id, $month,$closedate);
 
         $no_pay_days_data = Leave::where('leave_type', 3)
             ->where('emp_id', $emp_id)
@@ -340,4 +341,5 @@ class RptNopayController extends Controller
         return $no_pay_days_data_html;
 
     }
+    
 }
