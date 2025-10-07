@@ -17,52 +17,16 @@
         </div>
     </div>
     <div class="container-fluid mt-2 p-0 p-2">
-        <div class="card mb-2">
-            <div class="card-body p-0 p-2">
-                <form class="form-horizontal" id="formFilter">
-                    <div class="form-row mb-1">
-                        <div class="col-md-3">
-                            <label class="small font-weight-bold text-dark">Location</label>
-                            <select name="company" id="company" class="form-control form-control-sm">
-                                <option value="">Please Select</option>
-                                @foreach ($locations as $location){
-                                    <option value="{{$location->id}}">{{$location->location}}</option>
-                                }  
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="small font-weight-bold text-dark">Time Period</label><br>
-                            <div class="input-group input-group-sm mb-3">
-                                <input type="date" id="from_date" name="from_date" class="form-control border-right-0" required>
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text" id="inputGroup-sizing-sm"><i class="far fa-calendar"></i></span>
-                                </div>
-                                <input type="date" id="to_date" name="to_date" class="form-control" required>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="small font-weight-bold text-dark">Employee</label>
-                            <select name="employee" id="employee_f" class="form-control form-control-sm">
-                                <option value="">Please Select</option>
-                                @foreach ($employees as $employee){
-                                    <option value="{{$employee->id}}">{{$employee->emp_name_with_initial}}</option>
-                                }  
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <br>
-                            <button type="submit" class="btn btn-primary btn-sm filter-btn" id="btn-filter"><i class="fas fa-search mr-2"></i> Filter</button>
-                        </div>
-                    </div>
-
-                </form>
-            </div>
-        </div>
         <div class="card">
             <div class="card-body p-0 p-2">
                 <div class="row">
+                    <div class="col-md-12">
+                        <button class="btn btn-warning btn-sm filter-btn float-right px-3" type="button"
+                            data-toggle="offcanvas" data-target="#offcanvasRight" aria-controls="offcanvasRight"><i
+                                class="fas fa-filter mr-1"></i> Filter
+                            Records</button><br><br>
+                    </div>
+
                     <div class="col-12">
                         <div class="center-block fix-width scroll-inner" id="emptablesection">
                             <table class="table table-striped table-bordered table-sm small nowrap" style="width: 100%" id="emptable">
@@ -83,6 +47,72 @@
                 </div>
             </div>
         </div>
+
+         <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+             <div class="offcanvas-header">
+                 <h2 class="offcanvas-title font-weight-bolder" id="offcanvasRightLabel">Records Filter Options</h2>
+                 <button type="button" class="btn-close" data-dismiss="offcanvas" aria-label="Close">
+                     <span aria-hidden="true" class="h1 font-weight-bolder">&times;</span>
+                 </button>
+             </div>
+             <div class="offcanvas-body">
+                 <ul class="list-unstyled">
+                     <form class="form-horizontal" id="formFilter">
+                         <li class="mb-3">
+                             <div class="col-md-12">
+                                 <label class="small font-weight-bolder text-dark">Location</label>
+                                 <select name="company" id="company" class="form-control form-control-sm">
+                                     <option value="">Please Select</option>
+                                     @foreach ($locations as $location){
+                                     <option value="{{$location->id}}">{{$location->location}}</option>
+                                     }
+                                     @endforeach
+                                 </select>
+                             </div>
+                         </li>
+                          <li class="mb-3">
+                              <div class="col-md-12">
+                                  <label class="small font-weight-bolder text-dark">Employee</label>
+                                  <select name="employee" id="employee_f" class="form-control form-control-sm">
+                                      <option value="">Please Select</option>
+                                      @foreach ($employees as $employee){
+                                      <option value="{{$employee->id}}">{{$employee->emp_name_with_initial}}</option>
+                                      }
+                                      @endforeach
+                                  </select>
+                              </div>
+                          </li>
+
+                         <li class="mb-3">
+                             <div class="col-md-12">
+                                 <label class="small font-weight-bolder text-dark"> From Date* </label>
+                                 <input type="date" id="from_date" name="from_date" class="form-control form-control-sm"
+                                     placeholder="yyyy-mm-dd" value="{{date('Y-m-d') }}" required>
+                             </div>
+                         </li>
+                         <li class="mb-3">
+                             <div class="col-md-12">
+                                 <label class="small font-weight-bolder text-dark"> To Date*</label>
+                                 <input type="date" id="to_date" name="to_date" class="form-control form-control-sm"
+                                     placeholder="yyyy-mm-dd" value="{{date('Y-m-d') }}" required>
+                             </div>
+                         </li>
+                         <li>
+                             <div class="col-md-12 d-flex justify-content-between">
+                                 <button type="submit" class="btn btn-primary btn-md filter-btn px-3" id="btn-filter">
+                                     <i class="fas fa-search mr-2"></i>Search
+                                 </button>
+                                 <button type="button" class="btn btn-danger btn-md filter-btn px-3" id="btn-reset">
+                                     <i class="fas fa-redo mr-1"></i> Reset
+                                 </button>
+                             </div>
+                         </li>
+                     </form>
+                 </ul>
+             </div>
+         </div>
+
+
     </div>
 </main>
                 
@@ -180,6 +210,7 @@ load_dt('','', '','');
         let employee_f = $('#employee_f').val();
 
         load_dt(location,from_date, to_date,employee_f);
+         closeOffcanvasSmoothly();
     });
 
 

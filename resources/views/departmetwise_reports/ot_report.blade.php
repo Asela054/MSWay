@@ -19,12 +19,37 @@
             </div>
 
         <div class="container-fluid mt-2 p-0 p-2">
-            <div class="card mb-2">
-                <div class="card-body p-0 p-2">
-                    <form class="form-horizontal" id="formFilter">
-                        <div class="form-row mb-1">
-                            <div class="col-md-3">
-                                <label class="small font-weight-bold text-dark">Company</label>
+            <div class="card">
+                <div class="card-body p-0 p-2 main_card">
+                    <div class="col-md-12">
+                        <button class="btn btn-warning btn-sm filter-btn float-right px-3" type="button"
+                            data-toggle="offcanvas" data-target="#offcanvasRight" aria-controls="offcanvasRight"><i
+                                class="fas fa-filter mr-1"></i> Filter
+                            Records</button>
+                    </div><br>
+                    <div class="col-12">
+                        <hr class="border-dark">
+                    </div>
+                    <div class="table_outer">
+                        <div class="daily_table table-responsive center-block fix-width scroll-inner" id="tableContainer">
+                        </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+              <div class="offcanvas-header">
+                  <h2 class="offcanvas-title font-weight-bolder" id="offcanvasRightLabel">Records Filter Options</h2>
+                  <button type="button" class="btn-close" data-dismiss="offcanvas" aria-label="Close">
+                      <span aria-hidden="true" class="h1 font-weight-bolder">&times;</span>
+                  </button>
+              </div>
+              <div class="offcanvas-body">
+                  <ul class="list-unstyled">
+                      <form class="form-horizontal" id="formFilter">
+                          <li class="mb-3">
+                              <div class="col-md-12">
+                                  <label class="small font-weight-bolder text-dark">Company*</label>
                                 <select name="company" id="company" class="form-control form-control-sm">
                                     <option value="">Please Select</option>
                                     @foreach ($companies as $company){
@@ -32,56 +57,69 @@
                                     }  
                                     @endforeach
                                 </select>
-                            </div>
-    
-                            <div class="col-md-3">
-                                <label class="small font-weight-bold text-dark">Department</label>
+                              </div>
+                          </li>
+                          <li class="mb-3">
+                              <div class="col-md-12">
+                                 <label class="small font-weight-bolder text-dark">Department*</label>
                                 <select name="department" id="department" class="form-control form-control-sm">
                                     <option value="">Please Select</option>
                                     <option value="All">All Departments</option>
                                 </select>
-                            </div>
-                            <div class="col-md-2">
-                                <label class="small font-weight-bold text-dark">Type</label>
-                                <select name="reporttype" id="reporttype" class="form-control form-control-sm">
+                              </div>
+                          </li>
+                          <li class="mb-3">
+                              <div class="col-md-12">
+                                  <label class="small font-weight-bolder text-dark">Type*</label>
+                                  <select name="reporttype" id="reporttype" class="form-control form-control-sm">
                                     <option value="">Please Select Type</option>
                                     <option value="1">Month Wise</option>
                                     <option value="2">Date Range Wise</option>
                                 </select>
-                            </div>
-                            <div class="col-md-3 " id="div_date_range">
-                                <label class="small font-weight-bold text-dark">Date : From - To</label>
-                                <div class="input-group input-group-sm mb-3">
-                                    <input type="date" id="from_date" name="from_date" class="form-control form-control-sm border-right-0"
-                                           placeholder="yyyy-mm-dd">
-                                    <input type="date" id="to_date" name="to_date" class="form-control" placeholder="yyyy-mm-dd">
-                                </div>
-                            </div>
-                            <div class="col-md-3 " id="div_month">
-                                <label class="small font-weight-bold text-dark">Month</label>
-                                <div class="input-group input-group-sm mb-3">
-                                    <input type="month" id="selectedmonth" name="selectedmonth" class="form-control form-control-sm border-right-0" placeholder="yyyy-mm-dd">
-                    
-                                </div>
-                            </div>
-                            <div class="col-md-1">
-                                <br>
-                                <button type="submit" class="btn btn-primary btn-sm filter-btn" id="btn-filter"><i class="fas fa-search mr-2"></i>Filter</button>
-                            </div>
-                        </div>
+                              </div>
+                          </li>
 
-                    </form>
-                </div>
-            </div>
+                          <li class="div_date_range">
+                              <div class="col-md-12">
+                                  <label class="small font-weight-bolder text-dark">From Date</label>
+                                  <div class="input-group input-group-sm mb-3">
+                                      <input type="date" id="from_date" name="from_date"
+                                          class="form-control form-control-sm" placeholder="yyyy-mm-dd">
+                                  </div>
+                              </div>
+                          </li>
+                          <li class="div_date_range">
+                              <div class="col-md-12">
+                                  <label class="small font-weight-bolder text-dark">To Date  </label>
+                                  <div class="input-group input-group-sm mb-3">
+                                      <input type="date" id="to_date" name="to_date"  class="form-control form-control-sm" placeholder="yyyy-mm-dd">
+                                  </div>
+                              </div>
+                          </li>
+                          <li id="div_month">
+                              <div class="col-md-12">
+                                 <label class="small font-weight-bolder text-dark">Month</label>
+                                 <div class="input-group input-group-sm mb-3">
+                                    <input type="month" id="selectedmonth" name="selectedmonth" class="form-control form-control-sm" placeholder="yyyy-mm-dd">
+                                </div>
+                              </div>
+                          </li>
+                          <li>
+                              <div class="col-md-12 d-flex justify-content-between">
+                                  <button type="submit" class="btn btn-primary btn-md filter-btn px-3" id="btn-filter">
+                                      <i class="fas fa-search mr-2"></i>Search
+                                  </button>
+                                  <button type="button" class="btn btn-danger btn-md filter-btn px-3" id="btn-reset">
+                                      <i class="fas fa-redo mr-1"></i> Reset
+                                  </button>
+                              </div>
+                          </li>
+                      </form>
+                  </ul>
+              </div>
+          </div>
 
-            <div class="card">
-                <div class="card-body p-0 p-2 main_card">
-                    <div class="table_outer">
-                        <div class="daily_table table-responsive center-block fix-width scroll-inner" id="tableContainer">
-                        </div>
-                </div>
-            </div>
-        </div>
+     </div>
 
     </main>
 
@@ -99,7 +137,7 @@
 
                 </div>
                 <div class="modal-footer p-2">
-                    <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-danger btn-sm px-3" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -118,19 +156,21 @@
             $('#departmentvisereport').addClass('navbtnactive');
             $('#department').select2({ width: '100%' });
 
+            showInitialMessage()
+            
             // chage date and onth according to selcted report types
-            $('#div_date_range').addClass('d-none');
+            $('.div_date_range').addClass('d-none');
             $('#div_month').addClass('d-none');
             $('#reporttype').on('change', function () {
                 let $type = $(this).val();
                 if ($type == 1) {
 
-                    $('#div_date_range').addClass('d-none');
+                    $('.div_date_range').addClass('d-none');
                     $('#div_month').removeClass('d-none');
 
                 } else {
                     $('#div_month').addClass('d-none');
-                    $('#div_date_range').removeClass('d-none');
+                    $('.div_date_range').removeClass('d-none');
                 }
             });
 
@@ -143,6 +183,8 @@
                     let to_date = $('#to_date').val();
                     let reporttype = $('#reporttype').val();
                     let selectedmonth = $('#selectedmonth').val();
+
+                    closeOffcanvasSmoothly();
 
                     $.ajax({
                         url: '{{ route("departmentwise_generateotreport") }}',
@@ -208,21 +250,39 @@
             }
         });
 
+        $('#btn-reset').on('click', function () {
+            $('#formFilter')[0].reset();
+            $('#company').val(null).trigger('change');
+            $('#department').val(null).trigger('change');
+        });
 
         });
 
 
         function getMonthsBetween(startDate, endDate) {
-        let months = [];
-        let date = new Date(startDate);
+            let months = [];
+            let date = new Date(startDate);
 
-        while (date <= endDate) {
-            months.push(date.toLocaleString('default', { month: 'long', year: 'numeric' }));
-            date.setMonth(date.getMonth() + 1);
+            while (date <= endDate) {
+                months.push(date.toLocaleString('default', {
+                    month: 'long',
+                    year: 'numeric'
+                }));
+                date.setMonth(date.getMonth() + 1);
+            }
+
+            return months;
         }
 
-        return months;
-    }
+    function showInitialMessage() {
+        $('#tableContainer').html(
+            '<div class="d-flex flex-column align-items-center">' +
+            '<i class="fas fa-filter fa-3x text-muted mb-3"></i>' +
+            '<h4 class="text-muted mb-2">No Records Found</h4>' +
+            '<p class="text-muted">Use the filter options to get records</p>' +
+            '</div>'
+        );
+        }
     </script>
 
 @endsection
