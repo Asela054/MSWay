@@ -66,6 +66,27 @@ class PromotionletterController extends Controller
             Session::flash('alert-class', 'alert-success');
             return redirect('promotionletter');
         }
+        elseif($recordOption == 2){
+            $form_data = array(
+                'company_id' => $company,
+                'employee_id' => $employee,
+                'old_department_id' => $old_department,
+                'new_department_id' => $new_department,
+                'old_jobtitle' => $old_jobtitle,
+                'new_jobtitle' => $new_jobtitle,
+                'date' => $date,
+                'comment1' => $comment1,
+                'comment2' => $comment2,
+                'updated_by' => Auth::id(),
+                'updated_at' => Carbon::now()->toDateTimeString()
+            );
+            
+            Promotionletter::where('id', $recordID)->update($form_data);
+            
+            Session::flash('message', 'The Employee Promotion Details Successfully Updated');
+            Session::flash('alert-class', 'alert-success');
+            return redirect('promotionletter');
+        }
     }
 
     public function letterlist ()

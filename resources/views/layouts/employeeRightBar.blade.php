@@ -13,11 +13,12 @@
                 } 
             }
         @endphp
-        <div class="d-flex justify-content-center position-relative">
+        <div class="d-flex justify-content-center position-relative" 
+            style="background-color: #f8f9fa; padding: 30px; border-radius: 20px;">
             <img src="{{ $imagePath }}" 
-                class="card-img-top profile-image" 
                 alt="Employee Image" 
-                style="width: 300px; height: 300px; border-radius: 50%; object-fit: cover;">
+                class="profile-image shadow"
+                style="width: 300px; height: 300px; border-radius: 50%; object-fit: cover; background-color: #e9ecef;">
         </div>
         <ul class="list-group list-group-flush" style="padding-left: 0px; padding-right:0px;">
             <li class="list-group-item py-1 px-2" id="view_employee_link"><a href="{{ url('/viewEmployee/') }}/{{$id}}" class="text-decoration-none text-dark"><i class="fas fa-user mr-2"></i>Personal Details</a></li>
