@@ -17,60 +17,16 @@
         </div>
     </div>
     <div class="container-fluid mt-2 p-0 p-2">
-        <div class="card mb-2">
-            <div class="card-body p-0 p-2">
-                <form class="form-horizontal" id="formFilter">
-                    <div class="form-row mb-1">
-                        <div class="col-md-3">
-                            <label class="small font-weight-bold text-dark">Company</label>
-                            <select name="company" id="company" class="form-control form-control-sm">
-                                <option value="">Please Select</option>
-                                @foreach ($companies as $company){
-                                    <option value="{{$company->id}}">{{$company->name}}</option>
-                                }  
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="small font-weight-bold text-dark">Department</label>
-                            <select name="department" id="department" class="form-control form-control-sm">
-                                <option value="">Please Select</option>
-                                <option value="All">All Departments</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="small font-weight-bold text-dark">Employee</label>
-                            <select name="employee" id="employee_f" class="form-control form-control-sm">
-                                <option value="">Please Select</option>
-                                @foreach ($employees as $employee){
-                                    <option value="{{$employee->id}}">{{$employee->emp_name_with_initial}}</option>
-                                }  
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="small font-weight-bold text-dark">Type</label>
-                            <select name="reporttype" id="reporttype" class="form-control form-control-sm">
-                                <option value="">Please Select Type</option>
-                                <option value="1">As Interviewer</option>
-                                <option value="2">As Employee</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-1">
-                            <br>
-                            <button type="submit" class="btn btn-primary btn-sm filter-btn" id="btn-filter"><i class="fas fa-search mr-2"></i> Filter</button>
-                        </div>
-                    </div>
-
-                </form>
-            </div>
-        </div>
         <div class="card">
             <div class="card-body p-0 p-2">
                 <div class="row">
+                    <div class="col-md-12">
+                        <button class="btn btn-warning btn-sm filter-btn float-right px-3" type="button"
+                            data-toggle="offcanvas" data-target="#offcanvasRight" aria-controls="offcanvasRight"><i
+                                class="fas fa-filter mr-1"></i> Filter
+                            Records</button><br><br>
+                    </div>
                     <div class="col-12">
-
                         <div class="center-block fix-width scroll-inner" id="emptablesection">
                             <table class="table table-striped table-bordered table-sm small nowrap" style="width: 100%" id="emptable">
                                 <thead>
@@ -105,13 +61,79 @@
                                 </tbody>
                             </table>
                         </div>
-                        
-
-
                     </div>
                 </div>
             </div>
         </div>
+
+        <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+            <div class="offcanvas-header">
+                <h2 class="offcanvas-title font-weight-bolderer" id="offcanvasRightLabel">Records Filter Options</h2>
+                <button type="button" class="btn-close" data-dismiss="offcanvas" aria-label="Close">
+                    <span aria-hidden="true" class="h1 font-weight-bolderer">&times;</span>
+                </button>
+            </div>
+            <div class="offcanvas-body">
+                <ul class="list-unstyled">
+                    <form class="form-horizontal" id="formFilter">
+                        <li class="mb-3">
+                            <div class="col-md-12">
+                                <label class="small font-weight-bolder text-dark">Company*</label>
+                                <select name="company" id="company" class="form-control form-control-sm">
+                                    <option value="">Please Select</option>
+                                    @foreach ($companies as $company){
+                                    <option value="{{$company->id}}">{{$company->name}}</option>
+                                    }
+                                    @endforeach
+                                </select>
+                            </div>
+                        </li>
+                        <li class="mb-3">
+                            <div class="col-md-12">
+                                <label class="small font-weight-bolder text-dark">Department</label>
+                                <select name="department" id="department" class="form-control form-control-sm">
+                                    <option value="">Please Select</option>
+                                    <option value="All">All Departments</option>
+                                </select>
+                            </div>
+                        </li>
+                        <li class="mb-3">
+                            <div class="col-md-12">
+                                <label class="small font-weight-bolder text-dark">Employee</label>
+                                <select name="employee" id="employee_f" class="form-control form-control-sm">
+                                    <option value="">Please Select</option>
+                                    @foreach ($employees as $employee){
+                                    <option value="{{$employee->id}}">{{$employee->emp_name_with_initial}}</option>
+                                    }
+                                    @endforeach
+                                </select>
+                            </div>
+                        </li>
+                        <li class="mb-3">
+                            <div class="col-md-12">
+                                <label class="small font-weight-bolder text-dark">Type*</label>
+                                <select name="reporttype" id="reporttype" class="form-control form-control-sm">
+                                    <option value="">Please Select Type</option>
+                                    <option value="1">As Interviewer</option>
+                                    <option value="2">As Employee</option>
+                                </select>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="col-md-12 d-flex justify-content-between">
+                                <button type="submit" class="btn btn-primary btn-md filter-btn px-3" id="btn-filter">
+                                    <i class="fas fa-search mr-2"></i>Search
+                                </button>
+                                <button type="button" class="btn btn-danger btn-md filter-btn px-3" id="btn-reset">
+                                    <i class="fas fa-redo mr-1"></i> Reset
+                                </button>
+                            </div>
+                        </li>
+                    </form>
+                </ul>
+            </div>
+        </div>
+
     </div>
 </main>
                 
@@ -126,9 +148,8 @@ $(document).ready(function() {
     $('#employeedetailsreport').addClass('navbtnactive');
     $('#employee_f').select2({ width: '100%' });
     $('#department').select2({ width: '100%' });
+     showInitialMessage()
 
-
-    $('#emptablesection').addClass('d-none');
     $('#interviwersection').addClass('d-none');
     $('#reporttype').on('change', function () {
     let $type = $(this).val();
@@ -148,7 +169,7 @@ $('#formFilter').on('submit',function(e) {
         let type = $('#reporttype').val();
         let employee_f = $('#employee_f').val();
         let department = $('#department').val();
-
+        closeOffcanvasSmoothly();
 
         if (type == 1) {
             $('#emptablesection').addClass('d-none');
@@ -334,9 +355,29 @@ $('#formFilter').on('submit',function(e) {
                 $('#department').empty();
                 $('#department').append('<option value="">Please Select</option>');
             }
-        });
+   });
 
+
+     $('#btn-reset').on('click', function () {
+                 $('#formFilter')[0].reset();
+                 $('#employee_f').val(null).trigger('change');
+                 $('#department').val(null).trigger('change');
+             });
 } );
+
+function showInitialMessage() {
+        $('#emptable tbody').html(
+            '<tr>' +
+            '<td colspan="8" class="text-center py-5">' + // Changed colspan to 9 to match your columns
+            '<div class="d-flex flex-column align-items-center">' +
+            '<i class="fas fa-filter fa-3x text-muted mb-3"></i>' +
+            '<h4 class="text-muted mb-2">No Records Found</h4>' +
+            '<p class="text-muted">Use the filter options to get records</p>' +
+            '</div>' +
+            '</td>' +
+            '</tr>'
+        );
+        }
 </script>
 
 @endsection
