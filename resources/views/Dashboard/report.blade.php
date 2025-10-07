@@ -3,13 +3,20 @@
 @section('content')
 
 <main>
-    <div class="page-header shadow">
+     <div class="page-header">
+        <div class="container-fluid d-none d-sm-block shadow">
+             @include('layouts.reports_nav_bar')
+        </div>
         <div class="container-fluid">
-            @include('layouts.reports_nav_bar')
-           
+            <div class="page-header-content py-3 px-2">
+                <h1 class="page-header-title ">
+                    <div class="page-header-icon"><i class="fa-light fa-file-contract"></i></div>
+                    <span>Reports</span>
+                </h1>
+            </div>
         </div>
     </div>
-    <div class="container-fluid mt-4">
+    <div class="container-fluid mt-2 p-0 p-2">
         <div class="card">
             <div class="card-body p-0 p-2">
                 <div class="row">

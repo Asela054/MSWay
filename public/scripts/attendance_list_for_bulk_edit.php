@@ -59,9 +59,10 @@ if (!empty($_POST['location'])) {
     $location = $_POST['location'];
     $extraWhere .= " AND `sub`.`location` = '$location'";
 }
-if (!empty($_POST['date'])) {
-    $date = $_POST['date'];
-    $extraWhere .= " AND `sub`.`date` = '$date'";
+if (!empty($_POST['from_date']) && !empty($_POST['to_date'])) {
+    $from_date = $_POST['from_date'];
+    $to_date = $_POST['to_date'];
+    $extraWhere .= " AND `sub`.`date` BETWEEN '$from_date' AND '$to_date'";
 }
 
 $joinQuery = "FROM (

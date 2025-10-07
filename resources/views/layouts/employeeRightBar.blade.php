@@ -13,10 +13,13 @@
                 } 
             }
         @endphp
-        <div class="d-flex justify-content-center">
-            <img src="{{ $imagePath }}" class="card-img-top" alt="Employee Image" style="width: 300px; height:300px;">
+        <div class="d-flex justify-content-center position-relative">
+            <img src="{{ $imagePath }}" 
+                class="card-img-top profile-image" 
+                alt="Employee Image" 
+                style="width: 300px; height: 300px; border-radius: 50%; object-fit: cover;">
         </div>
-        <ul class="list-group list-group-flush">
+        <ul class="list-group list-group-flush" style="padding-left: 0px; padding-right:0px;">
             <li class="list-group-item py-1 px-2" id="view_employee_link"><a href="{{ url('/viewEmployee/') }}/{{$id}}" class="text-decoration-none text-dark"><i class="fas fa-user mr-2"></i>Personal Details</a></li>
             <li class="list-group-item py-1 px-2" id="view_contact_link"><a href="{{ url('/viewEmergencyContacts/') }}/{{$id}}" class="text-decoration-none text-dark"><i class="fas fa-phone-alt mr-2"></i>Emergency Contacts</a></li>
             <li class="list-group-item py-1 px-2" id="view_dependent_link"><a href="{{ url('/viewDependents/') }}/{{$id}}" class="text-decoration-none text-dark"><i class="fas fa-users mr-2"></i>Dependents</a></li>

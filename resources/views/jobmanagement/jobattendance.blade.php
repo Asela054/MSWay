@@ -85,7 +85,7 @@
                                 {{ csrf_field() }}	
                                 <div class="row">
                                     <div class="col-sm-12 col-md-4">
-                                        <label class="small font-weight-bold text-dark">Location</label>
+                                        <label class="small font-weight-bolder text-dark">Location*</label>
                                         <select name="location" id="location"
                                             class="form-control form-control-sm " style="width: 100%;" required>
                                             <option value="">Select Location</option>
@@ -96,7 +96,7 @@
                                         </select>
                                     </div>
                                     <div class="col-sm-12 col-md-4">
-                                        <label class="small font-weight-bold text-dark">Date</label>
+                                        <label class="small font-weight-bolder text-dark">Date*</label>
                                         <input type="date" class="form-control form-control-sm"
                                             name="attendancedate" id="attendancedate">
                                     </div>
@@ -152,22 +152,18 @@
                                 {{ csrf_field() }}
                                 <div class="row">
                                     <div class="col-sm-12 col-md-4">
-                                        <label class="small font-weight-bold text-dark">Employees</label>
+                                        <label class="small font-weight-bolder text-dark">Employees*</label>
                                             <select name="employee" id="employee" class="form-control form-control-sm" style="width:100%" disabled>
                                                 <option value="">Select Employees</option>
-                                        @foreach($employees as $employee)
-                                        <option value="{{$employee->emp_id}}">
-                                            {{$employee->emp_name_with_initial}}</option>
-                                        @endforeach
                                     </select>
                                     </div>
                                     <div class="col-sm-12 col-md-4">
-                                        <label class="small font-weight-bold text-dark">Date</label>
+                                        <label class="small font-weight-bolder text-dark">Date</label>
                                         <input type="date" class="form-control form-control-sm"
                                             name="attendancedateedit" id="attendancedateedit" disabled>
                                     </div>
                                     <div class="col-sm-12 col-md-4">
-                                        <label class="small font-weight-bold text-dark">Location</label>
+                                        <label class="small font-weight-bolder text-dark">Location*</label>
                                         <select name="locationedit" id="locationedit"
                                             class="form-control form-control-sm " style="width: 100%;" required>
                                             <option value="">Select Location</option>
@@ -180,11 +176,11 @@
 
                                     
                                     <div class="col-sm-12 col-md-4">
-                                        <label class="small font-weight-bold text-dark">On Time</label>
+                                        <label class="small font-weight-bolder text-dark">On Time</label>
                                         <input type="datetime-local" id="empontime" name="empontime" class="form-control form-control-sm"   required>
                                     </div>
                                     <div class="col-sm-12 col-md-4">
-                                        <label class="small font-weight-bold text-dark">Off Time</label>
+                                        <label class="small font-weight-bolder text-dark">Off Time</label>
                                         <input type="datetime-local" id="empofftime" name="empofftime" class="form-control form-control-sm"  required>
                                     </div>
                                 </div>
@@ -221,14 +217,14 @@
                                 {{ csrf_field() }}	
                                 <div class="row">
                                       <div class="col-sm-12 col-md-6">
-                                        <label class="small font-weight-bold text-dark">Employee</label>
+                                        <label class="small font-weight-bolder text-dark">Employee*</label>
                                         <select name="employee_single" id="employee_single"
                                             class="form-control form-control-sm " style="width: 100%;" required>
                                             <option value="">Select Location</option>
                                         </select>
                                     </div>
                                     <div class="col-sm-12 col-md-6">
-                                        <label class="small font-weight-bold text-dark">Location</label>
+                                        <label class="small font-weight-bolder text-dark">Location*</label>
                                         <select name="locationsingle" id="locationsingle"
                                             class="form-control form-control-sm " style="width: 100%;" required>
                                             <option value="">Select Location</option>
@@ -241,20 +237,20 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-12 col-md-4">
-                                        <label class="small font-weight-bold text-dark">Date</label>
+                                        <label class="small font-weight-bolder text-dark">Date</label>
                                         <input type="date" class="form-control form-control-sm" name="singleattendancedate" id="singleattendancedate">
                                     </div>
 
                                     <div class="col-sm-12 col-md-8">
                                         <div class="row">
                                             <div class="col-sm-12 col-md-6">
-                                                <label class="small font-weight-bold text-dark">On Time</label>
+                                                <label class="small font-weight-bolder text-dark">On Time</label>
                                                 <input type="datetime-local" id="singleempontime" name="singleempontime" class="form-control form-control-sm"
                                                     required>
                                             </div>
 
                                             <div class="col-sm-12 col-md-6">
-                                                <label class="small font-weight-bold text-dark">Off Time</label>
+                                                <label class="small font-weight-bolder text-dark">Off Time</label>
                                                 <input type="datetime-local" id="singleempofftime" name="singleempofftime" class="form-control form-control-sm"
                                                     required>
                                             </div>
@@ -279,13 +275,6 @@
 
     <script>
         $(document).ready(function () {
-
-            @can('Job-Attendance-edit')
-                canEditattendace = true;
-            @endcan
-            @can('Job-Attendance-delete')
-                candeleteattendace = true;
-            @endcan
 
             $('#attendant_menu_link').addClass('active');
             $('#attendant_menu_link_icon').addClass('active');
@@ -387,12 +376,11 @@
                             var is_resigned = row.is_resigned;
                             var buttons = '';
 
-                            if (canEditattendace) {
+                       
                                 buttons += '<button name="edit" id="' + row.id +'" class="edit btn btn-primary btn-sm" type="submit"  data-toggle="tooltip" title="Edit"><i class="fas fa-pencil-alt"></i></button>&nbsp;';
-                            }
-                            if (candeleteattendace) {
+                           
                                 buttons += '<button name="delete" id="' + row.id +'" class="delete btn btn-danger btn-sm" data-toggle="tooltip" title="Remove"><i class="far fa-trash-alt"></i></button>';
-                            }
+                            
                             return buttons;
                         }
                     },
@@ -510,7 +498,9 @@
                         dataType: "json",
                         data: {id: id },
                     success: function (data) {
-                        $('#employee').val(data.result.employee_id);
+                         $('#employee').empty();
+                        $('#employee').append('<option value="">Select Employees</option>');
+                        $('#employee').append('<option value="' + data.result.employee_id + '" selected>' + data.result.emp_name_with_initial + '</option>');
                         $('#attendancedateedit').val(data.result.attendance_date);
                         $('#empontime').val(data.result.on_time);
                         $('#empofftime').val(data.result.off_time);

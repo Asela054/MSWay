@@ -73,6 +73,7 @@
           @if($user->can('Holiday-DeductionApprove-list'))
           <li><a class="dropdown-item" href="{{ route('holidaydeductionapproval')}}">Leave Deduction Approval</a></li>
           @endif
+           {{-- <li><a class="dropdown-item" href="{{ route('absentnopay')}}">Absent Noapy Apply</a></li> --}}
         </ul>
   </div>
   @endif
@@ -144,7 +145,7 @@
             @if(auth()->user()->can('Job-Attendance-Approve-list'))
             <li><a class="dropdown-item" href="{{ route('jobattendanceapprove')}}">Location Attendance Approve</a></li>
             @endif
-            @if(auth()->user()->can('Location-Allowance-Approve-list'))
+            @if(auth()->user()->can('Job-Attendance-Approve-list'))
            <li><a class="dropdown-item" href="{{ route('unauthorizejobattendanceapprove')}}">Unauthorized Location Attendance Approve</a></li>
             @endif
             <li><a class="dropdown-item" href="{{ route('locationallwanceapprove')}}">Location Allowance Approval</a></li>

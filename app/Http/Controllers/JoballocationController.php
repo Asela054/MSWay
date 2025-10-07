@@ -16,11 +16,17 @@ class JoballocationController extends Controller
 {
     public function index()
     {
+        $permission = \Auth::user()->can('Job-Allocation-list');
+        if (!$permission) {
+            abort(403);
+        }
+
         $employees=DB::table('employees')->select('id','emp_id','emp_name_with_initial','emp_job_code')
         ->where('deleted',0)
         ->where('is_resigned',0)
         ->get();
         $locations=DB::table('branches')->select('*')->get();
+
         return view('jobmanagement.joballocation',compact('locations','employees'));
     }
 
@@ -126,6 +132,10 @@ class JoballocationController extends Controller
     }
 
     public function delete(Request $request){
+        $permission = \Auth::user()->can('Job-Allocation-delete');
+        if (!$permission) {
+            abort(403);
+        }
         $id = Request('id');
         $form_data = array(
             'status' =>  '3',

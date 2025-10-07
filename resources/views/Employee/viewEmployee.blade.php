@@ -4,11 +4,18 @@
 
 <main>
 	<div class="page-header shadow">
-        <div class="container-fluid">
+            <div class="container-fluid d-none d-sm-block shadow">
             @include('layouts.employee_nav_bar')
-           
-        </div>
-    </div>
+            </div>
+            <div class="container-fluid">
+                <div class="page-header-content py-3 px-2">
+                    <h1 class="page-header-title ">
+                        <div class="page-header-icon"><i class="fa-light fa-users-gear"></i></div>
+                        <span>Personal Details</span>
+                    </h1>
+                </div>
+            </div>
+    </div>    
 	<div class="container-fluid mt-3">
 		<div class="card">
             <div class="card-body p-0 p-2">
@@ -483,7 +490,7 @@
 							<input type="hidden" class="form-control form-control-sm" id="id" name="id" placeholder="First Name" value="{{$employee->id}}" readonly>
 							<div class="form-group mt-3 text-right">
 								@can('employee-edit')
-									<button type="submit" class="btn btn-outline-primary btn-sm  px-4"><i class="far fa-edit"></i>&nbsp;Update</button>
+									<button type="submit" class="btn btn-primary btn-sm  px-4"><i class="far fa-edit"></i>&nbsp;Update</button>
 								@endcan
 							</div>
 						</form>
@@ -543,7 +550,7 @@
 	$('#employee_menu_link').addClass('active');
     $('#employee_menu_link_icon').addClass('active');
     $('#employeeinformation').addClass('navbtnactive');
-	$('#view_employee_link').addClass('navbtnactive');
+	$('#view_employee_link').addClass('active');
 
 	let company = $('#company');
 	let department = $('#department');

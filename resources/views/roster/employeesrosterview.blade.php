@@ -6,13 +6,22 @@
 
 <main>
     <div class="page-header shadow">
+        <div class="container-fluid d-none d-sm-block shadow">
+             @include('layouts.shift_nav_bar')
+        </div>
         <div class="container-fluid">
-            @include('layouts.shift_nav_bar')
-           
+            <div class="page-header-content py-3 px-2">
+                <h1 class="page-header-title ">
+                    <div class="page-header-icon"><i class="fa-light fa-business-time"></i></div>
+                    <span>Roster View</span>
+                </h1>
+            </div>
         </div>
     </div>
-    <div class="container-fluid mt-4">
-<h2>Roster View</h2>
+      <div class="container-fluid mt-2 p-0 p-2">
+        <div class="card">
+            <div class="card-body p-0 p-2">
+
 
 <form class="form-horizontal" id="formFilter">
     <div class="form-row mb-1">
@@ -33,7 +42,7 @@
     </div>
 </form>
 
-<div class="center-block fix-width scroll-inner">
+<div class="center-block fix-width scroll-inner my-2">
     <table class="table table-striped table-bordered table-sm small nowrap" style="width: 100%" id="shiftTable">
         <thead></thead>
         <tbody></tbody>
@@ -41,7 +50,9 @@
 </div>
 
 
-    </div>
+            </div>
+        </div>
+    </div>      
 
 </main>
               

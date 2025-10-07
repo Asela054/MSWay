@@ -46,7 +46,8 @@ class EmployeeRosterDetailsController extends Controller
                     // Update shift
                     $existing->shift_id = $newShiftId;
                     $existing->save();
-                    return response()->json(['message' => 'Roster updated and changes logged.']);
+                    // return response()->json(['message' => 'Roster updated and changes logged.']);
+                     return response()->json(['success' => 'Roster updated and changes logged.']);
                 }
             } else {
                 // Create new roster record
@@ -59,7 +60,8 @@ class EmployeeRosterDetailsController extends Controller
             }
         }
 
-        return response()->json(['message' => 'Roster Inserted Successfully!.']);
+        // return response()->json(['message' => 'Roster Inserted Successfully!.']);
+         return response()->json(['success' => 'Roster Inserted Successfully!']);
     }
 
     public function getViewRosterData(Request $request)

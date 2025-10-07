@@ -1314,7 +1314,7 @@ Route::get('late_attendance_by_time_approve',['uses' => 'LateAttendanceControlle
 Route::get('attendance_by_time_approve_report_list',['uses' => 'LateAttendanceController@attendance_by_time_approve_report_list', 'as' => 'attendance_by_time_approve_report_list']);
 Route::post('lateAttendance_mark_as_late_approve',['uses' => 'LateAttendanceController@lateAttendance_mark_as_late_approve', 'as' => 'lateAttendance_mark_as_late_approve']);
 Route::get('late_attendances_all',['uses' => 'LateAttendanceController@late_attendances_all', 'as' => 'late_attendances_all']);
-Route::get('late_attendance_list_approved',['uses' => 'LateAttendanceController@late_attendance_list_approved', 'as' => 'late_attendance_list_approved']);
+//Route::get('late_attendance_list_approved',['uses' => 'LateAttendanceController@late_attendance_list_approved', 'as' => 'late_attendance_list_approved']);
 Route::post('/late_attendancedestroy', 'LateAttendanceController@destroy_late_attendacne')->name('late_attendancedestroy');
 
 //OT Approve Controller Routes

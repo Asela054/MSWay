@@ -17,56 +17,25 @@
             </div>
         </div>
         <div class="container-fluid mt-2 p-0 p-2">
-            <div class="card mb-2">
-                <div class="card-body p-0 p-2">
-                    <form class="form-horizontal" id="formFilter">
-                        <div class="form-row mb-1">
-                            <div class="col-md-2">
-                                <label class="small font-weight-bold text-dark">Company</label>
-                                <select name="company" id="company_f" class="form-control form-control-sm" >
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <label class="small font-weight-bold text-dark">Department</label>
-                                <select name="department" id="department_f" class="form-control form-control-sm">
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <label class="small font-weight-bold text-dark">Employee</label>
-                                <select name="employee" id="employee_f" class="form-control form-control-sm">
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="small font-weight-bold text-dark">Date : From - To</label>
-                                <div class="input-group input-group-sm mb-3">
-                                    <input type="date" id="from_date" name="from_date" class="form-control form-control-sm border-right-0" placeholder="yyyy-mm-dd">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text" id="inputGroup-sizing-sm"> </span>
-                                    </div>
-                                    <input type="date" id="to_date" name="to_date" class="form-control" placeholder="yyyy-mm-dd">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                 <br>
-                                <button type="submit" class="btn btn-primary btn-sm filter-btn float-right" id="btn-filter"> Filter</button>
-                            </div>
-                        </div>
-
-                    </form>
-                </div>
-            </div>
             <div class="card">
                 <div class="card-body p-0 p-2">
                     <div class="row">
                         <div class="col-12">
-                            <button type="button" class="btn btn-primary btn-sm fa-pull-right"
+                            <button type="button" class="btn btn-primary btn-sm fa-pull-right px-3" 
                                     name="create_record" id="create_record"><i class="fas fa-plus mr-2"></i>Add Leave Request
                             </button>
                         </div>
                         <div class="col-12">
                             <hr class="border-dark">
                         </div>
-                        <div class="col-12">
+                        <div class="col-md-12">
+                                <div class="col-md-12">
+                                    <button class="btn btn-warning btn-sm filter-btn float-right px-3" type="button"
+                                        data-toggle="offcanvas" data-target="#offcanvasRight"
+                                        aria-controls="offcanvasRight"><i class="fas fa-filter mr-1"></i> Filter
+                                        Options</button>
+                                </div><br><br>
+
                             <div class="center-block fix-width scroll-inner">
                             <table class="table table-striped table-bordered table-sm small nowrap display" style="width: 100%" id="divicestable">
                                 <thead>
@@ -93,6 +62,8 @@
                     </div>
                 </div>
             </div>
+
+             @include('layouts.filter_menu_offcanves') 
         </div>
 
         <!-- Modal Area Start -->
@@ -114,8 +85,8 @@
                                     {{ csrf_field() }}
                                     <div class="form-row mb-1">
                                         <div class="col-sm-12 col-md-12">
-                                            <label class="small font-weight-bold text-dark">Select Employee</label>
-                                            <select name="employee" id="employee" class="form-control form-control-sm" required>
+                                            <label class="small font-weight-bolder text-dark">Select Employee*</label>
+                                            <select name="employee_f" id="employee_f" class="form-control form-control-sm" required>
                                                 <option value="">Select</option>
 
                                             </select>
@@ -124,19 +95,19 @@
 
                                     <div class="form-row mb-1">
                                         <div class="col-sm-12 col-md-6">
-                                            <label class="small font-weight-bold text-dark">From</label>
+                                            <label class="small font-weight-bolder text-dark">From*</label>
                                             <input type="date" name="fromdate" id="fromdate"
                                                    class="form-control form-control-sm" placeholder="YYYY-MM-DD" required/>
                                         </div>
                                         <div class="col-sm-12 col-md-6">
-                                            <label class="small font-weight-bold text-dark">To</label>
+                                            <label class="small font-weight-bolder text-dark">To*</label>
                                             <input type="date" name="todate" id="todate"
                                                    class="form-control form-control-sm" placeholder="YYYY-MM-DD" required/>
                                         </div>
                                     </div>
                                     <div class="form-row mb-1">
                                         <div class="col-sm-12 col-md-12">
-                                            <label class="small font-weight-bold text-dark">Half Day/ Short <span id="half_short_span"></span> </label>
+                                            <label class="small font-weight-bolder text-dark">Half Day/ Short* <span id="half_short_span"></span> </label>
                                             <select name="half_short" id="half_short" class="form-control form-control-sm" required>
                                                 <option value="0.00">Select</option>
                                                 <option value="0.25">Short Leave</option>
@@ -147,13 +118,13 @@
                                     </div>
                                     <div class="form-row mb-1">
                                         <div class="col-sm-12 col-md-12">
-                                            <label class="small font-weight-bold text-dark">Reason</label>
+                                            <label class="small font-weight-bolder text-dark">Reason</label>
                                             <input type="text" name="reason" id="reason" class="form-control form-control-sm"/>
                                         </div>
                                     </div>
                                     
                                     <div class="form-group mt-3">
-                                        <input type="submit" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-4" value="Add"/>
+                                        <input type="submit" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-3" value="Add"/>
                                     </div>
                                     
                                     <input type="hidden" name="action" id="action" value="Add"/>
@@ -166,6 +137,7 @@
                 </div>
             </div>
         </div>
+
         <!-- Modal Area End -->
     </main>
 
@@ -177,28 +149,15 @@
     <script>
         $(document).ready(function () {
 
-             var canleaverequestapprove = false;
-            @can('LeaveRequest-Approve')
-            canleaverequestapprove = true;
-            @endcan
-
-            var leaverequestedit = false;
-            @can('LeaveRequest-edit')
-            leaverequestedit = true;
-            @endcan
-
-            var leaverequestdelete = false;
-            @can('LeaveRequest-delete')
-                leaverequestdelete = true;
-            @endcan
 
             $('#attendant_menu_link').addClass('active');
             $('#attendant_menu_link_icon').addClass('active');
             $('#leavemaster').addClass('navbtnactive');
 
-            let company_f = $('#company_f');
-            let department_f = $('#department_f');
-            let employee_f = $('#employee_f');
+            let company_f = $('#company');
+            let department_f = $('#department');
+            let employee = $('#employee');
+            let location = $('#location');
 
 
             company_f.select2({
@@ -218,7 +177,6 @@
                 }
             });
 
-           
             department_f.select2({
                 placeholder: 'Select...',
                 width: '100%',
@@ -236,6 +194,42 @@
                     cache: true
                 }
             });
+            employee.select2({
+                placeholder: 'Select...',
+                width: '100%',
+                allowClear: true,
+                parent: '#formModal',
+                ajax: {
+                    url: '{{url("employee_list_sel2")}}',
+                    dataType: 'json',
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1
+                        }
+                    },
+                    cache: true
+                }
+            });
+
+            location.select2({
+            placeholder: 'Select...',
+            width: '100%',
+            allowClear: true,
+            ajax: {
+                url: '{{url("location_list_sel2")}}',
+                dataType: 'json',
+                data: function (params) {
+                    return {
+                        term: params.term || '',
+                        page: params.page || 1
+                    }
+                },
+                cache: true
+            }
+        });
+
+              let employee_f = $('#employee_f');
 
             employee_f.select2({
                 placeholder: 'Select...',
@@ -256,28 +250,6 @@
                 }
             });
 
-
-            let employee = $('#employee');
-            
-            employee.select2({
-                placeholder: 'Select...',
-                width: '100%',
-                allowClear: true,
-                parent: '#formModal',
-                ajax: {
-                    url: '{{url("employee_list_sel2")}}',
-                    dataType: 'json',
-                    data: function(params) {
-                        return {
-                            term: params.term || '',
-                            page: params.page || 1
-                        }
-                    },
-                    cache: true
-                }
-            });
-
-           
             function load_dt(department, employee, from_date, to_date){
                 $('#divicestable').DataTable({
                      "destroy": true,
@@ -375,16 +347,14 @@
                         render: function(data, type, row) {
                             var buttons = '';
 
-                            if (canleaverequestapprove && row.approvestatus == 0 ) {
+                            if (row.approvestatus == 0 ) {
                                 buttons += '<button type="submit" name="approve" id="'+row.id+'" class="approve btn btn-warning btn-sm" style="margin:1px;" data-toggle="tooltip" title="Approve" ><i class="fas fa-check"></i></button>';
                             }
-
-                            if (leaverequestedit) {
+                    
                                 buttons += '<button name="edit" id="'+row.id+'" class="edit btn btn-primary btn-sm" style="margin:1px;" type="submit" data-toggle="tooltip" title="Edit"><i class="fas fa-pencil-alt"></i></button>';
-                            }
-                            if (leaverequestdelete) {
+
                                 buttons += '<button type="submit" name="delete" id="'+row.id+'" class="delete btn btn-danger btn-sm" style="margin:1px;" data-toggle="tooltip" title="Remove" ><i class="far fa-trash-alt"></i></button>';
-                            }
+                            
 
                             return buttons;
                         }
@@ -401,12 +371,14 @@
 
             $('#formFilter').on('submit',function(e) {
                 e.preventDefault();
-                let department = $('#department_f').val();
-                let employee = $('#employee_f').val();
+                let department = $('#department').val();
+                let employee = $('#employee').val();
                 let from_date = $('#from_date').val();
                 let to_date = $('#to_date').val();
-
                 load_dt(department, employee, from_date, to_date);
+
+                closeOffcanvasSmoothly();
+
             });
 
         });
@@ -489,8 +461,8 @@
                         },
                         success: function (data) {
                             let empOption = $("<option selected></option>").val(data.result.emp_id).text(data.result.emp_name);
-                            $('#employee').append(empOption).trigger('change');
-                            $('#employee').val(data.result.emp_id);
+                            $('#employee_f').append(empOption).trigger('change');
+                            $('#employee_f').val(data.result.emp_id);
                             $('#fromdate').val(data.result.from_date);
                             $('#todate').val(data.result.to_date);
                             $('#half_short').val(data.result.leave_category);
@@ -544,6 +516,7 @@
             $(document).on('click', '.approve',async function () {
                var r = await Otherconfirmation("You want to remove this ? ");
                 if (r == true) {
+                       user_id = $(this).attr('id');
                         $.ajaxSetup({
                             headers: {
                                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')

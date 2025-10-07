@@ -3,8 +3,8 @@
 @section('content')
 
     <main>
-        <div class="page-header page-header-light bg-white shadow">
-            <div class="container-fluid">
+        <div class="page-header shadow">
+            <div class="container-fluid d-none d-sm-block shadow">
                 @include('layouts.employee_nav_bar')
             </div>
             <div class="container-fluid">

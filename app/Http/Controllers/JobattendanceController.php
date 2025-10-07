@@ -18,7 +18,11 @@ class JobattendanceController extends Controller
 {
     public function index()
     {
-        $employees=DB::table('employees')->select('id','emp_id','emp_name_with_initial','emp_job_code')->where('deleted',0)->get();
+         $permission = \Auth::user()->can('Job-Attendance-list');
+        if (!$permission) {
+            abort(403);
+        }
+
         $locations=DB::table('branches')->select('*')->get();
         return view('jobmanagement.jobattendance',compact('locations','employees'));
     }
@@ -141,7 +145,8 @@ class JobattendanceController extends Controller
         $id = Request('id');
         if (request()->ajax()){
         $data = DB::table('job_attendance')
-        ->select('job_attendance.*')
+        ->select('job_attendance.*','employees.emp_name_with_initial')
+        ->leftjoin('employees', 'job_attendance.employee_id', '=', 'employees.emp_id')
         ->where('job_attendance.id', $id)
         ->get(); 
         return response() ->json(['result'=> $data[0]]);
@@ -178,6 +183,10 @@ class JobattendanceController extends Controller
     }
 
     public function delete(Request $request){
+         $permission = \Auth::user()->can('Job-Attendance-delete');
+        if (!$permission) {
+            abort(403);
+        }
         $id = Request('id');
         $form_data = array(
             'status' =>  '3',

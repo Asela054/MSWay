@@ -19,49 +19,15 @@
          </div>
 
         <div class="container-fluid mt-2  p-0 p-2">
-            <div class="card mb-2">
-                <div class="card-body  p-0 p-2">
-                    <form class="form-horizontal" id="formFilter">
-                        <div class="form-row mb-1">
-                            <div class="col-md-2">
-                                <label class="small font-weight-bold text-dark">Company</label>
-                                <select name="company" id="company" class="form-control form-control-sm">
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <label class="small font-weight-bold text-dark">Department</label>
-                                <select name="department" id="department" class="form-control form-control-sm">
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <label class="small font-weight-bold text-dark">Location</label>
-                                <select name="location" id="location" class="form-control form-control-sm">
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="small font-weight-bold text-dark">Date : From - To</label>
-                                <div class="input-group input-group-sm mb-3">
-                                    <input type="date" id="from_date" name="from_date" class="form-control form-control-sm border-right-0" placeholder="yyyy-mm-dd">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text" id="inputGroup-sizing-sm"> </span>
-                                    </div>
-                                    <input type="date" id="to_date" name="to_date" class="form-control" placeholder="yyyy-mm-dd">
-                                </div>
-                            </div>
-
-                            <div class="col">
-                                <br>
-                                <button type="submit" class="btn btn-primary btn-sm filter-btn float-right ml-2" id="btn-filter"><i class="fas fa-search mr-2"></i>Filter</button>
-                                <button type="button" class="btn btn-danger btn-sm filter-btn float-right" id="btn-clear"><i class="far fa-trash-alt"></i>&nbsp;&nbsp;Clear</button>
-                            </div>
-                        </div>
-
-                    </form>
-                </div>
-            </div>
-
             <div class="card">
                 <div class="card-body p-0 p-2">
+                    <div class="col-md-12">
+                        <button class="btn btn-warning btn-sm filter-btn float-right px-3" type="button"
+                            data-toggle="offcanvas" data-target="#offcanvasRight"
+                            aria-controls="offcanvasRight"><i class="fas fa-filter mr-1"></i> Filter
+                            Options</button>
+                    </div><br><br>
+
                     <div class="center-block fix-width scroll-inner">
                     <table class="table table-striped table-bordered table-sm small nowrap" style="width: 100%" id="attendtable">
                         <thead>
@@ -84,6 +50,7 @@
                     </div>
                 </div>
             </div>
+            @include('layouts.filter_menu_offcanves')
         </div>
 
     </main>
@@ -98,6 +65,7 @@
             $('#attendant_menu_link').addClass('active');
             $('#attendant_menu_link_icon').addClass('active');
             $('#attendantmaster').addClass('navbtnactive');
+
 
             let late_id = 0;
 
@@ -217,8 +185,15 @@
                         },
                     ],
                     ajax: {
-                        "url": "{!! route('late_attendance_list_approved') !!}",
-                        "data": {'department':department, 'employee':employee, 'location': location, 'from_date': from_date, 'to_date': to_date},
+                         url: scripturl +"/late_attendance_list.php", 
+                          type: "POST",
+                           data : function(d) {
+                                d.department = $('#department').val();
+                                d.employee = $('#employee').val();
+                                d.location = $('#location').val();
+                                d.from_date = $('#from_date').val();
+                                d.to_date = $('#to_date').val();
+                            }
                     },
                     columns: [
                         { data: 'emp_id', name: 'emp_id' },
@@ -229,11 +204,26 @@
                         { data: 'working_hours', name: 'working_hours' },
                         { data: 'location', name: 'location' },
                         { data: 'dep_name', name: 'dep_name' },
-                        {data: 'action', name: 'action', orderable: false, searchable: false},
+                         {
+                            "data": "id",
+                            "name": "action",
+                            "className": 'text-right',
+                            "orderable": false,
+                            "searchable": false,
+                            "render": function(data, type, full) {
+                                var id = full['id'];
+                                var button = '';
+
+                                    button += '<button type="button"  name="delete_button" title="Delete" data-id="'  + id +'" class="view_button btn btn-danger btn-sm delete_button" data-toggle="tooltip" title="Remove">'+
+                                       '<i class="fas fa-trash-alt" ></i></button>';
+
+                                return button;
+                            }
+                        }
                     ],
                     "bDestroy": true,
                     "order": [
-                        [3, "desc"]
+                        [2, "desc"]
                     ]
                 });
 
@@ -259,18 +249,7 @@
                 let to_date = $('#to_date').val();
 
                 load_dt(department, company, location, employee, from_date, to_date);
-            });
-
-            document.getElementById('btn-clear').addEventListener('click', function() {
-            document.getElementById('formFilter').reset();
-
-                $('#company').val('').trigger('change');   
-                $('#location').val('').trigger('change');
-                $('#department').val('').trigger('change');
-                $('#from_date').val('');                     
-                $('#to_date').val('');                       
-
-                // load_dt('', '', '', '', '');
+                 closeOffcanvasSmoothly();
             });
 
             $(document).on('click', '.delete_button', async function () {

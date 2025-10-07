@@ -4,14 +4,21 @@
 
 <main>
     <div class="page-header shadow">
+        <div class="container-fluid d-none d-sm-block shadow">
+             @include('layouts.shift_nav_bar')
+        </div>
         <div class="container-fluid">
-            @include('layouts.shift_nav_bar')
-           
+            <div class="page-header-content py-3 px-2">
+                <h1 class="page-header-title ">
+                    <div class="page-header-icon"><i class="fa-light fa-business-time"></i></div>
+                    <span>Employee Shifts </span>
+                </h1>
+            </div>
         </div>
     </div>
-    <div class="container-fluid mt-4">
-        <div class="card mb-2">
-            <div class="card-body">
+      <div class="container-fluid mt-2 p-0 p-2">
+        <div class="card">
+            <div class="card-body p-0 p-2">
                 <form class="form-horizontal" id="formFilter">
                     <div class="form-row mb-1">
                         <div class="col-md-2">
@@ -55,7 +62,7 @@
                     </div>
                     <div class="col-12">
                         <div class="center-block fix-width scroll-inner">
-                        <table class="table table-striped table-bordered table-hover nowrap" style="width: 100%" id="divicestable">
+                         <table class="table table-striped table-bordered table-sm small nowrap w-100" id="dataTable">
                             <thead>
                                 <tr>
                                     <th>Employee Name </th>
@@ -66,9 +73,6 @@
                                     <th class="text-right">Action</th>
                                 </tr>
                             </thead>
-                            
-                            <tbody>
-                            </tbody>
                         </table>
                         </div>
                     </div>
@@ -109,7 +113,7 @@
                                     <label class="control-label col-md-4">Shift</label>
 
                                     <div class="col-md-8">
-                                        <select name="shift" id="shift" class="custom-select">
+                                        <select name="shift" id="shift" class="form-control form-control-sm">
                                             <option value="">Please Select</option>
                                             @foreach($shifttype as $shifttypes)
                                             <option value="{{$shifttypes->id}}">{{$shifttypes->shift_name}}</option>
@@ -168,14 +172,6 @@
 @section('script')
 
 <script>
-// $('#todate').datepicker({
-//     format: "yyyy/mm/dd",
-//     autoclose: true
-// });
-// $('#fromdate').datepicker({
-//     format: "yyyy/mm/dd",
-//     autoclose: true
-// });
 
 $(document).ready(function () {
 
@@ -258,44 +254,101 @@ $(document).ready(function () {
     });
 
     function load_dt(department, employee, location, from_date, to_date){
-        $('#divicestable').DataTable({
-            dom: 'lBfrtip',
-            buttons: [
-                {
-                    extend: 'excelHtml5',
-                    text: 'Excel',
-                    className: 'btn btn-default',
-                    exportOptions: {
-                        columns: 'th:not(:last-child)'
-                    }
-                },
-                {
-                    extend: 'pdfHtml5',
-                    text: 'Print',
-                    className: 'btn btn-default',
-                    exportOptions: {
-                        columns: 'th:not(:last-child)'
-                    }
-                }
-            ],
-            processing: true,
-            serverSide: true,
-            ajax: {
-                "url": "{!! route('shift_list_dt') !!}",
-                "data": {'department':department, 'employee':employee, 'location': location, 'from_date': from_date, 'to_date': to_date},
+        $('#dataTable').DataTable({
+          "destroy": true,
+        "processing": true,
+        "serverSide": true,
+        dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
+            "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+        "buttons": [{
+                extend: 'csv',
+                className: 'btn btn-success btn-sm',
+                title: 'Customer  Information',
+                text: '<i class="fas fa-file-csv mr-2"></i> CSV',
             },
+            { 
+                extend: 'pdf', 
+                className: 'btn btn-danger btn-sm', 
+                title: 'Location Information', 
+                text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
+                orientation: 'landscape', 
+                pageSize: 'legal', 
+                customize: function(doc) {
+                    doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+                }
+            },
+            {
+                extend: 'print',
+                title: 'Customer  Information',
+                className: 'btn btn-primary btn-sm',
+                text: '<i class="fas fa-print mr-2"></i> Print',
+                customize: function(win) {
+                    $(win.document.body).find('table')
+                        .addClass('compact')
+                        .css('font-size', 'inherit');
+                },
+            },
+            // 'copy', 'csv', 'excel', 'pdf', 'print'
+        ],
+        "order": [
+            [0, "desc"]
+        ],
+        ajax: {
+             url: scripturl + "/shift_list.php",
+            type: "POST",
+            data: {},
+        },
             columns: [
-                { data: 'employee_display', name: 'employee_display' },
-                { data: 'dep_name', name: 'dep_name' },
-                { data: 'shift_name', name: 'shift_name' },
-                { data: 'onduty_time', name: 'onduty_time' },
-                { data: 'offduty_time', name: 'offduty_time' },
-                { data: 'action', name: 'action', orderable: false, searchable: false},
-            ],
-            "bDestroy": true,
-            "order": [
-                [3, "desc"]
-            ]
+            { 
+                data: 'emp_name_with_initial', 
+                name: 'emp_name_with_initial'
+            },
+            { 
+                data: 'departmentname', 
+                name: 'departmentname'
+            },
+            { 
+                data: 'shift_name', 
+                name: 'shift_name'
+            },
+            { 
+                data: 'onduty_time', 
+                name: 'onduty_time'
+            },
+            { 
+                data: 'offduty_time', 
+                name: 'offduty_time'
+            },
+            {
+                data: 'id',
+                name: 'action',
+                className: 'text-right',
+                orderable: false,
+                searchable: false,
+                render: function(data, type, row) {
+                    var is_resigned = row.is_resigned;
+                    var buttons = '';
+
+                   
+                   buttons += '<button name="edit" id="'+row.emp_id+'" ' +
+    'data-id="'+row.emp_id+'" ' +
+    'data-emp_name_with_initial="'+row.emp_name_with_initial+'" ' +
+    'data-shift_name="'+row.shift_name+'" ' +
+    'data-onduty_time="'+row.onduty_time+'" ' +
+    'data-offduty_time="'+row.offduty_time+'" ' +
+    'data-shift_type_id="'+row.shift_type_id+'" ' +
+    'class="edit btn btn-primary btn-sm mr-1" type="button" data-toggle="tooltip" title="Edit">' +
+    '<i class="fas fa-pencil-alt"></i></button>';
+
+                    buttons += '<button type="submit" name="delete" id="'+row.emp_id+'" class="delete btn btn-danger btn-sm" data-toggle="tooltip" title="Remove"><i class="far fa-trash-alt"></i></button>';
+
+                    return buttons;
+                }
+            }
+        ],
+          drawCallback: function(settings) {
+            $('[data-toggle="tooltip"]').tooltip();
+        }
         });
     }
 
@@ -336,22 +389,31 @@ $(document).ready(function () {
             dataType: "json",
             success: function (data) {
 
-                var html = '';
                 if (data.errors) {
-                    html = '<div class="alert alert-danger">';
-                    for (var count = 0; count < data.errors.length; count++) {
-                        html += '<p>' + data.errors[count] + '</p>';
-                    }
-                    html += '</div>';
+                    const actionObj = {
+                        icon: 'fas fa-warning',
+                        title: '',
+                        message: 'Record Error',
+                        url: '',
+                        target: '_blank',
+                        type: 'danger'
+                    };
+                    const actionJSON = JSON.stringify(actionObj, null, 2);
+                    action(actionJSON);
                 }
-
                 if (data.success) {
-                    html = '<div class="alert alert-success">' + data.success + '</div>';
-                    //  $('#formTitle')[0].reset();
-                    $('#divicestable').DataTable().ajax.reload();
-                    setTimeout(function() { $('#formModal').modal('hide'); }, 1000);
+                    const actionObj = {
+                        icon: 'fas fa-save',
+                        title: '',
+                        message: data.success,
+                        url: '',
+                        target: '_blank',
+                        type: 'success'
+                    };
+                    const actionJSON = JSON.stringify(actionObj, null, 2);
+                    $('#formTitle')[0].reset();
+                    actionreload(actionJSON);
                 }
-                $('#form_result').html(html);
             }
         });
     });
@@ -383,11 +445,16 @@ $(document).ready(function () {
                 $('#ok_button').text('Deleting...');
             },
             success: function (data) {
-                let html = '<div class="alert alert-success">' + data.success + '</div>';
-                $('#response').html(html);
-                $('#confirmModal').modal('hide');
-                $('#divicestable').DataTable().ajax.reload();
-                //location.reload();
+                const actionObj = {
+                    icon: 'fas fa-trash-alt',
+                    title: '',
+                    message: 'Record Remove Successfully',
+                    url: '',
+                    target: '_blank',
+                    type: 'danger'
+                };
+                const actionJSON = JSON.stringify(actionObj, null, 2);
+                actionreload(actionJSON);
             }
         })
     });

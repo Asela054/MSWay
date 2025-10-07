@@ -25,6 +25,44 @@ class LateAttendanceController extends Controller
         return view('Attendent.late_attendance_by_time');
     }
 
+        public function late_types_sel2(Request $request)
+    {
+        if ($request->ajax()) {
+            $page = Input::get('page');
+            $resultCount = 25;
+
+            $offset = ($page - 1) * $resultCount;
+
+            $breeds = DB::query()
+                ->where('name', 'LIKE', '%' . Input::get("term") . '%')
+                ->from('late_types')
+                ->orderBy('name')
+                ->skip($offset)
+                ->take($resultCount)
+                ->get([DB::raw('DISTINCT id as id'), DB::raw('name as text')]);
+
+            $count = DB::query()
+                ->where('name', 'LIKE', '%' . Input::get("term") . '%')
+                ->from('late_types')
+                ->orderBy('name')
+                ->skip($offset)
+                ->take($resultCount)
+                ->select([DB::raw('DISTINCT id as id'), DB::raw('name as text')])
+                ->count();
+            $endCount = $offset + $resultCount;
+            $morePages = $endCount < $count;
+
+            $results = array(
+                "results" => $breeds,
+                "pagination" => array(
+                    "more" => $morePages
+                )
+            );
+
+            return response()->json($results);
+        }
+    }
+
     // late attendace mark data table
     public function attendance_by_time_report_list(Request $request)
     {
@@ -60,8 +98,11 @@ class LateAttendanceController extends Controller
         $late_time_threshold = null;
         if ($late_type) {
             $late_time = DB::table('late_types')->where('id', $late_type)->first();
-            if ($late_time) {
+            if ($late_time && $late_time->late_early == 0) {
                 $late_time_threshold = $late_time->time_from;
+            }
+            else if ($late_time && $late_time->late_early == 1) {
+                $late_time_threshold = $late_time->time_to;
             }
         }
 
@@ -124,8 +165,11 @@ class LateAttendanceController extends Controller
             ->count();
 
         $filteredQuery = clone $baseQuery;
-        if ($late_time_threshold) {
+        if ($late_time_threshold && $late_time->late_early == 0) {
             $filteredQuery->havingRaw("TIME(MIN(at1.timestamp)) > ?", [$late_time_threshold]);
+        }
+        else if ($late_time_threshold && $late_time->late_early == 1) {
+            $filteredQuery->havingRaw("TIME(MAX(at1.timestamp)) < ?", [$late_time_threshold]);
         }
 
         $totalFiltered = DB::table(DB::raw("({$filteredQuery->toSql()}) as sub"))
@@ -181,43 +225,7 @@ class LateAttendanceController extends Controller
         ]);
     }
 
-    public function late_types_sel2(Request $request)
-    {
-        if ($request->ajax()) {
-            $page = Input::get('page');
-            $resultCount = 25;
 
-            $offset = ($page - 1) * $resultCount;
-
-            $breeds = DB::query()
-                ->where('name', 'LIKE', '%' . Input::get("term") . '%')
-                ->from('late_types')
-                ->orderBy('name')
-                ->skip($offset)
-                ->take($resultCount)
-                ->get([DB::raw('DISTINCT id as id'), DB::raw('name as text')]);
-
-            $count = DB::query()
-                ->where('name', 'LIKE', '%' . Input::get("term") . '%')
-                ->from('late_types')
-                ->orderBy('name')
-                ->skip($offset)
-                ->take($resultCount)
-                ->select([DB::raw('DISTINCT id as id'), DB::raw('name as text')])
-                ->count();
-            $endCount = $offset + $resultCount;
-            $morePages = $endCount < $count;
-
-            $results = array(
-                "results" => $breeds,
-                "pagination" => array(
-                    "more" => $morePages
-                )
-            );
-
-            return response()->json($results);
-        }
-    }
 
     public function lateAttendance_mark_as_late(Request $request)
     {
@@ -228,43 +236,60 @@ class LateAttendanceController extends Controller
         }
 
         $selected_cb = $request->selected_cb;
+        $late_type = $request->late_type;
 
         if (empty($selected_cb)) {
             return response()->json(['status' => false, 'msg' => 'Select one or more employees']);
         }
 
+        $latetype = DB::table('late_types')->select('time_from', 'time_to', 'late_early')->where('id', $late_type)->first();
+
         $data_arr = array();
         foreach ($selected_cb as $cr) {
 
             if ($cr['lasttimestamp'] != '') {
+                
+                if ($latetype && $latetype->time_from && $latetype->late_early == 0) {
+                    $ondutyTime = new DateTime($latetype->time_from);
+                    $checkInTime = new DateTime($cr['timestamp']);
 
-                    $shiftType = DB::table('employees')
-                                ->join('shift_types', 'employees.emp_shift', '=', 'shift_types.id')
-                                ->select('shift_types.onduty_time')
-                                ->where('employees.emp_id', $cr['uid']) 
-                                ->first();
+                    $interval = $checkInTime->diff($ondutyTime);
+                    $minutesDifference = ($interval->h * 60) + $interval->i;
 
+                    // Check if check-in time is after on-duty time
+                    if ($checkInTime > $ondutyTime) {
+                        $interval = $checkInTime->diff($ondutyTime);
+                        $minutesDifference = ($interval->h * 60) + $interval->i;
 
-                        if ($shiftType && $shiftType->onduty_time) {
-                            $ondutyTime = new DateTime($shiftType->onduty_time);
-                            $checkInTime = new DateTime($cr['timestamp']);
+                        $late_minutes_data[] = array(
+                            'attendance_id' => $cr['id'],
+                            'emp_id' => $cr['uid'],
+                            'attendance_date' => $cr['date'],
+                            'minites_count' => $minutesDifference,
+                        );
+                    }
+                }
+                else if ($latetype && $latetype->time_to && $latetype->late_early == 1) {
+                    $offdutyTime = new DateTime($latetype->time_to);
+                    $checkOutTime = new DateTime($cr['lasttimestamp']);
 
-                            $interval = $checkInTime->diff($ondutyTime);
-                            $minutesDifference = ($interval->h * 60) + $interval->i;
+                    $interval = $offdutyTime->diff($checkOutTime);
+                    $minutesDifference = ($interval->h * 60) + $interval->i;
 
-                            // Check if check-in time is after on-duty time
-                            if ($checkInTime > $ondutyTime) {
-                                $interval = $checkInTime->diff($ondutyTime);
-                                $minutesDifference = ($interval->h * 60) + $interval->i;
+                    // Check if check-out time is before off-duty time
+                    if ($checkOutTime < $offdutyTime) {
+                        $interval = $offdutyTime->diff($checkOutTime);
+                        $minutesDifference = ($interval->h * 60) + $interval->i;
 
-                                $late_minutes_data[] = array(
-                                    'attendance_id' => $cr['id'],
-                                    'emp_id' => $cr['uid'],
-                                    'attendance_date' => $cr['date'],
-                                    'minites_count' => $minutesDifference,
-                                );
-                            }
-                        }
+                        $late_minutes_data[] = array(
+                            'attendance_id' => $cr['id'],
+                            'emp_id' => $cr['uid'],
+                            'attendance_date' => $cr['date'],
+                            'minites_count' => $minutesDifference,
+                        );
+                    }
+                }
+
                 $data_arr[] = array(
                     'attendance_id' => $cr['id'],
                     'emp_id' => $cr['uid'],
@@ -305,152 +330,99 @@ class LateAttendanceController extends Controller
         return view('Attendent.late_attendance_by_time_approve', compact('leave_types'));
     }
 
-    public function attendance_by_time_approve_report_list(Request $request)
-    {
-        $user = Auth::user();
-        $permission = $user->can('late-attendance-approve');
-        if (!$permission) {
-            return response()->json(['error' => 'UnAuthorized'], 401);
-        }
+    // public function attendance_by_time_approve_report_list(Request $request)
+    // {
+    //     $user = Auth::user();
+    //     $permission = $user->can('late-attendance-approve');
+    //     if (!$permission) {
+    //         return response()->json(['error' => 'UnAuthorized'], 401);
+    //     }
 
-        ## Read value
-        $department = $request->get('department');
-        $company = $request->get('company');
-        $location = $request->get('location');
-        $date = $request->get('date');
+    //     ## Read value
+    //     $department = $request->get('department');
+    //     $company = $request->get('company');
+    //     $location = $request->get('location');
+    //     $date = $request->get('date');
+
+    //     // Total records
+    //     $query2 = 'FROM `employee_late_attendances` as `ela` ';
+    //     $query2 .= 'left join attendances as at1 on at1.`id` = `ela`.`id` ';
+    //     $query2 .= 'join `employees` on `employees`.`emp_id` = `ela`.`emp_id` ';
+    //     $query2 .= 'left join `branches` on `at1`.`location` = `branches`.`id` ';
+    //     $query2 .= 'left join `departments` on `departments`.`id` = `employees`.`emp_department` ';
+    //     $query2 .= 'left join `companies` on `companies`.`id` = `departments`.`company_id` ';
+    //     $query2 .= 'WHERE 1 = 1 and ela.is_approved = 0 ';
+    
+    //     if ($department != '') {
+    //         $query2 .= 'AND departments.id = "' . $department . '" ';
+    //     }
+
+    //     if ($company != '') {
+    //         $query2 .= 'AND employees.emp_company = "' . $company . '" ';
+    //     }
+
+    //     // if ($location != '') {
+    //     //     $query2 .= 'AND at1.location = "' . $location . '" ';
+    //     // }
+
+    //     if ($date != '') {
+    //         $query2 .= 'AND ela.date = "' . $date . '" ';
+    //     }
+
+    //     $query6 = ' ';
+    //     $query6 .= ' ';
 
 
-        $draw = $request->get('draw');
-        $start = $request->get("start");
-        $rowperpage = $request->get("length"); // Rows display per page
 
-        $columnIndex_arr = $request->get('order');
-        $columnName_arr = $request->get('columns');
-        $order_arr = $request->get('order');
-        $search_arr = $request->get('search');
+    //     // Fetch records
+    //     $query3 = 'select ela.*,   
+    //         employees.emp_id ,
+    //         employees.emp_name_with_initial ,
+    //         `employees`.`calling_name`,
+    //         branches.location as b_location,
+    //         branches.id as b_location_id,
+    //         departments.name as dept_name,  
+    //         departments.id as dept_id  
+    //           ';
 
-        $columnIndex = $columnIndex_arr[0]['column']; // Column index
-        $columnName = $columnName_arr[$columnIndex]['data']; // Column name
-        $columnSortOrder = $order_arr[0]['dir']; // asc or desc
-        $searchValue = $search_arr['value']; // Search value
+    //     $records = DB::select($query3 . $query2 . $query6 );
+    //     //error_log($query3.$query2.$query6.$query7.$query5);
+    //     //var_dump(sizeof($records));
+    //     //die();
+    //     $data_arr = array();
 
-        // Total records
-        $totalRecords_array = DB::select('
-            SELECT COUNT(*) as acount
-                FROM
-                (
-                    SELECT COUNT(*)
-                    from `employee_late_attendances` as `ela` 
-                    left join attendances as at1 on `at1`.`id` = `ela`.`attendance_id`  
-                    left join `employees` on `at1`.`uid` = `employees`.`emp_id`  
-                    left join `branches` on `at1`.`location` = `branches`.`id`
-                    WHERE ela.is_approved = 0
-                    group by `at1`.`uid`, `at1`.`date`  
-                )t
-            ');
+    //     foreach ($records as $record) {
 
-        $totalRecords = $totalRecords_array[0]->acount;
+    //           $employeeObj = (object)[
+    //             'emp_id' => $record->emp_id,
+    //             'emp_name_with_initial' => $record->emp_name_with_initial,
+    //             'calling_name' => $record->calling_name
+    //         ];
 
-        $query1 = 'SELECT COUNT(*) as acount ';
-        $query2 = 'FROM `employee_late_attendances` as `ela` ';
-        $query2 .= 'left join attendances as at1 on at1.`id` = `ela`.`id` ';
-        $query2 .= 'join `employees` on `employees`.`emp_id` = `ela`.`emp_id` ';
-        $query2 .= 'left join `branches` on `at1`.`location` = `branches`.`id` ';
-        $query2 .= 'left join `departments` on `departments`.`id` = `employees`.`emp_department` ';
-        $query2 .= 'left join `companies` on `companies`.`id` = `departments`.`company_id` ';
-        $query2 .= 'WHERE 1 = 1 and ela.is_approved = 0 ';
-        //$searchValue = 'Breeder Farm';
-        if ($searchValue != '') {
-            $query2 .= 'AND ';
-            $query2 .= '( ';
-            $query2 .= 'employees.emp_id like "' . $searchValue . '%" ';
-            $query2 .= 'OR employees.emp_name_with_initial like "' . $searchValue . '%" ';
-            $query2 .= 'OR ela.date like "' . $searchValue . '%" ';
-            $query2 .= 'OR companies.name like "' . $searchValue . '%" ';
-            $query2 .= 'OR branches.location like "' . $searchValue . '%" ';
-            $query2 .= 'OR departments.name like "' . $searchValue . '%" ';
-            $query2 .= ') ';
-        }
+    //         $data_arr[] = array(
+    //             "id" => $record->id,
+    //             "emp_name_with_initial" => $record->emp_name_with_initial,
+    //             "employee_display" => EmployeeHelper::getDisplayName($employeeObj),
+    //             "date" => $record->date,
+    //             "check_in_time" => date('H:i', strtotime($record->check_in_time)),
+    //             "check_out_time" => date('H:i', strtotime($record->check_out_time)),
+    //             "working_hours" => $record->working_hours,
+    //             "dept_name" => $record->dept_name,
+    //             "dept_id" => $record->dept_id,
+    //             "location" => $record->b_location,
+    //             "location_id" => $record->b_location_id,
+    //             "is_approved_int" => $record->is_approved,
+    //             "is_approved" => ($record->is_approved == 0) ? 'No' : 'Yes',
+    //         );
+    //     }
 
-        if ($department != '') {
-            $query2 .= 'AND departments.id = "' . $department . '" ';
-        }
+    //     $response = array(
+    //         "aaData" => $data_arr
+    //     );
 
-        if ($company != '') {
-            $query2 .= 'AND employees.emp_company = "' . $company . '" ';
-        }
-
-        // if ($location != '') {
-        //     $query2 .= 'AND at1.location = "' . $location . '" ';
-        // }
-
-        if ($date != '') {
-            $query2 .= 'AND ela.date = "' . $date . '" ';
-        }
-
-        $query6 = ' ';
-        $query6 .= ' ';
-
-        $query5 = 'LIMIT ' . (string)$start . ' , ' . $rowperpage . ' ';
-        $query7 = 'ORDER BY ' . $columnName . ' ' . $columnSortOrder . ' ';
-
-        //error_log($query1.$query2.$query6);
-
-        $totalRecordswithFilter_arr = DB::select($query1 . $query2 . $query6);
-        $totalRecordswithFilter = $totalRecordswithFilter_arr[0]->acount;
-
-        // Fetch records
-        $query3 = 'select ela.*,   
-            employees.emp_id ,
-            employees.emp_name_with_initial ,
-            `employees`.`calling_name`,
-            branches.location as b_location,
-            branches.id as b_location_id,
-            departments.name as dept_name,  
-            departments.id as dept_id  
-              ';
-
-        $records = DB::select($query3 . $query2 . $query6 . $query7 . $query5);
-        //error_log($query3.$query2.$query6.$query7.$query5);
-        //var_dump(sizeof($records));
-        //die();
-        $data_arr = array();
-
-        foreach ($records as $record) {
-
-              $employeeObj = (object)[
-                'emp_id' => $record->emp_id,
-                'emp_name_with_initial' => $record->emp_name_with_initial,
-                'calling_name' => $record->calling_name
-            ];
-
-            $data_arr[] = array(
-                "id" => $record->id,
-                "emp_name_with_initial" => $record->emp_name_with_initial,
-                "employee_display" => EmployeeHelper::getDisplayName($employeeObj),
-                "date" => $record->date,
-                "check_in_time" => date('H:i', strtotime($record->check_in_time)),
-                "check_out_time" => date('H:i', strtotime($record->check_out_time)),
-                "working_hours" => $record->working_hours,
-                "dept_name" => $record->dept_name,
-                "dept_id" => $record->dept_id,
-                "location" => $record->b_location,
-                "location_id" => $record->b_location_id,
-                "is_approved_int" => $record->is_approved,
-                "is_approved" => ($record->is_approved == 0) ? 'No' : 'Yes',
-            );
-        }
-
-        $response = array(
-            "draw" => intval($draw),
-            "iTotalRecords" => $totalRecords,
-            "iTotalDisplayRecords" => $totalRecordswithFilter,
-            "aaData" => $data_arr
-        );
-
-        echo json_encode($response);
-        exit;
-    }
+    //     echo json_encode($response);
+    //     exit;
+    // }
 
     public function lateAttendance_mark_as_late_approve(Request $request)
     {
@@ -772,6 +744,11 @@ class LateAttendanceController extends Controller
             }else{
                 $leaves = Leave::findOrFail($id_leave);
                 $leaves->delete();
+
+                $deletedCount = DB::table('employee_late_attendance_minites')
+                    ->where('attendance_date', $date)
+                    ->where('emp_id', $empid)
+                    ->delete();
 
                 $lateattendance->delete();
 

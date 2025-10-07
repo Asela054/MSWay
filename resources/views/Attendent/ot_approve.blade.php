@@ -1,4 +1,3 @@
-<?php $page_stitle = 'Report on Employee O.T. Hours - Multi Offset'; ?>
 @extends('layouts.app')
 
 @section('content')
@@ -19,73 +18,29 @@
          </div>
 
         <div class="container-fluid mt-2 p-0 p-2">
-            <div class="card mb-2">
-                <div class="card-body">
-                    <form class="form-horizontal" id="formFilter">
-                        
-                        <div class="form-row mb-1">
-                            <div class="col-md-3">
-                                <label class="small font-weight-bold text-dark">Company</label>
-                                <select name="company" id="company" class="form-control form-control-sm">
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="small font-weight-bold text-dark">Department</label>
-                                <select name="department" id="department" class="form-control form-control-sm">
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="small font-weight-bold text-dark">Location</label>
-                                <select name="location" id="location" class="form-control form-control-sm">
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="small font-weight-bold text-dark">Employee</label>
-                                <select name="employee" id="employee" class="form-control form-control-sm">
-                                </select>
-                            </div>
-
-                            <div class="col-md-3 div_date_range">
-                                <label class="small font-weight-bold text-dark">Date : From - To</label>
-                                <div class="input-group input-group-sm mb-3">
-                                    <input type="date" id="from_date" name="from_date" class="form-control form-control-sm border-right-0"
-                                           placeholder="yyyy-mm-dd"
-                                           required 
-                                    >
-
-                                    <input type="date" id="to_date" name="to_date" class="form-control"
-                                           required
-                                           placeholder="yyyy-mm-dd"
-                                    >
-                                </div>
-                            </div>
-                            <div class="col">
-                                <br>
-                                <button type="submit" class="btn btn-primary btn-sm filter-btn float-right ml-2" id="btn-filter"><i class="fas fa-search mr-2"></i>Filter</button>
-                                <button type="button" class="btn btn-danger btn-sm filter-btn float-right" id="btn-clear"><i class="far fa-trash-alt"></i>&nbsp;&nbsp;Clear</button>
-                            </div>
-                        </div>
-                        
-                    </form>
-
-                </div>
-            </div>
-
             <div class="card">
                 <div class="card-body p-0 p-2">
-                    <div class="row mt-1">
+                    <div class="row align-items-center mb-4">
+                        <div class="col-md-12">
+                            <button class="btn btn-warning btn-sm filter-btn float-right px-3" type="button"
+                                data-toggle="offcanvas" data-target="#offcanvasRight" aria-controls="offcanvasRight"><i
+                                    class="fas fa-filter mr-1"></i> Filter
+                                Records</button>
+                        </div>
+                        <div class="col-12">
+                            <hr class="border-dark">
+                        </div>
                         <div class="col-6 mb-2">
                             <div class="form-check">
                                 <input type="checkbox" class="form-check-input checkallocate" id="selectAll">
                                 <label class="form-check-label" for="selectAll">Select All Records</label>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <button type="button" class="btn btn-primary btn-sm float-right" id="btn_approve_ot"><i
-                                    class="fa-light fa-light fa-clipboard-check"></i>&nbsp;Approve OT</button><br>
+                        <div class="col-6 text-right">
+                            <button type="button" class="btn btn-primary btn-sm float-right px-3" id="btn_approve_ot"><i
+                                    class="fa-light fa-light fa-clipboard-check"></i>&nbsp;&nbsp;Approve OT</button><br>
                         </div>
                     </div>
-                    <br>
                     <div class="col-12">
                         <div class="center-block fix-width scroll-inner">
                             <table class="table table-striped table-bordered table-sm small nowrap" id="ot_table">
@@ -112,6 +67,8 @@
                     </div>
                 </div>
             </div>
+
+           @include('layouts.filter_menu_offcanves') 
         </div>
 
     </main>
@@ -201,6 +158,18 @@
                     cache: true
                 }
             });
+
+             $('.response').html(
+                '<tr>' +
+                '<td colspan="13" class="text-center py-5">' +
+                '<div class="d-flex flex-column align-items-center">' +
+                '<i class="fas fa-filter fa-3x text-muted mb-3"></i>' +
+                '<h4 class="text-muted mb-2">No Records Found</h4>' +
+                '<p class="text-muted">Use the filter options to get records</p>' +
+                '</div>' +
+                '</td>' +
+                '</tr>'
+            );
 
             function load_table() {
                 let department = $('#department').val();
@@ -341,6 +310,7 @@
                 e.preventDefault();
                 $('.info_msg').html('');
                 load_table();
+                closeOffcanvasSmoothly();
 
             });
 
@@ -444,18 +414,6 @@
                          btn.attr('disabled', false);
                     }
                 }
-            });
-
-            document.getElementById('btn-clear').addEventListener('click', function() {
-                document.getElementById('formFilter').reset();
-
-                $('#company').val('').trigger('change');   
-                $('#location').val('').trigger('change');
-                $('#department').val('').trigger('change');
-                $('#employee').val('').trigger('change');
-                $('#from_date').val('');                     
-                $('#to_date').val('');                       
-                // load_dt('', '', '', '', '');
             });
 
              $('#selectAll').click(function (e) {

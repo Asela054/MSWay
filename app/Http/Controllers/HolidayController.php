@@ -25,12 +25,8 @@ class HolidayController extends Controller
         }
 
         $worklevel = WorkLevel::orderBy('id', 'asc')->get();
-        $holiday = DB::table('holidays')
-            ->join('work_levels', 'holidays.work_level', '=', 'work_levels.id')
-            ->join('holiday_types', 'holidays.holiday_type', '=', 'holiday_types.id')
-            ->select('holidays.*', 'work_levels.level', 'holiday_types.name as holiday_type_name')
-            ->get();
-        return view('Holiday.holiday', compact('holiday', 'worklevel'));
+       
+        return view('Holiday.holiday', compact('worklevel'));
     }
 
     /**

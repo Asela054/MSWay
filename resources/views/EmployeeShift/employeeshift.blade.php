@@ -1,15 +1,21 @@
 @extends('layouts.app')
 
 @section('content')
-
 <main>
     <div class="page-header shadow">
+        <div class="container-fluid d-none d-sm-block shadow">
+             @include('layouts.shift_nav_bar')
+        </div>
         <div class="container-fluid">
-            @include('layouts.shift_nav_bar')
-           
+            <div class="page-header-content py-3 px-2">
+                <h1 class="page-header-title ">
+                    <div class="page-header-icon"><i class="fa-light fa-business-time"></i></div>
+                    <span>Employee Night Shift Assign </span>
+                </h1>
+            </div>
         </div>
     </div>
-    <div class="container-fluid mt-4">
+      <div class="container-fluid mt-2 p-0 p-2">
         <div class="card">
             <div class="card-body p-0 p-2">
                 <div class="row">
@@ -32,7 +38,6 @@
                                     <tr>
                                         <th>ID </th>
                                         <th>Date</th>
-                                        {{-- <th>Date To</th> --}}
                                         <th>Shift</th>
                                         <th class="text-right">Action</th>
                                     </tr>
@@ -359,25 +364,59 @@
         });
 
         $('#dataTable').DataTable({
-            processing: true,
-            serverSide: true,
+            "destroy": true,
+            "processing": true,
+            "serverSide": true,
+            dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+            "buttons": [{
+                    extend: 'csv',
+                    className: 'btn btn-success btn-sm',
+                    title: 'Customer  Information',
+                    text: '<i class="fas fa-file-csv mr-2"></i> CSV',
+                },
+                { 
+                    extend: 'pdf', 
+                    className: 'btn btn-danger btn-sm', 
+                    title: 'Location Information', 
+                    text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
+                    orientation: 'landscape', 
+                    pageSize: 'legal', 
+                    customize: function(doc) {
+                        doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+                    }
+                },
+                {
+                    extend: 'print',
+                    title: 'Customer  Information',
+                    className: 'btn btn-primary btn-sm',
+                    text: '<i class="fas fa-print mr-2"></i> Print',
+                    customize: function(win) {
+                        $(win.document.body).find('table')
+                            .addClass('compact')
+                            .css('font-size', 'inherit');
+                    },
+                },
+                // 'copy', 'csv', 'excel', 'pdf', 'print'
+            ],
+            "order": [
+                [0, "desc"]
+            ],
             ajax: {
-                "url": "{!! route('employeeshiftlist') !!}",
-
+                url: scripturl + "/employeeshiftlist.php",
+                type: "POST",
+                data: {},
             },
-            columns: [{
-                    data: 'id',
+            columns: [
+                { 
+                    data: 'id', 
                     name: 'id'
                 },
-                {
-                    data: 'date_from',
+                { 
+                    data: 'date_from', 
                     name: 'date_from'
                 },
-                // {
-                //     data: 'date_to',
-                //     name: 'date_to'
-                // },
-                {
+               {
                     data: 'shift_id',
                     name: 'shift_id',
                     render: function(data, type, row) {
@@ -390,20 +429,36 @@
                         }
                     }
                 },
+                
                 {
-                    data: 'action',
+                    data: 'id',
                     name: 'action',
+                    className: 'text-right',
                     orderable: false,
                     searchable: false,
-                    render: function (data, type, row) {
-                        return '<div style="text-align: right;">' + data + '</div>';
+                    render: function(data, type, row) {
+                        var buttons = '';
+                        // View button
+                        buttons += '<button name="view" id="'+row.id+'" class="view btn btn-secondary btn-sm mr-1" type="button"><i class="fas fa-eye"></i></button>';
+                        // Edit button
+                        buttons += '<button name="edit" id="'+row.id+'" class="edit btn btn-primary btn-sm mr-1" type="button" data-toggle="tooltip" title="Edit"><i class="fas fa-pencil-alt"></i></button>';
+                        // Delete button
+                        buttons += '<button type="button" name="delete" id="'+row.id+'" class="delete btn btn-danger btn-sm mr-1" data-toggle="tooltip" title="Remove"><i class="far fa-trash-alt"></i></button>';
+                        // Status toggle button
+                        if (row.status == 1) {
+                            buttons += '<a href="/employeeshiftstatus/'+row.id+'/2" onclick="return deactive_confirm()" class="btn btn-success btn-sm mr-1" data-toggle="tooltip" title="Active"><i class="fas fa-check"></i></a>';
+                        } else {
+                            buttons += '<a href="/employeeshiftstatus/'+row.id+'/1" onclick="return active_confirm()" class="btn btn-warning btn-sm mr-1" data-toggle="tooltip" title="Inactive"><i class="fas fa-times"></i></a>';
+                        }
+
+                        return buttons;
                     }
-                },
+
+                }
             ],
-            "bDestroy": true,
-            "order": [
-                [0, "desc"]
-            ]
+            drawCallback: function(settings) {
+                $('[data-toggle="tooltip"]').tooltip();
+            }
         });
 
         $('#create_record').click(function () {
