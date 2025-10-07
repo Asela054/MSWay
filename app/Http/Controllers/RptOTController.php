@@ -260,11 +260,11 @@ class RptOTController extends Controller
                 return $work_days;
             })
             ->addColumn('leave_days', function($row) use ($month, $closingday){
-                $leave_days = (new \App\Attendance)->get_leave_days($row->emp_id, $month, $closingday);
+                $leave_days = (new \App\Leave)->get_leave_days($row->emp_id, $month, $closingday);
                 return $leave_days;
             })
             ->addColumn('no_pay_days', function ($row) use ($month, $closingday) {
-                $no_pay_days = (new \App\Attendance)->get_no_pay_days($row->emp_id, $month, $closingday);
+                $no_pay_days = (new \App\Leave)->get_no_pay_days($row->emp_id, $month, $closingday);
                 return $no_pay_days;
             })
             ->addColumn('normal_rate_otwork_hrs', function ($row) use ($month) {

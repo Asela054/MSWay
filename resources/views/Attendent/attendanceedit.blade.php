@@ -28,7 +28,7 @@
                                         </button>
                                     </div>
                                     <div class="col-sm-12 col-md-auto mb-2 mr-md-2">
-                                        <button type="button" class="btn btn-success btn-sm px-3 w-100" name="edit_record_month" id="edit_record_month">
+                                        <button type="button" class="btn btn-primary btn-sm px-3 w-100" name="edit_record_month" id="edit_record_month">
                                             <i class="fas fa-pencil-alt mr-2"></i>Add - Month
                                         </button>
                                     </div>
@@ -43,7 +43,7 @@
                                         </button>
                                     </div>
                                     <div class="col-sm-12 col-md-auto mb-2">
-                                        <button type="button" class="btn btn-primary btn-sm px-3 w-100" name="create_record_upload" id="create_record_upload">
+                                        <button type="button" class="btn btn-success btn-sm px-3 w-100" name="create_record_upload" id="create_record_upload">
                                             <i class="fa fa-upload mr-2"></i>Upload Attendance TXT
                                         </button>
                                     </div>
