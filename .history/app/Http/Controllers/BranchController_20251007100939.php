@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Branch;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Auth; // Add this import
 use Validator;
 
 class BranchController extends Controller

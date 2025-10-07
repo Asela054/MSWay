@@ -317,16 +317,18 @@ $(document).ready(function(){
 
     var user_id;
 
-    $(document).on('click', '.delete', async function() {
-        var r = await Otherconfirmation("You want to remove this ? ");
-        if (r == true) {
-            user_id = $(this).attr('id');
-            $.ajax({
-                url: "LeaveDeduction/destroy/" + user_id,
-                beforeSend: function () {
-                    $('#ok_button').text('Deleting...');
-                },
-                success: function (data) {//alert(data);
+    $(document).on('click', '.delete', function () {
+        user_id = $(this).attr('id');
+        $('#confirmModal').modal('show');
+    });
+
+    $('#ok_button').click(function () {
+        $.ajax({
+            url: "LeaveDeduction/destroy/" + user_id,
+            beforeSend: function () {
+                $('#ok_button').text('Deleting...');
+            },
+            success: function (data) {//alert(data);
                     const actionObj = {
                         icon: 'fas fa-trash-alt',
                         title: '',
@@ -338,8 +340,7 @@ $(document).ready(function(){
                     const actionJSON = JSON.stringify(actionObj, null, 2);
                     actionreload(actionJSON);
                 }
-            })
-        }
+        })
     });
 
 

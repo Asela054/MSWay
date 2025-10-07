@@ -256,41 +256,41 @@
                 });
             });
             
-            $(document).on('click', '.edit', async function () {
-                var r = await Otherconfirmation("You want to Edit this ? ");
-                if (r == true) {
-                    var id = $(this).attr('id');
-                    $('#form_result').html('');
-                    $.ajax({
-                        url: "../Department/" + id + "/edit",
-                        dataType: "json",
-                        success: function (data) {
-                            $('#name').val(data.result.name);
-                            $('#department_id').val(data.result.department_id);
-                            $('#hidden_id').val(id);
-                            $('.modal-title').text('Edit Department');
-                            $('#action_button').html('Edit');
-                            $('#action').val('Edit');
-                            $('#formModal').modal('show');
-                        }
-                    })
-                }
+    $(document).on('click', '.edit', async function () {
+        var r = await Otherconfirmation("You want to Edit this ? ");
+        if (r == true) {
+                var id = $(this).attr('id');
+                $('#form_result').html('');
+                $.ajax({
+                    url: "../Department/" + id + "/edit",
+                    dataType: "json",
+                    success: function (data) {
+                        $('#name').val(data.result.name);
+                        $('#department_id').val(data.result.department_id);
+                        $('#hidden_id').val(id);
+                        $('.modal-title').text('Edit Department');
+                        $('#action_button').html('Edit');
+                        $('#action').val('Edit');
+                        $('#formModal').modal('show');
+                    }
+                })
+            }
             });
 
             var user_id;
 
-    var user_id;
+            $(document).on('click', '.delete', function () {
+                user_id = $(this).attr('id');
+                $('#confirmModal').modal('show');
+            });
 
-    $(document).on('click', '.delete', async function() {
-        var r = await Otherconfirmation("You want to remove this ? ");
-        if (r == true) {
-            user_id = $(this).attr('id');
-            $.ajax({
-                url: "../Department/destroy/" + user_id,
-                beforeSend: function () {
-                    $('#ok_button').text('Deleting...');
-                },
-                success: function (data) {//alert(data);
+            $('#ok_button').click(function () {
+                $.ajax({
+                    url: "../Department/destroy/" + user_id,
+                    beforeSend: function () {
+                        $('#ok_button').text('Deleting...');
+                    },
+                    success: function (data) {//alert(data);
                     const actionObj = {
                         icon: 'fas fa-trash-alt',
                         title: '',
@@ -302,9 +302,8 @@
                     const actionJSON = JSON.stringify(actionObj, null, 2);
                     actionreload(actionJSON);
                 }
-            })
-        }
-    });
+                })
+            });
         });
     </script>
 

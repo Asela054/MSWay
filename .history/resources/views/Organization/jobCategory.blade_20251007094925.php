@@ -788,224 +788,223 @@ $(document).ready(function(){
     $(document).on('click', '.edit', async function () {
         var r = await Otherconfirmation("You want to Edit this ? ");
         if (r == true) {
-            var id = $(this).attr('id');
-            $('#form_result').html('');
-            $.ajax({
-                url: "JobCategory/" + id + "/edit",
-                dataType: "json",
-                success: function (data) {
+        var id = $(this).attr('id');
+        $('#form_result').html('');
+        $.ajax({
+            url: "JobCategory/" + id + "/edit",
+            dataType: "json",
+            success: function (data) {
 
-                    //$('#sunday_rate').val(data.result.sunday_rate);
-                    let short_leave_enabled = data.result.short_leave_enabled;
-                    if (short_leave_enabled == 1) {
-                        $('#short_leave_enabled').prop("checked", true);
-                    } else {
-                        $('#short_leave_enabled').prop("checked", false);
-                    }
-
-                    $('#category').val(data.result.category);
-                    $('#annual_leaves').val(data.result.annual_leaves);
-                    $('#casual_leaves').val(data.result.casual_leaves);
-                    $('#medical_leaves').val(data.result.medical_leaves);
-                    $('#emp_payroll_workdays').val(data.result.emp_payroll_workdays);
-                    $('#emp_payroll_workhrs').val(data.result.emp_payroll_workhrs);
-                    $('#ot_app_hours').val(data.result.ot_app_hours);
-                    $('#holiday_ot_minimum_min').val(data.result.holiday_ot_minimum_min);
-                    $('#spe_deduct_pre').val(data.result.spe_deduct_pre);
-                    $('#shift_hours').val(data.result.shift_hours);
-                    // $('#otdeduct').val(data.result.otdeduct);
-                    // $('#nopaydeduct').val(data.result.nopaydeduct);
-                    $('#holiday_work_hours').val(data.result.holiday_work_hours);
-                    $('#week_after_double').val(data.result.week_after_double);
-
-                    if (data.result.work_hour_date == 'Date') {
-                        $('#work_hour_date_0').prop("checked", true);
-                        $('.custom_work').css('display', 'none');
-                    } else if (data.result.work_hour_date == 'Hour') {
-                        $('#work_hour_date_1').prop("checked", true);
-                        $('.custom_work').css('display', 'block');
-                    }
-
-                    if (data.result.morning_ot == 0) {
-                        $('#morning_ot_0').prop("checked", true);
-                        $('.custom_morning').css('display', 'none');
-                    } else if (data.result.morning_ot == 1) {
-                        $('#morning_ot_1').prop("checked", true);
-                        $('.custom_morning').css('display', 'block');
-                    }
-
-                    if (data.result.holiday_ot_start == 0) {
-                        $('#holiday_ot_start_0').prop("checked", true);
-                    } else if (data.result.holiday_ot_start == 1) {
-                        $('#holiday_ot_start_1').prop("checked", true);
-                    }
-
-                    if (data.result.holiday_lunch_deduct == 0) {
-                        $('#holiday_lunch_deduct_0').prop("checked", true);
-                    } else if (data.result.holiday_lunch_deduct == 1) {
-                        $('#holiday_lunch_deduct_1').prop("checked", true);
-                    }
-
-                    if (data.result.lunch_deduct_type == 0) {
-                        $('#lunch_deduct_type_0').prop("checked", true);
-                        $('.custom_lunch').css('display', 'none');
-                        $('#lunch_deduct_min').val(0).prop("checked", true);
-                        $('<input>').attr({
-                            type: 'hidden',
-                            name: 'lunch_deduct_min',
-                            value: 0
-                        });
-                    } else if (data.result.lunch_deduct_type == 1) {
-                        $('#lunch_deduct_type_1').prop("checked", true);
-                        $('.custom_lunch').css('display', 'block');
-                    }
-
-                    $('#lunch_deduct_min').val(data.result.lunch_deduct_min);
-
-                    if (data.result.salary_without_attendace == 0) {
-                        $('#salary_without_attendace_0').prop("checked", true);
-                        $('.custom_salary').css('display', 'none');
-                    } else if (data.result.salary_without_attendace == 1) {
-                        $('#salary_without_attendace_1').prop("checked", true);
-                        $('.custom_salary').css('display', 'block');
-                    }
-
-                    if (data.result.is_sat_ot_type_as_act == 1) {
-                        $('#is_sat_ot_type_as_act_1').prop("checked", true);
-                        $('.custom_sat').css('display', 'none');
-                    } else if (data.result.is_sat_ot_type_as_act == 0) {
-                        $('#is_sat_ot_type_as_act_0').prop("checked", true);
-                        $('.custom_sat').css('display', 'block');
-                    } else {
-                        $('#is_sat_ot_type_as_act_2').prop("checked", true);
-                        $('.custom_sat').css('display', 'none');
-                    }
-
-                    if (data.result.custom_saturday_ot_type == 1) {
-                        $('#custom_saturday_ot_type_1').prop("checked", true);
-                    }
-
-                    if (data.result.custom_saturday_ot_type == 1.5) {
-                        $('#custom_saturday_ot_type_1_5').prop("checked", true);
-                    }
-
-                    if (data.result.custom_saturday_ot_type == 2) {
-                        $('#custom_saturday_ot_type_2').prop("checked", true);
-                    }
-
-                    if (data.result.is_sun_ot_type_as_act == 1) {
-                        $('#is_sun_ot_type_as_act_1').prop("checked", true);
-                        $('.custom_sun').css('display', 'none');
-                        $('.custom_sun_after').css('display', 'none');
-                        $('#sun_after_double').prop('required', false);
-                    } else if (data.result.is_sun_ot_type_as_act == 0) {
-                        $('#is_sun_ot_type_as_act_0').prop("checked", true);
-                        $('.custom_sun').css('display', 'block');
-                    } else {
-                        $('#is_sun_ot_type_as_act_2').prop("checked", true);
-                        $('.custom_sun').css('display', 'none');
-                        $('.custom_sun_after').css('display', 'none');
-                        $('#sun_after_double').prop('required', false);
-                    }
-
-                    if (data.result.custom_sunday_ot_type == 1) {
-                        $('#custom_sunday_ot_type_1').prop("checked", true);
-                        $('.custom_sun_after').css('display', 'block');
-                        $('#sun_after_double').prop('disabled', false).val(data.result.sun_after_double);
-                        $('#sun_after_double').prop('required', true);
-                    } else if (data.result.custom_sunday_ot_type == 2) {
-                        $('#custom_sunday_ot_type_2').prop("checked", true);
-                        $('.custom_sun_after').css('display', 'none');
-                        $('#sun_after_double').val(0).prop("checked", true);
-                        $('#sun_after_double').prop('required', false);
-                        $('<input>').attr({
-                            type: 'hidden',
-                            name: 'sun_after_double',
-                            value: 0
-                        });
-                    }
-
-                    $('#sun_after_double').val(data.result.sun_after_double);
-
-                    $('#spe_day_1_day').change(function () {
-                        const selectedDay = $(this).val();
-
-                        if (selectedDay == "") {
-                            $('.spe_day_1_type').prop("checked", false);
-                            $('.custom_spe').css('display', 'none');
-                            $('input[name="spe_day_1_rate"]').prop("checked", false);
-                        } else {
-                            $('.custom_spe').css('display', 'block');
-                        }
-                    });
-
-                    $('#spe_day_1_day').val(data.result.spe_day_1_day);
-
-                    if (data.result.spe_day_1_type == 1) {
-                        $('#spe_day_1_type_1').prop("checked", true);
-                        $('.custom_spe').css('display', 'none');
-                    } else if (data.result.spe_day_1_type == 0) {
-                        $('#spe_day_1_type_0').prop("checked", true);
-                        $('.custom_spe').css('display', 'block');
-                    } else {
-                        console.warn('Unexpected value for spe_day_1_type:', data.result.spe_day_1_type);
-                    }
-
-                    if (data.result.spe_day_1_rate == 1) {
-                        $('#spe_day_1_rate_1').prop("checked", true);
-                    } else if (data.result.spe_day_1_rate == 2) {
-                        $('#spe_day_1_rate_2').prop("checked", true);
-                    } else {
-                        console.warn('Unexpected value for spe_day_1_rate:', data.result.spe_day_1_rate);
-                    }
-
-                    if (data.result.late_type == 1) {
-                        $('#late_type_1').prop("checked", true);
-                        $('.per_min').css('display', 'block');
-                        $('.short_lev').css('display', 'none');
-                        $('.half_day').css('display', 'none');
-                        $('#short_leaves').val(0).prop("checked", true);
-                        $('<input>').attr({
-                            type: 'hidden',
-                            name: 'short_leaves',
-                            value: 0
-                        });
-                        $('#half_days').val(0).prop("checked", true);
-                        $('<input>').attr({
-                            type: 'hidden',
-                            name: 'half_days',
-                            value: 0
-                        });
-                    } else if (data.result.late_type == 2) {
-                        $('#late_type_2').prop("checked", true);
-                        $('.short_lev').css('display', 'block');
-                        $('.half_day').css('display', 'block');
-                        $('.per_min').css('display', 'none');
-                        $('#late_attend_min').val(0).prop("checked", true);
-                        $('<input>').attr({
-                            type: 'hidden',
-                            name: 'late_attend_min',
-                            value: 0
-                        });
-                    } else if (data.result.late_type == 3) {
-                        $('#late_type_3').prop("checked", true);
-                        $('.short_lev').css('display', 'block');
-                        $('.half_day').css('display', 'block');
-                        $('.per_min').css('display', 'block');
-                    }
-
-                    $('#late_attend_min').val(data.result.late_attend_min);
-                    $('#short_leaves').val(data.result.short_leaves);
-                    $('#half_days').val(data.result.half_days);
-
-                    $('#hidden_id').val(id);
-                    $('.modal-title').text('Edit Job Category');
-                    $('#action_button').html('<i class="fas fa-edit"></i>&nbsp;Edit');
-                    $('#action').val('Edit');
-                    $('#formModal').modal('show');
+                //$('#sunday_rate').val(data.result.sunday_rate);
+                let short_leave_enabled = data.result.short_leave_enabled;
+                if(short_leave_enabled == 1){
+                    $('#short_leave_enabled').prop( "checked", true );
+                }else {
+                    $('#short_leave_enabled').prop( "checked", false );
                 }
-            })
-        }
+
+                $('#category').val(data.result.category);
+                $('#annual_leaves').val(data.result.annual_leaves);
+                $('#casual_leaves').val(data.result.casual_leaves);
+                $('#medical_leaves').val(data.result.medical_leaves);
+                $('#emp_payroll_workdays').val(data.result.emp_payroll_workdays);
+                $('#emp_payroll_workhrs').val(data.result.emp_payroll_workhrs);
+                $('#ot_app_hours').val(data.result.ot_app_hours);
+                $('#holiday_ot_minimum_min').val(data.result.holiday_ot_minimum_min);
+                $('#spe_deduct_pre').val(data.result.spe_deduct_pre);
+                $('#shift_hours').val(data.result.shift_hours);
+               // $('#otdeduct').val(data.result.otdeduct);
+               // $('#nopaydeduct').val(data.result.nopaydeduct);
+                $('#holiday_work_hours').val(data.result.holiday_work_hours);
+                $('#week_after_double').val(data.result.week_after_double);
+
+               if(data.result.work_hour_date == 'Date'){
+                    $('#work_hour_date_0').prop( "checked", true );
+                    $('.custom_work').css('display', 'none');
+                }else if(data.result.work_hour_date == 'Hour') {
+                    $('#work_hour_date_1').prop( "checked", true );
+                    $('.custom_work').css('display', 'block');
+                }
+
+               if(data.result.morning_ot == 0){
+                    $('#morning_ot_0').prop( "checked", true );
+                    $('.custom_morning').css('display', 'none');
+                }else if(data.result.morning_ot == 1) {
+                    $('#morning_ot_1').prop( "checked", true );
+                    $('.custom_morning').css('display', 'block');
+                }
+
+               if(data.result.holiday_ot_start == 0){
+                    $('#holiday_ot_start_0').prop( "checked", true );
+                }else if(data.result.holiday_ot_start == 1) {
+                    $('#holiday_ot_start_1').prop( "checked", true );
+                }
+
+               if(data.result.holiday_lunch_deduct == 0){
+                    $('#holiday_lunch_deduct_0').prop( "checked", true );
+                }else if(data.result.holiday_lunch_deduct == 1) {
+                    $('#holiday_lunch_deduct_1').prop( "checked", true );
+                }
+
+               if(data.result.lunch_deduct_type == 0){
+                    $('#lunch_deduct_type_0').prop( "checked", true );
+                    $('.custom_lunch').css('display', 'none');
+                    $('#lunch_deduct_min').val(0).prop( "checked", true); 
+                    $('<input>').attr({
+                        type: 'hidden',
+                        name: 'lunch_deduct_min',
+                        value: 0
+                    }); 
+                }else if(data.result.lunch_deduct_type == 1) {
+                    $('#lunch_deduct_type_1').prop( "checked", true );
+                    $('.custom_lunch').css('display', 'block');
+                }
+
+                $('#lunch_deduct_min').val(data.result.lunch_deduct_min);
+
+                if(data.result.salary_without_attendace == 0){
+                    $('#salary_without_attendace_0').prop( "checked", true );
+                    $('.custom_salary').css('display', 'none');
+                }else if(data.result.salary_without_attendace == 1) {
+                    $('#salary_without_attendace_1').prop( "checked", true );
+                    $('.custom_salary').css('display', 'block');
+                }
+
+                if(data.result.is_sat_ot_type_as_act == 1){
+                    $('#is_sat_ot_type_as_act_1').prop( "checked", true );
+                    $('.custom_sat').css('display', 'none');
+                }else if(data.result.is_sat_ot_type_as_act == 0) {
+                    $('#is_sat_ot_type_as_act_0').prop( "checked", true );
+                    $('.custom_sat').css('display', 'block');
+                }else{
+                    $('#is_sat_ot_type_as_act_2').prop( "checked", true );
+                    $('.custom_sat').css('display', 'none');
+                }
+
+                if(data.result.custom_saturday_ot_type == 1 ){
+                    $('#custom_saturday_ot_type_1').prop( "checked", true );
+                }
+
+                if(data.result.custom_saturday_ot_type == 1.5 ){
+                    $('#custom_saturday_ot_type_1_5').prop( "checked", true );
+                }
+
+                if(data.result.custom_saturday_ot_type == 2 ){
+                    $('#custom_saturday_ot_type_2').prop( "checked", true );
+                }
+
+                if(data.result.is_sun_ot_type_as_act == 1){
+                    $('#is_sun_ot_type_as_act_1').prop( "checked", true );
+                    $('.custom_sun').css('display', 'none');
+                    $('.custom_sun_after').css('display', 'none'); 
+                    $('#sun_after_double').prop('required', false);
+                }else if(data.result.is_sun_ot_type_as_act == 0) {
+                    $('#is_sun_ot_type_as_act_0').prop( "checked", true );
+                    $('.custom_sun').css('display', 'block');
+                }else{
+                    $('#is_sun_ot_type_as_act_2').prop( "checked", true );
+                    $('.custom_sun').css('display', 'none');
+                    $('.custom_sun_after').css('display', 'none'); 
+                    $('#sun_after_double').prop('required', false);
+                }
+
+                if (data.result.custom_sunday_ot_type == 1) {
+                    $('#custom_sunday_ot_type_1').prop("checked", true);
+                    $('.custom_sun_after').css('display', 'block'); 
+                    $('#sun_after_double').prop('disabled', false).val(data.result.sun_after_double);
+                    $('#sun_after_double').prop('required', true); 
+                } else if (data.result.custom_sunday_ot_type == 2) {
+                    $('#custom_sunday_ot_type_2').prop("checked", true);
+                    $('.custom_sun_after').css('display', 'none'); 
+                    $('#sun_after_double').val(0).prop("checked", true); 
+                    $('#sun_after_double').prop('required', false);
+                    $('<input>').attr({
+                        type: 'hidden',
+                        name: 'sun_after_double',
+                        value: 0
+                    }); 
+                }
+
+                $('#sun_after_double').val(data.result.sun_after_double);
+
+                $('#spe_day_1_day').change(function () {
+                    const selectedDay = $(this).val();
+
+                    if (selectedDay == "") { 
+                        $('.spe_day_1_type').prop("checked", false); 
+                        $('.custom_spe').css('display', 'none'); 
+                        $('input[name="spe_day_1_rate"]').prop("checked", false); 
+                    } else {                        
+                        $('.custom_spe').css('display', 'block'); 
+                    }
+                });
+
+                $('#spe_day_1_day').val(data.result.spe_day_1_day);
+
+                if (data.result.spe_day_1_type == 1) {
+                    $('#spe_day_1_type_1').prop("checked", true); 
+                    $('.custom_spe').css('display', 'none'); 
+                } else if (data.result.spe_day_1_type == 0) {
+                    $('#spe_day_1_type_0').prop("checked", true); 
+                    $('.custom_spe').css('display', 'block'); 
+                } else {
+                    console.warn('Unexpected value for spe_day_1_type:', data.result.spe_day_1_type);
+                }
+
+                if (data.result.spe_day_1_rate == 1) {
+                    $('#spe_day_1_rate_1').prop("checked", true); 
+                } else if (data.result.spe_day_1_rate == 2) {
+                    $('#spe_day_1_rate_2').prop("checked", true); 
+                } else {
+                    console.warn('Unexpected value for spe_day_1_rate:', data.result.spe_day_1_rate);
+                }
+
+                if(data.result.late_type == 1){
+                    $('#late_type_1').prop( "checked", true );
+                    $('.per_min').css('display', 'block');
+                    $('.short_lev').css('display', 'none');
+                    $('.half_day').css('display', 'none');
+                    $('#short_leaves').val(0).prop( "checked", true); 
+                    $('<input>').attr({
+                        type: 'hidden',
+                        name: 'short_leaves',
+                        value: 0
+                    });
+                    $('#half_days').val(0).prop( "checked", true);
+                    $('<input>').attr({
+                        type: 'hidden',
+                        name: 'half_days',
+                        value: 0
+                    });
+                }else if(data.result.late_type == 2){
+                    $('#late_type_2').prop( "checked", true );
+                    $('.short_lev').css('display', 'block');
+                    $('.half_day').css('display', 'block');
+                    $('.per_min').css('display', 'none');
+                    $('#late_attend_min').val(0).prop( "checked", true); 
+                    $('<input>').attr({
+                        type: 'hidden',
+                        name: 'late_attend_min',
+                        value: 0
+                    });
+                } else if(data.result.late_type == 3){
+                    $('#late_type_3').prop( "checked", true );
+                    $('.short_lev').css('display', 'block');
+                    $('.half_day').css('display', 'block');
+                    $('.per_min').css('display', 'block');
+                }
+
+                $('#late_attend_min').val(data.result.late_attend_min);
+                $('#short_leaves').val(data.result.short_leaves);
+                $('#half_days').val(data.result.half_days);
+
+                $('#hidden_id').val(id);
+                $('.modal-title').text('Edit Job Category');
+                $('#action_button').html('<i class="fas fa-edit"></i>&nbsp;Edit');
+                $('#action').val('Edit');
+                $('#formModal').modal('show');
+            }
+        })
     });
 
     var user_id;

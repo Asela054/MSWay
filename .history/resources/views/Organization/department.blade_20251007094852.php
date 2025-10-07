@@ -279,18 +279,18 @@
 
             var user_id;
 
-    var user_id;
+            $(document).on('click', '.delete', function () {
+                user_id = $(this).attr('id');
+                $('#confirmModal').modal('show');
+            });
 
-    $(document).on('click', '.delete', async function() {
-        var r = await Otherconfirmation("You want to remove this ? ");
-        if (r == true) {
-            user_id = $(this).attr('id');
-            $.ajax({
-                url: "../Department/destroy/" + user_id,
-                beforeSend: function () {
-                    $('#ok_button').text('Deleting...');
-                },
-                success: function (data) {//alert(data);
+            $('#ok_button').click(function () {
+                $.ajax({
+                    url: "../Department/destroy/" + user_id,
+                    beforeSend: function () {
+                        $('#ok_button').text('Deleting...');
+                    },
+                    success: function (data) {//alert(data);
                     const actionObj = {
                         icon: 'fas fa-trash-alt',
                         title: '',
@@ -302,9 +302,8 @@
                     const actionJSON = JSON.stringify(actionObj, null, 2);
                     actionreload(actionJSON);
                 }
-            })
-        }
-    });
+                })
+            });
         });
     </script>
 

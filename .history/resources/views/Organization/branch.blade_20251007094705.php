@@ -11,7 +11,7 @@
             <div class="page-header-content py-3 px-2">
                 <h1 class="page-header-title ">
                     <div class="page-header-icon"><i class="fa-light fa-building"></i></div>
-                    <span>Leave Deductions</span>
+                    <span>Branch</span>
                 </h1>
             </div>
         </div>
@@ -21,8 +21,8 @@
             <div class="card-body p-0 p-2">
                 <div class="row">
                     <div class="col-12">
-                        @can('Leave-Deduction-create')
-                            <button type="button" class="btn btn-primary btn-sm fa-pull-right" name="create_record" id="create_record"><i class="fas fa-plus mr-2"></i>Add Leave Deduction</button>
+                        @can('location-create')
+                        <button type="button" class="btn btn-primary btn-sm fa-pull-right" name="create_record" id="create_record"><i class="fas fa-plus mr-2"></i>Add Location</button>
                         @endcan
                     </div>
                     <div class="col-12">
@@ -30,32 +30,31 @@
                     </div>
                     <div class="col-12">
                         <div class="center-block fix-width scroll-inner">
-                            <table class="table table-striped table-bordered table-sm small nowrap display text-uppercase" style="width: 100%" id="dataTable">
-                                    <thead>
-                                        <tr>
-                                            <th>Id </th>
-                                            <th>Job Category</th>
-                                            <th>Remuneration Name</th>
-                                            <th>Day Count</th> 
-                                            <th>Amount</th> 
-                                            <th class="text-right">Action</th>  
-                                        </tr>
-                                    </thead>
-                            </table>
+                        <table class="table table-striped table-bordered table-sm small nowrap text-uppercase" style="width: 100%" id="dataTable">
+                            <thead>
+                                <tr>
+                                    <th>ID </th>
+                                    <th>Location</th>
+                                    <th>Contact No</th>
+                                    <th>EPF No</th>
+                                    <th>ETF No</th>
+                                    <th class="text-right">Action</th>
+                                </tr>
+                            </thead>
+                        </table>
                         </div>
                     </div>
-                </div>
+                </div>    
             </div>
         </div>
     </div>
-
     <!-- Modal Area Start -->
     <div class="modal fade" id="formModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-        aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
+    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header p-2">
-                    <h5 class="modal-title" id="staticBackdropLabel">Add Leave Deduction</h5>
+                    <h5 class="modal-title" id="staticBackdropLabel">Add Location</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -66,42 +65,23 @@
                             <span id="form_result"></span>
                             <form method="post" id="formTitle" class="form-horizontal">
                                 {{ csrf_field() }}	
-
-                                <div class="form-row mb-2">
-                                    <div class="col-md-6">
-                                        <label class="small font-weight-bold text-dark">Job Category</label>
-                                        <select id="job_category" name="job_category" class="form-control form-control-sm" required>
-                                        <option value="">Select Job Category</option>
-                                        @foreach ($job_categories as $job_category){
-                                            <option value="{{$job_category->id}}" >{{$job_category->category}}</option>
-                                        }  
-                                        @endforeach
-                                        </select>
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <label class="small font-weight-bold text-dark">Addition/Deduction Type</label>
-                                        <select id="remuneration_name" name="remuneration_name" class="form-control form-control-sm" required>
-                                        <option value="">Select Remuneration</option>
-                                        @foreach ($remunerations as $remuneration){
-                                            <option value="{{$remuneration->id}}" >{{$remuneration->remuneration_name}}</option>
-                                        }  
-                                        @endforeach
-                                    </select>
-                                    </div>
+                                <div class="form-group mb-1">
+                                    <label class="small font-weight-bold text-dark">Location</label>
+                                    <input type="text" name="location" id="location" class="form-control form-control-sm" />
                                 </div>
-                                
-                                <div class="form-row mb-2">
-                                    <div class="col-md-6">
-                                        <label class="small font-weight-bold text-dark">Day Count</label>
-                                        <input type="number" step="0.01" name="day_count" id="day_count" class="form-control form-control-sm" required />
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="small font-weight-bold text-dark">Amount</label>
-                                        <input type="number" name="amount" step="0.01" id="amount" class="form-control form-control-sm" required />
-                                    </div>
+                                <div class="form-group mb-1">
+                                    <label class="small font-weight-bold text-dark">Contact No</label>
+                                    <input type="text" name="contactno" id="contactno" class="form-control form-control-sm" />
                                 </div>
-                                <div class="form-group mt-2">
+                                <div class="form-group mb-1">
+                                    <label class="small font-weight-bold text-dark">EPF No</label>
+                                    <input type="text" name="epf" id="epf" class="form-control form-control-sm" />
+                                </div>
+                                <div class="form-group mb-1">
+                                    <label class="small font-weight-bold text-dark">ETF No</label>
+                                    <input type="text" name="etf" id="etf" class="form-control form-control-sm" />
+                                </div>
+                                <div class="form-group mt-3">
                                     <button type="submit" name="action_button" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
                                 </div>
                                 <input type="hidden" name="action" id="action" value="Add" />
@@ -113,7 +93,6 @@
             </div>
         </div>
     </div>
-
     <div class="modal fade" id="confirmModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
     aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">
@@ -139,15 +118,18 @@
     </div>
     <!-- Modal Area End -->
 </main>
+              
 @endsection
 
+
 @section('script')
+
 <script>
 $(document).ready(function(){
 
     $('#organization_menu_link').addClass('active');
     $('#organization_menu_link_icon').addClass('active');
-    $('#leave_deductionlink').addClass('navbtnactive');
+    $('#branchlink').addClass('navbtnactive');
 
     $('#dataTable').DataTable({
         "destroy": true,
@@ -158,13 +140,13 @@ $(document).ready(function(){
         "buttons": [{
                 extend: 'csv',
                 className: 'btn btn-success btn-sm',
-                title: 'Leave Deduction Information',
+                title: 'Location  Information',
                 text: '<i class="fas fa-file-csv mr-2"></i> CSV',
             },
             { 
                 extend: 'pdf', 
                 className: 'btn btn-danger btn-sm', 
-                title: 'Leave Deduction Information', 
+                title: 'Location Information', 
                 text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
                 orientation: 'landscape', 
                 pageSize: 'legal', 
@@ -174,7 +156,7 @@ $(document).ready(function(){
             },
             {
                 extend: 'print',
-                title: 'Leave Deduction Information',
+                title: 'Location  Information',
                 className: 'btn btn-primary btn-sm',
                 text: '<i class="fas fa-print mr-2"></i> Print',
                 customize: function(win) {
@@ -189,7 +171,7 @@ $(document).ready(function(){
             [0, "desc"]
         ],
         ajax: {
-            url: scripturl + "/leavedeductionlist.php",
+            url: scripturl + "/branchlist.php",
             type: "POST",
             data: {},
         },
@@ -199,20 +181,20 @@ $(document).ready(function(){
                 name: 'id'
             },
             { 
-                data: 'category', 
-                name: 'category'
+                data: 'location', 
+                name: 'location'
             },
             { 
-                data: 'remuneration_name', 
-                name: 'remuneration_name'
+                data: 'contactno', 
+                name: 'contactno'
             },
             { 
-                data: 'day_count', 
-                name: 'day_count'
+                data: 'epf', 
+                name: 'epf'
             },
             { 
-                data: 'amount', 
-                name: 'amount'
+                data: 'etf', 
+                name: 'etf'
             },
             {
                 data: 'id',
@@ -222,8 +204,10 @@ $(document).ready(function(){
                 searchable: false,
                 render: function(data, type, row) {
                     var buttons = '';
-                        buttons += '<button name="edit" id="'+row.id+'" class="edit btn btn-primary btn-sm mr-1" type="button" data-toggle="tooltip" title="Edit"><i class="fas fa-pencil-alt"></i></button>';
-                        buttons += '<button type="submit" name="delete" id="'+row.id+'" class="delete btn btn-danger btn-sm" data-toggle="tooltip" title="Remove"><i class="far fa-trash-alt"></i></button>';
+
+                    buttons += '<button name="edit" id="'+row.id+'" class="edit btn btn-primary btn-sm mr-1" type="button" data-toggle="tooltip" title="Edit"><i class="fas fa-pencil-alt"></i></button>';
+
+                    buttons += '<button type="submit" name="delete" id="'+row.id+'" class="delete btn btn-danger btn-sm" data-toggle="tooltip" title="Remove"><i class="far fa-trash-alt"></i></button>';
 
                     return buttons;
                 }
@@ -235,8 +219,8 @@ $(document).ready(function(){
     });
 
     $('#create_record').click(function(){
-        $('.modal-title').text('Add Leave Deduction');
-        $('#action_button').html('<i class="fas fa-plus"></i>&nbsp;Add');
+        $('.modal-title').text('Add New Location');
+        $('#action_button').html('Add');
         $('#action').val('Add');
         $('#form_result').html('');
         $('#formTitle')[0].reset();
@@ -249,10 +233,10 @@ $(document).ready(function(){
         var action_url = '';
 
         if ($('#action').val() == 'Add') {
-            action_url = "{{ route('addLeaveDeduction') }}";
+            action_url = "{{ route('addBranch') }}";
         }
         if ($('#action').val() == 'Edit') {
-            action_url = "{{ route('LeaveDeduction.update') }}";
+            action_url = "{{ route('Branch.update') }}";
         }
 
         $.ajax({
@@ -260,7 +244,7 @@ $(document).ready(function(){
             method: "POST",
             data: $(this).serialize(),
             dataType: "json",
-            success: function (data) {//alert(data);        
+            success: function (data) { //alert(data);        
                 if (data.errors) {
                     const actionObj = {
                         icon: 'fas fa-warning',
@@ -290,24 +274,22 @@ $(document).ready(function(){
         });
     });
 
-    $(document).on('click', '.edit', async function () {
+    $(document).on('click', '.edit', function () {
         var r = await Otherconfirmation("You want to Edit this ? ");
         if (r == true) {
             var id = $(this).attr('id');
             $('#form_result').html('');
             $.ajax({
-                url: "LeaveDeduction/" + id + "/edit",
+                url: "Branch/" + id + "/edit",
                 dataType: "json",
                 success: function (data) {
-
-                    $('#job_category').val(data.result.job_id);
-                    $('#remuneration_name').val(data.result.remuneration_id);
-                    $('#day_count').val(data.result.day_count);
-                    $('#amount').val(data.result.amount);
-
+                    $('#location').val(data.result.location);
+                    $('#contactno').val(data.result.contactno);
+                    $('#epf').val(data.result.epf);
+                    $('#etf').val(data.result.etf);
                     $('#hidden_id').val(id);
-                    $('.modal-title').text('Edit Leave Deduction');
-                    $('#action_button').html('<i class="fas fa-edit"></i>&nbsp;Edit');
+                    $('.modal-title').text('Edit Location');
+                    $('#action_button').html('Edit');
                     $('#action').val('Edit');
                     $('#formModal').modal('show');
                 }
@@ -317,15 +299,17 @@ $(document).ready(function(){
 
     var user_id;
 
-    $(document).on('click', '.delete', async function() {
-        var r = await Otherconfirmation("You want to remove this ? ");
-        if (r == true) {
-            user_id = $(this).attr('id');
-            $.ajax({
-                url: "LeaveDeduction/destroy/" + user_id,
-                beforeSend: function () {
-                    $('#ok_button').text('Deleting...');
-                },
+    $(document).on('click', '.delete', function () {
+        user_id = $(this).attr('id');
+        $('#confirmModal').modal('show');
+    });
+
+    $('#ok_button').click(function () {
+        $.ajax({
+            url: "Branch/destroy/" + user_id,
+            beforeSend: function () {
+                $('#ok_button').text('Deleting...');
+            },
                 success: function (data) {//alert(data);
                     const actionObj = {
                         icon: 'fas fa-trash-alt',
@@ -338,17 +322,9 @@ $(document).ready(function(){
                     const actionJSON = JSON.stringify(actionObj, null, 2);
                     actionreload(actionJSON);
                 }
-            })
-        }
+        })
     });
-
-
-
-    
 });
 </script>
 
-
 @endsection
-
-                                

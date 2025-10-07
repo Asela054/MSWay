@@ -286,7 +286,7 @@
         if (r == true) {
             user_id = $(this).attr('id');
             $.ajax({
-                url: "../Department/destroy/" + user_id,
+                url: "Company/destroy/" + user_id,
                 beforeSend: function () {
                     $('#ok_button').text('Deleting...');
                 },

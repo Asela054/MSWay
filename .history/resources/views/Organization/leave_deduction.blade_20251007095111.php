@@ -293,40 +293,42 @@ $(document).ready(function(){
     $(document).on('click', '.edit', async function () {
         var r = await Otherconfirmation("You want to Edit this ? ");
         if (r == true) {
-            var id = $(this).attr('id');
-            $('#form_result').html('');
-            $.ajax({
-                url: "LeaveDeduction/" + id + "/edit",
-                dataType: "json",
-                success: function (data) {
+        var id = $(this).attr('id');
+        $('#form_result').html('');
+        $.ajax({
+            url: "LeaveDeduction/" + id + "/edit",
+            dataType: "json",
+            success: function (data) {
 
-                    $('#job_category').val(data.result.job_id);
-                    $('#remuneration_name').val(data.result.remuneration_id);
-                    $('#day_count').val(data.result.day_count);
-                    $('#amount').val(data.result.amount);
+                $('#job_category').val(data.result.job_id);
+                $('#remuneration_name').val(data.result.remuneration_id);
+                $('#day_count').val(data.result.day_count);
+                $('#amount').val(data.result.amount);
 
-                    $('#hidden_id').val(id);
-                    $('.modal-title').text('Edit Leave Deduction');
-                    $('#action_button').html('<i class="fas fa-edit"></i>&nbsp;Edit');
-                    $('#action').val('Edit');
-                    $('#formModal').modal('show');
-                }
-            })
-        }
+                $('#hidden_id').val(id);
+                $('.modal-title').text('Edit Leave Deduction');
+                $('#action_button').html('<i class="fas fa-edit"></i>&nbsp;Edit');
+                $('#action').val('Edit');
+                $('#formModal').modal('show');
+            }
+        })
+    }
     });
 
     var user_id;
 
-    $(document).on('click', '.delete', async function() {
-        var r = await Otherconfirmation("You want to remove this ? ");
-        if (r == true) {
-            user_id = $(this).attr('id');
-            $.ajax({
-                url: "LeaveDeduction/destroy/" + user_id,
-                beforeSend: function () {
-                    $('#ok_button').text('Deleting...');
-                },
-                success: function (data) {//alert(data);
+    $(document).on('click', '.delete', function () {
+        user_id = $(this).attr('id');
+        $('#confirmModal').modal('show');
+    });
+
+    $('#ok_button').click(function () {
+        $.ajax({
+            url: "LeaveDeduction/destroy/" + user_id,
+            beforeSend: function () {
+                $('#ok_button').text('Deleting...');
+            },
+            success: function (data) {//alert(data);
                     const actionObj = {
                         icon: 'fas fa-trash-alt',
                         title: '',
@@ -338,8 +340,7 @@ $(document).ready(function(){
                     const actionJSON = JSON.stringify(actionObj, null, 2);
                     actionreload(actionJSON);
                 }
-            })
-        }
+        })
     });
 
 

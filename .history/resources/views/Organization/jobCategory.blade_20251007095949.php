@@ -1010,30 +1010,29 @@ $(document).ready(function(){
 
     var user_id;
 
-    $(document).on('click', '.delete', function () {
-        user_id = $(this).attr('id');
-        $('#confirmModal').modal('show');
-    });
-
-    $('#ok_button').click(function () {
-        $.ajax({
-            url: "JobCategory/destroy/" + user_id,
-            beforeSend: function () {
-                $('#ok_button').text('Deleting...');
-            },
-            success: function (data) { //alert(data);
-                const actionObj = {
-                    icon: 'fas fa-trash-alt',
-                    title: '',
-                    message: 'Record Remove Successfully',
-                    url: '',
-                    target: '_blank',
-                    type: 'danger'
-                };
-                const actionJSON = JSON.stringify(actionObj, null, 2);
-                actionreload(actionJSON);
-            }
-        })
+    $(document).on('click', '.delete', async function() {
+        var r = await Otherconfirmation("You want to remove this ? ");
+        if (r == true) {
+            user_id = $(this).attr('id');
+            $.ajax({
+                url: "JobCategory/destroy/" + user_id,
+                beforeSend: function () {
+                    $('#ok_button').text('Deleting...');
+                },
+                success: function (data) {//alert(data);
+                    const actionObj = {
+                        icon: 'fas fa-trash-alt',
+                        title: '',
+                        message: 'Record Remove Successfully',
+                        url: '',
+                        target: '_blank',
+                        type: 'danger'
+                    };
+                    const actionJSON = JSON.stringify(actionObj, null, 2);
+                    actionreload(actionJSON);
+                }
+            })
+        }
     });
 
     $(document).on('change', '.lunch_deduct_type', function (e) {

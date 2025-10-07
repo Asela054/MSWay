@@ -364,44 +364,44 @@ $(document).ready(function(){
     $(document).on('click', '.edit', async function () {
         var r = await Otherconfirmation("You want to Edit this ? ");
         if (r == true) {
-            var id = $(this).attr('id');
-            $('#form_result').html('');
+        var id = $(this).attr('id');
+        $('#form_result').html('');
 
-            $('#employee').prop('disabled', false).parent().show();
-            $('#job_category').prop('disabled', false);
-            $('#remuneration_name').prop('disabled', false);
-            $('#allowance_type_0, #allowance_type_1').prop('disabled', false);
-            $('#amount').prop('readonly', false);
-            $('#allowleave').prop('readonly', false);
+        $('#employee').prop('disabled', false).parent().show();
+        $('#job_category').prop('disabled', false);
+        $('#remuneration_name').prop('disabled', false);
+        $('#allowance_type_0, #allowance_type_1').prop('disabled', false);
+        $('#amount').prop('readonly', false);
+        $('#allowleave').prop('readonly', false);
 
-            $.ajax({
-                url: "SalaryAdjustment/" + id + "/edit",
-                dataType: "json",
-                success: function (data) {
+        $.ajax({
+            url: "SalaryAdjustment/" + id + "/edit",
+            dataType: "json",
+            success: function (data) {
 
-                    $('#employee').val(data.result.emp_id);
-                    $('#job_category').val(data.result.job_id);
-                    $('#remuneration_name').val(data.result.remuneration_id);
+                $('#employee').val(data.result.emp_id);
+                $('#job_category').val(data.result.job_id);
+                $('#remuneration_name').val(data.result.remuneration_id);
 
-                    if (data.result.allowance_type == '1') {
-                        $('#allowance_type_0').prop("checked", true);
-                        // $('.custom_work').css('display', 'none');
-                    } else if (data.result.allowance_type == '2') {
-                        $('#allowance_type_1').prop("checked", true);
-                        // $('.custom_work').css('display', 'block');
-                    }
-
-                    $('#amount').val(data.result.amount);
-                    $('#allowleave').val(data.result.allowleave);
-
-                    $('#hidden_id').val(id);
-                    $('.modal-title').text('Edit Salary Adjustment');
-                    $('#action_button').html('<i class="fas fa-edit"></i>&nbsp;Edit');
-                    $('#action').val('Edit');
-                    $('#formModal').modal('show');
+                if(data.result.allowance_type == '1'){
+                    $('#allowance_type_0').prop( "checked", true );
+                    // $('.custom_work').css('display', 'none');
+                }else if(data.result.allowance_type == '2') {
+                    $('#allowance_type_1').prop( "checked", true );
+                    // $('.custom_work').css('display', 'block');
                 }
-            })
-        }
+
+                $('#amount').val(data.result.amount);
+                $('#allowleave').val(data.result.allowleave);
+
+                $('#hidden_id').val(id);
+                $('.modal-title').text('Edit Salary Adjustment');
+                $('#action_button').html('<i class="fas fa-edit"></i>&nbsp;Edit');
+                $('#action').val('Edit');
+                $('#formModal').modal('show');
+            }
+        })
+    }
     });
 
     $(document).on('click', '.approve', function () {
@@ -438,29 +438,30 @@ $(document).ready(function(){
 
     var user_id;
 
-    $(document).on('click', '.delete', async function() {
-        var r = await Otherconfirmation("You want to remove this ? ");
-        if (r == true) {
-            user_id = $(this).attr('id');
-            $.ajax({
-                url: "SalaryAdjustment/destroy/" + user_id,
-                beforeSend: function () {
-                    $('#ok_button').text('Deleting...');
-                },
-                success: function (data) {//alert(data);
-                    const actionObj = {
-                        icon: 'fas fa-trash-alt',
-                        title: '',
-                        message: 'Record Remove Successfully',
-                        url: '',
-                        target: '_blank',
-                        type: 'danger'
-                    };
-                    const actionJSON = JSON.stringify(actionObj, null, 2);
-                    actionreload(actionJSON);
-                }
-            })
-        }
+    $(document).on('click', '.delete', function () {
+        user_id = $(this).attr('id');
+        $('#confirmModal').modal('show');
+    });
+
+    $('#ok_button').click(function () {
+        $.ajax({
+            url: "SalaryAdjustment/destroy/" + user_id,
+            beforeSend: function () {
+                $('#ok_button').text('Deleting...');
+            },
+            success: function (data) {//alert(data);
+                const actionObj = {
+                    icon: 'fas fa-trash-alt',
+                    title: '',
+                    message: 'Record Remove Successfully',
+                    url: '',
+                    target: '_blank',
+                    type: 'danger'
+                };
+                const actionJSON = JSON.stringify(actionObj, null, 2);
+                actionreload(actionJSON);
+            }
+        })
     });
 
 

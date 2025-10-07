@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Branch;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Validator;
 
 class BranchController extends Controller
@@ -169,4 +168,17 @@ class BranchController extends Controller
         $data = Branch::findOrFail($id);
         $data->delete();
     }
+
+        public function destroy($id)
+    {
+        $user = Auth::user();
+        $permission = $user->can('company-delete');
+        if(!$permission) {
+            return response()->json(['errors' => array('You do not have permission to remove company.')]);
+        }
+
+        $data = Company::findOrFail($id);
+        $data->delete();
+    }
+
 }

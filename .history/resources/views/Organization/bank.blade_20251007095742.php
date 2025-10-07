@@ -2,27 +2,27 @@
 
 @section('content')
 
-<main>
-        <div class="page-header shadow">
-            <div class="container-fluid d-none d-sm-block shadow">
-                @include('layouts.corporate_nav_bar')
-            </div>
-            <div class="container-fluid">
-                <div class="page-header-content py-3 px-2">
-                    <h1 class="page-header-title ">
-                        <div class="page-header-icon"><i class="fa-light fa-building"></i></div>
-                        <span>Department</span>
-                    </h1>
-                </div>
+    <main>
+    <div class="page-header shadow">
+        <div class="container-fluid d-none d-sm-block shadow">
+            @include('layouts.corporate_nav_bar')
+        </div>
+        <div class="container-fluid">
+            <div class="page-header-content py-3 px-2">
+                <h1 class="page-header-title ">
+                    <div class="page-header-icon"><i class="fa-light fa-building"></i></div>
+                    <span>Bank</span>
+                </h1>
             </div>
         </div>
-        <div class="container-fluid mt-2 p-0 p-2">
-            <div class="card">
-                <div class="card-body p-0 p-2">
+    </div>
+    <div class="container-fluid mt-2 p-0 p-2">
+        <div class="card">
+            <div class="card-body p-0 p-2">
                     <div class="row">
                         <div class="col-12">
-                            @can('department-create')
-                                <button type="button" class="btn btn-primary btn-sm fa-pull-right" name="create_record" id="create_record"><i class="fas fa-plus mr-2"></i>Add Department</button>
+                            @can('bank-create')
+                                <button type="button" class="btn btn-primary btn-sm fa-pull-right" name="create_record" id="create_record"><i class="fas fa-plus mr-2"></i>Add Bank</button>
                             @endcan
                         </div>
                         <div class="col-12">
@@ -30,15 +30,18 @@
                         </div>
                         <div class="col-12">
                             <div class="center-block fix-width scroll-inner">
-                            <table class="table table-striped table-bordered table-sm small nowrap text-uppercase" style="width: 100%" id="dataTable">
-                                <thead>
-                                <tr>
-                                    <th>ID </th>
-                                    <th>Name</th>
-                                    <th class="text-right">Action</th>
-                                </tr>
-                                </thead>
-                            </table>
+                            @can('bank-list')
+                                <table class="table table-striped table-bordered table-sm small nowrap text-uppercase" style="width: 100%" id="dataTable">
+                                    <thead>
+                                    <tr>
+                                        <th>ID </th>
+                                        <th>Code</th>
+                                        <th>Bank</th>
+                                        <th class="text-right">Action</th>
+                                    </tr>
+                                    </thead>
+                                </table>
+                            @endcan
                             </div>
                         </div>
                     </div>
@@ -51,7 +54,7 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header p-2">
-                        <h5 class="modal-title" id="staticBackdropLabel">Add Department</h5>
+                        <h5 class="modal-title" id="staticBackdropLabel">Add Bank</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -63,20 +66,19 @@
                                 <form method="post" id="formTitle" class="form-horizontal">
                                     {{ csrf_field() }}
                                     <div class="form-row mb-1">
-                                        <div class="col-12">
+                                        <div class="col-9">
                                             <label class="small font-weight-bold text-dark">Name*</label>
                                             <input type="text" name="name" id="name" class="form-control form-control-sm" />
                                         </div>
-{{--                                        <div class="col">--}}
-{{--                                            <label class="small font-weight-bold text-dark">Code*</label>--}}
-{{--                                            <input type="text" name="code" id="code" class="form-control form-control-sm" />--}}
-{{--                                        </div>--}}
+                                        <div class="col">
+                                            <label class="small font-weight-bold text-dark">Code*</label>
+                                            <input type="text" name="code" id="code" class="form-control form-control-sm" />
+                                        </div>
                                     </div>
                                     <div class="form-group mt-3">
                                         <button type="submit" name="action_button" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
                                     </div>
                                     <input type="hidden" name="action" id="action" value="Add" />
-                                    <input type="hidden" name="company_id" id="company_id" value="{{$company->id}}" />
                                     <input type="hidden" name="hidden_id" id="hidden_id" />
                                 </form>
                             </div>
@@ -121,7 +123,7 @@
 
             $('#organization_menu_link').addClass('active');
             $('#organization_menu_link_icon').addClass('active');
-            $('#companylink').addClass('navbtnactive');
+            $('#banklink').addClass('navbtnactive');
 
             $('#dataTable').DataTable({
                 "destroy": true,
@@ -132,26 +134,26 @@
                 "buttons": [{
                         extend: 'csv',
                         className: 'btn btn-success btn-sm',
-                        title: 'Customer  Information',
+                        title: 'Bank  Information',
                         text: '<i class="fas fa-file-csv mr-2"></i> CSV',
                     },
-                    { 
-                        extend: 'pdf', 
-                        className: 'btn btn-danger btn-sm', 
-                        title: 'Location Information', 
+                    {
+                        extend: 'pdf',
+                        className: 'btn btn-danger btn-sm',
+                        title: 'Bank Information',
                         text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
-                        orientation: 'landscape', 
-                        pageSize: 'legal', 
-                        customize: function(doc) {
+                        orientation: 'landscape',
+                        pageSize: 'legal',
+                        customize: function (doc) {
                             doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
                         }
                     },
                     {
                         extend: 'print',
-                        title: 'Customer  Information',
+                        title: 'Bank  Information',
                         className: 'btn btn-primary btn-sm',
                         text: '<i class="fas fa-print mr-2"></i> Print',
-                        customize: function(win) {
+                        customize: function (win) {
                             $(win.document.body).find('table')
                                 .addClass('compact')
                                 .css('font-size', 'inherit');
@@ -163,20 +165,21 @@
                     [0, "desc"]
                 ],
                 ajax: {
-                    url: scripturl + "/departmentlist.php",
+                    url: scripturl + "/banklist.php",
                     type: "POST",
-                   data: {
-                        company_id: $('#company_id').val()
-                    },
+                    data: {},
                 },
-                columns: [
-                    { 
-                        data: 'id', 
+                columns: [{
+                        data: 'id',
                         name: 'id'
                     },
-                    { 
-                        data: 'name', 
-                        name: 'name'
+                    {
+                        data: 'code',
+                        name: 'code'
+                    },
+                    {
+                        data: 'bank',
+                        name: 'bank'
                     },
                     {
                         data: 'id',
@@ -184,24 +187,26 @@
                         className: 'text-right',
                         orderable: false,
                         searchable: false,
-                        render: function(data, type, row) {
-                            var is_resigned = row.is_resigned;
+                        render: function (data, type, row) {
                             var buttons = '';
+                            var url = "{{ route('bank_branch_show', ':code') }}";
+                            url = url.replace(':code', row.code);
 
-                            buttons += '<button name="edit" id="'+row.id+'" class="edit btn btn-primary btn-sm mr-1" type="button" data-toggle="tooltip" title="Edit"><i class="fas fa-pencil-alt"></i></button>';
-                            buttons += '<button type="submit" name="delete" id="'+row.id+'" class="delete btn btn-danger btn-sm" data-toggle="tooltip" title="Remove"><i class="far fa-trash-alt"></i></button>';
+                            buttons += '<a title="View Branches" href="' + url + '" class="branches btn btn-info btn-sm mr-1"><i class="fas fa-building"></i></a>';
+                            buttons += '<button name="edit" id="' + row.id + '" class="edit btn btn-primary btn-sm mr-1" type="button" data-toggle="tooltip" title="Edit"><i class="fas fa-pencil-alt"></i></button>';
+                            buttons += '<button type="submit" name="delete" id="' + row.id + '" class="delete btn btn-danger btn-sm" data-toggle="tooltip" title="Remove"><i class="far fa-trash-alt"></i></button>';
 
                             return buttons;
                         }
                     }
                 ],
-                drawCallback: function(settings) {
+                drawCallback: function (settings) {
                     $('[data-toggle="tooltip"]').tooltip();
                 }
             });
 
             $('#create_record').click(function(){
-                $('.modal-title').text('Add New Department');
+                $('.modal-title').text('Add New Bank');
                 $('#action_button').html('Add');
                 $('#action').val('Add');
                 $('#form_result').html('');
@@ -215,10 +220,10 @@
                 var action_url = '';
 
                 if ($('#action').val() == 'Add') {
-                    action_url = "{{ route('addDepartment') }}";
+                    action_url = "{{ route('addBank') }}";
                 }
                 if ($('#action').val() == 'Edit') {
-                    action_url = "{{ route('Department.update') }}";
+                    action_url = "{{ route('Bank.update') }}";
                 }
 
                 $.ajax({
@@ -255,20 +260,20 @@
                     }
                 });
             });
-            
+
             $(document).on('click', '.edit', async function () {
                 var r = await Otherconfirmation("You want to Edit this ? ");
                 if (r == true) {
                     var id = $(this).attr('id');
                     $('#form_result').html('');
                     $.ajax({
-                        url: "../Department/" + id + "/edit",
+                        url: "Bank/" + id + "/edit",
                         dataType: "json",
                         success: function (data) {
-                            $('#name').val(data.result.name);
-                            $('#department_id').val(data.result.department_id);
+                            $('#name').val(data.result.bank);
+                            $('#code').val(data.result.code);
                             $('#hidden_id').val(id);
-                            $('.modal-title').text('Edit Department');
+                            $('.modal-title').text('Edit Bank');
                             $('#action_button').html('Edit');
                             $('#action').val('Edit');
                             $('#formModal').modal('show');
@@ -286,7 +291,7 @@
         if (r == true) {
             user_id = $(this).attr('id');
             $.ajax({
-                url: "../Department/destroy/" + user_id,
+                url: "Bank/destroy/" + user_id,
                 beforeSend: function () {
                     $('#ok_button').text('Deleting...');
                 },

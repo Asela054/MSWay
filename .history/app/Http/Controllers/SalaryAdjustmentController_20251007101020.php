@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Auth;
 use App\SalaryAdjustment;
+use Auth;
 use Carbon\Carbon;
 use Datatables;
 

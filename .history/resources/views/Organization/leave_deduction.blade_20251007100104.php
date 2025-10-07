@@ -322,7 +322,7 @@ $(document).ready(function(){
         if (r == true) {
             user_id = $(this).attr('id');
             $.ajax({
-                url: "LeaveDeduction/destroy/" + user_id,
+                url: "Leave/destroy/" + user_id,
                 beforeSend: function () {
                     $('#ok_button').text('Deleting...');
                 },
