@@ -56,6 +56,8 @@
                                         <th>OFF TIME</th>
                                         <th class="d-none">LOCATION ID</th>
                                         <th class="d-none" >REASON</th>
+                                        <th class="d-none">EMPNAME</th>
+                                        <th class="d-none">CALLING</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -78,7 +80,7 @@
                 <div class="offcanvas-body">
                     <ul class="list-unstyled">
                         <form class="form-horizontal" id="formFilter">
-                            <li class="mb-3">
+                            <li class="mb-2">
                                 <div class="col-md-12">
                                    <label class="small font-weight-bolder text-dark">Location</label>
                                     <select name="location" id="location" class="form-control form-control-sm">
@@ -90,14 +92,14 @@
                                     </select>
                                 </div>
                             </li>
-                            <li class="mb-3">
+                            <li class="mb-2">
                                 <div class="col-md-12">
                                     <label class="small font-weight-bolder text-dark">Employee</label>
                                     <select name="employee" id="employee_f" class="form-control form-control-sm">
                                     </select>
                                 </div>
                             </li>
-                            <li class="mb-3">
+                            <li class="mb-2">
                                 <div class="col-md-12">
                                     <label class="small font-weight-bolder text-dark"> From Date* </label>
                                     <input type="date" id="from_date" name="from_date"
@@ -105,7 +107,7 @@
                                            required>
                                 </div>
                             </li>
-                            <li class="mb-3">
+                            <li class="mb-2">
                                 <div class="col-md-12">
                                     <label class="small font-weight-bolder text-dark"> To Date*</label>
                                     <input type="date" id="to_date" name="to_date" class="form-control form-control-sm"
@@ -114,11 +116,11 @@
                             </li>
                             <li>
                                 <div class="col-md-12 d-flex justify-content-between">
-                                    <button type="submit" class="btn btn-primary btn-md filter-btn px-3"
+                                    <button type="submit" class="btn btn-primary btn-sm filter-btn px-3"
                                         id="btn-filter">
                                         <i class="fas fa-search mr-2"></i>Search
                                     </button>
-                                    <button type="button" class="btn btn-danger btn-md filter-btn px-3" id="btn-reset">
+                                    <button type="button" class="btn btn-danger btn-sm filter-btn px-3" id="btn-reset">
                                         <i class="fas fa-redo mr-1"></i> Reset
                                     </button>
                                 </div>
@@ -243,7 +245,16 @@ $(document).ready(function(){
                         data: 'reason',
                         name: 'reason',
                           visible: false
-                    }
+                    },
+                     { data: "employee_name", 
+                        name: "employee_name", 
+                        visible: false
+                        },
+                        {   data: "calling_name",
+                            name: "calling_name", 
+                            visible: false
+                        }
+
                 ],
             });
         }

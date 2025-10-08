@@ -384,6 +384,19 @@
                             return buttons;
                         }
                     },
+                     { data: "employee_name", 
+                        name: "employee_name", 
+                        visible: false
+                      },
+                      {   data: "calling_name",
+                          name: "calling_name", 
+                          visible: false
+                       },
+                       { data: "emp_id", 
+                        name: "emp_id", 
+                        visible: false
+                      },
+
                 ],
                 "bDestroy": true,
                 "order": [

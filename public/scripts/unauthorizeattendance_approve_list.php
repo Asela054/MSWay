@@ -14,11 +14,11 @@ $primaryKey = 'id';
 
 $columns = array(
     array('db' => '`u`.`id`', 'dt' => 'id', 'field' => 'id'),
-    array('db' => '`u`.`emp_id`', 'dt' => 'emp_id', 'field' => 'emp_id'),
+    array('db' => '`u`.`emp_id`', 'dt' => 'emp_id', 'field' => 'emp_id', 'visible' => false),
     array('db' => '`u`.`attendance_date`', 'dt' => 'date', 'field' => 'attendance_date'),
     array('db' => '`u`.`employee_id`', 'dt' => 'employee_id', 'field' => 'employee_id'),
-    array('db' => '`u`.`emp_name_with_initial`', 'dt' => 'employee_name', 'field' => 'emp_name_with_initial'),
-    array('db' => '`u`.`calling_name`', 'dt' => 'calling_name', 'field' => 'calling_name'),
+    array('db' => '`u`.`emp_name_with_initial`', 'dt' => 'employee_name', 'field' => 'emp_name_with_initial', 'visible' => false),
+    array('db' => '`u`.`calling_name`', 'dt' => 'calling_name', 'field' => 'calling_name', 'visible' => false),
     array('db' => '`u`.`shift_id`', 'dt' => 'shift_id', 'field' => 'shift_id'),
     array('db' => '`u`.`on_time`', 'dt' => 'on_time', 'field' => 'on_time'),
     array('db' => '`u`.`off_time`', 'dt' => 'off_time', 'field' => 'off_time'),

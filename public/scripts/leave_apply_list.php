@@ -13,11 +13,11 @@ $primaryKey = 'id';
 
 $columns = array(
     array('db' => '`u`.`id`', 'dt' => 'id', 'field' => 'id'),
-    array('db' => '`u`.`emp_id`', 'dt' => 'emp_id', 'field' => 'emp_id'),
-    array('db' => '`u`.`emp_name_with_initial`', 'dt' => 'emp_name', 'field' => 'emp_name_with_initial'),
+    array('db' => '`u`.`emp_id`', 'dt' => 'emp_id', 'field' => 'emp_id', 'visible' => false),
+    array('db' => '`u`.`emp_name_with_initial`', 'dt' => 'emp_name', 'field' => 'emp_name_with_initial', 'visible' => false),
     array('db' => '`u`.`leave_type`', 'dt' => 'leave_type', 'field' => 'leave_type'),
     array('db' => '`u`.`covering_emp_name`', 'dt' => 'covering_emp', 'field' => 'covering_emp_name'),
-    array('db' => '`u`.`calling_name`', 'dt' => 'calling_name', 'field' => 'calling_name'),
+    array('db' => '`u`.`calling_name`', 'dt' => 'calling_name', 'field' => 'calling_name', 'visible' => false),
     array('db' => '`u`.`dep_name`', 'dt' => 'dep_name', 'field' => 'dep_name'),
     array('db' => '`u`.`leave_from`', 'dt' => 'leave_from', 'field' => 'leave_from'),
     array('db' => '`u`.`leave_to`', 'dt' => 'leave_to', 'field' => 'leave_to'),

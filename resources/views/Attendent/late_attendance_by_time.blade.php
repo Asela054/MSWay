@@ -407,10 +407,10 @@
                     save_btn.html('<i class="fa fa-spinner fa-spin"></i> loading...' );
                     $.ajax({
                         url: "lateAttendance_mark_as_late",
-                        late_type: late_type,
                         method: "POST",
                         data: {
                             'selected_cb': selected_cb,
+                            late_type: late_type,
                             _token: $('input[name=_token]').val(),
                         },
                         success: function (data) {
@@ -468,34 +468,6 @@
             }
 
 
-      // Offcanvas toggle functionality
-             $('[data-toggle="offcanvas"]').on('click', function () {
-                 var target = $(this).data('target');
-                 $(target).toggleClass('show');
-                 $('body').toggleClass('offcanvas-open');
-
-                 // Add backdrop
-                 if ($(target).hasClass('show')) {
-                     $('<div class="offcanvas-backdrop fade show"></div>').appendTo('body');
-                 } else {
-                     $('.offcanvas-backdrop').remove();
-                 }
-             });
-
-             // Close offcanvas when clicking on backdrop
-             $(document).on('click', '.offcanvas-backdrop', function () {
-                 $('.offcanvas').removeClass('show');
-                 $('body').removeClass('offcanvas-open');
-                 $(this).remove();
-             });
-
-             // Close offcanvas when clicking on close button
-             $('[data-dismiss="offcanvas"]').on('click', function () {
-                 var target = $(this).closest('.offcanvas');
-                 target.removeClass('show');
-                 $('body').removeClass('offcanvas-open');
-                 $('.offcanvas-backdrop').remove();
-             });
              $('#btn-reset').on('click', function () {
                  $('#formFilter')[0].reset();
                  $('#company').val(null).trigger('change');
@@ -554,21 +526,7 @@
             $(this).prop('checked', isChecked);
         });
 
-         function closeOffcanvasSmoothly(offcanvasId = '#offcanvasRight') {
-             const offcanvas = $(offcanvasId);
-             const backdrop = $('.offcanvas-backdrop');
-
-             // Add hiding class to trigger reverse animation
-             offcanvas.addClass('hiding');
-             backdrop.addClass('fading');
-
-             // Remove elements after animation completes
-             setTimeout(() => {
-                 offcanvas.removeClass('show hiding');
-                 backdrop.remove();
-                 $('body').removeClass('offcanvas-open');
-             }, 900); // Match this with your CSS transition duration
-         }
+         
     </script>
 
 @endsection

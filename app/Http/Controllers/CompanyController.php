@@ -178,33 +178,5 @@ class CompanyController extends Controller
         $data->delete();
     }
 
-    public function company_list_sel2(Request $request){
-        if ($request->ajax())
-        {
-            $page = Input::get('page');
-            $resultCount = 25;
-
-            $offset = ($page - 1) * $resultCount;
-
-            $breeds = Company::where('name', 'LIKE',  '%' . Input::get("term"). '%')
-                ->orderBy('name')
-                ->skip($offset)
-                ->take($resultCount)
-                ->get([DB::raw('id as id'),DB::raw('name as text'), DB::raw('name as name')]);
-
-            $count = Company::count();
-            $endCount = $offset + $resultCount;
-            $morePages = $endCount < $count;
-
-            $results = array(
-                "results" => $breeds,
-                "pagination" => array(
-                    "more" => $morePages
-                )
-            );
-
-            return response()->json($results);
-        }
-    }
-
+  
 }

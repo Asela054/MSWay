@@ -73,27 +73,27 @@
                 <div class="offcanvas-body">
                     <ul class="list-unstyled">
                         <form class="form-horizontal" id="formFilter">
-                            <li class="mb-3">
+                            <li class="mb-2">
                                 <div class="col-md-12">
                                    <label class="small font-weight-bolder text-dark">Company</label>
                                     <select name="company" id="company" class="form-control form-control-sm" required>
                                     </select>
                                 </div>
                             </li>
-                            <li class="mb-3">
+                            <li class="mb-2">
                                 <div class="col-md-12">
                                      <label class="small font-weight-bolder text-dark">Department</label>
                                     <select name="department" id="department" class="form-control form-control-sm" required>
                                     </select>
                                 </div>
                             </li>
-                            <li class="mb-3">
+                            <li class="mb-2">
                                 <div class="col-md-12">
                                     <label class="small font-weight-bolder text-dark">Month</label>
                                      <input type="month" id="month" name="month" class="form-control form-control-sm" placeholder="yyyy-mm" required>
                                 </div>
                             </li>
-                            <li class="mb-3">
+                            <li class="mb-2">
                                 <div class="col-md-12">
                                    <label class="small font-weight-bolder text-dark">Close Date</label>
                                  <input type="date" id="closedate" name="closedate" class="form-control form-control-sm" required>
@@ -101,11 +101,11 @@
                             </li>
                             <li>
                                 <div class="col-md-12 d-flex justify-content-between">
-                                    <button type="submit" class="btn btn-primary btn-md filter-btn px-3"
+                                    <button type="submit" class="btn btn-primary btn-sm filter-btn px-3"
                                         id="btn-filter">
                                         <i class="fas fa-search mr-2"></i>Search
                                     </button>
-                                    <button type="button" class="btn btn-danger btn-md filter-btn px-3" id="btn-reset">
+                                    <button type="button" class="btn btn-danger btn-sm filter-btn px-3" id="btn-reset">
                                         <i class="fas fa-redo mr-1"></i> Reset
                                     </button>
                                 </div>
@@ -449,7 +449,7 @@ $(document).on('click', '#approvel', function () {
             '<tr>' +
             '<td colspan="9" class="text-center py-5">' + // Changed colspan to 9 to match your columns
             '<div class="d-flex flex-column align-items-center">' +
-            '<i class="fas fa-filter fa-3x text-muted mb-3"></i>' +
+            '<i class="fas fa-filter fa-3x text-muted mb-2"></i>' +
             '<h4 class="text-muted mb-2">No Records Found</h4>' +
             '<p class="text-muted">Use the filter options to get records</p>' +
             '</div>' +

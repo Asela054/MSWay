@@ -271,10 +271,19 @@
                         {data: 'working_hours'},
                         {data: 'location'},
                         {data: 'dept_name'},
-                        {data: 'is_approved'}
+                        {data: 'is_approved'},
+                        {data: "emp_name_with_initial", 
+                        "visible": false
+                        },
+                        {data: "calling_name",
+                         "visible": false
+                        },
+                        {data: "emp_id", 
+                        "visible": false
+                        }
                     ],
                     "bDestroy": true,
-                    "order": [[9, "asc"]],
+                    "order": [[1, "asc"]],
 
                     "drawCallback": function( settings ) {
                         check_changed_text_boxes();
@@ -365,7 +374,7 @@
                                  const actionObj = {
                                             icon: 'fas fa-save',
                                             title: '',
-                                            message: data.status,
+                                            message: data.msg,
                                             url: '',
                                             target: '_blank',
                                             type: 'success'
@@ -377,7 +386,7 @@
                                const actionObj = {
                                             icon: 'fas fa-warning',
                                             title: '',
-                                            message: 'Record Error',
+                                            message: data.msg,
                                             url: '',
                                             target: '_blank',
                                             type: 'danger'

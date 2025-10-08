@@ -13,8 +13,8 @@ $primaryKey = 'id';
 
     $columns = array(
         array('db' => '`u`.`id`', 'dt' => 'id', 'field' => 'id'),
-        array('db' => '`u`.`emp_id`', 'dt' => 'emp_id', 'field' => 'emp_id'),
-        array('db' => '`u`.`emp_name_with_initial`', 'dt' => 'emp_name_with_initial', 'field' => 'emp_name_with_initial'),
+        array('db' => '`u`.`emp_id`', 'dt' => 'emp_id', 'field' => 'emp_id','visible' => false),
+        array('db' => '`u`.`emp_name_with_initial`', 'dt' => 'emp_name_with_initial', 'field' => 'emp_name_with_initial','visible' => false),
         array('db' => '`u`.`name`', 'dt' => 'dep_name', 'field' => 'name'),
         array('db' => '`u`.`leave_type`', 'dt' => 'leave_type', 'field' => 'leave_type'),
         array('db' => '`u`.`leave_from`', 'dt' => 'from_date', 'field' => 'leave_from'),
@@ -24,7 +24,7 @@ $primaryKey = 'id';
         array('db' => '`u`.`approvestatus`', 'dt' => 'approvestatus', 'field' => 'approvestatus'),
         array('db' => '`u`.`leave_category`', 'dt' => 'leave_category', 'field' => 'leave_category'),
         array('db' => '`u`.`reason`', 'dt' => 'reason', 'field' => 'reason'),
-        array( 'db' => '`u`.`calling_name`', 'dt' => 'calling_name', 'field' => 'calling_name' ),
+        array( 'db' => '`u`.`calling_name`', 'dt' => 'calling_name', 'field' => 'calling_name','visible' => false ),
         array('db' => '`u`.`emp_id`', 'dt' => 'employee_display', 'field' => 'emp_id', 
           'formatter' => function($d, $row) {
               $employee = (object)[
