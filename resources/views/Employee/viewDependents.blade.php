@@ -16,24 +16,24 @@
                 </div>
             </div>
     </div>    
-    <div class="container-fluid mt-4">
+    <div class="container-fluid mt-2 p-0 p-2">
         <div class="card">
             <div class="card-body p-0 p-2">
                 <div class="row">
-                    <div class="col-9">
+                    <div class="col-lg-9 col-12">
                         @if(session('success'))
                             <div class="alert alert-success">{{session('success')}}</div>
                         @endif
                         <form id="PdetailsForm" class="form-horizontal" method="POST" action="{{ route('dependentInsert') }}">
                             {{ csrf_field() }}
                             <div class="form-row">
-                                <div class="col">
+                                <div class="col-md-4 col-12 mb-2">
                                     <label class="small font-weight-bold text-dark">Name</label>
                                     <input required class="form-control form-control-sm @if ($errors->has('dep_name')) border-danger-soft @endif"
-                                           id="dep_name" name="dep_name" type="text" value="{{old('dep_name')}}">
+                                        id="dep_name" name="dep_name" type="text" value="{{old('dep_name')}}">
                                     @if ($errors->has('dep_name')) <p class="text-danger">{{ $errors->first('dep_name') }}</p> @endif
                                 </div>
-                                <div class="col">
+                                <div class="col-md-4 col-12 mb-2">
                                     <label class="small font-weight-bold text-dark">Relationship</label>
                                     <select required class="form-control form-control-sm @if ($errors->has('relationship')) border-danger-soft @endif"
                                             id="relationship" name="relationship">
@@ -51,48 +51,49 @@
                                     </select>
                                     @if ($errors->has('relationship')) <p class="text-danger">{{ $errors->first('relationship') }}</p> @endif
                                 </div>
-                                <div class="col">
+                                <div class="col-md-4 col-12 mb-2">
                                     <label class="small font-weight-bold text-dark">Date of Birth</label>
-                                    <input required class="form-control form-control-sm @if ($errors->has('birthday')) border-danger-soft @endif" id="birthday" name="birthday" type="text" value="{{old('birthday')}}"
-                                    placeholder="yyyy-mm-dd">
+                                    <input required class="form-control form-control-sm @if ($errors->has('birthday')) border-danger-soft @endif" 
+                                        id="birthday" name="birthday" type="text" value="{{old('birthday')}}"
+                                        placeholder="yyyy-mm-dd">
                                     @if ($errors->has('birthday')) <p class="text-danger">{{ $errors->first('birthday') }}</p> @endif
                                 </div>
                             </div>
                             <div class="form-group mt-3 text-right">
                                 @can('employee-edit')
-                                    <button type="submit" name="action_button" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
-                                    <button type="reset" class="btn btn-danger btn-sm mr-2"><i class="far fa-trash-alt"></i>&nbsp;Clear</button>
+                                    <button type="submit" name="action_button" id="action_button" class="btn btn-primary btn-sm px-4 mb-2 mb-sm-0"><i class="fas fa-plus"></i>&nbsp;Add</button>
+                                    <button type="reset" class="btn btn-danger btn-sm mr-2 mb-2 mb-sm-0"><i class="far fa-trash-alt"></i>&nbsp;Clear</button>
                                 @endcan
                             </div>
                             <input type="hidden" class="form-control form-control-sm" id="emp_id" name="emp_id" value="{{$id}}">
                         </form>
                         <hr class="border-dark">
-                        <div class="center-block fix-width scroll-inner">
-                        <table class="table table-striped table-bordered table-sm small nowrap" id="dataTable" width="100%" cellspacing="0">
-                            <thead>
-                                <tr>
-                                    <th>NAME</th>
-                                    <th>RELATION</th>
-                                    <th>DATE OF BIRTH</th>
-                                    <th class="text-right">ACTION</th>
-                                </tr>
-                            </thead>                            
-                            <tbody>
-                            @foreach($dependent as $dependents)
-                                <tr>
-                                    <td><a href="">{{$dependents->emp_dep_name}}</a></td>
-                                    <td>{{$dependents->emp_dep_relation}}</td>
-                                    <td>{{$dependents->emp_dep_birthday}}</td>
-                                    <td class="text-right">
-                                        @can('employee-edit')
-                                            <a href="#" class="btn btn-primary btn-sm btn-edit mr-1 mt-1" data-id="{{$dependents->id}}"><i class="fas fa-pencil-alt"></i></a>
-                                            <a href="#" class="btn btn-danger btn-sm btn-delete mr-1 mt-1" data-id="{{$dependents->id}}"><i class="far fa-trash-alt"></i></a>
-                                        @endcan
-                                    </td>
-                                </tr>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered table-sm small" id="dataTable">
+                                <thead>
+                                    <tr>
+                                        <th>NAME</th>
+                                        <th>RELATION</th>
+                                        <th>DATE OF BIRTH</th>
+                                        <th class="text-right">ACTION</th>
+                                    </tr>
+                                </thead>                            
+                                <tbody>
+                                @foreach($dependent as $dependents)
+                                    <tr>
+                                        <td><a href="">{{$dependents->emp_dep_name}}</a></td>
+                                        <td>{{$dependents->emp_dep_relation}}</td>
+                                        <td>{{$dependents->emp_dep_birthday}}</td>
+                                        <td class="text-right text-nowrap">
+                                            @can('employee-edit')
+                                                <a href="#" class="btn btn-primary btn-sm btn-edit mr-1 mt-1" data-id="{{$dependents->id}}"><i class="fas fa-pencil-alt"></i></a>
+                                                <a href="#" class="btn btn-danger btn-sm btn-delete mr-1 mt-1" data-id="{{$dependents->id}}"><i class="far fa-trash-alt"></i></a>
+                                            @endcan
+                                        </td>
+                                    </tr>
                                 @endforeach
-                            </tbody>
-                        </table>
+                                </tbody>
+                            </table>
                         </div>
                         <!-- <hr class="border-dark">
                         <form class="form-horizontal" method="POST" action="{{ route('dependetAttachment') }}" enctype="multipart/form-data">
@@ -214,7 +215,46 @@
 
 @section('script')
 <script>
-$('#dataTable').DataTable();
+    $('#dataTable').DataTable({
+        "destroy": true,
+        "processing": true,
+        
+        dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
+            "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+        "buttons": [{
+                extend: 'csv',
+                className: 'btn btn-success btn-sm',
+                title: 'Dependents  Information',
+                text: '<i class="fas fa-file-csv mr-2"></i> CSV',
+            },
+            { 
+                extend: 'pdf', 
+                className: 'btn btn-danger btn-sm', 
+                title: 'Dependents Information', 
+                text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
+                orientation: 'portrait', 
+                pageSize: 'legal', 
+                customize: function(doc) {
+                    doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+                }
+            },
+            {
+                extend: 'print',
+                title: 'Dependents  Information',
+                className: 'btn btn-primary btn-sm',
+                text: '<i class="fas fa-print mr-2"></i> Print',
+                customize: function(win) {
+                    $(win.document.body).find('table')
+                        .addClass('compact')
+                        .css('font-size', 'inherit');
+                },
+            },
+        ],
+        "order": [
+            [0, "desc"]
+        ],
+        }
+        );
 
     $('#employee_menu_link').addClass('active');
     $('#employee_menu_link_icon').addClass('active');

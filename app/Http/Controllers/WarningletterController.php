@@ -67,6 +67,27 @@ class WarningletterController extends Controller
             Session::flash('alert-class', 'alert-success');
             return redirect('warningletter');
         }
+        elseif($recordOption == 2){
+            $form_data = array(
+                'company_id' => $company,
+                'department_id' => $department,
+                'employee_id' => $employee,
+                'jobtitle' => $jobtitle,
+                'date' => $date,
+                'reason' => $reason,
+                'description' => $description,
+                'comment1' => $comment1,
+                'comment2' => $comment2,
+                'updated_by' => Auth::id(),
+                'updated_at' => Carbon::now()->toDateTimeString()
+            );
+            
+            Warningletter::where('id', $recordID)->update($form_data);
+            
+            Session::flash('message', 'The Employee Warning Details Successfully Updated');
+            Session::flash('alert-class', 'alert-success');
+            return redirect('warningletter');
+        }
         
     }
 

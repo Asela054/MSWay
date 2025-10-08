@@ -66,6 +66,27 @@ class ResignletterController extends Controller
             Session::flash('alert-class', 'alert-success');
             return redirect('resignletter');
         }
+        elseif($recordOption == 2){
+            $form_data = array(
+                'company_id' => $company,
+                'department_id' => $department,
+                'employee_id' => $employee,
+                'jobtitle' => $jobtitle,
+                'join_date' => $joindate,
+                'last_date' => $lastdate,
+                'reason' => $reason,
+                'comment1' => $comment1,
+                'comment2' => $comment2,
+                'updated_by' => Auth::id(),
+                'updated_at' => Carbon::now()->toDateTimeString()
+            );
+            
+            Resignletter::where('id', $recordID)->update($form_data);
+            
+            Session::flash('message', 'The Employee Resign Details Successfully Updated');
+            Session::flash('alert-class', 'alert-success');
+            return redirect('resignletter');
+        }
         
     }
 

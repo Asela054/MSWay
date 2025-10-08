@@ -23,101 +23,109 @@
                 <div class="card-body">
                     <form method="POST" action="{{ route('appoinementletterinsert') }}" class="form-horizontal">
                         {{ csrf_field() }}
-                        <div class="form-row mb-1">
-                            <div class="col-md-3">
+                        
+                        <!-- First Row -->
+                        <div class="form-row mb-3">
+                            <div class="col-12 col-sm-6 col-lg-3 mb-2 mb-lg-0">
                                 <label class="small font-weight-bold text-dark">Company</label>
                                 <select name="company" id="company_f" class="form-control form-control-sm">
                                 </select>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-12 col-sm-6 col-lg-3 mb-2 mb-lg-0">
                                 <label class="small font-weight-bold text-dark">Employee</label>
                                 <select name="employee" id="employee_f" class="form-control form-control-sm">
                                 </select>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-12 col-sm-6 col-lg-3 mb-2 mb-lg-0">
                                 <label class="small font-weight-bold text-dark">Job Title</label>
                                 <select name="jobtitle" id="jobtitle" class="form-control form-control-sm">
                                     <option value="">Please Select</option>
-                                    @foreach ($jobtitles as $jobtitle){
+                                    @foreach ($jobtitles as $jobtitle)
                                     <option value="{{$jobtitle->id}}">{{$jobtitle->title}}</option>
-                                    }
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-3 ">
+                            <div class="col-12 col-sm-6 col-lg-3 mb-2 mb-lg-0">
                                 <label class="small font-weight-bold text-dark">Date</label>
-                                <div class="input-group input-group-sm mb-3">
+                                <div class="input-group input-group-sm">
                                     <input type="date" id="letterdate" name="letterdate"
                                         class="form-control form-control-sm border-right-0" placeholder="yyyy-mm-dd" required>
                                 </div>
                             </div>
-
                         </div>
-                        <div class="form-row mb-1">
-                            <div class="col-3">
+
+                        <!-- Second Row -->
+                        <div class="form-row mb-3">
+                            <div class="col-12 col-sm-6 col-lg-3 mb-2 mb-lg-0">
                                 <label class="small font-weight-bold text-dark">Compensation Amount</label>
                                 <input type="number" class="form-control form-control-sm" id="compensation"
                                     name="compensation" value="" required>
                             </div>
-                            <div class="col-md-3 ">
+                            <div class="col-12 col-sm-6 col-lg-3 mb-2 mb-lg-0">
                                 <label class="small font-weight-bold text-dark">Probation Period : From - To</label>
-                                <div class="input-group input-group-sm mb-3">
+                                <div class="input-group input-group-sm">
                                     <input type="date" id="from_date" name="from_date"
                                         class="form-control form-control-sm border-right-0" placeholder="yyyy-mm-dd" required>
-                                    <input type="date" id="to_date" name="to_date" class="form-control"
+                                    <input type="date" id="to_date" name="to_date" class="form-control form-control-sm"
                                         placeholder="yyyy-mm-dd" required>
                                 </div>
                             </div>
-                            <div class="col-2">
+                            <div class="col-12 col-sm-6 col-lg-2 mb-2 mb-lg-0">
                                 <label class="small font-weight-bold text-dark">No of Weeks</label>
                                 <input type="text" class="form-control form-control-sm" id="noweeks"
                                     name="noweeks" value="">
                             </div>
-                            <div class="col-4">
-                                <div class="row">
-                                    <div class="col-6">
-                                        <label class="small font-weight-bold text-dark">On Time</label>
-                                        <input type="time" class="form-control form-control-sm" id="ontime" name="ontime" value="">
+                            <div class="col-12 col-sm-6 col-lg-4 mb-2 mb-lg-0">
+                                <label class="small font-weight-bold text-dark">Working Hours</label>
+                                <div class="row no-gutters">
+                                    <div class="col-6 pr-1">
+                                        <input type="time" class="form-control form-control-sm" id="ontime" 
+                                            name="ontime" value="" placeholder="On Time">
                                     </div>
-                                    <div class="col-6">
-                                        <label class="small font-weight-bold text-dark">Off Time</label>
+                                    <div class="col-6 pl-1">
                                         <input type="time" class="form-control form-control-sm" id="offtime"
-                                            name="offtime" value="">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-3" style="margin-right: 15px;">
-                                <label class="small font-weight-bold text-dark">Leave Policy</label>
-                                <input type="text" class="form-control form-control-sm" id="leaves" name="leaves"
-                                    value="">
-                            </div>
-                            <div class="col-3">
-                                <label class="form-control-label">Saturday</label>
-                                <div class="row">
-                                    <div class="custom-control custom-radio">
-                                        <input type="radio" class="custom-control-input" id="saturdayfull"
-                                            name="saturdayshift" value="Full Day">
-                                        <label class="custom-control-label" for="saturdayfull">Full Day</label>
-                                    </div>&nbsp;
-                                    <div class="custom-control custom-radio">
-                                        <input type="radio" class="custom-control-input" id="saturdayhalf"
-                                            name="saturdayshift" value="Half Day">
-                                        <label class="custom-control-label" for="saturdayhalf">Half Day</label>
+                                            name="offtime" value="" placeholder="Off Time">
                                     </div>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Third Row -->
+                        <div class="form-row mb-3">
+                            <div class="col-12 col-sm-6 col-lg-3 mb-2 mb-lg-0">
+                                <label class="small font-weight-bold text-dark">Leave Policy</label>
+                                <input type="text" class="form-control form-control-sm" id="leaves" name="leaves" value="">
+                            </div>
+                            <div class="col-12 col-sm-6 col-lg-3 mb-2 mb-lg-0">
+                                <label class="small font-weight-bold text-dark d-block">Saturday</label>
+                                <div class="d-flex align-items-center pt-2">
+                                    <div class="custom-control custom-radio mr-3">
+                                        <input type="radio" class="custom-control-input" id="saturdayfull"
+                                            name="saturdayshift" value="Full Day">
+                                        <label class="custom-control-label small" for="saturdayfull">Full Day</label>
+                                    </div>
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" class="custom-control-input" id="saturdayhalf"
+                                            name="saturdayshift" value="Half Day">
+                                        <label class="custom-control-label small" for="saturdayhalf">Half Day</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <input type="hidden" name="recordOption" id="recordOption" value="1">
                         <input type="hidden" name="recordID" id="recordID" value="">
-                        <div class="form-group mt-4 text-center">
-                            <button type="submit" id="submitBtn" class="btn btn-primary btn-sm fa-pull-right px-4"><i
-                                    class="fas fa-plus"></i>&nbsp;&nbsp;Add
+                        
+                        <!-- Submit Button -->
+                        <div class="form-group mt-4 text-center text-sm-right">
+                            <button type="submit" id="submitBtn" class="btn btn-primary btn-sm px-4">
+                                <i class="fas fa-plus"></i>&nbsp;&nbsp;Add
                             </button>
                         </div>
                     </form>
                 </div>
             </div>
+        </div>
 
             <div class="card">
                 <div class="card-body p-0 p-2 main_card">
