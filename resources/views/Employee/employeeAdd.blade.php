@@ -47,6 +47,9 @@
                                     <th>JOB CATEGORY</th>
                                     <th class="text-center">STATUS</th>
                                     <th class="text-right">ACTION</th>
+                                    <th class="d-none">ID</th>
+                                    <th class="d-none">EMPNAME</th>
+                                    <th class="d-none">CALLING</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -844,7 +847,16 @@ $(document).ready(function () {
 
                         return buttons;
                     }
-                }
+                },
+                { data: 'id', name: 'id' , visible: false},
+                { data: "emp_name_with_initial", 
+                name: "emp_name_with_initial", 
+                visible: false
+                },
+                {   data: "calling_name",
+                    name: "calling_name", 
+                    visible: false
+                },
             ],
             order: [[0, "asc"]],
             destroy: true
