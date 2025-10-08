@@ -35,7 +35,7 @@
                                         <th>TYPE</th>
                                         <th>EPF PAYABLE</th>
                                         <th>OT APPLICABLE</th>
-                                        <th>NOPAY APPLICABLE</th>
+                                        <th>NOPAY APPRICABLE</th>
                                         <th class="actlist_col text-right">ACTION</th>
                                     </tr>
                                 </thead>
