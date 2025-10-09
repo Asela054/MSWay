@@ -15,11 +15,16 @@ use Validator;
 
 class UserController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
 
    public function index(Request $request)
     {
         $data = User::orderBy('emp_id','DESC')->get();
-        return view('users.index',compact('data'));
+        $roles = Role::pluck('name','name')->all();
+        return view('users.index',compact('data','roles'));
     }
 
 
@@ -102,44 +107,27 @@ class UserController extends Controller
     public function edit($id)
     {
         $user = User::find($id);
-        $roles = Role::pluck('name','name')->all();
-        $userRole = $user->roles->pluck('name','name')->all();
+        $roles = Role::pluck('name', 'name')->all();
+        $userRole = $user->roles->pluck('name')->first(); // single role name
 
-        return view('users.edit',compact('user','roles','userRole'));
+        return response()->json([
+            'result' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $userRole
+            ],
+            'roles' => $roles
+        ]);
     }
 
 
-    // public function update(Request $request, $id)
-    // {
-    //     $this->validate($request, [
-    //         'company_id' => 'required',
-    //         'name' => 'required',
-    //         'email' => 'required|email|unique:users,email,'.$id,
-    //         'password' => 'same:confirm-password',
-    //         'roles' => 'required'
-    //     ]);
 
-    //     $input = $request->all();
-    //     if(!empty($input['password'])){
-    //         $input['password'] = Hash::make($input['password']);
-    //     }else{
-    //         $input = Arr::except($input,array('password'));
-    //     }
-
-    //     $user = User::find($id);
-    //     $user->update($input);
-
-    //     //remove roles from user
-    //     $user->roles()->detach();
-    //     $user->assignRole($request->input('roles'));
-
-    //     return redirect()->route('users.index')
-    //                     ->with('success','User updated successfully');
-    // }
 
     public function destroy($id)
     {
         User::find($id)->delete();
+        
         return redirect()->route('users.index')
                         ->with('success','User deleted successfully');
     }
@@ -160,12 +148,15 @@ class UserController extends Controller
         $user = User::create($input);
         $user->assignRole($request->input('roles'));
 
-        return redirect()->route('users.index')
-                        ->with('success','User created successfully');
+         return response()->json(['success' => 'User successfully Created']);
+
+        
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
+        
+        $id = $request->input('hidden_id');
         $this->validate($request, [
             'name' => 'required',
             'email' => 'required|email|unique:users,email,'.$id,
@@ -187,7 +178,6 @@ class UserController extends Controller
         $user->roles()->detach();
         $user->assignRole($request->input('roles'));
 
-        return redirect()->route('users.index')
-                        ->with('success','User updated successfully');
+        return response()->json(['success' => 'User successfully Updated']);
     }
 }

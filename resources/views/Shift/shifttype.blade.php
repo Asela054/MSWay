@@ -504,7 +504,7 @@ $(document).ready(function(){
                  const actionObj = {
                     icon: 'fas fa-trash-alt',
                     title: '',
-                    message: 'Record Remove Successfully',
+                    message: 'Shift Type Remove Successfully',
                     url: '',
                     target: '_blank',
                     type: 'danger'
