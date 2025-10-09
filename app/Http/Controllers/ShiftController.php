@@ -10,6 +10,7 @@ use App\Branch;
 use Illuminate\Http\Request;
 use Validator;
 use DB;
+use Illuminate\Support\Facades\Auth;
 use Yajra\Datatables\Datatables;
 
 class ShiftController extends Controller
@@ -26,6 +27,11 @@ class ShiftController extends Controller
     
     public function index()
     {
+        $user = Auth::user();
+        $permission = $user->can('shift-list');
+        if(!$permission) {
+            abort(403);
+        }
         $shifttype= ShiftType::orderBy('id', 'asc')->get();
         $employee=Employee::orderBy('id', 'desc')->get();
         $branch=Branch::orderBy('id', 'desc')->get();
@@ -36,6 +42,12 @@ class ShiftController extends Controller
 
     public function shift_list_dt(Request $request)
     {
+        $user = Auth::user();
+        $permission = $user->can('shift-list');
+        if(!$permission) {
+             return response()->json(['error' => 'UnAuthorized']);
+        }
+
         $department = $request->get('department');
         $employee = $request->get('employee');
         $location = $request->get('location');
@@ -102,6 +114,12 @@ class ShiftController extends Controller
 
 
     public function getshift(){
+        $user = Auth::user();
+        $permission = $user->can('shift-list');
+        if(!$permission) {
+             return response()->json(['error' => 'UnAuthorized']);
+        }
+
         $data = DB::table('employees')            
         ->leftjoin('shift_types', 'employees.emp_shift', '=', 'shift_types.id')
         ->select('employees.id', 'employees.emp_first_name', 'shift_types.shift_name', 'shift_types.onduty_time', 'shift_types.offduty_time')
@@ -120,6 +138,12 @@ class ShiftController extends Controller
      */
 
     public function Shiftupdate(Request $request){
+        $user = Auth::user();
+        $permission = $user->can('shift-edit');
+        if(!$permission) {
+             return response()->json(['error' => 'UnAuthorized']);
+        }
+
         if($request->ajax())
         {
             $data = array(
@@ -147,6 +171,12 @@ class ShiftController extends Controller
      */
     public function store(Request $request)
     {
+        $user = Auth::user();
+        $permission = $user->can('shift-create');
+        if(!$permission) {
+             return response()->json(['error' => 'UnAuthorized']);
+        }
+
         $rules = array(
             'employee'    =>  'required',
             'shift'    =>  'required'
@@ -197,6 +227,11 @@ class ShiftController extends Controller
      */
     public function edit($id)
     {
+        $user = Auth::user();
+        $permission = $user->can('shift-edit');
+        if(!$permission) {
+             return response()->json(['error' => 'UnAuthorized']);
+        }
       
         if(request()->ajax())
         {
@@ -215,6 +250,12 @@ class ShiftController extends Controller
      */
     public function update(Request $request, Shift $shift)
     {
+        $user = Auth::user();
+        $permission = $user->can('shift-edit');
+        if(!$permission) {
+             return response()->json(['error' => 'UnAuthorized']);
+        }
+
         $rules = array(
             'uid'    =>  'required',
             'shift'    =>  'required'
@@ -252,6 +293,12 @@ class ShiftController extends Controller
      */
     public function destroy($id)
     {
+        $user = Auth::user();
+        $permission = $user->can('shift-delete');
+        if(!$permission) {
+             return response()->json(['error' => 'UnAuthorized']);
+        }
+
         DB::table('employees')
             ->where('emp_id', $id)
             ->update(['emp_shift' => '']);

@@ -23,6 +23,8 @@ Route::get('/home', 'HomeController@index')->name('home');
 Route::resource('roles','RoleController');
 Route::resource('permissions','PermissionController');
 Route::resource('users','UserController');
+Route::get('users/destroy/{id}', 'UserController@destroy');
+Route::post('users.update', 'UserController@update')->name('users.update');
 Route::resource('permission','PermissionController');
 Route::resource('rolepermission','RolePermissionController');
 Route::resource('userrole','RoleUserController');

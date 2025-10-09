@@ -6,6 +6,7 @@ use App\EmployeeRoster;
 use App\EmployeeRosterDetails;
 use App\Employee;
 use App\ShiftType;
+use Auth;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -18,6 +19,10 @@ class EmployeeRosterController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
     
     public function fullroster(Request $request){
 
@@ -48,6 +53,12 @@ class EmployeeRosterController extends Controller
      }
 
      public function employee_list(Request $request){
+
+        $user = Auth::user();
+        $permission = $user->can('employee-roster');
+        if (!$permission) {
+             return response()->json(['error' => 'UnAuthorized']);
+        }
       
 
         $departmentId = $request->get('department_id');
@@ -62,6 +73,12 @@ class EmployeeRosterController extends Controller
 
      public function getRosterData(Request $request)
     {
+        $user = Auth::user();
+        $permission = $user->can('employee-roster');
+        if (!$permission) {
+             return response()->json(['error' => 'UnAuthorized']);
+        }
+
         $departmentId = $request->get('department_id');
         $month = $request->get('month'); // format: YYYY-MM
 

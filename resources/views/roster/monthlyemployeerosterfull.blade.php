@@ -163,7 +163,7 @@ $(document).ready(function() {
             for (let d = 1; d <= daysInMonth; d++) {
                 const existingShift = (existingData[emp.id] && existingData[emp.id][d]) || '';
                row += `<td style="padding: 0px;">
-                    <select name="shifts[${emp.id}][${d}]" class="form-control form-control-sm shiftcode ${existingShift ? 'border border-primary' : ''}" style="width: 60px;">
+                    <select name="shifts[${emp.id}][${d}]" class="form-control form-control-sm ${existingShift ? 'bg-primary text-white' : ''}" style="width: 55px;">
                         
                         ${shiftOptions.map(opt =>
                             `<option value="${opt.id}" ${opt.id == existingShift ? 'selected' : ''}>${opt.code}</option>`

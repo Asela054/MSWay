@@ -6,6 +6,7 @@ use App\ShiftType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Validator;
+use Illuminate\Support\Facades\Auth;
 
 class ShiftTypeController extends Controller
 {
@@ -21,6 +22,11 @@ class ShiftTypeController extends Controller
     
     public function index()
     {
+        $user = Auth::user();
+        $permission = $user->can('work-shift-list');
+        if(!$permission) {
+            abort(403);
+        }
         $shifttype= ShiftType::orderBy('id', 'asc')->where('deleted', 0)->get();
         return view('Shift.shifttype',compact('shifttype'));
     }
@@ -43,6 +49,11 @@ class ShiftTypeController extends Controller
      */
     public function store(Request $request)
     {
+        $user = Auth::user();
+        $permission = $user->can('work-shift-create');
+        if(!$permission) {
+             return response()->json(['error' => 'UnAuthorized']);
+        }
         $rules = array(
             'shiftname'    =>  '',
             'ondutytime'    =>  '',
@@ -137,6 +148,12 @@ class ShiftTypeController extends Controller
      */
     public function edit($id)
     {
+        $user = Auth::user();
+        $permission = $user->can('work-shift-edit');
+        if(!$permission) {
+             return response()->json(['error' => 'UnAuthorized']);
+        }
+
         if(request()->ajax())
         {
             $data = ShiftType::findOrFail($id);
@@ -153,6 +170,12 @@ class ShiftTypeController extends Controller
      */
     public function update(Request $request, ShiftType $shiftType)
     {
+        $user = Auth::user();
+        $permission = $user->can('work-shift-edit');
+        if(!$permission) {
+             return response()->json(['error' => 'UnAuthorized']);
+        }
+
         $rules = array(
             'shiftname'    =>  'required',
             'ondutytime'    =>  'required',
@@ -214,6 +237,12 @@ class ShiftTypeController extends Controller
      */
     public function destroy($id)
     {
+        $user = Auth::user();
+        $permission = $user->can('work-shift-delete');
+        if(!$permission) {
+             return response()->json(['error' => 'UnAuthorized']);
+        }
+
         DB::table('shift_types')
         ->where('id', $id)
         ->update(['deleted' => 1]);

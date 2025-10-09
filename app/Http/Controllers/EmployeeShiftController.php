@@ -20,10 +20,10 @@ class EmployeeShiftController extends Controller
     public function index()
     {
        
-        $user = Auth::user();
+         $user = Auth::user();
         $permission = $user->can('employee-shift-allocation-list');
-        if (!$permission) {
-            return response()->json(['error' => 'UnAuthorized'], 401);
+        if(!$permission) {
+            abort(403);
         }
 
         $employees = DB::table('employees')->select('employees.*')->get();

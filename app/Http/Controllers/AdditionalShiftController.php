@@ -14,7 +14,7 @@ class AdditionalShiftController extends Controller
         $this->middleware('auth');
     }
 
-    public function index($bankcode)
+    public function index()
     {
         $user = Auth::user();
         $permission = $user->can('additional-shift-list');
@@ -60,7 +60,7 @@ class AdditionalShiftController extends Controller
         $user = Auth::user();
         $permission = $user->can('bank-create');
         if(!$permission) {
-            return response()->json(['error' => 'UnAuthorized'], 401);
+             return response()->json(['error' => 'UnAuthorized']);
         }
 
         $rules = array(
@@ -90,7 +90,7 @@ class AdditionalShiftController extends Controller
         $user = Auth::user();
         $permission = $user->can('bank-edit');
         if(!$permission) {
-            return response()->json(['error' => 'UnAuthorized'], 401);
+             return response()->json(['error' => 'UnAuthorized']);
         }
 
         if (request()->ajax()) {
@@ -104,7 +104,7 @@ class AdditionalShiftController extends Controller
         $user = Auth::user();
         $permission = $user->can('bank-edit');
         if(!$permission) {
-            return response()->json(['error' => 'UnAuthorized'], 401);
+             return response()->json(['error' => 'UnAuthorized']);
         }
 
         $rules = array(
@@ -137,7 +137,7 @@ class AdditionalShiftController extends Controller
         $user = Auth::user();
         $permission = $user->can('bank-delete');
         if(!$permission) {
-            return response()->json(['error' => 'UnAuthorized'], 401);
+             return response()->json(['error' => 'UnAuthorized']);
         }
 
         $data = Bank_branch::findOrFail($id);
