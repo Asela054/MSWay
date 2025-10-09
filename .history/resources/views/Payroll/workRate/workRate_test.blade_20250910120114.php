@@ -120,7 +120,7 @@
                                                        <input type="hidden" name="action" id="action" value="Edit" />
                                                        <input type="hidden" name="hidden_id" id="hidden_id" />
                                                        <input type="hidden" name="payroll_process_type_id" id="payroll_process_type_id" value="" />
-                                                       <input type="submit" name="action_button" id="action_button" class="btn btn-success" value="Edit" />
+                                                       <input type="submit" name="action_button" id="action_button" class="btn btn-warning" value="Edit" />
                                                        <!--input type="button" id="btn_next" value="More" class="btn btn-light" /-->
                                                     
                                                    </div>

@@ -11,7 +11,7 @@
             <div class="page-header-content py-3 px-2">
                 <h1 class="page-header-title ">
                     <div class="page-header-icon"><i class="fa-light fa-money-check-dollar-pen"></i></div>
-                    <span>Pay Register</span>
+                    <span>Salary Sheet</span>
                 </h1>
             </div>
         </div>
@@ -19,13 +19,12 @@
     <div class="container-fluid mt-2 p-0 p-2">
         <div class="card">
             <div class="card-body p-0 p-2">
-                <form id="frmExport" method="post">
+                <form id="frmExport" method="post" target="_blank" action="{{ url('DownloadSalarySheet') }}">
                     {{ csrf_field() }}
                     <div class="row">
                         <div class="col-12 text-right">
-                            <button type="button" name="find_employee" id="find_employee" class="btn btn-success btn-sm px-3"><i class="fal fa-search mr-2"></i>Search</button>
-                            <button type="submit" name="print_record" id="print_record" disabled="disabled" class="btn btn-success btn-sm btn-light px-3" onclick="this.form.action='{{ url('DownloadPayRegister') }}'" style="width:auto;" value="1"><i class="fal fa-file-excel mr-2"></i> Download XLS</button>
-                            <button type="submit" name="print_record" id="print_record_pdf" disabled="disabled" class="btn btn-danger btn-sm btn-light px-3" onclick="this.form.action='{{ url('DownloadPayRegister') }}'" style="width:auto;" value="2"><i class="fal fa-file-pdf mr-2"></i>Download PDF</button>
+                            <button type="button" name="find_employee" id="find_employee" class="btn btn-warning btn-sm px-3"><i class="fal fa-search mr-2"></i>Search</button>
+                            <button type="submit" name="print_record" id="print_record" disabled="disabled" class="btn btn-danger btn-sm btn-light px-3"><i class="fal fa-file-pdf mr-2"></i>Download</button>
                         </div>
                         <div class="col-12">
                             <span id="lbl_duration" style="display:none; margin-right:auto; padding-left:10px;">
@@ -35,51 +34,25 @@
                                 </div>
                             </span>
                         </div>
-                        <div class="col-12">
+                        <div class="col-lg-12">
                             <hr>
                             <div id="divPrint" class="center-block fix-width scroll-inner">
-                                <table class="table table-bordered table-striped table-sm small nowrap w-100" id="emptable" width="100%"
-                                    cellspacing="0">
+                                <table class="table table-bordered table-striped table-sm small w-100 nowrap" id="emptable"
+                                    width="100%" cellspacing="0">
                                     <thead>
                                         <tr>
-                                            <th>#</th>
-                                            <th>EPF NO</th>
-                                            <th>EMPLOYEE NAME</th>
+                                            <th>NAME</th>
+                                            <th>OFFICE</th>
                                             <th>BASIC</th>
-                                            <th>BRA I</th>
-                                            <th>BRA II</th>
                                             <th>NO-PAY</th>
-                                            <th>TOTAL BEFOR NOPAY</th>
-                                            <th class="">ARREARS</th>
-                                            <!--th class="">Total for Tax</th-->
-                                            <th>ATTENDANCE ALLOW.</th>
-                                            <!--th>Weekly Attendance</th-->
-                                            <th>PERF. BASED INCENTIVE</th>
-                                            <!--th>Director Incentive</th-->
-                                            <th>TRANSPORT</th>
-                                            <th>OTHER ALLOWANCE</th>
-                                            <th>OTHER ADDITIONS</th>
-                                            <!--th>Salary Arrears</th-->
-                                            <th>NORMAL</th>
-                                            <th>DOUBLE</th>
-                                            <th>TOTAL EARNED</th>
-                                            <th>TOTAL FOR TAX</th>
-                                            <th>EPF-8
-                                                <!--8-->
-                                            </th>
-                                            <th>SALARY ADVANCE</th>
-                                            <th>LOANS</th>
-                                            <!--th>Telephone</th-->
-                                            <th>LATE DEDUCTION</th>
-                                            <th>BANK CHARGES</th>
-                                            <th>PAYE</th>
-                                            <th>OTHER DEDUCTIONS</th>
-                                            <!--th>PAYE</th-->
-                                            <!--th>Loans</th-->
-                                            <th>TOTAL DEDUCTIONS</th>
-                                            <th>BALANCE PAY</th>
+                                            <th class="">OT</th>
+                                            <th class="">FACILITY</th>
+                                            <th>LOAN</th>
+                                            <th>ADDITIONS</th>
+                                            <th>EPF-8</th>
                                             <th>EPF-12</th>
                                             <th>ETF-3</th>
+                                            <th>PAYE</th>
                                         </tr>
                                     </thead>
 
@@ -125,11 +98,13 @@
                             <div class="col">
                                 <label class="font-weight-bolder small">Branch</label>
                                 <select name="location_filter_id" id="location_filter_id"
-                                    class="custom-select custom-select-sm shipClass nest_head" style="" data-findnest="deptnest">
-                                    <option value="-1" selected="selected" data-regcode="">Please Select</option>
+                                    class="custom-select custom-select-sm shipClass nest_head" style="" data-findnest="deptnest" required>
+                                    <option value="" disabled="disabled" selected="selected" data-regcode="">Please
+                                        Select</option>
                                     @foreach($branch as $branches)
 
-                                    <option value="{{$branches->id}}" data-regcode="{{$branches->id}}">{{$branches->location}}</option>
+                                    <option value="{{$branches->id}}" data-regcode="{{$branches->id}}">
+                                        {{$branches->location}}</option>
                                     @endforeach
 
                                 </select>
@@ -138,10 +113,14 @@
                                 <label class="font-weight-bolder small">Department</label>
                                 <select name="department_filter_id" id="department_filter_id" class="custom-select custom-select-sm"
                                     style="" data-nestname="deptnest">
-                                    <option value="" selected="selected">All Employees</option>
+                                    <!--option value="" disabled="disabled" selected="selected">Please Select</option-->
+                                    <option value="" selected="selected">All Departments</option>
+
                                     @foreach($department as $section)
 
-                                    <option class="nestopt d-none" value="{{$section->id}}" data-nestcode="{{$section->company_id}}" data-sectcode="{{$section->id}}">{{$section->name}}</option>
+                                    <option class="nestopt d-none" value="{{$section->id}}"
+                                        data-nestcode="{{$section->company_id}}" data-sectcode="{{$section->id}}">
+                                        {{$section->name}}</option>
                                     @endforeach
 
                                 </select>
@@ -151,11 +130,12 @@
                             <div class="col">
                                 <label class="font-weight-bolder small">Payroll type</label>
                                 <select name="payroll_process_type_id" id="payroll_process_type_id"
-                                    class="form-control form-control-sm">
+                                    class="form-control form-control-sm" required>
                                     <option value="" disabled="disabled" selected="selected">Please select</option>
                                     @foreach($payroll_process_type as $payroll)
 
-                                    <option value="{{$payroll->id}}" data-totdays="{{$payroll->total_work_days}}">{{$payroll->process_name}}</option>
+                                    <option value="{{$payroll->id}}" data-totdays="{{$payroll->total_work_days}}">
+                                        {{$payroll->process_name}}</option>
                                     @endforeach
 
                                 </select>
@@ -163,28 +143,38 @@
                             <div class="col">
                                 <label class="font-weight-bolder small">Working Period</label>
                                 <select name="period_filter_id" id="period_filter_id" class="custom-select custom-select-sm"
-                                    style="">
+                                    style="" required>
                                     <option value="" disabled="disabled" selected="selected">Please Select</option>
                                     @foreach($payment_period as $schedule)
 
-                                    <option value="{{$schedule->id}}" disabled="disabled" data-payroll="{{$schedule->payroll_process_type_id}}" style="display:none;">{{$schedule->payment_period_fr}} to {{$schedule->payment_period_to}}</option>
+                                    <option value="{{$schedule->id}}" disabled="disabled"
+                                        data-payroll="{{$schedule->payroll_process_type_id}}" style="display:none;">
+                                        {{$schedule->payment_period_fr}} to {{$schedule->payment_period_to}}
+                                    </option>
                                     @endforeach
 
                                 </select>
                             </div>
+                            <!--div class="form-group col-md-6">
+                                <label class="control-label col">To</label>
+                                <div class="col">
+                                    <input type="date" class="form-control" name="work_date_to" id="work_date_to" value="" />
+                                </div>
+                            </div-->
                         </div>
                         <div class="form-row">
-                            <div class="col text-right">
+                            <div class="col-12 text-right">
                                 <hr>
-                                <input type="submit" name="action_button" id="action_button" class="btn btn-success btn-sm px-3" value="View Payslips" />
+                                <input type="submit" name="action_button" id="action_button" class="btn btn-warning btn-sm px-3" value="View Payslips" />
                                 <button type="button" class="btn btn-light btn-sm px-3" data-dismiss="modal">Close</button>
                             </div>
                         </div>
                     </form>
                 </div>
-            </div>
+            </div>            
         </div>
     </div>
+
 
     <div id="loanModal" class="modal fade" role="dialog">
         <div class="modal-dialog modal-lg">
@@ -272,95 +262,43 @@
 
 <script>
     $(document).ready(function () {
-
         $('#payrollmenu').addClass('active');
         $('#payrollmenu_icon').addClass('active');
         $('#payrollreport').addClass('navbtnactive');
 
         var empTable = $("#emptable").DataTable({
             "columns": [{
-                    data: 'reg_indexno'
-                }, {
-                    data: 'emp_epfno'
-                }, {
                     data: 'emp_first_name'
                 }, {
+                    data: 'location'
+                }, {
                     data: 'BASIC'
-                }, {
-                    data: 'BRA_I'
-                }, {
-                    data: 'add_bra2'
                 },
                 {
                     data: 'NOPAY'
                 }, {
-                    data: 'tot_bnp'
-                }, {
-                    data: 'sal_arrears1'
-                },
-                //{data:'tot_fortax'}, {data:'ATTBONUS'}, {data:'add_transport'}, 
-                {
-                    data: 'ATTBONUS'
-                }, {
-                    data: 'INCNTV_EMP'
-                }, {
-                    data: 'add_transport'
-                }, {
-                    data: 'INCNTV_DIR'
+                    data: 'OTHRS'
                 },
                 {
-                    data: 'add_other'
-                }, //{data:'sal_arrears2'}, 
-                {
-                    data: 'OTHRS1'
+                    data: 'FACILITY'
                 }, {
-                    data: 'OTHRS2'
-                },
-                {
-                    data: 'tot_earn'
+                    data: 'LOAN'
                 }, {
-                    data: 'tot_earn'
+                    data: 'ADDITION'
                 },
                 {
                     data: 'EPF8'
                 }, {
-                    data: 'sal_adv'
-                }, //{data:'ded_tp'}, 
-                {
-                    data: 'LOAN'
-                },
-                {
-                    data: 'ded_IOU'
-                }, {
-                    data: 'ded_fund_1'
-                },
-                {
-                    data: 'PAYE'
-                }, {
-                    data: 'ded_other'
-                },
-                {
-                    data: 'tot_ded'
-                }, {
-                    data: 'NETSAL'
-                },
-                {
                     data: 'EPF12'
                 }, {
                     data: 'ETF3'
+                }, {
+                    data: 'PAYE'
                 }
             ],
             "order": [],
             "columnDefs": [{
-                "targets": 13,
-                render: function (data, type, row) {
-                    var living_exp = parseFloat(row.ATTBONUS_W);
-                    var add_other = parseFloat(row.add_other);
-                    var disp_other = living_exp + add_other;
-                    return disp_other.toFixed(2);
-                }
-            }, {
-                "targets": [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28],
+                "targets": [3, 4, 5, 6, 7, 8, 9, 10, 11],
                 "className": 'text-right'
             }],
             "createdRow": function (row, data, dataIndex) {
@@ -405,7 +343,7 @@
 
         $('.nest_head').change(function () {
             //prep_nest($(this).data('findnest'), $(this).find(":selected").val(), 0);
-            prep_nest($(this).data('findnest'), $(this).find(":selected").data('regcode'), '-1'); //0
+            prep_nest($(this).data('findnest'), $(this).find(":selected").data('regcode'), 0);
         });
 
         function prep_nest(nestname, nestcode, selectedval) {
@@ -430,7 +368,7 @@
                 //selected_val=(typeof($(allowobj).val())=="undefined")?$(childobj).children('option:first').val():$(allowobj).val();
                 //console.log(typeof($(allowobj).val())=="undefined");//$(allowobj).length
                 //console.log('0--'+$(allowobj).index());
-                selected_pos = (selected_opt > 0) ? selected_opt : 0;
+                selected_pos = 0; //(selected_opt>0)?selected_opt:0;
             } else {
                 var actobj = $(childobj).find('option[data-nestcode="' + (nestcode) + '"][data-sectcode="' + (
                     selectedval) + '"]');
@@ -448,7 +386,7 @@
             event.preventDefault();
 
             $.ajax({
-                url: "checkPayRegister",
+                url: "checkPayslipListByDept",
                 method: 'POST',
                 data: $(this).serialize(),
                 dataType: "JSON",
@@ -493,11 +431,8 @@
                         $("#rpt_info").val(data.work_date_fr + " To " + data.work_date_to +
                             " (" + $("#payroll_process_type_id").find(":selected")
                             .text() + ")");
-
                         $("#print_record").prop('disabled', false);
                         $("#print_record").removeClass('btn-light');
-                        $("#print_record_pdf").prop('disabled', false);
-                        $("#print_record_pdf").removeClass('btn-light');
 
                         $('#formModal').modal('hide');
                     }
