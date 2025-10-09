@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Session;
 use Datatables;
+use App\Helpers\EmployeeHelper;
 
 class ResignletterController extends Controller
 {
@@ -65,6 +66,27 @@ class ResignletterController extends Controller
             Session::flash('alert-class', 'alert-success');
             return redirect('resignletter');
         }
+        elseif($recordOption == 2){
+            $form_data = array(
+                'company_id' => $company,
+                'department_id' => $department,
+                'employee_id' => $employee,
+                'jobtitle' => $jobtitle,
+                'join_date' => $joindate,
+                'last_date' => $lastdate,
+                'reason' => $reason,
+                'comment1' => $comment1,
+                'comment2' => $comment2,
+                'updated_by' => Auth::id(),
+                'updated_at' => Carbon::now()->toDateTimeString()
+            );
+            
+            Resignletter::where('id', $recordID)->update($form_data);
+            
+            Session::flash('message', 'The Employee Resign Details Successfully Updated');
+            Session::flash('alert-class', 'alert-success');
+            return redirect('resignletter');
+        }
         
     }
 
@@ -75,21 +97,32 @@ class ResignletterController extends Controller
         ->leftjoin('departments', 'resign_letter.department_id', '=', 'departments.id')
         ->leftjoin('employees', 'resign_letter.employee_id', '=', 'employees.id')
         ->leftjoin('job_titles', 'resign_letter.jobtitle', '=', 'job_titles.id')
-        ->select('resign_letter.*','employees.emp_name_with_initial As emp_name','job_titles.title As emptitle','companies.name As companyname','departments.name As department')
+        ->select('resign_letter.*','employees.emp_name_with_initial','employees.calling_name','job_titles.title As emptitle','companies.name As companyname','departments.name As department')
         ->whereIn('resign_letter.status', [1, 2])
         ->get();
         return Datatables::of($letters)
         ->addIndexColumn()
+        ->addColumn('employee_display', function ($row) {
+                   return EmployeeHelper::getDisplayName($row);
+                   
+        })
+        ->filterColumn('employee_display', function($query, $keyword) {
+            $query->where(function($q) use ($keyword) {
+                $q->where('employees.emp_name_with_initial', 'like', "%{$keyword}%")
+                ->orWhere('employees.calling_name', 'like', "%{$keyword}%")
+                ->orWhere('employees.emp_id', 'like', "%{$keyword}%");
+            });
+        })
         ->addColumn('action', function ($row) {
             $btn = '';
                     if(Auth::user()->can('Resign-letter-edit')){
-                        $btn .= ' <button name="edit" id="'.$row->id.'" class="edit btn btn-outline-primary btn-sm" type="submit"><i class="fas fa-pencil-alt"></i></button>'; 
+                        $btn .= ' <button name="edit" id="'.$row->id.'" class="edit btn btn-primary btn-sm" type="submit"><i class="fas fa-pencil-alt"></i></button>'; 
                     }
                     
                     if(Auth::user()->can('Resign-letter-delete')){
-                        $btn .= ' <button name="delete" id="'.$row->id.'" class="delete btn btn-outline-danger btn-sm"><i class="far fa-trash-alt"></i></button>';
+                        $btn .= ' <button name="delete" id="'.$row->id.'" class="delete btn btn-danger btn-sm"><i class="far fa-trash-alt"></i></button>';
                     }
-                    $btn .= ' <button name="print" id="'.$row->id.'" class="print btn btn-outline-info btn-sm"><i class="fas fa-print"></i></button>';
+                    $btn .= ' <button name="print" id="'.$row->id.'" class="print btn btn-info btn-sm"><i class="fas fa-print"></i></button>';
             return $btn;
         })
        

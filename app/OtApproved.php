@@ -47,20 +47,6 @@ class OtApproved extends Model
         return $triple_ot_hours;
     }
 
-    // public function is_exists_in_ot_approved($emp_id, $date){
-    //     $date = Carbon::parse($date);
-    //     $date = $date->format('Y-m-d');
-    //     $ot = OtApproved::where('emp_id', $emp_id)
-    //         ->where('date', '=', $date)
-    //         ->get();
-
-    //     $status = true;
-    //     if($ot->isEmpty()){
-    //         $status = false;
-    //     }
-
-    //     return $status;
-    // }
     public function is_exists_in_ot_approved($emp_id, $date, $OTfrom){
         $date = Carbon::parse($date);
         $date = $date->format('Y-m-d');
@@ -76,4 +62,5 @@ class OtApproved extends Model
 
         return $status;
     }
+    
 }

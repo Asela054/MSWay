@@ -41,33 +41,6 @@
                                 </tr>
                             </thead>                            
                             <tbody>
-                                @foreach($holiday as $holidays)
-                                <tr>
-                                    <td>{{$holidays->holiday_name}}</td>
-                                    <td>{{$holidays->holiday_type_name}}</td>
-                                    <td>
-                                    @php
-                                    if($holidays->half_short == 1){
-                                        echo "Full Day";
-                                    }else if($holidays->half_short == 0.5){
-                                        echo "Half Day";
-                                    }else if($holidays->half_short == 0.25){
-                                        echo "Short Day";
-                                    }
-                                    @endphp
-                                    </td>
-                                    <td>{{$holidays->date}}</td>
-                                    <td>{{$holidays->level}}</td>
-                                    <td class="text-right">
-                                        @can('holiday-edit')
-                                            <button name="edit" id="{{$holidays->id}}" class="edit btn btn-primary btn-sm" type="submit" data-toggle="tooltip" title="Edit"><i class="fas fa-pencil-alt"></i></button>
-                                        @endcan
-                                        @can('holiday-delete')
-                                            <button type="submit" name="delete" id="{{$holidays->id}}" class="delete btn btn-danger btn-sm" data-toggle="tooltip" title="Remove"><i class="far fa-trash-alt"></i></button>
-                                        @endcan
-                                    </td>
-                                </tr>
-                                @endforeach
                             </tbody>
                         </table>
                         </div>
@@ -95,11 +68,11 @@
                             <form method="post" id="formTitle" class="form-horizontal">
                                 {{ csrf_field() }}	
                                 <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">Holiday Name</label>
+                                    <label class="small font-weight-bolder text-dark">Holiday Name</label>
                                     <input type="text" name="holiday_name" id="holiday_name" class="form-control form-control-sm" />
                                 </div>
                                 <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">Holiday Type</label>
+                                    <label class="small font-weight-bolder text-dark">Holiday Type</label>
                                     <select name="type" class="form-control form-control-sm">
                                         <option value="1">Poya Holiday</option>
                                         <option value="2">Public & Bank Holiday</option>
@@ -108,7 +81,7 @@
                                 </div>
 
                                 <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">Half Day/ Short</label>
+                                    <label class="small font-weight-bolder text-dark">Half Day/ Short</label>
                                     <select name="half_short" id="half_short"
                                             class="form-control form-control-sm">
                                         <option value="0.00">Select</option>
@@ -123,11 +96,11 @@
                                 </div>
 
                                 <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">Date</label>
+                                    <label class="small font-weight-bolder text-dark">Date</label>
                                     <input type="date" name="date" id="date" class="form-control form-control-sm" placeholder="YYYY-MM-DD" />
                                 </div>
                                 <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">Work Level</label>
+                                    <label class="small font-weight-bolder text-dark">Work Level</label>
                                     <select name="work_level" id="work_level" class="form-control form-control-sm">
                                         <option value="">Select</option>
                                         @foreach($worklevel as $worklevels)
@@ -254,62 +227,106 @@ $(document).ready(function(){
             $('#attendant_menu_link_icon').addClass('active');
             $('#leavemaster').addClass('navbtnactive');
 
+            $('#jobtable').DataTable({
+                "destroy": true,
+                "processing": true,
+                "serverSide": true,
+                dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+                "buttons": [{
+                        extend: 'csv',
+                        className: 'btn btn-success btn-sm',
+                        title: 'Holiday Details',
+                        text: '<i class="fas fa-file-csv mr-2"></i> CSV',
+                    },
+                    { 
+                        extend: 'pdf', 
+                        className: 'btn btn-danger btn-sm', 
+                        title: 'Holiday Details', 
+                        text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
+                        orientation: 'landscape', 
+                        pageSize: 'legal', 
+                        customize: function(doc) {
+                            doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+                        }
+                    },
+                    {
+                        extend: 'print',
+                        title: 'Holiday Details',
+                        className: 'btn btn-primary btn-sm',
+                        text: '<i class="fas fa-print mr-2"></i> Print',
+                        customize: function(win) {
+                            $(win.document.body).find('table')
+                                .addClass('compact')
+                                .css('font-size', 'inherit');
+                        },
+                    },
+                ],
+                
+            ajax: {
+                url: scripturl + '/holidays_list.php',
+                type: 'POST',
+            },
+            columns: [
+                { data: 'holiday_name', name: 'holiday_name' },
+                { data: 'holiday_type_name', name: 'holiday_type_name' },
+                { 
+                    data: 'half_short', 
+                    name: 'half_short',
+                    render: function(data, type, row) {
+                        if (data == 1) {
+                            return "Full Day";
+                        } else if (data == 0.5) {
+                            return "Half Day";
+                        } else if (data == 0.25) {
+                            return "Short Day";
+                        } else {
+                            return data;
+                        }
+                    }
+                },
+                { data: 'date', name: 'date' },
+                { data: 'level', name: 'level' },
+                {
+                data: 'id',
+                name: 'action',
+                className: 'text-right',
+                orderable: false,
+                searchable: false,
+                render: function(data, type, row) {
+                    var buttons = '';
+
+                        buttons += '<button name="edit"  id="'+row.id+'" class="edit btn btn-primary btn-sm"   style="margin:1px;" type="submit" data-toggle="tooltip"  title="Edit"><i class="fas fa-pencil-alt"></i></button>';
+
+                        buttons += '<button type="submit" name="delete" id="'+row.id+'" class="delete btn btn-danger btn-sm"  style="margin:1px;" data-toggle="tooltip" title="Remove"><i class="far fa-trash-alt"></i></button>';
+                    
+
+                    return buttons;
+                }
+            }
+            ],
+            "bDestroy": true,
+            "order": [
+                [4, "desc"]
+            ]
+        });
     //#half_short select change
     $('#half_short').change(function(){
         var half_short = $(this).val();
         if(half_short == 0.25 || half_short == 0.5){
             // $('.half_short_time').html(`
             //     <div class="form-group mb-1">
-            //         <label class="small font-weight-bold text-dark">Start Time</label>
+            //         <label class="small font-weight-bolder text-dark">Start Time</label>
             //         <input type="time" name="start_time" id="start_time" class="form-control form-control-sm" />
             //     </div>
             //     <div class="form-group mb-1">
-            //         <label class="small font-weight-bold text-dark">End Time</label>
+            //         <label class="small font-weight-bolder text-dark">End Time</label>
             //         <input type="time" name="end_time" id="end_time" class="form-control form-control-sm" />
             //     </div>
             // `);
         }else{
             $('.half_short_time').html('');
         }
-    });
-
-    $(document).ready(function () {
-        $('#jobtable').DataTable({
-              dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
-              "<'row'<'col-sm-5'i><'col-sm-7'p>>",
-          "buttons": [{
-                  extend: 'csv',
-                  className: 'btn btn-success btn-sm',
-                  title: 'Holiday Details',
-                  text: '<i class="fas fa-file-csv mr-2"></i> CSV',
-              },
-              {
-                  extend: 'pdf',
-                  className: 'btn btn-danger btn-sm',
-                  title: 'Holiday Details',
-                  text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
-                  orientation: 'landscape',
-                  pageSize: 'legal',
-                  customize: function (doc) {
-                      doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
-                  }
-              },
-              {
-                  extend: 'print',
-                  title: 'Holiday Details',
-                  className: 'btn btn-primary btn-sm',
-                  text: '<i class="fas fa-print mr-2"></i> Print',
-                  customize: function (win) {
-                      $(win.document.body).find('table')
-                          .addClass('compact')
-                          .css('font-size', 'inherit');
-                  },
-              },
-          ],
-          "order": [
-              [0, "desc"]
-          ]
-        });
     });
 
     $('#create_record').click(function () {
@@ -404,11 +421,11 @@ $(document).ready(function(){
                     if (data.result.half_short == 0.25 || data.result.half_short == 0.5) {
                         // $('.half_short_time').html(`
                         //     <div class="form-group mb-1">
-                        //         <label class="small font-weight-bold text-dark">Start Time</label>
+                        //         <label class="small font-weight-bolder text-dark">Start Time</label>
                         //         <input type="time" name="start_time" id="start_time" class="form-control form-control-sm" value="` + data.result.start_time + `" />
                         //     </div>
                         //     <div class="form-group mb-1">
-                        //         <label class="small font-weight-bold text-dark">End Time</label>
+                        //         <label class="small font-weight-bolder text-dark">End Time</label>
                         //         <input type="time" name="end_time" id="end_time" class="form-control form-control-sm" value="` + data.result.end_time + `" />
                         //     </div>
                         // `);
@@ -456,6 +473,8 @@ $(document).ready(function(){
         }
 
     });
+
+    
 });
 </script>
 

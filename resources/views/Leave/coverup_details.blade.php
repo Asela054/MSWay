@@ -17,53 +17,25 @@
              </div>
          </div>
         <div class="container-fluid mt-2 p-0 p-2">
-            <div class="card mb-2">
-                <div class="card-body p-0 p-2">
-                    <form class="form-horizontal" id="formFilter">
-                        <div class="form-row mb-1">
-                            <div class="col-md-3">
-                                <label class="small font-weight-bold text-dark">Company</label>
-                                <select name="company" id="company_f" class="form-control form-control-sm">
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <label class="small font-weight-bold text-dark">Department</label>
-                                <select name="department" id="department_f" class="form-control form-control-sm">
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <label class="small font-weight-bold text-dark">Location</label>
-                                <select name="location" id="location_f" class="form-control form-control-sm">
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="small font-weight-bold text-dark">Employee</label>
-                                <select name="employee" id="employee_f" class="form-control form-control-sm">
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                 <br>
-                                <button type="submit" class="btn btn-primary btn-sm filter-btn float-right ml-2" id="btn-filter"><i class="fas fa-search mr-2"></i>Filter</button>
-                                <button type="button" class="btn btn-danger btn-sm filter-btn float-right" id="btn-clear"><i class="far fa-trash-alt"></i>&nbsp;&nbsp;Clear</button>
-                            </div>
-                        </div>
-
-                    </form>
-                </div>
-            </div>
-
             <div class="card">
                 <div class="card-body p-0 p-2">
                     <div class="row">
-                        <div class="col-12">
+                        <div class="col-md-12">
                             <button type="button" class="btn btn-primary btn-sm fa-pull-right"
                                     name="create_record" id="create_record"><i class="fas fa-plus mr-2"></i>Add Covering Details
                             </button>
                         </div>
-                        <div class="col-12">
+                        <div class="col-md-12">
                             <hr class="border-dark">
                         </div>
-                        <div class="col-12">
+                        <div class="col-md-12">
+                             <div class="col-md-12">
+                                    <button class="btn btn-warning btn-sm filter-btn float-right px-3" type="button"
+                                        data-toggle="offcanvas" data-target="#offcanvasRight"
+                                        aria-controls="offcanvasRight"><i class="fas fa-filter mr-1"></i> Filter
+                                        Options</button>
+                                </div><br><br>
+
                             <div class="center-block fix-width scroll-inner">
                             <table class="table table-striped table-bordered table-sm small nowrap" style="width: 100%" id="divicestable">
                                 <thead>
@@ -86,6 +58,7 @@
                     </div>
                 </div>
             </div>
+             @include('layouts.filter_menu_offcanves') 
         </div>
 
 
@@ -108,7 +81,7 @@
                                     {{ csrf_field() }}
                                     <div class="form-row mb-1">
                                         <div class="col-sm-12 col-md-12">
-                                            <label class="small font-weight-bold text-dark">Covering Employee</label>
+                                            <label class="small font-weight-bolder text-dark">Covering Employee</label>
                                             <select name="coveringemployee" id="coveringemployee"
                                                     class="form-control form-control-sm" required>
                                                 <option value="">Select</option>
@@ -117,19 +90,19 @@
                                     </div>
                                     <div class="form-row mb-1">
                                         <div class="col-sm-12 col-md-12">
-                                            <label class="small font-weight-bold text-dark">Date</label>
+                                            <label class="small font-weight-bolder text-dark">Date</label>
                                             <input type="date" name="date" id="date"
                                                    class="form-control form-control-sm" required/>
                                         </div>
                                     </div>
                                     <div class="form-row mb-1">
                                         <div class="col-sm-12 col-md-6">
-                                            <label class="small font-weight-bold text-dark">Start Time</label>
+                                            <label class="small font-weight-bolder text-dark">Start Time</label>
                                             <input type="time" name="start_time" id="start_time"
                                                    class="form-control form-control-sm" placeholder="hh:mm:ss" required/>
                                         </div>
                                         <div class="col-sm-12 col-md-6">
-                                            <label class="small font-weight-bold text-dark">End Time</label>
+                                            <label class="small font-weight-bolder text-dark">End Time</label>
                                             <input type="time" name="end_time" id="end_time"
                                                    class="form-control form-control-sm" placeholder="hh:mm:ss" required/>
                                         </div>
@@ -161,10 +134,10 @@
             $('#attendant_menu_link_icon').addClass('active');
             $('#leavemaster').addClass('navbtnactive');
 
-            let company_f = $('#company_f');
-            let department_f = $('#department_f');
-            let employee_f = $('#employee_f');
-            let location_f = $('#location_f');
+            let company_f = $('#company');
+            let department_f = $('#department');
+            let employee_f = $('#employee');
+            let location_f = $('#location');
 
             company_f.select2({
                 placeholder: 'Select...',
@@ -318,28 +291,18 @@
 
             $('#formFilter').on('submit',function(e) {
                 e.preventDefault();
-                let department = $('#department_f').val();
-                let employee = $('#employee_f').val();
-                let location = $('#location_f').val();
+                let department = $('#department').val();
+                let employee = $('#employee').val();
+                let location = $('#location').val();
 
                 load_dt(department, employee, location);
-            });
-
-
-            document.getElementById('btn-clear').addEventListener('click', function() {
-            document.getElementById('formFilter').reset();
-
-                $('#company_f').val('').trigger('change');   
-                $('#location_f').val('').trigger('change');
-                $('#department_f').val('').trigger('change');
-                $('#employee_f').val('').trigger('change');
-
-                // load_dt('', '', '', '', '');
+                 closeOffcanvasSmoothly();
             });
 
         });    
 
             $(document).ready(function () {
+
             $('#create_record').click(function () {
                 $('.modal-title').text('Covering Details');
                 $('#action_button').val('Add');

@@ -20,55 +20,16 @@
          </div>
 
         <div class="container-fluid mt-2 p-0 p-2">
-            <div class="card mb-2">
-                <div class="card-body">
-                    <form class="form-horizontal" id="formFilter">
-                        <div class="form-row mb-1">
-                            <div class="col-md-3">
-                                <label class="small font-weight-bold text-dark">Company</label>
-                                <select name="company" id="company" class="form-control form-control-sm">
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="small font-weight-bold text-dark">Department</label>
-                                <select name="department" id="department" class="form-control form-control-sm">
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="small font-weight-bold text-dark">Location</label>
-                                <select name="location" id="location" class="form-control form-control-sm">
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="small font-weight-bold text-dark">Employee</label>
-                                <select name="employee" id="employee" class="form-control form-control-sm">
-                                </select>
-                            </div>
-
-                            <div class="col-md-3 mt-3 div_date_range">
-                                <label class="small font-weight-bold text-dark">Date : From - To</label>
-                                <div class="input-group input-group-sm mb-3">
-                                    <input type="date" id="from_date" name="from_date" class="form-control form-control-sm border-right-0"
-                                           placeholder="yyyy-mm-dd"
-                                    >
-                                    <input type="date" id="to_date" name="to_date" class="form-control" placeholder="yyyy-mm-dd">
-                                </div>
-                            </div>
-                            <div class="col mt-3">
-                                <br>
-                                <button type="submit" class="btn btn-primary btn-sm filter-btn float-right ml-2" id="btn-filter"><i class="fas fa-search mr-2"></i>Filter</button>
-                                <button type="button" class="btn btn-danger btn-sm filter-btn float-right" id="btn-clear"><i class="far fa-trash-alt"></i>&nbsp;&nbsp;Clear</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
             <div class="card">
                 <div class="card-body p-0 p-2">
                      <div class="col-12">
                          <div class="center-block fix-width scroll-inner">
-
+                            <div class="col-md-12">
+                                <button class="btn btn-warning btn-sm filter-btn float-right px-3" type="button"
+                                    data-toggle="offcanvas" data-target="#offcanvasRight"
+                                    aria-controls="offcanvasRight"><i class="fas fa-filter mr-1"></i> Filter
+                                    Options</button>
+                            </div><br><br>
                              <div class="daily_table">
                                  <table class="table table-striped table-bordered table-sm small nowrap w-100" id="ot_report_dt">
                                      <thead>
@@ -96,29 +57,10 @@
                     {{ csrf_field() }}
                 </div>
             </div>
+            @include('layouts.filter_menu_offcanves')
         </div>
 
     </main>
-
-    <div class="modal fade" id="view_more_modal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-         aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-                <div class="modal-header p-2">
-                    <h5 class="modal-title" id="staticBackdropLabel">OT Breakdown</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="viewRes"></div>
-                </div>
-                <div class="modal-footer p-2">
-                    <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
     <!-- Modal Area End -->
 
 @endsection
@@ -138,10 +80,7 @@
             let location = $('#location');
             let type = $('#type');
 
-            var canDeleteEmployee = false;
-            @can('ot-delete')
-                canDeleteEmployee = true;
-            @endcan
+          
 
             company.select2({
                 placeholder: 'Select...',
@@ -377,12 +316,19 @@
 
                                     var button = '';
 
-                                    if (canDeleteEmployee) {
                                         button += '<a href="javascript:void(0)" data-toggle="tooltip" data-id="' + full['id'] + '" data-original-title="Delete" class="delete_btn btn btn-danger btn-sm" data-toggle="tooltip" title="Remove"><i class="far fa-trash-alt"></i> </a>';
-                                    }
 
                                     return button;
                                 }
+                            },
+                            {data: "emp_name_with_initial", 
+                             visible: false
+                            },
+                            {data: "calling_name",
+                            visible: false
+                            },
+                            {data: "emp_id", 
+                             visible: false
                             }
                         ],
                         "bDestroy": true,
@@ -457,7 +403,16 @@
                             { data: 'normal_rate_otwork_hrs' },
                             { data: 'double_rate_otwork_hrs' },
                             { data: 'b_location' },
-                            { data: 'dept_name' }
+                            { data: 'dept_name' },
+                            {data: "emp_name_with_initial", 
+                             visible: false
+                            },
+                            {data: "calling_name",
+                            visible: false
+                            },
+                            {data: "emp_id", 
+                             visible: false
+                            }
                         ],
                         "bDestroy": true,
                         "order": [[ 2, "desc" ]],
@@ -496,19 +451,8 @@
                 e.preventDefault();
 
                 load_dt(department, employee, location, from_date, to_date, type, month);
-            });
+                 closeOffcanvasSmoothly();
 
-            document.getElementById('btn-clear').addEventListener('click', function() {
-            document.getElementById('formFilter').reset();
-
-                $('#company').val('').trigger('change');   
-                $('#location').val('').trigger('change');
-                $('#department').val('').trigger('change');
-                $('#employee').val('').trigger('change');
-                $('#from_date').val('');                     
-                $('#to_date').val('');                       
-
-                // load_dt('', '', '', '', '');
             });
 
             $(document).on('click','.delete_btn',async function(e){

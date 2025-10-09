@@ -1,61 +1,50 @@
-<?php $page_stitle = 'Report on Employees - '.$company_name.''; ?>
 @extends('layouts.app')
 
 @section('content')
 <main> 
-    <div class="page-header shadow">
-        <div class="container-fluid">
-            @include('layouts.reports_nav_bar')
-           
+   <div class="page-header">
+        <div class="container-fluid d-none d-sm-block shadow">
+             @include('layouts.reports_nav_bar')
         </div>
-    </div>
-    <div class="container-fluid mt-4">
-        <div class="card mb-2">
-            <div class="card-body">
-                <form class="form-horizontal" id="formFilter">
-                    <div class="form-row mb-1">
-                        <div class="col">
-                            <label class="small font-weight-bold text-dark">Company</label>
-                            <select name="company" id="company" class="form-control form-control-sm">
-                            </select>
-                        </div>
-                        <div class="col">
-                            <label class="small font-weight-bold text-dark">Department</label>
-                            <select name="department" id="department" class="form-control form-control-sm" required>
-                            </select>
-                        </div>
-                        <div class="col">
-                            <br>
-                            <button type="submit" class="btn btn-primary btn-sm filter-btn" id="btn-filter"> Filter</button>
-                        </div>
-                    </div>
-
-                </form>
+        <div class="container-fluid">
+            <div class="page-header-content py-3 px-2">
+                <h1 class="page-header-title ">
+                    <div class="page-header-icon"><i class="fa-light fa-file-contract"></i></div>
+                    <span>Employee Report</span>
+                </h1>
             </div>
         </div>
+    </div>
+    <div class="container-fluid mt-2 p-0 p-2">
         <div class="card">
             <div class="card-body p-0 p-2">
                 <div class="row">
+                    <div class="col-md-12">
+                        <button class="btn btn-warning btn-sm filter-btn float-right px-3" type="button"
+                            data-toggle="offcanvas" data-target="#offcanvasRight" aria-controls="offcanvasRight"><i
+                                class="fas fa-filter mr-1"></i> Filter
+                            Records</button><br><br>
+                    </div>
                     <div class="col-12">
-                        <div class="table-responsive">
-                            <table class="table table-striped table-bordered table-sm small" id="emptable">
+                        <div class="center-block fix-width scroll-inner" >
+                            <table class="table table-striped table-bordered table-sm small nowrap" style="width: 100%" id="emptable">
                                 <thead>
                                 <tr>
                                     <th>ID</th>
-                                    <th>Name with Initial</th>
-                                    <th>Location</th>
-                                    <th>Department</th>
-                                    <th>Date of Birth</th>
-                                    <th>Mobile No</th>
-                                    <th>Telephone</th>
-                                    <th>Nic No</th>
-                                    <th>Gender</th>
-                                    <th>Email</th>
-                                    <th>Permanent Address</th>
-                                    <th>Temporary Address</th>
-                                    <th>Job Category</th>
-                                    <th>Job Status</th>
-                                    <th>Permanent Date</th>
+                                    <th>EMPLOYEE</th>
+                                    <th>LOCATION</th>
+                                    <th>DEPARTMENT</th>
+                                    <th>DATE OF BIRTH</th>
+                                    <th>MOBILE NO</th>
+                                    <th>TELEPHONE</th>
+                                    <th>NIC</th>
+                                    <th>GENDER</th>
+                                    <th>EMAIL</th>
+                                    <th>PERMANENT ADDRESS</th>
+                                    <th>TEMPORARY ADDRESS</th>
+                                    <th>JOB CATEGORY</th>
+                                    <th>JOB STATUS</th>
+                                    <th>PERMANENT DATE</th>
 
                                 </tr>
                                 </thead>
@@ -67,6 +56,47 @@
                 </div>
             </div>
         </div>
+
+         <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+             <div class="offcanvas-header">
+                 <h2 class="offcanvas-title font-weight-bolder" id="offcanvasRightLabel">Records Filter Options</h2>
+                 <button type="button" class="btn-close" data-dismiss="offcanvas" aria-label="Close">
+                     <span aria-hidden="true" class="h1 font-weight-bolder">&times;</span>
+                 </button>
+             </div>
+             <div class="offcanvas-body">
+                 <ul class="list-unstyled">
+                     <form class="form-horizontal" id="formFilter">
+                         <li class="mb-3">
+                             <div class="col-md-12">
+                                 <label class="small font-weight-bolder text-dark">Company</label>
+                                 <select name="company" id="company" class="form-control form-control-sm">
+                                 </select>
+                             </div>
+                         </li>
+                         <li class="mb-3">
+                             <div class="col-md-12">
+                                 <label class="small font-weight-bolder text-dark">Department</label>
+                                 <select name="department" id="department" class="form-control form-control-sm"
+                                     required>
+                                 </select>
+                             </div>
+                         </li>
+                         <li>
+                             <div class="col-md-12 d-flex justify-content-between">
+                                 <button type="submit" class="btn btn-primary btn-md filter-btn px-3" id="btn-filter">
+                                     <i class="fas fa-search mr-2"></i>Search
+                                 </button>
+                                 <button type="button" class="btn btn-danger btn-md filter-btn px-3" id="btn-reset">
+                                     <i class="fas fa-redo mr-1"></i> Reset
+                                 </button>
+                             </div>
+                         </li>
+                     </form>
+                 </ul>
+             </div>
+         </div>
+
     </div>
 </main>
                 
@@ -78,7 +108,7 @@ $(document).ready(function() {
 
     $('#report_menu_link').addClass('active');
     $('#report_menu_link_icon').addClass('active');
-    $('#employeereportmaster').addClass('navbtnactive');
+    $('#employeedetailsreport').addClass('navbtnactive');
 
     let company = $('#company');
     let department = $('#department');
@@ -121,17 +151,44 @@ $(document).ready(function() {
     load_dt('');
     function load_dt(department){
         $('#emptable').DataTable({
-            "lengthMenu": [[10, 25, 50, 100, 500, 1000], [10, 25, 50, 100, 500, 1000]],
-            dom: 'Blfrtip',
-            buttons: [
-                'excelHtml5',
-                'pdfHtml5'
-            ],
-            processing: true,
-            serverSide: true,
+                    "destroy": true,
+                    "processing": true,
+                    "serverSide": true,
+                    dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
+                        "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+                    "buttons": [{
+                            extend: 'csv',
+                            className: 'btn btn-success btn-sm',
+                            title: 'Employee Reports',
+                            text: '<i class="fas fa-file-csv mr-2"></i> CSV',
+                        },
+                        { 
+                            extend: 'pdf', 
+                            className: 'btn btn-danger btn-sm', 
+                            title: 'Employee Reports', 
+                            text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
+                            orientation: 'landscape', 
+                            pageSize: 'legal', 
+                            customize: function(doc) {
+                                doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+                            }
+                        },
+                        {
+                            extend: 'print',
+                            title: 'Employee Reports',
+                            className: 'btn btn-primary btn-sm',
+                            text: '<i class="fas fa-print mr-2"></i> Print',
+                            customize: function(win) {
+                                $(win.document.body).find('table')
+                                    .addClass('compact')
+                                    .css('font-size', 'inherit');
+                            },
+                        },
+                    ],
             ajax: {
-                "url": "{{url('/employee_report_list')}}",
-                "data": {'department':department},
+                  url: scripturl + "/rpt_employee.php",
+                  type: "POST",
+                  data: {'department':department},
             },
             columns: [
                 { data: 'id' },
@@ -160,9 +217,15 @@ $(document).ready(function() {
         let department = $('#department').val();
 
         load_dt(department);
+        closeOffcanvasSmoothly();
     });
 
 
+     $('#btn-reset').on('click', function () {
+                 $('#formFilter')[0].reset();
+                 $('#company').val(null).trigger('change');
+                 $('#department').val(null).trigger('change');
+             });
 
 } );
 </script>

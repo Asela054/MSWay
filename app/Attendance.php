@@ -288,37 +288,6 @@ class Attendance extends Model
         );
     }
 
-    public function get_leave_days($emp_id, $month ,$closedate)
-    {
-        $query = DB::table('leaves')
-            ->select(DB::raw('SUM(no_of_days) as total'))
-            ->where('emp_id', $emp_id )
-            ->where('status', 'Approved' )
-            ->where('leave_from', 'like',  $month . '%')
-            ->where('leave_from', '<=', $closedate)
-            ->whereNotIn('leave_type', [7, 3]);
-        $leave_days_data = $query->get();
-        $leave_days = (!empty($leave_days_data[0]->total)) ? $leave_days_data[0]->total : 0;
-
-        return $leave_days;
-    }
-
-    public function get_no_pay_days($emp_id, $month ,$closedate){
-
-        $query = DB::table('leaves')
-            ->select(DB::raw('SUM(no_of_days) as total'))
-            ->where('emp_id', '=' , $emp_id)
-            ->where('leave_from', 'like',  $month . '%')
-            ->where('leave_from', '<=', $closedate)
-            ->where('leave_type', '=', '3')
-            ->where('status', '=', 'Approved');
-
-        $no_pay_days_data = $query->get();
-        $no_pay_days = (!empty($no_pay_days_data[0]->total)) ? $no_pay_days_data[0]->total : 0;
-
-        return $no_pay_days;
-    }
-
     public function get_ot_hours($emp_id, $month){
 
         $month = $month . '%';
@@ -441,6 +410,13 @@ class Attendance extends Model
         $ondutyTime = Carbon::parse($shift->onduty_time);
         $offdutyTime = Carbon::parse($shift->offduty_time);
 
+        if($emp->flex_ot==1):
+            $ondutyTime = Carbon::parse($on_time->format('H:i'));
+            $offdutyTime = $ondutyTime->copy()->addHours($emp->shift_hours);
+            $shift_start_ = $ondutyTime->format('H:i');
+            $shift_end_ = $offdutyTime->format('H:i');
+        endif;
+
         $leaveinfo = DB::table('leaves')
             ->select('half_short')
             ->where('emp_id', $emp_id)
@@ -469,10 +445,19 @@ class Attendance extends Model
         }
 
         $otminimumminits=  $emp->holiday_ot_minimum_min; //Please add database column
+
         $begining_checkin= $shift->begining_checkin; //Please add database column
         $onduty_time=$shift->onduty_time; //Please add database column
         $earlystart=$shift->leave_early_time; //Please add database column
         $earlyend=$shift->saturday_offduty_time; //Please add database column
+
+        if($emp->flex_ot==1):
+            $begining_checkin= $ondutyTime->format('H:i'); //Please add database column
+            $onduty_time=$ondutyTime->format('H:i'); //Please add database column
+            $earlystart=$offdutyTime->format('H:i'); //Please add database column
+            $earlyend=$ondutyTime->copy()->addHours(($emp->shift_hours/2))->format('H:i:s'); //Please add database column
+        endif;
+
         $shifthours= $offdutyTime->diffInHours($ondutyTime); //Get shift different
         $otafterhours= $emp->ot_app_hours;//Please add database column
         $emplyeeworkhours= $on_time->diffInHours($off_time);//Differents of in time & out time

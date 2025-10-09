@@ -71,18 +71,18 @@
                                 {{ csrf_field() }}	
                                 <div class="form-row mb-1">
                                     <div class="col-sm-8 col-md-6">
-                                        <label class="small font-weight-bold text-dark">IP*</label>
+                                        <label class="small font-weight-bolder">IP*</label>
                                         <input type="text" name="ip" id="ip" class="form-control form-control-sm" required/>
                                     </div>
                                     <div class="col-sm-4 col-md-6">
-                                        <label class="small font-weight-bold text-dark">Name*</label>
+                                        <label class="small font-weight-bolder">Name*</label>
                                         <input type="text" name="name" id="name" class="form-control form-control-sm" required/>
                                     </div>
                                 </div>
 
                                 <div class="form-row mb-1">
                                     <div class="col-sm-6 col-md-4">
-                                        <label class="small font-weight-bold text-dark">Location*</label>
+                                        <label class="small font-weight-bolder">Location*</label>
                                         <select name="location" id="location" class="form-control form-control-sm"
                                             required>
                                             <option value="">Select</option>
@@ -92,12 +92,12 @@
                                         </select>
                                     </div>
                                     <div class="col-sm-6 col-md-4">
-                                        <label class="small font-weight-bold text-dark">Sno*</label>
+                                        <label class="small font-weight-bolder">Sno*</label>
                                         <input type="text" name="sno" id="sno" class="form-control form-control-sm"
                                             required />
                                     </div>
                                     <div class="col-sm-6 col-md-4">
-                                        <label class="small font-weight-bold text-dark">EMI*</label>
+                                        <label class="small font-weight-bolder">EMI*</label>
                                         <input type="text" name="emi" id="emi" class="form-control form-control-sm"
                                             required />
                                     </div>
@@ -105,12 +105,12 @@
 
                                 <div class="form-row mb-1">
                                     <div class="col-sm-6 col-md-4">
-                                        <label class="small font-weight-bold text-dark">Connection No*</label>
+                                        <label class="small font-weight-bolder">Connection No*</label>
                                         <input type="text" name="connectionno" id="connectionno"
                                             class="form-control form-control-sm" required />
                                     </div>
                                     <div class="col-sm-6 col-md-4">
-                                        <label class="small font-weight-bold text-dark">Status*</label><br>
+                                        <label class="small font-weight-bolder">Status*</label><br>
                                         <div class="custom-control custom-radio custom-control-inline">
                                             <input type="radio" id="status1" name="status" class="custom-control-input"
                                                 value="1" checked required>
@@ -145,13 +145,6 @@
 
 <script>
 $(document).ready(function(){
-
-    @can('finger-print-device-edit')
-        canEditfingerprint = true;
-    @endcan
-    @can('finger-print-device-delete')
-        canDeletefingerprint = true;
-    @endcan
 
     $('#attendant_menu_link').addClass('active');
     $('#attendant_menu_link_icon').addClass('active');
@@ -246,13 +239,9 @@ $(document).ready(function(){
                 render: function(data, type, row) {
                     var buttons = '';
 
-                    if (canEditfingerprint) {
                         buttons += '<button name="edit" id="'+row.id+'" class="edit btn btn-primary btn-sm mr-1" type="submit" data-toggle="tooltip" title="Edit"><i class="fas fa-pencil-alt"></i></button>';
-                    }
-
-                    if (canDeletefingerprint) {
+                  
                         buttons += '<button type="submit" name="delete" id="'+row.id+'" class="delete btn btn-danger btn-sm"  data-toggle="tooltip" title="Remove"><i class="far fa-trash-alt"></i></button>';
-                    }
 
                     return buttons;
                 }

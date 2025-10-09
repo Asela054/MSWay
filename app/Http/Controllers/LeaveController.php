@@ -16,6 +16,7 @@ use Validator;
 use DB;
 use Yajra\Datatables\Datatables;
 use App\Holiday;
+use App\Services\LeavepolicyService;
 
 class LeaveController extends Controller
 {
@@ -24,10 +25,15 @@ class LeaveController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function __construct()
+
+     protected $leavePolicyService;
+
+    public function __construct(LeavepolicyService $leavePolicyService)
     {
+        $this->leavePolicyService = $leavePolicyService;
         $this->middleware('auth');
     }
+
 
     public function index()
     {
@@ -271,186 +277,6 @@ class LeaveController extends Controller
          return response()->json(['result' => $employeedetails]);
     }
 
-    // public function getemployeeleavestatus(Request $request)
-    // {
-    //     if ($request->ajax()) {
-
-    //         $employee = Employee::where('emp_id', $request->emp_id)->first();
-
-    //         $emp_join_date = $employee->emp_join_date;
-    //         $join_year = Carbon::parse($emp_join_date)->year;
-    //         $join_month = Carbon::parse($emp_join_date)->month;
-    //         $join_date = Carbon::parse($emp_join_date)->day;
-    //         $full_date = '2022-'.$join_month.'-'.$join_date;
-
-    //         $q_data = DB::table('quater_leaves')
-    //             ->where('from_date', '<=', $full_date)
-    //             ->where('to_date', '>', $full_date)
-    //             ->first();
-
-    //         $like_from_date = date('Y').'-01-01';
-    //         $like_from_date2 = date('Y').'-12-31';
-
-    //         $total_taken_annual_leaves = DB::table('leaves')
-    //             ->where('leaves.emp_id', '=', $employee->emp_id)
-    //             ->whereBetween('leaves.leave_from', [$like_from_date, $like_from_date2])
-    //             ->where('leaves.leave_type', '=', '1')
-    //             ->get()->toArray();
-
-    //         $current_year_taken_a_l = 0;
-    //         foreach ($total_taken_annual_leaves as $tta){
-    //             $leave_from = $tta->leave_from;
-    //             $leave_to = $tta->leave_to;
-
-    //             $leave_from_year = Carbon::parse($leave_from)->year;
-    //             $leave_to_year = Carbon::parse($leave_to)->year;
-
-    //             if($leave_from_year != $leave_to_year){
-    //                 //get current year leaves for that record
-    //                 $lastDayOfMonth = Carbon::parse($leave_from)->endOfMonth()->toDateString();
-
-    //                 $to = \Carbon\Carbon::createFromFormat('Y-m-d', $lastDayOfMonth);
-    //                 $from = \Carbon\Carbon::createFromFormat('Y-m-d', $leave_from);
-
-    //                 $diff_in_days = $to->diffInDays($from);
-    //                 $current_year_taken_a_l += $diff_in_days;
-
-    //                 $jan_data = DB::table('leaves')
-    //                     ->where('leaves.id', '=', $tta->id)
-    //                     ->first();
-
-    //                 $firstDayOfMonth = Carbon::parse($jan_data->leave_to)->startOfMonth()->toDateString();
-    //                 $to_t = \Carbon\Carbon::createFromFormat('Y-m-d', $jan_data->leave_to);
-    //                 $from_t = \Carbon\Carbon::createFromFormat('Y-m-d', $firstDayOfMonth);
-
-    //                 $diff_in_days_f = $to_t->diffInDays($from_t);
-    //                 $current_year_taken_a_l += $diff_in_days_f;
-
-    //             }else{
-    //                 $current_year_taken_a_l += $tta->no_of_days;
-    //             }
-    //         }
-
-    //         $like_from_date_cas = date('Y').'-01-01';
-    //         $like_from_date2_cas = date('Y').'-12-31';
-    //         $total_taken_casual_leaves = DB::table('leaves')
-    //             ->where('leaves.emp_id', '=', $request->emp_id)
-    //             ->whereBetween('leaves.leave_from', [$like_from_date_cas, $like_from_date2_cas])
-    //             ->where('leaves.leave_type', '=', '2')
-    //             ->get()->toArray();
-
-    //         $current_year_taken_c_l = 0;
-    //         foreach ($total_taken_casual_leaves as $tta){
-    //             $leave_from = $tta->leave_from;
-    //             $leave_to = $tta->leave_to;
-
-    //             $leave_from_year = Carbon::parse($leave_from)->year;
-    //             $leave_to_year = Carbon::parse($leave_to)->year;
-
-    //             if($leave_from_year != $leave_to_year){
-    //                 //get current year leaves for that record
-    //                 $lastDayOfMonth = Carbon::parse($leave_from)->endOfMonth()->toDateString();
-
-    //                 $to = \Carbon\Carbon::createFromFormat('Y-m-d', $lastDayOfMonth);
-    //                 $from = \Carbon\Carbon::createFromFormat('Y-m-d', $leave_from);
-
-    //                 $diff_in_days = $to->diffInDays($from);
-    //                 $current_year_taken_c_l += $diff_in_days;
-    //             }else{
-    //                 $current_year_taken_c_l += $tta->no_of_days;
-    //             }
-    //         }
-
-
-    //         $like_from_date_med = date('Y').'-01-01';
-    //         $like_from_date2_med = date('Y').'-12-31';
-    //         $total_taken_med_leaves = DB::table('leaves')
-    //             ->where('leaves.emp_id', '=', $request->emp_id)
-    //             ->whereBetween('leaves.leave_from', [$like_from_date_med, $like_from_date2_med])
-    //             ->where('leaves.leave_type', '=', '4')
-    //             ->get()->toArray();
-
-    //         $current_year_taken_med = 0;
-    //         foreach ($total_taken_med_leaves as $tta){
-    //             $leave_from = $tta->leave_from;
-    //             $leave_to = $tta->leave_to;
-
-    //             $leave_from_year = Carbon::parse($leave_from)->year;
-    //             $leave_to_year = Carbon::parse($leave_to)->year;
-
-    //             if($leave_from_year != $leave_to_year){
-    //                 //get current year leaves for that record
-    //                 $lastDayOfMonth = Carbon::parse($leave_from)->endOfMonth()->toDateString();
-
-    //                 $to = \Carbon\Carbon::createFromFormat('Y-m-d', $lastDayOfMonth);
-    //                 $from = \Carbon\Carbon::createFromFormat('Y-m-d', $leave_from);
-
-    //                 $diff_in_days = $to->diffInDays($from);
-    //                 $current_year_taken_med += $diff_in_days;
-    //             }else{
-    //                 $current_year_taken_med += $tta->no_of_days;
-    //             }
-    //         }
-
-
-    //         $leave_msg = '';
-    //         $medical_leaves = 0;
-    //         if($join_year == date('Y')){
-    //             $annual_leaves = $q_data->leaves;
-    //             $leave_msg = "Employee can have only a half day per month in Casual Leaves. (Employee joined in current year)";
-    //         }else{
-    //             //set from new table
-    //             $leaves = DB::table('job_categories')->where('id', $employee->job_category_id)->first();
-
-    //             $annual_leaves = $leaves->annual_leaves;
-    //             // $casual_leaves = $leaves->casual_leaves;
-    //             $medical_leaves = $leaves->medical_leaves;
-    //         }
-
-    //         $casual_leaves = 0;
-    //         $join_date = new DateTime($emp_join_date);
-    //         $current_date = new DateTime();
-    //         $interval = $join_date->diff($current_date);
-            
-    //         $years_of_service = $interval->y;
-    //         $months_of_service = $interval->m;
-            
-    //         // Casual leave calculation
-    //         if ($years_of_service == 0) {
-    //         $casual_leaves = number_format((7 / 12) * $months_of_service, 2);
-    //         } else {
-    //             $casual_leaves = 7;
-    //         }
-
-
-    //         $total_no_of_annual_leaves = $annual_leaves;
-    //         $total_no_of_casual_leaves = $casual_leaves;
-    //         $total_no_of_med_leaves = $medical_leaves;
-
-    //         $available_no_of_annual_leaves = $total_no_of_annual_leaves - $current_year_taken_a_l;
-    //         $available_no_of_casual_leaves = $total_no_of_casual_leaves - $current_year_taken_c_l;
-    //         $available_no_of_med_leaves = $total_no_of_med_leaves - $current_year_taken_med;
-
-    //         if($employee->emp_status != 1){
-    //             $emp_status = DB::table('employment_statuses')->where('id', $employee->emp_status)->first();
-    //             $leave_msg = 'Casual Leaves - '.$emp_status->emp_status.' Employee can have only a half day per month (Not a permanent employee)';
-    //         }
-
-    //         $results = array(
-    //             "total_no_of_annual_leaves" => $total_no_of_annual_leaves,
-    //             "total_no_of_casual_leaves" => $total_no_of_casual_leaves,
-    //             "total_no_of_med_leaves" => $total_no_of_med_leaves,
-    //             "total_taken_annual_leaves" => $current_year_taken_a_l,
-    //             "total_taken_casual_leaves" => $current_year_taken_c_l,
-    //             "total_taken_med_leaves" => $current_year_taken_med,
-    //             "available_no_of_annual_leaves" => $available_no_of_annual_leaves,
-    //             "available_no_of_casual_leaves" => $available_no_of_casual_leaves,
-    //             "available_no_of_med_leaves" => $available_no_of_med_leaves,
-    //             "leave_msg" => $leave_msg
-    //         );
-    //         return response()->json($results);
-    //     }
-    // }
     public function getemployeeleavestatus(Request $request)
     {
         if ($request->ajax()) {
@@ -462,189 +288,30 @@ class LeaveController extends Controller
             $join_month = Carbon::parse($emp_join_date)->month;
             $join_date = Carbon::parse($emp_join_date)->day;
             $full_date = '2022-'.$join_month.'-'.$join_date;
-
-            $q_data = DB::table('quater_leaves')
-                ->where('from_date', '<', $full_date)
-                ->where('to_date', '>', $full_date)
-                ->first();
-
-            $like_from_date = date('Y').'-01-01';
-            $like_from_date2 = date('Y').'-12-31';
-
-            $total_taken_annual_leaves = DB::table('leaves')
-                ->where('leaves.emp_id', '=', $employee->emp_id)
-                ->whereBetween('leaves.leave_from', [$like_from_date, $like_from_date2])
-                ->where('leaves.leave_type', '=', '1')
-                ->get()->toArray();
-
-            $current_year_taken_a_l = 0;
-            foreach ($total_taken_annual_leaves as $tta){
-                $leave_from = $tta->leave_from;
-                $leave_to = $tta->leave_to;
-
-                $leave_from_year = Carbon::parse($leave_from)->year;
-                $leave_to_year = Carbon::parse($leave_to)->year;
-
-                if($leave_from_year != $leave_to_year){
-                    //get current year leaves for that record
-                    $lastDayOfMonth = Carbon::parse($leave_from)->endOfMonth()->toDateString();
-
-                    $to = \Carbon\Carbon::createFromFormat('Y-m-d', $lastDayOfMonth);
-                    $from = \Carbon\Carbon::createFromFormat('Y-m-d', $leave_from);
-
-                    $diff_in_days = $to->diffInDays($from);
-                    $current_year_taken_a_l += $diff_in_days;
-
-                    $jan_data = DB::table('leaves')
-                        ->where('leaves.id', '=', $tta->id)
-                        ->first();
-
-                    $firstDayOfMonth = Carbon::parse($jan_data->leave_to)->startOfMonth()->toDateString();
-                    $to_t = \Carbon\Carbon::createFromFormat('Y-m-d', $jan_data->leave_to);
-                    $from_t = \Carbon\Carbon::createFromFormat('Y-m-d', $firstDayOfMonth);
-
-                    $diff_in_days_f = $to_t->diffInDays($from_t);
-                    $current_year_taken_a_l += $diff_in_days_f;
-
-                }else{
-                    $current_year_taken_a_l += $tta->no_of_days;
-                }
-            }
-
-            $like_from_date_cas = date('Y').'-01-01';
-            $like_from_date2_cas = date('Y').'-12-31';
-            $total_taken_casual_leaves = DB::table('leaves')
-                ->where('leaves.emp_id', '=', $request->emp_id)
-                ->whereBetween('leaves.leave_from', [$like_from_date_cas, $like_from_date2_cas])
-                ->where('leaves.leave_type', '=', '2')
-                ->get()->toArray();
-
-            $current_year_taken_c_l = 0;
-            foreach ($total_taken_casual_leaves as $tta){
-                $leave_from = $tta->leave_from;
-                $leave_to = $tta->leave_to;
-
-                $leave_from_year = Carbon::parse($leave_from)->year;
-                $leave_to_year = Carbon::parse($leave_to)->year;
-
-                if($leave_from_year != $leave_to_year){
-                    //get current year leaves for that record
-                    $lastDayOfMonth = Carbon::parse($leave_from)->endOfMonth()->toDateString();
-
-                    $to = \Carbon\Carbon::createFromFormat('Y-m-d', $lastDayOfMonth);
-                    $from = \Carbon\Carbon::createFromFormat('Y-m-d', $leave_from);
-
-                    $diff_in_days = $to->diffInDays($from);
-                    $current_year_taken_c_l += $diff_in_days;
-                }else{
-                    $current_year_taken_c_l += $tta->no_of_days;
-                }
-            }
+            $empid = $employee->emp_id;
 
 
-            $like_from_date_med = date('Y').'-01-01';
-            $like_from_date2_med = date('Y').'-12-31';
-            $total_taken_med_leaves = DB::table('leaves')
-                ->where('leaves.emp_id', '=', $request->emp_id)
-                ->whereBetween('leaves.leave_from', [$like_from_date_med, $like_from_date2_med])
-                ->where('leaves.leave_type', '=', '4')
-                ->get()->toArray();
+            $formated_from_date = date('Y').'-01-01';
+            $formated_fromto_date = date('Y').'-12-31';
 
-            $current_year_taken_med = 0;
-            foreach ($total_taken_med_leaves as $tta){
-                $leave_from = $tta->leave_from;
-                $leave_to = $tta->leave_to;
+            $current_year_taken_a_l = (new \App\Leave)->taken_annual_leaves($empid, $formated_from_date, $formated_fromto_date);
 
-                $leave_from_year = Carbon::parse($leave_from)->year;
-                $leave_to_year = Carbon::parse($leave_to)->year;
+            $current_year_taken_c_l = (new \App\Leave)->taken_casual_leaves($empid, $formated_from_date, $formated_fromto_date);
 
-                if($leave_from_year != $leave_to_year){
-                    //get current year leaves for that record
-                    $lastDayOfMonth = Carbon::parse($leave_from)->endOfMonth()->toDateString();
+            $current_year_taken_med = (new \App\Leave)->taken_medical_leaves($empid, $formated_from_date, $formated_fromto_date);
 
-                    $to = \Carbon\Carbon::createFromFormat('Y-m-d', $lastDayOfMonth);
-                    $from = \Carbon\Carbon::createFromFormat('Y-m-d', $leave_from);
-
-                    $diff_in_days = $to->diffInDays($from);
-                    $current_year_taken_med += $diff_in_days;
-                }else{
-                    $current_year_taken_med += $tta->no_of_days;
-                }
-            }
-
-
-           
-            $medical_leaves = 0;
-            $leaves = DB::table('job_categories')->where('id', $employee->job_category_id)->first();
-            $medical_leaves = $leaves->medical_leaves;
 
             $leave_msg = '';
 
-            $employee_join_date = Carbon::parse($emp_join_date);
-            $current_date = Carbon::now();
+            $annualData = $this->leavePolicyService->calculateAnnualLeaves($employee->emp_join_date, $employee->emp_id);
+            $annual_leaves = $annualData['annual_leaves'];
+            $leave_msg = $annualData['leave_msg'];
 
-            // Calculate months of service
-            $months_of_service = $employee_join_date->diffInMonths($current_date);
+            // casual leave calculation
+            $casual_leaves = $this->leavePolicyService->calculateCasualLeaves($employee->emp_join_date);
 
-            // First Year (0-12 months) - No annual leaves
-            if ($months_of_service < 12) {
-                $annual_leaves = 0;
-                $leave_msg = "Employee is in the first year of service - no annual leaves yet.";
-            }
-
-            // Second Year (12-24 months) - Pro-rated leaves based on first year's quarter
-            elseif ($months_of_service < 24) {
-                // Get the 1-year anniversary date
-                $anniversary_date = $employee_join_date->copy()->addYear();
-
-                // Check if current date is between anniversary and December 31
-                 $year_end = Carbon::create($anniversary_date->year, 12, 31);
-
-                // Only calculate if current date is after anniversary but before next year
-                if ($current_date >= $anniversary_date && $current_date <= $year_end) {
-                    // Get the quarter period from the joining year (original employment quarter)
-                      $full_date = '2022-'.$join_month.'-'.$join_date;
-
-                    $q_data = DB::table('quater_leaves')
-                        ->where('from_date', '<=', $full_date)
-                        ->where('to_date', '>', $full_date)
-                        ->first();
-
-                       $annual_leaves = $q_data ? $q_data->leaves : 0;
-                        $leave_msg = $q_data ? "Using quarter leaves value from anniversary to year-end." : "No matching quarter found for pro-rated leaves.";
-                }
-                    // After December 31, switch to standard 14 days
-                elseif ($current_date > $year_end) {
-                    $annual_leaves = 14;
-                    $leave_msg = "Switched to standard 14 days from January 1st.";
-                }
-                // Before anniversary date
-                else {
-                    $annual_leaves = 0;
-                    $leave_msg = "Waiting for 1-year anniversary date ($anniversary_date->format('Y-m-d'))";
-                } 
-            }
-            // Third year onwards (24+ months) - Full 14 days
-            else {
-                $annual_leaves = 14;
-                $leave_msg = "Employee is eligible for full 14 annual leaves per year.";
-            }
-
-            $casual_leaves = 0;
-            $join_date = new DateTime($emp_join_date);
-            $current_date = new DateTime();
-            $interval = $join_date->diff($current_date);
-            
-            $years_of_service = $interval->y;
-            $months_of_service = $interval->m;
-            
-            // Casual leave calculation
-            if ($years_of_service == 0) {
-            $casual_leaves = number_format((7 / 12) * $months_of_service, 2);
-            } else {
-                $casual_leaves = 7;
-            }
-
+             // medical leave calculation
+            $medical_leaves = $this->leavePolicyService->getMedicalLeaves($employee->job_category_id);
 
             $total_no_of_annual_leaves = $annual_leaves;
             $total_no_of_casual_leaves = $casual_leaves;
@@ -684,6 +351,11 @@ class LeaveController extends Controller
      */
     public function store(Request $request)
     {
+        $permission = Auth::user()->can('leave-create');
+        if (!$permission) {
+            return response()->json(['error' => 'UnAuthorized'], 401);
+        }
+
         $rules = array(
             'employee' => '',
             'leavetype' => '',
@@ -704,6 +376,38 @@ class LeaveController extends Controller
         $from = \Carbon\Carbon::createFromFormat('Y-m-d', $request->todate);
         $diff_days = $to->diffInDays($from);
         $half_short = $request->input('half_short');
+
+        // Process leave balance data from frontend
+            $leaveBalanceData = [];
+            $balanceErrors = [];
+
+            if ($request->has('leave_balance_data')) {
+                $leaveBalanceData = json_decode($request->leave_balance_data, true);
+                
+                // Validate if the applied leave doesn't exceed available balance
+             
+
+                    foreach ($leaveBalanceData as $balance) {
+                        if ($balance['leave_type'] === 'Annual' && $request->leavetype == 1) {
+                            $availableAnnual = (float) $balance['available'];
+                            if ($diff_days > $availableAnnual) {
+                                $balanceErrors[] = "Applied annual leave days ($diff_days) exceed available balance ($availableAnnual days)";
+                            }
+                        }
+                        
+                        if ($balance['leave_type'] === 'Casual' && $request->leavetype == 2) {
+                            $availableCasual = (float) $balance['available'];
+                            if ($diff_days > $availableCasual) {
+                                $balanceErrors[] = "Applied casual leave days ($diff_days) exceed available balance ($availableCasual days)";
+                            }
+                        }
+                
+           } 
+        }
+
+            if (!empty($balanceErrors)) {
+                    return response()->json(['errors' => $balanceErrors]);
+                }
 
         $leave = new Leave;
         $leave->emp_id = $request->input('employee');
@@ -778,6 +482,10 @@ class LeaveController extends Controller
      */
     public function edit($id)
     {
+         $permission = Auth::user()->can('leave-edit');
+        if (!$permission) {
+            return response()->json(['error' => 'UnAuthorized'], 401);
+        }
         if (request()->ajax()) {
             //$data = Leave::findOrFail($id);
             /* $data = DB::table('leaves')
@@ -803,6 +511,10 @@ class LeaveController extends Controller
      */
     public function update(Request $request, Leave $leave)
     {
+         $permission = Auth::user()->can('leave-edit');
+        if (!$permission) {
+            return response()->json(['error' => 'UnAuthorized'], 401);
+        }
         $rules = array(
             'hidden_id' => 'required',
             'leavetype' => 'required',
@@ -960,47 +672,7 @@ class LeaveController extends Controller
         ]);
     }
 
-    // public function calculateWorkingDays(Request $request)
-    // {
-    //     $fromDate = Carbon::parse($request->input('from_date'));
-    //     $toDate = Carbon::parse($request->input('to_date'));
-    //     $halfShort = (float)$request->input('half_short', 0);
-        
-    //     $holidays = Holiday::whereBetween('date', [$fromDate->format('Y-m-d'), $toDate->format('Y-m-d')])->pluck('date')->toArray();
 
-    //     $workingDays = 0;
-    //     $currentDate = $fromDate->copy();
-    //     $dateRangeCount = 0;
-
-    //     while ($currentDate <= $toDate) {
-    //         $dateRangeCount++;
-    //         $dayOfWeek = $currentDate->dayOfWeek;
-    //         $dateStr = $currentDate->format('Y-m-d');
-
-    //         if ($dayOfWeek === Carbon::SUNDAY) {
-    //             $currentDate->addDay();
-    //             continue;
-    //         }
-
-    //         if (in_array($dateStr, $holidays)) {
-    //             $currentDate->addDay();
-    //             continue;
-    //         }
-
-    //         if ($dayOfWeek === Carbon::SATURDAY) {
-    //             $workingDays += 0.5;
-    //         } else {
-    //             $workingDays += 1;
-    //         }
-
-    //         $currentDate->addDay();
-    //     }
-    //     // $workingDays += $halfShort;
-
-    //     return response()->json([
-    //         'working_days' => number_format($workingDays, 2),
-    //     ]);
-    // }
 
     public function calculateWorkingDays(Request $request)
     {

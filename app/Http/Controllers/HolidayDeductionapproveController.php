@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\EmployeeTermPayment;
+use App\Helpers\EmployeeHelper;
 use App\Holidaydiductionapproved;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -53,6 +54,7 @@ class HolidayDeductionapproveController extends Controller
         ->select(
             'employees.emp_id as empid',
             'employees.emp_name_with_initial as emp_name',
+            'employees.calling_name',
             'payroll_profiles.basic_salary as basicsalary',
             'payroll_profiles.id as payroll_profiles_id')
         ->where('employees.emp_department', '=', $department)
@@ -67,6 +69,12 @@ class HolidayDeductionapproveController extends Controller
                 $empId = $row->empid;
                 $empName = $row->emp_name;
                 $payrollProfileId = $row->payroll_profiles_id;
+
+                $employeeObj = (object)[
+                    'emp_id' => $row->empid,
+                    'emp_name_with_initial' => $row->emp_name,
+                    'calling_name' => $row->calling_name
+                ];
 
                 
                 // $absentdaycount = (new \App\Holidaydiductionapproved)->absentdayscounts($empId, $firstDate, $lastDate);
@@ -142,7 +150,7 @@ class HolidayDeductionapproveController extends Controller
                 $datareturn[] = [
                     'deductionsstatus' => $approveholidayductionsstatus,
                     'empid' => $empId,
-                    'emp_name' => $empName,
+                    'emp_name' =>  EmployeeHelper::getDisplayName($employeeObj),
                     'payroll_Profile' => $payrollProfileId,
                     'absent_Days' => $totalDays->total_days,
                     'remuneration_id' => $remunerationtype,

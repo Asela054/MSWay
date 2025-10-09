@@ -6,6 +6,7 @@ use App\Company;
 use App\Department;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Input;
 use Validator;
 
@@ -43,11 +44,10 @@ class CompanyController extends Controller
      */
     public function store(Request $request)
     {
-        $user = auth()->user();
+        $user = Auth::user();
         $permission = $user->can('company-create');
-
         if(!$permission) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+            return response()->json(['errors' => array('You do not have permission to create company.')]);
         }
 
         $rules = array(
@@ -118,11 +118,10 @@ class CompanyController extends Controller
      */
     public function update(Request $request, Company $company)
     {
-        $user = auth()->user();
+        $user = Auth::user();
         $permission = $user->can('company-edit');
-
         if(!$permission) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+            return response()->json(['errors' => array('You do not have permission to update company.')]);
         }
 
         $rules = array(
@@ -170,44 +169,15 @@ class CompanyController extends Controller
      */
     public function destroy($id)
     {
-        $user = auth()->user();
+        $user = Auth::user();
         $permission = $user->can('company-delete');
-
         if(!$permission) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+            return response()->json(['errors' => array('You do not have permission to remove company.')]);
         }
 
         $data = Company::findOrFail($id);
         $data->delete();
     }
 
-    public function company_list_sel2(Request $request){
-        if ($request->ajax())
-        {
-            $page = Input::get('page');
-            $resultCount = 25;
-
-            $offset = ($page - 1) * $resultCount;
-
-            $breeds = Company::where('name', 'LIKE',  '%' . Input::get("term"). '%')
-                ->orderBy('name')
-                ->skip($offset)
-                ->take($resultCount)
-                ->get([DB::raw('id as id'),DB::raw('name as text'), DB::raw('name as name')]);
-
-            $count = Company::count();
-            $endCount = $offset + $resultCount;
-            $morePages = $endCount < $count;
-
-            $results = array(
-                "results" => $breeds,
-                "pagination" => array(
-                    "more" => $morePages
-                )
-            );
-
-            return response()->json($results);
-        }
-    }
-
+  
 }

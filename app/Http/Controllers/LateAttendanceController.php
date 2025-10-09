@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\EmployeeHelper;
 use App\LateAttendance;
 use App\Leave;
+use App\Services\LatePolicyService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -23,6 +24,44 @@ class LateAttendanceController extends Controller
             abort(403);
         }
         return view('Attendent.late_attendance_by_time');
+    }
+
+        public function late_types_sel2(Request $request)
+    {
+        if ($request->ajax()) {
+            $page = Input::get('page');
+            $resultCount = 25;
+
+            $offset = ($page - 1) * $resultCount;
+
+            $breeds = DB::query()
+                ->where('name', 'LIKE', '%' . Input::get("term") . '%')
+                ->from('late_types')
+                ->orderBy('name')
+                ->skip($offset)
+                ->take($resultCount)
+                ->get([DB::raw('DISTINCT id as id'), DB::raw('name as text')]);
+
+            $count = DB::query()
+                ->where('name', 'LIKE', '%' . Input::get("term") . '%')
+                ->from('late_types')
+                ->orderBy('name')
+                ->skip($offset)
+                ->take($resultCount)
+                ->select([DB::raw('DISTINCT id as id'), DB::raw('name as text')])
+                ->count();
+            $endCount = $offset + $resultCount;
+            $morePages = $endCount < $count;
+
+            $results = array(
+                "results" => $breeds,
+                "pagination" => array(
+                    "more" => $morePages
+                )
+            );
+
+            return response()->json($results);
+        }
     }
 
     // late attendace mark data table
@@ -124,8 +163,11 @@ class LateAttendanceController extends Controller
             ->count();
 
         $filteredQuery = clone $baseQuery;
-        if ($late_time_threshold) {
+        if ($late_time_threshold && $late_time->late_early == 0) {
             $filteredQuery->havingRaw("TIME(MIN(at1.timestamp)) > ?", [$late_time_threshold]);
+        }
+        else if ($late_time_threshold && $late_time->late_early == 1) {
+            $filteredQuery->havingRaw("TIME(MAX(at1.timestamp)) < ?", [$late_time_threshold]);
         }
 
         $totalFiltered = DB::table(DB::raw("({$filteredQuery->toSql()}) as sub"))
@@ -181,43 +223,7 @@ class LateAttendanceController extends Controller
         ]);
     }
 
-    public function late_types_sel2(Request $request)
-    {
-        if ($request->ajax()) {
-            $page = Input::get('page');
-            $resultCount = 25;
 
-            $offset = ($page - 1) * $resultCount;
-
-            $breeds = DB::query()
-                ->where('name', 'LIKE', '%' . Input::get("term") . '%')
-                ->from('late_types')
-                ->orderBy('name')
-                ->skip($offset)
-                ->take($resultCount)
-                ->get([DB::raw('DISTINCT id as id'), DB::raw('name as text')]);
-
-            $count = DB::query()
-                ->where('name', 'LIKE', '%' . Input::get("term") . '%')
-                ->from('late_types')
-                ->orderBy('name')
-                ->skip($offset)
-                ->take($resultCount)
-                ->select([DB::raw('DISTINCT id as id'), DB::raw('name as text')])
-                ->count();
-            $endCount = $offset + $resultCount;
-            $morePages = $endCount < $count;
-
-            $results = array(
-                "results" => $breeds,
-                "pagination" => array(
-                    "more" => $morePages
-                )
-            );
-
-            return response()->json($results);
-        }
-    }
 
     public function lateAttendance_mark_as_late(Request $request)
     {
@@ -233,19 +239,20 @@ class LateAttendanceController extends Controller
             return response()->json(['status' => false, 'msg' => 'Select one or more employees']);
         }
 
+
         $data_arr = array();
         foreach ($selected_cb as $cr) {
 
             if ($cr['lasttimestamp'] != '') {
 
-                    $shiftType = DB::table('employees')
+                 $shiftType = DB::table('employees')
                                 ->join('shift_types', 'employees.emp_shift', '=', 'shift_types.id')
                                 ->select('shift_types.onduty_time')
                                 ->where('employees.emp_id', $cr['uid']) 
                                 ->first();
 
 
-                        if ($shiftType && $shiftType->onduty_time) {
+                if ($shiftType && $shiftType->onduty_time) {
                             $ondutyTime = new DateTime($shiftType->onduty_time);
                             $checkInTime = new DateTime($cr['timestamp']);
 
@@ -264,7 +271,9 @@ class LateAttendanceController extends Controller
                                     'minites_count' => $minutesDifference,
                                 );
                             }
-                        }
+                }
+                
+
                 $data_arr[] = array(
                     'attendance_id' => $cr['id'],
                     'emp_id' => $cr['uid'],
@@ -305,157 +314,9 @@ class LateAttendanceController extends Controller
         return view('Attendent.late_attendance_by_time_approve', compact('leave_types'));
     }
 
-    public function attendance_by_time_approve_report_list(Request $request)
+
+        public function lateAttendance_mark_as_late_approve(Request $request)
     {
-        $user = Auth::user();
-        $permission = $user->can('late-attendance-approve');
-        if (!$permission) {
-            return response()->json(['error' => 'UnAuthorized'], 401);
-        }
-
-        ## Read value
-        $department = $request->get('department');
-        $company = $request->get('company');
-        $location = $request->get('location');
-        $date = $request->get('date');
-
-
-        $draw = $request->get('draw');
-        $start = $request->get("start");
-        $rowperpage = $request->get("length"); // Rows display per page
-
-        $columnIndex_arr = $request->get('order');
-        $columnName_arr = $request->get('columns');
-        $order_arr = $request->get('order');
-        $search_arr = $request->get('search');
-
-        $columnIndex = $columnIndex_arr[0]['column']; // Column index
-        $columnName = $columnName_arr[$columnIndex]['data']; // Column name
-        $columnSortOrder = $order_arr[0]['dir']; // asc or desc
-        $searchValue = $search_arr['value']; // Search value
-
-        // Total records
-        $totalRecords_array = DB::select('
-            SELECT COUNT(*) as acount
-                FROM
-                (
-                    SELECT COUNT(*)
-                    from `employee_late_attendances` as `ela` 
-                    left join attendances as at1 on `at1`.`id` = `ela`.`attendance_id`  
-                    left join `employees` on `at1`.`uid` = `employees`.`emp_id`  
-                    left join `branches` on `at1`.`location` = `branches`.`id`
-                    WHERE ela.is_approved = 0
-                    group by `at1`.`uid`, `at1`.`date`  
-                )t
-            ');
-
-        $totalRecords = $totalRecords_array[0]->acount;
-
-        $query1 = 'SELECT COUNT(*) as acount ';
-        $query2 = 'FROM `employee_late_attendances` as `ela` ';
-        $query2 .= 'left join attendances as at1 on at1.`id` = `ela`.`id` ';
-        $query2 .= 'join `employees` on `employees`.`emp_id` = `ela`.`emp_id` ';
-        $query2 .= 'left join `branches` on `at1`.`location` = `branches`.`id` ';
-        $query2 .= 'left join `departments` on `departments`.`id` = `employees`.`emp_department` ';
-        $query2 .= 'left join `companies` on `companies`.`id` = `departments`.`company_id` ';
-        $query2 .= 'WHERE 1 = 1 and ela.is_approved = 0 ';
-        //$searchValue = 'Breeder Farm';
-        if ($searchValue != '') {
-            $query2 .= 'AND ';
-            $query2 .= '( ';
-            $query2 .= 'employees.emp_id like "' . $searchValue . '%" ';
-            $query2 .= 'OR employees.emp_name_with_initial like "' . $searchValue . '%" ';
-            $query2 .= 'OR ela.date like "' . $searchValue . '%" ';
-            $query2 .= 'OR companies.name like "' . $searchValue . '%" ';
-            $query2 .= 'OR branches.location like "' . $searchValue . '%" ';
-            $query2 .= 'OR departments.name like "' . $searchValue . '%" ';
-            $query2 .= ') ';
-        }
-
-        if ($department != '') {
-            $query2 .= 'AND departments.id = "' . $department . '" ';
-        }
-
-        if ($company != '') {
-            $query2 .= 'AND employees.emp_company = "' . $company . '" ';
-        }
-
-        // if ($location != '') {
-        //     $query2 .= 'AND at1.location = "' . $location . '" ';
-        // }
-
-        if ($date != '') {
-            $query2 .= 'AND ela.date = "' . $date . '" ';
-        }
-
-        $query6 = ' ';
-        $query6 .= ' ';
-
-        $query5 = 'LIMIT ' . (string)$start . ' , ' . $rowperpage . ' ';
-        $query7 = 'ORDER BY ' . $columnName . ' ' . $columnSortOrder . ' ';
-
-        //error_log($query1.$query2.$query6);
-
-        $totalRecordswithFilter_arr = DB::select($query1 . $query2 . $query6);
-        $totalRecordswithFilter = $totalRecordswithFilter_arr[0]->acount;
-
-        // Fetch records
-        $query3 = 'select ela.*,   
-            employees.emp_id ,
-            employees.emp_name_with_initial ,
-            `employees`.`calling_name`,
-            branches.location as b_location,
-            branches.id as b_location_id,
-            departments.name as dept_name,  
-            departments.id as dept_id  
-              ';
-
-        $records = DB::select($query3 . $query2 . $query6 . $query7 . $query5);
-        //error_log($query3.$query2.$query6.$query7.$query5);
-        //var_dump(sizeof($records));
-        //die();
-        $data_arr = array();
-
-        foreach ($records as $record) {
-
-              $employeeObj = (object)[
-                'emp_id' => $record->emp_id,
-                'emp_name_with_initial' => $record->emp_name_with_initial,
-                'calling_name' => $record->calling_name
-            ];
-
-            $data_arr[] = array(
-                "id" => $record->id,
-                "emp_name_with_initial" => $record->emp_name_with_initial,
-                "employee_display" => EmployeeHelper::getDisplayName($employeeObj),
-                "date" => $record->date,
-                "check_in_time" => date('H:i', strtotime($record->check_in_time)),
-                "check_out_time" => date('H:i', strtotime($record->check_out_time)),
-                "working_hours" => $record->working_hours,
-                "dept_name" => $record->dept_name,
-                "dept_id" => $record->dept_id,
-                "location" => $record->b_location,
-                "location_id" => $record->b_location_id,
-                "is_approved_int" => $record->is_approved,
-                "is_approved" => ($record->is_approved == 0) ? 'No' : 'Yes',
-            );
-        }
-
-        $response = array(
-            "draw" => intval($draw),
-            "iTotalRecords" => $totalRecords,
-            "iTotalDisplayRecords" => $totalRecordswithFilter,
-            "aaData" => $data_arr
-        );
-
-        echo json_encode($response);
-        exit;
-    }
-
-    public function lateAttendance_mark_as_late_approve(Request $request)
-    {
-        // pubudu = 	3580.77
-
         $user = Auth::user();
         $permission = $user->can('late-attendance-approve');
         if (!$permission) {
@@ -469,176 +330,35 @@ class LateAttendanceController extends Controller
             return response()->json(['status' => false, 'msg' => 'Select one or more employees']);
         }
 
+        $latePolicyService = new LatePolicyService();
         $id_arr = array();
         $date = '';
 
         foreach ($selected_cb as $cr) {
             $date = $cr['date'];
-
             array_push($id_arr, $cr['id']);
 
-            DB::table('employee_late_attendances')
-                ->where('id', $cr['id'])
-                ->update(['is_approved' => 1]);
-
+            // Get employee late attendance data
             $emp_data = DB::table('employee_late_attendances')
                 ->find($cr['id']);
 
-            //count this month leaves and to leaves table
-            $d_count = DB::table('employee_late_attendances')
-                ->where('date', $emp_data->date)
-                ->where('emp_id', $emp_data->emp_id)
-                ->count();
+            // Process late attendance using service
+             $result = $latePolicyService->processLateAttendance($emp_data, $leave_type, $date);
 
-            
-            switch (true) {
-                case ($d_count == 1 || $d_count == 2):
-                    //add short leave
-                    $half_short = 0.25;
-                    break;
-                default:
-                    //add half day
-                    $half_short = 0.5;
-            }
-
-
-
-            $jobcategory = DB::table('employees')
-                            ->leftjoin('job_categories', 'employees.job_category_id', '=', 'job_categories.id')
-                            ->select('job_categories.late_type','job_categories.short_leaves','job_categories.half_days','job_categories.late_attend_min')
-                            ->where('employees.emp_id', $emp_data->emp_id) 
-                            ->first();
-
-            $latetype = $jobcategory->late_type; 
-            $shortleave = $jobcategory->short_leaves; 
-            $halfday = $jobcategory->half_days;   
-            $minitescount = $jobcategory->late_attend_min; 
-
-            if($latetype == 1){
-
-                if(!empty($minitescount)){
-
-                   
-    
-                    $totalMinutes = DB::table('employee_late_attendance_minites')
-                                        ->where('emp_id', $emp_data->emp_id) 
-                                        ->whereRaw("DATE_FORMAT(attendance_date, '%Y-%m') = DATE_FORMAT(?, '%Y-%m')", [$emp_data->date])
-                                        ->where('attendance_date', '!=', $emp_data->date) 
-                                        ->sum('minites_count');
-                    
-                    $attendanceminitesrecord = DB::table('employee_late_attendance_minites')
-                                                ->select('id', 'attendance_id', 'emp_id', 'attendance_date', 'minites_count')
-                                                ->where('emp_id',$emp_data->emp_id)
-                                                ->where('attendance_date', '!=',$emp_data->date)
-                                                ->first();
-                    
-                    $totalminitescount = $totalMinutes + $attendanceminitesrecord->minites_count;
-    
-                    if( $minitescount < $totalminitescount){
-                        $leave = new Leave;
-                        $leave->emp_id = $emp_data->emp_id;
-                        $leave->leave_type = $leave_type;
-                        $leave->leave_from = $emp_data->date;
-                        $leave->leave_to = $emp_data->date;
-                        $leave->no_of_days = '0';
-                        $leave->half_short = '0';
-                        $leave->reson = 'Late';
-                        $leave->comment = '';
-                        $leave->emp_covering = '';
-                        $leave->leave_approv_person = Auth::id();
-                        $leave->status = 'Pending';
-                        $leave->save();
-                    }
-                    else{
-    
-                        $leave = new Leave;
-                        $leave->emp_id = $emp_data->emp_id;
-                        $leave->leave_type = $leave_type;
-                        $leave->leave_from = $emp_data->date;
-                        $leave->leave_to = $emp_data->date;
-                        $leave->no_of_days = $half_short;
-                        $leave->half_short = $half_short;
-                        $leave->reson = 'Late';
-                        $leave->comment = '';
-                        $leave->emp_covering = '';
-                        $leave->leave_approv_person = Auth::id();
-                        $leave->status = 'Pending';
-                        $leave->save();
-        
-                    }
-                    
+              if (!$result) {
+                    return response()->json([
+                        'status' => false, 
+                        'msg' => 'Employee ' . $emp_data->emp_id . ' does not have a job category assigned.'
+                    ]);
                 }
-              
-            }
-            elseif($latetype == 2){
-
-                if($d_count <=  $shortleave)
-                {
-                    $leaveamount = 0.25;
-                    $applyleavetype = $leave_type;
-                }
-                elseif($d_count <=  $halfday)
-                {
-                    $leaveamount = 0.5;
-                    $applyleavetype = $leave_type;
-                }
-                else{
-                    $leaveamount = 0.5;
-                    $applyleavetype = 3;
-                }
-
-
-                $leave = new Leave;
-                $leave->emp_id = $emp_data->emp_id;
-                $leave->leave_type =  $applyleavetype;
-                $leave->leave_from = $emp_data->date;
-                $leave->leave_to = $emp_data->date;
-                $leave->no_of_days = $leaveamount;
-                $leave->half_short = $leaveamount;
-                $leave->reson = 'Late';
-                $leave->comment = '';
-                $leave->emp_covering = '';
-                $leave->leave_approv_person = Auth::id();
-                $leave->status = 'Pending';
-                $leave->save();
-
-
-            }
-            elseif($latetype == 3){
-
-                if($d_count <=  $shortleave)
-                {
-                    $leaveamount = 0.25;
-                }
-                elseif($d_count <=  $halfday)
-                {
-                    $leaveamount = 0.5;
-                }
-                else{
-                   
-                    if(!empty($minitescount)){
-
-                            $leave = new Leave;
-                            $leave->emp_id = $emp_data->emp_id;
-                            $leave->leave_type = $leave_type;
-                            $leave->leave_from = $emp_data->date;
-                            $leave->leave_to = $emp_data->date;
-                            $leave->no_of_days = '0';
-                            $leave->half_short = '0';
-                            $leave->reson = 'Late';
-                            $leave->comment = '';
-                            $leave->emp_covering = '';
-                            $leave->leave_approv_person = Auth::id();
-                            $leave->status = 'Pending';
-                            $leave->save();
-                    }
-
-                }
-            }
+                
+          // Update late attendance as approved
+            DB::table('employee_late_attendances')
+                ->where('id', $cr['id'])
+                ->update(['is_approved' => 1]);
         }
 
-        return response()->json(['status' => true, 'msg' => 'Updated successfully.']);
-
+        return response()->json(['status' => true, 'msg' => 'Late Mark Completed successfully.']);
     }
 
      public function late_attendances_all(Request $request)
@@ -772,6 +492,11 @@ class LateAttendanceController extends Controller
             }else{
                 $leaves = Leave::findOrFail($id_leave);
                 $leaves->delete();
+
+                $deletedCount = DB::table('employee_late_attendance_minites')
+                    ->where('attendance_date', $date)
+                    ->where('emp_id', $empid)
+                    ->delete();
 
                 $lateattendance->delete();
 

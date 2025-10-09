@@ -27,7 +27,7 @@
                             <div class="form-row mb-1">
 
                                 <div class="col-sm-6 col-md-3">
-                                    <label class="small font-weight-bold text-dark">Location*</label>
+                                    <label class="small font-weight-bolder">Location*</label>
                                     <select name="device" id="device" class="form-control form-control-sm" required>
                                         <option value="">Select</option>
                                         @foreach($device as $devices)
@@ -37,7 +37,7 @@
                                     </select>
                                 </div>
                                 <div class="col-sm-6 col-md-3">
-                                    <label class="small font-weight-bold text-dark">&nbsp;</label><br>
+                                    <label class="small font-weight-bolder">&nbsp;</label><br>
                                  
                                         <button type="button" name="getuserdata" id="getuserdata" class="btn btn-primary btn-sm getuserdata"><i class="fas fa-search mr-2"></i>Get data</button>
                                   
@@ -96,23 +96,23 @@
 
                                 <div class="form-row mb-1">
                                     <div class="col-sm-8 col-md-4">
-                                        <label class="small font-weight-bold text-dark">ID*</label>
+                                        <label class="small font-weight-bolder">ID*</label>
                                         <input type="text" name="id" id="id" class="form-control form-control-sm" required/>
                                     </div>
                                     <div class="col-sm-8 col-md-8">
-                                        <label class="small font-weight-bold text-dark">Name*</label>
+                                        <label class="small font-weight-bolder">Name*</label>
                                         <input type="text" name="name" id="name" class="form-control form-control-sm" required/>
                                     </div>
                                 </div>
 
                                 <div class="form-row mb-1">
                                     <div class="col-sm-8 col-md-6">
-                                        <label class="small font-weight-bold text-dark">Card No*</label>
+                                        <label class="small font-weight-bolder">Card No*</label>
                                         <input type="text" name="cardno" id="cardno"
                                             class="form-control form-control-sm" required/>
                                     </div>
                                     <div class="col-sm-8 col-md-6">
-                                        <label class="small font-weight-bold text-dark">Role*</label>
+                                        <label class="small font-weight-bolder">Role*</label>
                                         <select name="role" id="role" class="form-control form-control-sm" required>
                                             <option value="">Please Select</option>
                                             @foreach($title as $titles)
@@ -124,12 +124,12 @@
 
                                 <div class="form-row mb-1">
                                     <div class="col-sm-8 col-md-6">
-                                        <label class="small font-weight-bold text-dark">Password*</label>
+                                        <label class="small font-weight-bolder">Password*</label>
                                         <input type="text" name="password" id="password"
                                             class="form-control form-control-sm" required/>
                                     </div>
                                     <div class="col-sm-8 col-md-6">
-                                        <label class="small font-weight-bold text-dark">FP Location*</label>
+                                        <label class="small font-weight-bolder">FP Location*</label>
                                         <select name="devices" id="devices"
                                             class="form-control form-control-sm shipClass" required>
                                             <option value="">Please Select</option>
@@ -187,13 +187,6 @@
 <script>
 
 $(document).ready(function() {
-
-    @can('finger-print-user-edit')
-        canEditfingerprint = true;
-    @endcan
-    @can('finger-print-user-delete')
-        canDeletefingerprint = true;
-    @endcan
 
     $('#attendant_menu_link').addClass('active');
     $('#attendant_menu_link_icon').addClass('active');
@@ -281,13 +274,10 @@ $(document).ready(function() {
                 render: function(data, type, row) {
                     var buttons = '';
 
-                    if (canEditfingerprint) {
+                 
                         buttons += '<button name="edit" id="'+row.id+'" class="edit btn btn-primary btn-sm mr-1" type="submit" data-toggle="tooltip" title="Edit"><i class="fas fa-pencil-alt"></i></button>';
-                    }
-
-                    if (canDeletefingerprint) {
+                  
                         buttons += '<button type="submit" name="delete" id="'+row.id+'" class="delete btn btn-danger btn-sm" data-toggle="tooltip" title="Remove"><i class="far fa-trash-alt"></i></button>';
-                    }
 
                     return buttons;
                 }
@@ -307,11 +297,49 @@ $(document).ready(function() {
         $('#formModal').modal('show');
     });
 
-    $(document).on('click', '.getuserdata', function () {
+    $(document).on('click', '.getuserdata',async function () {
         var device = $('#device').val();
         if (device != '') {
-            $('#getuserdataModal').modal('show');
-        } 
+            var r = await Otherconfirmation("Please check the devices connection and confirm?");
+            if (r == true) {
+                var _token = $('input[name="_token"]').val();
+                $.ajax({
+                    url: "FingerprintUser/getdeviceuserdata",
+                    method: "POST",
+                    data: {
+                        device: device,
+                        _token: _token
+                    },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.errors) {
+                    const actionObj = {
+                        icon: 'fas fa-warning',
+                        title: '',
+                        message: 'Record Error',
+                        url: '',
+                        target: '_blank',
+                        type: 'danger'
+                    };
+                    const actionJSON = JSON.stringify(actionObj, null, 2);
+                    action(actionJSON);
+                }
+                if (data.success) {
+                    const actionObj = {
+                        icon: 'fas fa-save',
+                        title: '',
+                        message: data.success,
+                        url: '',
+                        target: '_blank',
+                        type: 'success'
+                    };
+                    const actionJSON = JSON.stringify(actionObj, null, 2);
+                    actionreload(actionJSON);
+                }
+                    },
+                })
+            }
+        }
          else {
         Swal.fire({
             position: "top-end",
@@ -431,32 +459,7 @@ $(document).ready(function() {
 });
 
 $('#comfirm_users').click(function () {
-    var device = $('#device').val();
-    var _token = $('input[name="_token"]').val();
-    $.ajax({
-        url: "FingerprintUser/getdeviceuserdata",
-        method: "POST",
-        data: {
-            device: device,
-            _token: _token
-        },
-        dataType: "json",
-        beforeSend: function () {
-            $('#comfirm_users').text('Procesing...');
-        },
-        success: function (data) {
-            var html = '';
-            if (data.errors) {
-                html = '<div class="alert alert-danger">' + data.errors + '</div>';
-                $('#comfirm_users').text('confirm');
-            }
-            if (data.success) {
-                html = '<div class="alert alert-success">' + data.success + '</div>';
-                location.reload()
-            }
-            $('#confirm_result').html(html);
-        },
-    })
+    
  });
 
 

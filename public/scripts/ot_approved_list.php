@@ -35,7 +35,7 @@ $primaryKey = 'id';
 // indexes
 $columns = array(
 	array( 'db' => '`u`.`id`', 'dt' => 'id', 'field' => 'id' ),
-	array( 'db' => '`u`.`emp_id`', 'dt' => 'emp_id', 'field' => 'emp_id' ),
+	array( 'db' => '`u`.`emp_id`', 'dt' => 'emp_id', 'field' => 'emp_id','visible' => false ),
 	array( 'db' => '`u`.`date`', 'dt' => 'date', 'field' => 'date' ),
 	array( 'db' => '`u`.`from`', 'dt' => 'from', 'field' => 'from' ),
 	array( 'db' => '`u`.`to`', 'dt' => 'to', 'field' => 'to' ),
@@ -44,8 +44,8 @@ $columns = array(
 	array( 'db' => '`u`.`triple_hours`', 'dt' => 'triple_hours', 'field' => 'triple_hours' ),
 	array( 'db' => '`u`.`is_holiday`', 'dt' => 'is_holiday', 'field' => 'is_holiday' ),
 	array( 'db' => '`emp`.`emp_shift`', 'dt' => 'emp_shift', 'field' => 'emp_shift' ),
-	array( 'db' => '`emp`.`emp_name_with_initial`', 'dt' => 'emp_name_with_initial', 'field' => 'emp_name_with_initial' ),
-	array( 'db' => '`emp`.`calling_name`', 'dt' => 'calling_name', 'field' => 'calling_name' ),
+	array( 'db' => '`emp`.`emp_name_with_initial`', 'dt' => 'emp_name_with_initial', 'field' => 'emp_name_with_initial', 'visible' => false),
+	array( 'db' => '`emp`.`calling_name`', 'dt' => 'calling_name', 'field' => 'calling_name', 'visible' => false),
 	array( 'db' => '`emp`.`emp_department`', 'dt' => 'emp_department', 'field' => 'emp_department' ),
 	array( 'db' => '`bran`.`b_location`', 'dt' => 'b_location', 'field' => 'b_location' ),
 	array( 'db' => '`dep`.`dept_name`', 'dt' => 'dept_name', 'field' => 'dept_name' ),

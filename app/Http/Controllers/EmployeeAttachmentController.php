@@ -73,20 +73,28 @@ class EmployeeAttachmentController extends Controller
     {
         $this->validate($request, array(
             'empattachment' => 'required|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120',
-            //'empcomment' => 'required|string|max:255',
             'attachment_type' => 'required',
         ));
 
         $id = $request->input('id');
+        
         if ($request->hasFile('empattachment')) {
             $image = $request->file('empattachment');
-            $name = $image->getClientOriginalName();
+            $originalName = $image->getClientOriginalName();
+            
+            $fileName = 'emp_' . $id . '_' . $originalName;
+            
             $destinationPath = public_path('/attachment');
-            $image->move($destinationPath, $name);
+            
+            if (!file_exists($destinationPath)) {
+                mkdir($destinationPath, 0777, true);
+            }
+            
+            $image->move($destinationPath, $fileName);
 
             $employeeattachment = new EmployeeAttachment;
             $employeeattachment->emp_id = $id;
-            $employeeattachment->emp_ath_file_name = $name;
+            $employeeattachment->emp_ath_file_name = $fileName;
             $employeeattachment->attachment_type = $request->input('attachment_type');
             $employeeattachment->empcomment = $request->input('empcomment');
             $employeeattachment->save();

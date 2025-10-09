@@ -174,6 +174,12 @@ class AttendanceSyncController extends Controller
     // get attendance from fingerprint
     public function getdevicedata(Request $request)
     {
+         $user = Auth::user();
+        $permission = $user->can('attendance-sync');
+        if (!$permission) {
+            return response()->json(['error' => 'UnAuthorized'], 401);
+        }
+
         ini_set('max_execution_time', 3000);
         //dd($request->device);
         $device = FingerprintDevice::where('ip', '=', $request->device)->get();
@@ -294,6 +300,11 @@ class AttendanceSyncController extends Controller
     //cleardevicedata
     public function cleardevicedata(Request $request)
     {
+         $user = Auth::user();
+        $permission = $user->can('attendance-sync');
+        if (!$permission) {
+            return response()->json(['error' => 'UnAuthorized'], 401);
+        }
         //dd($request->device);
         $device = FingerprintDevice::where('ip', '=', $request->device)->get();
         $device = DB::table('fingerprint_devices')->where('ip', '=', $request->device)->first();

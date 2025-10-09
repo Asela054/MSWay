@@ -21,57 +21,29 @@
 
         <div class="container-fluid mt-2 p-0 p-2">
             <div class="card mb-2">
-                <div class="card-body p-0 p-2">
-                    <div class="message"></div>
-                    <form class="form-horizontal" id="formFilter">
-                        <div class="form-row mb-1">
-                            <div class="col-md-2">
-                                <label class="small font-weight-bold text-dark">Company</label>
-                                <select name="company" id="company" class="form-control form-control-sm">
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <label class="small font-weight-bold text-dark">Department</label>
-                                <select name="department" id="department" class="form-control form-control-sm">
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <label class="small font-weight-bold text-dark">Location</label>
-                                <select name="location" id="location" class="form-control form-control-sm">
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <label class="small font-weight-bold text-dark">Date</label>
-                                <input type="date" name="date" id="date" class="form-control-sm form-control" required>
-                            </div>
-
-                            <div class="col">
-                                <br>
-                                <button type="submit" class="btn btn-primary btn-sm filter-btn" id="btn-filter">
-                                    Filter
-                                </button>
-                            </div>
-                        </div>
-
-                    </form>
-                </div>
-            </div>
-
-            <div class="card mb-2">
                 <div class="card-body p-0 p-2 ">
                      <div class="row">
                         <div class="col-md-12">
                             <div class="row align-items-center mb-4">
-                                <div class="col-6 mb-2">
-                                    {{-- <div class="form-check">
+                                <div class="col-md-6 mb-2">
+                                    <div class="form-check">
                                         <input type="checkbox" class="form-check-input checkallocate" id="selectAll">
                                         <label class="form-check-label" for="selectAll">Select All Records</label>
-                                    </div> --}}
+                                    </div>
                                 </div>
-                                <div class="col-6 text-right">
-                                    <button id="approve" class="btn btn-primary float-right mt-2 btn-sm"> Approve Late Attendance</button>
+                                <div class="col-md-6 text-right">
+                                    <button id="approve" class="btn btn-primary float-right mt-2 btn-sm px-3"><i class="fa-light fa-light fa-clipboard-check"></i>&nbsp; Approve Late Attendance</button>
                                 </div>
                             </div>
+                            <div class="col-12">
+                                <hr class="border-dark">
+                            </div>
+                            <div class="col-md-12">
+                                <button class="btn btn-warning btn-sm filter-btn float-right px-3" type="button"
+                                    data-toggle="offcanvas" data-target="#offcanvasRight"
+                                    aria-controls="offcanvasRight"><i class="fas fa-filter mr-1"></i> Filter
+                                    Options</button>
+                            </div><br><br>
                             <div class="center-block fix-width scroll-inner">
                                 <table class="table table-striped table-bordered table-sm small nowrap w-100"
                                     id="attendreporttable">
@@ -97,6 +69,7 @@
                     </div>
                     {{ csrf_field() }}
                 </div>
+                 @include('layouts.filter_menu_offcanves')
             </div>
 
              <!-- approve modal -->
@@ -113,7 +86,7 @@
                             <div class="message_modal"></div>
                             <form class="form-horizontal" id="formApprove">
                                 <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">Leave Type</label>
+                                    <label class="small font-weight-bolder text-dark">Leave Type</label>
                                     <select name="leave_type" id="leave_type" class="form-control form-control-sm">
                                         <option value="">Select Leave Type</option>
                                         @foreach($leave_types as $leave_type)
@@ -124,8 +97,7 @@
                             </form>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Close</button>
-                            <button type="button" class="btn btn-primary btn-sm" id="btn-approve">Approve</button>
+                            <button type="button" class="btn btn-primary btn-sm px-3" id="btn-approve"><i class="fa-light fa-light fa-clipboard-check"></i>&nbsp;Approve</button>
                         </div>
                     </div>
                 </div>
@@ -146,20 +118,6 @@
             $('#attendantmaster').addClass('navbtnactive');
 
             let selected_cb = [];
-
-            $("#from_date").datetimepicker({
-                pickTime: false,
-                minView: 2,
-                format: 'yyyy-mm-dd',
-                autoclose: true,
-            });
-
-            $("#to_date").datetimepicker({
-                pickTime: false,
-                minView: 2,
-                format: 'yyyy-mm-dd',
-                autoclose: true,
-            });
 
             let company = $('#company');
             let department = $('#department');
@@ -235,9 +193,9 @@
                 }
             });
 
-            //load_dt('','','','');
+            load_dt('','','','','');
 
-            function load_dt(department, company, location, date) {
+            function load_dt(department, company, location, from_date, to_date) {
                 $('#attendreporttable').DataTable({
                     "destroy": true,
                     "processing": true,
@@ -274,32 +232,36 @@
                         },
                     ],
                     ajax: {
-                        "url": "{{url('/attendance_by_time_approve_report_list')}}",
-                        "data": {
+                        url: scripturl +"/late_attendance_approve_list.php", 
+                        type: "POST",
+                        data : {
                             'department': department,
                             'company': company,
                             'location': location,
-                            'date': date
+                            'from_date': from_date,
+                            'to_date': to_date
                         },
                     },
 
                     columns: [
                         { data: 'id' ,
                             render : function ( data, type, row, meta ) {
-                                return type === 'display'  ?
-                                    '<label> '+
-                                    '<input type="checkbox" ' +
-                                    'data-id="'+data+'" ' +
-                                    'data-emp_name_with_initial="'+row["emp_name_with_initial"]+'" ' +
-                                    'data-date="'+row["date"]+'" ' +
-                                    'data-check_in_time="'+row["check_in_time"]+'" ' +
-                                    'data-check_out_time="'+row["check_out_time"]+'" ' +
-                                    'data-working_hours="'+row["working_hours"]+'" ' +
-                                    'data-location_id="'+row["location_id"]+'" ' +
-                                    'data-dept_id="'+row["dept_id"]+'" ' +
-                                    'class="cb"/> '+
-                                    '</label> '
-                                    :data
+                                if (type === 'display') {
+                                    return '<div class="custom-control custom-checkbox">' +
+                                        '<input type="checkbox" ' +
+                                        'data-id="' + data + '" ' +
+                                        'data-emp_name_with_initial="' + row["emp_name_with_initial"] + '" ' +
+                                        'data-date="' + row["date"] + '" ' +
+                                        'data-check_in_time="' + row["check_in_time"] + '" ' +
+                                        'data-check_out_time="' + row["check_out_time"] + '" ' +
+                                        'data-working_hours="' + row["working_hours"] + '" ' +
+                                        'data-location_id="' + row["location_id"] + '" ' +
+                                        'data-dept_id="' + row["dept_id"] + '" ' +
+                                        'class="form-check-input cb" id="cb_' + data + '">' +
+                                        '<label class="form-check-label" for="cb_' + data + '"></label>' +
+                                        '</div>';
+                                }
+                                return data;
                             }},
                         {data: 'id'},
                         {data: 'employee_display'},
@@ -309,10 +271,19 @@
                         {data: 'working_hours'},
                         {data: 'location'},
                         {data: 'dept_name'},
-                        {data: 'is_approved'}
+                        {data: 'is_approved'},
+                        {data: "emp_name_with_initial", 
+                        "visible": false
+                        },
+                        {data: "calling_name",
+                         "visible": false
+                        },
+                        {data: "emp_id", 
+                        "visible": false
+                        }
                     ],
                     "bDestroy": true,
-                    "order": [[9, "asc"]],
+                    "order": [[1, "asc"]],
 
                     "drawCallback": function( settings ) {
                         check_changed_text_boxes();
@@ -325,9 +296,10 @@
                 let department = $('#department').val();
                 let company = $('#company').val();
                 let location = $('#location').val();
-                let date = $('#date').val();
-
-                load_dt(department, company, location, date);
+                let from_date = $('#from_date').val();
+                let to_date = $('#to_date').val();
+                load_dt(department, company, location, from_date, to_date);
+                 closeOffcanvasSmoothly();
             });
 
             $('body').on('click', '.cb', function (){
@@ -402,7 +374,7 @@
                                  const actionObj = {
                                             icon: 'fas fa-save',
                                             title: '',
-                                            message:'Late Attendance Approved',
+                                            message: data.msg,
                                             url: '',
                                             target: '_blank',
                                             type: 'success'
@@ -414,7 +386,7 @@
                                const actionObj = {
                                             icon: 'fas fa-warning',
                                             title: '',
-                                            message: 'Record Error',
+                                            message: data.msg,
                                             url: '',
                                             target: '_blank',
                                             type: 'danger'
@@ -453,6 +425,70 @@
                 }
             }
 
+            // Select All functionality
+            $('body').on('click', '#selectAll', function (){
+                let isChecked = $(this).is(':checked');
+                let table = $('#attendreporttable').DataTable();
+                
+                // Loop through all rows in the DataTable
+                table.rows().every(function () {
+                    let row = this.node();
+                    let checkbox = $(row).find('.cb');
+                    
+                    // Only process checkboxes that exist and are not disabled
+                    if (checkbox.length > 0) {
+                        if (isChecked) {
+                            // Check the checkbox
+                            checkbox.prop('checked', true);
+                            
+                            // Trigger the same process as individual click
+                            let id = checkbox.data('id');
+                            
+                            let b = {};
+                            b["id"] = id;
+                            b["emp_name_with_initial"] = checkbox.data('emp_name_with_initial');
+                            b["date"] = checkbox.data('date');
+                            b["check_in_time"] = checkbox.data('check_in_time');
+                            b["check_out_time"] = checkbox.data('check_out_time');
+                            b["working_hours"] = checkbox.data('working_hours');
+                            b["location_id"] = checkbox.data('location_id');
+                            b["dept_id"] = checkbox.data('dept_id');
+                            b["is_approved_int"] = checkbox.data('is_approved_int');
+
+                            // Add to selected_cb array if not already present
+                            if (jQuery.inArray(b, selected_cb) === -1) {
+                                selected_cb.push(b);
+                            }
+                            
+                            // Apply background color
+                            $(row).css('background-color', '#f7c8c8');
+                            
+                        } else {
+                            // Uncheck the checkbox
+                            checkbox.prop('checked', false);
+                            
+                            // Remove from selected_cb array
+                            removeA(selected_cb, checkbox.data('id'));
+                            
+                            // Remove background color
+                            $(row).css('background-color', '');
+                        }
+                    }
+                });
+            });
+    
+            function removeA(arr, id) {
+                for (let i = 0; i < arr.length; i++) {
+                    if (arr[i].id === id) {
+                        arr.splice(i, 1);
+                        break;
+                    }
+                }
+
+                // Also remove the background color from the unselected row
+                let selector = $('.cb[data-id="' + id + '"]');
+                selector.closest('tr').css('background-color', '');
+            }
         });
     </script>
 

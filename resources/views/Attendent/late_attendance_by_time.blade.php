@@ -19,70 +19,28 @@
          </div>
 
         <div class="container-fluid mt-2 p-0 p-2">
-            <div class="card mb-2">
-                <div class="card-body p-0 p-2">
-                    <div class="message"></div>
-                    <form class="form-horizontal" id="formFilter">
-                        <div class="form-row mb-1">
-                            <div class="col-md-3">
-                                <label class="small font-weight-bold text-dark">Company</label>
-                                <select name="company" id="company" class="form-control form-control-sm">
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="small font-weight-bold text-dark">Department</label>
-                                <select name="department" id="department" class="form-control form-control-sm">
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="small font-weight-bold text-dark">Employee</label>
-                                <select name="employee" id="employee" class="form-control form-control-sm">
-                                </select>
-                            </div>
-                            <div class="col-md-3 div_date_range">
-                                <label class="small font-weight-bold text-dark">Date : From - To</label>
-                                <div class="input-group input-group-sm mb-3">
-                                    <input type="date" id="from_date" name="from_date"
-                                        class="form-control form-control-sm border-right-0" placeholder="yyyy-mm-dd" required>
-                                    <input type="date" id="to_date" name="to_date" class="form-control" required
-                                        placeholder="yyyy-mm-dd">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-row mb-1">
-                            <div class="col-md-3">
-                                <label class="small font-weight-bold text-dark">Late Type</label>
-                                <select name="late_type" id="late_type" class="form-control form-control-sm">
-                                </select>
-                            </div>
-                            <div class="col">
-                                <br>
-                                <button type="submit" class="btn btn-primary btn-sm filter-btn" id="btn-filter"><i
-                                        class="fas fa-search mr-2"></i>Filter</button>
-                                <button type="button" class="btn btn-danger btn-sm filter-btn" id="btn-clear"><i
-                                        class="far fa-trash-alt"></i>&nbsp;&nbsp;Clear</button>
-                            </div>
-                        </div>
-
-                    </form>
-                </div>
-            </div>
-
             <div class="card">
                 <div class="card-body p-0 p-2">
                     <div class="row">
                         <div class="col-md-12">
                             <div class="row align-items-center mb-4">
+                                <div class="col-md-12">
+                                    <button class="btn btn-warning btn-sm filter-btn float-right px-3" type="button"
+                                        data-toggle="offcanvas" data-target="#offcanvasRight"
+                                        aria-controls="offcanvasRight"><i class="fas fa-filter mr-1"></i> Filter
+                                        Records</button>
+                                </div>
+                                 <div class="col-12">
+                                    <hr class="border-dark">
+                                </div>
                                 <div class="col-6 mb-2">
-                                    {{-- <div class="form-check">
+                                    <div class="form-check">
                                         <input type="checkbox" class="form-check-input checkallocate" id="selectAll">
                                         <label class="form-check-label" for="selectAll">Select All Records</label>
-                                    </div> --}}
+                                    </div>
                                 </div>
                                 <div class="col-6 text-right">
-                                    <button id="mark_as_late" class="btn btn-primary float-right mt-2 btn-sm"> Mark as
-                                        Late</button>
+                                    <button id="mark_as_late" class="btn btn-primary float-right mt-2 btn-sm px-3"><i class="fas fa-plus mr-2"></i>Mark as Late</button>
                                 </div>
                             </div>
                             <div class="center-block fix-width scroll-inner">
@@ -108,6 +66,78 @@
                         </div>
                     </div>
                     {{ csrf_field() }}
+                </div>
+            </div>
+
+            {{-- offcanvas menu --}}
+
+            <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight"
+                aria-labelledby="offcanvasRightLabel">
+                <div class="offcanvas-header">
+                    <h2 class="offcanvas-title font-weight-bolder" id="offcanvasRightLabel">Records Filter Options</h2>
+                    <button type="button" class="btn-close" data-dismiss="offcanvas" aria-label="Close">
+                        <span aria-hidden="true" class="h1 font-weight-bolder">&times;</span>
+                    </button>
+                </div>
+                <div class="offcanvas-body">
+                    <ul class="list-unstyled">
+                        <form class="form-horizontal" id="formFilter">
+                            <li class="mb-3">
+                                <div class="col-md-12">
+                                    <label class="small font-weight-bolder text-dark">Company</label>
+                                    <select name="company" id="company" class="form-control form-control-sm">
+                                    </select>
+                                </div>
+                            </li>
+                            <li class="mb-3">
+                                <div class="col-md-12">
+                                    <label class="small font-weight-bolder text-dark">Department</label>
+                                    <select name="department" id="department" class="form-control form-control-sm">
+                                    </select>
+                                </div>
+                            </li>
+                            <li class="mb-3">
+                                <div class="col-md-12">
+                                    <label class="small font-weight-bolder text-dark">Employee</label>
+                                    <select name="employee" id="employee" class="form-control form-control-sm">
+                                    </select>
+                                </div>
+                            </li>
+                            <li class="mb-3">
+                                <div class="col-md-12">
+                                    <label class="small font-weight-bolder text-dark"> From Date </label>
+
+                                    <input type="date" id="from_date" name="from_date"
+                                        class="form-control form-control-sm" placeholder="yyyy-mm-dd">
+                                </div>
+                            </li>
+                            <li class="mb-3">
+                                <div class="col-md-12">
+                                    <label class="small font-weight-bolder text-dark"> To Date</label>
+                                    <input type="date" id="to_date" name="to_date" class="form-control form-control-sm"
+                                        placeholder="yyyy-mm-dd">
+                                </div>
+                            </li>
+                            <li class="mb-3">
+                                <div class="col-md-12">
+                                    <label class="small font-weight-bolder text-dark">Late Type</label>
+                                    <select name="late_type" id="late_type" class="form-control form-control-sm">
+                                    </select>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="col-md-12 d-flex justify-content-between">
+                                    <button type="submit" class="btn btn-primary btn-md filter-btn px-3"
+                                        id="btn-filter">
+                                        <i class="fas fa-search mr-2"></i>Search
+                                    </button>
+                                    <button type="button" class="btn btn-danger btn-md filter-btn px-3" id="btn-reset">
+                                        <i class="fas fa-redo mr-1"></i> Reset
+                                    </button>
+                                </div>
+                            </li>
+                        </form>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -204,12 +234,14 @@
                 }
             });
 
+             load_dt('', '', '', '', '', '', true);
 
-            function load_dt(department, company, employee, from_date,to_date, late_type) {
+            function load_dt(department, company, employee, from_date,to_date, late_type,isInitialLoad = false) {
                 $('#attendreporttable').DataTable({
                     "destroy": true,
                     "processing": true,
                     "serverSide": true,
+                    "searching": false,
                     dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
                         "<'row'<'col-sm-5'i><'col-sm-7'p>>",
                     "buttons": [{
@@ -252,6 +284,14 @@
                             'late_type': late_type
                         },
                     },
+                     "language": {
+                                "emptyTable": isInitialLoad ? 
+                                    "<div class='text-center py-4'>" +
+                                    "<h5 class='text-muted'>No records to display</h5>" +
+                                    "<p class='text-muted small'>Please use the filter options to get records</p>" +
+                                    "</div>" : 
+                                    "No data available in table"
+                            },
 
                     columns: [
                         { 
@@ -262,7 +302,7 @@
                                         return '<i class="fa fa-check text-success"></i>';
                                     } else {
                                         return '<label>' +
-                                            '<input type="checkbox" ' +
+                                            '<input type="checkbox"' +
                                             'data-id="'+data+'" ' +
                                             'data-uid="'+row["uid"]+'" ' +
                                             'data-emp_name_with_initial="'+row["emp_name_with_initial"]+'" ' +
@@ -324,7 +364,8 @@
                 let to_date = $('#to_date').val();
                 let late_type = $('#late_type').val();
 
-                load_dt(department, company, employee, from_date,to_date, late_type);
+                 load_dt(department, company, employee, from_date, to_date, late_type, false);
+                 closeOffcanvasSmoothly();
             });
 
             $('body').on('click', '.cb', function (){
@@ -354,24 +395,13 @@
                 //show_selected_po_nos(selected_cb)
             });
 
-            document.getElementById('btn-clear').addEventListener('click', function() {
-            document.getElementById('formFilter').reset();
-
-                        $('#company').val('').trigger('change');   
-                        $('#department').val('').trigger('change');
-                        $('#location').val('').trigger('change');
-                        $('#date').val('');
-                        $('#late_type').val('').trigger('change');
-                                        
-                        // load_dt('', '', '', '', '');
-            });
-
             $(document).on('click', '#mark_as_late',async function (e) {
 
                 e.preventDefault();
                 let save_btn = $(this);
+                let late_type = $('#late_type').val();
 
-                 var r = await Otherconfirmation("You want to Edit this ? ");
+                var r = await Otherconfirmation("You want to Edit this ? ");
                 if (r == true) {
                     save_btn.prop("disabled", true);
                     save_btn.html('<i class="fa fa-spinner fa-spin"></i> loading...' );
@@ -380,6 +410,7 @@
                         method: "POST",
                         data: {
                             'selected_cb': selected_cb,
+                            late_type: late_type,
                             _token: $('input[name=_token]').val(),
                         },
                         success: function (data) {
@@ -436,10 +467,66 @@
                 }
             }
 
-        $('#selectAll').click(function (e) {
-            $('#attendreporttable').closest('table').find('td input:checkbox').prop('checked', this.checked);
+
+             $('#btn-reset').on('click', function () {
+                 $('#formFilter')[0].reset();
+                 $('#company').val(null).trigger('change');
+                 $('#department').val(null).trigger('change');
+                 $('#employee').val(null).trigger('change');
+                 $('#location').val(null).trigger('change');
+             });
+
         });
+        $('body').on('click', '#selectAll', function () {
+            let isChecked = $(this).is(':checked');
+            let table = $('#attendreporttable').DataTable();
+
+            // Clear existing selection
+            selected_cb = [];
+
+            // Loop through all rows in the DataTable
+            table.rows().every(function () {
+                let row = this.node();
+                let checkbox = $(row).find('.cb');
+
+                // Only process checkboxes that are not already marked as late
+                if (checkbox.length > 0 && !checkbox.closest('td').find('.fa-check').length) {
+                    if (isChecked) {
+                        // Check the checkbox
+                        checkbox.prop('checked', true);
+
+                        // Add to selected_cb array
+                        let b = {};
+                        b["id"] = checkbox.data('id');
+                        b["uid"] = checkbox.data('uid');
+                        b["emp_name_with_initial"] = checkbox.data('emp_name_with_initial');
+                        b["date"] = checkbox.data('date');
+                        b["timestamp"] = checkbox.data('timestamp');
+                        b["lasttimestamp"] = checkbox.data('lasttimestamp');
+                        b["workhours"] = checkbox.data('workhours');
+                        b["location_id"] = checkbox.data('location_id');
+                        b["dept_id"] = checkbox.data('dept_id');
+
+                        if (jQuery.inArray(b, selected_cb) === -1) {
+                            selected_cb.push(b);
+                        }
+                        // Apply background color
+                        $(row).css('background-color', '#f7c8c8');
+                    } else {
+                        // Uncheck the checkbox
+                        checkbox.prop('checked', false);
+                        // Remove from selected_cb array by ID
+                        selected_cb = selected_cb.filter(item => item.id !== checkbox.data('id'));
+                        // Remove background color
+                        $(row).css('background-color', '');
+                    }
+                }
+            });
+            // Update the select all checkbox state
+            $(this).prop('checked', isChecked);
         });
+
+         
     </script>
 
 @endsection

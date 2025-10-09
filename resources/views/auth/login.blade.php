@@ -7,7 +7,7 @@
                         <div class="row justify-content-center">
                             <div class="col-lg-4">
                                 <div class="card shadow-lg border-0 rounded-lg mt-5">
-                                    <div class="card-header justify-content-center"><img src="{{url('/public/images/hrm.png')}}" class="img-fluid" alt=""></div>
+                                    <img src="{{url('/public/images/hrm.png')}}" class="card-img-top" alt="">
                                     <div class="card-body">
                                         <form class="form-horizontal" method="POST" action="{{ route('login') }}" autocomplete="off">
                                             {{ csrf_field() }}
@@ -35,9 +35,10 @@
                                                 </span>
                                             @endif
                                             <div class="form-group">
-                                                <div class="custom-control">
-                                                    <input class="control-input" type="checkbox" name="remember" id="rememberPasswordCheck" {{ old('remember') ? 'checked' : '' }}> 
-                                                    <label class="control-label" for="rememberPasswordCheck">Remember password</label></div>
+                                                <div class="custom-control custom-checkbox mt-2">
+                                                    <input type="checkbox" class="custom-control-input" name="remember" id="rememberPasswordCheck" {{ old('remember') ? 'checked' : '' }}>
+                                                    <label class="custom-control-label" for="rememberPasswordCheck">Remember password</label>
+                                                </div>
                                             </div>
                                             <div class="form-group text-right mt-4 mb-0">
                                                 <button type="submit" class="btn btn-primary btn-sm px-3">Login</button>

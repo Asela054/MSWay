@@ -95,6 +95,7 @@ class EmployeeBankController extends Controller
             ->select(
                 'eb.id',
                 'eb.bank_ac_no',
+                'eb.status',
                 'b.code as bankcode',
                 'b.bank',
                 'bb.branch',
@@ -328,6 +329,22 @@ class EmployeeBankController extends Controller
 
         echo json_encode($response);
         exit;
+    }
+
+    public function updateStatus(Request $request)
+    {
+        $permission = \Auth::user()->can('employee-edit');
+        if (!$permission) {
+            return response()->json(['error' => 'UnAuthorized'], 401);
+        }
+        $bank = EmployeeBank::findOrFail($request->id);
+        $bank->status = ($bank->status == 1) ? 2 : 1;
+        $bank->save();
+
+        return response()->json([
+            'success' => true,
+            'new_status' => $bank->status
+        ]);
     }
 
 }

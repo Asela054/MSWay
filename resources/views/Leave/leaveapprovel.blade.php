@@ -18,48 +18,6 @@
         </div>
                     
     <div class="container-fluid mt-2 p-0 p-2">
-        <div class="card mb-2">
-            <div class="card-body p-0 p-2">
-                <form class="form-horizontal" id="formFilter">
-                    <div class="form-row mb-1">
-                        <div class="col-md-2">
-                            <label class="small font-weight-bold text-dark">Company</label>
-                            <select name="company" id="company_f" class="form-control form-control-sm">
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="small font-weight-bold text-dark">Department</label>
-                            <select name="department" id="department_f" class="form-control form-control-sm">
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="small font-weight-bold text-dark">Location</label>
-                            <select name="location" id="location_f" class="form-control form-control-sm">
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="small font-weight-bold text-dark">Employee</label>
-                            <select name="employee" id="employee_f" class="form-control form-control-sm">
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="small font-weight-bold text-dark">Date : From - To</label>
-                            <div class="input-group input-group-sm mb-3">
-                                <input type="date" id="from_date" name="from_date" class="form-control form-control-sm border-right-0" placeholder="yyyy-mm-dd">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text" id="inputGroup-sizing-sm"> </span>
-                                </div>
-                                <input type="date" id="to_date" name="to_date" class="form-control" placeholder="yyyy-mm-dd">
-                            </div>
-                        </div>
-                        <div class="col-md-12">
-                            <button type="submit" class="btn btn-primary btn-sm filter-btn float-right" id="btn-filter"> Filter</button>
-                        </div>
-                    </div>
-
-                </form>
-            </div>
-        </div>
         <div class="card">
             <div class="card-body p-0 p-2">
                 <div class="row">
@@ -72,9 +30,18 @@
                                 </div>
                             </div>
                             <div class="col-6 text-right">
-                                <button id="allapproveel" class="btn btn-primary btn-sm px-3">Approve All Leave</button>
+                                <button id="allapproveel" class="btn btn-primary btn-sm px-3"><i class="fa-light fa-light fa-clipboard-check"></i>&nbsp;Approve All Leave</button>
                             </div>
                         </div>
+                          <div class="col-12">
+                              <hr class="border-dark">
+                          </div>
+                          <div class="col-md-12">
+                              <button class="btn btn-warning btn-sm filter-btn float-right px-3" type="button"
+                                  data-toggle="offcanvas" data-target="#offcanvasRight"
+                                  aria-controls="offcanvasRight"><i class="fas fa-filter mr-1"></i> Filter
+                                  Options</button>
+                          </div><br><br>
                         <div class="center-block fix-width scroll-inner">
                         <table class="table table-striped table-bordered table-sm small nowrap" style="width: 100%" id="divicestable">
                             <thead>
@@ -91,6 +58,8 @@
                                     <th>STATUS</th>
                                     <th class="text-right">ACTION</th>
                                     <th class="d-none">ID</th>
+                                    <th class="d-none">EMPNAME</th>
+                                    <th class="d-none">CALLING</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -102,6 +71,7 @@
                 </div>
             </div>
         </div>
+         @include('layouts.filter_menu_offcanves') 
     </div>
 
     <!-- Modal Area Start -->
@@ -119,7 +89,7 @@
                     <span id="form_result"></span>
                     <span id=""></span>
                     <div class="form-group">
-                        <label class="small font-weight-bold text-dark">Comment</label>
+                        <label class="small font-weight-bolder text-dark">Comment</label>
                         <textarea class="form-control form-control-sm" id="comment" name="comment" rows="3"></textarea>
                     </div>
 
@@ -135,7 +105,7 @@
                     <input type="hidden" name="emp_id" id="emp_id" class="form-control" readonly />
                 </div>
                 <div class="modal-footer p-2">
-                    <button type="submit" class="btn btn-danger px-3 btn-sm" id="approve">Submit</button>
+                    <button type="submit" class="btn btn-primary px-3 btn-sm" id="approve"><i class="fas fa-plus mr-2"></i>Add</button>
                 </div>
             </div>
         </div>
@@ -157,7 +127,7 @@
                       <span id="form_result"></span>
                       <span id=""></span>
                       <div class="form-group">
-                          <label class="small font-weight-bold text-dark">Comment</label>
+                          <label class="small font-weight-bolder text-dark">Comment</label>
                           <textarea class="form-control form-control-sm" id="allcomment" name="allcomment" rows="3"></textarea>
                       </div>
   
@@ -173,7 +143,7 @@
                       <input type="hidden" name="emp_id" id="emp_id" class="form-control" readonly />
                   </div>
                   <div class="modal-footer p-2">
-                      <button type="submit" class="btn btn-danger px-3 btn-sm" id="approveall">Submit</button>
+                      <button type="submit" class="btn btn-primary px-3 btn-sm" id="approveall"><i class="fas fa-plus mr-2"></i>Add</button>
                   </div>
               </div>
           </div>
@@ -193,10 +163,10 @@
             $('#attendant_menu_link_icon').addClass('active');
             $('#leavemaster').addClass('navbtnactive');
 
-        let company_f = $('#company_f');
-        let department_f = $('#department_f');
-        let employee_f = $('#employee_f');
-        let location_f = $('#location_f');
+        let company_f = $('#company');
+        let department_f = $('#department');
+        let employee_f = $('#employee');
+        let location_f = $('#location');
 
         company_f.select2({
             placeholder: 'Select...',
@@ -356,6 +326,7 @@
                      { 
                         data: null, 
                         name: 'action',
+                         className: 'text-right',
                         render: function(data, type, row) {
                             if (row.status === 'Pending' || row.status === 'Approved' || row.status === 'Rejected') {
                                 return '<button id="view" name="view" data-id="' + row.id + '" data-empid="' + row.emp_id + '" class="view btn btn-primary btn-sm" type="submit" data-toggle="tooltip" title="Approve"><i class="fas fa-pencil-alt"></i></button>';
@@ -366,15 +337,16 @@
                         orderable: false, 
                         searchable: false 
                     },
-                    { data: 'id', name: 'id' },
+                    { data: 'id', name: 'id' , visible: false},
+                     { data: "emp_name_with_initial", 
+                        name: "emp_name_with_initial", 
+                        visible: false
+                        },
+                        {   data: "calling_name",
+                            name: "calling_name", 
+                            visible: false
+                        },
                 ],
-                columnDefs: [
-                    {
-                        targets: -1,
-                        className: 'd-none'
-                    }
-                ],
-                "bDestroy": true,
                 "order": [
                     [6, "desc"]
                 ]
@@ -385,13 +357,14 @@
 
         $('#formFilter').on('submit',function(e) {
             e.preventDefault();
-            let department = $('#department_f').val();
-            let employee = $('#employee_f').val();
-            let location = $('#location_f').val();
+            let department = $('#department').val();
+            let employee = $('#employee').val();
+            let location = $('#location').val();
             let from_date = $('#from_date').val();
             let to_date = $('#to_date').val();
 
             load_dt(department, employee, location, from_date, to_date);
+              closeOffcanvasSmoothly();
         });
     });
 

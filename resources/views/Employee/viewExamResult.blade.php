@@ -3,30 +3,38 @@
 @section('content')
 
 <main>
-    <div class="page-header page-header-light bg-white shadow">
-        <div class="container-fluid">
+    <div class="page-header shadow">
+            <div class="container-fluid d-none d-sm-block shadow">
             @include('layouts.employee_nav_bar')
-        </div>
-    </div>
-    <div class="container-fluid mt-3">
+            </div>
+            <div class="container-fluid">
+                <div class="page-header-content py-3 px-2">
+                    <h1 class="page-header-title ">
+                        <div class="page-header-icon"><i class="fa-light fa-users-gear"></i></div>
+                        <span>View Exam Result</span>
+                    </h1>
+                </div>
+            </div>
+        </div>    
+    <div class="container-fluid mt-2 p-0 p-2">
         <div class="card">
             <div class="card-body p-0 p-2">
                 <div class="row">
                     <span id="form_result"></span>
-                    <div class="col-9">
+                    <div class="col-lg-9 col-md-12">
                         <div class="container-fluid mt-3">
-                      
+                    
                         <div class="row">
                             <div class="col-12">
                                 
                                 <form method="post" id="formTitle" class="form-horizontal">
-                                 <input type="hidden" class="form-control form-control-sm" id="empid" name="empid" value="{{$id}}">
+                                <input type="hidden" class="form-control form-control-sm" id="empid" name="empid" value="{{$id}}">
                                     {{ csrf_field() }}
                                     
                                     <!-- First Row -->
                                     <div class="row">
-                                        <div class="col-3">
-                                            <div class="form-row mb-1">
+                                        <div class="col-lg-3 col-md-6 col-sm-6 col-12">
+                                            <div class="form-row mb-2">
                                                 <label class="small font-weight-bold text-dark">Exam Type</label>
                                                 <select name="examtype" id="examtype" class="form-control form-control-sm" required>
                                                     <option value="">Select Exam Type</option>
@@ -35,8 +43,8 @@
                                                 </select>
                                             </div>
                                         </div>
-                                        <div class="col-3">
-                                            <div class="form-row mb-1">
+                                        <div class="col-lg-3 col-md-6 col-sm-6 col-12">
+                                            <div class="form-row mb-2">
                                                 <label class="small font-weight-bold text-dark">Medium</label>
                                                 <select name="medium" id="medium" class="form-control form-control-sm" required>
                                                     <option value="">Select Medium</option>
@@ -46,15 +54,15 @@
                                                 </select>
                                             </div>
                                         </div>
-                                        <div class="col-3">
-                                            <div class="form-row mb-1">
+                                        <div class="col-lg-3 col-md-6 col-sm-6 col-12">
+                                            <div class="form-row mb-2">
                                                 <label class="small font-weight-bold text-dark">Year</label>
                                                 <input type="number" name="year" id="year" class="form-control form-control-sm" 
-                                                       min="1980" max="2030" required/>
+                                                    min="1980" max="2030" required/>
                                             </div>
                                         </div>
-                                        <div class="col-3">
-                                            <div class="form-row mb-1">
+                                        <div class="col-lg-3 col-md-6 col-sm-6 col-12">
+                                            <div class="form-row mb-2">
                                                 <label class="small font-weight-bold text-dark">School</label>
                                                 <input type="text" name="school" id="school" class="form-control form-control-sm" required/>
                                             </div>
@@ -63,20 +71,20 @@
                                     
                                     <!-- Second Row -->
                                     <div class="row">
-                                        <div class="col-3">
-                                            <div class="form-row mb-1">
+                                        <div class="col-lg-3 col-md-6 col-sm-6 col-12">
+                                            <div class="form-row mb-2">
                                                 <label class="small font-weight-bold text-dark">Center No</label>
                                                 <input type="text" name="center_no" id="center_no" class="form-control form-control-sm"/>
                                             </div>
                                         </div>
-                                        <div class="col-3">
-                                            <div class="form-row mb-1">
+                                        <div class="col-lg-3 col-md-6 col-sm-6 col-12">
+                                            <div class="form-row mb-2">
                                                 <label class="small font-weight-bold text-dark">Index No</label>
                                                 <input type="number" name="index_no" id="index_no" class="form-control form-control-sm"/>
                                             </div>
                                         </div>
-                                        <div class="col-3">
-                                            <div class="form-row mb-1">
+                                        <div class="col-lg-3 col-md-6 col-sm-6 col-12">
+                                            <div class="form-row mb-2">
                                                 <label class="small font-weight-bold text-dark">Subject</label>
                                                 <select name="subject" id="subject" class="form-control form-control-sm" required>
                                                     <option value="">Select Subject</option>
@@ -86,8 +94,8 @@
                                                 </select>
                                             </div>
                                         </div>
-                                        <div class="col-3">
-                                            <div class="form-row mb-1">
+                                        <div class="col-lg-3 col-md-6 col-sm-6 col-12">
+                                            <div class="form-row mb-2">
                                                 <label class="small font-weight-bold text-dark">Grade</label>
                                                 <input type="text" name="grade" id="grade" class="form-control form-control-sm" required/>
                                             </div>
@@ -107,26 +115,27 @@
                         <!-- Table for temporary results -->
                         <div class="row mt-3">
                             <div class="col-12">
-                                <table class="table table-striped table-bordered table-sm small" id="tableresult">
-                                    <thead>
-                                        <tr>
-                                            <th>Subject</th>
-                                            <th>Grade</th>
-                                            <th>School</th>
-                                            <th>Medium</th>
-                                            <th>Year</th>
-                                            <th>Center No</th>
-                                            <th>Index No</th>
-                                            <th class="d-none">SubjectID</th>
-                                            <th class="d-none">MediumID</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody></tbody>
-                                </table>
-                                <div class="form-group mt-2">
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-bordered table-sm small" id="tableresult">
+                                        <thead>
+                                            <tr>
+                                                <th>SUBJECT</th>
+                                                <th>GRADE</th>
+                                                <th>SCHOOL</th>
+                                                <th class="d-none d-md-table-cell">MEDIUM</th>
+                                                <th class="d-none d-lg-table-cell">YEAR</th>
+                                                <th class="d-none d-lg-table-cell">CENTER NO</th>
+                                                <th class="d-none d-lg-table-cell">INDEX NO</th>
+                                                <th class="d-none">SubjectID</th>
+                                                <th class="d-none">MediumID</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                                <div class="form-group mt-2 text-right">
                                     <button type="button" name="btncreateorder" id="btncreateorder"
-                                        class="btn btn-outline-primary btn-sm fa-pull-right px-4"><i
-                                            class="fas fa-plus"></i>&nbsp;Save</button>
+                                        class="btn btn-primary btn-sm fa-pull-right px-4"> <i class="fas fa-plus"></i>&nbsp;Create</button>
                                 </div>
                             </div>
                         </div>
@@ -135,20 +144,19 @@
                     <hr>
                     <br>
                         <div class="col-12">
-                            <div class="center-block fix-width scroll-inner">
-                                <table class="table table-striped table-bordered table-sm small nowrap display"
-                                    style="width: 100%" id="dataTable">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-bordered table-sm small" id="dataTable">
                                     <thead>
                                         <tr>
-                                            <th>Exam</th>
-                                            <th>Subject</th>
-                                            <th>Grade</th>
-                                            <th>School</th>
-                                            <th>Medium</th>
-                                            <th>Year</th>
-                                            <th>Center No</th>
-                                            <th>Index No</th>
-                                            <th class="text-right">Action</th>
+                                            <th>EXAM</th>
+                                            <th>SUBJECT</th>
+                                            <th>GRADE</th>
+                                            <th class="d-none d-md-table-cell">SCHOOL</th>
+                                            <th class="d-none d-md-table-cell">MEDIUM</th>
+                                            <th class="d-none d-lg-table-cell">YEAR</th>
+                                            <th class="d-none d-lg-table-cell">CENTER NO</th>
+                                            <th class="d-none d-lg-table-cell">INDEX NO</th>
+                                            <th class="text-right">ACTION</th>
                                         </tr>
                                     </thead>
                                     <tbody></tbody>
@@ -161,13 +169,14 @@
             </div>
         </div>
     </div>
+
 </main>
 
 
 {{-- EDIT MODEL --}}
 <div class="modal fade" id="formModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-aria-labelledby="staticBackdropLabel" aria-hidden="true">
-<div class="modal-dialog modal-dialog-centered modal-xl">
+aria-labelledby="staticBackdropLabel">
+<div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
    <div class="modal-content">
        <div class="modal-header p-2">
            <h5 class="modal-title" id="staticBackdropLabel">Edit Exam Results</h5>
@@ -183,7 +192,7 @@ aria-labelledby="staticBackdropLabel" aria-hidden="true">
                     
                     <!-- First Row -->
                     <div class="row">
-                        <div class="col-3">
+                        <div class="col-md-3 col-sm-6 col-12 mb-2">
                             <label class="small font-weight-bold text-dark">Exam Type</label>
                             <select name="eeditxamtype" id="eeditxamtype" class="form-control form-control-sm" required>
                                 <option value="">Select Exam Type</option>
@@ -191,7 +200,7 @@ aria-labelledby="staticBackdropLabel" aria-hidden="true">
                                 <option value="A/L">A/L</option>
                             </select>
                         </div>
-                        <div class="col-3">
+                        <div class="col-md-3 col-sm-6 col-12 mb-2">
                             <label class="small font-weight-bold text-dark">Medium</label>
                             <select name="editmedium" id="editmedium" class="form-control form-control-sm" required>
                                 <option value="">Select Medium</option>
@@ -200,28 +209,28 @@ aria-labelledby="staticBackdropLabel" aria-hidden="true">
                                 <option value="3">Tamil</option>
                             </select>
                         </div>
-                        <div class="col-3">
+                        <div class="col-md-3 col-sm-6 col-12 mb-2">
                             <label class="small font-weight-bold text-dark">Year</label>
                             <input type="number" name="edityear" id="edityear" class="form-control form-control-sm" 
                                    min="1980" max="2030" required/>
                         </div>
-                        <div class="col-3">
+                        <div class="col-md-3 col-sm-6 col-12 mb-2">
                             <label class="small font-weight-bold text-dark">School</label>
                             <input type="text" name="editschool" id="editschool" class="form-control form-control-sm" required/>
                         </div>
                     </div>
                     
                     <!-- Second Row -->
-                    <div class="row mt-2">
-                        <div class="col-3">
+                    <div class="row mt-md-2">
+                        <div class="col-md-3 col-sm-6 col-12 mb-2">
                             <label class="small font-weight-bold text-dark">Center No</label>
                             <input type="text" name="editcenter_no" id="editcenter_no" class="form-control form-control-sm"/>
                         </div>
-                        <div class="col-3">
+                        <div class="col-md-3 col-sm-6 col-12 mb-2">
                             <label class="small font-weight-bold text-dark">Index No</label>
                             <input type="number" name="editindex_no" id="editindex_no" class="form-control form-control-sm"/>
                         </div>
-                        <div class="col-3">
+                        <div class="col-md-3 col-sm-6 col-12 mb-2">
                             <label class="small font-weight-bold text-dark">Subject</label>
                             <select name="editsubject" id="editsubject" class="form-control form-control-sm" required>
                                 <option value="">Select Subject</option>
@@ -230,7 +239,7 @@ aria-labelledby="staticBackdropLabel" aria-hidden="true">
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-3">
+                        <div class="col-md-3 col-sm-6 col-12 mb-2">
                             <label class="small font-weight-bold text-dark">Grade</label>
                             <input type="text" name="editgrade" id="editgrade" class="form-control form-control-sm" required/>
                         </div>
@@ -238,9 +247,9 @@ aria-labelledby="staticBackdropLabel" aria-hidden="true">
                 </div>
             </div>
                
-            <div class="form-group mt-3">
+            <div class="form-group mt-3 mb-0">
                 <button type="submit" name="action_button" id="action_button" 
-                class="btn btn-outline-primary btn-sm fa-pull-right px-4">
+                class="btn btn-primary btn-sm float-right px-4">
                     <i class="fas fa-plus"></i>&nbsp;Update</button>
             </div>
         </form>
@@ -251,22 +260,23 @@ aria-labelledby="staticBackdropLabel" aria-hidden="true">
 
 
 <div class="modal fade" id="confirmModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-     aria-labelledby="staticBackdropLabel" aria-hidden="true">
+     aria-labelledby="confirmModalLabel">
     <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content">
             <div class="modal-header p-2">
+                <h5 class="modal-title sr-only" id="confirmModalLabel">Confirm Deletion</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
                 <div class="row">
-                    <div class="col text-center">
-                        <h4 class="font-weight-normal">Are you sure you want to remove this data?</h4>
+                    <div class="col text-center px-3">
+                        <h4 class="font-weight-normal h5">Are you sure you want to remove this data?</h4>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer p-2">
+            <div class="modal-footer p-2 flex-nowrap">
                 <button type="button" name="ok_button" id="ok_button" class="btn btn-danger px-3 btn-sm">OK</button>
                 <button type="button" class="btn btn-dark px-3 btn-sm" data-dismiss="modal">Cancel</button>
             </div>
@@ -282,7 +292,7 @@ $(document).ready(function(){
     $('#employee_menu_link').addClass('active');
     $('#employee_menu_link_icon').addClass('active');
     $('#employeeinformation').addClass('navbtnactive');
-    $('#view_examresult_link').addClass('navbtnactive');
+    $('#view_examresult_link').addClass('active');
 
     $("#subject").select2();
     $("#editsubject").select2();
@@ -293,8 +303,40 @@ $(document).ready(function(){
 
     // Initialize DataTable with grouping
     $('#dataTable').DataTable({
-        processing: true,
-        serverSide: true,
+        "destroy": true,
+        "processing": true,
+        
+        dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
+            "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+        "buttons": [{
+                extend: 'csv',
+                className: 'btn btn-success btn-sm',
+                title: 'Exam  Information',
+                text: '<i class="fas fa-file-csv mr-2"></i> CSV',
+            },
+            { 
+                extend: 'pdf', 
+                className: 'btn btn-danger btn-sm', 
+                title: 'Exam Information', 
+                text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
+                orientation: 'portrait', 
+                pageSize: 'legal', 
+                customize: function(doc) {
+                    doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+                }
+            },
+            {
+                extend: 'print',
+                title: 'Exam  Information',
+                className: 'btn btn-primary btn-sm',
+                text: '<i class="fas fa-print mr-2"></i> Print',
+                customize: function(win) {
+                    $(win.document.body).find('table')
+                        .addClass('compact')
+                        .css('font-size', 'inherit');
+                },
+            },
+        ],
         ajax: {
             url: "{!! route('examresultlist') !!}",
             type: "POST",

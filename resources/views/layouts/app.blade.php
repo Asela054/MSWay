@@ -776,7 +776,115 @@
             color: #343a40;
             font-weight: 600;
         }
+  
+    .offcanvas {
+        position: fixed;
+        bottom: 0;
+        z-index: 1050;
+        display: flex;
+        flex-direction: column;
+        max-width: 100%;
+        visibility: hidden;
+        background-color: #fff;
+        background-clip: padding-box;
+        outline: 0;
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .offcanvas-end {
+        top: 0;
+        right: 0;
+        width: 400px;
+        border-left: 1px solid rgba(0, 0, 0, 0.2);
+        transform: translateX(100%);
+    }
+
+    .offcanvas.show {
+        transform: none;
+        visibility: visible;
+    }
+    .offcanvas.hiding {
+    transform: translateX(100%);
+    visibility: hidden;
+}
+
+    .offcanvas-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1040;
+        width: 100vw;
+        height: 100vh;
+        background-color: #000;
+    }
+
+    .offcanvas-backdrop.fade {
+        opacity: 0;
+    }
+
+    .offcanvas-backdrop.show {
+        opacity: 0.5;
+    }
+
+    .offcanvas-backdrop.fading {
+        opacity: 0;
+    }
+
+    .offcanvas-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid #dee2e6;
+        background-color: #f8f9fa;
+    }
+
+    .offcanvas-title {
+        margin-bottom: 0;
+        line-height: 1.5;
+        font-size: 1.25rem;
+        color: #343a40;
+    }
+
+    .btn-close {
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0.5rem;
+        opacity: 0.7;
+        transition: opacity 0.15s ease-in-out;
+    }
+
+    .btn-close:hover {
+        opacity: 1;
+    }
+
+    .offcanvas-body {
+        flex-grow: 1;
+        padding: 1.5rem;
+        overflow-y: auto;
+    }
+
+    .list-unstyled {
+        padding-left: 0;
+        list-style: none;
+    }
+
+    @media (max-width: 575.98px) {
+        .offcanvas-end {
+            width: 100%;
+        }
+
+        .offcanvas-header {
+            padding: 1rem;
+        }
+
+        .offcanvas-body {
+            padding: 1rem;
+        }
+    }
     </style>
+    
     @php if(Auth::user()->hasRole('Employee')){ @endphp
     <style>
         .home-section{
@@ -800,8 +908,10 @@
                 /* z-index: 2; */
             }
         }
+
     </style>
     @php } @endphp
+
     @yield('style')
   </head>
   <body class="nav-fixed">
@@ -894,7 +1004,7 @@
                     <footer class="footer mt-auto footer-light">
                         <div class="container-fluid">
                             <div class="row">
-                                <div class="col-md-6 small">Copyright &copy;  ShapeUP HRM <?php echo date('Y') ?>
+                                <div class="col-md-6 small">Copyright &copy;  ShapeUP HRM V3.0 <?php echo date('Y') ?>
                                     Made  by <a href="https://www.erav.lk" target="_blank">eRAV
                                         technologies</a>
                                 </div>
@@ -1037,6 +1147,59 @@
             });
         }
     }
+
+      $(document).ready(function () {
+       // Offcanvas toggle functionality
+       $('[data-toggle="offcanvas"]').on('click', function () {
+           var target = $(this).data('target');
+           $(target).toggleClass('show');
+           $('body').toggleClass('offcanvas-open');
+
+           // Add backdrop
+           if ($(target).hasClass('show')) {
+               $('<div class="offcanvas-backdrop fade show"></div>').appendTo('body');
+           } else {
+               $('.offcanvas-backdrop').remove();
+           }
+       });
+
+       // Close offcanvas when clicking on backdrop
+       $(document).on('click', '.offcanvas-backdrop', function () {
+           $('.offcanvas').removeClass('show');
+           $('body').removeClass('offcanvas-open');
+           $(this).remove();
+       });
+
+       // Close offcanvas when clicking on close button
+       $('[data-dismiss="offcanvas"]').on('click', function () {
+           var target = $(this).closest('.offcanvas');
+           target.removeClass('show');
+           $('body').removeClass('offcanvas-open');
+           $('.offcanvas-backdrop').remove();
+       });
+      $('#btn-reset').on('click', function() {
+        $('#formFilter')[0].reset();
+        $('#company').val(null).trigger('change');
+         $('#department').val(null).trigger('change');
+        $('#employee').val(null).trigger('change');
+         $('#location').val(null).trigger('change');
+    });
+   });
+   function closeOffcanvasSmoothly(offcanvasId = '#offcanvasRight') {
+       const offcanvas = $(offcanvasId);
+       const backdrop = $('.offcanvas-backdrop');
+
+       // Add hiding class to trigger reverse animation
+       offcanvas.addClass('hiding');
+       backdrop.addClass('fading');
+
+       // Remove elements after animation completes
+       setTimeout(() => {
+           offcanvas.removeClass('show hiding');
+           backdrop.remove();
+           $('body').removeClass('offcanvas-open');
+       }, 900); // Match this with your CSS transition duration
+   }
 </script>
 
 @yield('script')

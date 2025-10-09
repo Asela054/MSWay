@@ -17,48 +17,22 @@
             </div>
         </div>
         <div class="container-fluid mt-2 p-0 p-2">
-            <div class="card mb-2">
-                <div class="card-body p-0 p-2">
-                    <form class="form-horizontal" id="formFilter">
-                        <div class="form-row mb-1">
-                            <div class="col-md-2">
-                                <label class="small font-weight-bold text-dark">Company*</label>
-                                <select name="company" id="company" class="form-control form-control-sm" required>
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <label class="small font-weight-bold text-dark">Department*</label>
-                                <select name="department" id="department" class="form-control form-control-sm" required>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="small font-weight-bold text-dark">Date*</label>
-                                <input type="date" id="filter_date" name="date" class="form-control form-control-sm" placeholder="yyyy-mm-dd" required>
-                            </div>
-                            <div class="col-md-2">
-                                <label class="small font-weight-bold text-dark">Employee</label>
-                                <select name="employee" id="employee_main" class="form-control form-control-sm">
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <br>
-                                <button type="submit" class="btn btn-primary btn-sm filter-btn" id="btn-filter"> Filter</button>
-                            </div>
-                        </div>
-
-                    </form>
-                </div>
-            </div>
             <div class="card">
                 <div class="card-body p-0 p-2">
                     <div class="row">
                         <div class="col-sm-12">
-                            <button type="button" class="btn btn-success btn-sm fa-pull-right px-3 mr-2" name="edit_record_month" id="edit_record_month"><i class="fas fa-pencil-alt mr-2"></i>Edit - Month</button>
-                            <button id="approve_att" class="btn btn-primary btn-sm fa-pull-right px-3 mr-2"><i class="fas fa-save mr-2"></i> Update Attendance</button><br>
+                            <button type="button" class="btn btn-primary btn-sm fa-pull-right px-3 mr-2" name="edit_record_month" id="edit_record_month"><i class="fas fa-pencil-alt mr-2"></i>Edit - Month</button>
+                            {{-- <button id="approve_att" class="btn btn-success btn-sm fa-pull-right px-3 mr-2"><i class="fas fa-upload mr-2"></i> Update Attendance</button><br> --}}
                         </div>
                         <div class="col-12">
                             <hr class="border-dark">
                         </div>
+                         <div class="col-md-12">
+                                    <button class="btn btn-warning btn-sm filter-btn float-right px-3" type="button"
+                                        data-toggle="offcanvas" data-target="#offcanvasRight"
+                                        aria-controls="offcanvasRight"><i class="fas fa-filter mr-1"></i> Filter
+                                        Options</button>
+                                </div><br><br>
                         <div class="col-12">
                             <div class="center-block fix-width scroll-inner">
                                 <table class="table table-striped table-bordered table-sm small nowrap" style="width: 100%" id="attendtable">
@@ -83,6 +57,8 @@
                     </div>
                 </div>
             </div>
+             @include('layouts.filter_menu_offcanves')
+
         </div>
 
     </main>
@@ -105,13 +81,13 @@
                             <div class="col">
                                 <div class="form-row mb-1">
                                     <div class="col-sm-12 col-md-6">
-                                        <label class="small font-weight-bold text-dark">Employee*</label>
+                                        <label class="small font-weight-bolder text-dark">Employee*</label>
                                         <select name="employee" id="employee_m" class="form-control form-control-sm">
                                             <option value="">Select...</option>
                                         </select>
                                     </div>
                                     <div class="col-sm-12 col-md-6">
-                                        <label class="small font-weight-bold text-dark">Month*</label>
+                                        <label class="small font-weight-bolder text-dark">Month*</label>
                                         <input type="month" id="month_m" name="month" class="form-control form-control-sm" min="2021-01" value="{{Date('Y-m')}}" />
                                     </div>
                                 </div>
@@ -170,7 +146,8 @@
 
             let company = $('#company');
             let department = $('#department');
-            let employee_f = $('#employee_main');
+            let employee_f = $('#employee');
+            let location = $('#location');
 
             company.select2({
                 placeholder: 'Select...',
@@ -194,7 +171,7 @@
                 width: '100%',
                 allowClear: true,
                 ajax: {
-                    url: '{{url("department_list_sel3")}}',
+                    url: '{{url("department_list_sel2")}}',
                     dataType: 'json',
                     data: function (params) {
                         return {
@@ -226,6 +203,23 @@
                 }
             });
 
+            location.select2({
+                placeholder: 'Select...',
+                width: '100%',
+                allowClear: true,
+                ajax: {
+                    url: '{{url("location_list_sel2")}}',
+                    dataType: 'json',
+                    data: function (params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1
+                        }
+                    },
+                    cache: true
+                }
+            });
+
 
             $('#employee_m').select2({
                 placeholder: 'Select...',
@@ -245,7 +239,8 @@
             });
 
             load_dt('');
-            function load_dt(company,department, date, employee) {
+
+            function load_dt(company,department, from_date, to_date, employee) {
                 $('#attendtable').DataTable({
                     "destroy": true,
                     "processing": true,
@@ -287,14 +282,15 @@
                         data: {
                             company: company,
                             department: department,
-                            date: date,
+                            from_date: from_date,
+                            to_date: to_date,
                             employee: employee
                         }
                     },
-                   columns: [
+                    columns: [
                         { 
-                            "data": "uid",
-                            "name": "uid", 
+                            "data": "emp_id",
+                            "name": "emp_id", 
                         },
                         { 
                             "data": "employee_display",
@@ -303,75 +299,40 @@
                         { 
                             "data": "month",
                             "name": "month",
-                         },
+                        },
                         { 
                             "data": "dept_name",
                             "name": "dept_name",
-                         },
+                        },
                         { 
                             "data": "location",
                             "name": "location",
-                         },
+                        },
                         {
                             "data": 'firsttimestamp',
                             "name": 'firsttimestamp',
-                            render: function (data, type, row) {
-                                let firstTime = row['firsttimestamp'] ? row['firsttimestamp'] : '';
-                                return type === 'display' ?
-                                    `<input type="datetime-local" class="form-control form-control-sm time_in" 
-                                        data-id="${row['id']}" 
-                                        data-uid="${row['uid']}" 
-                                        data-date="${row['date']}" 
-                                        data-dept_id="${row['dept_id']}" 
-                                        data-time_type="first_time" 
-                                        data-timestamp="${row['firsttimestamp'] || ''}" 
-                                        value="${firstTime}" 
-                                        placeholder="YYYY-MM-DD HH:MM" />`
-                                    : data;
-                            }
                         },
                         {
-                            data: 'lasttimestamp',
-                            render: function (data, type, row) {
-                                let lastTime = row['lasttimestamp'] ? row['lasttimestamp'] : '';
-                                if (row['lasttimestamp'] !== row['firsttimestamp'] && row['lasttimestamp'] !== null) {
-                                    return type === 'display' ?
-                                        `<input type="datetime-local" class="form-control form-control-sm time_out" 
-                                            data-id="${row['id']}" 
-                                            data-uid="${row['uid']}" 
-                                            data-date="${row['date']}" 
-                                            data-dept_id="${row['dept_id']}" 
-                                            data-time_type="last_time" 
-                                            data-timestamp="${row['lasttimestamp'] || ''}" 
-                                            value="${lastTime}" 
-                                            placeholder="YYYY-MM-DD HH:MM" />`
-                                        : data;
-                                } else {
-                                    return type === 'display' ?
-                                        `<input type="datetime-local" class="form-control form-control-sm time_out" 
-                                            data-id="${row['id']}" 
-                                            data-uid="${row['uid']}" 
-                                            data-date="${row['date']}" 
-                                            data-dept_id="${row['dept_id']}" 
-                                            data-time_type="last_time" 
-                                            data-timestamp="" 
-                                            value="" 
-                                            placeholder="YYYY-MM-DD HH:MM" />`
-                                        : data;
-                                }
-                            }
+                            "data": 'lasttimestamp',
+                            "name": 'lasttimestamp',
+                        },
+
+                         {   "data": "emp_name_with_initial", 
+                            "name": "emp_name_with_initial", 
+                            "visible": false
+                        },
+                        {   "data": "calling_name",
+                            "name": "calling_name", 
+                             "visible": false
+                        },
+                        {   "data": "emp_id", 
+                            "name": "emp_id", 
+                            "visible": false
                         }
                     ],
                     "bDestroy": true,
-                    "order": [[ 6, "desc" ]],
-
-                    "drawCallback": function( settings ) {
-                        check_changed_text_boxes();
-                        $('.time').datetimepicker({
-                            format:'Y-m-d H:i',
-                            mask:false,
-                        });
-
+                    "order": [[ 2, "desc" ]],
+                    "drawCallback": function(settings) {
                     }
                 });
             }
@@ -380,10 +341,13 @@
                 e.preventDefault();
                 let department = $('#department').val();
                 let company = $('#company').val();
-                let date = $('#filter_date').val();
-                let employee = $('#employee_main').val();
+                let from_date = $('#from_date').val();
+                 let to_date = $('#to_date').val();
+                let employee = $('#employee').val();
 
-                load_dt(company, department, date, employee);
+                load_dt(company, department, from_date, to_date, employee);
+                 closeOffcanvasSmoothly();
+
             });
 
             $(document).delegate("table tbody tr .time_in","change",function(e){
@@ -468,9 +432,10 @@
 
 
             $(document).on('click', '#approve_att', async function (e) {
-                var r = await Otherconfirmation("You want to Approve this ? ");
+                e.preventDefault();
+
+                var r = await Otherconfirmation("You want to Update this?");
                 if (r == true) {
-                    e.preventDefault();
                     $.ajax({
                         url: "AttendanceEditBulkSubmit",
                         method: "POST",
@@ -480,19 +445,20 @@
                             _token: $('input[name=_token]').val(),
                         },
                         success: function (data) {
+                            console.log('Response data:', data); // Debug log
+
                             if (data.errors) {
                                 const actionObj = {
                                     icon: 'fas fa-warning',
                                     title: '',
-                                    message: 'Record Error',
+                                    message: data.errors || 'Record Error',
                                     url: '',
                                     target: '_blank',
                                     type: 'danger'
                                 };
                                 const actionJSON = JSON.stringify(actionObj, null, 2);
                                 action(actionJSON);
-                            }
-                            if (data.success) {
+                            } else if (data.success) {
                                 const actionObj = {
                                     icon: 'fas fa-save',
                                     title: '',
@@ -503,44 +469,44 @@
                                 };
                                 const actionJSON = JSON.stringify(actionObj, null, 2);
                                 actionreload(actionJSON);
+
+                                // Clear the changed records after successful update
+                                changed_records_in = [];
+                                changed_records_out = [];
+
+                                // Reset background colors
+                                $('.changed').css('background-color', '');
+                                $('.changed').removeClass('changed');
+                            } else if (data.msg) {
+                                const actionObj = {
+                                    icon: 'fas fa-save',
+                                    title: '',
+                                    message: data.msg,
+                                    url: '',
+                                    target: '_blank',
+                                    type: 'success'
+                                };
+                                const actionJSON = JSON.stringify(actionObj, null, 2);
+                                actionreload(actionJSON);
                             }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error('AJAX Error:', error);
+                            const actionObj = {
+                                icon: 'fas fa-exclamation-triangle',
+                                title: '',
+                                message: 'Server error: ' + error,
+                                url: '',
+                                target: '_blank',
+                                type: 'danger'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            action(actionJSON);
                         }
                     });
                 }
             });
 
-            function check_changed_text_boxes(){
-
-                for(let a = 0; a < changed_records_in.length; a++){
-                    let time_stamp = changed_records_in[a]['time_stamp'];
-                    let id = changed_records_in[a]['id'];
-                    let uid = changed_records_in[a]['uid'];
-                    let date = changed_records_in[a]['date'];
-                    let time_type = changed_records_in[a]['time_type'];
-                    let dept_id = changed_records_in[a]['dept_id'];
-
-                    let selector = $('.time[data-id="' + id + '"][data-uid="'+ uid +'"][data-date="'+ date +'"][data-time_type="'+ time_type +'"][data-dept_id="'+ dept_id +'"]');
-
-                    selector.val(time_stamp);
-                    selector.parent().parent().css('background-color', '#f7c8c8');
-                    selector.parent().parent().addClass('changed');
-                }
-
-                for(let a = 0; a < changed_records_out.length; a++){
-                    let time_stamp = changed_records_out[a]['time_stamp'];
-                    let id = changed_records_out[a]['id'];
-                    let uid = changed_records_out[a]['uid'];
-                    let date = changed_records_out[a]['date'];
-                    let time_type = changed_records_out[a]['time_type'];
-                    let dept_id = changed_records_out[a]['dept_id'];
-
-                    let selector = $('.time[data-id="' + id + '"][data-uid="'+ uid +'"][data-date="'+ date +'"][data-time_type="'+ time_type +'"][data-dept_id="'+ dept_id +'"]');
-
-                    selector.val(time_stamp);
-                    selector.parent().parent().css('background-color', '#f7c8c8');
-                    selector.parent().parent().addClass('changed');
-                }
-            }
 
             $('#edit_record_month').click(function () {
                 $('#bulk_response').html('');

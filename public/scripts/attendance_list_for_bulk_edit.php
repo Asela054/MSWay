@@ -14,9 +14,9 @@ $columns = array(
     array('db' => '`sub`.`month`', 'dt' => 'month', 'field' => 'month'),
     array('db' => '`sub`.`firsttimestamp`', 'dt' => 'firsttimestamp', 'field' => 'firsttimestamp'),
     array('db' => '`sub`.`lasttimestamp`', 'dt' => 'lasttimestamp', 'field' => 'lasttimestamp'),
-    array('db' => '`employees`.`emp_name_with_initial`', 'dt' => 'emp_name_with_initial', 'field' => 'emp_name_with_initial'),
-    array('db' => '`employees`.`calling_name`', 'dt' => 'calling_name', 'field' => 'calling_name'),
-    array('db' => '`employees`.`emp_id`', 'dt' => 'emp_id', 'field' => 'emp_id'),
+    array('db' => '`employees`.`emp_name_with_initial`', 'dt' => 'emp_name_with_initial', 'field' => 'emp_name_with_initial', 'visible' => false),
+    array('db' => '`employees`.`calling_name`', 'dt' => 'calling_name', 'field' => 'calling_name', 'visible' => false),
+    array('db' => '`employees`.`emp_id`', 'dt' => 'emp_id', 'field' => 'emp_id', 'visible' => false),
     array('db' => '`branches`.`location`', 'dt' => 'location', 'field' => 'location'),
     array('db' => '`departments`.`name`', 'dt' => 'dept_name', 'field' => 'dept_name', 'as' => 'dept_name'),
      array('db' => '`employees`.`emp_id`', 'dt' => 'employee_display', 'field' => 'emp_id', 
@@ -59,9 +59,10 @@ if (!empty($_POST['location'])) {
     $location = $_POST['location'];
     $extraWhere .= " AND `sub`.`location` = '$location'";
 }
-if (!empty($_POST['date'])) {
-    $date = $_POST['date'];
-    $extraWhere .= " AND `sub`.`date` = '$date'";
+if (!empty($_POST['from_date']) && !empty($_POST['to_date'])) {
+    $from_date = $_POST['from_date'];
+    $to_date = $_POST['to_date'];
+    $extraWhere .= " AND `sub`.`date` BETWEEN '$from_date' AND '$to_date'";
 }
 
 $joinQuery = "FROM (
