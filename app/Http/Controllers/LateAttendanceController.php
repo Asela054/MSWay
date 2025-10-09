@@ -99,11 +99,8 @@ class LateAttendanceController extends Controller
         $late_time_threshold = null;
         if ($late_type) {
             $late_time = DB::table('late_types')->where('id', $late_type)->first();
-            if ($late_time && $late_time->late_early == 0) {
+            if ($late_time) {
                 $late_time_threshold = $late_time->time_from;
-            }
-            else if ($late_time && $late_time->late_early == 1) {
-                $late_time_threshold = $late_time->time_to;
             }
         }
 
@@ -237,59 +234,45 @@ class LateAttendanceController extends Controller
         }
 
         $selected_cb = $request->selected_cb;
-        $late_type = $request->late_type;
 
         if (empty($selected_cb)) {
             return response()->json(['status' => false, 'msg' => 'Select one or more employees']);
         }
 
-        $latetype = DB::table('late_types')->select('time_from', 'time_to', 'late_early')->where('id', $late_type)->first();
 
         $data_arr = array();
         foreach ($selected_cb as $cr) {
 
             if ($cr['lasttimestamp'] != '') {
+
+                 $shiftType = DB::table('employees')
+                                ->join('shift_types', 'employees.emp_shift', '=', 'shift_types.id')
+                                ->select('shift_types.onduty_time')
+                                ->where('employees.emp_id', $cr['uid']) 
+                                ->first();
+
+
+                if ($shiftType && $shiftType->onduty_time) {
+                            $ondutyTime = new DateTime($shiftType->onduty_time);
+                            $checkInTime = new DateTime($cr['timestamp']);
+
+                            $interval = $checkInTime->diff($ondutyTime);
+                            $minutesDifference = ($interval->h * 60) + $interval->i;
+
+                            // Check if check-in time is after on-duty time
+                            if ($checkInTime > $ondutyTime) {
+                                $interval = $checkInTime->diff($ondutyTime);
+                                $minutesDifference = ($interval->h * 60) + $interval->i;
+
+                                $late_minutes_data[] = array(
+                                    'attendance_id' => $cr['id'],
+                                    'emp_id' => $cr['uid'],
+                                    'attendance_date' => $cr['date'],
+                                    'minites_count' => $minutesDifference,
+                                );
+                            }
+                }
                 
-                if ($latetype && $latetype->time_from && $latetype->late_early == 0) {
-                    $ondutyTime = new DateTime($latetype->time_from);
-                    $checkInTime = new DateTime($cr['timestamp']);
-
-                    $interval = $checkInTime->diff($ondutyTime);
-                    $minutesDifference = ($interval->h * 60) + $interval->i;
-
-                    // Check if check-in time is after on-duty time
-                    if ($checkInTime > $ondutyTime) {
-                        $interval = $checkInTime->diff($ondutyTime);
-                        $minutesDifference = ($interval->h * 60) + $interval->i;
-
-                        $late_minutes_data[] = array(
-                            'attendance_id' => $cr['id'],
-                            'emp_id' => $cr['uid'],
-                            'attendance_date' => $cr['date'],
-                            'minites_count' => $minutesDifference,
-                        );
-                    }
-                }
-                else if ($latetype && $latetype->time_to && $latetype->late_early == 1) {
-                    $offdutyTime = new DateTime($latetype->time_to);
-                    $checkOutTime = new DateTime($cr['lasttimestamp']);
-
-                    $interval = $offdutyTime->diff($checkOutTime);
-                    $minutesDifference = ($interval->h * 60) + $interval->i;
-
-                    // Check if check-out time is before off-duty time
-                    if ($checkOutTime < $offdutyTime) {
-                        $interval = $offdutyTime->diff($checkOutTime);
-                        $minutesDifference = ($interval->h * 60) + $interval->i;
-
-                        $late_minutes_data[] = array(
-                            'attendance_id' => $cr['id'],
-                            'emp_id' => $cr['uid'],
-                            'attendance_date' => $cr['date'],
-                            'minites_count' => $minutesDifference,
-                        );
-                    }
-                }
 
                 $data_arr[] = array(
                     'attendance_id' => $cr['id'],
@@ -355,11 +338,6 @@ class LateAttendanceController extends Controller
             $date = $cr['date'];
             array_push($id_arr, $cr['id']);
 
-            // Update late attendance as approved
-            DB::table('employee_late_attendances')
-                ->where('id', $cr['id'])
-                ->update(['is_approved' => 1]);
-
             // Get employee late attendance data
             $emp_data = DB::table('employee_late_attendances')
                 ->find($cr['id']);
@@ -373,7 +351,11 @@ class LateAttendanceController extends Controller
                         'msg' => 'Employee ' . $emp_data->emp_id . ' does not have a job category assigned.'
                     ]);
                 }
-
+                
+          // Update late attendance as approved
+            DB::table('employee_late_attendances')
+                ->where('id', $cr['id'])
+                ->update(['is_approved' => 1]);
         }
 
         return response()->json(['status' => true, 'msg' => 'Late Mark Completed successfully.']);

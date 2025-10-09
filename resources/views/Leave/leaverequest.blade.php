@@ -52,6 +52,8 @@
                                     <th>APPROVED LEAVE</th>
                                     <th>LEAVE APPROVE STATUS</th>
                                     <th class="text-right">ACTION</th>
+                                    <th class="d-none">empname</th>
+                                    <th class="d-none">empname</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -252,12 +254,12 @@
 
             function load_dt(department, employee, from_date, to_date){
                 $('#divicestable').DataTable({
-                     "destroy": true,
-                        "processing": true,
-                        "serverSide": true,
+                        destroy: true,
+                        processing: true,
+                        serverSide: true,
                         dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
                             "<'row'<'col-sm-5'i><'col-sm-7'p>>",
-                        "buttons": [{
+                        buttons: [{
                                 extend: 'csv',
                                 className: 'btn btn-success btn-sm',
                                 title: 'Leave Request Details',
@@ -285,9 +287,6 @@
                                         .css('font-size', 'inherit');
                                 },
                             },
-                        ],
-                        "order": [
-                            [0, "desc"]
                         ],
                     ajax: {
                          url: scripturl + '/leave_request_list.php',
@@ -358,12 +357,17 @@
 
                             return buttons;
                         }
+                    }, 
+                    { data: "emp_name_with_initial", 
+                      name: "emp_name_with_initial", 
+                      visible: false
+                    },
+                    {   data: "calling_name",
+                        name: "calling_name", 
+                        visible: false
                     }
                     ],
-                    "bDestroy": true,
-                    "order": [
-                        [0, "desc"]
-                    ]
+                    order: [[0, "desc"]],
                 });
             }
 
@@ -514,7 +518,7 @@
 
             
             $(document).on('click', '.approve',async function () {
-               var r = await Otherconfirmation("You want to remove this ? ");
+               var r = await Otherconfirmation("You want to Approve this ? ");
                 if (r == true) {
                        user_id = $(this).attr('id');
                         $.ajaxSetup({
@@ -561,6 +565,7 @@
                 }
 
             });
+
         });
     </script>
 

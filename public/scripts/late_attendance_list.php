@@ -13,9 +13,9 @@ $primaryKey = 'id';
 
 $columns = array(
     array('db' => '`u`.`id`', 'dt' => 'id', 'field' => 'id'),
-    array('db' => '`u`.`emp_id`', 'dt' => 'emp_id', 'field' => 'emp_id'),
-    array('db' => '`u`.`emp_name_with_initial`', 'dt' => 'emp_name_with_initial', 'field' => 'emp_name_with_initial'),
-    array('db' => '`u`.`calling_name`', 'dt' => 'calling_name', 'field' => 'calling_name'),
+    array('db' => '`u`.`emp_id`', 'dt' => 'emp_id', 'field' => 'emp_id', 'visible' => false),
+    array('db' => '`u`.`emp_name_with_initial`', 'dt' => 'emp_name_with_initial', 'field' => 'emp_name_with_initial', 'visible' => false),
+    array('db' => '`u`.`calling_name`', 'dt' => 'calling_name', 'field' => 'calling_name', 'visible' => false),
     array('db' => '`u`.`date`', 'dt' => 'date', 'field' => 'date'),
     array('db' => '`u`.`check_in_time`', 'dt' => 'check_in_time', 'field' => 'check_in_time'),
     array('db' => '`u`.`check_out_time`', 'dt' => 'check_out_time', 'field' => 'check_out_time'),

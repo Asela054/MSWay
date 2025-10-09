@@ -58,6 +58,8 @@
                                     <th>STATUS</th>
                                     <th class="text-right">ACTION</th>
                                     <th class="d-none">ID</th>
+                                    <th class="d-none">EMPNAME</th>
+                                    <th class="d-none">CALLING</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -335,15 +337,16 @@
                         orderable: false, 
                         searchable: false 
                     },
-                    { data: 'id', name: 'id' },
+                    { data: 'id', name: 'id' , visible: false},
+                     { data: "emp_name_with_initial", 
+                        name: "emp_name_with_initial", 
+                        visible: false
+                        },
+                        {   data: "calling_name",
+                            name: "calling_name", 
+                            visible: false
+                        },
                 ],
-                columnDefs: [
-                    {
-                        targets: -1,
-                        className: 'd-none'
-                    }
-                ],
-                "bDestroy": true,
                 "order": [
                     [6, "desc"]
                 ]

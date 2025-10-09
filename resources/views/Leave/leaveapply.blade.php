@@ -52,6 +52,9 @@
                                     <th>COVERING PERSON</th>
                                     <th>STATUS</th>
                                     <th class="text-right">ACTION</th>
+                                    <th class="d-none">EMPNAME</th>
+                                    <th class="d-none">CALLING</th>
+                                    <th class="d-none">EMPID</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -461,7 +464,16 @@
 
                                 return buttons;
                             }
-                        }
+                        },
+                         { data: "emp_name", 
+                            name: "emp_name", 
+                            visible: false
+                            },
+                            {   data: "calling_name",
+                                name: "calling_name", 
+                                visible: false
+                            }
+
                     ],
                     "bDestroy": true,
                     "order": [

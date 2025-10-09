@@ -444,22 +444,36 @@ class AttendanceController extends Controller
     public function getAttendance(Request $request)
     {
 
-
-        $data = DB::table('attendances')
-            ->select('attendances.*', 'employees.emp_name_with_initial', 'employees.emp_etfno', 'shift_types.begining_checkout', 'shift_types.ending_checkout')
-            ->Join('employees', 'attendances.uid', '=', 'employees.emp_id')
+        $user = Auth::user();
+        $permission = $user->can('attendance-edit');
+        if (!$permission) {
+            abort(403);
+        }
+         $data = DB::table('attendances as at1')
+            ->select(
+                'at1.*', 
+                DB::raw('MIN(at1.timestamp) as first_time_stamp'),
+                DB::raw('CASE WHEN MIN(at1.timestamp) = MAX(at1.timestamp) THEN NULL ELSE MAX(at1.timestamp) END as last_time_stamp'),
+                'employees.emp_name_with_initial',
+                'employees.emp_etfno',
+                'shift_types.begining_checkout',
+                'shift_types.ending_checkout'
+            )
+            ->join('employees', 'at1.uid', '=', 'employees.emp_id')
             ->leftJoin('shift_types', 'employees.emp_shift', '=', 'shift_types.id')
             ->where([
-                ['date', '=', $request->date],
-                ['uid', '=', $request->id],
-
-            ])->get();
+                ['at1.date', '=', $request->date],
+                ['at1.uid', '=', $request->id],
+            ])
+            ->get();
 
 
         return response()->json($data);
 
         //echo json_encode($data);
     }
+
+
 
     public function attendentUpdateLive(Request $request)
     {
@@ -687,140 +701,301 @@ class AttendanceController extends Controller
 
     }
 
+    // public function AttendanceEditBulkSubmit(Request $request)
+    // {
+    //     $user = Auth::user();
+    //     $permission = $user->can('attendance-edit');
+    //     if (!$permission) {
+    //         return response()->json(['error' => 'UnAuthorized'], 401);
+    //     }
+
+    //     $changed_records_in = $request->changed_records_in;
+    //     $changed_records_out = $request->changed_records_out;
+
+    //     if($changed_records_in){
+    //         foreach ($changed_records_in as $cr) {
+
+    //             if ($cr['existing_time_stamp'] == '' && $cr['time_stamp'] != '') {
+
+    //                 $employee = DB::table('employees')
+    //                     ->join('branches', 'employees.emp_location', '=', 'branches.id')
+    //                     ->join('fingerprint_devices', 'branches.id', '=', 'fingerprint_devices.location')
+    //                     ->select('fingerprint_devices.sno', 'fingerprint_devices.location', 'employees.emp_id', 'employees.emp_name_with_initial')
+    //                     ->groupBy('fingerprint_devices.location')
+    //                     ->where('employees.emp_id', $cr['uid'])
+    //                     ->first();
+
+    //                 $data = array(
+    //                     'emp_id' => $employee->emp_id,
+    //                     'uid' => $employee->emp_id,
+    //                     'state' => 1,
+    //                     'timestamp' => $cr['time_stamp'],
+    //                     'date' => $cr['date'],
+    //                     'approved' => 0,
+    //                     'type' => 255,
+    //                     'devicesno' => $employee->sno,
+    //                     'location' => $employee->location
+    //                 );
+    //                 $id = DB::table('attendances')->insert($data);
+
+    //             } else {
+
+    //                 $attendance = Attendance::where('uid', $cr['uid'])
+    //                     ->where('date', $cr['date'])
+    //                     ->where('timestamp', $cr['existing_time_stamp'])->first();
+
+    //                 $prev_timestamp = $attendance->timestamp;
+
+    //                 $attendance->timestamp = $cr['time_stamp'];
+
+    //                 $attendance->save();
+
+    //                 $log_data = array(
+    //                     'attendance_id' => $attendance->id,
+    //                     'emp_id' => $attendance->emp_id,
+    //                     'date' => $cr['date'],
+    //                     'prev_val' => $prev_timestamp,
+    //                     'new_val' => $cr['time_stamp'],
+    //                     'edited_user_id' => Auth::user()->id,
+    //                 );
+
+    //                 AttendanceEdited::create($log_data);
+
+    //                 if ($cr['time_stamp'] == '') {
+    //                     DB::table('attendances')
+    //                         ->where('uid', $cr['uid'])
+    //                         ->where('date', $cr['date'])
+    //                         ->where('timestamp', $cr['time_stamp'])
+    //                         ->delete();
+    //                 }
+    //             }
+    //         }
+    //     }
+
+    //     if ($changed_records_out){
+    //         foreach ($changed_records_out as $cr) {
+
+    //             if ($cr['existing_time_stamp'] == '' && $cr['time_stamp'] != '') {
+
+    //                 $employee = DB::table('employees')
+    //                     ->join('branches', 'employees.emp_location', '=', 'branches.id')
+    //                     ->join('fingerprint_devices', 'branches.id', '=', 'fingerprint_devices.location')
+    //                     ->select('fingerprint_devices.sno', 'fingerprint_devices.location', 'employees.emp_id', 'employees.emp_name_with_initial')
+    //                     ->groupBy('fingerprint_devices.location')
+    //                     ->where('employees.emp_id', $cr['uid'])
+    //                     ->first();
+
+    //                 $data = array(
+    //                     'emp_id' => $employee->emp_id,
+    //                     'uid' => $employee->emp_id,
+    //                     'state' => 1,
+    //                     'timestamp' => $cr['time_stamp'],
+    //                     'date' => $cr['date'],
+    //                     'approved' => 0,
+    //                     'type' => 255,
+    //                     'devicesno' => $employee->sno,
+    //                     'location' => $employee->location
+    //                 );
+    //                 $id = DB::table('attendances')->insert($data);
+
+    //             } else {
+
+    //                 $attendance = Attendance::where('uid', $cr['uid'])
+    //                     ->where('date', $cr['date'])
+    //                     ->where('timestamp', $cr['existing_time_stamp'])->first();
+
+    //                 $prev_timestamp = $attendance->timestamp;
+
+    //                 $attendance->timestamp = $cr['time_stamp'];
+
+    //                 $attendance->save();
+
+    //                 $log_data = array(
+    //                     'attendance_id' => $attendance->id,
+    //                     'emp_id' => $attendance->emp_id,
+    //                     'date' => $cr['date'],
+    //                     'prev_val' => $prev_timestamp,
+    //                     'new_val' => $cr['time_stamp'],
+    //                     'edited_user_id' => Auth::user()->id,
+    //                 );
+
+    //                 AttendanceEdited::create($log_data);
+
+    //                 if ($cr['time_stamp'] == '') {
+    //                     DB::table('attendances')
+    //                         ->where('uid', $cr['uid'])
+    //                         ->where('date', $cr['date'])
+    //                         ->where('timestamp', $cr['time_stamp'])
+    //                         ->delete();
+    //                 }
+    //             }
+    //         }
+    //     }
+
+    //     return response()->json(['status' => true, 'msg' => 'Updated successfully.']);
+
+    // }
+
     public function AttendanceEditBulkSubmit(Request $request)
-    {
+{
+    try {
         $user = Auth::user();
         $permission = $user->can('attendance-edit');
         if (!$permission) {
             return response()->json(['error' => 'UnAuthorized'], 401);
         }
 
-        $changed_records_in = $request->changed_records_in;
-        $changed_records_out = $request->changed_records_out;
+        $changed_records_in = $request->changed_records_in ?? [];
+        $changed_records_out = $request->changed_records_out ?? [];
 
-        if($changed_records_in){
-            foreach ($changed_records_in as $cr) {
+        \Log::info('Bulk Update Request:', [
+            'changed_records_in_count' => count($changed_records_in),
+            'changed_records_out_count' => count($changed_records_out),
+            'user_id' => $user->id
+        ]);
 
-                if ($cr['existing_time_stamp'] == '' && $cr['time_stamp'] != '') {
+        DB::beginTransaction();
 
-                    $employee = DB::table('employees')
-                        ->join('branches', 'employees.emp_location', '=', 'branches.id')
-                        ->join('fingerprint_devices', 'branches.id', '=', 'fingerprint_devices.location')
-                        ->select('fingerprint_devices.sno', 'fingerprint_devices.location', 'employees.emp_id', 'employees.emp_name_with_initial')
-                        ->groupBy('fingerprint_devices.location')
-                        ->where('employees.emp_id', $cr['uid'])
-                        ->first();
+        $updateCount = 0;
 
-                    $data = array(
-                        'emp_id' => $employee->emp_id,
-                        'uid' => $employee->emp_id,
-                        'state' => 1,
-                        'timestamp' => $cr['time_stamp'],
-                        'date' => $cr['date'],
-                        'approved' => 0,
-                        'type' => 255,
-                        'devicesno' => $employee->sno,
-                        'location' => $employee->location
-                    );
-                    $id = DB::table('attendances')->insert($data);
-
-                } else {
-
-                    $attendance = Attendance::where('uid', $cr['uid'])
-                        ->where('date', $cr['date'])
-                        ->where('timestamp', $cr['existing_time_stamp'])->first();
-
-                    $prev_timestamp = $attendance->timestamp;
-
-                    $attendance->timestamp = $cr['time_stamp'];
-
-                    $attendance->save();
-
-                    $log_data = array(
-                        'attendance_id' => $attendance->id,
-                        'emp_id' => $attendance->emp_id,
-                        'date' => $cr['date'],
-                        'prev_val' => $prev_timestamp,
-                        'new_val' => $cr['time_stamp'],
-                        'edited_user_id' => Auth::user()->id,
-                    );
-
-                    AttendanceEdited::create($log_data);
-
-                    if ($cr['time_stamp'] == '') {
-                        DB::table('attendances')
-                            ->where('uid', $cr['uid'])
-                            ->where('date', $cr['date'])
-                            ->where('timestamp', $cr['time_stamp'])
-                            ->delete();
-                    }
-                }
-            }
+        // Process IN records
+        foreach ($changed_records_in as $cr) {
+            $result = $this->processAttendanceRecord($cr);
+            if ($result) $updateCount++;
         }
 
-        if ($changed_records_out){
-            foreach ($changed_records_out as $cr) {
-
-                if ($cr['existing_time_stamp'] == '' && $cr['time_stamp'] != '') {
-
-                    $employee = DB::table('employees')
-                        ->join('branches', 'employees.emp_location', '=', 'branches.id')
-                        ->join('fingerprint_devices', 'branches.id', '=', 'fingerprint_devices.location')
-                        ->select('fingerprint_devices.sno', 'fingerprint_devices.location', 'employees.emp_id', 'employees.emp_name_with_initial')
-                        ->groupBy('fingerprint_devices.location')
-                        ->where('employees.emp_id', $cr['uid'])
-                        ->first();
-
-                    $data = array(
-                        'emp_id' => $employee->emp_id,
-                        'uid' => $employee->emp_id,
-                        'state' => 1,
-                        'timestamp' => $cr['time_stamp'],
-                        'date' => $cr['date'],
-                        'approved' => 0,
-                        'type' => 255,
-                        'devicesno' => $employee->sno,
-                        'location' => $employee->location
-                    );
-                    $id = DB::table('attendances')->insert($data);
-
-                } else {
-
-                    $attendance = Attendance::where('uid', $cr['uid'])
-                        ->where('date', $cr['date'])
-                        ->where('timestamp', $cr['existing_time_stamp'])->first();
-
-                    $prev_timestamp = $attendance->timestamp;
-
-                    $attendance->timestamp = $cr['time_stamp'];
-
-                    $attendance->save();
-
-                    $log_data = array(
-                        'attendance_id' => $attendance->id,
-                        'emp_id' => $attendance->emp_id,
-                        'date' => $cr['date'],
-                        'prev_val' => $prev_timestamp,
-                        'new_val' => $cr['time_stamp'],
-                        'edited_user_id' => Auth::user()->id,
-                    );
-
-                    AttendanceEdited::create($log_data);
-
-                    if ($cr['time_stamp'] == '') {
-                        DB::table('attendances')
-                            ->where('uid', $cr['uid'])
-                            ->where('date', $cr['date'])
-                            ->where('timestamp', $cr['time_stamp'])
-                            ->delete();
-                    }
-                }
-            }
+        // Process OUT records
+        foreach ($changed_records_out as $cr) {
+            $result = $this->processAttendanceRecord($cr);
+            if ($result) $updateCount++;
         }
 
-        return response()->json(['status' => true, 'msg' => 'Updated successfully.']);
+        DB::commit();
 
+        \Log::info('Bulk Update Completed:', [
+            'total_updated' => $updateCount,
+            'user_id' => $user->id
+        ]);
+
+        return response()->json([
+            'status' => true, 
+            'success' => 'Successfully updated ' . $updateCount . ' record(s).',
+            'updated_count' => $updateCount
+        ]);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        \Log::error('Bulk Update Error:', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+
+        return response()->json([
+            'status' => false,
+            'errors' => 'Update failed: ' . $e->getMessage()
+        ], 500);
     }
+}
+
+private function processAttendanceRecord($cr)
+{
+    try {
+        // Validate required fields - use emp_id instead of uid
+        if (empty($cr['emp_id']) || empty($cr['date'])) {
+            \Log::warning('Missing required fields:', $cr);
+            return false;
+        }
+
+        // If creating new record
+        if (empty($cr['existing_time_stamp']) && !empty($cr['time_stamp'])) {
+            $employee = DB::table('employees')
+                ->join('branches', 'employees.emp_location', '=', 'branches.id')
+                ->join('fingerprint_devices', 'branches.id', '=', 'fingerprint_devices.location')
+                ->select('fingerprint_devices.sno', 'fingerprint_devices.location', 'employees.emp_id', 'employees.emp_name_with_initial')
+                ->where('employees.emp_id', $cr['emp_id']) // Changed from uid to emp_id
+                ->first();
+
+            if (!$employee) {
+                \Log::warning('Employee not found:', ['emp_id' => $cr['emp_id']]);
+                return false;
+            }
+
+            $data = [
+                'emp_id' => $employee->emp_id,
+                'uid' => $employee->emp_id,
+                'state' => 1,
+                'timestamp' => $cr['time_stamp'],
+                'date' => $cr['date'],
+                'approved' => 0,
+                'type' => 255,
+                'devicesno' => $employee->sno,
+                'location' => $employee->location
+            ];
+
+            DB::table('attendances')->insert($data);
+            return true;
+        }
+        // If updating existing record
+        elseif (!empty($cr['existing_time_stamp'])) {
+            $attendance = Attendance::where('uid', $cr['emp_id']) // Changed from uid to emp_id
+                ->where('date', $cr['date'])
+                ->where('timestamp', $cr['existing_time_stamp'])
+                ->first();
+
+            if (!$attendance) {
+                \Log::warning('Attendance record not found for update:', $cr);
+                return false;
+            }
+
+            $prev_timestamp = $attendance->timestamp;
+
+            // If time_stamp is empty, delete the record
+            if (empty($cr['time_stamp'])) {
+                $attendance->delete();
+                
+                $log_data = [
+                    'attendance_id' => $attendance->id,
+                    'emp_id' => $attendance->emp_id,
+                    'date' => $cr['date'],
+                    'prev_val' => $prev_timestamp,
+                    'new_val' => null,
+                    'edited_user_id' => Auth::user()->id
+                ];
+                
+                AttendanceEdited::create($log_data);
+                return true;
+            }
+            // Update the timestamp
+            else {
+                $attendance->timestamp = $cr['time_stamp'];
+                $attendance->save();
+
+                $log_data = [
+                    'attendance_id' => $attendance->id,
+                    'emp_id' => $attendance->emp_id,
+                    'date' => $cr['date'],
+                    'prev_val' => $prev_timestamp,
+                    'new_val' => $cr['time_stamp'],
+                    'edited_user_id' => Auth::user()->id
+                ];
+
+                AttendanceEdited::create($log_data);
+                return true;
+            }
+        }
+
+        return false;
+
+    } catch (\Exception $e) {
+        \Log::error('Error processing attendance record:', [
+            'record' => $cr,
+            'error' => $e->getMessage()
+        ]);
+        return false;
+    }
+}
+
+
 
     public function attendance_update_bulk_submit(Request $request)
     {

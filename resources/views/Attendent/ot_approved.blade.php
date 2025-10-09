@@ -320,6 +320,15 @@
 
                                     return button;
                                 }
+                            },
+                            {data: "emp_name_with_initial", 
+                             visible: false
+                            },
+                            {data: "calling_name",
+                            visible: false
+                            },
+                            {data: "emp_id", 
+                             visible: false
                             }
                         ],
                         "bDestroy": true,
@@ -394,7 +403,16 @@
                             { data: 'normal_rate_otwork_hrs' },
                             { data: 'double_rate_otwork_hrs' },
                             { data: 'b_location' },
-                            { data: 'dept_name' }
+                            { data: 'dept_name' },
+                            {data: "emp_name_with_initial", 
+                             visible: false
+                            },
+                            {data: "calling_name",
+                            visible: false
+                            },
+                            {data: "emp_id", 
+                             visible: false
+                            }
                         ],
                         "bDestroy": true,
                         "order": [[ 2, "desc" ]],

@@ -406,7 +406,6 @@ Route::get('Company',['uses' => 'CompanyController@index', 'as' => 'Company']);
 Route::post('addCompany',['uses' => 'CompanyController@store', 'as' => 'addCompany']); 
 Route::post('Company/update', 'CompanyController@update')->name('Company.update');
 Route::get('Company/destroy/{id}', 'CompanyController@destroy');
-Route::get('company_list_sel2', 'CompanyController@company_list_sel2');
 /*-- End Company Info----*/
 
 /*-- Department Info----*/
@@ -415,7 +414,7 @@ Route::get('DepartmentShow/{id}',['uses' => 'DepartmentController@index', 'as' =
 Route::post('addDepartment',['uses' => 'DepartmentController@store', 'as' => 'addDepartment']);
 Route::post('Department/update', 'DepartmentController@update')->name('Department.update');
 Route::get('Department/destroy/{id}', 'DepartmentController@destroy');
-Route::get('department_list_sel2', 'DepartmentController@department_list_sel2');
+
 
 /*-- End Department Info----*/
 
@@ -450,16 +449,9 @@ Route::post('OccupationGroup.update_manual', 'OccupationGroupController@update_m
 //OccupationGroup.fetch_single
 Route::get('OccupationGroup.fetch_single', 'OccupationGroupController@fetch_single')->name('OccupationGroup.fetch_single');
 
-/*-- common routes --*/
-// Route::get('employee_list_sel2', 'EmployeeController@employee_list_sel2')->name('employee_list_sel2');
-// Route::get('location_list_sel2', 'EmployeeController@location_list_sel2')->name('location_list_sel2');
-// Route::post('get_dept_emp_list', 'EmployeeController@get_dept_emp_list')->name('get_dept_emp_list');
-
 Route::get('employee_list_sel2', 'EmployeeSelectController@employee_list_sel2')->name('employee_list_sel2');
 Route::get('location_list_sel2', 'EmployeeSelectController@location_list_sel2')->name('location_list_sel2');
 Route::post('get_dept_emp_list', 'EmployeeSelectController@get_dept_emp_list')->name('get_dept_emp_list');
-
-
 
 Auth::routes();
 
@@ -1234,7 +1226,7 @@ Route::get('/empshiftextendstatus/{id}/{stasus}','ShiftExtendController@status')
 Route::get('employee_list_for_shift', 'ShiftExtendController@employee_list_for_shift')->name('employee_list_for_shift');
 Route::post('/shift_extend_allocate_csv' ,'ShiftExtendController@shift_extend_allocate_csv')->name('shift_extend_allocate_csv');
 
-Route::get('department_list_sel3', 'DepartmentController@department_list_sel3')->name('department_list_sel3');
+
 
 Route::post('/calculate-working-days', 'LeaveController@calculateWorkingDays')->name('calculate-working-days');
 
@@ -1492,6 +1484,15 @@ Route::get('/getrostershifts', 'EmployeeRosterController@getshifts');
 Route::post('fullrosterstore', 'EmployeeRosterDetailsController@fullrosterstore')->name('fullrosterstore');
 
 Route::get('get-view-roster-data', 'EmployeeRosterDetailsController@getViewRosterData');
+
+
+// Commen Get Records
+Route::get('company_list_sel2', 'CommenGetrreordController@company_list_sel2');
+Route::get('department_list_sel2', 'CommenGetrreordController@department_list_sel2');
+Route::get('department_list_sel3', 'CommenGetrreordController@department_list_sel3')->name('department_list_sel3');
+Route::get('employee_list_sel2', 'CommenGetrreordController@employee_list_sel2')->name('employee_list_sel2');
+Route::get('location_list_sel2', 'CommenGetrreordController@location_list_sel2')->name('location_list_sel2');
+Route::post('get_dept_emp_list', 'CommenGetrreordController@get_dept_emp_list')->name('get_dept_emp_list');
 
 
 Route::get('/clear-cache', function() {

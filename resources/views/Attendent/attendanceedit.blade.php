@@ -687,6 +687,18 @@
 
                                 return button;
                             }
+                        },
+                        {"data": "emp_name_with_initial", 
+                        "name": "emp_name_with_initial", 
+                        "visible": false
+                        },
+                        {"data": "calling_name",
+                         "name": "calling_name", 
+                         "visible": false
+                        },
+                        {"data": "emp_id", 
+                        "name": "emp_id", 
+                        "visible": false
                         }
                     ],
                     destroy: true,
@@ -1537,39 +1549,37 @@
                     url: "AttendentView",
                     dataType: "json",
                     data: formdata,
-                    success: function (data) {
+                     success: function (data) {
                         $('#AttendviewModal').modal('show');
                         var htmlhead = '';
                         htmlhead += '<tr><td>Emp ID :' + id + '</td><td >Name :' + emp_name_with_initial + '</td></tr>';
                         htmlhead += '<tr> <th>Type</th> <th>Date & Time</th> </tr>';
                         var html = '';
-                        html += '<tr>';
 
-                        for (var count = 0; count < data.length; count++) {
-                            html += '<tr>';
-                            const timestamp = new Date(data[count].timestamp);
-                            const date = data[count].date;
-                            const begining_checkout = data[count].begining_checkout;
-                            const ending_checkin = data[count].ending_checkin;
-                            const checkdate = date.slice(0, -8)
-
-                            var checkbegining_checkout = checkdate + begining_checkout + ':00';
-                            var checkending_checkin = checkdate + ending_checkin + ':00';
-
-                            var setbegining_checkout = new Date(checkbegining_checkout).getTime();
-                            var setcheckending_checkin = new Date(checkending_checkin).getTime();
-                            var settimestamp = timestamp.getTime();
-
-                            html += '<tr>';
-                            if (settimestamp < setbegining_checkout) {
-                                html += '<td> Checkin</td>';
-                            }else{
-                                html += '<td> Checkout</td>';
+                        if (data.length > 0) {
+                            const record = data[0]; // Since we're grouping, we get one record per day
+                            // Add Check-in row (first_time_stamp)
+                            if (record.first_time_stamp) {
+                                html += '<tr>';
+                                html += '<td>Checkin</td>';
+                                html += '<td contenteditable class="timestamp" data-timestamp="first_time_stamp" data-id="' + record.uid + '">' + record.first_time_stamp + '</td>';
+                                html += '</tr>';
                             }
-
-                            html += '<td contenteditable class="timestamp" data-timestamp="timestamp" data-id="' + data[count].id + '">' + data[count].timestamp + '</td>';
-
+                            // Add Check-out row (last_time_stamp) - only if it's different from first_time_stamp
+                            if (record.last_time_stamp && record.last_time_stamp !== record.first_time_stamp) {
+                                html += '<tr>';
+                                html += '<td>Checkout</td>';
+                                html += '<td contenteditable class="timestamp" data-timestamp="last_time_stamp" data-id="' + record.uid + '">' + record.last_time_stamp + '</td>';
+                                html += '</tr>';
+                            }
+                            // If no records found after processing
+                            if (html === '') {
+                                html += '<tr><td colspan="2">No valid attendance records found</td></tr>';
+                            }
+                        } else {
+                            html += '<tr><td colspan="2">No attendance records found</td></tr>';
                         }
+                        
                         $('#attendTable thead').html(htmlhead);
                         $('#attendTable tbody').html(html);
                     }

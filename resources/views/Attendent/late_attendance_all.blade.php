@@ -114,7 +114,7 @@
                 width: '100%',
                 allowClear: true,
                 ajax: {
-                    url: '{{url("employee_list_from_attendance_sel2")}}',
+                    url: '{{url("employee_list_sel2")}}',
                     dataType: 'json',
                     data: function (params) {
                         return {
@@ -219,7 +219,21 @@
 
                                 return button;
                             }
+                        },
+                        {
+                         data: "emp_name_with_initial", 
+                         name: "emp_name_with_initial", 
+                         visible: false
+                        },
+                        {data: "calling_name",
+                         name: "calling_name", 
+                         visible: false
+                        },
+                        {data: "emp_id", 
+                         name: "emp_id", 
+                        visible: false
                         }
+
                     ],
                     "bDestroy": true,
                     "order": [
