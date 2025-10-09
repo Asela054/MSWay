@@ -63,18 +63,21 @@
                     <div class="card mt-3">
                         <div class="card-body">
                             <h6 class="font-weight-bold text-dark">ASSIGNED DEVICES</h6>
-                            <table class="table table-bordered table-sm" id="deviceTable">
-                                <thead class="thead-light">
-                                    <tr>
-                                        <th>DEVICE TYPE</th>
-                                        <th>MODEL NUMBER</th>
-                                        <th>SERIAL NUMBER</th>
-                                        <th>ASSIGNED DATE</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                </tbody>
-                            </table>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-sm" id="deviceTable">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th>DEVICE TYPE</th>
+                                            <th>MODEL NUMBER</th>
+                                            <th>SERIAL NUMBER</th>
+                                            <th>ASSIGNED DATE</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>

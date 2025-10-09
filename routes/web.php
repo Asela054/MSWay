@@ -124,6 +124,8 @@ Route::post('BankInsert',['uses' => 'EmployeeBankController@store', 'as' => 'Ban
 Route::get('empBank/destroy/{id}', 'EmployeeBankController@destroy');
 Route::get('empBankReport',['uses' => 'EmployeeBankController@empBankReport', 'as' => 'empBankReport']);
 Route::get('bank_report_list',['uses' => 'EmployeeBankController@bank_report_list', 'as' => 'bank_report_list']);
+Route::post('bankAccountStatusUpdate', ['uses' => 'EmployeeBankController@updateStatus', 'as' => 'bankAccountStatusUpdate']);
+
 
 
 
@@ -447,6 +449,9 @@ Route::post('OccupationGroup.update_manual', 'OccupationGroupController@update_m
 //OccupationGroup.fetch_single
 Route::get('OccupationGroup.fetch_single', 'OccupationGroupController@fetch_single')->name('OccupationGroup.fetch_single');
 
+Route::get('employee_list_sel2', 'EmployeeSelectController@employee_list_sel2')->name('employee_list_sel2');
+Route::get('location_list_sel2', 'EmployeeSelectController@location_list_sel2')->name('location_list_sel2');
+Route::post('get_dept_emp_list', 'EmployeeSelectController@get_dept_emp_list')->name('get_dept_emp_list');
 
 Auth::routes();
 

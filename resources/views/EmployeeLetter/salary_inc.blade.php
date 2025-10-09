@@ -48,6 +48,10 @@
                                 <label class="small font-weight-bold text-dark">Employee</label>
                                 <select name="employee_f" id="employee_f" class="form-control form-control-sm" required>
                                     <option value="">Please Select</option>
+                                     @foreach ($employees as $employee){
+                                        <option value="{{$employee->id}}" >{{$employee->emp_name_with_initial}}</option>
+                                    }  
+                                    @endforeach
                                 </select>
                             </div>
                             <div class="col-md-3">

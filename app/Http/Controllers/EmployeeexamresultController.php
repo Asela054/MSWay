@@ -88,8 +88,8 @@ class EmployeeexamresultController extends Controller
         })
         ->addColumn('action', function ($row) {
             $btn='';
-            $btn .= ' <button name="edit" id="'.$row->id.'" class="edit btn btn-outline-primary btn-sm" ><i class="fas fa-pencil-alt"></i></button>';
-            $btn .= ' <button name="delete" id="'.$row->id.'" class="delete btn btn-outline-danger btn-sm"><i class="far fa-trash-alt"></i></button>';  
+            $btn .= ' <button name="edit" id="'.$row->id.'" class="edit btn btn-primary btn-sm" ><i class="fas fa-pencil-alt"></i></button>';
+            $btn .= ' <button name="delete" id="'.$row->id.'" class="delete btn btn-danger btn-sm"><i class="far fa-trash-alt"></i></button>';  
             return $btn;
         })
         ->rawColumns(['action'])

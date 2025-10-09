@@ -67,6 +67,27 @@ class Salary_incletterController extends Controller
             Session::flash('alert-class', 'alert-success');
             return redirect('salary_incletter');
         }
+        elseif($recordOption == 2){
+            $form_data = array(
+                'company_id' => $company,
+                'department_id' => $department,
+                'employee_id' => $employee,
+                'jobtitle' => $jobtitle,
+                'pre_salary' => $pre_salary,
+                'new_salary' => $new_salary,
+                'date' => $date,
+                'comment1' => $comment1,
+                'comment2' => $comment2,
+                'updated_by' => Auth::id(),
+                'updated_at' => Carbon::now()->toDateTimeString()
+            );
+            
+            Salary_incletter::where('id', $recordID)->update($form_data);
+            
+            Session::flash('message', 'The Employee Salary increment Details Successfully Updated');
+            Session::flash('alert-class', 'alert-success');
+            return redirect('salary_incletter');
+        }
     }
 
     public function letterlist ()
