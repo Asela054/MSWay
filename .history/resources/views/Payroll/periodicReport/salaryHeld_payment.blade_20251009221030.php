@@ -11,7 +11,7 @@
             <div class="page-header-content py-3 px-2">
                 <h1 class="page-header-title ">
                     <div class="page-header-icon"><i class="fa-light fa-money-check-dollar-pen"></i></div>
-                    <span>Additions Report</span>
+                    <span>Salary Sheet - Held Payments</span>
                 </h1>
             </div>
         </div>
@@ -19,14 +19,15 @@
 	<div class="container-fluid mt-2 p-0 p-2">
         <div class="card">
             <div class="card-body p-0 p-2">
-				<form id="frmExport" method="post" action="{{ url('DownloadEpfEtf') }}">
+				<form id="frmExport" method="post">
 					{{ csrf_field() }}
 					<div class="row">
 						<div class="col-12 text-right">
 							<button type="button" name="find_employee" id="find_employee" class="btn btn-success btn-sm px-3"><i class="fal fa-search mr-2"></i>Search</button>
-							<button type="submit" name="print_record" id="print_record" disabled="disabled" class="btn btn-danger btn-sm btn-light px-3"><i class="fal fa-file-pdf mr-2"></i>Download PDF</button>
-                        </div>
-                        <div class="col-12">
+							<button type="submit" name="print_record" id="print_record" disabled="disabled" class="btn btn-success btn-sm px-3 btn-light" onclick="this.form.action='{{ url('DownloadHeldSalaries') }}'" style="width:auto;" value="1"><i class="fal fa-file-excel mr-2"></i>Download XLS</button>
+							<button type="submit" name="print_record" id="print_record_pdf" disabled="disabled" class="btn btn-danger btn-sm px-3 btn-light" onclick="this.form.action='{{ url('DownloadHeldSalaries') }}'" style="width:auto;" value="2"><i class="fal fa-file-pdf mr-2"></i>Download PDF</button>
+						</div>
+						<div class="col-12">
                             <span id="lbl_duration" style="display:none; margin-right:auto; padding-left:10px;">
                                 <div class="alert alert-primary" role="alert">
                                     <span id="lbl_date_fr">&nbsp;</span> To <span id="lbl_date_to">&nbsp;</span>
@@ -34,19 +35,20 @@
                                 </div>
                             </span>
                         </div>
-						<div class="col-lg-12">
+						<div class="col-12">
 							<hr>
 							<div id="divPrint" class="center-block fix-width scroll-inner">
-								<table class="table table-bordered table-striped table-sm small w-100 nowrap" id="emptable" cellspacing="0">
+								<table class="table table-bordered table-striped table-sm small w-100 nowrap" id="emptable" width="100%"
+									cellspacing="0">
 									<thead>
 										<tr>
 											<th style="width:300px;">NAME</th>
 											<th>LOCATION</th>
-											<th>ADDITIONS</th>
-											<th>FACILITY</th>
-											<th>LOAN</th>
-											<th>OT</th>
-											<th>NOPAY</th>
+											<th>NET AMOUNT</th>
+											<th>STATUS</th>
+											<th>HELD REASON</th>
+											<th>RELEASE REASON</th>
+											<th>ATTACHEMENT</th>
 										</tr>
 									</thead>
 
@@ -59,8 +61,7 @@
 							<input type="hidden" name="payroll_profile_id" id="payroll_profile_id" value="" />
 							<!-- edit loans -->
 							<input type="hidden" name="payment_period_id" id="payment_period_id" value="" />
-							<input type="hidden" name="payslip_process_type_id" id="payslip_process_type_id"
-								value="" />
+							<input type="hidden" name="payslip_process_type_id" id="payslip_process_type_id" value="" />
 
 							<input type="hidden" name="rpt_period_id" id="rpt_period_id" value="" />
 							<input type="hidden" name="rpt_info" id="rpt_info" value="-" />
@@ -68,6 +69,9 @@
 							<input type="hidden" name="rpt_location_id" id="rpt_location_id" value="" />
 							<input type="hidden" name="rpt_dept_id" id="rpt_dept_id" value="" />
 							<input type="hidden" name="rpt_dept_name" id="rpt_dept_name" value="" />
+
+							<input type="hidden" name="rpt_chk_held" id="rpt_chk_held" value="0" />
+							<input type="hidden" name="rpt_chk_released" id="rpt_chk_released" value="0" />
 						</div>
 					</div>
 				</form>
@@ -90,7 +94,7 @@
 						<span id="search_result"></span>
 						<div class="form-row mb-1">
 							<div class="col">
-								<label class="font-weight-bolder small">Branch*</label>
+								<label class="font-weight-bolder small">Branch</label>
 								<select name="location_filter_id" id="location_filter_id"
 									class="custom-select custom-select-sm shipClass nest_head" style="" data-findnest="deptnest" required>
 									<option value="" disabled="disabled" selected="selected" data-regcode="">Please Select</option>
@@ -102,8 +106,9 @@
 								</select>
 							</div>
 							<div class="col">
-								<label class="font-weight-bolder small">Department*</label>
-								<select name="department_filter_id" id="department_filter_id" class="custom-select custom-select-sm" style="" data-nestname="deptnest" required>
+								<label class="font-weight-bolder small">Department</label>
+								<select name="department_filter_id" id="department_filter_id" class="custom-select custom-select-sm"
+									style="" data-nestname="deptnest" required>
 									<option value="" disabled="disabled" selected="selected">Please Select</option>
 									@foreach($department as $section)
 
@@ -113,9 +118,9 @@
 								</select>
 							</div>
 						</div>
-						<div class="form-row mb-1">
+						<div class="form-row">
 							<div class="col">
-								<label class="font-weight-bolder small">Payroll type*</label>
+								<label class="font-weight-bolder small">Payroll type</label>
 								<select name="payroll_process_type_id" id="payroll_process_type_id"
 									class="form-control form-control-sm" required>
 									<option value="" disabled="disabled" selected="selected">Please select</option>
@@ -127,15 +132,13 @@
 								</select>
 							</div>
 							<div class="col">
-								<label class="font-weight-bolder small">Working Period*</label>
+								<label class="font-weight-bolder small">Working Period</label>
 								<select name="period_filter_id" id="period_filter_id" class="custom-select custom-select-sm"
 									style="" required>
 									<option value="" disabled="disabled" selected="selected">Please Select</option>
 									@foreach($payment_period as $schedule)
 
-									<option value="{{$schedule->id}}" disabled="disabled" data-payroll="{{$schedule->payroll_process_type_id}}" style="display:none;">
-										{{$schedule->payment_period_fr}} to {{$schedule->payment_period_to}}
-									</option>
+									<option value="{{$schedule->id}}" disabled="disabled" data-payroll="{{$schedule->payroll_process_type_id}}" style="display:none;">{{$schedule->payment_period_fr}} to {{$schedule->payment_period_to}}</option>
 									@endforeach
 
 								</select>
@@ -147,19 +150,30 @@
 												</div>
 											</div-->
 						</div>
+						<div class="form-row mt-2">
+							<div class="col-12">
+								<div class="custom-control custom-checkbox custom-control-inline">
+									<input type="checkbox" class="custom-control-input" id="chk_held" name="chk_held" value="held" checked="checked">
+									<label class="custom-control-label small" for="chk_held">Held</label>
+								</div>
+								<div class="custom-control custom-checkbox custom-control-inline">
+									<input type="checkbox" class="custom-control-input" checked="checked" id="chk_released" name="chk_released" value="released">
+									<label class="custom-control-label small" for="chk_released">Released</label>
+								</div>
+							</div>
+						</div>
 						<div class="form-row">
 							<div class="col-12 text-right">
 								<hr>
-								<input type="submit" name="action_button" id="action_button" class="btn btn-success btn-sm px-3" value="View Payslips" />
+								<input type="submit" name="action_button" id="action_button" class="btn btn-warning btn-sm px-3" value="View Payslips" />
 								<button type="button" class="btn btn-light btn-sm px-3" data-dismiss="modal">Close</button>
 							</div>
 						</div>
 					</form>
 				</div>
-			</div>
+			</div>			
 		</div>
 	</div>
-
 </main>
 
 @endsection
@@ -175,21 +189,50 @@
 
 		var empTable = $("#emptable").DataTable({
 			"columns": [{
-					data: 'emp_first_name'
+					data: 'Name'
 				}, {
-					data: 'location'
+					data: 'Office'
 				},
 				{
-					data: 'ADDITION'
-				}, {
-					data: 'FACILITY'
-				}, {
-					data: 'LOAN'
+					data: 'NETSAL'
 				},
 				{
-					data: 'OTHRS'
-				}, {
-					data: 'NOPAY'
+					data: 'payslip_held',
+					"render": function (data, type, row) {
+						return ((data == '0') ?
+							'<span class="badge badge-primary badge-pill">Released</span>' :
+							'<span class="badge badge-warning badge-pill">Held</span>');
+					}
+				},
+				{
+					data: 'payheld_reason'
+				},
+				{
+					data: 'payrelease_reason'
+				},
+				{
+					data: 'attached_files',
+					"orderable": false,
+					"className": "text-center",
+					"render": function (data, type, row) {
+						var comm_fileattach = data; //'No Attachments';
+
+						var held_attachment = '';
+						if (row.payslip_remarks_file != '') {
+							comm_fileattach = '';
+							held_attachment = '<a href="' + row.payslip_remarks_file +
+								'" class="nav-link" style="display:inline;" title="Salary Held Ref." target="_blank"><i class="fas fa-lock"></i></>';
+						}
+
+						var released_attachment = '';
+						if (row.release_remarks_file != '') {
+							comm_fileattach = '';
+							released_attachment = '<a href="' + row.release_remarks_file +
+								'" class="nav-link" style="display:inline;" title="Released Ref." target="_blank"><i class="fas fa-unlock"></i></>';
+						}
+
+						return comm_fileattach + held_attachment + released_attachment;
+					}
 				}
 			],
 			"order": [],
@@ -279,7 +322,7 @@
 			event.preventDefault();
 
 			$.ajax({
-				url: "checkPayslipListByDept",
+				url: "checkHeldSalaryList",
 				method: 'POST',
 				data: $(this).serialize(),
 				dataType: "JSON",
@@ -299,6 +342,10 @@
 						html += '</div>';
 						$('#search_result').html(html);
 					} else {
+						var rpt_chk_held = $("#chk_held").is(":checked") ? $("#chk_held")
+						.val() : 0;
+						var rpt_chk_released = $("#chk_released").is(":checked") ? $(
+							"#chk_released").val() : 0;
 						empTable.rows.add(data.employee_detail);
 						empTable.draw();
 						$("#lbl_date_fr").html(data.work_date_fr);
@@ -321,12 +368,16 @@
 							.text());
 						$("#rpt_period_id").val($("#period_filter_id").find(":selected")
 					.val());
-						$("#rpt_info").val(data.work_date_fr + " To " + data.work_date_to +
-							" (" + $("#payroll_process_type_id").find(":selected").text() +
-							")");
+						console.log($("#payroll_process_type_id").find(":selected").text());
+						
+						$("#rpt_info").val(data.work_date_fr + " To " + data.work_date_to + " (" + $("#payroll_process_type_id").find(":selected").text() + ")");
+						$("#rpt_chk_held").val(rpt_chk_held);
+						$("#rpt_chk_released").val(rpt_chk_released);
 
-						//$("#print_record").prop('disabled', false);
-						//$("#print_record").removeClass('btn-light');
+						$("#print_record").prop('disabled', false);
+						$("#print_record").removeClass('btn-light');
+						$("#print_record_pdf").prop('disabled', false);
+						$("#print_record_pdf").removeClass('btn-light');
 
 						$('#formModal').modal('hide');
 					}

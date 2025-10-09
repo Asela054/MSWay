@@ -11,7 +11,7 @@
             <div class="page-header-content py-3 px-2">
                 <h1 class="page-header-title ">
                     <div class="page-header-icon"><i class="fa-light fa-money-check-dollar-pen"></i></div>
-                    <span>Pay Register</span>
+                    <span>OT Report</span>
                 </h1>
             </div>
         </div>
@@ -19,13 +19,12 @@
     <div class="container-fluid mt-2 p-0 p-2">
         <div class="card">
             <div class="card-body p-0 p-2">
-                <form id="frmExport" method="post">
+                <form id="frmExport" method="post" action="{{ url('DownloadEmpOvertime') }}">
                     {{ csrf_field() }}
                     <div class="row">
                         <div class="col-12 text-right">
                             <button type="button" name="find_employee" id="find_employee" class="btn btn-success btn-sm px-3"><i class="fal fa-search mr-2"></i>Search</button>
-                            <button type="submit" name="print_record" id="print_record" disabled="disabled" class="btn btn-success btn-sm btn-light px-3" onclick="this.form.action='{{ url('DownloadPayRegister') }}'" style="width:auto;" value="1"><i class="fal fa-file-excel mr-2"></i> Download XLS</button>
-                            <button type="submit" name="print_record" id="print_record_pdf" disabled="disabled" class="btn btn-danger btn-sm btn-light px-3" onclick="this.form.action='{{ url('DownloadPayRegister') }}'" style="width:auto;" value="2"><i class="fal fa-file-pdf mr-2"></i>Download PDF</button>
+                            <button type="submit" name="print_record" id="print_record" disabled="disabled" class="btn btn-danger btn-sm btn-light px-3"><i class="fal fa-file-pdf mr-2"></i>Download</button>
                         </div>
                         <div class="col-12">
                             <span id="lbl_duration" style="display:none; margin-right:auto; padding-left:10px;">
@@ -35,51 +34,19 @@
                                 </div>
                             </span>
                         </div>
-                        <div class="col-12">
+                        <div class="col-lg-12">
                             <hr>
                             <div id="divPrint" class="center-block fix-width scroll-inner">
-                                <table class="table table-bordered table-striped table-sm small nowrap w-100" id="emptable" width="100%"
-                                    cellspacing="0">
+                                <table class="table table-bordered table-striped table-sm small nowrap w-100" id="emptable" cellspacing="0">
                                     <thead>
                                         <tr>
-                                            <th>#</th>
+                                            <th style="width:300px;">NAME</th>
                                             <th>EPF NO</th>
-                                            <th>EMPLOYEE NAME</th>
-                                            <th>BASIC</th>
-                                            <th>BRA I</th>
-                                            <th>BRA II</th>
-                                            <th>NO-PAY</th>
-                                            <th>TOTAL BEFOR NOPAY</th>
-                                            <th class="">ARREARS</th>
-                                            <!--th class="">Total for Tax</th-->
-                                            <th>ATTENDANCE ALLOW.</th>
-                                            <!--th>Weekly Attendance</th-->
-                                            <th>PERF. BASED INCENTIVE</th>
-                                            <!--th>Director Incentive</th-->
-                                            <th>TRANSPORT</th>
-                                            <th>OTHER ALLOWANCE</th>
-                                            <th>OTHER ADDITIONS</th>
-                                            <!--th>Salary Arrears</th-->
-                                            <th>NORMAL</th>
-                                            <th>DOUBLE</th>
-                                            <th>TOTAL EARNED</th>
-                                            <th>TOTAL FOR TAX</th>
-                                            <th>EPF-8
-                                                <!--8-->
-                                            </th>
-                                            <th>SALARY ADVANCE</th>
-                                            <th>LOANS</th>
-                                            <!--th>Telephone</th-->
-                                            <th>LATE DEDUCTION</th>
-                                            <th>BANK CHARGES</th>
-                                            <th>PAYE</th>
-                                            <th>OTHER DEDUCTIONS</th>
-                                            <!--th>PAYE</th-->
-                                            <!--th>Loans</th-->
-                                            <th>TOTAL DEDUCTIONS</th>
-                                            <th>BALANCE PAY</th>
-                                            <th>EPF-12</th>
-                                            <th>ETF-3</th>
+                                            <th>NORMAL OT RATE</th>
+                                            <th>DOUBLE OT RATE</th>
+                                            <th>NORMAL OT AMT</th>
+                                            <th>DOUBLE OT AMT</th>
+                                            <th>TOTAL AMOUNT</th>
                                         </tr>
                                     </thead>
 
@@ -88,7 +55,6 @@
 
                                 </table>
                             </div>
-
                             <input type="hidden" name="payroll_profile_id" id="payroll_profile_id" value="" />
                             <!-- edit loans -->
                             <input type="hidden" name="payment_period_id" id="payment_period_id" value="" />
@@ -123,25 +89,27 @@
                         <span id="search_result"></span>
                         <div class="form-row mb-1">
                             <div class="col">
-                                <label class="font-weight-bolder small">Branch</label>
-                                <select name="location_filter_id" id="location_filter_id"
-                                    class="custom-select custom-select-sm shipClass nest_head" style="" data-findnest="deptnest">
-                                    <option value="-1" selected="selected" data-regcode="">Please Select</option>
+                                <label class="font-weight-bolder small">Branch*</label>
+                                <select name="location_filter_id" id="location_filter_id" class="custom-select custom-select-sm shipClass nest_head" style="" data-findnest="deptnest" required>
+                                    <option value="" disabled="disabled" selected="selected" data-regcode="">Please
+                                        Select</option>
                                     @foreach($branch as $branches)
 
-                                    <option value="{{$branches->id}}" data-regcode="{{$branches->id}}">{{$branches->location}}</option>
+                                    <option value="{{$branches->id}}" data-regcode="{{$branches->id}}">
+                                        {{$branches->location}}</option>
                                     @endforeach
 
                                 </select>
                             </div>
                             <div class="col">
-                                <label class="font-weight-bolder small">Department</label>
-                                <select name="department_filter_id" id="department_filter_id" class="custom-select custom-select-sm"
-                                    style="" data-nestname="deptnest">
-                                    <option value="" selected="selected">All Employees</option>
+                                <label class="font-weight-bolder small">Department*</label>
+                                <select name="department_filter_id" id="department_filter_id" class="custom-select custom-select-sm" style="" data-nestname="deptnest" required>
+                                    <option value="" disabled="disabled" selected="selected">Please Select</option>
                                     @foreach($department as $section)
 
-                                    <option class="nestopt d-none" value="{{$section->id}}" data-nestcode="{{$section->company_id}}" data-sectcode="{{$section->id}}">{{$section->name}}</option>
+                                    <option class="nestopt d-none" value="{{$section->id}}"
+                                        data-nestcode="{{$section->company_id}}" data-sectcode="{{$section->id}}">
+                                        {{$section->name}}</option>
                                     @endforeach
 
                                 </select>
@@ -149,34 +117,42 @@
                         </div>
                         <div class="form-row mb-1">
                             <div class="col">
-                                <label class="font-weight-bolder small">Payroll type</label>
-                                <select name="payroll_process_type_id" id="payroll_process_type_id"
-                                    class="form-control form-control-sm">
+                                <label class="font-weight-bolder small">Payroll type*</label>
+                                <select name="payroll_process_type_id" id="payroll_process_type_id" class="form-control form-control-sm" required>
                                     <option value="" disabled="disabled" selected="selected">Please select</option>
                                     @foreach($payroll_process_type as $payroll)
 
-                                    <option value="{{$payroll->id}}" data-totdays="{{$payroll->total_work_days}}">{{$payroll->process_name}}</option>
+                                    <option value="{{$payroll->id}}" data-totdays="{{$payroll->total_work_days}}">
+                                        {{$payroll->process_name}}</option>
                                     @endforeach
 
-                                </select>
+                                </select> 
                             </div>
                             <div class="col">
-                                <label class="font-weight-bolder small">Working Period</label>
-                                <select name="period_filter_id" id="period_filter_id" class="custom-select custom-select-sm"
-                                    style="">
+                                <label class="font-weight-bolder small">Working Period*</label>
+                                <select name="period_filter_id" id="period_filter_id" class="custom-select custom-select-sm" style="" required>
                                     <option value="" disabled="disabled" selected="selected">Please Select</option>
                                     @foreach($payment_period as $schedule)
 
-                                    <option value="{{$schedule->id}}" disabled="disabled" data-payroll="{{$schedule->payroll_process_type_id}}" style="display:none;">{{$schedule->payment_period_fr}} to {{$schedule->payment_period_to}}</option>
+                                    <option value="{{$schedule->id}}" disabled="disabled"
+                                        data-payroll="{{$schedule->payroll_process_type_id}}" style="display:none;">
+                                        {{$schedule->payment_period_fr}} to {{$schedule->payment_period_to}}
+                                    </option>
                                     @endforeach
 
                                 </select>
                             </div>
+                            <!--div class="form-group col-md-6">
+                                                <label class="control-label col">To</label>
+                                                <div class="col">
+                                                    <input type="date" class="form-control" name="work_date_to" id="work_date_to" value="" />
+                                                </div>
+                                            </div-->
                         </div>
                         <div class="form-row">
-                            <div class="col text-right">
+                            <div class="col-12 text-right">
                                 <hr>
-                                <input type="submit" name="action_button" id="action_button" class="btn btn-success btn-sm px-3" value="View Payslips" />
+                                <input type="submit" name="action_button" id="action_button" class="btn btn-warning btn-sm px-3" value="View Payslips" />
                                 <button type="button" class="btn btn-light btn-sm px-3" data-dismiss="modal">Close</button>
                             </div>
                         </div>
@@ -185,84 +161,6 @@
             </div>
         </div>
     </div>
-
-    <div id="loanModal" class="modal fade" role="dialog">
-        <div class="modal-dialog modal-lg">
-
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="loanModalLabel">Loan Installments</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span
-                            class="btn-sm btn-danger" aria-hidden="true">X</span></button>
-                </div>
-                <div class="modal-body">
-                    <span id="loan_result"></span>
-                    <form id="frmInstallmentList" class="frm_link" method="post">
-                        {{ csrf_field() }}
-                        <div class="">
-                            <div class="" style="">
-                                <div class="datatable table-responsive" style="margin-top:10px;">
-                                    <table class="table table-bordered table-hover" id="loantable" width="100%"
-                                        cellspacing="0">
-                                        <thead>
-                                            <tr>
-                                                <th>Loan Name</th>
-                                                <th>Payment</th>
-                                                <th class="actlist_col">Actions</th>
-                                            </tr>
-                                        </thead>
-
-
-                                    </table>
-                                </div>
-
-                            </div>
-                            <div class="" align="right" style="padding:5px; border-top:none;">
-                                <button type="button" class="btn btn-light" data-dismiss="modal">Close</button>
-                            </div>
-                        </div>
-                    </form>
-                    <form id="frmInstallmentInfo" class="frm_info sect_bg" method="post">
-                        {{ csrf_field() }}
-                        <div class="">
-                            <div class="" style="">
-                                <div class="row">
-                                    <div class="form-group col-md-6">
-                                        <label class="control-label col">Installment</label>
-                                        <div class="col">
-                                            <input type="text" name="pre_installment_amount" id="pre_installment_amount"
-                                                class="form-control" readonly="readonly" />
-                                        </div>
-                                    </div>
-                                    <div class="form-group col-md-6">
-                                        <label class="control-label col">Payment</label>
-                                        <div class="col">
-                                            <input type="text" name="new_installment_amount" id="new_installment_amount"
-                                                class="form-control" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="" align="right" style="padding:5px; border-top:none;">
-                                <input type="submit" name="setup_button" id="setup_button" class="btn btn-warning"
-                                    value="Edit" />
-                                <input type="button" id="" value="Back" class="btn btn-light btn_back" />
-                                <input type="hidden" name="hidden_loan_id" id="hidden_loan_id" value="" />
-                            </div>
-                        </div>
-
-
-                    </form>
-
-
-                </div>
-
-
-            </div>
-
-        </div>
-    </div>
-
 </main>
 
 @endsection
@@ -272,95 +170,38 @@
 
 <script>
     $(document).ready(function () {
-
         $('#payrollmenu').addClass('active');
         $('#payrollmenu_icon').addClass('active');
         $('#payrollreport').addClass('navbtnactive');
 
         var empTable = $("#emptable").DataTable({
             "columns": [{
-                    data: 'reg_indexno'
-                }, {
-                    data: 'emp_epfno'
-                }, {
                     data: 'emp_first_name'
                 }, {
-                    data: 'BASIC'
-                }, {
-                    data: 'BRA_I'
-                }, {
-                    data: 'add_bra2'
+                    data: 'emp_etfno'
                 },
-                {
-                    data: 'NOPAY'
-                }, {
-                    data: 'tot_bnp'
-                }, {
-                    data: 'sal_arrears1'
-                },
-                //{data:'tot_fortax'}, {data:'ATTBONUS'}, {data:'add_transport'}, 
-                {
-                    data: 'ATTBONUS'
-                }, {
-                    data: 'INCNTV_EMP'
-                }, {
-                    data: 'add_transport'
-                }, {
-                    data: 'INCNTV_DIR'
-                },
-                {
-                    data: 'add_other'
-                }, //{data:'sal_arrears2'}, 
                 {
                     data: 'OTHRS1'
                 }, {
                     data: 'OTHRS2'
+                }, {
+                    data: 'OTVAL1'
                 },
                 {
-                    data: 'tot_earn'
+                    data: 'OTVAL2'
                 }, {
-                    data: 'tot_earn'
-                },
-                {
-                    data: 'EPF8'
-                }, {
-                    data: 'sal_adv'
-                }, //{data:'ded_tp'}, 
-                {
-                    data: 'LOAN'
-                },
-                {
-                    data: 'ded_IOU'
-                }, {
-                    data: 'ded_fund_1'
-                },
-                {
-                    data: 'PAYE'
-                }, {
-                    data: 'ded_other'
-                },
-                {
-                    data: 'tot_ded'
-                }, {
-                    data: 'NETSAL'
-                },
-                {
-                    data: 'EPF12'
-                }, {
-                    data: 'ETF3'
+                    data: null
                 }
             ],
             "order": [],
             "columnDefs": [{
-                "targets": 13,
-                render: function (data, type, row) {
-                    var living_exp = parseFloat(row.ATTBONUS_W);
-                    var add_other = parseFloat(row.add_other);
-                    var disp_other = living_exp + add_other;
-                    return disp_other.toFixed(2);
+                "targets": 6,
+                "render": function (data, type, row) {
+                    var totamt = parseFloat(row.OTVAL1) + parseFloat(row.OTVAL2);
+                    return totamt.toFixed(2);
                 }
             }, {
-                "targets": [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28],
+                "targets": [2, 3, 4, 5, 6],
                 "className": 'text-right'
             }],
             "createdRow": function (row, data, dataIndex) {
@@ -405,7 +246,7 @@
 
         $('.nest_head').change(function () {
             //prep_nest($(this).data('findnest'), $(this).find(":selected").val(), 0);
-            prep_nest($(this).data('findnest'), $(this).find(":selected").data('regcode'), '-1'); //0
+            prep_nest($(this).data('findnest'), $(this).find(":selected").data('regcode'), 0);
         });
 
         function prep_nest(nestname, nestcode, selectedval) {
@@ -448,7 +289,7 @@
             event.preventDefault();
 
             $.ajax({
-                url: "checkPayRegister",
+                url: "checkEmpOvertime",
                 method: 'POST',
                 data: $(this).serialize(),
                 dataType: "JSON",
@@ -496,8 +337,6 @@
 
                         $("#print_record").prop('disabled', false);
                         $("#print_record").removeClass('btn-light');
-                        $("#print_record_pdf").prop('disabled', false);
-                        $("#print_record_pdf").removeClass('btn-light');
 
                         $('#formModal').modal('hide');
                     }
@@ -506,23 +345,7 @@
         });
 
 
-        $(".btn_back").on("click", function () {
-            $(".show .frm_info").addClass('sect_bg');
-            $(".show .frm_link").removeClass('sect_bg');
-        });
 
-
-        $(".modal").on("shown.bs.modal", function (e) {
-            if ($(this).find(".frm_link")) {
-                $(".show .frm_info").addClass('sect_bg');
-                $(".show .frm_link").removeClass('sect_bg');
-            }
-        });
-        /*
-        $(".modal").on("hide.bs.modal", function(e){
-        	$(this).removeClass('active');
-        });
-        */
 
     });
 </script>

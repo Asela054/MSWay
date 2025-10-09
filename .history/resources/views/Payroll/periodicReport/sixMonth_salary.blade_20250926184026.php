@@ -11,7 +11,7 @@
             <div class="page-header-content py-3 px-2">
                 <h1 class="page-header-title ">
                     <div class="page-header-icon"><i class="fa-light fa-money-check-dollar-pen"></i></div>
-                    <span>Additions Report</span>
+                    <span>Six Month Report</span>
                 </h1>
             </div>
         </div>
@@ -24,29 +24,29 @@
 					<div class="row">
 						<div class="col-12 text-right">
 							<button type="button" name="find_employee" id="find_employee" class="btn btn-success btn-sm px-3"><i class="fal fa-search mr-2"></i>Search</button>
-							<button type="submit" name="print_record" id="print_record" disabled="disabled" class="btn btn-danger btn-sm btn-light px-3"><i class="fal fa-file-pdf mr-2"></i>Download PDF</button>
-                        </div>
-                        <div class="col-12">
-                            <span id="lbl_duration" style="display:none; margin-right:auto; padding-left:10px;">
-                                <div class="alert alert-primary" role="alert">
-                                    <span id="lbl_date_fr">&nbsp;</span> To <span id="lbl_date_to">&nbsp;</span>
-									(<span id="lbl_payroll_name">&nbsp;</span>)
-                                </div>
-                            </span>
-                        </div>
+							<button type="submit" name="print_record" id="print_record" disabled="disabled" class="btn btn-secondary btn-sm btn-light px-3"><i class="fal fa-file-pdf mr-2"></i>Download</button>
+						</div>
+					</div>
+					<div class="col-12">
+						<span id="lbl_duration" style="display:none; margin-right:auto; padding-left:10px;">
+							<div class="alert alert-primary" role="alert">
+								<span id="lbl_date_fr">&nbsp;</span> To <span id="lbl_date_to">&nbsp;</span>
+								(<span id="lbl_payroll_name">&nbsp;</span>)
+							</div>
+						</span>
+					</div>
+					<div class="row">
 						<div class="col-lg-12">
 							<hr>
 							<div id="divPrint" class="center-block fix-width scroll-inner">
 								<table class="table table-bordered table-striped table-sm small w-100 nowrap" id="emptable" cellspacing="0">
 									<thead>
 										<tr>
-											<th style="width:300px;">NAME</th>
-											<th>LOCATION</th>
-											<th>ADDITIONS</th>
-											<th>FACILITY</th>
-											<th>LOAN</th>
-											<th>OT</th>
-											<th>NOPAY</th>
+											<th nowrap style="width:300px;">NAME</th>
+											<th nowrap>LOCATION</th>
+											@foreach($payroll_months as $payroll_month)
+											<th nowrap class="text-capitalize">{{$payroll_month}}</th>
+											@endforeach
 										</tr>
 									</thead>
 
@@ -66,8 +66,6 @@
 							<input type="hidden" name="rpt_info" id="rpt_info" value="-" />
 							<input type="hidden" name="rpt_payroll_id" id="rpt_payroll_id" value="" />
 							<input type="hidden" name="rpt_location_id" id="rpt_location_id" value="" />
-							<input type="hidden" name="rpt_dept_id" id="rpt_dept_id" value="" />
-							<input type="hidden" name="rpt_dept_name" id="rpt_dept_name" value="" />
 						</div>
 					</div>
 				</form>
@@ -75,8 +73,8 @@
 		</div>
 	</div>
 
-	<div id="formModal" class="modal fade" role="dialog">
-		<div class="modal-dialog">
+	<div id="formModal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
 			<div class="modal-content">
 				<div class="modal-header">
 					<h5 class="modal-title" id="formModalLabel"></h5>
@@ -90,34 +88,9 @@
 						<span id="search_result"></span>
 						<div class="form-row mb-1">
 							<div class="col">
-								<label class="font-weight-bolder small">Branch*</label>
-								<select name="location_filter_id" id="location_filter_id"
-									class="custom-select custom-select-sm shipClass nest_head" style="" data-findnest="deptnest" required>
-									<option value="" disabled="disabled" selected="selected" data-regcode="">Please Select</option>
-									@foreach($branch as $branches)
-
-									<option value="{{$branches->id}}" data-regcode="{{$branches->id}}">{{$branches->location}}</option>
-									@endforeach
-
-								</select>
-							</div>
-							<div class="col">
-								<label class="font-weight-bolder small">Department*</label>
-								<select name="department_filter_id" id="department_filter_id" class="custom-select custom-select-sm" style="" data-nestname="deptnest" required>
-									<option value="" disabled="disabled" selected="selected">Please Select</option>
-									@foreach($department as $section)
-
-									<option class="nestopt d-none" value="{{$section->id}}" data-nestcode="{{$section->company_id}}" data-sectcode="{{$section->id}}">{{$section->name}}</option>
-									@endforeach
-
-								</select>
-							</div>
-						</div>
-						<div class="form-row mb-1">
-							<div class="col">
-								<label class="font-weight-bolder small">Payroll type*</label>
+								<label class="font-weight-bolder small">Payroll type</label>
 								<select name="payroll_process_type_id" id="payroll_process_type_id"
-									class="form-control form-control-sm" required>
+									class="form-control form-control-sm">
 									<option value="" disabled="disabled" selected="selected">Please select</option>
 									@foreach($payroll_process_type as $payroll)
 
@@ -127,15 +100,27 @@
 								</select>
 							</div>
 							<div class="col">
-								<label class="font-weight-bolder small">Working Period*</label>
+								<label class="font-weight-bolder small">Location</label>
+								<select name="location_filter_id" id="location_filter_id"
+									class="custom-select custom-select-sm shipClass" style="">
+									<option value="" disabled="disabled" selected="selected">Please Select</option>
+									@foreach($branch as $branches)
+
+									<option value="{{$branches->id}}">{{$branches->location}}</option>
+									@endforeach
+
+								</select>
+							</div>
+						</div>
+						<div class="form-row mb-1">
+							<div class="col">
+								<label class="font-weight-bolder small">Working Period</label>
 								<select name="period_filter_id" id="period_filter_id" class="custom-select custom-select-sm"
-									style="" required>
+									style="">
 									<option value="" disabled="disabled" selected="selected">Please Select</option>
 									@foreach($payment_period as $schedule)
 
-									<option value="{{$schedule->id}}" disabled="disabled" data-payroll="{{$schedule->payroll_process_type_id}}" style="display:none;">
-										{{$schedule->payment_period_fr}} to {{$schedule->payment_period_to}}
-									</option>
+									<option value="{{$schedule->id}}" disabled="disabled" data-payroll="{{$schedule->payroll_process_type_id}}" style="display:none;">{{$schedule->payment_period_fr}} to {{$schedule->payment_period_to}}</option>
 									@endforeach
 
 								</select>
@@ -150,15 +135,18 @@
 						<div class="form-row">
 							<div class="col-12 text-right">
 								<hr>
-								<input type="submit" name="action_button" id="action_button" class="btn btn-success btn-sm px-3" value="View Payslips" />
+								<input type="submit" name="action_button" id="action_button" class="btn btn-warning btn-sm px-3" value="View Payslips" />
 								<button type="button" class="btn btn-light btn-sm px-3" data-dismiss="modal">Close</button>
 							</div>
 						</div>
 					</form>
 				</div>
-			</div>
+			</div>			
 		</div>
 	</div>
+
+
+
 
 </main>
 
@@ -180,20 +168,52 @@
 					data: 'location'
 				},
 				{
-					data: 'ADDITION'
+					data: 'Col1'
 				}, {
-					data: 'FACILITY'
+					data: 'Col2'
 				}, {
-					data: 'LOAN'
+					data: 'Col3'
 				},
 				{
-					data: 'OTHRS'
+					data: 'Col4'
 				}, {
-					data: 'NOPAY'
+					data: 'Col5'
+				}, {
+					data: 'Col6'
 				}
 			],
 			"order": [],
-
+			"columnDefs": [{
+				"targets": 2,
+				render: function (data, type, row) {
+					return month_salary(data);
+				}
+			}, {
+				"targets": 3,
+				render: function (data, type, row) {
+					return month_salary(data);
+				}
+			}, {
+				"targets": 4,
+				render: function (data, type, row) {
+					return month_salary(data);
+				}
+			}, {
+				"targets": 5,
+				render: function (data, type, row) {
+					return month_salary(data);
+				}
+			}, {
+				"targets": 6,
+				render: function (data, type, row) {
+					return month_salary(data);
+				}
+			}, {
+				"targets": 7,
+				render: function (data, type, row) {
+					return month_salary(data);
+				}
+			}],
 			"createdRow": function (row, data, dataIndex) {
 				//$('td', row).eq(5).attr('data-colvalue', data.loan_installments); 
 				//$('td', row).eq(0).attr('data-refemp', data.payroll_profile_id); 
@@ -204,6 +224,11 @@
 		//var loanTable=$("#loantable").DataTable();
 
 		var _token = $('#frmSearch input[name="_token"]').val();;
+
+		function month_salary(data) {
+			//console.log(JSON.stringify(data));
+			return 'Basic: ' + data.BASIC + '<br />OT: ' + data.OTHRS; //0;
+		}
 
 		function findEmployee() {
 			$('#formModalLabel').text('Find Employee');
@@ -234,52 +259,11 @@
 				.val() + '"]').show();
 		});
 
-		$('.nest_head').change(function () {
-			//prep_nest($(this).data('findnest'), $(this).find(":selected").val(), 0);
-			prep_nest($(this).data('findnest'), $(this).find(":selected").data('regcode'), 0);
-		});
-
-		function prep_nest(nestname, nestcode, selectedval) {
-			//console.log(nestname+'--'+nestcode+'--'+selectedval);
-
-			var childobj = $('select[data-nestname="' + nestname + '"]')
-
-			var blockobj = $(childobj).find('option.nestopt');
-			$(blockobj).prop('disabled', true);
-			$(blockobj).addClass('d-none');
-
-			var allowobj = $(childobj).find('option[data-nestcode="' + (nestcode) + '"]');
-			$(allowobj).prop('disabled', false);
-			$(allowobj).removeClass('d-none');
-
-			var selected_val = (selectedval !== '') ? selectedval : '-1';
-			//console.log(selectedval+'vs'+selected_val);
-			var selected_pos = 0;
-
-			if (selected_val == '0') {
-				var selected_opt = $(allowobj).index();
-				//selected_val=(typeof($(allowobj).val())=="undefined")?$(childobj).children('option:first').val():$(allowobj).val();
-				//console.log(typeof($(allowobj).val())=="undefined");//$(allowobj).length
-				//console.log('0--'+$(allowobj).index());
-				selected_pos = (selected_opt > 0) ? selected_opt : 0;
-			} else {
-				var actobj = $(childobj).find('option[data-nestcode="' + (nestcode) + '"][data-sectcode="' + (
-					selectedval) + '"]');
-				//console.log('1--'+$(actobj).index());
-				var selected_opt = $(actobj).index();
-				selected_pos = (selected_opt > 0) ? selected_opt : 0;
-			}
-
-			//$(childobj).val(selected_val);
-			$(childobj).find('option').eq(selected_pos).prop("selected", true);
-
-		}
-
 		$("#frmSearch").on('submit', function (event) {
 			event.preventDefault();
 
 			$.ajax({
-				url: "checkPayslipListByDept",
+				url: "previewSixMonth",
 				method: 'POST',
 				data: $(this).serialize(),
 				dataType: "JSON",
@@ -299,6 +283,11 @@
 						html += '</div>';
 						$('#search_result').html(html);
 					} else {
+						//alert(JSON.stringify(empTable.columns().header()));
+						$.each(data.colslist, function (index, value) {
+							empTable.columns(index + 2).header().to$().text(value);
+						});
+
 						empTable.rows.add(data.employee_detail);
 						empTable.draw();
 						$("#lbl_date_fr").html(data.work_date_fr);
@@ -315,10 +304,6 @@
 							":selected").val());
 						$("#rpt_location_id").val($("#location_filter_id").find(":selected")
 							.val());
-						$("#rpt_dept_id").val($("#department_filter_id").find(":selected")
-						.val());
-						$("#rpt_dept_name").val($("#department_filter_id").find(":selected")
-							.text());
 						$("#rpt_period_id").val($("#period_filter_id").find(":selected")
 					.val());
 						$("#rpt_info").val(data.work_date_fr + " To " + data.work_date_to +

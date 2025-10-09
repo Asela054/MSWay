@@ -11,7 +11,7 @@
             <div class="page-header-content py-3 px-2">
                 <h1 class="page-header-title ">
                     <div class="page-header-icon"><i class="fa-light fa-money-check-dollar-pen"></i></div>
-                    <span>Pay Register</span>
+                    <span>EPF & ETF Report</span>
                 </h1>
             </div>
         </div>
@@ -24,8 +24,8 @@
                     <div class="row">
                         <div class="col-12 text-right">
                             <button type="button" name="find_employee" id="find_employee" class="btn btn-success btn-sm px-3"><i class="fal fa-search mr-2"></i>Search</button>
-                            <button type="submit" name="print_record" id="print_record" disabled="disabled" class="btn btn-success btn-sm btn-light px-3" onclick="this.form.action='{{ url('DownloadPayRegister') }}'" style="width:auto;" value="1"><i class="fal fa-file-excel mr-2"></i> Download XLS</button>
-                            <button type="submit" name="print_record" id="print_record_pdf" disabled="disabled" class="btn btn-danger btn-sm btn-light px-3" onclick="this.form.action='{{ url('DownloadPayRegister') }}'" style="width:auto;" value="2"><i class="fal fa-file-pdf mr-2"></i>Download PDF</button>
+                            <button type="submit" name="print_record" id="print_record" disabled="disabled" class="btn btn-success btn-sm btn-light px-3" onclick="this.form.action='{{ url('DownloadEpfEtf') }}'" style="width:auto;" value="1"><i class="fal fa-file-excel mr-2"></i>Download XLS</button>
+                            <button type="submit" name="print_record" id="print_record_pdf" disabled="disabled" class="btn btn-danger btn-sm btn-light px-3" onclick="this.form.action='{{ url('DownloadEpfEtf') }}'" style="width:auto;" value="2"><i class="fal fa-file-pdf mr-2"></i>Download PDF</button>
                         </div>
                         <div class="col-12">
                             <span id="lbl_duration" style="display:none; margin-right:auto; padding-left:10px;">
@@ -38,64 +38,74 @@
                         <div class="col-12">
                             <hr>
                             <div id="divPrint" class="center-block fix-width scroll-inner">
-                                <table class="table table-bordered table-striped table-sm small nowrap w-100" id="emptable" width="100%"
-                                    cellspacing="0">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>EPF NO</th>
-                                            <th>EMPLOYEE NAME</th>
-                                            <th>BASIC</th>
-                                            <th>BRA I</th>
-                                            <th>BRA II</th>
-                                            <th>NO-PAY</th>
-                                            <th>TOTAL BEFOR NOPAY</th>
-                                            <th class="">ARREARS</th>
-                                            <!--th class="">Total for Tax</th-->
-                                            <th>ATTENDANCE ALLOW.</th>
-                                            <!--th>Weekly Attendance</th-->
-                                            <th>PERF. BASED INCENTIVE</th>
-                                            <!--th>Director Incentive</th-->
-                                            <th>TRANSPORT</th>
-                                            <th>OTHER ALLOWANCE</th>
-                                            <th>OTHER ADDITIONS</th>
-                                            <!--th>Salary Arrears</th-->
-                                            <th>NORMAL</th>
-                                            <th>DOUBLE</th>
-                                            <th>TOTAL EARNED</th>
-                                            <th>TOTAL FOR TAX</th>
-                                            <th>EPF-8
-                                                <!--8-->
-                                            </th>
-                                            <th>SALARY ADVANCE</th>
-                                            <th>LOANS</th>
-                                            <!--th>Telephone</th-->
-                                            <th>LATE DEDUCTION</th>
-                                            <th>BANK CHARGES</th>
-                                            <th>PAYE</th>
-                                            <th>OTHER DEDUCTIONS</th>
-                                            <!--th>PAYE</th-->
-                                            <!--th>Loans</th-->
-                                            <th>TOTAL DEDUCTIONS</th>
-                                            <th>BALANCE PAY</th>
-                                            <th>EPF-12</th>
-                                            <th>ETF-3</th>
-                                        </tr>
-                                    </thead>
+                                <div id="tbl_all">
+                                    <table class="table table-bordered table-striped table-sm small w-100 nowrap" id="emptable" width="100%"
+                                        cellspacing="0">
+                                        <thead>
+                                            <tr>
+                                                <th style="width:300px;">NAME</th>
+                                                <th>OFFICE</th>
+                                                <th>EPF-12</th>
+                                                <th>EPF-8</th>
+                                                <th>ETF-3</th>
+                                            </tr>
+                                        </thead>
 
-                                    <tbody class="">
-                                    </tbody>
+                                        <tbody class="">
+                                        </tbody>
 
-                                </table>
+                                    </table>
+                                </div>
+                                <div id="tbl_etf" style="display:none;">
+                                    <table class="table table-bordered table-striped table-sm small w-100 nowrap" id="emp_etftable" width="100%"
+                                        cellspacing="0">
+                                        <thead>
+                                            <tr>
+                                                <th>EPF No.</th>
+                                                <th style="width:300px;">NAME</th>
+                                                <th>NIC</th>
+                                                <th>OFFICE</th>
+                                                <th>TAX TOTAL</th>
+                                                <th>ETF-3</th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody class="">
+                                        </tbody>
+
+                                    </table>
+                                </div>
+                                <div id="tbl_epf" style="display:none;">
+                                    <table class="table table-bordered table-striped table-sm small w-100 nowrap" id="emp_epftable" width="100%"
+                                        cellspacing="0">
+                                        <thead>
+                                            <tr>
+                                                <th>EPF No.</th>
+                                                <th style="width:300px;">NAME</th>
+                                                <th>NIC</th>
+                                                <th>OFFICE</th>
+                                                <th>TAX TOTAL</th>
+                                                <th>EPF-12</th>
+                                                <th>EPF-8</th>
+                                                <th>TOTAL</th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody class="">
+                                        </tbody>
+
+                                    </table>
+                                </div>
                             </div>
 
                             <input type="hidden" name="payroll_profile_id" id="payroll_profile_id" value="" />
                             <!-- edit loans -->
                             <input type="hidden" name="payment_period_id" id="payment_period_id" value="" />
-                            <input type="hidden" name="payslip_process_type_id" id="payslip_process_type_id"
-                                value="" />
+                            <input type="hidden" name="payslip_process_type_id" id="payslip_process_type_id" value="" />
 
                             <input type="hidden" name="rpt_period_id" id="rpt_period_id" value="" />
+                            <input type="hidden" name="rpt_layout_no" id="rpt_layout_no" value="1" />
+                            <!-- opt_rpt -->
                             <input type="hidden" name="rpt_info" id="rpt_info" value="-" />
                             <input type="hidden" name="rpt_payroll_id" id="rpt_payroll_id" value="" />
                             <input type="hidden" name="rpt_location_id" id="rpt_location_id" value="" />
@@ -138,7 +148,7 @@
                                 <label class="font-weight-bolder small">Department</label>
                                 <select name="department_filter_id" id="department_filter_id" class="custom-select custom-select-sm"
                                     style="" data-nestname="deptnest">
-                                    <option value="" selected="selected">All Employees</option>
+                                    <option value="-1" selected="selected">Please Select</option>
                                     @foreach($department as $section)
 
                                     <option class="nestopt d-none" value="{{$section->id}}" data-nestcode="{{$section->company_id}}" data-sectcode="{{$section->id}}">{{$section->name}}</option>
@@ -172,11 +182,34 @@
 
                                 </select>
                             </div>
+                            <!--div class="form-group col-md-6">
+                                <label class="control-label col">To</label>
+                                <div class="col">
+                                    <input type="date" class="form-control" name="work_date_to" id="work_date_to" value="" />
+                                </div>
+                            </div-->
+                        </div>
+                        <div class="form-row mb-1">
+                            <div class="col-12">
+                                <label class="font-weight-bolder small">Report Type</label><br>
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" id="opt_rpt_a" name="opt_rpt" class="custom-control-input">
+                                    <label class="custom-control-label small" for="opt_rpt_a">EPF & ETF</label>
+                                </div>
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" id="opt_rpt_b" name="opt_rpt" class="custom-control-input">
+                                    <label class="custom-control-label small" for="opt_rpt_b">EPF Only</label>
+                                </div>
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" id="opt_rpt_c" name="opt_rpt" class="custom-control-input">
+                                    <label class="custom-control-label small" for="opt_rpt_c">ETF Only</label>
+                                </div>
+                            </div>
                         </div>
                         <div class="form-row">
-                            <div class="col text-right">
+                            <div class="col-12 text-right">
                                 <hr>
-                                <input type="submit" name="action_button" id="action_button" class="btn btn-success btn-sm px-3" value="View Payslips" />
+                                <input type="submit" name="action_button" id="action_button" class="btn btn-warning btn-sm px-3" value="View Payslips" />
                                 <button type="button" class="btn btn-light btn-sm px-3" data-dismiss="modal">Close</button>
                             </div>
                         </div>
@@ -272,96 +305,61 @@
 
 <script>
     $(document).ready(function () {
-
         $('#payrollmenu').addClass('active');
         $('#payrollmenu_icon').addClass('active');
         $('#payrollreport').addClass('navbtnactive');
 
         var empTable = $("#emptable").DataTable({
             "columns": [{
-                    data: 'reg_indexno'
-                }, {
-                    data: 'emp_epfno'
-                }, {
                     data: 'emp_first_name'
                 }, {
-                    data: 'BASIC'
-                }, {
-                    data: 'BRA_I'
-                }, {
-                    data: 'add_bra2'
-                },
-                {
-                    data: 'NOPAY'
-                }, {
-                    data: 'tot_bnp'
-                }, {
-                    data: 'sal_arrears1'
-                },
-                //{data:'tot_fortax'}, {data:'ATTBONUS'}, {data:'add_transport'}, 
-                {
-                    data: 'ATTBONUS'
-                }, {
-                    data: 'INCNTV_EMP'
-                }, {
-                    data: 'add_transport'
-                }, {
-                    data: 'INCNTV_DIR'
-                },
-                {
-                    data: 'add_other'
-                }, //{data:'sal_arrears2'}, 
-                {
-                    data: 'OTHRS1'
-                }, {
-                    data: 'OTHRS2'
-                },
-                {
-                    data: 'tot_earn'
-                }, {
-                    data: 'tot_earn'
-                },
-                {
-                    data: 'EPF8'
-                }, {
-                    data: 'sal_adv'
-                }, //{data:'ded_tp'}, 
-                {
-                    data: 'LOAN'
-                },
-                {
-                    data: 'ded_IOU'
-                }, {
-                    data: 'ded_fund_1'
-                },
-                {
-                    data: 'PAYE'
-                }, {
-                    data: 'ded_other'
-                },
-                {
-                    data: 'tot_ded'
-                }, {
-                    data: 'NETSAL'
+                    data: 'location'
                 },
                 {
                     data: 'EPF12'
+                }, {
+                    data: 'EPF8'
                 }, {
                     data: 'ETF3'
                 }
             ],
             "order": [],
-            "columnDefs": [{
-                "targets": 13,
-                render: function (data, type, row) {
-                    var living_exp = parseFloat(row.ATTBONUS_W);
-                    var add_other = parseFloat(row.add_other);
-                    var disp_other = living_exp + add_other;
-                    return disp_other.toFixed(2);
+
+            "createdRow": function (row, data, dataIndex) {
+                //$('td', row).eq(5).attr('data-colvalue', data.loan_installments); 
+                //$('td', row).eq(0).attr('data-refemp', data.payroll_profile_id); 
+                $(row).attr('id', 'row-' + data.id); //$( row ).data( 'refid', data[3] );
+            }
+        });
+
+        var emp_epfTable = $("#emp_epftable").DataTable({
+            "columns": [{
+                    data: 'emp_epfno'
+                }, {
+                    data: 'emp_first_name'
+                }, {
+                    data: 'emp_nicno'
+                }, {
+                    data: 'location'
+                },
+                {
+                    data: 'tot_fortax'
+                }, {
+                    data: 'EPF12'
+                }, {
+                    data: 'EPF8'
+                }, {
+                    data: null
                 }
-            }, {
-                "targets": [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28],
-                "className": 'text-right'
+            ],
+            "order": [],
+            "columnDefs": [{
+                "targets": 7,
+                "render": function (data, type, row) {
+                    var epf8 = parseFloat(row.EPF8);
+                    var epf12 = parseFloat(row.EPF12);
+                    return (epf8 + epf12);
+                }
             }],
             "createdRow": function (row, data, dataIndex) {
                 //$('td', row).eq(5).attr('data-colvalue', data.loan_installments); 
@@ -370,6 +368,30 @@
             }
         });
 
+        var emp_etfTable = $("#emp_etftable").DataTable({
+            "columns": [{
+                    data: 'emp_epfno'
+                }, {
+                    data: 'emp_first_name'
+                }, {
+                    data: 'emp_nicno'
+                }, {
+                    data: 'location'
+                },
+                {
+                    data: 'tot_fortax'
+                }, {
+                    data: 'ETF3'
+                }
+            ],
+            "order": [],
+
+            "createdRow": function (row, data, dataIndex) {
+                //$('td', row).eq(5).attr('data-colvalue', data.loan_installments); 
+                //$('td', row).eq(0).attr('data-refemp', data.payroll_profile_id); 
+                $(row).attr('id', 'row-' + data.id); //$( row ).data( 'refid', data[3] );
+            }
+        });
         //var loanTable=$("#loantable").DataTable();
 
         var _token = $('#frmSearch input[name="_token"]').val();;
@@ -405,7 +427,7 @@
 
         $('.nest_head').change(function () {
             //prep_nest($(this).data('findnest'), $(this).find(":selected").val(), 0);
-            prep_nest($(this).data('findnest'), $(this).find(":selected").data('regcode'), '-1'); //0
+            prep_nest($(this).data('findnest'), $(this).find(":selected").data('regcode'), '-1');
         });
 
         function prep_nest(nestname, nestcode, selectedval) {
@@ -448,7 +470,7 @@
             event.preventDefault();
 
             $.ajax({
-                url: "checkPayRegister",
+                url: "checkEmpEpfEtf", //"checkPayslipListByDept",
                 method: 'POST',
                 data: $(this).serialize(),
                 dataType: "JSON",
@@ -468,8 +490,43 @@
                         html += '</div>';
                         $('#search_result').html(html);
                     } else {
-                        empTable.rows.add(data.employee_detail);
-                        empTable.draw();
+                        var optrpt = $('input[name="opt_rpt"]:checked').val();
+
+                        if (optrpt == 1) {
+                            $("#tbl_all").show();
+                            $("#tbl_etf").hide();
+                            $("#tbl_epf").hide();
+                            empTable.clear();
+                            emp_epfTable.clear();
+                            emp_etfTable.clear();
+                            empTable.rows.add(data.employee_detail);
+                            empTable.draw();
+                            emp_epfTable.draw();
+                            emp_etfTable.draw();
+                        } else if (optrpt == 2) {
+                            $("#tbl_epf").show();
+                            $("#tbl_all").hide();
+                            $("#tbl_etf").hide();
+                            empTable.clear();
+                            emp_epfTable.clear();
+                            emp_etfTable.clear();
+                            emp_epfTable.rows.add(data.employee_detail);
+                            emp_epfTable.draw();
+                            empTable.draw();
+                            emp_etfTable.draw();
+                        } else {
+                            $("#tbl_etf").show();
+                            $("#tbl_all").hide();
+                            $("#tbl_epf").hide();
+                            empTable.clear();
+                            emp_epfTable.clear();
+                            emp_etfTable.clear();
+                            emp_etfTable.rows.add(data.employee_detail);
+                            emp_etfTable.draw();
+                            empTable.draw();
+                            emp_epfTable.draw();
+                        }
+
                         $("#lbl_date_fr").html(data.work_date_fr);
                         $("#lbl_date_to").html(data.work_date_to);
                         $("#lbl_duration").show();
@@ -493,7 +550,6 @@
                         $("#rpt_info").val(data.work_date_fr + " To " + data.work_date_to +
                             " (" + $("#payroll_process_type_id").find(":selected")
                             .text() + ")");
-
                         $("#print_record").prop('disabled', false);
                         $("#print_record").removeClass('btn-light');
                         $("#print_record_pdf").prop('disabled', false);
@@ -523,6 +579,14 @@
         	$(this).removeClass('active');
         });
         */
+
+        /**/
+        $('input[name="opt_rpt"]').change(function (e) { // Select the radio input group
+            //console.log( $(this).val() ); 
+            //console.log( $('input[name="opt_docslist"]:checked').val() ); 
+            $("#rpt_layout_no").val($(this).val());
+
+        });
 
     });
 </script>
