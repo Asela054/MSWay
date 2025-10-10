@@ -11,7 +11,7 @@
                 <div class="page-header-content py-3 px-2">
                     <h1 class="page-header-title ">
                         <div class="page-header-icon"><i class="fa-light fa-calendar-pen"></i></div>
-                        <span>Attendance Add</span>
+                        <span>Attendance</span>
                     </h1>
                 </div>
             </div>
@@ -22,28 +22,28 @@
                     <div class="row">
                         <div class="col-sm-12 col-md-12">
                                 <div class="d-flex flex-wrap justify-content-end mb-2">
-                                    <div class="col-sm-12 col-md-auto mb-2 mr-md-2">
-                                        <button type="button" class="btn btn-primary btn-sm px-3 w-100" name="create_record" id="create_record">
+                                    <div class="col-sm-12 col-md-auto mb-2">
+                                        <button type="button" class="btn btn-primary btn-sm px-2 w-100" name="create_record" id="create_record">
                                             <i class="fas fa-plus mr-2"></i>Add - Single Date
                                         </button>
                                     </div>
-                                    <div class="col-sm-12 col-md-auto mb-2 mr-md-2">
-                                        <button type="button" class="btn btn-primary btn-sm px-3 w-100" name="edit_record_month" id="edit_record_month">
-                                            <i class="fas fa-pencil-alt mr-2"></i>Add - Month
+                                    <div class="col-sm-12 col-md-auto mb-2 ">
+                                        <button type="button" class="btn btn-primary btn-sm px-2 w-100" name="edit_record_month" id="edit_record_month">
+                                            <i class="fas fa-pencil-alt mr-2"></i>Add / Edit - Month
                                         </button>
                                     </div>
-                                    <div class="col-sm-12 col-md-auto mb-2 mr-md-2">
-                                        <button type="button" class="btn btn-primary btn-sm px-3 w-100" name="create_record_dept_wise" id="create_record_dept_wise">
+                                    <div class="col-sm-12 col-md-auto mb-2 ">
+                                        <button type="button" class="btn btn-primary btn-sm px-2 w-100" name="create_record_dept_wise" id="create_record_dept_wise">
                                             <i class="fas fa-plus mr-2"></i>Add - Department Wise
                                         </button>
                                     </div>
-                                    <div class="col-sm-12 col-md-auto mb-2 mr-md-2">
-                                        <button type="button" class="btn btn-success btn-sm px-3 w-100" name="csv_upload_record" id="csv_upload_record">
+                                    <div class="col-sm-12 col-md-auto mb-2 ">
+                                        <button type="button" class="btn btn-success btn-sm px-2 w-100" name="csv_upload_record" id="csv_upload_record">
                                             <i class="fas fa-upload mr-2"></i>Upload CSV
                                         </button>
                                     </div>
                                     <div class="col-sm-12 col-md-auto mb-2">
-                                        <button type="button" class="btn btn-success btn-sm px-3 w-100" name="create_record_upload" id="create_record_upload">
+                                        <button type="button" class="btn btn-success btn-sm px-2 w-100" name="create_record_upload" id="create_record_upload">
                                             <i class="fa fa-upload mr-2"></i>Upload Attendance TXT
                                         </button>
                                     </div>
@@ -53,7 +53,7 @@
                             <hr class="border-dark">
                         </div>
                         <div class="col-md-12">
-                                    <button class="btn btn-warning btn-sm filter-btn float-right px-3" type="button"
+                                    <button class="btn btn-warning btn-sm filter-btn float-right px-2" type="button"
                                         data-toggle="offcanvas" data-target="#offcanvasRight"
                                         aria-controls="offcanvasRight"><i class="fas fa-filter mr-1"></i> Filter
                                         Options</button>
@@ -677,10 +677,11 @@
                                             '<i class="fas fa-eye"></i>' +
                                             '</button> ';
                               
-                                    button += '<button type="button" class="btn btn-primary btn-sm edit_button" data-uid="'+ uid + '" data-date="' + date + '" data-name="' + emp_name + '" data-toggle="tooltip" title="Edit">' +
-                                            '<i class="fas fa-pencil-alt"></i>' +
-                                            '</button> ';
+                                    // button += '<button type="button" class="btn btn-primary btn-sm edit_button" data-uid="'+ uid + '" data-date="' + date + '" data-name="' + emp_name + '" data-toggle="tooltip" title="Edit">' +
+                                    //         '<i class="fas fa-pencil-alt"></i>' +
+                                    //         '</button> ';
                                
+
                                     button += '<button type="button" class="btn btn-danger btn-sm delete_button" data-uid="' + uid + '" data-date="' + date + '" data-name="' + emp_name + '" data-toggle="tooltip" title="Delete">' +
                                             '<i class="fas fa-trash-alt"></i>' +
                                             '</button>';
@@ -703,6 +704,9 @@
                     ],
                     destroy: true,
                     order: [[2, "desc"]],
+                     drawCallback: function(settings) {
+                        $('[data-toggle="tooltip"]').tooltip();
+                    }
                 });
             }
 
@@ -1503,7 +1507,7 @@
             });
 
             $(document).on('click', '.addelete',async function () {
-                var r = await Otherconfirmation("You want to remove this ? ");
+                var r = await Otherconfirmation("You want to Remove this ? ");
                 if (r == true) {
                     var id = $(this).attr("id");
                     var _token = $('input[name="_token"]').val();
@@ -1549,33 +1553,35 @@
                     url: "AttendentView",
                     dataType: "json",
                     data: formdata,
-                     success: function (data) {
+                    success: function (data) {
                         $('#AttendviewModal').modal('show');
                         var htmlhead = '';
                         htmlhead += '<tr><td>Emp ID :' + id + '</td><td >Name :' + emp_name_with_initial + '</td></tr>';
-                        htmlhead += '<tr> <th>Type</th> <th>Date & Time</th> </tr>';
+                        htmlhead += '<tr><th>TYPE</th><th>TIMESTAMPS</th></tr>';
                         var html = '';
 
                         if (data.length > 0) {
-                            const record = data[0]; // Since we're grouping, we get one record per day
-                            // Add Check-in row (first_time_stamp)
-                            if (record.first_time_stamp) {
+                            data.forEach(function(record, index) {
+                                var type = '';
+                                
+                                if (index === 0) {
+                                    type = 'Check In';
+                                }
+                                else if (index === data.length - 1) {
+                                    type = 'Check Out';
+                                }
+                                else {
+                                    type = 'Additional ' + index;
+                                    
+                                }
+
                                 html += '<tr>';
-                                html += '<td>Checkin</td>';
-                                html += '<td contenteditable class="timestamp" data-timestamp="first_time_stamp" data-id="' + record.uid + '">' + record.first_time_stamp + '</td>';
+                                html += '<td>' + type + '</td>';
+                                html += '<td contenteditable class="timestamp" data-timestamp="' + record.timestamp + '" data-id="' + record.uid + '" data-attendance-id="' + record.id + '">';
+                                html += record.timestamp;
+                                html += '</td>';
                                 html += '</tr>';
-                            }
-                            // Add Check-out row (last_time_stamp) - only if it's different from first_time_stamp
-                            if (record.last_time_stamp && record.last_time_stamp !== record.first_time_stamp) {
-                                html += '<tr>';
-                                html += '<td>Checkout</td>';
-                                html += '<td contenteditable class="timestamp" data-timestamp="last_time_stamp" data-id="' + record.uid + '">' + record.last_time_stamp + '</td>';
-                                html += '</tr>';
-                            }
-                            // If no records found after processing
-                            if (html === '') {
-                                html += '<tr><td colspan="2">No valid attendance records found</td></tr>';
-                            }
+                            });
                         } else {
                             html += '<tr><td colspan="2">No attendance records found</td></tr>';
                         }
@@ -1586,34 +1592,91 @@
                 });
             });
 
-            $(document).on('click', '.delete_button',async function () {
-                 var r = await Otherconfirmation("You want to remove this ? ");
+              $(document).on('click', '.delete_button', async function () {
+                var r = await Otherconfirmation("You want to Remove this ? ");
                 if (r == true) {
-                    let uid = $(this).data("uid");
-                    let date = $(this).data("date");
+                    let id = $(this).data("uid");
+                    date = $(this).attr('data-date');
+                    emp_name_with_initial = $(this).attr('data-name');
+
+                    var formdata = {
+                        _token: $('input[name=_token]').val(),
+                        id: id,
+                        date: date
+                    };
+                    // alert(date);
+                    $('#form_result').html('');
                     $.ajax({
-                        url: "{{ route('Attendance.delete') }}",
-                        method: "POST",
-                        data: {
-                            _token: '{{ csrf_token() }}',
-                            uid: uid,
-                            date: date
-                        },
-                        success: function (data) {
-                            const actionObj = {
-                                icon: 'fas fa-trash-alt',
-                                title: '',
-                                message: 'Record Remove Successfully',
-                                url: '',
-                                target: '_blank',
-                                type: 'danger'
-                            };
-                            const actionJSON = JSON.stringify(actionObj, null, 2);
-                            actionreload(actionJSON);
+                        url: "AttendentUpdate",
+                        dataType: "json",
+                        data: formdata,
+                       success: function (data) {
+                            $('#AttendeditModal').modal('show');
+                            var htmlhead = '';
+                            htmlhead += '<tr><td>Emp ID :' + id + '</td><td colspan="2">Name :' + emp_name_with_initial + '</td></tr>';
+                            htmlhead += '<tr> <th> Type </th> <th>Date & Time</th><th class="text-right">Action</th>';
+                            var html = '';
+
+                            if (data.length > 0) {
+                                data.forEach(function(record, index) {
+                                    var type = '';
+                                    
+                                    if (index === 0) {
+                                        type = 'Check In';
+                                    }
+                                    else if (index === data.length - 1) {
+                                        type = 'Check Out';
+                                    }
+                                    else {
+                                        type = 'Additional ' + index;
+                                    }
+
+                                    html += '<tr>';
+                                    html += '<td>' + type + '</td>';
+                                    html += '<td contenteditable class="timestamp" data-timestamp="' + record.timestamp + '" data-id="' + record.uid + '" data-attendance-id="' + record.id + '">' + record.timestamp + '</td>';
+                                    html += '<td class="text-right"><button type="button" class="btn btn-danger btn-sm addelete" id="' + record.id + '"><i class="far fa-trash-alt"></i></button></td>';
+                                    html += '</tr>';
+                                });
+                            } else {
+                                html += '<tr><td colspan="3">No attendance records found</td></tr>';
+                            }
+                            
+                            $('#attendTable thead').html(htmlhead);
+                            $('#attendTable tbody').html(html);
                         }
-                    });
-                } 
+                    })
+                }
+
             });
+
+            // $(document).on('click', '.delete_button',async function () {
+            //      var r = await Otherconfirmation("You want to remove this ? ");
+            //     if (r == true) {
+            //         let uid = $(this).data("uid");
+            //         let date = $(this).data("date");
+            //         $.ajax({
+            //             url: "{{ route('Attendance.delete') }}",
+            //             method: "POST",
+            //             data: {
+            //                 _token: '{{ csrf_token() }}',
+            //                 uid: uid,
+            //                 date: date
+            //             },
+            //             success: function (data) {
+            //                 const actionObj = {
+            //                     icon: 'fas fa-trash-alt',
+            //                     title: '',
+            //                     message: 'Record Remove Successfully',
+            //                     url: '',
+            //                     target: '_blank',
+            //                     type: 'danger'
+            //                 };
+            //                 const actionJSON = JSON.stringify(actionObj, null, 2);
+            //                 actionreload(actionJSON);
+            //             }
+            //         });
+            //     } 
+            // });
 
 
             $('#create_record_upload').click(function () {

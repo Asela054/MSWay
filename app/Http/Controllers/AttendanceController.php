@@ -443,17 +443,15 @@ class AttendanceController extends Controller
 
     public function getAttendance(Request $request)
     {
-
         $user = Auth::user();
         $permission = $user->can('attendance-edit');
         if (!$permission) {
             abort(403);
         }
-         $data = DB::table('attendances as at1')
+
+        $data = DB::table('attendances as at1')
             ->select(
                 'at1.*', 
-                DB::raw('MIN(at1.timestamp) as first_time_stamp'),
-                DB::raw('CASE WHEN MIN(at1.timestamp) = MAX(at1.timestamp) THEN NULL ELSE MAX(at1.timestamp) END as last_time_stamp'),
                 'employees.emp_name_with_initial',
                 'employees.emp_etfno',
                 'shift_types.begining_checkout',
@@ -465,12 +463,11 @@ class AttendanceController extends Controller
                 ['at1.date', '=', $request->date],
                 ['at1.uid', '=', $request->id],
             ])
+            ->where(['at1.deleted_at' => null])
+            ->orderBy('at1.timestamp', 'asc')
             ->get();
 
-
         return response()->json($data);
-
-        //echo json_encode($data);
     }
 
 
@@ -551,10 +548,15 @@ class AttendanceController extends Controller
 
     public function attendentdeletelive(Request $request)
     {
+        $permission = Auth::user()->can('attendance-delete');
+        if(!$permission){
+            return response()->json(['error' => 'UnAuthorized'], 401);
+        }
+
         if ($request->ajax()) {
             DB::table('attendances')
                 ->where('id', $request->id)
-                ->delete();
+                 ->update(['deleted_at' => Carbon::now()]);
             echo 'Attendant Details Deleted';
         }
     }

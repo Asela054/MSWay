@@ -308,7 +308,10 @@ $(document).ready(function(){
             "bDestroy": true,
             "order": [
                 [4, "desc"]
-            ]
+            ],
+             drawCallback: function(settings) {
+                $('[data-toggle="tooltip"]').tooltip();
+            }
         });
     //#half_short select change
     $('#half_short').change(function(){

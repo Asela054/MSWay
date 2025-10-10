@@ -282,7 +282,10 @@
                     "bDestroy": true,
                     "order": [
                         [3, "desc"]
-                    ]
+                    ],
+                    drawCallback: function(settings) {
+                        $('[data-toggle="tooltip"]').tooltip();
+                    }
                 });
             }
 

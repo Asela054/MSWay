@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\Controller;
 use App\Helpers\EmployeeHelper;
+use Session;
 
 class RptLeaveController extends Controller
 {

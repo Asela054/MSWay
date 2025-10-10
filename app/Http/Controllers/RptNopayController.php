@@ -183,7 +183,7 @@ class RptNopayController extends Controller
         //remove emp_id's which doesn't have no pay
         $index = 0;
         foreach ($data as $d){
-            $no_pay_days = (new \App\Attendance)->get_no_pay_days($d->emp_id, $month,$closedate);
+            $no_pay_days = (new \App\Leave)->get_no_pay_days($d->emp_id, $month,$closedate);
             if($no_pay_days == 0){
                 //remove emp_id from the array
                 unset($data[$index]);
@@ -303,11 +303,11 @@ class RptNopayController extends Controller
 
         $no_pay_days_data_html = '<table> 
                                     <tr>
-                                        <th> Employee </th>
+                                        <th> EMPLOYEE </th>
                                         <td> '. $employee->emp_name_with_initial .' </td>  
                                     </tr> 
                                     <tr>
-                                        <th> Month </th>
+                                        <th> MONTH </th>
                                         <td> '. $month .' </td>  
                                     </tr> 
                                     </table>';
@@ -315,9 +315,9 @@ class RptNopayController extends Controller
         $no_pay_days_data_html .= '<table class="table table-bordered table-striped table-hover">
                                     <thead>
                                         <tr>
-                                            <th>Leave From</th>
-                                            <th>Leave To</th>
-                                            <th>No of Days</th> 
+                                            <th>LEAVE FROM</th>
+                                            <th>LEAVE TO</th>
+                                            <th>NO OF DAYS</th> 
                                         </tr>
                                     </thead>
                                     <tbody>';
@@ -331,7 +331,7 @@ class RptNopayController extends Controller
         }
 
         $no_pay_days_data_html .= '<tr>
-                                        <th colspan="2" class="text-right">Total</th>
+                                        <th colspan="2" class="text-right">TOTAL</th>
                                         <th>'.$no_pay_days.'</th> 
                                     </tr>';
 

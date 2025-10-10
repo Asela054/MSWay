@@ -72,9 +72,6 @@
                                     <th>ACTION</th>
                                 </tr>
                             </thead>
-                            <tbody>
-
-                            </tbody>
                         </table>
                         </div>
                     </div>
@@ -331,12 +328,14 @@ $(document).ready(function() {
                   orderable: false,
                    searchable: false,
                     render : function ( data, type, row, meta ) {
+
+                        
                             return type === 'display'  ?
                                 ' <button class="btn btn-danger btn-sm delete_button" ' +
                                 'data-uid="'+row['uid'] +'" ' +
                                 'data-date="'+row['date_row'] +'" ' +
                                 'data-type="delete" ' +
-                                ' data-toggle="tooltip" title="Remove"> <i class="far fa-trash-alt"> </i> </button> '
+                                ' data-toggle="tooltip" title="Remove" name="delete"> <i class="far fa-trash-alt"> </i> </button> '
                                 : data;
                     }
                 }
@@ -344,7 +343,9 @@ $(document).ready(function() {
             "bDestroy": true,
             "order": [
                 [2, "desc"]
-            ]
+            ], drawCallback: function(settings) {
+            $('[data-toggle="tooltip"]').tooltip();
+        }
         });
      }
 

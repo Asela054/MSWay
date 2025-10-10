@@ -238,7 +238,9 @@
                     "bDestroy": true,
                     "order": [
                         [2, "desc"]
-                    ]
+                    ], drawCallback: function(settings) {
+                        $('[data-toggle="tooltip"]').tooltip();
+                    }
                 });
 
             }

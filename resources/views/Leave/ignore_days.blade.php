@@ -155,7 +155,10 @@
         ],
         "order": [
             [1, "desc"]
-        ]
+        ],
+         drawCallback: function(settings) {
+            $('[data-toggle="tooltip"]').tooltip();
+        }
     });
 
 
