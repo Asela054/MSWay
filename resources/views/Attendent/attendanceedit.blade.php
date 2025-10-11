@@ -20,29 +20,30 @@
             <div class="card">
                 <div class="card-body p-0 p-2">
                     <div class="row">
-                        <div class="col-sm-12 col-md-12">
+
+                            <div class="col-sm-12 col-md-12">
                                 <div class="d-flex flex-wrap justify-content-end mb-2">
-                                    <div class="col-sm-12 col-md-auto mb-2">
+                                    <div class="col-sm-12 col-md-auto mb-1 px-1">
                                         <button type="button" class="btn btn-primary btn-sm px-2 w-100" name="create_record" id="create_record">
                                             <i class="fas fa-plus mr-2"></i>Add - Single Date
                                         </button>
                                     </div>
-                                    <div class="col-sm-12 col-md-auto mb-2 ">
+                                    <div class="col-sm-12 col-md-auto mb-1 px-1">
                                         <button type="button" class="btn btn-primary btn-sm px-2 w-100" name="edit_record_month" id="edit_record_month">
                                             <i class="fas fa-pencil-alt mr-2"></i>Add / Edit - Month
                                         </button>
                                     </div>
-                                    <div class="col-sm-12 col-md-auto mb-2 ">
+                                    <div class="col-sm-12 col-md-auto mb-1 px-1">
                                         <button type="button" class="btn btn-primary btn-sm px-2 w-100" name="create_record_dept_wise" id="create_record_dept_wise">
                                             <i class="fas fa-plus mr-2"></i>Add - Department Wise
                                         </button>
                                     </div>
-                                    <div class="col-sm-12 col-md-auto mb-2 ">
+                                    <div class="col-sm-12 col-md-auto mb-1 px-1">
                                         <button type="button" class="btn btn-success btn-sm px-2 w-100" name="csv_upload_record" id="csv_upload_record">
                                             <i class="fas fa-upload mr-2"></i>Upload CSV
                                         </button>
                                     </div>
-                                    <div class="col-sm-12 col-md-auto mb-2">
+                                    <div class="col-sm-12 col-md-auto mb-1 px-1">
                                         <button type="button" class="btn btn-success btn-sm px-2 w-100" name="create_record_upload" id="create_record_upload">
                                             <i class="fa fa-upload mr-2"></i>Upload Attendance TXT
                                         </button>
@@ -405,37 +406,37 @@
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col">
-                                <span id="form_result1"></span>
-                                <form method="post" id="formTitle1" class="form-horizontal">
-                                    {{ csrf_field() }}
-                                    <div class="form-group mb-1">
-                                        <label class="control-label col" >
-                                        File Content :
-                                            <a class="col" href="{{ url('/public/csvsample/add_attendances_format.csv') }}">
-                                            CSV Format-Download Sample File
-                                            </a>
-                                        </label>
-                                    </div>	
-                                    <div class="fields">
-                                        <div class="input-group mb-3">
-                                            <input type="file" class="form-control" id="import_csv" name="import_csv" accept=".csv" required>
-                                            <label class="input-group-text" for="import_csv">Upload</label>
-                                        </div>
+                     <div class="modal-body">
+                    <form method="post" target="_self" id="formTitle1" enctype="multipart/form-data">
+                        {{ csrf_field() }}
+                        <div class="form-row mb-1">
+                            <div class="col-12">
+                                <label class="font-weight-bolder small">
+                                    File Content :
+                                    <a class="font-weight-normal" href="{{ url('/public/csvsample/add_attendances_format.csv') }}">
+                                        CSV Format-Download Sample File
+                                    </a>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-row mt-3">
+                            <div class="col-12">
+                                <h6 class="title-style small"><span>Upload File</span></h6>
+                                <div class="input-group input-group-sm">
+                                    <div class="custom-file">
+                                        <input type="file" class="custom-file-input" name="import_csv" id="import_csv" aria-describedby="inputGroupFileAddon04" accept=".csv" required>
+                                        <label class="custom-file-label" for="import_csv">Choose file</label>
                                     </div>
-                                    <div class="form-group mt-3">
-                                        <button type="submit" name="action_button" id="action_button" class="btn btn-success btn-sm">
-                                            <i class="fas fa-upload mr-2"></i>Import CSV
-                                        </button>                               
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary" type="submit" name="action_button" id="action_button" required="required">Import CSV</button>
                                     </div>
                                     <input type="hidden" name="action" id="action" value="Upload" />
                                     <input type="hidden" name="hidden_id" id="hidden_id" />
-                                </form>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </form>
+                </div>
                 </div>
             </div>
         </div>
