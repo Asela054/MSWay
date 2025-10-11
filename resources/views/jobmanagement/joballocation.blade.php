@@ -254,6 +254,9 @@
                     }
                 },
                 ],
+                drawCallback: function(settings) {
+            $('[data-toggle="tooltip"]').tooltip();
+        }
             });
 
             $('#formTitle').on('submit', function (event) {

@@ -349,7 +349,10 @@
                 ],
                 "order": [
                     [6, "desc"]
-                ]
+                ],
+                 drawCallback: function(settings) {
+                    $('[data-toggle="tooltip"]').tooltip();
+                }
             });
         }
 

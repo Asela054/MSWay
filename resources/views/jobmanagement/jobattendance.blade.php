@@ -401,7 +401,10 @@
                 "bDestroy": true,
                 "order": [
                     [0, "desc"]
-                ]
+                ],
+                drawCallback: function(settings) {
+                    $('[data-toggle="tooltip"]').tooltip();
+                }
             });
 
             $('#searchbtn').click(function () {

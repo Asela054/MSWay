@@ -116,12 +116,12 @@
                             </li>
                             <li>
                                 <div class="col-md-12 d-flex justify-content-between">
+                                    <button type="button" class="btn btn-danger btn-sm filter-btn px-3" id="btn-reset">
+                                        <i class="fas fa-redo mr-1"></i> Reset
+                                    </button>
                                     <button type="submit" class="btn btn-primary btn-sm filter-btn px-3"
                                         id="btn-filter">
                                         <i class="fas fa-search mr-2"></i>Search
-                                    </button>
-                                    <button type="button" class="btn btn-danger btn-sm filter-btn px-3" id="btn-reset">
-                                        <i class="fas fa-redo mr-1"></i> Reset
                                     </button>
                                 </div>
                             </li>

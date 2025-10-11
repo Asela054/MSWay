@@ -30,8 +30,8 @@
                                 id="divicestable">
                                 <thead>
                                     <tr>
-                                        <th>Department</th>
-                                        <th>Attendance</th>
+                                        <th>DEPARTMENT</th>
+                                        <th>ATTENDANCE</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -56,9 +56,9 @@
                                 id="divicestable">
                                 <thead>
                                     <tr>
-                                        <th>EPF No</th>
-                                        <th>Employee</th>
-                                        <th>Leaves</th>
+                                        <th>EPF NO</th>
+                                        <th>EMPLOYEE</th>
+                                        <th>LEAVES</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -81,10 +81,10 @@
                                 id="divicestable">
                                 <thead>
                                     <tr>
-                                        <th>EPF No</th>
-                                        <th>Employee</th>
-                                        <th>Single OT</th>
-                                        <th>Double OT</th>
+                                        <th>EPF NO</th>
+                                        <th>EMPLOYEE</th>
+                                        <th>SINGLE OT</th>
+                                        <th>DOUBLE OT</th>
                                     </tr>
                                 </thead>
                                 <tbody>

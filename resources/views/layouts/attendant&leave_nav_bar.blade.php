@@ -38,11 +38,11 @@
             <li><a class="dropdown-item" href="{{ route('Attendance')}}">Attendance Sync</a></li>
           @endif
           @if($user->can('attendance-create'))
-            <li><a class="dropdown-item" href="{{ route('AttendanceEdit')}}">Attendance Add</a></li>
+            <li><a class="dropdown-item" href="{{ route('AttendanceEdit')}}">Attendance</a></li>
           @endif
-          @if($user->can('attendance-edit'))
+          {{-- @if($user->can('attendance-edit'))
             <li><a class="dropdown-item" href="{{ route('AttendanceEditBulk')}}">Attendance Edit</a></li>
-          @endif
+          @endif --}}
           @if($user->can('late-attendance-create'))
             <li><a class="dropdown-item" href="{{ route('late_attendance_by_time')}}">Late Attendance Mark</a></li>
           @endif

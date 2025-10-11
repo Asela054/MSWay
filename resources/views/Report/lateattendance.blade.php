@@ -4,75 +4,41 @@
 @section('content')
 
 <main>
-    <div class="page-header shadow">
-        <div class="container-fluid">
-            @include('layouts.reports_nav_bar')
-           
+     <div class="page-header">
+        <div class="container-fluid d-none d-sm-block shadow">
+             @include('layouts.reports_nav_bar')
         </div>
-    </div>
-    <div class="container-fluid mt-4">
-        <div class="card mb-2">
-            <div class="card-body">
-                <form class="form-horizontal" id="formFilter">
-                    <div class="form-row mb-1">
-                        <div class="col">
-                            <label class="small font-weight-bold text-dark">Company</label>
-                            <select name="company" id="company" class="form-control form-control-sm">
-                            </select>
-                        </div>
-                        <div class="col">
-                            <label class="small font-weight-bold text-dark">Department</label>
-                            <select name="department" id="department" class="form-control form-control-sm">
-                            </select>
-                        </div>
-                        <div class="col">
-                                <label class="small font-weight-bold text-dark">Employee</label>
-                                <select name="employee" id="employee" class="form-control form-control-sm">
-                                </select>
-                        </div>
-                        <div class="col">
-                            <label class="small font-weight-bold text-dark">Date Range: From - To</label>
-                            <div class="input-group input-group-sm mb-3">
-                                <input type="date" id="from_date" name="from_date" class="form-control form-control-sm border-right-0"
-                                       placeholder="yyyy-mm-dd">
-                                <input type="date" id="to_date" name="to_date" class="form-control" placeholder="yyyy-mm-dd">
-                            </div>
-                        </div>
-                        
-                    </div>
-                    <div class="form-row mb-1">
-                        <div class="col-3">
-                                <label class="small font-weight-bold text-dark">Status</label>
-                                <select name="latestatus" id="latestatus" class="form-control form-control-sm">
-                                    <option value="">Select Late Status</option>
-                                    <option value="1">Late Coming</option>
-                                    <option value="2">Early Going</option>
-                                </select>
-                        </div>
-                        <div class="col">
-                            <br>
-                            <button type="submit" class="btn btn-primary btn-sm filter-btn" id="btn-filter"> Filter</button>
-                        </div>
-                    </div>
-
-                </form>
+        <div class="container-fluid">
+            <div class="page-header-content py-3 px-2">
+                <h1 class="page-header-title ">
+                    <div class="page-header-icon"><i class="fa-light fa-file-contract"></i></div>
+                    <span>Late Attendance Report</span>
+                </h1>
             </div>
         </div>
+    </div>
+    <div class="container-fluid mt-2 p-0 p-2">
         <div class="card">
-            <div class="card-body p-0 p-2">
+            <div class="card-body mt-2 p-0 p-2">
                 <div class="row">
-                    <div class="col-12">
+                    <div class="col-md-12">
+                        <button class="btn btn-warning btn-sm filter-btn float-right px-3" type="button"
+                            data-toggle="offcanvas" data-target="#offcanvasRight" aria-controls="offcanvasRight"><i
+                                class="fas fa-filter mr-1"></i> Filter
+                            Records</button><br><br>
+                    </div>
+
+                    <div class="col-md-12">
                         <table class="table table-striped table-bordered table-sm small" id="attendtable">
                             <thead>
                                 <tr>
-                                    <th>Employee ID</th> 
-                                    <th>Name</th>   
-                                    <th>Department</th>
-                                    <th>Date</th>
-                                    <th>Check In</th>
-                                    <th>Check Out</th>   
-                                    <th>Status</th>
-                                    <th>Action</th>
+                                    <th>EMP ID</th> 
+                                    <th>NAME</th>   
+                                    <th>DEPARTMENT</th>
+                                    <th>DATE</th>
+                                    <th>CHECK IN</th>
+                                    <th>CHECK OUT</th>   
+                                    <th>STATUS</th>
                                 </tr>
                             </thead>                            
                             <tbody>
@@ -82,59 +48,79 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Modal Area Start -->
-    <div class="modal fade" id="AttendviewModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-        aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header p-2">
-                    <h5 class="modal-title" id="staticBackdropLabel">Attendant Update</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col">
-                            <div id="message"></div>
-                            <table id='attendTable' class="table table-striped table-bordered table-sm small">
-                                <thead>
-                                </thead>
-                                <tbody>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+         <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+             <div class="offcanvas-header">
+                 <h2 class="offcanvas-title font-weight-bolder" id="offcanvasRightLabel">Records Filter Options</h2>
+                 <button type="button" class="btn-close" data-dismiss="offcanvas" aria-label="Close">
+                     <span aria-hidden="true" class="h1 font-weight-bolder">&times;</span>
+                 </button>
+             </div>
+             <div class="offcanvas-body">
+                 <ul class="list-unstyled">
+                     <form class="form-horizontal" id="formFilter">
+                         <li class="mb-2">
+                             <div class="col-md-12">
+                                 <label class="small font-weight-bolder text-dark">Company</label>
+                                <select name="company" id="company" class="form-control form-control-sm">
+                                </select>
+                             </div>
+                         </li>
+                         <li class="mb-2">
+                             <div class="col-md-12">
+                                 <label class="small font-weight-bolder text-dark">Department</label>
+                                <select name="department" id="department" class="form-control form-control-sm">
+                                </select>
+                             </div>
+                         </li>
+                         <li class="mb-2">
+                             <div class="col-md-12">
+                                <label class="small font-weight-bolder text-dark">Employee</label>
+                                <select name="employee" id="employee" class="form-control form-control-sm">
+                                </select>
+                             </div>
+                         </li>
+                         <li class="mb-2">
+                                <div class="col-md-12">
+                                    <label class="small font-weight-bolder text-dark"> From Date* </label>
+                                    <input type="date" id="from_date" name="from_date"
+                                        class="form-control form-control-sm" placeholder="yyyy-mm-dd"  required>
+                                </div>
+                            </li>
+                            <li class="mb-2">
+                                <div class="col-md-12">
+                                    <label class="small font-weight-bolder text-dark"> To Date*</label>
+                                    <input type="date" id="to_date" name="to_date" class="form-control form-control-sm"
+                                        placeholder="yyyy-mm-dd" required>
+                                </div>
+                            </li>
+                         <li class="mb-2">
+                             <div class="col-md-12">
+                                <label class="small font-weight-bolder text-dark">Status</label>
+                                <select name="latestatus" id="latestatus" class="form-control form-control-sm">
+                                    <option value="">Select Late Status</option>
+                                    <option value="1">Late Coming</option>
+                                    <option value="2">Early Going</option>
+                                </select>
+                             </div>
+                         </li>
+                         <li>
+                             <div class="col-md-12 d-flex justify-content-between">
+                                 <button type="button" class="btn btn-danger btn-sm filter-btn px-3" id="btn-reset">
+                                     <i class="fas fa-redo mr-1"></i> Reset
+                                 </button>
+                                  <button type="submit" class="btn btn-primary btn-sm filter-btn px-3" id="btn-filter">
+                                     <i class="fas fa-search mr-2"></i>Search
+                                 </button>
+                             </div>
+                         </li>
+                     </form>
+                 </ul>
+             </div>
+         </div>
+
+
     </div>
-    <div class="modal fade" id="confirmModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-        aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content">
-                <div class="modal-header p-2">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col text-center">
-                            <h4 class="font-weight-normal">Are you sure you want to remove this data?</h4>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer p-2">
-                    <button type="button" name="ok_button" id="ok_button" class="btn btn-danger px-3 btn-sm">OK</button>
-                    <button type="button" class="btn btn-dark px-3 btn-sm" data-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Modal Area End -->
 </main>
               
 @endsection
@@ -211,54 +197,40 @@ $(document).ready(function () {
     load_dt('','','','','');
     function load_dt(department,from_date,to_date,employee,latestatus){
         $('#attendtable').DataTable({
-            "columnDefs": [
-                {
-                    "targets": -1,
-                    "orderable": false
-                },
-                {
-                    "targets": -2,
-                    "orderable": false
-                },
-                {
-                    "targets": -3,
-                    "orderable": false
-                },
-                {
-                    "targets": -4,
-                    "orderable": false
-                },
-                {
-                    "targets": -5,
-                    "orderable": false
-                },
-                {
-                    "targets": -6,
-                    "orderable": false
-                },
-            ],
-            "lengthMenu": [[10, 25, 50, 100, 500, 1000], [10, 25, 50, 100, 500, 1000]],
-            dom: 'Blfrtip',
-            buttons: [
-                {
-                    extend: 'excelHtml5',
-                    text: 'Excel',
-                    className: 'btn btn-default btn-sm',
-                    exportOptions: {
-                        columns: 'th:not(:last-child)'
-                    }
-                },
-                {
-                    extend: 'pdfHtml5',
-                    text: 'Print',
-                    className: 'btn btn-default btn-sm',
-                    exportOptions: {
-                        columns: 'th:not(:last-child)'
-                    }
-                }
-            ],
-            processing: true,
-            serverSide: true,
+             "destroy": true,
+                    "processing": true,
+                    "serverSide": true,
+                    dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
+                        "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+                    "buttons": [{
+                            extend: 'csv',
+                            className: 'btn btn-success btn-sm',
+                            title: 'Late Attendance Reports',
+                            text: '<i class="fas fa-file-csv mr-2"></i> CSV',
+                        },
+                        { 
+                            extend: 'pdf', 
+                            className: 'btn btn-danger btn-sm', 
+                            title: 'Late Attendance Reports', 
+                            text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
+                            orientation: 'landscape', 
+                            pageSize: 'legal', 
+                            customize: function(doc) {
+                                doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+                            }
+                        },
+                        {
+                            extend: 'print',
+                            title: 'Late Attendance Reports',
+                            className: 'btn btn-primary btn-sm',
+                            text: '<i class="fas fa-print mr-2"></i> Print',
+                            customize: function(win) {
+                                $(win.document.body).find('table')
+                                    .addClass('compact')
+                                    .css('font-size', 'inherit');
+                            },
+                        },
+                    ],
             ajax: {
                 "url": "{{url('/late_attendance_report_list')}}",
                 "data": {'department':department,
@@ -277,22 +249,10 @@ $(document).ready(function () {
                 { data: 'date' },
                 { data: 'check_in_time'},
                 { data: 'check_out_time'},
-                { data: 'status', title: 'Status' },
-                { data: 'uid' ,
-                    render : function ( data, type, row, meta ) {
-
-                        return type === 'display'  ?
-                            ' <button class="view_button btn btn-outline-dark btn-sm" name="view_button" ' +
-                            'data-uid="'+row['uid'] +'" ' +
-                            'data-date="'+row['date'] +'" ' +
-                            'data-name="'+row['emp_name_with_initial'] +'" ' +
-                            '><i class="fas fa-eye"></i></button> ' +
-                            ' '
-                            : data;
-                    }},
+                { data: 'status'}
             ],
             "bDestroy": true,
-            "order": [[ 0, "desc" ]],
+            "order": [[ 3, "desc" ]],
         });
     }
 
@@ -303,7 +263,10 @@ $(document).ready(function () {
         let to_date = $('#to_date').val();
         let employee = $('#employee').val();
         let latestatus = $('#latestatus').val();
+
         load_dt(department,from_date,to_date,employee,latestatus);
+        closeOffcanvasSmoothly();
+
     });
 
 

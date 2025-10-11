@@ -210,6 +210,9 @@ $(document).ready(function(){
                     }
                 },
             ],
+            drawCallback: function(settings) {
+            $('[data-toggle="tooltip"]').tooltip();
+        }
         });
 
     $('#create_record').click(function(){
