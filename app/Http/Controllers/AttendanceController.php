@@ -1585,17 +1585,30 @@ private function processAttendanceRecord($cr)
             }
            
 
-            $emp = DB::table('employees')
+            $empshift = DB::table('employees')
             ->select('emp_id', 'emp_shift')
             ->where('emp_id', $full_emp_id)
             ->first();
 
-            if (is_null($emp)) {
+            if (is_null($empshift)) {
                 continue;
             }
 
+             $emprosterinfo = DB::table('employee_roster_details')
+                    ->select('emp_id', 'shift_id')
+                    ->where('emp_id', $full_emp_id)
+                    ->where('work_date', $date_input)
+                    ->first();
+
+                if ($emprosterinfo) {
+                    $empshiftid = $emprosterinfo->shift_id;   
+                }
+                else {
+                    $empshiftid = $empshift->emp_shift; // Use the shift from employees table
+                }
+
             $shift = DB::table('shift_types')
-                ->where('id', $emp->emp_shift)
+                ->where('id', $empshiftid)
                 ->first();
 
             $previousDate = Carbon::parse($date)->subDay()->format('Y-m-d');
@@ -1612,13 +1625,10 @@ private function processAttendanceRecord($cr)
                 if ($shift && $shift->off_next_day == '1' && $date == $date_input) {
                     $previous_day = (new DateTime($date_input))->modify('-1 day')->format('Y-m-d');
 
-                    $hasRecord = DB::table('attendances')
-                        ->whereDate('date', $previous_day)
-                        ->where('emp_id', $full_emp_id)
-                        ->whereNull('deleted_at')
-                        ->exists();
+                     $shif_ontime = Carbon::parse($shift->onduty_time);
+                    $txt_datetime = Carbon::parse($time_h . ':' . $time_m . ':00');
 
-                    if($hasRecord){
+                    if($shif_ontime > $txt_datetime){
                         $timestamp = $date_input . ' ' . $time_h . ':' . $time_m . ':00';
                         $attendance_date = ($period === 'AM') ? $previous_day : substr($timestamp, 0, 10);
                     }
@@ -1626,6 +1636,8 @@ private function processAttendanceRecord($cr)
                         $timestamp = $date_input . ' ' . $time_h . ':' . $time_m . ':00';
                         $attendance_date = substr($timestamp, 0, 10);
                     }
+                    
+                    
                 } else if ($date == $date_input) {
                     if($employeeshiftdetails){
                         $previous_day = (new DateTime($date_input))->modify('-1 day')->format('Y-m-d');

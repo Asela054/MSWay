@@ -59,6 +59,9 @@
                                             <th>LOCATION</th>
                                             <th>DEPARTMENT</th>
                                             <th>IS APPROVED ?</th>
+                                            <th class="d-none">EMPNAME</th>
+                                            <th class="d-none"> EMPID</th>
+                                            <th class="d-none">CALLINGNAME</th>
                                         </tr>
                                     </thead>
                                     <tbody>

@@ -70,7 +70,7 @@ $sql = "SELECT
     `departments`.`id` as `dept_id`
 FROM `employee_late_attendances` as `ela`
 LEFT JOIN `attendances` as `at1` ON `at1`.`id` = `ela`.`id`
-JOIN `employees` ON `employees`.`emp_id` = `ela`.`emp_id`
+LEFT JOIN `employees` ON `employees`.`emp_id` = `ela`.`emp_id`
 LEFT JOIN `branches` ON `at1`.`location` = `branches`.`id`
 LEFT JOIN `departments` ON `departments`.`id` = `employees`.`emp_department`
 LEFT JOIN `companies` ON `companies`.`id` = `departments`.`company_id`
@@ -87,10 +87,6 @@ if (!empty($_REQUEST['company'])) {
     $sql .= " AND `employees`.`emp_company` = '$company'";
 }
 
-if (!empty($_REQUEST['location'])) {
-    $location = $_REQUEST['location'];
-    $sql .= " AND `at1`.`location` = '$location'";
-}
 
 if (!empty($_POST['from_date']) && !empty($_POST['to_date'])) {
     $from_date = $_POST['from_date'];
