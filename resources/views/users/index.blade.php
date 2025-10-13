@@ -1,15 +1,23 @@
 @extends('layouts.app')
 @section('content')
 
-    <main>
+    <main>      
+
         <div class="page-header shadow">
+            <div class="container-fluid d-none d-sm-block shadow">
+            @include('layouts.administrator_nav_bar')
+            </div>
             <div class="container-fluid">
-                @include('layouts.administrator_nav_bar')
-               
+                <div class="page-header-content py-3 px-2">
+                    <h1 class="page-header-title ">
+                        <div class="page-header-icon"><i class="fa-light fa-gears"></i></div>
+                        <span>Users</span>
+                    </h1>
+                </div>
             </div>
         </div>
 
-        <div class="container-fluid mt-4">
+        <div class="container-fluid mt-2 p-0 p-2">
 
             <div class="card">
                 <div class="card-body p-0 p-2">
@@ -122,7 +130,7 @@
                             </div>
 
                             <div class="form-group mt-3">
-                                <button type="submit" name="action_button" id="action_button" class="btn btn-primary btn-sm float-end px-4">
+                                <button type="submit" name="action_button" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-4">
                                     <i class="fas fa-plus"></i>&nbsp;Add
                                 </button>
                             </div>
@@ -245,32 +253,32 @@
         }
     });
 
-    $(document).on('click', '.delete', function () {
-        id = $(this).attr('id');
-        $('#confirmModal').modal('show');
+    $(document).on('click', '.delete', async function() {
+        var r = await Otherconfirmation("You want to remove this ? ");
+        if (r == true) {
+            id = $(this).attr('id');
+            $.ajax({
+                url: "users/destroy/" + id,
+                beforeSend: function () {
+                    $('#ok_button').text('Deleting...');
+                },
+                success: function (data) {//alert(data);
+                    const actionObj = {
+                        icon: 'fas fa-trash-alt',
+                        title: '',
+                        message: 'Record Remove Successfully',
+                        url: '',
+                        target: '_blank',
+                        type: 'danger'
+                    };
+                    const actionJSON = JSON.stringify(actionObj, null, 2);
+                    actionreload(actionJSON);
+                }
+            })
+        }
     });
 
-    $('#ok_button').click(function () {
-        $.ajax({
-            url: "users/destroy/" + id,
-            beforeSend: function () {
-                $('#ok_button').text('Deleting...');
-            },
-            success: function (data) {
-                 const actionObj = {
-                    icon: 'fas fa-trash-alt',
-                    title: '',
-                    message: 'User Remove Successfully',
-                    url: '',
-                    target: '_blank',
-                    type: 'danger'
-                };
-                const actionJSON = JSON.stringify(actionObj, null, 2);
-                actionreload(actionJSON);
-            }
-        })
-    });
-
+    
     $('#create_record').click(function(){
         $('.modal-title').text('Create New User');
         $('#action_button').html('Add');

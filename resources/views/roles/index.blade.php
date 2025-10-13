@@ -3,9 +3,16 @@
 
     <main>
         <div class="page-header shadow">
+            <div class="container-fluid d-none d-sm-block shadow">
+            @include('layouts.administrator_nav_bar')
+            </div>
             <div class="container-fluid">
-                @include('layouts.administrator_nav_bar')
-               
+                <div class="page-header-content py-3 px-2">
+                    <h1 class="page-header-title ">
+                        <div class="page-header-icon"><i class="fa-light fa-gears"></i></div>
+                        <span>User Role</span>
+                    </h1>
+                </div>
             </div>
         </div>
 
@@ -73,7 +80,7 @@
 
     <!-- Modal Area Start -->
     <div class="modal fade" id="formModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-md">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header p-2">
                     <h6 class="modal-title" id="staticBackdropLabel">Add Company</h6>
@@ -88,37 +95,32 @@
                             <form method="post" id="formTitle">
                              {{ csrf_field() }}
 
-                            <div class="form-group">
-                                <strong>Name:</strong>
-                                <input type="text" name="name" id="name" class="form-control form-control-sm" placeholder="Name">
-                            </div>
+                            
+                                <div class="form-group">
+                                    <strong>Name:</strong>
+                                    <input type="text" name="name" id="name" class="form-control form-control-sm" placeholder="Name">
+                                </div>
+                            
+                                <div class="form-group">
+                                    <strong>Permission:</strong>
+                                    <br>
+                                   <div class="row">
+                                        @foreach($permission as $value)
+                                            <div class="col-4 mb-2">
+                                                <label>
+                                                    <input type="checkbox" name="permission[]" value="{{ $value->id }}" class="name">
+                                                    {{ $value->name }}
+                                                </label>
+                                            </div>
+                                        @endforeach
+                                    </div>
 
-                            <div class="form-group">
-                                <strong>Email:</strong>
-                                <input type="email" name="email" id="email" class="form-control form-control-sm" placeholder="Email">
-                            </div>
+                                </div>
+                            
 
-                            <div class="form-group">
-                                <strong>Password:</strong>
-                                <input type="password" name="password" id="password" class="form-control form-control-sm" placeholder="Password">
-                            </div>
-
-                            <div class="form-group">
-                                <strong>Confirm Password:</strong>
-                                <input type="password" name="confirm-password" id="confirm-password" class="form-control form-control-sm" placeholder="Confirm Password">
-                            </div>
-
-                            <div class="form-group">
-                                <strong>Role:</strong>
-                                <select name="roles[]" id="role" class="form-control form-control-sm" multiple>
-                                    @foreach($roles as $role)
-                                        <option value="{{ $role }}">{{ $role }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
 
                             <div class="form-group mt-3">
-                                <button type="submit" name="action_button" id="action_button" class="btn btn-primary btn-sm float-end px-4">
+                                <button type="submit" name="action_button" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-4">
                                     <i class="fas fa-plus"></i>&nbsp;Add
                                 </button>
                             </div>
@@ -210,7 +212,7 @@
                             var is_resigned = row.is_resigned;
                             var buttons = '';
 
-                        buttons += '<a class="btn btn-info btn-sm  mr-1" href="/users/' + row.id + '"><i class="fa fa-eye"></i></a>';
+                        buttons += '<button name="view" id="'+row.id+'" class="view btn btn-info btn-sm mr-1" type="button" data-toggle="tooltip" title="View"><i class="fa fa-eye"></i></button>';
                         buttons += '<button name="edit" id="'+row.id+'" class="edit btn btn-primary btn-sm mr-1" type="button" data-toggle="tooltip" title="Edit"><i class="fas fa-pencil-alt"></i></button>';
                         buttons += '<button type="submit" name="delete" id="'+row.id+'" class="delete btn btn-danger btn-sm  mr-1" data-toggle="tooltip" title="Remove"><i class="far fa-trash-alt"></i></button>';
 
@@ -223,34 +225,10 @@
                 }
             });
 
-            $(document).on('click', '.delete', function () {
-                id = $(this).attr('id');
-                $('#confirmModal').modal('show');
-            });
-
-            $('#ok_button').click(function () {
-                $.ajax({
-                    url: "users/destroy/" + id,
-                    beforeSend: function () {
-                        $('#ok_button').text('Deleting...');
-                    },
-                    success: function (data) {
-                        const actionObj = {
-                            icon: 'fas fa-trash-alt',
-                            title: '',
-                            message: 'User Remove Successfully',
-                            url: '',
-                            target: '_blank',
-                            type: 'danger'
-                        };
-                        const actionJSON = JSON.stringify(actionObj, null, 2);
-                        actionreload(actionJSON);
-                    }
-                })
-            });
+            
 
             $('#create_record').click(function(){
-                $('.modal-title').text('Create New User');
+                $('.modal-title').text('Create New Role');
                 $('#action_button').html('Add');
                 $('#action').val('Add');
                 $('#form_result').html('');
@@ -259,6 +237,147 @@
                 $('#formModal').modal('show');
             });
 
+            $('#formTitle').on('submit', function(event){
+                event.preventDefault();
+                var action_url = '';
+
+                if ($('#action').val() == 'Add') {
+                    action_url = "{{ route('roles.store') }}";
+                }
+                if ($('#action').val() == 'Edit') {
+                    action_url = "{{ route('roles.update') }}";
+                }
+
+                $.ajax({
+                    url: action_url,
+                    method: "POST",
+                    data: $(this).serialize(),
+                    dataType: "json",
+                    success: function (data) {//alert(data);        
+                        if (data.errors) {
+                            const actionObj = {
+                                icon: 'fas fa-warning',
+                                title: '',
+                                message: 'Record Error',
+                                url: '',
+                                target: '_blank',
+                                type: 'danger'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            action(actionJSON);
+                        }
+                        if (data.success) {
+                            const actionObj = {
+                                icon: 'fas fa-save',
+                                title: '',
+                                message: data.success,
+                                url: '',
+                                target: '_blank',
+                                type: 'success'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            $('#formTitle')[0].reset();
+                            actionreload(actionJSON);
+                        }
+                    }
+                });
+                
+            });
+
+            $(document).on('click', '.edit', async function() {
+                var r = await Otherconfirmation("You want to Edit this ? ");
+                if (r == true) {
+                    var id = $(this).attr('id');
+                    $('#form_result').html('');
+                    $.ajax({
+                        url: "{{ route('roles.edit', ':id') }}".replace(':id', id),
+                        dataType: "json",
+                        success: function (data) {
+                            $('#name').val(data.role.name);
+                            $('#hidden_id').val(data.role.id);
+                            $('input[name="permission[]"]').prop('checked', false);
+
+                            // Loop through returned permissions and check relevant ones
+                            $.each(data.rolePermissions, function (index, permission_id) {
+                                $(`input[name="permission[]"][value="${permission_id}"]`).prop('checked', true);
+                            });
+                            $('.modal-title').text('Edit Role');
+                            $('#action_button').show();
+                            $('#action_button').html('Edit');
+                            $('#action').val('Edit');
+                            $('#formModal').modal('show');
+                        }
+                    })
+                }
+            });
+
+            $(document).on('click', '.view', async function() {
+               
+                    var id = $(this).attr('id');
+                    $('#form_result').html('');
+                    $.ajax({
+                        url: "{{ route('roles.show', ':id') }}".replace(':id', id),
+                        dataType: "json",
+                        success: function (data) {
+                            $('#name').val(data.role.name);
+                            $('#hidden_id').val(data.role.id);
+                            $('input[name="permission[]"]').prop('checked', false);
+
+                            // Loop through returned permissions and check relevant ones
+                            $.each(data.rolePermissions, function (index, permission_id) {
+                                $(`input[name="permission[]"][value="${permission_id}"]`).prop('checked', true);
+                            });
+                            $('.modal-title').text('Edit Role');
+                            $('#action_button').hide();
+                            $('#action').val('Edit');
+                            $('#formModal').modal('show');
+                        }
+                    })
+                
+            });
+
+            $(document).on('click', '.delete', async function() {
+                var r = await Otherconfirmation("You want to remove this ? ");
+                if (r == true) {
+                    id = $(this).attr('id');
+                    $.ajax({
+                        url: "roles/destroy/" + id,
+                        beforeSend: function () {
+                            $('#ok_button').text('Deleting...');
+                        },
+                        success: function (data) {//alert(data);
+                           if (data.errors) {
+                            const actionObj = {
+                                icon: 'fas fa-warning',
+                                title: '',
+                                message: data.errors,
+                                url: '',
+                                target: '_blank',
+                                type: 'danger'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            action(actionJSON);
+                        }
+                        if (data.success) {
+                            const actionObj = {
+                                icon: 'fas fa-save',
+                                title: '',
+                                message: data.success,
+                                url: '',
+                                target: '_blank',
+                                type: 'success'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            $('#formTitle')[0].reset();
+                            actionreload(actionJSON);
+                        }
+                        }
+                    })
+                }
+            });
+
+
+            
 
         });
     </script>
