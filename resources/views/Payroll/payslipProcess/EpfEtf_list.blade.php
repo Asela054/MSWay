@@ -193,15 +193,15 @@
                             <div class="col-12">
                                 <label class="font-weight-bolder small">Report Type</label><br>
                                 <div class="custom-control custom-radio custom-control-inline">
-                                    <input type="radio" id="opt_rpt_a" name="opt_rpt" class="custom-control-input">
+                                    <input type="radio" id="opt_rpt_a" name="opt_rpt" class="custom-control-input" value="1">
                                     <label class="custom-control-label small" for="opt_rpt_a">EPF & ETF</label>
                                 </div>
                                 <div class="custom-control custom-radio custom-control-inline">
-                                    <input type="radio" id="opt_rpt_b" name="opt_rpt" class="custom-control-input">
+                                    <input type="radio" id="opt_rpt_b" name="opt_rpt" class="custom-control-input" value="2">
                                     <label class="custom-control-label small" for="opt_rpt_b">EPF Only</label>
                                 </div>
                                 <div class="custom-control custom-radio custom-control-inline">
-                                    <input type="radio" id="opt_rpt_c" name="opt_rpt" class="custom-control-input">
+                                    <input type="radio" id="opt_rpt_c" name="opt_rpt" class="custom-control-input" value="3">
                                     <label class="custom-control-label small" for="opt_rpt_c">ETF Only</label>
                                 </div>
                             </div>
