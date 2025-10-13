@@ -27,9 +27,9 @@ class RoleController extends Controller
             abort(403);
         }
 
-        $roles = Role::orderBy('id','DESC')->paginate(5);
-        return view('roles.index',compact('roles'))
-            ->with('i', ($request->input('page', 1) - 1) * 5);
+        
+        $permission = Permission::get();
+        return view('roles.index',compact('roles','permission'));
     }
 
     public function create()
@@ -48,6 +48,7 @@ class RoleController extends Controller
 
     public function store(Request $request)
     {
+       
         $user = \Auth::user();
         $permission = $user->can('role-create');
 
@@ -63,8 +64,7 @@ class RoleController extends Controller
         $role = Role::create(['name' => $request->input('name')]);
         $role->permissions()->sync($request->input('permission'));
 
-        return redirect()->route('roles.index')
-                        ->with('success','Role created successfully');
+        return response()->json(['success' => 'Role successfully Created']);
     }
 
     public function show($id)
@@ -78,27 +78,26 @@ class RoleController extends Controller
         }
 
         $role = Role::find($id);
-        $rolePermissions = Permission::join("role_has_permissions","role_has_permissions.permission_id","=","permissions.id")
-            ->where("role_has_permissions.role_id",$id)
-            ->get();
+        $rolePermissions = DB::table("role_has_permissions")
+            ->where("role_has_permissions.role_id", $id)
+            ->pluck('role_has_permissions.permission_id', 'role_has_permissions.permission_id')
+            ->all();
 
-        return view('roles.show',compact('role','rolePermissions'));
+        //return view('roles.show',compact('role','rolePermissions'));
+         return response()->json([
+            'role' => $role,
+            'rolePermissions' => $rolePermissions,
+        ]);
     }
 
 
     public function edit($id)
     {
-        $user = \Auth::user();
-        $permission = $user->can('role-edit');
-
-        if(!$permission){
-            abort(403);
-        }
-
         $role = Role::find($id);
         $permission = Permission::get();
-        $rolePermissions = DB::table("role_has_permissions")->where("role_has_permissions.role_id",$id)
-            ->pluck('role_has_permissions.permission_id','role_has_permissions.permission_id')
+        $rolePermissions = DB::table("role_has_permissions")
+            ->where("role_has_permissions.role_id", $id)
+            ->pluck('role_has_permissions.permission_id', 'role_has_permissions.permission_id')
             ->all();
 
         $perms_with_modules = DB::table("permissions")
@@ -107,11 +106,17 @@ class RoleController extends Controller
             ->get()
             ->toArray();
 
-        return view('roles.edit',compact('role','permission','rolePermissions', 'perms_with_modules'));
+        return response()->json([
+            'role' => $role,
+            'permission' => $permission,
+            'rolePermissions' => $rolePermissions,
+            'perms_with_modules' => $perms_with_modules,
+        ]);
     }
 
 
-    public function update(Request $request, $id)
+
+    public function update(Request $request)
     {
         $user = \Auth::user();
         $permission = $user->can('role-edit');
@@ -125,6 +130,8 @@ class RoleController extends Controller
             'permission' => 'required',
         ]);
 
+        $id = $request->input('hidden_id');
+
         $role = Role::find($id);
         $role->name = $request->input('name');
         $role->save();
@@ -136,8 +143,7 @@ class RoleController extends Controller
         $user->roles()->detach();
         $user->assignRole($userRole);
 
-        return redirect()->route('roles.index')
-                        ->with('success','Role updated successfully');
+        return response()->json(['success' => 'Role successfully Updated']);
     }
 
     public function destroy($id)
@@ -149,8 +155,14 @@ class RoleController extends Controller
             abort(403);
         }
 
-        DB::table("roles")->where('id',$id)->delete();
-        return redirect()->route('roles.index')
-                        ->with('success','Role deleted successfully');
+     
+        if(!$permission) {
+            return response()->json(['errors' => array('You do not have permission to remove Role.')]);
+        }
+
+        $data = Role::findOrFail($id);
+        $data->delete();
+
+        return response()->json(['success' => 'Role deleted successfully.']);
     }
 }

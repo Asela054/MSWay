@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Spatie\Permission\Models\Permission;
+use Illuminate\Support\Facades\Auth;
 use DB;
 
 class PermissionController extends Controller
@@ -23,6 +24,12 @@ class PermissionController extends Controller
     }
      public function store(Request $request)
     {
+        $user = Auth::user();
+        $permission = $user->can('permissions-create');
+        if(!$permission) {
+            return response()->json(['errors' => array('You do not have permission to remove Permission.')]);
+        }
+        
          
         Permission::create([
             'name' => $request->name,
@@ -30,36 +37,58 @@ class PermissionController extends Controller
             'module' => $request->module, 
         ]);
         $modules = DB::table('permissions')->groupBy('module')->get();
-       return redirect()->route('permissions.index')->with('success', 'Permission created successfully.');
+         return response()->json(['success' => 'Permission created  successfully.']);
+       
     }
     public function edit($id)
     {
         $permission =DB::table('permissions')->where('id',$id)->first();
         $modules = DB::table('permissions')->groupBy('module')->get();
-        return view('permission.edit',compact('modules','permission'));
+        // return view('permission.edit',compact('modules','permission'));
+        return response()->json([
+            'permission' => $permission,
+            'modules' => $modules
+        ]);
         
        
     }
 
-     public function update(Request $request,$id)
+     public function update(Request $request)
     {
+        $user = Auth::user();
+        $permission = $user->can('permissions-edit');
+        if(!$permission) {
+            return response()->json(['errors' => array('You do not have permission to update Permission.')]);
+        }
+        $id=$request->hidden_id;
+        // dd($request);
         DB::table('permissions')
         ->where('id', $id)
         ->update([
-            'name' => $request->input('name'),
-            'guard_name' => $request->input('guard_name'),
-            'module' => $request->input('module'),
+            'name' => $request->name,
+            'guard_name' => 'web',
+            'module' => $request->module, 
         ]);
 
-    return redirect()->route('permissions.index')->with('success', 'Permission updated successfully.');
+         return response()->json(['success' => 'Permission updated  successfully.']);
        
     }
     public function destroy($id)
         {
-            DB::table('permissions')->where('id', $id)->delete();
+           
 
-            return redirect()->route('permissions.index')
-                ->with('success', 'Permission deleted successfully.');
+            $user = Auth::user();
+            $permission = $user->can('permissions-delete');
+            if(!$permission) {
+                return response()->json(['errors' => array('You do not have permission to remove Permission.')]);
+            }
+
+            $data = Permission::findOrFail($id);
+            $data->delete();
+
+            return response()->json(['success' => 'Permission deleted successfully.']);
+
+           
         }
 
 

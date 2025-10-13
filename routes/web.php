@@ -21,7 +21,11 @@ Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
 Route::resource('roles','RoleController');
+Route::post('roles.update', 'RoleController@update')->name('roles.update');
+Route::get('roles/destroy/{id}', 'RoleController@destroy');
 Route::resource('permissions','PermissionController');
+Route::post('permissions.update', 'PermissionController@update')->name('permissions.update');
+Route::get('permissions/destroy/{id}', 'PermissionController@destroy');
 Route::resource('users','UserController');
 Route::get('users/destroy/{id}', 'UserController@destroy');
 Route::post('users.update', 'UserController@update')->name('users.update');
