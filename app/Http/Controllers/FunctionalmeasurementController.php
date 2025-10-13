@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Commen;
 use App\Functionalmeasurement;
-use App \Functionaldepartment_detail;
+use App\Functionaldepartment_detail;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Auth;
@@ -55,34 +55,42 @@ class FunctionalmeasurementController extends Controller
             return response()->json(['error' => 'UnAuthorized'], 401);
         }
         
+        $tableData = $request->input('tabledata');
+        
+        if (is_string($tableData)) {
+            $tableData = json_decode($tableData, true);
+        }
+        
+        if (empty($tableData) || !is_array($tableData)) {
+            return response()->json(['errors' => 'Please add at least one department to the list'], 422);
+        }
+        
         $functionalmeasurement = new Functionalmeasurement();
         $functionalmeasurement->type_id = $request->input('type');
         $functionalmeasurement->kpi_id = $request->input('kpi');
         $functionalmeasurement->parameter_id = $request->input('parameter');
-        $functionalmeasurement->measurement =  $request->input('measurement');
+        $functionalmeasurement->measurement = $request->input('measurement');
         $functionalmeasurement->status = '1';
         $functionalmeasurement->created_by = Auth::id();
         $functionalmeasurement->updated_by = '0';
         $functionalmeasurement->save();
         
-
-        $requestID=$functionalmeasurement->id;
-        $tableData = $request->input('tableData');
+        $requestID = $functionalmeasurement->id;
+        
         foreach ($tableData as $rowtabledata) {
             $department = $rowtabledata['col_1'];
-            $departmentweightage = $rowtabledata['col_2'];
-
+            $departmentweightage = trim($rowtabledata['col_2']); // Trim whitespace
         
-        $functionaldepartment_detail = new Functionaldepartment_detail();
-        $functionaldepartment_detail->measurement_id = $requestID;
-        $functionaldepartment_detail->department_id = $department;
-        $functionaldepartment_detail->departmentweightage = $departmentweightage;
-        $functionaldepartment_detail->status = '1';
-        $functionaldepartment_detail->created_by = Auth::id();
-        $functionaldepartment_detail->updated_by = '0';
-        $functionaldepartment_detail->save();
-        
+            $functionaldepartment_detail = new Functionaldepartment_detail();
+            $functionaldepartment_detail->measurement_id = $requestID;
+            $functionaldepartment_detail->department_id = $department;
+            $functionaldepartment_detail->departmentweightage = $departmentweightage;
+            $functionaldepartment_detail->status = '1';
+            $functionaldepartment_detail->created_by = Auth::id();
+            $functionaldepartment_detail->updated_by = '0';
+            $functionaldepartment_detail->save();
         }
+        
         return response()->json(['success' => 'Functional Measurement is Successfully Inserted']);
     }
 
@@ -106,7 +114,7 @@ class FunctionalmeasurementController extends Controller
         if (!$permission) {
             return response()->json(['error' => 'UnAuthorized'], 401);
         } 
-                            $btn .= ' <button name="view" id="'.$row->id.'" class="view btn btn-outline-secondary btn-sm" type="submit"><i class="fas fa-eye"></i></button>';
+                            $btn .= ' <button name="view" id="'.$row->id.'" class="view btn btn-secondary btn-sm" type="submit"><i class="fas fa-eye"></i></button>';
 
                             // if($row->status == 1){
                             //     $btn .= ' <a href="'.route('functionalmeasurementstatus', ['id' => $row->id, 'stasus' => 2]) .'" onclick="return deactive_confirm()" target="_self" class="btn btn-outline-success btn-sm mr-1 "><i class="fas fa-check"></i></a>';
@@ -114,7 +122,7 @@ class FunctionalmeasurementController extends Controller
                             //     $btn .= '&nbsp;<a href="'.route('functionalmeasurementstatus', ['id' => $row->id, 'stasus' => 1]) .'" onclick="return active_confirm()" target="_self" class="btn btn-outline-warning btn-sm mr-1 "><i class="fas fa-times"></i></a>';
                             // }
                        
-                            $btn .= ' <button name="delete" id="'.$row->id.'" class="delete btn btn-outline-danger btn-sm"><i class="far fa-trash-alt"></i></button>';
+                            $btn .= ' <button name="delete" id="'.$row->id.'" class="delete btn btn-danger btn-sm"><i class="far fa-trash-alt"></i></button>';
               
                 return $btn;
             })
@@ -130,12 +138,16 @@ class FunctionalmeasurementController extends Controller
             return response()->json(['error' => 'UnAuthorized'], 401);
         } 
 
+        $id = $request->input('id');
         $data = DB::table('functionalmeasurements')
-        ->leftjoin('functionaltypes', 'functionalmeasurements.type_id', '=', 'functionaltypes.id')
-        ->select('functionalmeasurements.*', 'functionaltypes.id AS type_id')
-        ->where('functionalmeasurements.id', $id)
-        ->get();
+            ->leftjoin('functionaltypes', 'functionalmeasurements.type_id', '=', 'functionaltypes.id')
+            ->leftjoin('functionalkpis', 'functionalmeasurements.kpi_id', '=', 'functionalkpis.id')
+            ->leftjoin('functionalparameters', 'functionalmeasurements.parameter_id', '=', 'functionalparameters.id')
+            ->select('functionalmeasurements.*', 'functionaltypes.id AS type_id', 'functionalkpis.id AS kpi_id', 'functionalparameters.id AS parameter_id')
+            ->where('functionalmeasurements.id', $id)
+            ->first();
 
+        return response()->json(['result' => $data]);
     }
 
     public function update(Request $request){

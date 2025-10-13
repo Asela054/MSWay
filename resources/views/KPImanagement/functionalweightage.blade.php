@@ -130,9 +130,9 @@
                                 <table class="table table-striped table-bordered table-sm small" id="tableorder">
                                     <thead>
                                         <tr>
-                                            <th>Parameter</th>
-                                            <th>Weightage(%)</th>
-                                            <th>Action</th>
+                                            <th>PARAMETER</th>
+                                            <th>WEIGHTAGE(%)</th>
+                                            <th>ACTION</th>
                                         </tr>
                                     </thead>
                                     <tbody id="tableorderlist"></tbody>

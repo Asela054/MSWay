@@ -3,192 +3,167 @@
 @section('content')
 
 <main>
-    <div class="page-header page-header-light bg-white shadow">
-        <div class="container-fluid">
+    <div class="page-header shadow">
+        <div class="container-fluid d-none d-sm-block shadow">
             @include('layouts.functional_nav_bar')
         </div>
+        <div class="container-fluid">
+            <div class="page-header-content py-3 px-2">
+                <h1 class="page-header-title ">
+                    <div class="page-header-icon"><i class="fa-light fa-chart-user"></i></div>
+                    <span>Functional Measurement</span>
+                </h1>
+            </div>
+        </div>
     </div>
-    <br>
-    <div class="container-fluid">
-        <div class="card">
-            <div class="card-body p-0 p-2">
-                <div class="row">
-                    <div class="col-12">
-               
-                        <button type="button" class="btn btn-outline-primary btn-sm fa-pull-right" name="create_record"
-                            id="create_record"><i class="fas fa-plus mr-2"></i>Add Measurement</button>
-                    
-                    </div>
-                    <div class="col-12">
-                        <hr class="border-dark">
-                    </div>
-                    <div class="col-12">
-                        <div class="center-block fix-width scroll-inner">
-                            <table class="table table-striped table-bordered table-sm small nowrap display" style="width: 100%"
-                                id="dataTable">
-                                <thead>
-                                    <tr>
-                                        <th>ID </th>
-                                        <th>KRA</th>
-                                        <th>KPI</th>
-                                        <th>Parameter</th>
-                                        <th>Measurement</th>
-                                        <th class="text-right">Action</th>
-                                    </tr>
-                                </thead>
-
-                                <tbody>
-
-                                </tbody>
-                            </table>
-                        </div>
+    <div class="container-fluid mt-2 p-0 p-2">
+    <div class="card">
+        <div class="card-body p-0 p-2">
+            <div class="row">
+                <div class="col-12">
+                    <button type="button" class="btn btn-primary btn-sm fa-pull-right" name="create_record"
+                        id="create_record"><i class="fas fa-plus mr-2"></i>Add</button>
+                </div>
+                <div class="col-12">
+                    <hr class="border-dark">
+                </div>
+                <div class="col-12">
+                    <div class="center-block fix-width scroll-inner">
+                        <table class="table table-striped table-bordered table-sm small nowrap display" style="width: 100%"
+                            id="dataTable">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>KRA</th>
+                                    <th>KPI</th>
+                                    <th>PARAMETER</th>
+                                    <th>MEASUREMENT</th>
+                                    <th class="text-right">ACTION</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- Modal Area Start -->
-    <div class="modal fade" id="formModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-        aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-xl">
-            <div class="modal-content">
-                <div class="modal-header p-2">
-                    <h5 class="modal-title" id="staticBackdropLabel">Add Measurement</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-4">
-                            <span id="form_result"></span>
-                            <form method="post" id="formTitle" class="form-horizontal">
-                                {{ csrf_field() }}
-                                <div class="form-row mb-1">
-                                    <div class="col-12">
-                                        <label class="small font-weight-bold text-dark">Functional KRA*</label>
-                                        <select name="type" id="type" class="form-control form-control-sm"
-                                            required>
-                                            <option value="">Select KRA</option>
-                                            @foreach($functionaltypes as $functionaltype)
-                                            <option value="{{$functionaltype->id}}">{{$functionaltype->type}}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
+</div>
+
+<!-- Modal Area Start -->
+<div class="modal fade" id="formModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header p-2">
+                <h5 class="modal-title" id="staticBackdropLabel">Add Measurement</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-4 col-md-12 mb-3 mb-lg-0">
+                        <span id="form_result"></span>
+                        <form method="post" id="formTitle" class="form-horizontal">
+                            {{ csrf_field() }}
+                            <div class="form-row mb-1">
+                                <div class="col-12">
+                                    <label class="small font-weight-bold text-dark">Functional KRA*</label>
+                                    <select name="type" id="type" class="form-control form-control-sm" required>
+                                        <option value="">Select KRA</option>
+                                        @foreach($functionaltypes as $functionaltype)
+                                        <option value="{{$functionaltype->id}}">{{$functionaltype->type}}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
-                                <div class="form-row mb-1">
-                                    <div class="col-12">
-                                        <label class="small font-weight-bold text-dark">KPI*</label>
-                                        <select name="kpi" id="kpi" class="form-control form-control-sm"
-                                        required>
+                            </div>
+                            <div class="form-row mb-1">
+                                <div class="col-12">
+                                    <label class="small font-weight-bold text-dark">KPI*</label>
+                                    <select name="kpi" id="kpi" class="form-control form-control-sm" required>
                                         <option value="">Select KPI</option>
                                     </select>
-                                    </div>
                                 </div>
-                                <div class="form-row mb-1">
-                                    <div class="col-12">
-                                        <label class="small font-weight-bold text-dark">Parameter*</label>
-                                        <select name="parameter" id="parameter" class="form-control form-control-sm"
-                                        required>
-                                        <option value="">Select Parameter</option>
+                            </div>
+                            <div class="form-row mb-1">
+                                <div class="col-12">
+                                    <label class="small font-weight-bold text-dark">Parameter*</label>
+                                    <select name="parameter" id="parameter" class="form-control form-control-sm" required>
+                                        <option value="">Select Measurement</option>
                                     </select>
-                                    </div>
                                 </div>
-                                <div class="form-row mb-1">
-                                    <div class="col-12">
-                                        <label class="small font-weight-bold text-dark">Measurement*</label>
-                                        <input type="text" id="measurement" name="measurement" class="form-control form-control-sm"
-                                            required>
-                                    </div>
+                            </div>
+                            <div class="form-row mb-1">
+                                <div class="col-12">
+                                    <label class="small font-weight-bold text-dark">Measurement*</label>
+                                    <input type="text" id="measurement" name="measurement" class="form-control form-control-sm" required>
                                 </div>
-                                <div class="form-row mb-1">
-                                    <div class="col-12">
+                            </div>
+                            <div class="form-row mb-1">
+                                <div class="col-12">
                                     <label class="small font-weight-bold text-dark">Department*</label>
-                                        <select name="name" id="name" class="form-control form-control-sm"
-                                            required>
-                                            <option value="">Select Department</option>
-                                            @foreach($departments as $department)
-                                            <option value="{{$department->id}}">{{$department->name}}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
+                                    <select name="name" id="name" class="form-control form-control-sm" required>
+                                        <option value="">Select Department</option>
+                                        @foreach($departments as $department)
+                                        <option value="{{$department->id}}">{{$department->name}}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
-                                <div class="form-row mb-1">
-                                    <div class="col-12">
-                                        <label class="small font-weight-bold text-dark">Department Weightage*</label>
-                                        <input type="number" id="departmentweightage" name="departmentweightage" class="form-control form-control-sm"
-                                            required>
-                                    </div>
+                            </div>
+                            <div class="form-row mb-1">
+                                <div class="col-12">
+                                    <label class="small font-weight-bold text-dark">Department Weightage*</label>
+                                    <input type="number" id="departmentweightage" name="departmentweightage" class="form-control form-control-sm" required>
                                 </div>
-                                <div class="form-group mt-3">
-                                    <button type="button" id="formsubmit"
-                                        class="btn btn-primary btn-sm px-4 float-right"><i
-                                            class="fas fa-plus"></i>&nbsp;Add to list</button>
-                                    <input name="submitBtn" type="submit" value="Save" id="submitBtn" class="d-none">
-                                    <button type="button" name="Btnupdatelist" id="Btnupdatelist"
-                                        class="btn btn-primary btn-sm px-4 fa-pull-right" style="display:none;"><i
-                                            class="fas fa-plus"></i>&nbsp;Update List</button>
-                                </div>
-                                <input type="hidden" name="action" id="action" value="Add" />
-                                <input type="hidden" name="hidden_id" id="hidden_id" />
-                                <input type="hidden" name="oprderdetailsid" id="oprderdetailsid">
-
-                            </form>
-                        </div>
-                        <div class="col-8">
+                            </div>
+                            <div class="form-group mt-3">
+                                <button type="button" id="formsubmit" class="btn btn-primary btn-sm px-3 px-md-4 float-right">
+                                    <i class="fas fa-plus"></i>&nbsp;<span class="d-none d-sm-inline">Add to list</span><span class="d-inline d-sm-none">Add</span>
+                                </button>
+                                <input name="submitBtn" type="submit" value="Save" id="submitBtn" class="d-none">
+                                <button type="button" name="Btnupdatelist" id="Btnupdatelist"
+                                    class="btn btn-primary btn-sm px-3 px-md-4 fa-pull-right" style="display:none;">
+                                    <i class="fas fa-plus"></i>&nbsp;<span class="d-none d-sm-inline">Update List</span><span class="d-inline d-sm-none">Update</span>
+                                </button>
+                            </div>
+                            <input type="hidden" name="action" id="action" value="Add" />
+                            <input type="hidden" name="hidden_id" id="hidden_id" />
+                            <input type="hidden" name="oprderdetailsid" id="oprderdetailsid">
+                        </form>
+                    </div>
+                    <div class="col-lg-8 col-md-12">
+                        <div class="table-responsive">
                             <table class="table table-striped table-bordered table-sm small" id="tableorder">
                                 <thead>
                                     <tr>
-                                        <th>Department</th>
-                                        <th>Department Weightage</th>
-                                        <th>Action</th>
+                                        <th>DEPARTMENT</th>
+                                        <th>WEIGHTAGE</th>
+                                        <th>ACTION</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tableorderlist"></tbody>
                             </table>
-                            <div class="form-group mt-2">
-                                <button type="button" name="btncreateorder" id="btncreateorder"
-                                    class="btn btn-outline-primary btn-sm fa-pull-right px-4"><i
-                                        class="fas fa-plus"></i>&nbsp;Create</button>
-
-                            </div>
+                        </div>
+                        <div class="form-group mt-2">
+                            <button type="button" name="btncreateorder" id="btncreateorder"
+                                class="btn btn-primary btn-sm fa-pull-right px-3 px-md-4">
+                                <i class="fas fa-plus"></i>&nbsp;Create
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <div class="modal fade" id="confirmModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-        aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content">
-                <div class="modal-header p-2">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col text-center">
-                            <h4 class="font-weight-normal">Are you sure you want to remove this data?</h4>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer p-2">
-                    <button type="button" name="ok_button" id="ok_button" class="btn btn-danger px-3 btn-sm">OK</button>
-                    <button type="button" class="btn btn-dark px-3 btn-sm" data-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="viewconfirmModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-        aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+<div class="modal fade" id="viewconfirmModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header p-2">
-                <h5 class="aviewmodal-title" id="staticBackdropLabel">View Mesurement Departments</h5>
+                <h5 class="modal-title" id="staticBackdropLabel">View Measurement Departments</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -212,29 +187,26 @@
                         </div>
                     </div>
                     <hr>
-                <div class="row">
-                    <div class="col-12">
-                        <div class="center-block fix-width scroll-inner">
-                            <table class="table table-striped table-bordered table-sm small" id="view_tableorder">
-                                <thead>
-                                    <tr>
-                                        <th>Department</th>
-                                        <th>Weightage</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="view_tableorderlist"></tbody>
-                            </table>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-bordered table-sm small" id="view_tableorder">
+                                    <thead>
+                                        <tr>
+                                            <th>DEPARTMENT</th>
+                                            <th>WEIGHTAGE</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="view_tableorderlist"></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
-                </div>
-                
                 </form>
             </div>
         </div>
     </div>
 </div>
-
-     
 
     <!-- Modal Area End -->
 </main>
@@ -245,14 +217,51 @@
 @section('script')
 
 <script>
+
+    function productDelete(button) {
+        $(button).closest('tr').remove();
+    }
+
     $(document).ready(function () {
 
         $("#functional").addClass('navbtnactive');
         $('#functional_menu_link').addClass('active');
 
         $('#dataTable').DataTable({
-            processing: true,
-            serverSide: true,
+            "destroy": true,
+            "processing": true,
+            "serverSide": false, 
+            dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+            "buttons": [{
+                    extend: 'csv',
+                    className: 'btn btn-success btn-sm',
+                    title: 'Measurement Details',
+                    text: '<i class="fas fa-file-csv mr-2"></i> CSV',
+                },
+                { 
+                    extend: 'pdf', 
+                    className: 'btn btn-danger btn-sm', 
+                    title: 'Measurement Details', 
+                    text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
+                    orientation: 'portrait', 
+                    pageSize: 'legal', 
+                    customize: function(doc) {
+                        doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+                    }
+                },
+                {
+                    extend: 'print',
+                    title: 'Measurement Details',
+                    className: 'btn btn-primary btn-sm',
+                    text: '<i class="fas fa-print mr-2"></i> Print',
+                    customize: function(win) {
+                        $(win.document.body).find('table')
+                            .addClass('compact')
+                            .css('font-size', 'inherit');
+                    },
+                },
+            ],
             ajax: {
                 "url": "{!! route('functionalmeasurementlist') !!}",
 
@@ -287,7 +296,6 @@
                     }
                 },
             ],
-            "bDestroy": true,
             "order": [
                 [0, "desc"]
             ]
@@ -298,21 +306,19 @@
             $('#action').val('Add');
             $('#form_result').html('');
             $('#formTitle')[0].reset();
-
+            $('#tableorder tbody').empty();
             $('#formModal').modal('show');
         });
 
         $("#formsubmit").click(function () {
             if (!$("#formTitle")[0].checkValidity()) {
-                // If the form is invalid, submit it. The form won't actually submit;
-                // this will just cause the browser to display the native HTML5 error messages.
                 $("#submitBtn").click();
             } else {
-                var name = $('#name').val();
+                var name = $('#name option:selected').text(); 
+                var name_id = $('#name').val(); 
                 var departmentweightage = $('#departmentweightage').val();
 
-                $('#tableorder > tbody:last').append('<tr class="pointer"><td> '+ name +' </td><td> '+ departmentweightage +' </td><td><button type="button" onclick= "productDelete(this);" id="btnDeleterow" class=" btn btn-danger btn-sm "><i class="fas fa-trash-alt"></i></button></td></tr>'
-                );
+                $('#tableorder > tbody:last').append('<tr class="pointer"><td data-id="'+ name_id +'">'+ name +' </td><td> '+ departmentweightage +' </td><td><button type="button" onclick="productDelete(this);" id="btnDeleterow" class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i></button></td></tr>');
 
                 $('#name').val('');
                 $('#departmentweightage').val('');
@@ -351,9 +357,8 @@
                 var jsonObj = [];
                 $("#tableorder tbody tr").each(function () {
                     var item = {};
-                    $(this).find('td').each(function (col_idx) {
-                        item["col_" + (col_idx + 1)] = $(this).text();
-                    });
+                    item["col_1"] = $(this).find('td').eq(0).data('id'); // Get department ID
+                    item["col_2"] = $(this).find('td').eq(1).text(); // Get weightage
                     jsonObj.push(item);
                 });
 
@@ -366,48 +371,95 @@
                 var hidden_id = $('#hidden_id').val();
 
                 $.ajax({
+                    url: action_url,
                     method: "POST",
-                    dataType: "json",
                     data: {
-                        _token: '{{ csrf_token() }}',
-                        tableData: jsonObj,
+                        _token: $('meta[name="csrf-token"]').attr('content'),
                         type: type,
                         kpi: kpi,
                         parameter: parameter,
                         measurement: measurement,
-                        name : name,
-                        departmentweightage : departmentweightage,
+                        tabledata: JSON.stringify(jsonObj), 
                         hidden_id: hidden_id,
-
+                        action: $('#action').val()
                     },
-                    url: action_url,
-                    success: function (data) { //alert(data);
-                        var html = '';
+                    dataType: "json",
+                    success: function (data) {
+                        $('#btncreateorder').prop('disabled', false).html('<i class="fas fa-plus"></i>&nbsp;Create');
+
                         if (data.errors) {
-                            html = '<div class="alert alert-danger">';
-                            for (var count = 0; count < data.errors.length; count++) {
-                                html += '<p>' + data.errors[count] + '</p>';
+                            if (Array.isArray(data.errors)) {
+                                var errorHtml = '<div class="alert alert-danger"><ul class="mb-0">';
+                                data.errors.forEach(function(error) {
+                                    errorHtml += '<li>' + error + '</li>';
+                                });
+                                errorHtml += '</ul></div>';
+                                $('#form_result').html(errorHtml);
+                            } else {
+                                $('#form_result').html('<div class="alert alert-danger">' + data.errors + '</div>');
                             }
-                            html += '</div>';
-                        }
-                        if (data.success) {
-                            html = '<div class="alert alert-success">' + data.success +
-                                '</div>';
+
+                            const actionObj = {
+                                icon: 'fas fa-warning',
+                                title: '',
+                                message: 'Record Error',
+                                url: '',
+                                target: '_blank',
+                                type: 'danger'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            action(actionJSON);
+                        } else if (data.success) {
+                            const actionObj = {
+                                icon: 'fas fa-save',
+                                title: '',
+                                message: data.success,
+                                url: '',
+                                target: '_blank',
+                                type: 'success'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            
                             $('#formTitle')[0].reset();
-                            //$('#titletable').DataTable().ajax.reload();
-                            window.location.reload(); // Use window.location.reload()
+                            $('#tableorderlist').empty();
+                            $('#tableorder tbody').empty();
+                            $('#form_result').html('');
+                            $('#formModal').modal('hide');
+                            actionreload(actionJSON);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        $('#btncreateorder').prop('disabled', false).html('<i class="fas fa-plus"></i>&nbsp;Create');
+
+                        console.log('Error:', error);
+                        console.log('Response:', xhr.responseText);
+
+                        var errorMessage = 'Something went wrong!';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
                         }
 
-                        $('#form_result').html(html);
-                        // resetfield();
+                        $('#form_result').html('<div class="alert alert-danger">' + errorMessage + '</div>');
 
+                        const actionObj = {
+                            icon: 'fas fa-warning',
+                            title: '',
+                            message: errorMessage,
+                            url: '',
+                            target: '_blank',
+                            type: 'danger'
+                        };
+                        const actionJSON = JSON.stringify(actionObj, null, 2);
+                        action(actionJSON);
                     }
                 });
             }
         });
 
         // edit function
-        $(document).on('click', '.edit', function () {
+        $(document).on('click', '.edit', async function () {
+            var r = await Otherconfirmation("You want to Edit this ? ");
+            if (r == true) {
             var id = $(this).attr('id');
 
             $('#form_result').html('');
@@ -436,10 +488,14 @@
                     $('.modal-title').text('Edit Functional Measurement');
                     $('#action_button').html('Edit');
                     $('#EditformModal').modal('show');
-                }
-            })
+                },
+                    error: function(xhr, status, error) {
+                        console.log('Error:', error);
+                    }
+                });
+            }
         });
-    // update 
+
         $('#action_button').click(function ()  {
             var id = $('#edithidden_id').val();
             var type = $('#edittype').val();
@@ -496,36 +552,42 @@
 
         var user_id;
 
-        $(document).on('click', '.delete', function () {
-            user_id = $(this).attr('id');
-            $('#confirmModal').modal('show');
-        });
+        $(document).on('click', '.delete', async function () {
+            var r = await Otherconfirmation("You want to remove this ? ");
+            if (r == true) {
+                user_id = $(this).attr('id');
 
-        $('#ok_button').click(function () {
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            })
-            $.ajax({
-                url: '{!! route("functionalmeasurementdelete") !!}',
-                type: 'POST',
-                dataType: "json",
-                data: {
-                    id: user_id
-                },
-                beforeSend: function () {
-                    $('#ok_button').text('Deleting...');
-                },
-                success: function (data) { //alert(data);
-                    setTimeout(function () {
-                        $('#confirmModal').modal('hide');
-                        $('#dataTable').DataTable().ajax.reload();
-                        // alert('Data Deleted');
-                    }, 2000);
-                    location.reload()
-                }
-            })
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    }
+                });
+
+                $.ajax({
+                    url: '{!! route("functionalmeasurementdelete") !!}',
+                    type: 'POST',
+                    dataType: "json",
+                    data: { id: user_id },
+                    beforeSend: function () {
+                        $('#ok_button').text('Deleting...');
+                    },
+                    success: function (data) {
+                        const actionObj = {
+                            icon: 'fas fa-trash-alt',
+                            title: '',
+                            message: 'Record Remove Successfully',
+                            url: '',
+                            target: '_blank',
+                            type: 'danger'
+                        };
+                        const actionJSON = JSON.stringify(actionObj, null, 2);
+                        actionreload(actionJSON);
+                    },
+                    error: function(xhr, status, error) {
+                        console.log('Error:', error);
+                    }
+                });
+            }
         });
 
     });
@@ -583,7 +645,7 @@
     }
 });
 
-    // Parameter filter insert part
+    // Measurement filter insert part
     $('#kpi').change(function () {
             var kpi = $(this).val();
             if (kpi !== '') {
@@ -594,7 +656,7 @@
                     dataType: 'json',
                     success: function (data) {
                         $('#parameter').empty().append(
-                            '<option value="">Select Parameter</option>');
+                            '<option value="">Select Measurement</option>');
                         $.each(data, function (index, parameter) {
                             $('#parameter').append('<option value="' + parameter.id + '">' + parameter.parameter + '</option>');
                         });
@@ -604,7 +666,7 @@
                     }
                 });
             } else {
-                $('#parameter').empty().append('<option value="">Select Parameter</option>');
+                $('#parameter').empty().append('<option value="">Select Measurement</option>');
             }
         });
 
@@ -636,7 +698,7 @@
             }
         };
 
-    // Parameter filter edit part
+    // Measurement filter edit part
     function getparameter(kpi,parameter_id){
             if (kpi !== '') {
                 $.ajax({
@@ -646,7 +708,7 @@
                     dataType: 'json',
                     success: function (data) {
                         $('#parameter').empty().append(
-                            '<option value="">Select Parameter</option>');
+                            '<option value="">Select Measurement</option>');
                         $.each(data, function (index, parameter) {
                             $('#parameter').append('<option value="' + parameter
                                 .id + '">' + parameter.parameter + '</option>');
@@ -658,21 +720,9 @@
                     }
                 });
             } else {
-                $('#parameter').empty().append('<option value="">Select Parameter</option>');
+                $('#parameter').empty().append('<option value="">Select Measurement</option>');
             }
         };
-
-    function productDelete(row) {
-        $(row).closest('tr').remove();
-    }
-
-    function deactive_confirm() {
-        return confirm("Are you sure you want to deactive this?");
-    }
-
-    function active_confirm() {
-        return confirm("Are you sure you want to active this?");
-    }
 </script>
 
 @endsection

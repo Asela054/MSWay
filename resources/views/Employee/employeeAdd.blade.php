@@ -71,53 +71,53 @@
             <div class="offcanvas-body">
                 <ul class="list-unstyled">
                     <form class="form-horizontal" id="formFilter">
-                        <li class="mb-3">
+                        <li class="mb-2">
                             <div class="col-md-12">
                                 <label class="small font-weight-bolder text-dark">Company</label>
                                 <select name="company" id="company_f" class="form-control form-control-sm">
                                 </select>
                             </div>
                         </li>
-                        <li class="mb-3">
+                        <li class="mb-2">
                             <div class="col-md-12">
                                 <label class="small font-weight-bolder text-dark">Department</label>
                                 <select name="department" id="department_f" class="form-control form-control-sm">
                                 </select>
                             </div>
                         </li>
-                        <li class="mb-3">
+                        <li class="mb-2">
                             <div class="col-md-12">
                                 <label class="small font-weight-bolder text-dark">Location</label>
                                 <select name="location" id="location_f" class="form-control form-control-sm">
                                 </select>
                             </div>
                         </li>
-                        <li class="mb-3">
+                        <li class="mb-2">
                             <div class="col-md-12">
                                 <label class="small font-weight-bolder text-dark">Employee</label>
                                 <select name="employee" id="employee_f" class="form-control form-control-sm">
                                 </select>
                             </div>
                         </li>
-                        <li class="mb-3">
+                        <li class="mb-2">
                             <div class="col-md-12">
                                 <label class="small font-weight-bolder text-dark"> From Date </label>
                                     <input type="date" id="from_date" name="from_date" class="form-control form-control-sm" placeholder="yyyy-mm-dd">
                             </div>
                         </li>
-                        <li class="mb-3">
+                        <li class="mb-2">
                             <div class="col-md-12">
                                 <label class="small font-weight-bolder text-dark"> To Date</label>
                                     <input type="date" id="to_date" name="to_date" class="form-control form-control-sm"  placeholder="yyyy-mm-dd">
                             </div>
                         </li>
                         <li>
-                            <div class="col-md-12">
-                                <button type="submit" class="btn btn-primary btn-sm fa-pull-right ml-2" id="btn-filter">
-                                    <i class="fas fa-search mr-2"></i>Search
-                                </button>
-                                <button type="button" class="btn btn-danger btn-sm fa-pull-right ml-2" id="btn-reset">
+                            <div class="col-md-12 d-flex justify-content-between">
+                                <button type="button" class="btn btn-danger btn-sm filter-btn px-3" id="btn-reset">
                                     <i class="fas fa-redo mr-1"></i> Reset
+                                </button>
+                                <button type="submit" class="btn btn-primary btn-sm filter-btn px-3" id="btn-filter">
+                                    <i class="fas fa-search mr-2"></i>Search
                                 </button>
                             </div>
                         </li>
@@ -125,6 +125,7 @@
                 </ul>
             </div>
         </div>
+
     </div>
 
     <!-- Modal Area Start -->
@@ -396,7 +397,7 @@
                                     <button type="submit" name="action_button" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
                                 </div>
                                 <input type="hidden" name="action" id="action" value="Add" />
-                                <button type="reset" class="btn btn-primary btn-sm"><i class="far fa-trash-alt"></i>&nbsp;Clear</button>   
+                                <button type="reset" class="btn btn-danger btn-sm fa-pull-right px-4"><i class="far fa-trash-alt"></i>&nbsp;Clear</button>   
                                 <input type="hidden" name="hidden_id" id="hidden_id" />
                             </form>
                         </div>
@@ -859,6 +860,9 @@ $(document).ready(function () {
                 },
             ],
             order: [[0, "asc"]],
+            drawCallback: function(settings) {
+                $('[data-toggle="tooltip"]').tooltip();
+            },
             destroy: true
         });
     }    

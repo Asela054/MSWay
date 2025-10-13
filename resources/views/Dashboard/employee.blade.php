@@ -4,7 +4,7 @@
 
 <main>
     <div class="page-header shadow">
-        <div class="container-fluid">
+        <div class="container-fluid d-none d-sm-block shadow">
             @include('layouts.employee_nav_bar')
         </div>
         <div class="container-fluid">
@@ -16,7 +16,7 @@
             </div>
         </div>
     </div>
-    <div class="container-fluidmt-2 p-0 p-2">
+    <div class="container-fluid mt-2 p-0 p-2">
         <div class="card">
             <div class="card-body p-0 p-2">
                 <div class="row">

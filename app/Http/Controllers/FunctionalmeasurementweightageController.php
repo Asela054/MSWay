@@ -56,25 +56,51 @@ class FunctionalmeasurementweightageController extends Controller
             return response()->json(['error' => 'UnAuthorized'], 401);
         }
         
-        $tableData = $request->input('tableData');
-        foreach ($tableData as $rowtabledata) {
-            $measurement = $rowtabledata['col_1'];
-            $measurement_weightage = $rowtabledata['col_2'];
-
-        $functionalmeasurement = new Functionalmeasurementweightage();
-        $functionalmeasurement->type_id = $request->input('type');
-        $functionalmeasurement->kpi_id = $request->input('kpi');
-        $functionalmeasurement->parameter_id = $request->input('parameter');
-        $functionalmeasurement->measurement_id = $measurement;
-        $functionalmeasurement->measurement_weightage = $measurement_weightage;
-        $functionalmeasurement->status = '1';
-        $functionalmeasurement->created_by = Auth::id();
-        $functionalmeasurement->updated_by = '0';
-        $functionalmeasurement->save();
+        $tableData = json_decode($request->input('tabledata'), true);
         
+        if (!$tableData || empty($tableData)) {
+            return response()->json(['errors' => 'No measurement data provided'], 400);
         }
+        
+        foreach ($tableData as $rowtabledata) {
+            $measurement_text = $rowtabledata['col_1'];
+            $measurement_weightage = $rowtabledata['col_2'];
+            
+            $measurement = DB::table('functionalmeasurements')
+                ->where('measurement', $measurement_text)
+                ->where('parameter_id', $request->input('parameter'))
+                ->first();
+                
+            if (!$measurement) {
+                continue; 
+            }
+
+            $exists = Functionalmeasurementweightage::where('type_id', $request->input('type'))
+                ->where('kpi_id', $request->input('kpi'))
+                ->where('parameter_id', $request->input('parameter'))
+                ->where('measurement_id', $measurement->id)
+                ->where('status', '1')
+                ->first();
+                
+            if ($exists) {
+                continue; 
+            }
+
+            $functionalmeasurement = new Functionalmeasurementweightage();
+            $functionalmeasurement->type_id = $request->input('type');
+            $functionalmeasurement->kpi_id = $request->input('kpi');
+            $functionalmeasurement->parameter_id = $request->input('parameter');
+            $functionalmeasurement->measurement_id = $measurement->id;
+            $functionalmeasurement->measurement_weightage = $measurement_weightage;
+            $functionalmeasurement->status = '1';
+            $functionalmeasurement->created_by = Auth::id();
+            $functionalmeasurement->updated_by = '0';
+            $functionalmeasurement->save();
+        }
+        
         return response()->json(['success' => 'Functional Measurement Weightage is Successfully Inserted']);
     }
+
 
     public function requestlist()
     {
@@ -103,7 +129,7 @@ class FunctionalmeasurementweightageController extends Controller
                             //     $btn .= '&nbsp;<a href="'.route('functionalmeasurementweightagestatus', ['id' => $row->id, 'stasus' => 1]) .'" onclick="return active_confirm()" target="_self" class="btn btn-outline-warning btn-sm mr-1 "><i class="fas fa-times"></i></a>';
                             // }
                        
-                            $btn .= ' <button name="delete" id="'.$row->id.'" class="delete btn btn-outline-danger btn-sm"><i class="far fa-trash-alt"></i></button>';
+                            $btn .= ' <button name="delete" id="'.$row->id.'" class="delete btn btn-danger btn-sm"><i class="far fa-trash-alt"></i></button>';
               
                 return $btn;
             })
@@ -119,12 +145,22 @@ class FunctionalmeasurementweightageController extends Controller
             return response()->json(['error' => 'UnAuthorized'], 401);
         } 
 
-        $data = DB::table('functionalmeasurementweightages')
-        ->leftjoin('functionaltypes', 'functionalmeasurementweightages.type_id', '=', 'functionaltypes.id')
-        ->select('functionalmeasurementweightages.*', 'functionaltypes.id AS type_id')
-        ->where('functionalmeasurementweightages.id', $id)
-        ->get();
+        $id = $request->id; // Add this line
 
+        $data = DB::table('functionalmeasurementweightages')
+            ->leftjoin('functionaltypes', 'functionalmeasurementweightages.type_id', '=', 'functionaltypes.id')
+            ->leftjoin('functionalkpis', 'functionalmeasurementweightages.kpi_id', '=', 'functionalkpis.id')
+            ->leftjoin('functionalparameters', 'functionalmeasurementweightages.parameter_id', '=', 'functionalparameters.id')
+            ->leftjoin('functionalmeasurements', 'functionalmeasurementweightages.measurement_id', '=', 'functionalmeasurements.id')
+            ->select('functionalmeasurementweightages.*', 
+                    'functionaltypes.id AS type_id',
+                    'functionalkpis.id AS kpi_id',
+                    'functionalparameters.id AS parameter_id',
+                    'functionalmeasurements.id AS measurement_id')
+            ->where('functionalmeasurementweightages.id', $id)
+            ->first(); // Use first() instead of get()
+
+        return response()->json(['result' => $data]);
     }
 
     public function update(Request $request){
@@ -133,22 +169,21 @@ class FunctionalmeasurementweightageController extends Controller
         if (!$permission) {
             return response()->json(['error' => 'UnAuthorized'], 401);
         } 
-       
-            $current_date_time = Carbon::now()->toDateTimeString();
+    
+        $current_date_time = Carbon::now()->toDateTimeString();
 
-        $id =  $request->hidden_id ;
+        $id = $request->hidden_id;
         $form_data = array(
-                'type_id' => $request->type,
-                'kpi_id' => $request->kpi,
-                'parameter_id' => $request->parameter,
-                'measurement' => $request->measurement,
-                'department_id' => $request->name,
-                'updated_by' => Auth::id(),
-                'updated_at' => $current_date_time,
-            );
+            'type_id' => $request->type,
+            'kpi_id' => $request->kpi,
+            'parameter_id' => $request->parameter,
+            'measurement_id' => $request->measurement, 
+            'measurement_weightage' => $request->measurement_weightage, 
+            'updated_by' => Auth::id(),
+            'updated_at' => $current_date_time,
+        );
 
-            Functionalmeasurementweightage::findOrFail($id)
-        ->update($form_data);
+        Functionalmeasurementweightage::findOrFail($id)->update($form_data);
         
         return response()->json(['success' => 'Functional Measurement Weightage is Successfully Updated']);
     }

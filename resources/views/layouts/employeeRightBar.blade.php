@@ -2,14 +2,15 @@
     <div class="card">
         @php
             $employeePicture = \App\EmployeePicture::where('emp_id', $id)->pluck('emp_pic_filename')->first();
-            if ($employeePicture) {
-                $imagePath = asset("/public/images/$employeePicture");
+            $employeegender = \App\Employee::where('id', $id)->pluck('emp_gender')->first();
+            
+            if ($employeePicture && file_exists(public_path("/images/$employeePicture"))) {
+                $imagePath = asset("/images/$employeePicture");
             } else {
-                $employeegender = \App\Employee::where('id', $id)->pluck('emp_gender')->first();
                 if ($employeegender == "Male"){
-                    $imagePath = asset("/public/image/profile.png");
-                }else {
-                    $imagePath = asset("/public/image/girl.png");
+                    $imagePath = asset("/image/profile.png");
+                } else {
+                    $imagePath = asset("/image/girl.png");
                 } 
             }
         @endphp

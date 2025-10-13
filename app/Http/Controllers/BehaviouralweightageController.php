@@ -10,6 +10,7 @@ use Auth;
 use Carbon\Carbon;
 use Datatables;
 use DB;
+use App\Helpers\EmployeeHelper;
 
 class BehaviouralweightageController extends Controller
 {
@@ -69,12 +70,22 @@ class BehaviouralweightageController extends Controller
         $types = DB::table('behaviouralweightages')
             ->leftjoin('behaviouraltypes', 'behaviouralweightages.type_id', '=', 'behaviouraltypes.id')
             ->leftjoin('employees', 'behaviouralweightages.emp_id', '=', 'employees.emp_id')
-            ->select('behaviouralweightages.*','behaviouraltypes.type AS type','employees.emp_name_with_initial AS empname')
+            ->select('behaviouralweightages.*','behaviouraltypes.type AS type','employees.emp_name_with_initial','employees.calling_name')
             ->whereIn('behaviouralweightages.status', [1, 2])
             ->get();
-
             return Datatables::of($types)
             ->addIndexColumn()
+            ->addColumn('employee_display', function ($row) {
+                    return EmployeeHelper::getDisplayName($row);
+                    
+            })
+            ->filterColumn('employee_display', function($query, $keyword) {
+                $query->where(function($q) use ($keyword) {
+                    $q->where('employees.emp_name_with_initial', 'like', "%{$keyword}%")
+                    ->orWhere('employees.calling_name', 'like', "%{$keyword}%")
+                    ->orWhere('employees.emp_id', 'like', "%{$keyword}%");
+                });
+            })
             ->addColumn('action', function ($row) {
                 $btn = '';
                 $user = Auth::user();
@@ -90,7 +101,7 @@ class BehaviouralweightageController extends Controller
                             //     $btn .= '&nbsp;<a href="'.route('behaviouralweightagestatus', ['id' => $row->id, 'stasus' => 1]) .'" onclick="return active_confirm()" target="_self" class="btn btn-outline-warning btn-sm mr-1 "><i class="fas fa-times"></i></a>';
                             // }
 
-                            $btn .= ' <button name="delete" id="'.$row->id.'" class="delete btn btn-outline-danger btn-sm"><i class="far fa-trash-alt"></i></button>';
+                            $btn .= ' <button name="delete" id="'.$row->id.'" class="delete btn btn-danger btn-sm"><i class="far fa-trash-alt"></i></button>';
               
                 return $btn;
             })
@@ -147,24 +158,38 @@ class BehaviouralweightageController extends Controller
 
 
     public function delete(Request $request){
+        try {
+            $user = Auth::user();
+            $permission = $user->can('Behavioural-status');
+            if (!$permission) {
+                return response()->json(['error' => 'UnAuthorized'], 401);
+            } 
+            
+            $id = $request->input('id');
+            
+            if (!$id) {
+                return response()->json(['error' => 'ID is required'], 400);
+            }
+            
+            // Check if record exists
+            $record = Behaviouralweightage::find($id);
+            if (!$record) {
+                return response()->json(['error' => 'Record not found'], 404);
+            }
+            
+            $current_date_time = Carbon::now()->toDateTimeString();
+            
+            $record->status = '3';
+            $record->updated_by = Auth::id();
+            $record->updated_at = $current_date_time;
+            $record->save();
 
-        $user = Auth::user();
-        $permission = $user->can('Behavioural-status');
-        if (!$permission) {
-            return response()->json(['error' => 'UnAuthorized'], 401);
-        } 
-        $id = Request('id');
-        $current_date_time = Carbon::now()->toDateTimeString();
-        $form_data = array(
-            'status' =>  '3',
-            'updated_by' => Auth::id(),
-            'updated_at' => $current_date_time,
-        );
-        Behaviouralweightage::findOrFail($id)
-        ->update($form_data);
-
-        return response()->json(['success' => 'Behavioural Weightage is Successfully Deleted']);
-
+            return response()->json(['success' => 'Behavioural Weightage is Successfully Deleted']);
+            
+        } catch (\Exception $e) {
+            \Log::error('Delete error: ' . $e->getMessage());
+            return response()->json(['error' => 'An error occurred: ' . $e->getMessage()], 500);
+        }
     }
 
     // public function status($id,$statusid){

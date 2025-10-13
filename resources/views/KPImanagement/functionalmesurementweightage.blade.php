@@ -3,27 +3,34 @@
 @section('content')
 
 <main>
-    <div class="page-header page-header-light bg-white shadow">
-        <div class="container-fluid">
+    <div class="page-header shadow">
+        <div class="container-fluid d-none d-sm-block shadow">
             @include('layouts.functional_nav_bar')
         </div>
+        <div class="container-fluid">
+            <div class="page-header-content py-3 px-2">
+                <h1 class="page-header-title ">
+                    <div class="page-header-icon"><i class="fa-light fa-chart-user"></i></div>
+                    <span>Measurement Weightage</span>
+                </h1>
+            </div>
+        </div>
     </div>
-    <br>
-    <div class="container-fluid">
+    <div class="container-fluid mt-2 p-0 p-2">
         <div class="card">
             <div class="card-body p-0 p-2">
                 <div class="row">
                     <div class="col-12">
                
-                        <button type="button" class="btn btn-outline-primary btn-sm fa-pull-right" name="create_record"
-                            id="create_record"><i class="fas fa-plus mr-2"></i>Add Measurement Weightage</button>
+                        <button type="button" class="btn btn-primary btn-sm float-right" name="create_record"
+                            id="create_record"><i class="fas fa-plus mr-2"></i>Add</button>
                     
                     </div>
                     <div class="col-12">
                         <hr class="border-dark">
                     </div>
                     <div class="col-12">
-                        <div class="center-block fix-width scroll-inner">
+                        <div class="center-block fix-width scroll-inner table-responsive">
                             <table class="table table-striped table-bordered table-sm small nowrap display" style="width: 100%"
                                 id="dataTable">
                                 <thead>
@@ -31,11 +38,11 @@
                                         <th>ID </th>
                                         <th>KRA</th>
                                         <th>KPI</th>
-                                        <th>Parameter</th>
-                                        <th>Parameter Weightage</th>
-                                        <th>Measurement</th>        
-                                        <th>Measurement Weightage</th>
-                                        <th class="text-right">Action</th>
+                                        <th>PARAMETER</th>
+                                        <th>PARAMETER WEIGHTAGE</th>
+                                        <th>MEASUREMENT</th>        
+                                        <th>MEASUREMENT WEIGHTAGE</th>
+                                        <th class="text-right">ACTION</th>
                                     </tr>
                                 </thead>
 
@@ -52,7 +59,7 @@
     <!-- Modal Area Start -->
     <div class="modal fade" id="formModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
         aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header p-2">
                     <h5 class="modal-title" id="staticBackdropLabel">Add Measurement Weightage</h5>
@@ -62,7 +69,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-4">
+                        <div class="col-12 col-lg-4 mb-3 mb-lg-0">
                             <span id="form_result"></span>
                             <form method="post" id="formTitle" class="form-horizontal">
                                 {{ csrf_field() }}
@@ -98,27 +105,27 @@
                                 </div>
                                 <div class="form-row mb-1">
                                 <div class="col-12">
-                                        <label class="small font-weight-bold text-dark">Measurement*</label>
+                                        <label class="small font-weight-bold text-dark">Measurement Weightage*</label>
                                         <select name="measurement" id="measurement" class="form-control form-control-sm"
                                         required>
-                                        <option value="">Select Measurement</option>
+                                        <option value="">Select Measurement Weightage</option>
                                     </select>
                                     </div>
                                 </div>
                                 <div class="form-row mb-1">
                                     <div class="col-12">
-                                        <label class="small font-weight-bold text-dark">Measurement Weightage*</label>
+                                        <label class="small font-weight-bold text-dark">Measurement Weightage Weightage*</label>
                                         <input type="number" id="measurement_weightage" name="measurement_weightage" class="form-control form-control-sm"
                                             required>
                                     </div>
                                 </div>
-                                <div class="form-group mt-3">
+                                <div class="form-group mt-3 mb-0">
                                     <button type="button" id="formsubmit"
                                         class="btn btn-primary btn-sm px-4 float-right"><i
                                             class="fas fa-plus"></i>&nbsp;Add to list</button>
                                     <input name="submitBtn" type="submit" value="Save" id="submitBtn" class="d-none">
                                     <button type="button" name="Btnupdatelist" id="Btnupdatelist"
-                                        class="btn btn-primary btn-sm px-4 fa-pull-right" style="display:none;"><i
+                                        class="btn btn-primary btn-sm px-4 float-right mr-2" style="display:none;"><i
                                             class="fas fa-plus"></i>&nbsp;Update List</button>
                                 </div>
                                 <input type="hidden" name="action" id="action" value="Add" />
@@ -127,49 +134,27 @@
 
                             </form>
                         </div>
-                        <div class="col-8">
-                            <table class="table table-striped table-bordered table-sm small" id="tableorder">
-                                <thead>
-                                    <tr>
-                                        <th>Measurement</th>
-                                        <th>Weightage</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tableorderlist"></tbody>
-                            </table>
-                            <div class="form-group mt-2">
+                        <div class="col-12 col-lg-8">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-bordered table-sm small" id="tableorder">
+                                    <thead>
+                                        <tr>
+                                            <th>MEASUREMENT</th>
+                                            <th>WEIGHTAGE</th>
+                                            <th>ACTION</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tableorderlist"></tbody>
+                                </table>
+                            </div>
+                            <div class="form-group mt-2 mb-0">
                                 <button type="button" name="btncreateorder" id="btncreateorder"
-                                    class="btn btn-outline-primary btn-sm fa-pull-right px-4"><i
+                                    class="btn btn-primary btn-sm float-right px-4"><i
                                         class="fas fa-plus"></i>&nbsp;Create</button>
 
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="modal fade" id="confirmModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-        aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content">
-                <div class="modal-header p-2">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col text-center">
-                            <h4 class="font-weight-normal">Are you sure you want to remove this data?</h4>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer p-2">
-                    <button type="button" name="ok_button" id="ok_button" class="btn btn-danger px-3 btn-sm">OK</button>
-                    <button type="button" class="btn btn-dark px-3 btn-sm" data-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </div>
@@ -185,14 +170,50 @@
 @section('script')
 
 <script>
+    function productDelete(button) {
+        $(button).closest('tr').remove();
+    }
+
     $(document).ready(function () {
 
         $("#functional").addClass('navbtnactive');
         $('#functional_menu_link').addClass('active');
 
         $('#dataTable').DataTable({
-            processing: true,
-            serverSide: true,
+            "destroy": true,
+            "processing": true,
+            "serverSide": false, 
+            dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+            "buttons": [{
+                    extend: 'csv',
+                    className: 'btn btn-success btn-sm',
+                    title: 'Measurement Weightage Details',
+                    text: '<i class="fas fa-file-csv mr-2"></i> CSV',
+                },
+                { 
+                    extend: 'pdf', 
+                    className: 'btn btn-danger btn-sm', 
+                    title: 'Measurement Weightage Details', 
+                    text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
+                    orientation: 'portrait', 
+                    pageSize: 'legal', 
+                    customize: function(doc) {
+                        doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+                    }
+                },
+                {
+                    extend: 'print',
+                    title: 'Measurement Weightage Details',
+                    className: 'btn btn-primary btn-sm',
+                    text: '<i class="fas fa-print mr-2"></i> Print',
+                    customize: function(win) {
+                        $(win.document.body).find('table')
+                            .addClass('compact')
+                            .css('font-size', 'inherit');
+                    },
+                },
+            ],
             ajax: {
                 "url": "{!! route('functionalmeasurementweightagelist') !!}",
 
@@ -235,7 +256,6 @@
                     }
                 },
             ],
-            "bDestroy": true,
             "order": [
                 [0, "desc"]
             ]
@@ -246,17 +266,15 @@
             $('#action').val('Add');
             $('#form_result').html('');
             $('#formTitle')[0].reset();
-
+            $('#tableorder tbody').empty();
             $('#formModal').modal('show');
         });
 
         $("#formsubmit").click(function () {
             if (!$("#formTitle")[0].checkValidity()) {
-                // If the form is invalid, submit it. The form won't actually submit;
-                // this will just cause the browser to display the native HTML5 error messages.
                 $("#submitBtn").click();
             } else {
-                var measurement = $('#measurement').val();
+                var measurement = $('#measurement option:selected').text(); 
                 var measurement_weightage = $('#measurement_weightage').val();
 
                 $('#tableorder > tbody:last').append('<tr class="pointer"><td>' + measurement +
@@ -314,47 +332,96 @@
                 var hidden_id = $('#hidden_id').val();
 
                 $.ajax({
-                    method: "POST",
-                    dataType: "json",
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        tableData: jsonObj,
-                        type: type,
-                        kpi: kpi,
-                        parameter: parameter,
-                        measurement: measurement,
-                        mesurement_weightage: mesurement_weightage,
-                        hidden_id: hidden_id,
+                url: action_url,
+                method: "POST",
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr('content'),
+                    type: type,
+                    kpi: kpi,
+                    parameter: parameter,
+                    // measurement: measurement,  
+                    // mesurement_weightage: mesurement_weightage,  
+                    tabledata: JSON.stringify(jsonObj), 
+                    hidden_id: hidden_id,
+                    action: $('#action').val()
+                },
+                dataType: "json",
+                success: function (data) {
+                        $('#btncreateorder').prop('disabled', false).html('<i class="fas fa-plus"></i>&nbsp;Create');
 
-                    },
-                    url: action_url,
-                    success: function (data) { //alert(data);
-                        var html = '';
                         if (data.errors) {
-                            html = '<div class="alert alert-danger">';
-                            for (var count = 0; count < data.errors.length; count++) {
-                                html += '<p>' + data.errors[count] + '</p>';
+                            if (Array.isArray(data.errors)) {
+                                var errorHtml = '<div class="alert alert-danger"><ul class="mb-0">';
+                                data.errors.forEach(function(error) {
+                                    errorHtml += '<li>' + error + '</li>';
+                                });
+                                errorHtml += '</ul></div>';
+                                $('#form_result').html(errorHtml);
+                            } else {
+                                $('#form_result').html('<div class="alert alert-danger">' + data.errors + '</div>');
                             }
-                            html += '</div>';
-                        }
-                        if (data.success) {
-                            html = '<div class="alert alert-success">' + data.success +
-                                '</div>';
+
+                            const actionObj = {
+                                icon: 'fas fa-warning',
+                                title: '',
+                                message: 'Record Error',
+                                url: '',
+                                target: '_blank',
+                                type: 'danger'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            action(actionJSON);
+                        } else if (data.success) {
+                            const actionObj = {
+                                icon: 'fas fa-save',
+                                title: '',
+                                message: data.success,
+                                url: '',
+                                target: '_blank',
+                                type: 'success'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            
                             $('#formTitle')[0].reset();
-                            //$('#titletable').DataTable().ajax.reload();
-                            window.location.reload(); // Use window.location.reload()
+                            $('#tableorderlist').empty();
+                            $('#tableorder tbody').empty();
+                            $('#form_result').html('');
+                            $('#formModal').modal('hide');
+                            actionreload(actionJSON);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        $('#btncreateorder').prop('disabled', false).html('<i class="fas fa-plus"></i>&nbsp;Create');
+
+                        console.log('Error:', error);
+                        console.log('Response:', xhr.responseText);
+
+                        var errorMessage = 'Something went wrong!';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
                         }
 
-                        $('#form_result').html(html);
-                        // resetfield();
+                        $('#form_result').html('<div class="alert alert-danger">' + errorMessage + '</div>');
 
+                        const actionObj = {
+                            icon: 'fas fa-warning',
+                            title: '',
+                            message: errorMessage,
+                            url: '',
+                            target: '_blank',
+                            type: 'danger'
+                        };
+                        const actionJSON = JSON.stringify(actionObj, null, 2);
+                        action(actionJSON);
                     }
                 });
             }
         });
 
         // edit function
-        $(document).on('click', '.edit', function () {
+        $(document).on('click', '.edit', async function () {
+            var r = await Otherconfirmation("You want to Edit this ? ");
+            if (r == true) {
             var id = $(this).attr('id');
 
             $('#form_result').html('');
@@ -379,20 +446,24 @@
                     $('#measurement_weightage').val(data.result.measurement_weightage);
 
                     $('#edithidden_id').val(id);
-                    $('.modal-title').text('Edit Functional Measurement Weightage');
+                    $('.modal-title').text('Edit Functional Measurement Weightage Weightage');
                     $('#action_button').html('Edit');
                     $('#EditformModal').modal('show');
-                }
-            })
+                },
+                    error: function(xhr, status, error) {
+                        console.log('Error:', error);
+                    }
+                });
+            }
         });
-    // update 
-        $('#action_button').click(function ()  {
-            var id = $('#edithidden_id').val();
-            var type = $('#edittype').val();
-            var kpi = $('#editkpi').val();
-            var parameter = $('#editparameter').val();
-            var measurement = $('#editmeasurement').val();
-            var measurement_weightage = $('#editmeasurement_weightage').val();
+    
+        $('#action_button').click(function () {
+            var id = $('#hidden_id').val(); 
+            var type = $('#type').val(); 
+            var kpi = $('#kpi').val(); 
+            var parameter = $('#parameter').val(); 
+            var measurement = $('#measurement').val(); 
+            var measurement_weightage = $('#measurement_weightage').val();
             
 
             $.ajaxSetup({
@@ -440,36 +511,42 @@
 
         var user_id;
 
-        $(document).on('click', '.delete', function () {
-            user_id = $(this).attr('id');
-            $('#confirmModal').modal('show');
-        });
+        $(document).on('click', '.delete', async function () {
+            var r = await Otherconfirmation("You want to remove this ? ");
+            if (r == true) {
+                user_id = $(this).attr('id');
 
-        $('#ok_button').click(function () {
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            })
-            $.ajax({
-                url: '{!! route("functionalmeasurementweightagedelete") !!}',
-                type: 'POST',
-                dataType: "json",
-                data: {
-                    id: user_id
-                },
-                beforeSend: function () {
-                    $('#ok_button').text('Deleting...');
-                },
-                success: function (data) { //alert(data);
-                    setTimeout(function () {
-                        $('#confirmModal').modal('hide');
-                        $('#dataTable').DataTable().ajax.reload();
-                        // alert('Data Deleted');
-                    }, 2000);
-                    location.reload()
-                }
-            })
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    }
+                });
+
+                $.ajax({
+                    url: '{!! route("functionalmeasurementweightagedelete") !!}',
+                    type: 'POST',
+                    dataType: "json",
+                    data: { id: user_id },
+                    beforeSend: function () {
+                        $('#ok_button').text('Deleting...');
+                    },
+                    success: function (data) {
+                        const actionObj = {
+                            icon: 'fas fa-trash-alt',
+                            title: '',
+                            message: 'Record Remove Successfully',
+                            url: '',
+                            target: '_blank',
+                            type: 'danger'
+                        };
+                        const actionJSON = JSON.stringify(actionObj, null, 2);
+                        actionreload(actionJSON);
+                    },
+                    error: function(xhr, status, error) {
+                        console.log('Error:', error);
+                    }
+                });
+            }
         });
 
     });
@@ -524,7 +601,7 @@
             }
         });
 
-    // Measurement filter insert part
+    // Measurement Weightage filter insert part
     $('#parameter').change(function () {
             var parameter = $(this).val();
             if (parameter !== '') {
@@ -602,7 +679,7 @@
             }
         };
 
-    // Measurement filter edit part
+    // Measurement Weightage filter edit part
     function getmeasurement(parameter,measurement_id){
             if (parameter !== '') {
                 $.ajax({
@@ -627,18 +704,6 @@
                 $('#measurement').empty().append('<option value="">Select measurement</option>');
             }
         };
-
-    function productDelete(row) {
-        $(row).closest('tr').remove();
-    }
-
-    function deactive_confirm() {
-        return confirm("Are you sure you want to deactive this?");
-    }
-
-    function active_confirm() {
-        return confirm("Are you sure you want to active this?");
-    }
 </script>
 
 @endsection
