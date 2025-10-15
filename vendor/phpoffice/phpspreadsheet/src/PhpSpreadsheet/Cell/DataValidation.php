@@ -460,7 +460,6 @@ class DataValidation
             $this->error .
             $this->promptTitle .
             $this->prompt .
-            $this->sqref .
             __CLASS__
         );
     }

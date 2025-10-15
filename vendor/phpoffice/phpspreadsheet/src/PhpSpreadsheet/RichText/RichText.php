@@ -17,23 +17,25 @@ class RichText implements IComparable
 
     /**
      * Create a new RichText instance.
+     *
+     * @param Cell $pCell
      */
-    public function __construct(?Cell $cell = null)
+    public function __construct(?Cell $pCell = null)
     {
         // Initialise variables
         $this->richTextElements = [];
 
         // Rich-Text string attached to cell?
-        if ($cell !== null) {
+        if ($pCell !== null) {
             // Add cell text and style
-            if ($cell->getValue() != '') {
-                $objRun = new Run($cell->getValue());
-                $objRun->setFont(clone $cell->getWorksheet()->getStyle($cell->getCoordinate())->getFont());
+            if ($pCell->getValue() != '') {
+                $objRun = new Run($pCell->getValue());
+                $objRun->setFont(clone $pCell->getWorksheet()->getStyle($pCell->getCoordinate())->getFont());
                 $this->addText($objRun);
             }
 
             // Set parent value
-            $cell->setValueExplicit($this, DataType::TYPE_STRING);
+            $pCell->setValueExplicit($this, DataType::TYPE_STRING);
         }
     }
 
@@ -158,14 +160,11 @@ class RichText implements IComparable
     {
         $vars = get_object_vars($this);
         foreach ($vars as $key => $value) {
-            $newValue = is_object($value) ? (clone $value) : $value;
-            if (is_array($value)) {
-                $newValue = [];
-                foreach ($value as $key2 => $value2) {
-                    $newValue[$key2] = is_object($value2) ? (clone $value2) : $value2;
-                }
+            if (is_object($value)) {
+                $this->$key = clone $value;
+            } else {
+                $this->$key = $value;
             }
-            $this->$key = $newValue;
         }
     }
 }
