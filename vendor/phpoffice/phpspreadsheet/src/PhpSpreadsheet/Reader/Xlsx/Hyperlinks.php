@@ -9,10 +9,8 @@ use SimpleXMLElement;
 
 class Hyperlinks
 {
-    /** @var Worksheet */
     private $worksheet;
 
-    /** @var array */
     private $hyperlinks = [];
 
     public function __construct(Worksheet $workSheet)
@@ -49,17 +47,17 @@ class Hyperlinks
             $cell = $worksheet->getCell($cellReference);
             if (isset($linkRel['id'])) {
                 $hyperlinkUrl = $this->hyperlinks[(string) $linkRel['id']] ?? null;
-                if (isset($attributes['location'])) {
-                    $hyperlinkUrl .= '#' . (string) $attributes['location'];
+                if (isset($hyperlink['location'])) {
+                    $hyperlinkUrl .= '#' . (string) $hyperlink['location'];
                 }
                 $cell->getHyperlink()->setUrl($hyperlinkUrl);
-            } elseif (isset($attributes['location'])) {
-                $cell->getHyperlink()->setUrl('sheet://' . (string) $attributes['location']);
+            } elseif (isset($hyperlink['location'])) {
+                $cell->getHyperlink()->setUrl('sheet://' . (string) $hyperlink['location']);
             }
 
             // Tooltip
-            if (isset($attributes['tooltip'])) {
-                $cell->getHyperlink()->setTooltip((string) $attributes['tooltip']);
+            if (isset($hyperlink['tooltip'])) {
+                $cell->getHyperlink()->setTooltip((string) $hyperlink['tooltip']);
             }
         }
     }

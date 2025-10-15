@@ -1500,6 +1500,12 @@ Route::get('employee_list_sel2', 'CommenGetrreordController@employee_list_sel2')
 Route::get('location_list_sel2', 'CommenGetrreordController@location_list_sel2')->name('location_list_sel2');
 Route::post('get_dept_emp_list', 'CommenGetrreordController@get_dept_emp_list')->name('get_dept_emp_list');
 
+Route::get('/qr-generate', 'QRController@generateQR')->name('qr.generate');
+Route::get('/qr-custom', 'QRController@generateCustomQR')->name('qr.custom');
+Route::get('/qr-download', 'QRController@downloadQR')->name('qr.download');
+Route::get('/qr-process', 'QRController@processQR')->name('qr.process');
+// For the alternative approach without AJAX
+Route::get('/qr-modal', 'QRController@generateQRModal')->name('qr.modal');
 
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');

@@ -34,9 +34,10 @@ abstract class AggregatedType implements Type, IteratorAggregate
      * @psalm-allow-private-mutation
      * @var array<int, Type>
      */
-    private array $types = [];
+    private $types = [];
 
-    private string $token;
+    /** @var string */
+    private $token;
 
     /**
      * @param array<Type> $types
@@ -106,7 +107,7 @@ abstract class AggregatedType implements Type, IteratorAggregate
      */
     private function add(Type $type): void
     {
-        if ($type instanceof static) {
+        if ($type instanceof self) {
             foreach ($type->getIterator() as $subType) {
                 $this->add($subType);
             }

@@ -42,11 +42,6 @@ class StringValueBinder implements IValueBinder
         return $this;
     }
 
-    public function getBooleanConversion(): bool
-    {
-        return $this->convertBoolean;
-    }
-
     public function setNumericConversion(bool $suppressConversion = false): self
     {
         $this->convertNumeric = $suppressConversion;
@@ -117,7 +112,7 @@ class StringValueBinder implements IValueBinder
             return true;
         }
 
-        $cell->setValueExplicit((string) $value, DataType::TYPE_STRING); // @phpstan-ignore-line
+        $cell->setValueExplicit((string) $value, DataType::TYPE_STRING);
 
         return true;
     }

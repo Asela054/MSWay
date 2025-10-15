@@ -9,8 +9,10 @@
     <title>  ShapeUP HRM - By eRav Technology</title>
     <link rel="icon" type="image/x-icon" href="{{url('/public/images/hrm.png')}}" />
     <!-- Styles -->
-    <link href="{{ url('/public/css/styles.css') }}" rel="stylesheet" />
+    <link href="{{ url('/css/styles.css') }}" rel="stylesheet" />
+    <link href="{{ url('/css/custom_styles.css') }}" rel="stylesheet"/>
     <link rel="icon" type="image/x-icon" href="{{url('/public/images/hrm.png')}}" />
+    <link rel="stylesheet" href="{{ url('/css/fontawesome/css/all.min.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         .bg-laugfs {
