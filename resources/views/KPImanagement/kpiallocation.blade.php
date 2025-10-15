@@ -3,40 +3,47 @@
 @section('content')
 
 <main>
-    <div class="page-header page-header-light bg-white shadow">
-        <div class="container-fluid">
+    <div class="page-header shadow">
+        <div class="container-fluid d-none d-sm-block shadow">
             @include('layouts.functional_nav_bar')
         </div>
+        <div class="container-fluid">
+            <div class="page-header-content py-3 px-2">
+                <h1 class="page-header-title ">
+                    <div class="page-header-icon"><i class="fa-light fa-chart-user"></i></div>
+                    <span>KPI Allocation</span>
+                </h1>
+            </div>
+        </div>
     </div>
-    <br>
-    <div class="container-fluid">
+    <div class="container-fluid mt-2 p-0 p-2">
         <div class="card">
             <div class="card-body p-0 p-2">
                 <div class="row">
                     <div class="col-12">
                
-                        <button type="button" class="btn btn-outline-primary btn-sm fa-pull-right" name="create_record"
-                            id="create_record"><i class="fas fa-plus mr-2"></i>Add KPI Allocation</button>
+                        <button type="button" class="btn btn-primary btn-sm fa-pull-right" name="create_record"
+                            id="create_record"><i class="fas fa-plus mr-2"></i>Add</button>
                     
                     </div>
                     <div class="col-12">
                         <hr class="border-dark">
                     </div>
                     <div class="col-12">
-                        <div class="center-block fix-width scroll-inner">
+                        <div class="center-block fix-width scroll-inner table-responsive">
                             <table class="table table-striped table-bordered table-sm small nowrap display" style="width: 100%"
                                 id="dataTable">
                                 <thead>
                                     <tr>
                                         <th>ID </th>
-                                        <th>Year</th>
+                                        <th>YEAR</th>
                                         <th>KRA</th>
                                         <th>KPI</th>
-                                        <th>Parameter</th>
-                                        <th>Parameter Weightage</th>
-                                        <th>Measurement</th>        
-                                        <th>Figure</th>
-                                        <th class="text-right">Action</th>
+                                        <th>PARAMETER</th>
+                                        <th>PARAMETER WEIGHTAGE</th>
+                                        <th>MEASUREMENT</th>        
+                                        <th>FIGURE</th>
+                                        <th class="text-right">ACTION</th>
                                     </tr>
                                 </thead>
 
@@ -53,7 +60,7 @@
     <!-- Modal Area Start -->
     <div class="modal fade" id="formModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
         aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-fullscreen">
+        <div class="modal-dialog modal-fullscreen-lg-down modal-xl">
             <div class="modal-content">
                 <div class="modal-header p-2">
                     <h5 class="modal-title" id="staticBackdropLabel">Add Kpi Allocation</h5>
@@ -63,13 +70,13 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-3">
+                        <div class="col-12 col-lg-3 mb-3 mb-lg-0">
                             <span id="form_result"></span>
                             <form method="post" id="formTitle" class="form-horizontal">
                                 {{ csrf_field() }}
                                 <div class="form-row mb-1">
 
-                                    <div class="col-12">
+                                    <div class="col-12 mb-2">
                                         <label class="small font-weight-bold text-dark">Kpi Year*</label>
                                         <select name="year" id="year" class="form-control form-control-sm"
                                             required>
@@ -80,7 +87,7 @@
                                         </select>
                                     </div>
                                 
-                                    <div class="col-12">
+                                    <div class="col-12 mb-2">
                                         <label class="small font-weight-bold text-dark">Functional KRA*</label>
                                         <select name="type" id="type" class="form-control form-control-sm"
                                             required>
@@ -91,14 +98,14 @@
                                         </select>
                                     </div>
                                  
-                                    <div class="col-12">
+                                    <div class="col-12 mb-2">
                                         <label class="small font-weight-bold text-dark">KPI*</label>
                                         <select name="kpi" id="kpi" class="form-control form-control-sm" required>
                                         <option value="">Select KPI</option>
                                     </select>
                                     </div>
                                  
-                                    <div class="col-12">
+                                    <div class="col-12 mb-2">
                                         <label class="small font-weight-bold text-dark">Parameter*</label>
                                         <select name="parameter" id="parameter" class="form-control form-control-sm"
                                         required>
@@ -106,33 +113,35 @@
                                     </select>
                                     </div>
                                  
-                                    <div class="col-12">
+                                    <div class="col-12 mb-2">
                                     <label class="small font-weight-bold text-dark">Measurement*</label>
                                         <select name="measurement" id="measurement" class="form-control form-control-sm" onchange="getDepartment()" required>
                                              <option value="">Select Measurement</option>
                                         </select>
                                     </div>
                                  
-                                    <div class="col-12">
+                                    <div class="col-12 mb-2">
                                         <label class="small font-weight-bold text-dark">Figure*</label>
                                         <input type="number" id="figure" name="figure" class="form-control form-control-sm"
                                             required>
                                     </div>
                                 </div>
 
-                                <div class="col-12">
+                                <div class="col-12 px-0">
+                                <div class="table-responsive">
                                 <table class="table table-striped table-bordered table-sm small" id="dept_tableorder">
                                 <thead>
                                         <tr>
-                                        <th>Department</th>
-                                        <th>Weightage</th>
+                                        <th>DEPARTMENT</th>
+                                        <th>WEIGHTAGE</th>
                                         </tr>
                                 </thead>
                                 <tbody id="dept_tableorderlist"></tbody>
                                 </table>
                                 </div>
+                                </div>
                                 
-                                <div class="form-group mt-3">
+                                <div class="form-group mt-3 mb-0">
                                     <button type="button" id="formsubmit"
                                         class="btn btn-primary btn-sm px-4 float-right"><i
                                             class="fas fa-plus"></i>&nbsp;Add to list</button>
@@ -148,20 +157,22 @@
 
                             </form>
                         </div>
-                        <div class="col-9">
+                        <div class="col-12 col-lg-9">
+                            <div class="table-responsive">
                             <table class="table table-striped table-bordered table-sm small" id="tableorder">
                                 <thead>
                                     <tr>
-                                        <th>Measurement</th>
-                                        <th>Figure</th>
-                                        <th class="text-right">Action</th>
+                                        <th>MEASUREMENT</th>
+                                        <th>FIGURE</th>
+                                        <th class="text-right">ACTION</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tableorderlist"></tbody>
                             </table>
-                            <div class="form-group mt-2">
+                            </div>
+                            <div class="form-group mt-2 mb-0">
                                 <button type="button" name="btncreateorder" id="btncreateorder"
-                                    class="btn btn-outline-primary btn-sm fa-pull-right px-4"><i
+                                    class="btn btn-primary btn-sm fa-pull-right px-4"><i
                                         class="fas fa-plus"></i>&nbsp;Create</button>
 
                             </div>
@@ -171,51 +182,32 @@
             </div>
         </div>
     </div>
-    
-    <div class="modal fade" id="confirmModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-        aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content">
-                <div class="modal-header p-2">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col text-center">
-                            <h4 class="font-weight-normal">Are you sure you want to remove this data?</h4>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer p-2">
-                    <button type="button" name="ok_button" id="ok_button" class="btn btn-danger px-3 btn-sm">OK</button>
-                    <button type="button" class="btn btn-dark px-3 btn-sm" data-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <div class="modal fade" id="viewInserListModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
         aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-dialog modal-dialog-centered modal-sm modal-fullscreen-sm-down">
             <div class="modal-content">
                 <div class="modal-header p-2">
+                    <h6 class="modal-title">Department List</h6>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body p-2">
                     <div class="row">
+                        <div class="col-12">
+                            <div class="table-responsive">
                             <table class="table table-striped table-bordered table-sm small" id="viewInserListTableorder">
                                     <thead>
                                         <tr>
-                                            <th>Department</th>
-                                            <th>Figure</th>
+                                            <th>DEPARTMENT</th>
+                                            <th>FIGURE</th>
                                         </tr>
                                     </thead>
                                     <tbody id="viewInserListTableorderlist"></tbody>
                             </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -224,19 +216,19 @@
 
     <div class="modal fade" id="viewconfirmModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
         aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-fullscreen-md-down modal-lg">
         <div class="modal-content">
             <div class="modal-header p-2">
-                <h5 class="aviewmodal-title" id="staticBackdropLabel">View Departments Figure</h5>
+                <h5 class="modal-title" id="staticBackdropLabel">View Departments Figure</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body p-2 p-md-3">
                 <form class="form-horizontal">
                     <div class="row">
                         <div class="col-12">
-                            <div class="form-row mb-1">
+                            <div class="form-row mb-2">
                                 <div class="col-12">
                                     <label class="small font-weight-bold text-dark">Measurement*</label>
                                     <select name="view_measurement" id="view_measurement" class="form-control form-control-sm"
@@ -250,15 +242,15 @@
                             </div>
                         </div>
                     </div>
-                    <hr>
+                    <hr class="my-2">
                 <div class="row">
                     <div class="col-12">
-                        <div class="center-block fix-width scroll-inner">
+                        <div class="center-block fix-width scroll-inner table-responsive">
                             <table class="table table-striped table-bordered table-sm small" id="view_tableorder">
                                 <thead>
                                     <tr>
-                                        <th>Department</th>
-                                        <th>Figure</th>
+                                        <th>DEPARTMENT</th>
+                                        <th>FIGURE</th>
                                     </tr>
                                 </thead>
                                 <tbody id="view_tableorderlist"></tbody>
@@ -271,9 +263,6 @@
         </div>
     </div>
 </div>
-
-     
-
     <!-- Modal Area End -->
 </main>
 
@@ -289,8 +278,40 @@
         $('#functional_menu_link').addClass('active');
 
         $('#dataTable').DataTable({
-            processing: true,
-            serverSide: true,
+            "destroy": true,
+            "processing": true,
+            "serverSide": false, 
+            dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+            "buttons": [{
+                    extend: 'csv',
+                    className: 'btn btn-success btn-sm',
+                    title: 'KPI Allocation Details',
+                    text: '<i class="fas fa-file-csv mr-2"></i> CSV',
+                },
+                { 
+                    extend: 'pdf', 
+                    className: 'btn btn-danger btn-sm', 
+                    title: 'KPI Allocation Details', 
+                    text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
+                    orientation: 'landscape', 
+                    pageSize: 'legal', 
+                    customize: function(doc) {
+                        doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+                    }
+                },
+                {
+                    extend: 'print',
+                    title: 'KPI Allocation Details',
+                    className: 'btn btn-primary btn-sm',
+                    text: '<i class="fas fa-print mr-2"></i> Print',
+                    customize: function(win) {
+                        $(win.document.body).find('table')
+                            .addClass('compact')
+                            .css('font-size', 'inherit');
+                    },
+                },
+            ],
             ajax: {
                 "url": "{!! route('kpiallocationlist') !!}",
 
@@ -337,7 +358,6 @@
                     }
                 },
             ],
-            "bDestroy": true,
             "order": [
                 [0, "desc"]
             ]
@@ -348,6 +368,7 @@
         $('#action').val('Add');
         $('#form_result').html('');
         $('#formTitle')[0].reset();  
+        $('#tableorder tbody').empty();
         $('#formModal').modal('show');
     });
 
@@ -439,30 +460,81 @@
                 },
                 url: action_url,
                 success: function (data) {
-                console.log(data); // Log the response
-                var html = '';
-                if (data.errors) {
-                html = '<div class="alert alert-danger">';
-                for (var count = 0; count < data.errors.length; count++) {
-                html += '<p>' + data.errors[count] + '</p>';
-                }
-                html += '</div>';
-                }
-                if (data.success) {
-                html = '<div class="alert alert-success">' + data.success + '</div>';
-                $('#formTitle')[0].reset();
-                window.location.reload();
-            }
+                        $('#btncreateorder').prop('disabled', false).html('<i class="fas fa-plus"></i>&nbsp;Create');
 
-                $('#form_result').html(html);
-            }
+                        if (data.errors) {
+                            if (Array.isArray(data.errors)) {
+                                var errorHtml = '<div class="alert alert-danger"><ul class="mb-0">';
+                                data.errors.forEach(function(error) {
+                                    errorHtml += '<li>' + error + '</li>';
+                                });
+                                errorHtml += '</ul></div>';
+                                $('#form_result').html(errorHtml);
+                            } else {
+                                $('#form_result').html('<div class="alert alert-danger">' + data.errors + '</div>');
+                            }
 
-            });
-        }
-    });
+                            const actionObj = {
+                                icon: 'fas fa-warning',
+                                title: '',
+                                message: 'Record Error',
+                                url: '',
+                                target: '_blank',
+                                type: 'danger'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            action(actionJSON);
+                        } else if (data.success) {
+                            const actionObj = {
+                                icon: 'fas fa-save',
+                                title: '',
+                                message: data.success,
+                                url: '',
+                                target: '_blank',
+                                type: 'success'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            
+                            $('#formTitle')[0].reset();
+                            $('#tableorderlist').empty();
+                            $('#tableorder tbody').empty();
+                            $('#form_result').html('');
+                            $('#formModal').modal('hide');
+                            actionreload(actionJSON);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        $('#btncreateorder').prop('disabled', false).html('<i class="fas fa-plus"></i>&nbsp;Create');
+
+                        console.log('Error:', error);
+                        console.log('Response:', xhr.responseText);
+
+                        var errorMessage = 'Something went wrong!';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        }
+
+                        $('#form_result').html('<div class="alert alert-danger">' + errorMessage + '</div>');
+
+                        const actionObj = {
+                            icon: 'fas fa-warning',
+                            title: '',
+                            message: errorMessage,
+                            url: '',
+                            target: '_blank',
+                            type: 'danger'
+                        };
+                        const actionJSON = JSON.stringify(actionObj, null, 2);
+                        action(actionJSON);
+                    }
+                });
+            }
+        });
 
         // edit function
-        $(document).on('click', '.edit', function () {
+        $(document).on('click', '.edit', async function () {
+            var r = await Otherconfirmation("You want to Edit this ? ");
+            if (r == true) {
             var id = $(this).attr('id');
 
             $('#form_result').html('');
@@ -491,12 +563,15 @@
                     $('.modal-title').text('Edit KPI Allocation');
                     $('#action_button').html('Edit');
                     $('#EditformModal').modal('show');
-                }
-            })
+                },
+                    error: function(xhr, status, error) {
+                        console.log('Error:', error);
+                    }
+                });
+            }
         });
 
         
-    // update 
         $('#action_button').click(function ()  {
             var id = $('#edithidden_id').val();
             var year = $('#year').val();
@@ -553,36 +628,42 @@
 
         // delete function
         var user_id;
-        $(document).on('click', '.delete', function () {
-            user_id = $(this).attr('id');
-            $('#confirmModal').modal('show');
-        });
+        $(document).on('click', '.delete', async function () {
+            var r = await Otherconfirmation("You want to remove this ? ");
+            if (r == true) {
+                user_id = $(this).attr('id');
 
-        $('#ok_button').click(function () {
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            })
-            $.ajax({
-                url: '{!! route("kpiallocationdelete") !!}',
-                type: 'POST',
-                dataType: "json",
-                data: {
-                    id: user_id
-                },
-                beforeSend: function () {
-                    $('#ok_button').text('Deleting...');
-                },
-                success: function (data) { //alert(data);
-                    setTimeout(function () {
-                        $('#confirmModal').modal('hide');
-                        $('#dataTable').DataTable().ajax.reload();
-                        // alert('Data Deleted');
-                    }, 2000);
-                    location.reload()
-                }
-            })
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    }
+                });
+
+                $.ajax({
+                    url: '{!! route("kpiallocationdelete") !!}',
+                    type: 'POST',
+                    dataType: "json",
+                    data: { id: user_id },
+                    beforeSend: function () {
+                        $('#ok_button').text('Deleting...');
+                    },
+                    success: function (data) {
+                        const actionObj = {
+                            icon: 'fas fa-trash-alt',
+                            title: '',
+                            message: 'Record Remove Successfully',
+                            url: '',
+                            target: '_blank',
+                            type: 'danger'
+                        };
+                        const actionJSON = JSON.stringify(actionObj, null, 2);
+                        actionreload(actionJSON);
+                    },
+                    error: function(xhr, status, error) {
+                        console.log('Error:', error);
+                    }
+                });
+            }
         });
 
     });
@@ -836,21 +917,6 @@
         } else {
             $('#dept_tableorderlist').html('');   
         }
-    }
-    
-    function productDelete(row) {
-        $(row).closest('tr').remove();
-    }
-
-    function deactive_confirm() {
-        return confirm("Are you sure you want to deactive this?");
-    }
-
-    function active_confirm() {
-        return confirm("Are you sure you want to active this?");
-    }
-    function approve_confirm() {
-        return confirm("Are you sure you want to approve this?");
     }
 </script>
 

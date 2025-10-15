@@ -13,6 +13,7 @@ use Auth;
 use Carbon\Carbon;
 use Datatables;
 use DB;
+use App\Helpers\EmployeeHelper;
 
 class Emp_kpi_allocationController extends Controller
 {
@@ -131,9 +132,9 @@ class Emp_kpi_allocationController extends Controller
         if (!$permission) {
             return response()->json(['error' => 'UnAuthorized'], 401);
         } 
-                            $btn .= ' <button name="view" id="'.$row->id.'" class="view btn btn-outline-secondary btn-sm" type="submit"><i class="fas fa-eye"></i></button>';
+                            $btn .= ' <button name="view" id="'.$row->id.'" class="view btn btn-secondary btn-sm" type="submit"><i class="fas fa-eye"></i></button>';
                             
-                            $btn .= ' <button name="add" id="'.$row->id.'" class="add btn btn-outline-secondary btn-sm" type="submit"><i class="fas fa-plus"></i></button>';
+                            $btn .= ' <button name="add" id="'.$row->id.'" class="add btn btn-secondary btn-sm" type="submit"><i class="fas fa-plus"></i></button>';
 
                             // if($row->status == 1){
                             //     $btn .= ' <a href="'.route('empallocationstatus', ['id' => $row->id, 'stasus' => 2]) .'" onclick="return deactive_confirm()" target="_self" class="btn btn-outline-success btn-sm mr-1 "><i class="fas fa-check"></i></a>';
@@ -141,7 +142,7 @@ class Emp_kpi_allocationController extends Controller
                             //     $btn .= '&nbsp;<a href="'.route('empallocationstatus', ['id' => $row->id, 'stasus' => 1]) .'" onclick="return active_confirm()" target="_self" class="btn btn-outline-warning btn-sm mr-1 "><i class="fas fa-times"></i></a>';
                             // }
                        
-                            $btn .= ' <button name="delete" id="'.$row->id.'" class="delete btn btn-outline-danger btn-sm"><i class="far fa-trash-alt"></i></button>';
+                            $btn .= ' <button name="delete" id="'.$row->id.'" class="delete btn btn-danger btn-sm"><i class="far fa-trash-alt"></i></button>';
               
                 return $btn;
             })
@@ -157,12 +158,22 @@ class Emp_kpi_allocationController extends Controller
             ->leftjoin('functionalmeasurements', 'functionalmeasurements.id', 'emp_kpi_allocations.measurement_id')
             ->leftjoin('departments', 'departments.id', 'emp_kpi_allocations.department_id')
             ->leftjoin('employees', 'employees.emp_id', 'emp_kpi_allocations.emp_id')
-            ->select('emp_kpi_allocations.*','functionalmeasurements.measurement AS measurement','kpiyears.year AS year','departments.name AS department','employees.emp_name_with_initial AS empname' )
+            ->select('emp_kpi_allocations.*','functionalmeasurements.measurement AS measurement','kpiyears.year AS year','departments.name AS department','employees.emp_name_with_initial','employees.calling_name' )
             ->whereIn('emp_kpi_allocations.status', [1, 2])
             ->get();
-
             return Datatables::of($types)
             ->addIndexColumn()
+            ->addColumn('employee_display', function ($row) {
+                    return EmployeeHelper::getDisplayName($row);
+                    
+            })
+            ->filterColumn('employee_display', function($query, $keyword) {
+                $query->where(function($q) use ($keyword) {
+                    $q->where('employees.emp_name_with_initial', 'like', "%{$keyword}%")
+                    ->orWhere('employees.calling_name', 'like', "%{$keyword}%")
+                    ->orWhere('employees.emp_id', 'like', "%{$keyword}%");
+                });
+            })
             ->addColumn('action', function ($row) {
                 $btn = '';
                 $user = Auth::user();

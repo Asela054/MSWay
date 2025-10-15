@@ -158,15 +158,15 @@
 										<div class="col-md-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">Current Photo</label>
 											<div>
-												@if(isset($employee) && $employee->employeePicture && $employee->employeePicture->emp_pic_filename)
+												@if(isset($employee) && $employee->employeePicture && $employee->employeePicture->emp_pic_filename && file_exists(public_path('/images/' . $employee->employeePicture->emp_pic_filename)))
 													<img class="img-thumbnail" style="max-width: 200px;"
-														src="{{ asset('public/images/' . $employee->employeePicture->emp_pic_filename) }}" 
+														src="{{ asset('images/' . $employee->employeePicture->emp_pic_filename) }}" 
 														alt="Employee Photo">
 												@else
 													<p class="text-muted">No photo uploaded</p>
 												@endif
 											</div>
-										</div>							
+										</div>					
 									</div>
 								</div>
 							</div>

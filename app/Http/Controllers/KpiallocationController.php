@@ -134,7 +134,7 @@ class KpiallocationController extends Controller
         if (!$permission) {
             return response()->json(['error' => 'UnAuthorized'], 401);
         } 
-                            $btn .= ' <button name="view" id="'.$row->id.'" class="view btn btn-outline-secondary btn-sm" type="submit"><i class="fas fa-eye"></i></button>';
+                            $btn .= ' <button name="view" id="'.$row->id.'" class="view btn btn-secondary btn-sm" type="submit"><i class="fas fa-eye"></i></button>';
 
                             if($row->approve_status == 1){
                                 $btn .= ' <a href="'.route('kpiallocationapprove', ['id' => $row->id, 'app_stasus' => 2]) .'" onclick="return approve_confirm()" target="_self" class="appL2 btn btn-outline-warning btn-sm"><i class="fas fa-level-up-alt"></i></a>';
@@ -146,7 +146,7 @@ class KpiallocationController extends Controller
                             //     $btn .= '&nbsp;<a href="'.route('kpiallocationstatus', ['id' => $row->id, 'stasus' => 1]) .'" onclick="return active_confirm()" target="_self" class="btn btn-outline-warning btn-sm mr-1 "><i class="fas fa-times"></i></a>';
                             // }
                        
-                            $btn .= ' <button name="delete" id="'.$row->id.'" class="delete btn btn-outline-danger btn-sm"><i class="far fa-trash-alt"></i></button>';
+                            $btn .= ' <button name="delete" id="'.$row->id.'" class="delete btn btn-danger btn-sm"><i class="far fa-trash-alt"></i></button>';
               
                 return $btn;
             })
