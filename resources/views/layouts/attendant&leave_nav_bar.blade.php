@@ -121,41 +121,28 @@
   </div>
   @endif
 
-  @php
-    $hasJobAccess = auth()->user()->can('Job-Location-list') ||
-                  auth()->user()->can('Job-Allocation-list') ||
-                  auth()->user()->can('Job-Attendance-list') ||
-                  auth()->user()->can('Job-Meal-list') ||
-                  auth()->user()->can('Job-Meal-Approval') ||
-                  auth()->user()->can('Job-Attendance-Approve-list')||
-                  auth()->user()->can('Location-Allowance-Approve-list');
-  @endphp
-
-  @if($hasJobAccess)
+ 
+  
   <div class="dropdown">
     <a role="button" data-toggle="dropdown" class="btn navbtncolor" href="javascript:void(0);" id="jobmanegment">
       Location Wise Attendance <span class="caret"></span></a>
         <ul class="dropdown-menu multi-level dropdownmenucolor" role="menu" aria-labelledby="dropdownMenu">
-            @if(auth()->user()->can('Job-Allocation-list'))
+           
             <li><a class="dropdown-item" href="{{ route('joballocation')}}">Allocation</a></li>
-            @endif
-            @if(auth()->user()->can('Job-Attendance-list'))
+          
             <li><a class="dropdown-item" href="{{ route('jobattendance')}}">Location Attendance</a></li>
-            @endif
-            @if(auth()->user()->can('Job-Attendance-Approve-list'))
+           
             <li><a class="dropdown-item" href="{{ route('jobattendanceapprove')}}">Location Attendance Approve</a></li>
-            @endif
-            @if(auth()->user()->can('Job-Attendance-Approve-list'))
+           
            <li><a class="dropdown-item" href="{{ route('unauthorizejobattendanceapprove')}}">Unauthorized Location Attendance Approve</a></li>
-            @endif
+           
             <li><a class="dropdown-item" href="{{ route('locationallwanceapprove')}}">Location Allowance Approval</a></li>
-            @if(auth()->user()->can('Job-Meal-list'))
-            <li><a class="dropdown-item" href="{{ route('jobmealallowance')}}">Meal Allowance</a></li>
-            @endif
-            @if(auth()->user()->can('Job-Meal-Approval'))
-            <li><a class="dropdown-item" href="{{ route('jobmealallowanceapp')}}">Meal Allowance Approval</a></li>
-            @endif
+           
+            {{-- <li><a class="dropdown-item" href="{{ route('jobmealallowance')}}">Meal Allowance</a></li>
+           
+            <li><a class="dropdown-item" href="{{ route('jobmealallowanceapp')}}">Meal Allowance Approval</a></li> --}}
+          
         </ul>
   </div> 
-  @endif
+
 </div>

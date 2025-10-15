@@ -915,9 +915,6 @@
 
             $('#formMonth').on('submit',function(e) {
                 e.preventDefault();
-                let save_btn=$("#btn-save");
-                let btn_prev_text = save_btn.html();
-                save_btn.html('<i class="fa fa-spinner fa-spin"></i> loading...' );
                 let formData = new FormData($('#formMonth')[0]);
                 let url_text = '{{ url("/attendance_update_bulk_submit") }}';
                 $.ajaxSetup({
@@ -936,13 +933,13 @@
                              const actionObj = {
                                 icon: 'fas fa-save',
                                 title: '',
-                                message: res.status,
+                                message: 'Attendance Updated',
                                 url: '',
                                 target: '_blank',
                                 type: 'success'
                             };
                             const actionJSON = JSON.stringify(actionObj, null, 2);
-                            $('#formTitle')[0].reset();
+                            $('#formMonth')[0].reset();
                             actionreload(actionJSON);
 
                         }else {
@@ -957,14 +954,7 @@
                             };
                             const actionJSON = JSON.stringify(actionObj, null, 2);
                             action(actionJSON);
-
-
-                            save_btn.prop("disabled", false);
-                            save_btn.html(btn_prev_text);
                         }
-                    },
-                    error: function(res) {
-                        alert(data);
                     }
                 });
             });
@@ -1168,7 +1158,7 @@
                                 type: 'success'
                             };
                             const actionJSON = JSON.stringify(actionObj, null, 2);
-                            $('#formTitle')[0].reset();
+                            $('#form_dept_wise')[0].reset();
                             actionreload(actionJSON);
 
                         }else {
