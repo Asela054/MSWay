@@ -883,6 +883,20 @@
             padding: 1rem;
         }
     }
+
+    .select2-container * {
+        font-family: inherit !important;
+        font-size: 14px !important;
+        font-weight: normal !important;
+        text-transform: none !important;
+        text-decoration: none !important;
+    }
+
+    .select2-container--default .select2-results__option {
+    text-transform: none !important;
+    text-decoration: none !important;
+    }
+    
     </style>
     
     @php if(Auth::user()->hasRole('Employee')){ @endphp

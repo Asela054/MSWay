@@ -1033,6 +1033,10 @@ private function processAttendanceRecord($cr)
                         ->where('date', $full_date)
                         ->where('timestamp', $existing_time_stamp_in[$i])->first();
 
+                         if (!$attendance) {
+                            continue; 
+                        }
+                        
                     $prev_timestamp = $attendance->timestamp;
 
                     $attendance->timestamp = $full_time_in;
@@ -1092,6 +1096,10 @@ private function processAttendanceRecord($cr)
                         ->where('timestamp', $existing_time_stamp_out[$i])->first();
 
                     $prev_timestamp = $attendance->timestamp;
+
+                     if (!$attendance) {
+                            continue; 
+                        }
 
                     $attendance->timestamp = $full_time_out;
 
