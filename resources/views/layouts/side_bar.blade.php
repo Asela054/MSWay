@@ -96,7 +96,7 @@
         @if($hasproductionPermissions)
             <li>
             <a href="{{ url('/productiontaskdashboard') }}" id="production_menu_link">
-                <i id="production_menu_link_icon" class="flaticon-381-background-1"></i>
+                <i class="fa-light fa-ballot-check"></i>
                 <span class="links_name">Production & Task</span>
             </a>
             <span class="tooltip">Production & Task</span>
