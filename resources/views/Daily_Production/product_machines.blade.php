@@ -162,7 +162,7 @@
                 var action_url = '';
 
                 if ($('#action').val() == 'Add') {
-                    action_url = "{{ route('addMachine') }}";
+                    action_url = "{{ route('addProductMachine') }}";
                 }
                 if ($('#action').val() == 'Edit') {
                     action_url = "{{ route('Machine.update') }}";
