@@ -1443,7 +1443,7 @@ Route::post('jobattendanceapprovesave', 'JobAttendaceApproveController@approveat
 /*-- Product Machines Info----*/
 Route::resource('Machine', 'ProductMachineController');
 Route::get('MachineShow/{id}',['uses' => 'ProductMachineController@index', 'as' => 'MachineShow']);
-Route::post('addMachine',['uses' => 'ProductMachineController@store', 'as' => 'addMachine']);
+Route::post('addProductMachine',['uses' => 'ProductMachineController@store', 'as' => 'addProductMachine']);
 Route::post('Machine/update', 'ProductMachineController@update')->name('Machine.update');
 Route::get('Machine/destroy/{id}', 'ProductMachineController@destroy');
 Route::get('Machine_list_sel2', 'ProductMachineController@Machine_list_sel2');
