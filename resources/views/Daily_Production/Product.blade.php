@@ -3,20 +3,25 @@
 @section('content')
 
 <main> 
-    <div class="page-header shadow">
-        <div class="container-fluid">
-             @include('layouts.production&task_nav_bar')
-           
+     <div class="page-header shadow">
+            <div class="container-fluid d-none d-sm-block shadow">
+                 @include('layouts.production&task_nav_bar')
+            </div>
+            <div class="container-fluid">
+                <div class="page-header-content py-3 px-2">
+                    <h1 class="page-header-title ">
+                        <div class="page-header-icon"><i class="fa-light fa-ballot-check"></i></div>
+                        <span>Products</span>
+                    </h1>
+                </div>
+            </div>
         </div>
-    </div>
-    <div class="container-fluid mt-4">
+    <div class="container-fluid mt-2 p-0 p-2">
         <div class="card">
             <div class="card-body p-0 p-2">
                 <div class="row">
                     <div class="col-12">
-                        
-                            <button type="button" class="btn btn-outline-primary btn-sm fa-pull-right" name="create_record" id="create_record"><i class="fas fa-plus mr-2"></i>Add Product</button>
-                      
+                            <button type="button" class="btn btn-primary btn-sm fa-pull-right" name="create_record" id="create_record"><i class="fas fa-plus mr-2"></i>Add Product</button>
                     </div>
                     <div class="col-12">
                         <hr class="border-dark">
@@ -27,24 +32,12 @@
                             <thead>
                                 <tr>
                                     <th>ID </th>
-                                    <th>Product</th>
-                                    <th>Description</th>
-                                    <th class="text-right">Action</th>
+                                    <th>PRODUCT</th>
+                                    <th>DESCRIPTION</th>
+                                    <th class="text-right">ACTION</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($product as $products)
-                                <tr>
-                                    <td>{{$products->id}}</td>
-                                    <td>{{$products->productname}}</td>
-                                    <td>{{$products->description}}</td>
-                                    <td class="text-right">
-                                            <a href="{{ route('MachineShow',$products->id) }}" title="Machines" class="machines btn btn-outline-info btn-sm" > <i class="fas fa-cogs"></i> </a>
-                                            <button name="edit" id="{{$products->id}}" class="edit btn btn-outline-primary btn-sm" type="submit"><i class="fas fa-pencil-alt"></i></button>
-                                            <button type="submit" name="delete" id="{{$products->id}}" class="delete btn btn-outline-danger btn-sm"><i class="far fa-trash-alt"></i></button>
-                                    </td>
-                                </tr>
-                                @endforeach
                             </tbody>
                         </table>
                         </div>
@@ -72,11 +65,11 @@
                             <form method="post" id="formTitle" class="form-horizontal">
                                 {{ csrf_field() }}	
                                 <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">Product Name</label>
+                                    <label class="small font-weight-bolder text-dark">Product Name*</label>
                                     <input type="text" name="productname" id="productname" class="form-control form-control-sm"  required/>
                                 </div>
                                 <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">Product Description</label>
+                                    <label class="small font-weight-bolder text-dark">Product Description</label>
                                     <input type="text" name="description" id="description" class="form-control form-control-sm" />
                                 </div>
                                 <!-- <div class="form-group mb-1">
@@ -88,7 +81,7 @@
                                     <input type="number" step="any" name="full_price" id="full_price" class="form-control form-control-sm" />
                                 </div> -->
                                 <div class="form-group mt-3">
-                                    <button type="submit" name="action_button" id="action_button" class="btn btn-outline-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
+                                    <button type="submit" name="action_button" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
                                 </div>
                                 <input type="hidden" name="action" id="action" value="Add" />
                                 <input type="hidden" name="hidden_id" id="hidden_id" />
@@ -98,31 +91,7 @@
                 </div>
             </div>
         </div>
-    </div>
-    <div class="modal fade" id="confirmModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-    aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content">
-                <div class="modal-header p-2">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col text-center">
-                            <h4 class="font-weight-normal">Are you sure you want to remove this data?</h4>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer p-2">
-                    <button type="button" name="ok_button" id="ok_button" class="btn btn-danger px-3 btn-sm">OK</button>
-                    <button type="button" class="btn btn-dark px-3 btn-sm" data-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Modal Area End -->     
+    </div>   
 </main>
               
 @endsection
@@ -136,7 +105,86 @@ $(document).ready(function(){
     $('#production_menu_link_icon').addClass('active');
     $('#dailyprocess').addClass('navbtnactive');
 
-    $('#dataTable').DataTable();
+     $('#dataTable').DataTable({
+        "destroy": true,
+        "processing": true,
+        "serverSide": true,
+        dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
+            "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+        "buttons": [{
+                extend: 'csv',
+                className: 'btn btn-success btn-sm',
+                title: 'Products  Information',
+                text: '<i class="fas fa-file-csv mr-2"></i> CSV',
+            },
+            { 
+                extend: 'pdf', 
+                className: 'btn btn-danger btn-sm', 
+                title: 'Products Information', 
+                text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
+                orientation: 'landscape', 
+                pageSize: 'legal', 
+                customize: function(doc) {
+                    doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+                }
+            },
+            {
+                extend: 'print',
+                title: 'Products  Information',
+                className: 'btn btn-primary btn-sm',
+                text: '<i class="fas fa-print mr-2"></i> Print',
+                customize: function(win) {
+                    $(win.document.body).find('table')
+                        .addClass('compact')
+                        .css('font-size', 'inherit');
+                },
+            },
+            // 'copy', 'csv', 'excel', 'pdf', 'print'
+        ],
+        "order": [
+            [0, "desc"]
+        ],
+        ajax: {
+            url: scripturl + "/productlist.php",
+            type: "POST",
+            data: {},
+        },
+        columns: [
+            { 
+                data: 'id', 
+                name: 'id'
+            },
+            { 
+                data: 'productname', 
+                name: 'productname'
+            },
+            { 
+                data: 'description', 
+                name: 'description'
+            },
+            {
+                data: 'id',
+                name: 'action',
+                className: 'text-right',
+                orderable: false,
+                searchable: false,
+                render: function(data, type, row) {
+                    var buttons = '';
+
+                    buttons += ' <a href="MachineShow/' + row.id + '" title="Machines" class="machines btn btn-info btn-sm mr-1" data-toggle="tooltip" title="Machines" > <i class="fas fa-cogs"></i> </a>';
+
+                    buttons += '<button name="edit" id="'+row.id+'" class="edit btn btn-primary btn-sm  mr-1" type="submit" data-toggle="tooltip" title="Edit"><i class="fas fa-pencil-alt"></i></button>';
+
+                    buttons += '<button type="submit" name="delete" id="'+row.id+'" class="delete btn btn-danger btn-sm" data-toggle="tooltip" title="Remove"><i class="far fa-trash-alt"></i></button>';
+
+                    return buttons;
+                }
+            }
+        ],
+        drawCallback: function(settings) {
+            $('[data-toggle="tooltip"]').tooltip();
+        }
+    });
  
     $('#create_record').click(function () {
         $('.modal-title').text('Add Product');
@@ -167,69 +215,80 @@ $(document).ready(function(){
             data: $(this).serialize(),
             dataType: "json",
             success: function (data) {
-
-                var html = '';
                 if (data.errors) {
-                    html = '<div class="alert alert-danger">';
-                    for (var count = 0; count < data.errors.length; count++) {
-                        html += '<p>' + data.errors[count] + '</p>';
-                    }
-                    html += '</div>';
+                    const actionObj = {
+                        icon: 'fas fa-warning',
+                        title: '',
+                        message: 'Record Error',
+                        url: '',
+                        target: '_blank',
+                        type: 'danger'
+                    };
+                    const actionJSON = JSON.stringify(actionObj, null, 2);
+                    action(actionJSON);
                 }
                 if (data.success) {
-                    html = '<div class="alert alert-success">' + data.success + '</div>';
-                    // $('#formTitle')[0].reset();
-                    // $('#titletable').DataTable().ajax.reload();
-                    location.reload()
+                    const actionObj = {
+                        icon: 'fas fa-save',
+                        title: '',
+                        message: data.success,
+                        url: '',
+                        target: '_blank',
+                        type: 'success'
+                    };
+                    const actionJSON = JSON.stringify(actionObj, null, 2);
+                    actionreload(actionJSON);
                 }
-                $('#form_result').html(html);
             }
         });
     });
 
-     $(document).on('click', '.edit', function () {
-        var id = $(this).attr('id');
-        $('#form_result').html('');
-        $.ajax({
-            url: "Product/" + id + "/edit",
-            dataType: "json",
-                success: function (data) {
-                    $('#productname').val(data.result.productname);
-                    $('#description').val(data.result.description);
-                    $('#semi_price').val(data.result.semi_price);
-                    $('#full_price').val(data.result.full_price);
+     $(document).on('click', '.edit', async function () {
+         var r = await Otherconfirmation("You want to Edit this ? ");
+         if (r == true) {
+             var id = $(this).attr('id');
+             $('#form_result').html('');
+             $.ajax({
+                 url: "Product/" + id + "/edit",
+                 dataType: "json",
+                 success: function (data) {
+                     $('#productname').val(data.result.productname);
+                     $('#description').val(data.result.description);
+                     $('#semi_price').val(data.result.semi_price);
+                     $('#full_price').val(data.result.full_price);
 
-                    $('#hidden_id').val(id);
-                    $('.modal-title').text('Edit Product');
-                    $('#action_button').html('Edit');
-                    $('#action').val('Edit');
-                    $('#formModal').modal('show');
-                }
-            })
-        });
+                     $('#hidden_id').val(id);
+                     $('.modal-title').text('Edit Product');
+                     $('#action_button').html('Edit');
+                     $('#action').val('Edit');
+                     $('#formModal').modal('show');
+                 }
+             })
+         }
+     });
 
     var user_id;
 
-    $(document).on('click', '.delete', function () {
+    $(document).on('click', '.delete', async function () {
         user_id = $(this).attr('id');
-        $('#confirmModal').modal('show');
-    });
-
-    $('#ok_button').click(function () {
-        $.ajax({
-            url: "Product/destroy/" + user_id,
-            beforeSend: function () {
-                $('#ok_button').text('Deleting...');
-            },
-            success: function (data) {
-                setTimeout(function () {
-                    $('#confirmModal').modal('hide');
-                    $('#user_table').DataTable().ajax.reload();
-                    alert('Data Deleted');
-                }, 2000);
-                location.reload()
-            }
-        })
+        var r = await Otherconfirmation("You want to remove this ? ");
+        if (r == true) {
+            $.ajax({
+                url: "Product/destroy/" + user_id,
+                success: function (data) {
+                   const actionObj = {
+                        icon: 'fas fa-trash-alt',
+                        title: '',
+                        message: 'Record Remove Successfully',
+                        url: '',
+                        target: '_blank',
+                        type: 'danger'
+                    };
+                    const actionJSON = JSON.stringify(actionObj, null, 2);
+                    actionreload(actionJSON);
+                }
+            })
+        }
     });
 
 });

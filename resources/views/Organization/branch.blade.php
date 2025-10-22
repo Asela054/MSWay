@@ -21,9 +21,9 @@
             <div class="card-body p-0 p-2">
                 <div class="row">
                     <div class="col-12">
-                        @can('location-create')
+                       
                         <button type="button" class="btn btn-primary btn-sm fa-pull-right" name="create_record" id="create_record"><i class="fas fa-plus mr-2"></i>Add Location</button>
-                        @endcan
+                        
                     </div>
                     <div class="col-12">
                         <hr class="border-dark">
@@ -35,9 +35,12 @@
                                 <tr>
                                     <th>ID </th>
                                     <th>Location</th>
+                                    <th>Code</th>
                                     <th>Contact No</th>
                                     <th>EPF No</th>
                                     <th>ETF No</th>
+                                    <th>Latitude</th>
+                                    <th>Longitude</th>
                                     <th class="text-right">Action</th>
                                 </tr>
                             </thead>
@@ -69,6 +72,11 @@
                                     <label class="small font-weight-bold text-dark">Location</label>
                                     <input type="text" name="location" id="location" class="form-control form-control-sm" />
                                 </div>
+                                
+                                <div class="form-group mb-1">
+                                    <label class="small font-weight-bold text-dark">Code</label>
+                                    <input type="text" name="code" id="code" class="form-control form-control-sm" />
+                                </div>
                                 <div class="form-group mb-1">
                                     <label class="small font-weight-bold text-dark">Contact No</label>
                                     <input type="text" name="contactno" id="contactno" class="form-control form-control-sm" />
@@ -80,6 +88,22 @@
                                 <div class="form-group mb-1">
                                     <label class="small font-weight-bold text-dark">ETF No</label>
                                     <input type="text" name="etf" id="etf" class="form-control form-control-sm" />
+                                </div>
+                                <div class="form-group mb-1">
+                                    <label class="small font-weight-bold text-dark">Latitude</label>
+                                    <input type="text" name="altitude" id="altitude"
+                                        class="form-control form-control-sm" />
+                                </div>
+                                <div class="form-group mb-1">
+                                    <label class="small font-weight-bold text-dark">Longitude</label>
+                                    <input type="text" name="longitude" id="longitude"
+                                        class="form-control form-control-sm" />
+                                </div>
+                                 <div class="form-group mb-1">
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input" id="outside_location" name="outside_location" value="1">
+                                        <label class="custom-control-label" for="outside_location">Outside Location</label>
+                                    </div>
                                 </div>
                                 <div class="form-group mt-3">
                                     <button type="submit" name="action_button" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
@@ -185,6 +209,10 @@ $(document).ready(function(){
                 name: 'location'
             },
             { 
+                data: 'code', 
+                name: 'code'
+            },
+            { 
                 data: 'contactno', 
                 name: 'contactno'
             },
@@ -195,6 +223,14 @@ $(document).ready(function(){
             { 
                 data: 'etf', 
                 name: 'etf'
+            },
+             { 
+                data: 'latitude', 
+                name: 'latitude'
+            },
+             { 
+                data: 'longitude', 
+                name: 'longitude'
             },
             {
                 data: 'id',
@@ -285,8 +321,17 @@ $(document).ready(function(){
                 success: function (data) {
                     $('#location').val(data.result.location);
                     $('#contactno').val(data.result.contactno);
+                     $('#code').val(data.result.code);
                     $('#epf').val(data.result.epf);
                     $('#etf').val(data.result.etf);
+                     $('#altitude').val(data.result.latitude);
+                    $('#longitude').val(data.result.longitude);
+
+                    if(data.result.outside_location == 1){
+                        $('#outside_location').prop('checked', true);
+                    }else{
+                        $('#outside_location').prop('checked', false);
+                    }
                     $('#hidden_id').val(id);
                     $('.modal-title').text('Edit Location');
                     $('#action_button').html('Edit');

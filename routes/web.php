@@ -1441,11 +1441,11 @@ Route::get('jobattendanceapprove', 'JobAttendaceApproveController@index')->name(
 Route::post('jobattendanceapprovesave', 'JobAttendaceApproveController@approveattendace')->name('jobattendanceapprovesave');
 
 /*-- Product Machines Info----*/
-Route::resource('Machine', 'ProductMachineController');
+Route::resource('productMachine', 'ProductMachineController');
 Route::get('MachineShow/{id}',['uses' => 'ProductMachineController@index', 'as' => 'MachineShow']);
 Route::post('addProductMachine',['uses' => 'ProductMachineController@store', 'as' => 'addProductMachine']);
-Route::post('Machine/update', 'ProductMachineController@update')->name('Machine.update');
-Route::get('Machine/destroy/{id}', 'ProductMachineController@destroy');
+Route::post('productMachine/update', 'ProductMachineController@update')->name('productMachine.update');
+Route::get('productMachine/destroy/{id}', 'ProductMachineController@destroy');
 Route::get('Machine_list_sel2', 'ProductMachineController@Machine_list_sel2');
 
 // Task & Product report Controller Routes
