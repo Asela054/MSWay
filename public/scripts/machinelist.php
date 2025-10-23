@@ -19,7 +19,7 @@
  */
 
 // DB table to use
-$table = 'branches';
+$table = 'machines';
 
 // Table's primary key
 $primaryKey = 'id';
@@ -30,13 +30,8 @@ $primaryKey = 'id';
 // indexes
 $columns = array(
 	array( 'db' => '`u`.`id`', 'dt' => 'id', 'field' => 'id' ),
-	array( 'db' => '`u`.`location`', 'dt' => 'location', 'field' => 'location' ),
-	array( 'db' => '`u`.`contactno`', 'dt' => 'contactno', 'field' => 'contactno' ),
-	array( 'db' => '`u`.`epf`', 'dt' => 'epf', 'field' => 'epf' ),
-	array( 'db' => '`u`.`etf`', 'dt' => 'etf', 'field' => 'etf' ),
-	array( 'db' => '`u`.`code`', 'dt' => 'code', 'field' => 'code' ),
-	array( 'db' => '`u`.`latitude`', 'dt' => 'latitude', 'field' => 'latitude' ),
-	array( 'db' => '`u`.`longitude`', 'dt' => 'longitude', 'field' => 'longitude' )
+	array( 'db' => '`u`.`machine`', 'dt' => 'machine', 'field' => 'machine' ),
+	array( 'db' => '`u`.`description`', 'dt' => 'description', 'field' => 'description' )
 );
 
 // SQL server connection information
@@ -56,7 +51,7 @@ $sql_details = array(
 // require( 'ssp.class.php' );
 require('ssp.customized.class.php' );
 
-$joinQuery = "FROM `branches` AS `u`";
+$joinQuery = "FROM `machines` AS `u`";
 	
 $extraWhere = "1=1";
 

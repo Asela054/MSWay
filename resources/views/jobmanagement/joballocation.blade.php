@@ -428,9 +428,6 @@
                             type: 'POST',
                             dataType: "json",
                             data: {id: user_id },
-                        beforeSend: function () {
-                            $('#ok_button').text('Deleting...');
-                        },
                         success: function (data) {
                              const actionObj = {
                                 icon: 'fas fa-trash-alt',
