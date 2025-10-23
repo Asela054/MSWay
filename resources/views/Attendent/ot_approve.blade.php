@@ -198,6 +198,11 @@
                         btn.html('Filter');
                         btn.prop('disabled', false);
 
+                         if ($.fn.DataTable.isDataTable('#ot_table')) {
+                        $('#ot_table').DataTable().clear().destroy();
+                    }
+                    $('#ot_table tbody').empty();
+
                         let ot_data = res.ot_data;
                         let ot_data_html = '';
                         
@@ -206,12 +211,6 @@
                                 let is_approved = key.is_approved;
                                 let obj = key.ot_breakdown;
                                 let is_holiday = obj.is_holiday == 1 ? 'Yes' : 'No';
-                                
-                                // let from_input = '<input type="datetime-local" class="form-control form-control-sm" placeholder="YYYY-MM-DD HH:MM" value="'+ obj.from_24+'" readonly>';
-                                // let to_input = '<input type="datetime-local" class="form-control form-control-sm" placeholder="YYYY-MM-DD HH:MM" value="'+obj.to_24+'" readonly>';
-                                // let hours_input = '<input type="number" class="form-control form-control-sm" value="'+obj.hours+'" step=".01" readonly>';
-                                // let double_hours_input = '<input type="number" class="form-control form-control-sm" value="'+obj.double_hours+'" step=".01" readonly>';
-                                // let triple_hours_input = '<input type="number" class="form-control form-control-sm" value="'+obj.triple_hours +'" step=".01" readonly>';
                                 
                                 let h_class = obj.is_morning ? 'bg-teal-light' : '';
                                 
@@ -240,12 +239,12 @@
                                 ot_data_html += '</tr>';
                             });
                         }
-                        
-                        
-                        $('.response').html(ot_data_html);
+                        $('#ot_table tbody').html(ot_data_html);
                         
                         // Initialize DataTable with export buttons
                         $('#ot_table').DataTable({
+                            destroy: true,
+                            responsive: true,
                               dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
                                 "<'row'<'col-sm-5'i><'col-sm-7'p>>",
                             "buttons": [{
@@ -277,8 +276,6 @@
                                     },
                                 },
                             ],
-
-                            responsive: true,
                             pageLength: 25,
                             order: [[1, 'desc']]
                         });
@@ -309,6 +306,7 @@
             $('#formFilter').on('submit',function(e) {
                 e.preventDefault();
                 $('.info_msg').html('');
+
                 load_table();
                 closeOffcanvasSmoothly();
 

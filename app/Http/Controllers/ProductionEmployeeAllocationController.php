@@ -108,20 +108,12 @@ class ProductionEmployeeAllocationController extends Controller
 
                 $btn .= ' <button name="view" id="'.$row->id.'" class="view btn btn-outline-secondary btn-sm" type="button"><i class="fas fa-eye"></i></button>';
 
-                if($user->can('product-allocation-edit')){
+               
                     $btn .= ' <button name="edit" id="'.$row->id.'" class="edit btn btn-outline-primary btn-sm" type="button"><i class="fas fa-pencil-alt"></i></button>';
-                }
-
-                if($user->can('product-allocation-status')){
-                    if($row->status == 1){
-                        $btn .= ' <a href="'.route('productallocationstatus', ['id' => $row->id, 'stasus' => 2]) .'" onclick="return deactive_confirm()" target="_self" class="btn btn-outline-success btn-sm mr-1 "><i class="fas fa-check"></i></a>';
-                    }else{
-                        $btn .= '&nbsp;<a href="'.route('productallocationstatus', ['id' => $row->id, 'stasus' => 1]) .'" onclick="return active_confirm()" target="_self" class="btn btn-outline-warning btn-sm mr-1 "><i class="fas fa-times"></i></a>';
-                    }
-                }
-                if($user->can('product-allocation-delete')){
+               
+                
                     $btn .= ' <button name="delete" id="'.$row->id.'" class="delete btn btn-outline-danger btn-sm"><i class="far fa-trash-alt"></i></button>';
-                }
+                
                 return $btn;
             })
             ->rawColumns(['action'])
@@ -130,6 +122,12 @@ class ProductionEmployeeAllocationController extends Controller
 
     public function edit(Request $request)
     {
+          $user = Auth::user();
+        $permission = $user->can('product-allocation-edit');
+        if (!$permission) {
+            return response()->json(['error' => 'UnAuthorized'], 401);
+        }
+
         $id = $request->input('id');
         if (request()->ajax()){
             $data = DB::table('emp_product_allocation as epa')

@@ -72,6 +72,9 @@
                                     <th>LOCATION</th>
                                     <th>DEPARTMENT</th>
                                     <th class="text-right">ACTION</th>
+                                     <th class="d-none">EMPNAME</th>
+                                    <th class="d-none">CALLING</th>
+                                    <th class="d-none">EMPID</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -1502,6 +1505,7 @@
                 if (r == true) {
                     var id = $(this).attr("id");
                     var _token = $('input[name="_token"]').val();
+                    var $deleteButton = $(this);
                     $.ajax({
                         url: "AttendentDeleteLive",
                         method: "POST",
@@ -1519,7 +1523,9 @@
                                 type: 'danger'
                             };
                             const actionJSON = JSON.stringify(actionObj, null, 2);
-                            actionreload(actionJSON);
+                            action(actionJSON);
+
+                              reloadModalTableData();
                         }
                     });
                 }
@@ -1589,6 +1595,12 @@
                     let id = $(this).data("uid");
                     date = $(this).attr('data-date');
                     emp_name_with_initial = $(this).attr('data-name');
+
+                    
+                $('#AttendeditModal')
+                            .data('current-id', id)
+                            .data('current-date', date)
+                            .data('current-name', emp_name_with_initial);
 
                     var formdata = {
                         _token: $('input[name=_token]').val(),
@@ -1786,6 +1798,77 @@
             });
 
         });
+
+      // Function to reload modal table data
+        function reloadModalTableData() {
+            // Extract data from the current modal header
+            var headerText = $('#attendTable thead tr:first').text();
+            var idMatch = headerText.match(/Emp ID :(\w+)/);
+            var nameMatch = headerText.match(/Name :([^]+?)(?=Type|$)/);
+            
+            var id = idMatch ? idMatch[1].trim() : '';
+            var emp_name_with_initial = nameMatch ? nameMatch[1].trim() : '';
+            
+            // Get date from the first timestamp in the table or use stored data
+            var firstTimestamp = $('#attendTable tbody tr:first .timestamp').data('timestamp');
+            var date = firstTimestamp ? firstTimestamp.split(' ')[0] : '';
+            
+            // If we can't extract from table, try to get from stored data
+            if (!id || !date) {
+                id = $('#AttendeditModal').data('current-id');
+                date = $('#AttendeditModal').data('current-date');
+                emp_name_with_initial = $('#AttendeditModal').data('current-name');
+            }
+
+            if (id && date) {
+                var formdata = {
+                    _token: $('input[name=_token]').val(),
+                    id: id,
+                    date: date
+                };
+
+                $('#form_result').html('');
+                $.ajax({
+                    url: "AttendentUpdate",
+                    dataType: "json",
+                    data: formdata,
+                    success: function (data) {
+                        // Keep modal open and refresh the table
+                        var htmlhead = '';
+                        htmlhead += '<tr><td>Emp ID :' + id + '</td><td colspan="2">Name :' + emp_name_with_initial + '</td></tr>';
+                        htmlhead += '<tr> <th> Type </th> <th>Date & Time</th><th class="text-right">Action</th>';
+                        var html = '';
+
+                        if (data.length > 0) {
+                            data.forEach(function(record, index) {
+                                var type = '';
+                                
+                                if (index === 0) {
+                                    type = 'Check In';
+                                }
+                                else if (index === data.length - 1) {
+                                    type = 'Check Out';
+                                }
+                                else {
+                                    type = 'Additional ' + index;
+                                }
+
+                                html += '<tr>';
+                                html += '<td>' + type + '</td>';
+                                html += '<td contenteditable class="timestamp" data-timestamp="' + record.timestamp + '" data-id="' + record.uid + '" data-attendance-id="' + record.id + '">' + record.timestamp + '</td>';
+                                html += '<td class="text-right"><button type="button" class="btn btn-danger btn-sm addelete" id="' + record.id + '"><i class="far fa-trash-alt"></i></button></td>';
+                                html += '</tr>';
+                            });
+                        } else {
+                            html += '<tr><td colspan="3">No attendance records found</td></tr>';
+                        }
+                        
+                        $('#attendTable thead').html(htmlhead);
+                        $('#attendTable tbody').html(html);
+                    }
+                });
+            }
+        }
     </script>
 
 @endsection

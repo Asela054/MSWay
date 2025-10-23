@@ -4,12 +4,20 @@
 
 <main> 
     <div class="page-header shadow">
-        <div class="container-fluid">
-             @include('layouts.production&task_nav_bar')
-           
+            <div class="container-fluid d-none d-sm-block shadow">
+                 @include('layouts.production&task_nav_bar')
+            </div>
+            <div class="container-fluid">
+                <div class="page-header-content py-3 px-2">
+                    <h1 class="page-header-title ">
+                        <div class="page-header-icon"><i class="fa-light fa-ballot-check"></i></div>
+                        <span>Daily Process Ending</span>
+                    </h1>
+                </div>
+            </div>
         </div>
-    </div>
-    <div class="container-fluid mt-4">
+
+    <div class="container-fluid mt-2 p-0 p-2">
         <div class="card">
             <div class="card-body p-0 p-2">
                 <div class="row">
@@ -19,11 +27,11 @@
                             <thead>
                                 <tr>
                                     <th>ID </th>
-                                    <th>Machine</th>
-                                    <th>Product</th>
-                                    <th>Date</th>
-                                    <th>Production Status</th>
-                                    <th class="text-right">Action</th>
+                                    <th>MACHINE</th>
+                                    <th>PRODUCT</th>
+                                    <th>DATE</th>
+                                    <th>PRODUCTION STATUS</th>
+                                    <th class="text-right">ACTION</th>
                                 </tr>
                             </thead>
                             <tbody>   
@@ -55,41 +63,41 @@
                                 {{ csrf_field() }}	
                                 <div class="row">
                                     
-                                        <div class="row col-6">
+                                        <div class="row col-sm-12 col-md-6">
                                             <div class="col-12">
-                                                <label class="small font-weight-bold text-dark">Product Type:</label><br>
+                                                <label class="small font-weight-bolder text-dark">Product Type:*</label><br>
                                                 <div class="form-check form-check-inline">
                                                     <input class="form-check-input" type="radio" name="product_type" id="semi" value="Semi Completed">
-                                                    <label class="form-check-label small font-weight-bold text-dark" for="semi" required>Semi Product</label>
+                                                    <label class="form-check-label small font-weight-bolder text-dark" for="semi" required>Semi Product</label>
                                                 </div>
                                                 <div class="form-check form-check-inline">
                                                     <input class="form-check-input" type="radio" name="product_type" id="full" value="Full Completed">
-                                                    <label class="form-check-label small font-weight-bold text-dark" for="full" required >Full Product</label>
+                                                    <label class="form-check-label small font-weight-bolder text-dark" for="full" required >Full Product</label>
                                                 </div>
                                                 <div class="form-check form-check-inline">
                                                     <input class="form-check-input" type="radio" name="product_type" id="both" value="Semi & Full">
-                                                    <label class="form-check-label small font-weight-bold text-dark" for="both" required >Semi & Full</label>
+                                                    <label class="form-check-label small font-weight-bolder text-dark" for="both" required >Semi & Full</label>
                                                 </div>
                                             </div>
                                         </div>
-                                     <div class="col-3 quantity-field hidden-field" id="semiQtyField">
-                                        <label class="small font-weight-bold text-dark">Semi Quntity</label>
+                                     <div class="col-sm-12 col-md-3 quantity-field hidden-field" id="semiQtyField">
+                                        <label class="small font-weight-bolder text-dark">Semi Quntity*</label>
                                         <input type="number" step="any" name="semiquntity" id="semiquntity" class="form-control form-control-sm" required />
                                     </div>
-                                     <div class="col-3  quantity-field hidden-field" id="fullQtyField">
-                                        <label class="small font-weight-bold text-dark">Full Quntity</label>
+                                     <div class="col-sm-12 col-md-3  quantity-field hidden-field" id="fullQtyField">
+                                        <label class="small font-weight-bolder text-dark">Full Quntity*</label>
                                         <input type="number" step="any" name="fullquntity" id="fullquntity" class="form-control form-control-sm" required />
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-12">
-                                        <label class="small font-weight-bold text-dark">Note</label>
+                                    <div class="col-sm-12 col-md-12">
+                                        <label class="small font-weight-bolder text-dark">Note</label>
                                         <input type="text" name="desription" id="desription" class="form-control form-control-sm"/>
                                     </div>
                                 </div>
                                 <br>
                                 <div class="form-group mt-3">
-                                    <button type="submit" name="action_button" id="action_button" class="btn btn-outline-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
+                                    <button type="submit" name="action_button" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
                                     <input type="hidden" name="hidden_id" id="hidden_id" />
                                 </div>
                             </form>
@@ -119,14 +127,14 @@
                                 <form method="post" id="cancelform" class="form-horizontal">
                                 {{ csrf_field() }}	
                                 <div class="row">
-                                    <div class="col-12">
-                                        <label class="small font-weight-bold text-dark">Cancel description</label>
+                                    <div class="col-sm-12 col-md-12">
+                                        <label class="small font-weight-bolder text-dark">Cancel description*</label>
                                         <input type="text" name="cancel_desription" id="cancel_desription" class="form-control form-control-sm" required/>
                                     </div>
                                 </div>
                                 <br>
                                 <div class="form-group mt-3">
-                                    <button type="submit" name="action_button" id="action_button" class="btn btn-outline-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
+                                    <button type="submit" name="action_button" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
                                 </div>
                                 <input type="hidden" name="cancel_id" id="cancel_id" />
                             </form>
@@ -155,22 +163,60 @@ $(document).ready(function(){
 
      // DataTable initialization
     $('#dataTable').DataTable({
-        processing: true,
-        serverSide: true,
+       "destroy": true,
+        "processing": true,
+        "serverSide": true,
+        dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
+            "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+        "buttons": [{
+                extend: 'csv',
+                className: 'btn btn-success btn-sm',
+                title: 'Production  Information',
+                text: '<i class="fas fa-file-csv mr-2"></i> CSV',
+            },
+            { 
+                extend: 'pdf', 
+                className: 'btn btn-danger btn-sm', 
+                title: 'Production Information', 
+                text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
+                orientation: 'landscape', 
+                pageSize: 'legal', 
+                customize: function(doc) {
+                    doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+                }
+            },
+            {
+                extend: 'print',
+                title: 'Production  Information',
+                className: 'btn btn-primary btn-sm',
+                text: '<i class="fas fa-print mr-2"></i> Print',
+                customize: function(win) {
+                    $(win.document.body).find('table')
+                        .addClass('compact')
+                        .css('font-size', 'inherit');
+                },
+            },
+            // 'copy', 'csv', 'excel', 'pdf', 'print'
+        ],
+        "order": [
+            [0, "desc"]
+        ],
         ajax: {
-            "url": "{!! route('productionendinglist') !!}",
+            url: scripturl + "/production_ending_list.php",
+            type: "POST",
+            data: {},
         },
         columns: [{
                 data: 'id',
                 name: 'id'
             },
             {
-                data: 'machine_name',
-                name: 'machine_name'
+                data: 'machine',
+                name: 'machine'
             },
             {
-                data: 'product_name',
-                name: 'product_name'
+                data: 'productname',
+                name: 'productname'
             },
             {
                 data: 'date',
@@ -198,19 +244,28 @@ $(document).ready(function(){
             }
         },
             {
-                data: 'action',
+                data: 'production_status',
                 name: 'action',
+                className: 'text-right',
                 orderable: false,
                 searchable: false,
                 render: function (data, type, row) {
-                    return '<div style="text-align: right;">' + data + '</div>';
+                    var buttons = '';
+
+                    if(data == 1){
+                        buttons += ' <button name="edit" id="'+row.id+'" class="edit btn btn-success btn-sm" type="button" title="Finish Production" data-toggle="tooltip"><i class="fas fa-check-circle"></i></button>';
+                    }
+                    if(data != 3){
+                        buttons += ' <button name="delete" id="'+row.id+'" class="delete btn btn-danger btn-sm" type="button" title="Cancel Production" data-toggle="tooltip"><i class="fas fa-times-circle"></i></button>';
+                    }
+                     
+                     return buttons;
                 }
             },
         ],
-        "bDestroy": true,
-        "order": [
-            [0, "desc"]
-        ]
+        drawCallback: function(settings) {
+            $('[data-toggle="tooltip"]').tooltip();
+        }
     });
 
 
@@ -232,53 +287,78 @@ $(document).ready(function(){
             data: $(this).serialize(),
             dataType: "json",
             success: function (data) {
-                var html = '';
                 if (data.errors) {
-                    html = '<div class="alert alert-danger">';
-                    for (var count = 0; count < data.errors.length; count++) {
-                        html += '<p>' + data.errors[count] + '</p>';
-                    }
-                    html += '</div>';
+                    const actionObj = {
+                        icon: 'fas fa-warning',
+                        title: '',
+                        message: 'Record Error',
+                        url: '',
+                        target: '_blank',
+                        type: 'danger'
+                    };
+                    const actionJSON = JSON.stringify(actionObj, null, 2);
+                    action(actionJSON);
                 }
                 if (data.success) {
-                    html = '<div class="alert alert-success">' + data.success + '</div>';
-                    location.reload()
+                    const actionObj = {
+                        icon: 'fas fa-save',
+                        title: '',
+                        message: data.success,
+                        url: '',
+                        target: '_blank',
+                        type: 'success'
+                    };
+                    const actionJSON = JSON.stringify(actionObj, null, 2);
+                    actionreload(actionJSON);
                 }
-                $('#form_result').html(html);
             }
         });
     });
 
-     $(document).on('click', '.delete', function () {
-        var id = $(this).attr('id');
-        $('#form_result_cancel').html('');
-        $('#cancel_id').val(id);
-        $('#cancelformModal').modal('show');
+     $(document).on('click', '.delete',async function () {
+         var r = await Otherconfirmation("You want to remove this ? ");
+        if (r == true) {
+            var id = $(this).attr('id');
+            $('#form_result_cancel').html('');
+            $('#cancel_id').val(id);
+            $('#cancelformModal').modal('show');
+        }
     });
     
     $('#cancelform').on('submit', function (event) {
-        event.preventDefault();
-        $.ajax({
-            url:  '{!! route("productionendingcancel") !!}',
-            method: "POST",
-            data: $(this).serialize(),
-            dataType: "json",
-            success: function (data) {
-                var html = '';
-                if (data.errors) {
-                    html = '<div class="alert alert-danger">';
-                    for (var count = 0; count < data.errors.length; count++) {
-                        html += '<p>' + data.errors[count] + '</p>';
+             event.preventDefault();
+            $.ajax({
+                url:  '{!! route("productionendingcancel") !!}',
+                method: "POST",
+                data: $(this).serialize(),
+                dataType: "json",
+                success: function (data) {
+                    if (data.errors) {
+                        const actionObj = {
+                            icon: 'fas fa-warning',
+                            title: '',
+                            message: 'Record Error',
+                            url: '',
+                            target: '_blank',
+                            type: 'danger'
+                        };
+                        const actionJSON = JSON.stringify(actionObj, null, 2);
+                        action(actionJSON);
                     }
-                    html += '</div>';
+                    if (data.success) {
+                        const actionObj = {
+                            icon: 'fas fa-save',
+                            title: '',
+                            message: data.success,
+                            url: '',
+                            target: '_blank',
+                            type: 'success'
+                        };
+                        const actionJSON = JSON.stringify(actionObj, null, 2);
+                        actionreload(actionJSON);
+                    }
                 }
-                if (data.success) {
-                    html = '<div class="alert alert-success">' + data.success + '</div>';
-                    location.reload()
-                }
-                $('#form_result_cancel').html(html);
-            }
-        });
+            });
     });
 
 
