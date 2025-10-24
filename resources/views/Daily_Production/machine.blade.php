@@ -63,11 +63,11 @@
                             <form method="post" id="formTitle" class="form-horizontal">
                                 {{ csrf_field() }}	
                                 <div class="form-group mb-1">
-                                    <label class="small font-weight-bolder text-dark">Machine*</label>
+                                    <label class="small font-weight-bolder ">Machine*</label>
                                     <input type="text" name="machine" id="machine" class="form-control form-control-sm"  required/>
                                 </div>
                                 <div class="form-group mb-1">
-                                    <label class="small font-weight-bolder text-dark">Description</label>
+                                    <label class="small font-weight-bolder ">Description</label>
                                     <input type="text" name="description" id="description" class="form-control form-control-sm" />
                                 </div>
                                 <div class="form-group mt-3">

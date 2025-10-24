@@ -79,7 +79,7 @@
                                 <form method="post" id="formTitle" class="form-horizontal">
                                     {{ csrf_field() }}
                                     <div class="form-group mb-1">
-                                        <label class="small font-weight-bolder text-dark">Machine *</label>
+                                        <label class="small font-weight-bolder ">Machine *</label>
                                         <select name="machine" id="machine" class="form-control form-control-sm">
                                             <option value="">Select Machine</option>
                                             @foreach ($machines as $machine)
@@ -88,11 +88,11 @@
                                         </select>
                                     </div>
                                     <div class="form-group mb-1">
-                                        <label class="small font-weight-bolder text-dark">Semi Finished Price</label>
+                                        <label class="small font-weight-bolder ">Semi Finished Price</label>
                                         <input type="number" step="any" name="semi_price" id="semi_price" class="form-control form-control-sm" />
                                     </div>
                                     <div class="form-group mb-1">
-                                        <label class="small font-weight-bolder text-dark">Full Finished Price</label>
+                                        <label class="small font-weight-bolder ">Full Finished Price</label>
                                         <input type="number" step="any" name="full_price" id="full_price" class="form-control form-control-sm" />
                                     </div>
                                     <div class="form-group mt-3">

@@ -65,19 +65,19 @@
                             <form method="post" id="formTitle" class="form-horizontal">
                                 {{ csrf_field() }}	
                                 <div class="form-group mb-1">
-                                    <label class="small font-weight-bolder text-dark">Product Name*</label>
+                                    <label class="small font-weight-bolder ">Product Name*</label>
                                     <input type="text" name="productname" id="productname" class="form-control form-control-sm"  required/>
                                 </div>
                                 <div class="form-group mb-1">
-                                    <label class="small font-weight-bolder text-dark">Product Description</label>
+                                    <label class="small font-weight-bolder ">Product Description</label>
                                     <input type="text" name="description" id="description" class="form-control form-control-sm" />
                                 </div>
                                 <!-- <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">Semi Finished Price</label>
+                                    <label class="small font-weight-bold ">Semi Finished Price</label>
                                     <input type="number" step="any" name="semi_price" id="semi_price" class="form-control form-control-sm" />
                                 </div>
                                 <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">Full Finished Price</label>
+                                    <label class="small font-weight-bold ">Full Finished Price</label>
                                     <input type="number" step="any" name="full_price" id="full_price" class="form-control form-control-sm" />
                                 </div> -->
                                 <div class="form-group mt-3">
