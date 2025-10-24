@@ -3,17 +3,25 @@
 @section('content')
 
 <main> 
-    <div class="page-header shadow">
-        <div class="container-fluid">
-             @include('layouts.production&task_nav_bar')
+   <div class="page-header shadow">
+            <div class="container-fluid d-none d-sm-block shadow">
+                 @include('layouts.production&task_nav_bar')
+            </div>
+            <div class="container-fluid">
+                <div class="page-header-content py-3 px-2">
+                    <h1 class="page-header-title ">
+                        <div class="page-header-icon"><i class="fa-light fa-ballot-check"></i></div>
+                        <span>Employee Allocation</span>
+                    </h1>
+                </div>
+            </div>
         </div>
-    </div>
-    <div class="container-fluid mt-4">
+    <div class="container-fluid mt-2 p-0 p-2">
         <div class="card">
             <div class="card-body p-0 p-2">
                 <div class="row">
                     <div class="col-12">
-                        <button type="button" class="btn btn-outline-primary btn-sm fa-pull-right mr-2" name="create_record"
+                        <button type="button" class="btn btn-primary btn-sm fa-pull-right mr-2" name="create_record"
                         id="create_record"><i class="fas fa-plus mr-2"></i>Add Employee</button>
                     </div>
                     <div class="col-12">
@@ -25,10 +33,10 @@
                             <thead>
                                 <tr>
                                     <th>ID</th>
-                                    <th>Date</th>
-                                    <th>Machine</th>
-                                    <th>Product</th>
-                                    <th class="text-right">Action</th>
+                                    <th>DATE</th>
+                                    <th>MACHINE</th>
+                                    <th>PRODUCT</th>
+                                    <th class="text-right">ACTION</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -64,13 +72,13 @@
                                 <input type="hidden" name="detailsid" id="detailsid" />
                                 
                                 <div class="row">
-                                    <div class="col-4">
-                                        <label class="small font-weight-bold text-dark">Date</label>
+                                    <div class="col-sm-12 col-md-6">
+                                        <label class="small font-weight-bolder text-dark">Date*</label>
                                         <input type="date" name="production_date" id="production_date"
                                             class="form-control form-control-sm" required />
                                     </div>
-                                    <div class="col-4">
-                                        <label class="small font-weight-bold text-dark">Shift</label>
+                                    <div class="col-sm-12 col-md-6">
+                                        <label class="small font-weight-bolder text-dark">Shift*</label>
                                         <select name="shift" id="shift" class="form-control form-control-sm">
                                             <option value="">Please Select</option>
                                             @foreach($shifttype as $shifttypes)
@@ -81,8 +89,8 @@
                                 </div>
                                 <hr>
                                 <div class="row">
-                                    <div class="col-4">
-                                        <label class="small font-weight-bold text-dark">Product</label>
+                                    <div class="col-sm-12 col-md-4">
+                                        <label class="small font-weight-bolder text-dark">Product*</label>
                                         <select name="product" id="product" class="form-control form-control-sm" style="width: 100%;" required>
                                             <option value="">Select Product</option>
                                             @foreach ($products as $product)
@@ -90,40 +98,41 @@
                                             @endforeach
                                         </select>
                                     </div>    
-                                    <div class="col-4">
-                                        <label class="small font-weight-bold text-dark">Machine</label>
+                                    <div class="col-sm-12 col-md-4">
+                                        <label class="small font-weight-bolder text-dark">Machine</label>
                                         <select name="machine" id="machine" class="form-control form-control-sm">
                                         </select>
                                     </div>
-                                    <div class="col-4">
-                                        <label class="small font-weight-bold text-dark">Employee</label>
+                                    <div class="col-sm-12 col-md-4">
+                                        <label class="small font-weight-bolder text-dark">Employee*</label>
                                         <select class="employee form-control form-control-sm" name="employee" id="employee" style="width:100%"></select>
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-4">
+                                    <div class="col-sm-12 col-md-4">
                                         <button type="button" id="addtolist" class="btn btn-primary btn-sm px-4" style="margin-top:30px;"><i class="fas fa-plus"></i>&nbsp;Add to list</button>
                                     </div>
-                                    <div class="col-2">
+                                    <div class="col-sm-12 col-md-4">
                                         <button type="button" id="Btnupdatelist" class="btn btn-success btn-sm px-3" style="margin-top:30px; display:none;"><i class="fas fa-edit"></i>&nbsp;Update</button>
                                     </div>
                                 </div>
 
                                 <br>
+                                <div class="center-block fix-width scroll-inner">
                                 <table class="table table-striped table-bordered table-sm small nowrap display" id="allocationtbl" style="width:100%;">
                                     <thead>
                                         <tr>
-                                            <th>Emp ID</th>
-                                            <th>Employee Name</th>
-                                            <th style="white-space: nowrap;">Action</th>
+                                            <th>EMP ID</th>
+                                            <th>EMPLOYEE NAME</th>
+                                            <th style="white-space: nowrap;">ACTION</th>
                                         </tr>
                                     </thead>
                                     <tbody id="emplistbody">
                                     </tbody>
                                 </table>
-                                
+                                </div>
                                 <div class="form-group mt-3">
-                                    <button type="button" name="action_button" id="action_button" class="btn btn-outline-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
+                                    <button type="button" name="action_button" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
                                 </div>
                             </form>
                         </div>
@@ -133,56 +142,7 @@
         </div>
     </div>
 
-    <!-- Confirm Delete Modal -->
-    <div class="modal fade" id="confirmModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-        aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content">
-                <div class="modal-header p-2">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col text-center">
-                            <h4 class="font-weight-normal">Are you sure you want to remove this data?</h4>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer p-2">
-                    <button type="button" name="ok_button" id="ok_button" class="btn btn-danger px-3 btn-sm">OK</button>
-                    <button type="button" class="btn btn-dark px-3 btn-sm closebtn" data-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Confirm Delete List Modal -->
-    <div class="modal fade" id="confirmModal2" data-backdrop="static" data-keyboard="false" tabindex="-1"
-        aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content">
-                <div class="modal-header p-2">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col text-center">
-                            <h4 class="font-weight-normal">Are you sure you want to remove this data?</h4>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer p-2">
-                    <button type="button" name="ok_button2" id="ok_button2"
-                        class="btn btn-danger px-3 btn-sm">OK</button>
-                    <button type="button" class="btn btn-dark px-3 btn-sm closebtn" data-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
+ 
 
     <!-- View Modal -->
     <div class="modal fade" id="viewconfirmModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
@@ -200,13 +160,13 @@
                         <div class="row">
                             <div class="col-12">
                                 <div class="form-row mb-1">
-                                    <div class="col-6">
-                                        <label class="small font-weight-bold text-dark">Date</label>
+                                    <div class="col-sm-12 col-md-6">
+                                        <label class="small font-weight-bolder text-dark">Date</label>
                                         <input type="date" name="view_production_date" id="view_production_date"
                                             class="form-control form-control-sm" readonly />
                                     </div>
-                                    <div class="col-6">
-                                        <label class="small font-weight-bold text-dark">Shift</label>
+                                    <div class="col-sm-12 col-md-6">
+                                        <label class="small font-weight-bolder text-dark">Shift</label>
                                         <select name="view_shift" id="view_shift" class="form-control form-control-sm" disabled>
                                             <option value="">Please Select</option>
                                             @foreach($shifttype as $shifttypes)
@@ -214,8 +174,8 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                    <div class="col-6">
-                                        <label class="small font-weight-bold text-dark">Machine</label>
+                                    <div class="col-sm-12 col-md-6">
+                                        <label class="small font-weight-bolder text-dark">Machine</label>
                                         <select name="view_machine" id="view_machine" class="form-control form-control-sm" style="width: 100%;" disabled>
                                             <option value="">Select Machine</option>
                                             @foreach ($machines as $machine)
@@ -223,8 +183,8 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                    <div class="col-6">
-                                        <label class="small font-weight-bold text-dark">Product</label>
+                                    <div class="col-sm-12 col-md-6">
+                                        <label class="small font-weight-bolder text-dark">Product</label>
                                         <select name="view_product" id="view_product" class="form-control form-control-sm" style="width: 100%;" disabled>
                                             <option value="">Select Product</option>
                                             @foreach ($products as $product)
@@ -237,13 +197,13 @@
                         </div>
                         <hr>
                         <div class="row">
-                            <div class="col-12">
+                            <div class="col-sm-12 col-md-12">
                                 <div class="center-block fix-width scroll-inner">
                                     <table class="table table-striped table-bordered table-sm small" id="view_tableorder">
                                         <thead>
                                             <tr>
-                                                <th>Emp ID</th>
-                                                <th>Employee Name</th>
+                                                <th>EMP ID</th>
+                                                <th>EMPLOYEE NAME</th>
                                             </tr>
                                         </thead>
                                         <tbody id="view_tableorderlist"></tbody>
@@ -256,6 +216,8 @@
             </div>
         </div>
     </div>
+
+
     <!-- Modal Area End -->     
 </main>
               
@@ -271,13 +233,6 @@ $(document).ready(function(){
     // Modal close handlers
     $('#viewconfirmModal .close').click(function(){
         $('#viewconfirmModal').modal('hide');
-    });
-
-    $('#confirmModal2 .close').click(function(){
-        $('#confirmModal2').modal('hide');
-    });
-    $('#confirmModal2 .closebtn').click(function(){
-        $('#confirmModal2').modal('hide');
     });
 
     let machine = $('#machine');
@@ -344,10 +299,48 @@ $(document).ready(function(){
 
     // DataTable initialization
     $('#dataTable').DataTable({
-        processing: true,
-        serverSide: true,
+        "destroy": true,
+        "processing": true,
+        "serverSide": true,
+        dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
+            "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+        "buttons": [{
+                extend: 'csv',
+                className: 'btn btn-success btn-sm',
+                title: 'Employee Allocation  Information',
+                text: '<i class="fas fa-file-csv mr-2"></i> CSV',
+            },
+            { 
+                extend: 'pdf', 
+                className: 'btn btn-danger btn-sm', 
+                title: 'Employee Allocation Information', 
+                text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
+                orientation: 'landscape', 
+                pageSize: 'legal', 
+                customize: function(doc) {
+                    doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+                }
+            },
+            {
+                extend: 'print',
+                title: 'Employee Allocation  Information',
+                className: 'btn btn-primary btn-sm',
+                text: '<i class="fas fa-print mr-2"></i> Print',
+                customize: function(win) {
+                    $(win.document.body).find('table')
+                        .addClass('compact')
+                        .css('font-size', 'inherit');
+                },
+            },
+            // 'copy', 'csv', 'excel', 'pdf', 'print'
+        ],
+        "order": [
+            [0, "desc"]
+        ],
         ajax: {
-            "url": "{!! route('productallocationlist') !!}",
+            url: scripturl + "/production_allocation_list.php",
+            type: "POST",
+            data: {},
         },
         columns: [{
                 data: 'id',
@@ -368,17 +361,25 @@ $(document).ready(function(){
             {
                 data: 'action',
                 name: 'action',
+                className: 'text-right',
                 orderable: false,
                 searchable: false,
                 render: function (data, type, row) {
-                    return '<div style="text-align: right;">' + data + '</div>';
+                    var buttons = '';
+
+                    buttons += ' <button name="view" id="'+row.id+'" class="view btn btn-secondary btn-sm mr-1" type="button" data-toggle="tooltip" title="View"><i class="fas fa-eye"></i></button>';
+
+                    buttons += ' <button name="edit" id="'+row.id+'" class="edit btn btn-primary btn-sm mr-1" type="button" data-toggle="tooltip" title="Edit"><i class="fas fa-pencil-alt"></i></button>';
+
+                    buttons += '<button name="delete" id="'+row.id+'" class="delete btn btn-danger btn-sm" data-toggle="tooltip" title="Delete"><i class="far fa-trash-alt"></i></button>';
+
+                      return buttons;
                 }
             },
         ],
-        "bDestroy": true,
-        "order": [
-            [0, "desc"]
-        ]
+        drawCallback: function(settings) {
+            $('[data-toggle="tooltip"]').tooltip();
+        }
     });
 
     // Create record button
@@ -397,12 +398,26 @@ $(document).ready(function(){
     // Add to list functionality
     $('#addtolist').click(function () {
         if (!$('#employee').val()) {
-            alert('Please select an employee');
+             Swal.fire({
+                position: "top-end",
+                icon: 'warning',
+                title: 'Please select an employee!',
+                showConfirmButton: false,
+                timer: 2500
+            });
+
+
             return;
         }
         
         if (!$('#machine').val() || !$('#product').val()) {
-            alert('Please select machine and product');
+              Swal.fire({
+                position: "top-end",
+                icon: 'warning',
+                title: 'Please select machine and product!',
+                showConfirmButton: false,
+                timer: 2500
+            });
             return;
         }
 
@@ -418,7 +433,13 @@ $(document).ready(function(){
         });
 
         if (exists) {
-            alert('Employee already added to the list');
+             Swal.fire({
+                position: "top-end",
+                icon: 'warning',
+                title: 'Employee already added to the list!',
+                showConfirmButton: false,
+                timer: 2500
+            });
             return;
         }
 
@@ -484,79 +505,89 @@ $(document).ready(function(){
                 },
                 url: action_url,
                 success: function (data) {
-                    var html = '';
-                    if (data.errors) {
-                        html = '<div class="alert alert-danger">';
-                        for (var count = 0; count < data.errors.length; count++) {
-                            html += '<p>' + data.errors[count] + '</p>';
-                        }
-                        html += '</div>';
+                     if (data.errors) {
+                        const actionObj = {
+                            icon: 'fas fa-warning',
+                            title: '',
+                            message: 'Record Error',
+                            url: '',
+                            target: '_blank',
+                            type: 'danger'
+                        };
+                        const actionJSON = JSON.stringify(actionObj, null, 2);
+                        action(actionJSON);
                     }
                     if (data.success) {
-                        html = '<div class="alert alert-success">' + data.success + '</div>';
-                        $('#formTitle')[0].reset();
-                        $('#emplistbody').empty();
-                        $('#dataTable').DataTable().ajax.reload();
-                        setTimeout(function(){
-                            $('#formModal').modal('hide');
-                        }, 2000);
+                        const actionObj = {
+                            icon: 'fas fa-save',
+                            title: '',
+                            message: data.success,
+                            url: '',
+                            target: '_blank',
+                            type: 'success'
+                        };
+                        const actionJSON = JSON.stringify(actionObj, null, 2);
+                        actionreload(actionJSON);
                     }
-                    $('#form_result').html(html);
-                    $('#action_button').prop('disabled', false).html('<i class="fas fa-plus"></i>&nbsp;Add');
-                },
-                error: function(xhr, status, error) {
-                    var html = '<div class="alert alert-danger">An error occurred: ' + error + '</div>';
-                    $('#form_result').html(html);
-                    $('#action_button').prop('disabled', false).html('<i class="fas fa-plus"></i>&nbsp;Add');
                 }
             });
         } else {
-            alert('Cannot Create..Table Empty!!');
+            Swal.fire({
+                position: "top-end",
+                icon: 'warning',
+                title: 'Cannot Create..Table Empty!',
+                showConfirmButton: false,
+                timer: 2500
+            });
+
             $('#action_button').prop('disabled', false).html('<i class="fas fa-plus"></i>&nbsp;Add');
         }
     });
 
     // Edit function
-    $(document).on('click', '.edit', function () {
-        var id = $(this).attr('id');
-        $('#form_result').html('');
-        
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        })
+    $(document).on('click', '.edit',async function () {
+        var r = await Otherconfirmation("You want to Edit this ? ");
+         if (r == true) {
+            var id = $(this).attr('id');
+            $('#form_result').html('');
+            
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            })
 
-        $.ajax({
-            url: '{!! route("productallocationedit") !!}',
-            type: 'POST',
-            dataType: "json",
-            data: {
-                id: id
-            },
-            success: function (data) {
-                $('#production_date').val(data.result.mainData.date);
-                setTimeout(function() {
-                    var machineId = data.result.mainData.machine_id;
-                    var machineName = data.result.mainData.machine_name || 'Selected Machine'; 
+            $.ajax({
+                url: '{!! route("productallocationedit") !!}',
+                type: 'POST',
+                dataType: "json",
+                data: {
+                    id: id
+                },
+                success: function (data) {
+                    $('#production_date').val(data.result.mainData.date);
+                    setTimeout(function() {
+                        var machineId = data.result.mainData.machine_id;
+                        var machineName = data.result.mainData.machine_name || 'Selected Machine'; 
+                        
+                        if (machine.find("option[value='" + machineId + "']").length === 0) {
+                            var newOption = new Option(machineName, machineId, true, true);
+                            machine.append(newOption);
+                        }
+                        machine.val(machineId).trigger('change');
+                    }, 500); 
                     
-                    if (machine.find("option[value='" + machineId + "']").length === 0) {
-                        var newOption = new Option(machineName, machineId, true, true);
-                        machine.append(newOption);
-                    }
-                    machine.val(machineId).trigger('change');
-                }, 500); 
-                
-                $('#product').val(data.result.mainData.product_id).trigger('change');
-                $('#shift').val(data.result.mainData.shift_id).trigger('change'); 
-                $('#emplistbody').html(data.result.requestdata);
-                $('#hidden_id').val(id);
-                $('.modal-title').text('Edit Production Allocation');
-                $('#action_button').html('<i class="fas fa-edit"></i>&nbsp;Update');
-                $('#action').val('Edit');
-                $('#formModal').modal('show');
-            }
-        })
+                    $('#product').val(data.result.mainData.product_id).trigger('change');
+                    $('#shift').val(data.result.mainData.shift_id).trigger('change'); 
+                    $('#emplistbody').html(data.result.requestdata);
+                    $('#hidden_id').val(id);
+                    $('.modal-title').text('Edit Production Allocation');
+                    $('#action_button').html('<i class="fas fa-edit"></i>&nbsp;Update');
+                    $('#action').val('Edit');
+                    $('#formModal').modal('show');
+                }
+            })
+         }
     });
 
     // Edit list item
@@ -589,7 +620,13 @@ $(document).ready(function(){
     // Update list item
     $(document).on("click", "#Btnupdatelist", function () {
         if (!$('#employee').val()) {
-            alert('Please select an employee');
+             Swal.fire({
+                position: "top-end",
+                icon: 'warning',
+                title: 'Please select an employee!',
+                showConfirmButton: false,
+                timer: 2500
+            });
             return;
         }
 
@@ -608,7 +645,7 @@ $(document).ready(function(){
             '<td>' + emp_id + '</td>' +
             '<td>' + selectedText + '</td>' +
             '<td class="text-right">' +
-                '<button type="button" onclick="productDelete(this);" class="btn btn-danger btn-sm">' +
+                '<button type="button" class="btn btn-danger btn-sm">' +
                     '<i class="fas fa-trash-alt"></i>' +
                 '</button>' +
             '</td>' +
@@ -623,81 +660,82 @@ $(document).ready(function(){
 
     // Delete list item
     var rowid;
-    $(document).on('click', '.btnDeletelist', function () {
+    $(document).on('click', '.btnDeletelist',async function () {
         rowid = $(this).attr('rowid');
-        $('#confirmModal2').modal('show');
-    });
+          var r = await Otherconfirmation("You want to remove this ? ");
+        if (r == true) {
+             $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            })
 
-    $('#ok_button2').click(function () {
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        })
-
-        $.ajax({
-            url: '{!! route("productallocationdeletelist") !!}',
-            type: 'POST',
-            dataType: "json",
-            data: {
-                id: rowid
-            },
-            beforeSend: function () {
-                $('#ok_button2').text('Deleting...');
-            },
-            success: function (data) {
-                setTimeout(function () {
-                    $('#confirmModal2').modal('hide');
-                    $('#dataTable').DataTable().ajax.reload();
-                    location.reload();
-                }, 1000);
-            }
-        })
+            $.ajax({
+                url: '{!! route("productallocationdeletelist") !!}',
+                type: 'POST',
+                dataType: "json",
+                data: {
+                    id: rowid
+                },
+                success: function (data) {
+                    const actionObj = {
+                        icon: 'fas fa-trash-alt',
+                        title: '',
+                        message: 'Record Remove Successfully',
+                        url: '',
+                        target: '_blank',
+                        type: 'danger'
+                    };
+                    const actionJSON = JSON.stringify(actionObj, null, 2);
+                    actionreload(actionJSON);
+                }
+            })
+        }
     });
 
     // Delete main record
     var user_id;
-    $(document).on('click', '.delete', function () {
+    $(document).on('click', '.delete',async function () {
         user_id = $(this).attr('id');
-        $('#confirmModal').modal('show');
-    });
-
-    $('#ok_button').click(function () {
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        })
-        
-        $.ajax({
-            url: '{!! route("productallocationdelete") !!}',
-            type: 'POST',
-            dataType: "json",
-            data: {
-                id: user_id
-            },
-            beforeSend: function () {
-                $('#ok_button').text('Deleting...');
-            },
-            success: function (data) {
-                setTimeout(function () {
-                    $('#confirmModal').modal('hide');
-                    $('#dataTable').DataTable().ajax.reload();
-                }, 1000);
-            }
-        })
+        var r = await Otherconfirmation("You want to remove this ? ");
+        if (r == true) {
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            })
+            
+            $.ajax({
+                url: '{!! route("productallocationdelete") !!}',
+                type: 'POST',
+                dataType: "json",
+                data: {
+                    id: user_id
+                },
+                success: function (data) {
+                    const actionObj = {
+                        icon: 'fas fa-trash-alt',
+                        title: '',
+                        message: 'Record Remove Successfully',
+                        url: '',
+                        target: '_blank',
+                        type: 'danger'
+                    };
+                    const actionJSON = JSON.stringify(actionObj, null, 2);
+                    actionreload(actionJSON);
+                }
+            })
+        }
     });
 
     // View modal 
     $(document).on('click', '.view', function () {
         var id = $(this).attr('id');
-        
         $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         })
-
         $.ajax({
             url: '{!! route("productallocationview") !!}',
             type: 'POST',
@@ -717,17 +755,6 @@ $(document).ready(function(){
     });
 });
 
-function productDelete(row) {
-    $(row).closest('tr').remove();
-}
-
-function deactive_confirm() {
-    return confirm("Are you sure you want to deactivate this?");
-}
-
-function active_confirm() {
-    return confirm("Are you sure you want to activate this?");
-}
 </script>
 
 @endsection

@@ -31,59 +31,64 @@ class OTApproveController extends Controller
             return response()->json(['error' => 'UnAuthorized'], 401);
         }
 
-        $department = Request('department');
-        $employee = Request('employee');
-        $location = Request('location');
-        $from_date = Request('from_date');
-        $to_date = Request('to_date');
+        $department = $request->input('department');
+        $employee = $request->input('employee');
+        $location = $request->input('location');
+        $from_date = $request->input('from_date');
+        $to_date = $request->input('to_date');
 
 
-        $sql = "SELECT at1.*,  
-                Min(at1.timestamp) as first_checkin,
-                Max(at1.timestamp) as lasttimestamp,
-                employees.emp_shift,
-                employees.id as emp_auto_id,
-                employees.emp_name_with_initial,
-                employees.emp_department,
-                employees.calling_name,
-                employees.emp_id,
-                shift_types.onduty_time,
-                shift_types.offduty_time,
-                shift_types.saturday_onduty_time,
-                shift_types.saturday_offduty_time,
-                shift_types.shift_name,
-                branches.location as b_location,
-                departments.name as dept_name
-                FROM attendances  as at1
-                join employees on employees.emp_id = at1.uid
-                left join shift_types ON employees.emp_shift = shift_types.id
-                left join branches ON at1.location = branches.id
-                left join departments ON employees.emp_department = departments.id
-                WHERE at1.deleted_at IS NULL "; 
+         $query = DB::table('attendances as at1')
+        ->select(
+            'at1.*',
+            DB::raw('MIN(at1.timestamp) as first_checkin'),
+            DB::raw('MAX(at1.timestamp) as lasttimestamp'),
+            'employees.emp_shift',
+            'employees.id as emp_auto_id',
+            'employees.emp_name_with_initial',
+            'employees.emp_department',
+            'employees.calling_name',
+            'employees.emp_id',
+            'shift_types.onduty_time',
+            'shift_types.offduty_time',
+            'shift_types.saturday_onduty_time',
+            'shift_types.saturday_offduty_time',
+            'shift_types.shift_name',
+            'branches.location as b_location',
+            'departments.name as dept_name'
+        )
+        ->join('employees', 'employees.emp_id', '=', 'at1.uid')
+        ->leftJoin('shift_types', 'employees.emp_shift', '=', 'shift_types.id')
+        ->leftJoin('branches', 'at1.location', '=', 'branches.id')
+        ->leftJoin('departments', 'employees.emp_department', '=', 'departments.id')
+        ->whereNull('at1.deleted_at');
 
-        if ($department != '') {
-            $sql .= " AND employees.emp_department = '$department'";
-        }
+    // Apply filters
+    if (!empty($department)) {
+        $query->where('employees.emp_department', $department);
+    }
 
-        if ($employee != '') {
-            $sql .= " AND employees.emp_id = '$employee'";
-        }
+    if (!empty($employee)) {
+        $query->where('employees.emp_id', $employee);
+    }
 
-        if ($location != '') {
-            $sql .= " AND at1.location = '$location'";
-        }
+    if (!empty($location)) {
+        $query->where('at1.location', $location);
+    }
 
-        if ($from_date != '') {
-            $sql .= " AND at1.date >= '$from_date'";
-        }
+    if (!empty($from_date)) {
+        $query->whereDate('at1.date', '>=', $from_date);
+    }
 
-        if ($to_date != '') {
-            $sql .= " AND at1.date <= '$to_date'";
-        }
+    if (!empty($to_date)) {
+        $query->whereDate('at1.date', '<=', $to_date);
+    }
 
-        $sql .= " GROUP BY at1.uid, at1.date ORDER BY at1.date ";
+    $query->groupBy('at1.uid', 'at1.date')
+          ->orderBy('at1.date');
 
-        $attendance_data = DB::select($sql);
+    $attendance_data = $query->get();
+    
 
         //dd($sql);
 

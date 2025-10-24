@@ -195,7 +195,10 @@
                         '<th>IS HOLIDAY</th> ' +
                         '<th>LOCATION</th> ' +
                         '<th>DEPARTMENT</th> ' +
-                        '<th>ACTION</th> ' );
+                        '<th>ACTION</th> ' +
+                        '<th class="d-none">EMPNAME</th>' +
+                       '<th class="d-none">CALLING</th>' +
+                       '<th class="d-none">EMPID</th>');
 
                     $('#ot_report_dt').DataTable({
                         "columnDefs": [
