@@ -1243,12 +1243,6 @@ Route::get('/dashboard/nextmonth-birthday','HomeController@nextmonth_birthday')-
 Route::get('/password-reset', 'Auth\UserPasswordResetController@showForm')->name('password-reset');
 Route::post('/password-reset', 'Auth\UserPasswordResetController@reset')->name('manual.reset.submit');
 
-// machine Controller Routes
-Route::resource('Machine', 'MachineController');
-Route::get('machines', 'MachineController@index')->name('machines');
-Route::post('addMachine',['uses' => 'MachineController@store', 'as' => 'addMachine']); 
-Route::post('Machine/update', 'MachineController@update')->name('Machine.update');
-Route::get('Machine/destroy/{id}', 'MachineController@destroy');
 
 // Production Controller Routes
 Route::resource('Product', 'ProductController');
@@ -1440,12 +1434,21 @@ Route::post('single_employeeattendance', 'JobattendanceController@single_employe
 Route::get('jobattendanceapprove', 'JobAttendaceApproveController@index')->name('jobattendanceapprove');
 Route::post('jobattendanceapprovesave', 'JobAttendaceApproveController@approveattendace')->name('jobattendanceapprovesave');
 
+
+// machine Controller Routes
+Route::resource('Machine', 'MachineController');
+Route::get('machines', 'MachineController@index')->name('machines');
+Route::post('addMachine',['uses' => 'MachineController@store', 'as' => 'addMachine']); 
+Route::post('Machine/update', 'MachineController@update')->name('Machine.update');
+Route::get('Machine/destroy/{id}', 'MachineController@destroy');
+
+
 /*-- Product Machines Info----*/
-Route::resource('Machine', 'ProductMachineController');
+Route::resource('productMachine', 'ProductMachineController');
 Route::get('MachineShow/{id}',['uses' => 'ProductMachineController@index', 'as' => 'MachineShow']);
 Route::post('addProductMachine',['uses' => 'ProductMachineController@store', 'as' => 'addProductMachine']);
-Route::post('Machine/update', 'ProductMachineController@update')->name('Machine.update');
-Route::get('Machine/destroy/{id}', 'ProductMachineController@destroy');
+Route::post('productMachine/update', 'ProductMachineController@update')->name('productMachine.update');
+Route::get('productMachine/destroy/{id}', 'ProductMachineController@destroy');
 Route::get('Machine_list_sel2', 'ProductMachineController@Machine_list_sel2');
 
 // Task & Product report Controller Routes
