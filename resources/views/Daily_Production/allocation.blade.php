@@ -73,12 +73,12 @@
                                 
                                 <div class="row">
                                     <div class="col-sm-12 col-md-6">
-                                        <label class="small font-weight-bolder ">Date*</label>
+                                        <label class="small font-weight-bold text-dark">Date*</label>
                                         <input type="date" name="production_date" id="production_date"
                                             class="form-control form-control-sm" required />
                                     </div>
                                     <div class="col-sm-12 col-md-6">
-                                        <label class="small font-weight-bolder ">Shift*</label>
+                                        <label class="small font-weight-bold text-dark">Shift*</label>
                                         <select name="shift" id="shift" class="form-control form-control-sm">
                                             <option value="">Please Select</option>
                                             @foreach($shifttype as $shifttypes)
@@ -90,7 +90,7 @@
                                 <hr>
                                 <div class="row">
                                     <div class="col-sm-12 col-md-4">
-                                        <label class="small font-weight-bolder ">Product*</label>
+                                        <label class="small font-weight-bold text-dark">Product*</label>
                                         <select name="product" id="product" class="form-control form-control-sm" style="width: 100%;" required>
                                             <option value="">Select Product</option>
                                             @foreach ($products as $product)
@@ -99,12 +99,12 @@
                                         </select>
                                     </div>    
                                     <div class="col-sm-12 col-md-4">
-                                        <label class="small font-weight-bolder ">Machine</label>
+                                        <label class="small font-weight-bold text-dark">Machine</label>
                                         <select name="machine" id="machine" class="form-control form-control-sm">
                                         </select>
                                     </div>
                                     <div class="col-sm-12 col-md-4">
-                                        <label class="small font-weight-bolder ">Employee*</label>
+                                        <label class="small font-weight-bold text-dark">Employee*</label>
                                         <select class="employee form-control form-control-sm" name="employee" id="employee" style="width:100%"></select>
                                     </div>
                                 </div>

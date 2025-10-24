@@ -63,11 +63,11 @@
                             <form method="post" id="formTitle" class="form-horizontal">
                                 {{ csrf_field() }}	
                                 <div class="form-group mb-1">
-                                    <label class="small font-weight-bolder ">Machine*</label>
+                                    <label class="small font-weight-bold text-dark ">Machine</label>
                                     <input type="text" name="machine" id="machine" class="form-control form-control-sm"  required/>
                                 </div>
                                 <div class="form-group mb-1">
-                                    <label class="small font-weight-bolder ">Description</label>
+                                    <label class="small font-weight-bold text-dark ">Description</label>
                                     <input type="text" name="description" id="description" class="form-control form-control-sm" />
                                 </div>
                                 <div class="form-group mt-3">
@@ -240,7 +240,7 @@ $(document).ready(function(){
                     var id = $(this).attr('id');
                     $('#form_result').html('');
                     $.ajax({
-                        url: "Machine/" + id + "/edit",
+                        url:"{{ url('Machine/') }}/" + id + "/edit",
                         dataType: "json",
                                 success: function (data) {
                                     $('#machine').val(data.result.machine);
@@ -263,7 +263,7 @@ $(document).ready(function(){
         if (r == true) {
             user_id = $(this).attr('id');
             $.ajax({
-                url: "Machine/destroy/" + user_id,
+                url: "{{ url('Machine/destroy/') }}/" + user_id,
                 beforeSend: function () {
                     $('#ok_button').text('Deleting...');
                 },

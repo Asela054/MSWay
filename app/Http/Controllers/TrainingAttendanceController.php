@@ -18,12 +18,23 @@ class TrainingAttendanceController extends Controller
 {
     public function train_attendance()
     {
-        $user = Auth::user();
-        $permission = $user->can('trainingAttendance-create');
-        if (!$permission) {
-            abort(403);
+        try {
+            $user = Auth::user();
+            
+            if (!$user) {
+                abort(403, 'User not authenticated');
+            }
+            
+            $permission = $user->can('trainingAttendance-create');
+            if (!$permission) {
+                abort(403, 'Unauthorized access');
+            }
+            
+            return view('Training_Management.trainingAttendance');
+        } catch (\Exception $e) {
+            \Log::error('Training Attendance Error: ' . $e->getMessage());
+            return back()->with('error', 'An error occurred while loading the page.');
         }
-        return view('Training_Management.trainingAttendance');
     }
 
     public function train_Attendance_list(Request $request)
@@ -191,7 +202,7 @@ class TrainingAttendanceController extends Controller
         return response()->json(['result' => $data]);
     }
 
-    public function update(Request $request, TrainingEmpAllocation $type)
+    public function update(Request $request)
     {
         $user = auth()->user();
         $permission = $user->can('trainingAttendance-edit');
@@ -199,15 +210,20 @@ class TrainingAttendanceController extends Controller
             return response()->json(['error' => 'UnAuthorized'], 401);
         }
 
-
-        $form_data = array(
-            'marks'    =>  $request->marks,
-            'remarks'    =>  $request->remarks
+        try {
+            $form_data = array(
+                'marks'    =>  $request->marks,
+                'remarks'  =>  $request->remarks,
+                'updated_by' => $user->id
+            );
             
-        );
-        TrainingEmpAllocation::whereId($request->hidden_id)->update($form_data);
+            TrainingEmpAllocation::whereId($request->hidden_id)->update($form_data);
 
-        return response()->json(['success' => 'Data is successfully updated']);
+            return response()->json(['success' => 'Data is successfully updated']);
+        } catch (\Exception $e) {
+            \Log::error('Training Mark Update Error: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to update marks'], 500);
+        }
     }
 
 }
