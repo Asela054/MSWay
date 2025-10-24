@@ -1509,11 +1509,11 @@ Route::get('/qr-modal', 'QRController@generateQRModal')->name('qr.modal');
 
 /*-- Training Management----*/
 /*-- Types----*/
-Route::resource('Trainingtype', 'TrainingtypeController');
-Route::get('Trainingtype',['uses' => 'TrainingtypeController@index', 'as' => 'Trainingtype']); 
-Route::post('addTrainingtype',['uses' => 'TrainingtypeController@store', 'as' => 'addTrainingtype']); 
-Route::post('Trainingtype/update', 'TrainingtypeController@update')->name('Trainingtype.update');
-Route::get('Trainingtype/destroy/{id}', 'TrainingtypeController@destroy');
+Route::resource('Trainingtype', 'TrainingTypeController');
+Route::get('Trainingtype',['uses' => 'TrainingTypeController@index', 'as' => 'Trainingtype']); 
+Route::post('addTrainingtype',['uses' => 'TrainingTypeController@store', 'as' => 'addTrainingtype']); 
+Route::post('Trainingtype/update', 'TrainingTypeController@update')->name('Trainingtype.update');
+Route::get('Trainingtype/destroy/{id}', 'TrainingTypeController@destroy');
 /*-- Types----*/
 /*-- allocation----*/
 Route::resource('TrainingAllocation', 'TrainingAllocationController');
@@ -1540,9 +1540,9 @@ Route::post('Trainingmark/update', 'TrainingAttendanceController@update')->name(
 Route::get('train_summary',['uses' => 'TrainingSummaryController@train_summary', 'as' => 'train_summary']);
 /*-- Summary----*/
 /*-- select----*/
-Route::get('trainType_list_sel2', 'TrainingtypeController@trainType_list_sel2');
-Route::get('trainVenue_list_sel2', 'TrainingtypeController@trainVenue_list_sel2');
-Route::get('trainEmp_list_sel2', 'TrainingtypeController@trainEmp_list_sel2');
+Route::get('trainType_list_sel2', 'TrainingTypeController@trainType_list_sel2');
+Route::get('trainVenue_list_sel2', 'TrainingTypeController@trainVenue_list_sel2');
+Route::get('trainEmp_list_sel2', 'TrainingTypeController@trainEmp_list_sel2');
 /*-- select----*/
 /*-- Training Management----*/
 
