@@ -21,7 +21,9 @@ class TaskController extends Controller
             abort(403);
         }
 
-        $task= Task::orderBy('id', 'asc')->get();
+        $task= Task::orderBy('id', 'asc')
+            ->where('status', '!=', 3)
+            ->get();
         return view('Daily_Task.Task',compact('task'));
     }
 
@@ -113,6 +115,9 @@ class TaskController extends Controller
         }
 
         $data = Task::findOrFail($id);
-        $data->delete();
+        $data->status = 3;
+        $data->save();
+
+        return response()->json(['success' => 'Data is successfully deleted']);
     }
 }

@@ -65,11 +65,11 @@
                             <form method="post" id="formTitle" class="form-horizontal">
                                 {{ csrf_field() }}	
                                 <div class="form-group mb-1">
-                                    <label class="small font-weight-bolder ">Product Name*</label>
+                                    <label class="small font-weight-bold text-dark">Product Name</label>
                                     <input type="text" name="productname" id="productname" class="form-control form-control-sm"  required/>
                                 </div>
                                 <div class="form-group mb-1">
-                                    <label class="small font-weight-bolder ">Product Description</label>
+                                    <label class="small font-weight-bold text-dark">Product Description</label>
                                     <input type="text" name="description" id="description" class="form-control form-control-sm" />
                                 </div>
                                 <!-- <div class="form-group mb-1">
@@ -249,7 +249,7 @@ $(document).ready(function(){
              var id = $(this).attr('id');
              $('#form_result').html('');
              $.ajax({
-                 url: "Product/" + id + "/edit",
+                 url: "{{ url('Product/') }}/" + id + "/edit",
                  dataType: "json",
                  success: function (data) {
                      $('#productname').val(data.result.productname);
@@ -274,7 +274,7 @@ $(document).ready(function(){
         var r = await Otherconfirmation("You want to remove this ? ");
         if (r == true) {
             $.ajax({
-                url: "Product/destroy/" + user_id,
+                url: "{{ url('Product/destroy/') }}/" + user_id,
                 success: function (data) {
                    const actionObj = {
                         icon: 'fas fa-trash-alt',
