@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Input;
 use App\JobCategory;
+use Illuminate\Support\Facades\Auth;
 
 class JobCategoryController extends Controller
 {
