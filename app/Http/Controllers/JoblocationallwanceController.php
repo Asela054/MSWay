@@ -35,6 +35,8 @@ class JoblocationallwanceController extends Controller
             return response()->json(['error' => 'UnAuthorized'], 401);
         }
 
+        $data = [];
+        
         $employee = $request->get('employee');
         $from_date = $request->get('from_date');
         $to_date = $request->get('to_date');
