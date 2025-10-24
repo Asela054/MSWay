@@ -55,7 +55,6 @@
                      $user->can('NDA-letter-list');
                      $user->can('end-user-letter-list');
   @endphp
-
   @if($hasLetterAccess)
   <div class="dropdown">
     <a role="button" data-toggle="dropdown" class="btn navbtncolor" href="#" id="appointmentletter">
@@ -84,6 +83,32 @@
           @endif
           @if($user->can('end-user-letter-list'))
             <li><a class="dropdown-item" href="{{ route('end_user_letter')}}">Employee End User Letter</a></li>
+          @endif
+        </ul>
+  </div>
+  @endif
+
+  @php
+    $hasLetterAccess = $user->can('trainingType-list')||
+                     $user->can('trainingAllocation-list') ||
+                     $user->can('trainingAttendance-list');
+  @endphp
+  @if($hasLetterAccess)
+  <div class="dropdown">
+    <a role="button" data-toggle="dropdown" class="btn navbtncolor" href="#" id="training">
+        Training Management <span class="caret"></span></a>
+        <ul class="dropdown-menu multi-level dropdownmenucolor" role="menu" aria-labelledby="dropdownMenu">
+          @if($user->can('trainingType-list'))
+          <li><a class="dropdown-item" href="{{ route('Trainingtype')}}" id="">Training Type</a></li>
+          @endif
+          @if($user->can('trainingAllocation-list'))
+            <li><a class="dropdown-item" href="{{ route('TrainingAllocation')}}">Training Allocation</a></li>
+          @endif
+          @if($user->can('trainingAttendance-list'))
+            <li><a class="dropdown-item" href="{{ route('train_attendance')}}">Training Attendance</a></li>
+          @endif
+          @if($user->can('trainingAttendance-list'))
+            <li><a class="dropdown-item" href="{{ route('train_summary')}}">Training Summary</a></li>
           @endif
         </ul>
   </div>

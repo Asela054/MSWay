@@ -1441,11 +1441,11 @@ Route::get('jobattendanceapprove', 'JobAttendaceApproveController@index')->name(
 Route::post('jobattendanceapprovesave', 'JobAttendaceApproveController@approveattendace')->name('jobattendanceapprovesave');
 
 /*-- Product Machines Info----*/
-Route::resource('productMachine', 'ProductMachineController');
+Route::resource('Machine', 'ProductMachineController');
 Route::get('MachineShow/{id}',['uses' => 'ProductMachineController@index', 'as' => 'MachineShow']);
 Route::post('addProductMachine',['uses' => 'ProductMachineController@store', 'as' => 'addProductMachine']);
-Route::post('productMachine/update', 'ProductMachineController@update')->name('productMachine.update');
-Route::get('productMachine/destroy/{id}', 'ProductMachineController@destroy');
+Route::post('Machine/update', 'ProductMachineController@update')->name('Machine.update');
+Route::get('Machine/destroy/{id}', 'ProductMachineController@destroy');
 Route::get('Machine_list_sel2', 'ProductMachineController@Machine_list_sel2');
 
 // Task & Product report Controller Routes
@@ -1506,6 +1506,45 @@ Route::get('/qr-download', 'QRController@downloadQR')->name('qr.download');
 Route::get('/qr-process', 'QRController@processQR')->name('qr.process');
 // For the alternative approach without AJAX
 Route::get('/qr-modal', 'QRController@generateQRModal')->name('qr.modal');
+
+/*-- Training Management----*/
+/*-- Types----*/
+Route::resource('Trainingtype', 'TrainingtypeController');
+Route::get('Trainingtype',['uses' => 'TrainingtypeController@index', 'as' => 'Trainingtype']); 
+Route::post('addTrainingtype',['uses' => 'TrainingtypeController@store', 'as' => 'addTrainingtype']); 
+Route::post('Trainingtype/update', 'TrainingtypeController@update')->name('Trainingtype.update');
+Route::get('Trainingtype/destroy/{id}', 'TrainingtypeController@destroy');
+/*-- Types----*/
+/*-- allocation----*/
+Route::resource('TrainingAllocation', 'TrainingAllocationController');
+Route::get('TrainingAllocation', 'TrainingAllocationController@index')->name('TrainingAllocation');
+Route::post('addTrainingAllocation',['uses' => 'TrainingAllocationController@store', 'as' => 'addTrainingAllocation']); 
+Route::post('TrainingAllocation/update', 'TrainingAllocationController@update')->name('TrainingAllocation.update');
+Route::get('TrainingAllocation/destroy/{id}', 'TrainingAllocationController@destroy')->name('TrainingAllocation.destroy');
+/*-- allocation----*/
+/*-- Employee allocation----*/
+Route::get('trainingEmpAllocation', 'TrainingEmployeeAllocationController@index')->name('trainingEmpAllocation');
+Route::get('TrainEmpShow/{id}', 'TrainingEmployeeAllocationController@show')->name('TrainEmpShow');
+Route::post('/trainingEmpAllocationinsert' ,'TrainingEmployeeAllocationController@insert')->name('trainingEmpAllocationinsert');
+Route::get('trainingEmpAllocation/destroy/{id}', 'TrainingEmployeeAllocationController@destroy')->name('trainingEmpAllocation.destroy');
+/*-- Employee allocation----*/
+/*-- Employee attendance----*/
+Route::get('train_attendance',['uses' => 'TrainingAttendanceController@train_attendance', 'as' => 'train_attendance']);
+Route::get('train_Attendance_list',['uses' => 'TrainingAttendanceController@train_Attendance_list', 'as' => 'train_Attendance_list']);
+Route::post('train_Attendance_mark',['uses' => 'TrainingAttendanceController@train_Attendance_mark', 'as' => 'train_Attendance_mark']);
+Route::get('train_attendances_all',['uses' => 'TrainingAttendanceController@train_attendances_all', 'as' => 'train_attendances_all']);
+Route::get('train_attendance/{id}/edit', ['uses' => 'TrainingAttendanceController@edit', 'as' => 'train_attendance.edit']);
+Route::post('Trainingmark/update', 'TrainingAttendanceController@update')->name('Trainingmark.update');
+/*-- Employee attendance----*/
+/*-- Summary----*/
+Route::get('train_summary',['uses' => 'TrainingSummaryController@train_summary', 'as' => 'train_summary']);
+/*-- Summary----*/
+/*-- select----*/
+Route::get('trainType_list_sel2', 'TrainingtypeController@trainType_list_sel2');
+Route::get('trainVenue_list_sel2', 'TrainingtypeController@trainVenue_list_sel2');
+Route::get('trainEmp_list_sel2', 'TrainingtypeController@trainEmp_list_sel2');
+/*-- select----*/
+/*-- Training Management----*/
 
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');
