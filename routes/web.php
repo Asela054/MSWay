@@ -1511,11 +1511,12 @@ Route::post('Trainingtype/update', 'TrainingTypeController@update')->name('Train
 Route::get('Trainingtype/destroy/{id}', 'TrainingTypeController@destroy');
 /*-- Types----*/
 /*-- allocation----*/
-Route::resource('TrainingAllocation', 'TrainingAllocationController');
+Route::get('/TrainingAllocation/getData','TrainingAllocationController@getData')->name('TrainingAllocation.getData');
 Route::get('TrainingAllocation', 'TrainingAllocationController@index')->name('TrainingAllocation');
 Route::post('addTrainingAllocation',['uses' => 'TrainingAllocationController@store', 'as' => 'addTrainingAllocation']); 
 Route::post('TrainingAllocation/update', 'TrainingAllocationController@update')->name('TrainingAllocation.update');
 Route::get('TrainingAllocation/destroy/{id}', 'TrainingAllocationController@destroy')->name('TrainingAllocation.destroy');
+Route::get('TrainingAllocation/{id}/edit', 'TrainingAllocationController@edit')->name('TrainingAllocation.edit');
 /*-- allocation----*/
 /*-- Employee allocation----*/
 Route::get('trainingEmpAllocation', 'TrainingEmployeeAllocationController@index')->name('trainingEmpAllocation');

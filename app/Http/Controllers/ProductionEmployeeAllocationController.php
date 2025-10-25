@@ -33,6 +33,7 @@ class ProductionEmployeeAllocationController extends Controller
 
         $products = DB::table('product')
             ->select('id', 'productname')
+            ->where('status', '1')
             ->get();
         $shifttype= ShiftType::orderBy('id', 'asc')->get();
 

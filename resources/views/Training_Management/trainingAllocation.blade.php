@@ -40,20 +40,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($allocation as $allocations)
-                                <tr>
-                                    <td>{{$allocations->id}}</td>
-                                    <td>{{$allocations->training_type}}</td>
-                                    <td>{{$allocations->venue}}</td>
-                                    <td>{{$allocations->start_time}}</td>
-                                    <td>{{$allocations->end_time}}</td>
-                                    <td class="text-right">
-                                            <a href="{{ route('TrainEmpShow',$allocations->id) }}" class="Employee btn btn-info btn-sm" > <i class="fas fa-users"></i> </a>
-                                            <button name="edit" id="{{$allocations->id}}" class="edit btn btn-primary btn-sm" type="submit"><i class="fas fa-pencil-alt"></i></button>
-                                            <button type="submit" name="delete" id="{{$allocations->id}}" class="delete btn btn-danger btn-sm"><i class="far fa-trash-alt"></i></button>
-                                    </td>
-                                </tr>
-                                @endforeach
+                                
                             </tbody>
                         </table>
                         </div>
@@ -131,7 +118,16 @@ $(document).ready(function(){
     {
         "destroy": true,
         "processing": true,
-        "serverSide": false, 
+        "serverSide": true, 
+        "ajax": "{{ route('TrainingAllocation.getData') }}",  
+        "columns": [
+            { "data": "id" },
+            { "data": "training_type" },
+            { "data": "venue" },
+            { "data": "start_time" },
+            { "data": "end_time" },
+            { "data": "action", "orderable": false, "searchable": false, "className": "text-right" }
+        ],
         dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
             "<'row'<'col-sm-5'i><'col-sm-7'p>>",
         "buttons": [{

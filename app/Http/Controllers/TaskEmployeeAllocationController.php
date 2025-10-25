@@ -28,6 +28,7 @@ class TaskEmployeeAllocationController extends Controller
 
         $tasks = DB::table('task')
             ->select('id', 'taskname')
+            ->where('status', 1)
             ->get();
 
         return view('Daily_Task.task_allocation', compact('tasks'));
@@ -95,21 +96,21 @@ class TaskEmployeeAllocationController extends Controller
                 $btn = '';
                 $user = Auth::user();
 
-                $btn .= ' <button name="view" id="'.$row->id.'" class="view btn btn-outline-secondary btn-sm" type="button"><i class="fas fa-eye"></i></button>';
+                $btn .= ' <button name="view" id="'.$row->id.'" class="view btn btn-secondary btn-sm" type="button"><i class="fas fa-eye"></i></button>';
 
                 if($user->can('task-allocation-edit')){
-                    $btn .= ' <button name="edit" id="'.$row->id.'" class="edit btn btn-outline-primary btn-sm" type="button"><i class="fas fa-pencil-alt"></i></button>';
+                    $btn .= ' <button name="edit" id="'.$row->id.'" class="edit btn btn-primary btn-sm" type="button"><i class="fas fa-pencil-alt"></i></button>';
                 }
 
-                if($user->can('task-allocation-status')){
-                    if($row->status == 1){
-                        $btn .= ' <a href="'.route('taskallocationstatus', ['id' => $row->id, 'stasus' => 2]) .'" onclick="return deactive_confirm()" target="_self" class="btn btn-outline-success btn-sm mr-1 "><i class="fas fa-check"></i></a>';
-                    }else{
-                        $btn .= '&nbsp;<a href="'.route('taskallocationstatus', ['id' => $row->id, 'stasus' => 1]) .'" onclick="return active_confirm()" target="_self" class="btn btn-outline-warning btn-sm mr-1 "><i class="fas fa-times"></i></a>';
-                    }
-                }
+                // if($user->can('task-allocation-status')){
+                //     if($row->status == 1){
+                //         $btn .= ' <a href="'.route('taskallocationstatus', ['id' => $row->id, 'stasus' => 2]) .'" onclick="return deactive_confirm()" target="_self" class="btn btn-outline-success btn-sm mr-1 "><i class="fas fa-check"></i></a>';
+                //     }else{
+                //         $btn .= '&nbsp;<a href="'.route('taskallocationstatus', ['id' => $row->id, 'stasus' => 1]) .'" onclick="return active_confirm()" target="_self" class="btn btn-outline-warning btn-sm mr-1 "><i class="fas fa-times"></i></a>';
+                //     }
+                // }
                 if($user->can('task-allocation-delete')){
-                    $btn .= ' <button name="delete" id="'.$row->id.'" class="delete btn btn-outline-danger btn-sm"><i class="far fa-trash-alt"></i></button>';
+                    $btn .= ' <button name="delete" id="'.$row->id.'" class="delete btn btn-danger btn-sm"><i class="far fa-trash-alt"></i></button>';
                 }
                 return $btn;
             })

@@ -6,6 +6,8 @@ use App\TrainingAllocation;
 use App\TrainingType;
 use Illuminate\Http\Request;
 use Validator;
+use Datatables;
+use DB;
 
 class TrainingAllocationController extends Controller
 {
@@ -26,13 +28,28 @@ class TrainingAllocationController extends Controller
             ->where('status',1)
             ->get();
 
-        $allocation= TrainingAllocation::orderBy('id', 'asc')
-            ->leftjoin('training_types', 'training_allocations.type_id', '=', 'training_types.id')
-            ->select('training_allocations.*', 'training_types.name as training_type')
-            ->where('training_allocations.status',1)
-            ->get();
+        return view('Training_Management.trainingAllocation',compact('trainingtype'));
+    }
 
-        return view('Training_Management.trainingAllocation',compact('allocation', 'trainingtype'));
+    public function getData(Request $request)
+    {
+        if ($request->ajax()) {
+            $data = TrainingAllocation::orderBy('id', 'desc')
+                ->leftjoin('training_types', 'training_allocations.type_id', '=', 'training_types.id')
+                ->select('training_allocations.*', 'training_types.name as training_type')
+                ->where('training_allocations.status', 1)
+                ->get();
+
+            return Datatables::of($data)
+                ->addColumn('action', function($row){
+                    $btn = '<a href="'.route('TrainEmpShow', $row->id).'" class="Employee btn btn-info btn-sm"><i class="fas fa-users"></i></a> ';
+                    $btn .= '<button name="edit" id="'.$row->id.'" class="edit btn btn-primary btn-sm" type="submit"><i class="fas fa-pencil-alt"></i></button> ';
+                    $btn .= '<button type="submit" name="delete" id="'.$row->id.'" class="delete btn btn-danger btn-sm"><i class="far fa-trash-alt"></i></button>';
+                    return $btn;
+                })
+                ->rawColumns(['action'])
+                ->make(true);
+        }
     }
 
     public function store(Request $request)

@@ -113,6 +113,8 @@ class ProductController extends Controller
         }
 
         $data = Product::findOrFail($id);
-        $data->delete();
+        $data->status = 3;
+        $data->save();
+        return response()->json(['success' => 'Data is successfully deleted']);
     }
 }

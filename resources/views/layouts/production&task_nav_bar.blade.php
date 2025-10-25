@@ -1,6 +1,6 @@
 <div class="row nowrap" style="padding-top: 5px;padding-bottom: 5px;">
   <div class="dropdown">
-    <a role="button" data-toggle="dropdown" class="btn navbtncolor" data-target="#" href="#" id="dailyprocess">
+    <a role="button" data-toggle="dropdown" class="btn navbtncolor" href="#" id="dailyprocess">
       Daily Production Process <span class="caret"></span></a>
     <ul class="dropdown-menu multi-level dropdownmenucolor" role="menu" aria-labelledby="dropdownMenu">
 
@@ -18,7 +18,7 @@
   </div>
 
   <div class="dropdown">
-    <a role="button" data-toggle="dropdown" class="btn navbtncolor" data-target="#" href="#" id="dailytask">
+    <a role="button" data-toggle="dropdown" class="btn navbtncolor" href="#" id="dailytask">
       Daily Task Process <span class="caret"></span></a>
     <ul class="dropdown-menu multi-level dropdownmenucolor" role="menu" aria-labelledby="dropdownMenu">
 
