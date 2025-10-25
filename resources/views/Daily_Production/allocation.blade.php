@@ -755,6 +755,9 @@ $(document).ready(function(){
     });
 });
 
+ function productDelete(ctl) {
+    	$(ctl).parents("tr").remove();
+    }
 </script>
 
 @endsection

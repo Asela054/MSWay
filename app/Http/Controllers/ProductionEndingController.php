@@ -4,8 +4,12 @@ namespace App\Http\Controllers;
 
 use App\EmployeeProduction;
 use App\EmpProductAllocation;
+use App\EmpProductAllocationDetail;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Productionempattendace;
+use App\Productionemptransfers;
+use App\Productionstatusrecords;
 use Auth;
 use Carbon\Carbon;
 use Datatables;
@@ -73,6 +77,9 @@ class ProductionEndingController extends Controller
           $fullquntity = $request->input('fullquntity');
           $desription = $request->input('desription');
           $hidden_id = $request->input('hidden_id');
+          $completetime = $request->input('completetime');
+
+        $completdate = Carbon::parse($completetime)->format('Y-m-d');
 
            $maindata = DB::table('emp_product_allocation')
                 ->select('emp_product_allocation.*','product.semi_price as semi_price','product.full_price as full_price')
@@ -118,11 +125,12 @@ class ProductionEndingController extends Controller
           // get employee count
            $employeeAllocations = DB::table('emp_product_allocation_details')
                             ->where('allocation_id', $hidden_id)
+                             ->where('status', 1)
+                             ->select('id', 'emp_id')
                             ->get();
 
-
           $employeeCount = $employeeAllocations->count();
-
+          $employeeIds = $employeeAllocations->pluck('emp_id')->toArray();
           
 
         if ($employeeCount > 0) {
@@ -158,11 +166,37 @@ class ProductionEndingController extends Controller
                     }
             }
 
+
+        // Create record in production_status_records table
+        Productionstatusrecords::create([
+            'production_id' => $hidden_id,
+            'date' => $completdate, 
+            'employee_count' => $employeeCount,
+            'timestamp' => $completetime,
+            'produced_quntity' => $quntity, 
+            'production_status' => 4, 
+            'created_by' => Auth::id()
+        ]);
+
+
+        foreach ($employeeIds as $emp_id) {
+            Productionempattendace::where('emp_id', $emp_id)
+                ->where('production_id', $hidden_id)
+                ->where('date', $completdate)
+                ->update([
+                    'finish_timestamp' => $completetime,
+                    'status' => 1,
+                    'updated_by' => Auth::id(),
+                    'updated_at' => Carbon::now()->toDateTimeString()
+                ]);
+        }
+
+
         $form_data = array(
                     'product_type' => $product_type,
                     'semi_amount' => $semiquntity,
                     'full_amount' => $fullquntity,
-                    'production_status' => '2',
+                    'production_status' => '4',
                     'updated_by' => Auth::id(),
                     'updated_at' => $current_date_time,
                 );
@@ -199,6 +233,180 @@ class ProductionEndingController extends Controller
 
     }
 
+
+    public function startproduction(Request $request)
+    {
+        $user = Auth::user();
+        $permission = $user->can('production-ending-finish');
+        if (!$permission) {
+            return response()->json(['error' => 'UnAuthorized'], 401);
+        }
+
+        $current_date_time = Carbon::now()->toDateTimeString();
+
+          $starttime = $request->input('starttime');
+          $start_id = $request->input('start_id');
+
+          $startdate = Carbon::parse($starttime)->format('Y-m-d');
+
+          $employeeDetails = DB::table('emp_product_allocation_details')
+            ->where('allocation_id', $start_id)
+            ->where('status', 1)
+            ->select('id', 'emp_id')
+            ->get();
+
+        // Get employee count
+        $employeeCount = $employeeDetails->count();
+        
+        // Get employee IDs as an array
+        $employeeIds = $employeeDetails->pluck('emp_id')->toArray();
+
+        // Create record in production_status_records table
+        Productionstatusrecords::create([
+            'production_id' => $start_id,
+            'date' => $startdate, 
+            'employee_count' => $employeeCount,
+            'timestamp' => $starttime,
+            'produced_quntity' => 0, 
+            'production_status' => 1, 
+            'created_by' => Auth::id()
+        ]);
+
+
+         foreach ($employeeIds as $emp_id) {
+            Productionempattendace::create([
+                'emp_id' => $emp_id,
+                'production_id' => $start_id,
+                'date' => $startdate,
+                'start_timestmp' => $starttime,
+                'finish_timestamp' => null, 
+                'status' => 1,
+                'created_by' => Auth::id(),
+                'updated_by' => Auth::id()
+            ]);
+        }
+
+        
+        $form_data = array(
+            'production_status' => '1',
+            'updated_by' => Auth::id(),
+            'updated_at' => $current_date_time,
+        );
+        
+        EmpProductAllocation::findOrFail($start_id)->update($form_data);
+
+        return response()->json(['success' => 'Production Start Successfully']);
+    }
+
+
+      public function breakdownproduction(Request $request)
+    {
+        $user = Auth::user();
+        $permission = $user->can('production-ending-finish');
+        if (!$permission) {
+            return response()->json(['error' => 'UnAuthorized'], 401);
+        }
+
+        $current_date_time = Carbon::now()->toDateTimeString();
+
+          $breakdowntime = $request->input('breakdowntime');
+          $produceqty = $request->input('produceqty');
+          $breakdown_id = $request->input('breakdown_id');
+
+          $breakdowndate = Carbon::parse($breakdowntime)->format('Y-m-d');
+
+          $employeeDetails = DB::table('emp_product_allocation_details')
+            ->where('allocation_id', $breakdown_id)
+            ->where('status', 1)
+            ->select('id', 'emp_id')
+            ->get();
+
+        // Get employee count
+        $employeeCount = $employeeDetails->count();
+
+        // Create record in production_status_records table
+        Productionstatusrecords::create([
+            'production_id' => $breakdown_id,
+            'date' => $breakdowndate, 
+            'employee_count' => $employeeCount,
+            'timestamp' => $breakdowntime,
+            'produced_quntity' => $produceqty, 
+            'production_status' => 2, 
+            'created_by' => Auth::id()
+        ]);
+
+
+        
+        $form_data = array(
+            'production_status' => '2',
+            'updated_by' => Auth::id(),
+            'updated_at' => $current_date_time,
+        );
+        
+        EmpProductAllocation::findOrFail($breakdown_id)->update($form_data);
+
+        return response()->json(['success' => 'Production Paused Successfully']);
+    }
+
+       public function resumeproduction(Request $request)
+    {
+        $user = Auth::user();
+        $permission = $user->can('production-ending-finish');
+        if (!$permission) {
+            return response()->json(['error' => 'UnAuthorized'], 401);
+        }
+
+        $current_date_time = Carbon::now()->toDateTimeString();
+
+          $resumetime = $request->input('resumetime');
+          $resume_id = $request->input('resume_id');
+
+          $resumedate = Carbon::parse($resumetime)->format('Y-m-d');
+
+          $employeeDetails = DB::table('emp_product_allocation_details')
+            ->where('allocation_id', $resume_id)
+            ->where('status', 1)
+            ->select('id', 'emp_id')
+            ->get();
+
+        // Get employee count
+        $employeeCount = $employeeDetails->count();
+
+         $breakdownrecord = DB::table('production_status_records')
+            ->where('production_id', $resume_id)
+            ->where('production_status', 2)
+            ->select('id', 'produced_quntity')
+            ->first();
+
+            if ($breakdownrecord) {
+                $produceqty = $breakdownrecord->produced_quntity;
+            } else {
+                $produceqty = 0;
+            }
+
+        // Create record in production_status_records table
+        Productionstatusrecords::create([
+            'production_id' => $resume_id,
+            'date' => $resumedate, 
+            'employee_count' => $employeeCount,
+            'timestamp' => $resumetime,
+            'produced_quntity' => $produceqty, 
+            'production_status' => 1, 
+            'created_by' => Auth::id()
+        ]);
+
+
+        
+        $form_data = array(
+            'production_status' => '1',
+            'updated_by' => Auth::id(),
+            'updated_at' => $current_date_time,
+        );
+        
+        EmpProductAllocation::findOrFail($resume_id)->update($form_data);
+
+        return response()->json(['success' => 'Production Resumed Successfully']);
+    }
 
      public function employeeproduction()
     {
@@ -262,5 +470,136 @@ class ProductionEndingController extends Controller
             return response()->json($results);
         }
     }
+
+
+     public function addingproductionemployees(Request $request)
+    {
+        $user = Auth::user();
+        $permission = $user->can('production-ending-finish');
+        if (!$permission) {
+            return response()->json(['error' => 'UnAuthorized'], 401);
+        }
+
+        try {
+            DB::beginTransaction();
+
+
+            $addingtime = $request->input('addingtime');
+            $currentproduceqty = $request->input('currentproduceqty');
+            $allocation_id = $request->input('allocation_id');
+            $tableData = $request->input('tableData');
+
+            $addingdate = Carbon::parse($addingtime)->format('Y-m-d');
+
+            foreach ($tableData as $rowtabledata) {
+                $emp_id = $rowtabledata['col_1'];
+                $empname = $rowtabledata['col_2'];
+
+                $EmpProductAllocationDetail = new EmpProductAllocationDetail();
+                $EmpProductAllocationDetail->allocation_id = $allocation_id;
+                $EmpProductAllocationDetail->emp_id = $emp_id;
+                $EmpProductAllocationDetail->date = $addingdate;
+                $EmpProductAllocationDetail->status = '1';
+                $EmpProductAllocationDetail->adding_status = '2';
+                $EmpProductAllocationDetail->created_by = Auth::id();
+                $EmpProductAllocationDetail->updated_by = '0';
+                $EmpProductAllocationDetail->save();
+
+                $allocation_detailed_id = $EmpProductAllocationDetail->id;
+
+                $attendanceRecord = Productionempattendace::create([
+                    'emp_id' => $emp_id,
+                    'production_id' => $allocation_id,
+                    'date' => $addingdate,
+                    'start_timestmp' => $addingtime,
+                    'finish_timestamp' => null, 
+                    'status' => 1,
+                    'created_by' => Auth::id(),
+                    'updated_by' => Auth::id()
+                ]);
+
+                 $attendance_record_id = $attendanceRecord->id;
+
+                    Productionemptransfers::create([
+                        'production_id' => $allocation_id,
+                        'allocation_detailed_id' => $allocation_detailed_id,
+                        'attendance_record_id' => $attendance_record_id,
+                        'current_qty' => $currentproduceqty,
+                        'status' => 1
+                    ]);
+            }
+
+            DB::commit();
+            return response()->json(['success' => 'Employee Product Allocation Successfully Inserted']);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['errors' => ['An error occurred while saving data: ' . $e->getMessage()]], 422);
+        }
+    }
+
+
+    public function removeproductionemployees(Request $request)
+{
+    $user = Auth::user();
+    $permission = $user->can('production-ending-finish');
+    if (!$permission) {
+        return response()->json(['error' => 'UnAuthorized'], 401);
+    }
+
+    try {
+        DB::beginTransaction();
+
+        $addingtime = $request->input('addingtime');
+        $currentproduceqty = $request->input('currentproduceqty');
+        $allocation_id = $request->input('allocation_id');
+        $rowid = $request->input('id');
+
+        $addingdate = Carbon::parse($addingtime)->format('Y-m-d');
+
+         $current_date_time = Carbon::now()->toDateTimeString();
+
+
+        $EmpProductAllocationDetail = EmpProductAllocationDetail::find($rowid);
+        if ($EmpProductAllocationDetail) {
+            $EmpProductAllocationDetail->status = '3'; 
+            $EmpProductAllocationDetail->updated_by = Auth::id();
+            $EmpProductAllocationDetail->updated_at = $current_date_time;
+            $EmpProductAllocationDetail->save();
+
+
+            $attendanceRecord = Productionempattendace::where('emp_id', $EmpProductAllocationDetail->emp_id)
+                ->where('production_id', $allocation_id)
+                ->where('date', $addingdate)
+                ->first();
+
+            if ($attendanceRecord) {
+
+                $attendanceRecord->update([
+                    'finish_timestamp' => $addingtime, 
+                    'status' => 3, 
+                    'updated_by' => Auth::id(),
+                    'updated_at' => $current_date_time
+                ]);
+
+                $attendance_record_id = $attendanceRecord->id;
+
+                Productionemptransfers::create([
+                    'production_id' => $allocation_id,
+                    'allocation_detailed_id' =>  $rowid,
+                    'attendance_record_id' => $attendance_record_id,
+                    'current_qty' => $currentproduceqty,
+                    'status' => 3
+                ]);
+            }
+        }
+
+        DB::commit();
+        return response()->json(['success' => 'Employee Removed from Production Successfully']);
+
+    } catch (\Exception $e) {
+        DB::rollback();
+        return response()->json(['errors' => ['An error occurred while removing employee: ' . $e->getMessage()]], 422);
+    }
+}
 
 }

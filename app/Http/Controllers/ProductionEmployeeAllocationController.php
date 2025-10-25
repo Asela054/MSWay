@@ -56,7 +56,7 @@ class ProductionEmployeeAllocationController extends Controller
             $EmpProductAllocation->machine_id = $request->input('machine');
             $EmpProductAllocation->product_id = $request->input('product');
             $EmpProductAllocation->shift_id = $request->input('shift');
-            $EmpProductAllocation->production_status = '1';
+            $EmpProductAllocation->production_status = '0';
             $EmpProductAllocation->status = '1';
             $EmpProductAllocation->created_by = Auth::id();
             $EmpProductAllocation->updated_by = '0';
@@ -78,6 +78,7 @@ class ProductionEmployeeAllocationController extends Controller
                 $EmpProductAllocationDetail->emp_id = $emp_id;
                 $EmpProductAllocationDetail->date = $date;
                 $EmpProductAllocationDetail->status = '1';
+                $EmpProductAllocationDetail->adding_status = '1';
                 $EmpProductAllocationDetail->created_by = Auth::id();
                 $EmpProductAllocationDetail->updated_by = '0';
                 $EmpProductAllocationDetail->save();

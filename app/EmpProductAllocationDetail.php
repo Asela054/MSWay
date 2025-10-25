@@ -11,6 +11,6 @@ class EmpProductAllocationDetail extends Model
     protected $primaryKey = 'id';
 
     protected $fillable = [
-        'allocation_id','emp_id','machine_id', 'product_id','date', 'status', 'created_by', 'updated_by'
+        'allocation_id','emp_id','date', 'status', 'adding_status','created_by', 'updated_by'
     ];
 }
