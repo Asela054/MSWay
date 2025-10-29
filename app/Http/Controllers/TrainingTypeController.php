@@ -169,9 +169,15 @@ class TrainingTypeController extends Controller
             return response()->json(['error' => 'UnAuthorized'], 401);
         }
 
-        $data = TrainingType::findOrFail($id);
-        $data->status = 3;
-        $data->save();
+        try {
+            $data = TrainingType::findOrFail($id);
+            $data->status = 3;
+            $data->save();
+            
+            return response()->json(['success' => 'Record deleted successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to delete record'], 500);
+        }
     }
 
     // Type List

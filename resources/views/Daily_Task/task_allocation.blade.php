@@ -257,7 +257,9 @@ $(document).ready(function(){
             [0, "desc"]
         ],
         ajax: {
-            "url": "{!! route('taskallocationlist') !!}",
+            url: scripturl + "/task_allocation_list.php",
+            type: "POST",
+            data: {},
         },
         columns: [{
                 data: 'id',
@@ -274,13 +276,25 @@ $(document).ready(function(){
             {
                 data: 'action',
                 name: 'action',
+                className: 'text-right',
                 orderable: false,
                 searchable: false,
                 render: function (data, type, row) {
-                    return '<div style="text-align: right;">' + data + '</div>';
+                    var buttons = '';
+
+                    buttons += ' <button name="view" id="'+row.id+'" class="view btn btn-secondary btn-sm mr-1" type="button" data-toggle="tooltip" title="View"><i class="fas fa-eye"></i></button>';
+
+                    buttons += ' <button name="edit" id="'+row.id+'" class="edit btn btn-primary btn-sm mr-1" type="button" data-toggle="tooltip" title="Edit"><i class="fas fa-pencil-alt"></i></button>';
+
+                    buttons += '<button name="delete" id="'+row.id+'" class="delete btn btn-danger btn-sm" data-toggle="tooltip" title="Delete"><i class="far fa-trash-alt"></i></button>';
+
+                      return buttons;
                 }
             },
         ],
+        drawCallback: function(settings) {
+            $('[data-toggle="tooltip"]').tooltip();
+        }
     });
 
     // Create record button

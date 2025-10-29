@@ -108,40 +108,33 @@
 @section('script')
 
 <script>
+
+var trainEmpShowUrl = "{{ route('TrainEmpShow', ':id') }}";
+    
 $(document).ready(function(){
 
     $('#employee_menu_link').addClass('active');
     $('#employee_menu_link_icon').addClass('active');
     $('#training').addClass('navbtnactive');
 
-    $('#dataTable').DataTable(
-    {
+    $('#dataTable').DataTable({
         "destroy": true,
         "processing": true,
-        "serverSide": true, 
-        "ajax": "{{ route('TrainingAllocation.getData') }}",  
-        "columns": [
-            { "data": "id" },
-            { "data": "training_type" },
-            { "data": "venue" },
-            { "data": "start_time" },
-            { "data": "end_time" },
-            { "data": "action", "orderable": false, "searchable": false, "className": "text-right" }
-        ],
+        "serverSide": true,
         dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
             "<'row'<'col-sm-5'i><'col-sm-7'p>>",
         "buttons": [{
                 extend: 'csv',
                 className: 'btn btn-success btn-sm',
-                title: 'Training allocation Details',
+                title: 'Employee Training  Information',
                 text: '<i class="fas fa-file-csv mr-2"></i> CSV',
             },
             { 
                 extend: 'pdf', 
                 className: 'btn btn-danger btn-sm', 
-                title: 'Training allocation Details', 
+                title: 'Employee Training Information', 
                 text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
-                orientation: 'portrait', 
+                orientation: 'landscape', 
                 pageSize: 'legal', 
                 customize: function(doc) {
                     doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
@@ -149,7 +142,7 @@ $(document).ready(function(){
             },
             {
                 extend: 'print',
-                title: 'Training allocation Details',
+                title: 'Employee Training  Information',
                 className: 'btn btn-primary btn-sm',
                 text: '<i class="fas fa-print mr-2"></i> Print',
                 customize: function(win) {
@@ -158,10 +151,57 @@ $(document).ready(function(){
                         .css('font-size', 'inherit');
                 },
             },
+            // 'copy', 'csv', 'excel', 'pdf', 'print'
         ],
         "order": [
             [0, "desc"]
         ],
+        ajax: {
+            url: scripturl + "/training_allocation_list.php",
+            type: "POST",
+            data: {},
+        },
+        columns: [{
+                data: 'id',
+                name: 'id'
+            },
+            {
+                data: 'training_type',
+                name: 'training_type'
+            },
+            {
+                data: 'venue',
+                name: 'venue'
+            },
+            {
+                data: 'start_time',
+                name: 'start_time'
+            },
+            {
+                data: 'end_time',
+                name: 'end_time'
+            },
+            {
+                data: 'action',
+                name: 'action',
+                className: 'text-right',
+                orderable: false,
+                searchable: false,
+                render: function (data, type, row) {
+                    var buttons = '';
+                    buttons += '<a href="' + trainEmpShowUrl.replace(':id', row.id) + '" class="Employee btn btn-info btn-sm mr-1" data-toggle="tooltip" title="View Employees"><i class="fas fa-users"></i></a> ';
+
+                    buttons += ' <button name="edit" id="'+row.id+'" class="edit btn btn-primary btn-sm mr-1" type="button" data-toggle="tooltip" title="Edit"><i class="fas fa-pencil-alt"></i></button>';
+
+                    buttons += '<button name="delete" id="'+row.id+'" class="delete btn btn-danger btn-sm" data-toggle="tooltip" title="Delete"><i class="far fa-trash-alt"></i></button>';
+
+                      return buttons;
+                }
+            },
+        ],
+        drawCallback: function(settings) {
+            $('[data-toggle="tooltip"]').tooltip();
+        }
     });
  
     $('#create_record').click(function () {

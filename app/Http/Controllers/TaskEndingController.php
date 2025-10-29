@@ -23,38 +23,6 @@ class TaskEndingController extends Controller
         }
         return view('Daily_Task.daily_task_ending');
     }
-
-    public function tasklist()
-    {
-        $types = DB::table('emp_task_allocation')
-            ->select(
-                'emp_task_allocation.*',
-                'task.taskname as task_name'
-            )
-            ->leftJoin('task', 'emp_task_allocation.task_id', '=', 'task.id')
-            ->whereIn('emp_task_allocation.status', [1])
-            ->get();
-
-        return Datatables::of($types)
-            ->addIndexColumn()
-            ->addColumn('action', function ($row) {
-                $btn = '';
-                $user = Auth::user();
-
-                    // Add Finish task button if status is not already finished
-                    if($row->task_status != 2 && $user->can('task-ending-finish')) {
-                        $btn .= ' <button name="edit" id="'.$row->id.'" class="edit btn btn-outline-success btn-sm" type="button" title="Finish Task"><i class="fas fa-check-circle"></i></button>';
-                    }
-                    // Add Cancel Production button if status is not already cancelled
-                    if($row->task_status != 3 && $user->can('task-ending-cancel')) {
-                        $btn .= ' <button name="delete" id="'.$row->id.'" class="delete btn btn-outline-danger btn-sm" type="button" title="Cancel Task"><i class="fas fa-times-circle"></i></button>';
-                    }
-            
-                return $btn;
-            })
-            ->rawColumns(['action'])
-            ->make(true);
-    }
     
     public function insert(Request $request)
     {
