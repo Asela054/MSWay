@@ -37,9 +37,9 @@
                                 <thead>
                                     <tr>
                                         <th>ID </th>
-                                        <th>Date</th>
-                                        <th>Shift</th>
-                                        <th class="text-right">Action</th>
+                                        <th>DATE</th>
+                                        <th>SHIFT</th>
+                                        <th class="text-right">ACTION</th>
                                     </tr>
                                 </thead>
 

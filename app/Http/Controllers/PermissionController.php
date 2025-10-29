@@ -24,11 +24,11 @@ class PermissionController extends Controller
     }
      public function store(Request $request)
     {
-        $user = Auth::user();
-        $permission = $user->can('permissions-create');
-        if(!$permission) {
-            return response()->json(['errors' => array('You do not have permission to remove Permission.')]);
-        }
+        // $user = Auth::user();
+        // $permission = $user->can('permissions-create');
+        // if(!$permission) {
+        //     return response()->json(['errors' => array('You do not have permission to insert Permission.')]);
+        // }
         
          
         Permission::create([

@@ -17,43 +17,16 @@
         </div>
     </div>
       <div class="container-fluid mt-2 p-0 p-2">
-        <div class="card">
-            <div class="card-body p-0 p-2">
-                <form class="form-horizontal" id="formFilter">
-                    <div class="form-row mb-1">
-                        <div class="col-md-2">
-                            <label class="small font-weight-bold text-dark">Company</label>
-                            <select name="company" id="company_f" class="form-control form-control-sm">
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="small font-weight-bold text-dark">Department</label>
-                            <select name="department" id="department_f" class="form-control form-control-sm">
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="small font-weight-bold text-dark">Location</label>
-                            <select name="location" id="location_f" class="form-control form-control-sm">
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="small font-weight-bold text-dark">Employee</label>
-                            <select name="employee" id="employee_f" class="form-control form-control-sm">
-                            </select>
-                        </div>
-
-                        <div class="col-md-2">
-                            <br>
-                            <button type="submit" class="btn btn-primary btn-sm filter-btn " id="btn-filter"> Filter</button>
-                        </div>
-                    </div>
-
-                </form>
-            </div>
-        </div>
+        
         <div class="card">
             <div class="card-body p-0 p-2">
                 <div class="row">
+                     <div class="col-md-12">
+                        <button class="btn btn-warning btn-sm filter-btn float-right px-3" type="button"
+                            data-toggle="offcanvas" data-target="#offcanvasRight"
+                            aria-controls="offcanvasRight"><i class="fas fa-filter mr-1"></i> Filter
+                            Options</button>
+                    </div>
                     <div class="col-12">
                         <hr class="border-dark">
                     </div>
@@ -65,12 +38,12 @@
                          <table class="table table-striped table-bordered table-sm small nowrap w-100" id="dataTable">
                             <thead>
                                 <tr>
-                                    <th>Employee Name </th>
-                                    <th>Department</th>
-                                    <th>Shift </th>
-                                    <th>Start Time</th>                                                
-                                    <th>End Time</th>   
-                                    <th class="text-right">Action</th>
+                                    <th>EMPLOYEE NAME</th>
+                                    <th>DEPARTMENT</th>
+                                    <th>SHIFT</th>
+                                    <th>START TIME</th>                                                
+                                    <th>END TIME</th>   
+                                    <th class="text-right">ACTION</th>
                                 </tr>
                             </thead>
                         </table>
@@ -162,7 +135,53 @@
             </div>
         </div>
     </div>
+    </div>
     <!-- Modal Area End -->
+
+    <!-- Search Offcanvas End -->
+
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+            <div class="offcanvas-header">
+                <h2 class="offcanvas-title font-weight-bolder" id="offcanvasRightLabel">Records Filter Options</h2>
+                <button type="button" class="btn-close" data-dismiss="offcanvas" aria-label="Close">
+                    <span aria-hidden="true" class="h1 font-weight-bolder">&times;</span>
+                </button>
+            </div>
+            <div class="offcanvas-body">
+                <ul class="list-unstyled">
+                    <form class="form" id="formFilter">
+                    <div class="form mb-1">
+                        <div class="col-md-12">
+                            <label class="small font-weight-bold text-dark">Company</label>
+                            <select name="company" id="company_f" class="form-control form-control-sm">
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="small font-weight-bold text-dark">Department</label>
+                            <select name="department" id="department_f" class="form-control form-control-sm">
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="small font-weight-bold text-dark">Location</label>
+                            <select name="location" id="location_f" class="form-control form-control-sm">
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="small font-weight-bold text-dark">Employee</label>
+                            <select name="employee" id="employee_f" class="form-control form-control-sm">
+                            </select>
+                        </div>
+
+                        <div class="col-md-12">
+                            <br>
+                            <button type="submit" class="btn btn-primary btn-sm filter-btn " id="btn-filter"> Filter</button>
+                        </div>
+                    </div>
+                    </form>
+                </ul>
+            </div>
+        </div>
+    </div>
 
 </main>
               
@@ -254,6 +273,7 @@ $(document).ready(function () {
     });
 
     function load_dt(department, employee, location, from_date, to_date){
+   
         $('#dataTable').DataTable({
           "destroy": true,
         "processing": true,
@@ -279,7 +299,7 @@ $(document).ready(function () {
             },
             {
                 extend: 'print',
-                title: 'Customer  Information',
+                title: 'Shift  Information',
                 className: 'btn btn-primary btn-sm',
                 text: '<i class="fas fa-print mr-2"></i> Print',
                 customize: function(win) {
@@ -296,7 +316,13 @@ $(document).ready(function () {
         ajax: {
              url: scripturl + "/shift_list.php",
             type: "POST",
-            data: {},
+            data: {
+                department: department,
+                employee: employee,
+                location: location,
+                from_date: from_date,
+                to_date: to_date
+            },
         },
             columns: [
             { 
@@ -350,6 +376,16 @@ $(document).ready(function () {
             $('[data-toggle="tooltip"]').tooltip();
         }
         });
+
+        var offcanvasElement = document.getElementById('offcanvasRight');
+        var offcanvasInstance = bootstrap.Offcanvas.getInstance(offcanvasElement);
+
+        // If not initialized, initialize it first
+        if (!offcanvasInstance) {
+          offcanvasInstance = new bootstrap.Offcanvas(offcanvasElement);
+        }
+
+        offcanvasInstance.hide(); // Close offcanvas
     }
 
     load_dt('', '', '', '', '');
@@ -362,6 +398,7 @@ $(document).ready(function () {
         let from_date = $('#from_date').val();
         let to_date = $('#to_date').val();
 
+       
         load_dt(department, employee, location, from_date, to_date);
     });
 

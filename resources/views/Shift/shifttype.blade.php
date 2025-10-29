@@ -31,18 +31,18 @@
                         <table class="table table-striped table-bordered table-sm small nowrap" style="width: 100%" id="dataTable">
                             <thead>
                                 <tr>
-                                    <th>Id </th>
-                                    <th>Shift </th> 
-                                    <th>Onduty time</th>                                                
-                                    <th>Offduty time</th>                                                
-                                    <th>Offduty date</th>                                               
-                                    <th>Saturday Onduty Time</th>
-                                    <th>Saturday Offduty Time</th>                                               
-                                    <th>Begining checkin</th>                                                
-                                    <th>Begining checkout</th>                                                
-                                    <th>Ending checkin</th>                                                
-                                    <th>Ending checkout</th>                                                
-                                    <th class="text-right">Action</th>                                      
+                                    <th>ID</th>
+                                    <th>SHIFT</th> 
+                                    <th>ONDUTY TIME</th>                                                
+                                    <th>OFFDUTY TIME</th>                                                
+                                    <th>OFFDUTY DATE</th>                                               
+                                    <th>SATURDAY ONDUTY TIME</th>
+                                    <th>SATURDAY OFFDUTY TIME</th>                                               
+                                    <th>BEGINING CHECKIN</th>                                                
+                                    <th>BEGINING CHECKOUT</th>                                                
+                                    <th>ENDING CHECKIN</th>                                                
+                                    <th>ENDING CHECKOUT</th>                                                
+                                    <th class="text-right">ACTION</th>                                      
                                 </tr>
                             </thead>                          
                             
