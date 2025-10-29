@@ -21,26 +21,20 @@
       <div class="container-fluid mt-2 p-0 p-2">
         <div class="card">
             <div class="card-body p-0 p-2">
+                <div class="row">
+                <div class="col-md-12">
+                    <button class="btn btn-warning btn-sm filter-btn float-right px-3" type="button"
+                        data-toggle="offcanvas" data-target="#offcanvasRight"
+                        aria-controls="offcanvasRight"><i class="fas fa-filter mr-1"></i> Filter
+                        Options</button>
+                </div>
+                <div class="col-12">
+                    <hr class="border-dark">
+                </div>
+                </div>
 
 
-<form class="form-horizontal" id="formFilter">
-    <div class="form-row mb-1">
-        <div class="col">
-            <label class="small font-weight-bold text-dark">Select Month:</label>
-            <select id="month" class="form-control form-control-sm" required>
-                @foreach ($months as $month)
-                    <option value="{{ $month->format('Y-m') }}" {{ $month->isSameMonth($currentMonth) ? 'selected' : '' }}>
-                        {{ $month->format('F Y') }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-        <div class="col">
-            <label class="small font-weight-bold text-dark">Department</label>
-            <select name="department" id="department" class="form-control form-control-sm" required></select>
-        </div>
-    </div>
-</form>
+
 
 <div class="center-block fix-width scroll-inner my-2">
     <table class="table table-striped table-bordered table-sm small nowrap" style="width: 100%" id="shiftTable">
@@ -52,7 +46,45 @@
 
             </div>
         </div>
-    </div>      
+    </div>    
+    </div>    
+    
+    <!-- Search Offcanvas End -->
+
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+            <div class="offcanvas-header">
+                <h2 class="offcanvas-title font-weight-bolder" id="offcanvasRightLabel">Records Filter Options</h2>
+                <button type="button" class="btn-close" data-dismiss="offcanvas" aria-label="Close">
+                    <span aria-hidden="true" class="h1 font-weight-bolder">&times;</span>
+                </button>
+            </div>
+            <div class="offcanvas-body">
+                
+                    <form class="form" id="formFilter">
+                    <div class="form-row mb-1">
+                        <div class="col-12">
+                            <label class="small font-weight-bold text-dark">Select Month:</label>
+                            <select id="month" class="form-control form-control-sm" required>
+                                @foreach ($months as $month)
+                                    <option value="{{ $month->format('Y-m') }}" {{ $month->isSameMonth($currentMonth) ? 'selected' : '' }}>
+                                        {{ $month->format('F Y') }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-12 mt-2">
+                            <label class="small font-weight-bold text-dark">Department</label>
+                            <select name="department" id="department" class="form-control form-control-sm" required></select>
+                        </div>
+                        <div class="col-md-12 mt-2">
+                            <button type="button" class="btn btn-primary btn-sm filter-btn " id="btn-filter"> Filter</button>
+                        </div>
+                    </div>
+                </form>
+                
+            </div>
+        </div>
+    </div>
 
 </main>
               
@@ -92,8 +124,8 @@ $(document).ready(function() {
         });
 
     // Department change event
-    department.on('change', function() {
-        const departmentId = $(this).val();
+    $('#btn-filter').on('click', function() {
+        const departmentId = $('#department').val();
         const selectedMonth = $('#month').val();
         if (!departmentId) return;
 
@@ -105,6 +137,8 @@ $(document).ready(function() {
                 loadRosterData(departmentId, selectedMonth).then(rosterData => {
                     generateViewTable(selectedMonth, rosterData);
                 });
+
+              
             }
         });
     });
@@ -122,6 +156,8 @@ $(document).ready(function() {
     function loadRosterData(departmentId, month) {
         return fetch(`get-view-roster-data?department_id=${departmentId}&month=${month}`)
             .then(response => response.json());
+
+            
     }
 
     function generateViewTable(month, rosterData = {}) {
@@ -134,7 +170,7 @@ $(document).ready(function() {
         tbody.innerHTML = '';
 
         // Header
-        let headerRow = `<tr><th>No</th><th>Name of Employee</th>`;
+        let headerRow = `<tr><th>NO</th><th>NAME OF EMPLOYEE</th>`;
         for (let d = 1; d <= daysInMonth; d++) {
             headerRow += `<th>${d}</th>`;
         }
@@ -152,6 +188,8 @@ $(document).ready(function() {
             row += `</tr>`;
             tbody.innerHTML += row;
         });
+
+        
     }
 
 });

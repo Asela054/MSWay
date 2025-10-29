@@ -6,7 +6,7 @@
        
         <a role="button" class="btn navbtncolor" href="{{ route('ShiftType') }}" id="work_shift_link">Work Shifts <span class="caret"></span></a>
        
-        <a role="button" class="btn navbtncolor" href="{{ route('AdditionalShift.index') }}" id="additional_shift_link">Additional Shifts <span class="caret"></span></a>
+        <!-- <a role="button" class="btn navbtncolor" href="{{ route('AdditionalShift.index') }}" id="additional_shift_link">Additional Shifts <span class="caret"></span></a> -->
       
         <a role="button" class="btn navbtncolor" href="{{ route('employeeshift') }}" id="employeeshift_link">Employee Night Shift Assign <span class="caret"></span></a>
         
