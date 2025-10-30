@@ -997,8 +997,6 @@ private function processAttendanceRecord($cr)
     }
 }
 
-
-
     public function attendance_update_bulk_submit(Request $request)
     {
         $user = Auth::user();
@@ -1007,53 +1005,58 @@ private function processAttendanceRecord($cr)
             return response()->json(['error' => 'UnAuthorized'], 401);
         }
 
-        $in_time = $request->in_time;
-        $out_time = $request->out_time;
-        $existing_time_stamp_in = $request->existing_time_stamp_in;
-        $existing_time_stamp_out = $request->existing_time_stamp_out;
-        $existing_time_stamp_in_rfc = $request->existing_time_stamp_in_rfc;
-        $existing_time_stamp_out_rfc = $request->existing_time_stamp_out_rfc;
-        $uid = $request->uid;
-        $emp_id = $request->employee;
-        $date = $request->date;
-        $month = $request->month;
-        $date_e = $request->date_e;
+        // Get the main employee ID from form data
+        $main_emp_id = $request->input('emp_id');
+        
+        // Get the JSON string and decode it
+        $changed_records_json = $request->input('changed_records');
+        $changed_records = json_decode($changed_records_json, true);
+        
+        if (empty($changed_records)) {
+            return response()->json(['status' => false, 'msg' => 'No changes detected.']);
+        }
 
-        for ($i = 0; $i < sizeof($in_time); $i++) {
+        foreach ($changed_records as $record) {
+            // Use main employee ID if record emp_id is empty
+            $emp_id = $main_emp_id;
+            $full_date = $record['date'];
+            $uid = $emp_id;
+        
+            // Process IN time
+            if (($record['new_in_time'] != '') && ($record['new_in_time'] != $record['old_in_time'])) {
+                $full_time_in = $record['new_in_time'];
 
-            $full_date = $month.'-'.$date[$i];
+                $new_timestamp_in = date('Y-m-d H:i:s', strtotime($full_time_in));
 
-            if (($in_time[$i] != '') && ($in_time[$i] != $existing_time_stamp_in_rfc[$i])) {
+                if ($record['old_in_time'] != '') {
 
-                $full_time_in = $in_time[$i];
+                    $old_timestamp_in = $record['old_in_time'];
+                    if (strpos($old_timestamp_in, 'T') !== false) {
+                        $old_timestamp_in = date('Y-m-d H:i:s', strtotime($old_timestamp_in));
+                    }
 
-                if ($existing_time_stamp_in[$i] != '' ) {
+                $attendance = Attendance::where('emp_id', $emp_id)
+                                            ->where('date', $full_date . ' 00:00:00')
+                                            ->where('timestamp', 'LIKE', $old_timestamp_in . '%')
+                                            ->first();
 
-                    $attendance = Attendance::where('uid', $uid[$i])
-                        ->where('date', $full_date)
-                        ->where('timestamp', $existing_time_stamp_in[$i])->first();
 
-                         if (!$attendance) {
-                            continue; 
-                        }
+                    if ($attendance) {
+                        $prev_timestamp = $attendance->timestamp;
+                        $attendance->timestamp = $new_timestamp_in;
+                        $attendance->save();
+
                         
-                    $prev_timestamp = $attendance->timestamp;
-
-                    $attendance->timestamp = $full_time_in;
-
-                    $attendance->save();
-
-                    $log_data = array(
-                        'attendance_id' => $attendance->id,
-                        'emp_id' => $attendance->emp_id,
-                        'date' => $attendance->date,
-                        'prev_val' => $prev_timestamp,
-                        'new_val' => $full_time_in,
-                        'edited_user_id' => Auth::user()->id,
-                    );
-
-                    AttendanceEdited::create($log_data);
-
+                        $log_data = [
+                            'attendance_id' => $attendance->id,
+                            'emp_id' => $attendance->emp_id,
+                            'date' => $attendance->date,
+                            'prev_val' => $prev_timestamp,
+                            'new_val' => $full_time_in,
+                            'edited_user_id' => Auth::user()->id,
+                        ];
+                        AttendanceEdited::create($log_data);
+                    }
                 } else {
                     $employee = DB::table('employees')
                         ->join('branches', 'employees.emp_location', '=', 'branches.id')
@@ -1063,59 +1066,57 @@ private function processAttendanceRecord($cr)
                         ->where('employees.emp_id', $emp_id)
                         ->first();
 
-                    $data = array(
-                        'emp_id' => $emp_id,
-                        'uid' => $emp_id,
-                        'state' => 1,
-                        'timestamp' => $full_time_in,
-                        'date' => $full_date,
-                        'approved' => 0,
-                        'type' => 255,
-                        'devicesno' => $employee->sno,
-                        'location' => $employee->location
-                    );
-                    $id = DB::table('attendances')->insert($data);
-
+                    if ($employee) {
+                        $data = [
+                            'emp_id' => $emp_id,
+                            'uid' => $uid,
+                            'state' => 1,
+                            'timestamp' => $full_time_in,
+                            'date' => $full_date,
+                            'approved' => 0,
+                            'type' => 255,
+                            'devicesno' => $employee->sno,
+                            'location' => $employee->location
+                        ];
+                        DB::table('attendances')->insert($data);
+                    }
                 }
-
             }
-        }
 
-        for ($i = 0; $i < sizeof($out_time); $i++) {
+            // Process OUT time
+            if (($record['new_out_time'] != '') && ($record['new_out_time'] != $record['old_out_time'])) {
+                $full_time_out = $record['new_out_time'];
 
-            $full_date = $month.'-'.$date[$i];
+                $new_timestamp_out = date('Y-m-d H:i:s', strtotime($full_time_out));
 
-            if (($out_time[$i] != '') && ($out_time[$i] != $existing_time_stamp_out_rfc[$i])) {
 
-                $full_time_out = $out_time[$i];
+                if ($record['old_out_time'] != '') {
 
-                if ($existing_time_stamp_out[$i] != '') {
+                $old_timestamp_out = $record['old_out_time'];
+                    if (strpos($old_timestamp_out, 'T') !== false) {
+                        $old_timestamp_out = date('Y-m-d H:i:s', strtotime($old_timestamp_out));
+                    }
 
-                    $attendance = Attendance::where('uid', $uid[$i])
-                        ->where('date', $full_date)
-                        ->where('timestamp', $existing_time_stamp_out[$i])->first();
+                $attendance = Attendance::where('emp_id', $emp_id)
+                                ->where('date', $full_date . ' 00:00:00')
+                                ->where('timestamp', 'LIKE', $old_timestamp_out . '%')
+                                ->first();
 
-                    $prev_timestamp = $attendance->timestamp;
+                    if ($attendance) {
+                        $prev_timestamp = $attendance->timestamp;
+                        $attendance->timestamp = $full_time_out;
+                        $attendance->save();
 
-                     if (!$attendance) {
-                            continue; 
-                        }
-
-                    $attendance->timestamp = $full_time_out;
-
-                    $attendance->save();
-
-                    $log_data = array(
-                        'attendance_id' => $attendance->id,
-                        'emp_id' => $attendance->emp_id,
-                        'date' => $attendance->date,
-                        'prev_val' => $prev_timestamp,
-                        'new_val' => $full_time_out,
-                        'edited_user_id' => Auth::user()->id,
-                    );
-
-                    AttendanceEdited::create($log_data);
-
+                        $log_data = [
+                            'attendance_id' => $attendance->id,
+                            'emp_id' => $attendance->emp_id,
+                            'date' => $attendance->date,
+                            'prev_val' => $prev_timestamp,
+                            'new_val' => $full_time_out,
+                            'edited_user_id' => Auth::user()->id,
+                        ];
+                        AttendanceEdited::create($log_data);
+                    }
                 } else {
                     $employee = DB::table('employees')
                         ->join('branches', 'employees.emp_location', '=', 'branches.id')
@@ -1125,29 +1126,26 @@ private function processAttendanceRecord($cr)
                         ->where('employees.emp_id', $emp_id)
                         ->first();
 
-                    $data = array(
-                        'emp_id' => $emp_id,
-                        'uid' => $emp_id,
-                        'state' => 1,
-                        'timestamp' => $full_time_out,
-                        'date' => $full_date,
-                        'approved' => 0,
-                        'type' => 255,
-                        'devicesno' => $employee->sno,
-                        'location' => $employee->location
-                    );
-                    $id = DB::table('attendances')->insert($data);
-
+                    if ($employee) {
+                        $data = [
+                            'emp_id' => $emp_id,
+                            'uid' => $uid,
+                            'state' => 1,
+                            'timestamp' => $full_time_out,
+                            'date' => $full_date,
+                            'approved' => 0,
+                            'type' => 255,
+                            'devicesno' => $employee->sno,
+                            'location' => $employee->location
+                        ];
+                        DB::table('attendances')->insert($data);
+                    }
                 }
-
             }
         }
 
-        return response()->json(['status' => true, 'msg' => 'Updated successfully.']);
-
+        return response()->json(['status' => true, 'msg' => 'Attendance Updated successfully.']);
     }
-
-
 
     public function getlateAttendance(Request $request)
     {

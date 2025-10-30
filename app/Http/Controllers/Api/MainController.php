@@ -130,29 +130,6 @@ class MainController extends Controller
         return (new BaseController)->sendResponse($data, 'employee_info');
     }
 
-    // public function empLocationStore(Request $request)
-    // {
-    //     //validate request
-    //     $validator = \Validator::make($request->all(), [
-    //         'emp_id' => 'required',
-    //         'location_id' => 'required',
-    //         'longitude' => 'required',
-    //         'latitude' => 'required'
-    //     ]);
-
-    //     if($validator->fails()){
-    //         return (new BaseController())->sendError('Validation Error.', $validator->errors(), '400');
-    //     }
-
-    //     $empLocation = new EmpLocation;
-    //     $empLocation->emp_id = $request->emp_id;
-    //     $empLocation->location_id = $request->location_id;
-    //     $empLocation->longitude = $request->longitude;
-    //     $empLocation->latitude = $request->latitude;
-
-    //     $empLocation->save();
-    //     return (new BaseController)->sendResponse($empLocation, 'Emp Location Added');
-    // }
 
     public function GetLeaveTypes(Request $request)
     {
@@ -372,6 +349,7 @@ class MainController extends Controller
         $leave->comment = $request->input('comment');
         $leave->emp_covering = $request->input('coveringemployee');
         $leave->leave_approv_person = $request->input('approveby');
+        $leave->request_id = $request->input('leaverequest_id');
         $leave->status = 'Pending';
         $leave->save();
 
@@ -399,6 +377,55 @@ class MainController extends Controller
         return (new BaseController)->sendResponse($leave, 'Success!');
     }
 
+    public function Getemployees(Request $request){
+
+        $employees = DB::table('employees')
+        ->select('emp_name_with_initial','emp_id','id')
+        ->where('deleted', 0)
+        ->get();
+
+        $data = array(
+            'employees' => $employees
+        );
+
+        return (new BaseController)->sendResponse($data, 'employees');
+    }
 
 
+   public function GetApplyLeavelist(Request $request)
+{
+    $validator = \Validator::make($request->all(), [
+        'employee' => 'required'
+    ]);
+
+    if($validator->fails()){
+        return (new BaseController())->sendError('Validation Error.', $validator->errors(), '400');
+    }
+
+    $query = DB::table('leaves')
+        ->join('leave_types', 'leaves.leave_type', '=', 'leave_types.id')
+        ->join('employees as ec', 'leaves.emp_covering', '=', 'ec.emp_id')
+        ->join('employees as e', 'leaves.emp_id', '=', 'e.emp_id')
+        ->leftjoin('branches', 'e.emp_location', '=', 'branches.id')
+        ->leftjoin('departments', 'e.emp_department', '=', 'departments.id')
+        ->select('leaves.*', 'ec.emp_name_with_initial as covering_emp', 'leave_types.leave_type', 'e.emp_name_with_initial as emp_name', 'departments.name as dep_name')
+        ->where(['e.emp_id' => $request->employee])
+        ->get()
+        ->map(function ($row) {
+            if ($row->half_short == 0.25) {
+                $row->duration_type = 'Short Leave';
+            } elseif ($row->half_short == 0.5) {
+                $row->duration_type = 'Half Day';
+            } elseif ($row->half_short == 1) {
+                $row->duration_type = 'Full Day';
+            }
+            return $row;
+        });
+
+    $data = array(
+        'applyleavelist' => $query
+    );
+
+    return (new BaseController)->sendResponse($data, 'applyleavelist');
+}
 }

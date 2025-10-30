@@ -21,8 +21,17 @@ class LatePolicyService
             ->first();
 
         if (!$jobcategory) {
-              return false; 
-        }
+                return false; // Simply return false if job category not found
+            }
+
+            // Check each required field for null values
+            if ($jobcategory->late_type === null || 
+                $jobcategory->short_leaves === null || 
+                $jobcategory->half_days === null || 
+                $jobcategory->late_attend_min === null) {
+                return false; // Simply return false if any field is null
+            }
+
 
         $latetype = $jobcategory->late_type;
         $shortleave = $jobcategory->short_leaves;
@@ -51,6 +60,8 @@ class LatePolicyService
                 $this->processLateType3($empData, $leaveType, $d_count, $shortleave, $halfday, $minitescount);
                 break;
         }
+
+         return true;
     }
 
     /**

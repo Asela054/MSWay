@@ -44,7 +44,7 @@ class LocationAttendanceController extends Controller
 
     public function GetLocations(Request $request)
     {
-        $locations=DB::table('job_location')->select('*')->where('status',1)->get();
+        $locations=DB::table('branches')->select('*')->get();
 
         $data = array(
             'locationlist' => $locations
@@ -69,88 +69,92 @@ class LocationAttendanceController extends Controller
         return (new BaseController)->sendResponse($data, 'shift_types');
     }
 
-    public function GetLocationEmployees(Request $request)
-    {
-
-        $location = $request->input('selectedlocation');
-        $shift = $request->input('shift');
-        $attendancedate = $request->input('attendancedate');
-
-        $shifts = DB::table('shift_types')
-        ->select('shift_types.*')
-        ->where('shift_types.id','=', $shift)
-        ->get(); 
-
-        $todayTimedate = Carbon::parse($attendancedate)->format('Y-m-d');
-
-        $onTime = Carbon::parse($attendancedate)
-            ->setTimeFromTimeString($shifts[0]->onduty_time)
-            ->format('Y-m-d H:i:s');
-
-        $offTime = Carbon::parse($attendancedate)
-            ->setTimeFromTimeString($shifts[0]->offduty_time)
-            ->format('Y-m-d H:i:s');
-
-        $allocation = DB::table('job_allocation')
-        ->leftjoin('employees', 'job_allocation.employee_id', '=', 'employees.id')
-        ->leftjoin('shift_types', 'job_allocation.shiftid', '=', 'shift_types.id')
-        ->select('job_allocation.*','job_allocation.id As allocationid','employees.emp_name_with_initial As emp_name')
-        ->where('job_allocation.status',1, 2)
-        ->where('job_allocation.location_id', $location)
-        ->where('job_allocation.shiftid', $shift)
-        ->get();
-
-        $data = array(
-            'on_Time' => $onTime,
-            'off_Time' => $offTime,
-            'allocation' => $allocation,
-        );
-
-        return (new BaseController)->sendResponse($data, 'on_Time','off_Time','allocation');
-    }
-
     public function Insertlocationattendance(Request $request)
     {
-        $location = $request->input('allocation');
-        $shift = $request->input('shift');
+        $location = $request->input('location_id');
         $attendancedate = $request->input('attendancedate');
-        $tableData = $request->input('tableData'); 
+        $empid = $request->input('emp_id');
+        $on_time = $request->input('on_time');
+        $off_time = $request->input('off_time');
+        $reason = $request->input('reason');
         $userID = $request->input('userID');
-        $tableDataArray = json_decode($tableData, true);  
+        $location_status = $request->input('location_status');
 
-        if (is_array($tableDataArray)) {
-            foreach ($tableDataArray as $rowtabledata) {
-                $empid = $rowtabledata['col_1'];
-                $ontime = $rowtabledata['col_2'];
-                $offtime = $rowtabledata['col_3'];
-                $allocationid = $rowtabledata['col_5'];
+        if($location_status == 1){
 
-                $attendance = new Jobattendance();
-                $attendance->attendance_date = $attendancedate;
-                $attendance->employee_id = $empid;
-                $attendance->shift_id = $shift;
-                $attendance->on_time = $ontime;
-                $attendance->off_time = $offtime;
-                $attendance->location_id = $location;
-                $attendance->allocation_id = $allocationid;
-                $attendance->status = '1';
-                $attendance->created_by = $userID;
-                $attendance->updated_by = '0';
-                $attendance->save();
-            }
-        } 
+        $attendance = new Jobattendance();
+        $attendance->attendance_date = $attendancedate;
+        $attendance->employee_id = $empid;
+        $attendance->shift_id = null;
+        $attendance->on_time = $on_time;
+        $attendance->off_time = $off_time;
+        $attendance->reason = $reason;
+        $attendance->location_id = $location;
+        $attendance->allocation_id = null;
+        $attendance->status = '1';
+        $attendance->location_status = '1';
+        $attendance->approve_status = '1';
+        $attendance->created_by = $userID;
+        $attendance->updated_by = '0';
+        $attendance->save();
 
-        return (new BaseController)->sendResponse($attendance, 'Job Attendance Added Successfully');
+
+        $data = array(
+            'emp_id' =>  $empid,
+            'uid' =>  $empid,
+            'state' => 1,
+            'timestamp' => $on_time,
+            'date' => $attendancedate,
+            'approved' => 0,
+            'type' => 255,
+            'devicesno' => '-',
+            'location' => $location
+        );
+         DB::table('attendances')->insert($data);
+
+        //off time
+        $data = array(
+            'emp_id' => $empid,
+            'uid' => $empid,
+            'state' => 1,
+            'timestamp' => $off_time,
+            'date' => $attendancedate,
+            'approved' => 0,
+            'type' => 255,
+            'devicesno' => '-',
+            'location' => $location
+        );
+        DB::table('attendances')->insert($data);
+
+        }else{
+
+        $attendance = new Jobattendance();
+        $attendance->attendance_date = $attendancedate;
+        $attendance->employee_id = $empid;
+        $attendance->shift_id = null;
+        $attendance->on_time = $on_time;
+        $attendance->off_time = $off_time;
+        $attendance->reason = $reason;
+        $attendance->location_id = $location;
+        $attendance->allocation_id = null;
+        $attendance->status = '1';
+        $attendance->location_status = '2';
+        $attendance->approve_status = '0';
+        $attendance->created_by = $userID;
+        $attendance->updated_by = '0';
+        $attendance->save();
+        }
+        
+        return (new BaseController)->sendResponse($attendance, 'Location Attendance Added Successfully');
     }
 
     public function Getlocationpoint(Request $request){
         $userID = $request->input('userid');
 
-        $location = DB::table('job_allocation')
-        ->leftjoin('job_location', 'job_allocation.location_id', '=', 'job_location.id')
-        ->select('job_location.*','job_allocation.id As allocationid')
-        ->where('job_allocation.status',1, 2)
-        ->where('job_allocation.employee_id', $userID)
+        $location = DB::table('employees')
+        ->leftjoin('branches', 'employees.emp_location', '=', 'branches.id')
+        ->select('branches.*')
+        ->where('employees.emp_id', $userID)
         ->get();
 
         $data = array(
@@ -160,4 +164,45 @@ class LocationAttendanceController extends Controller
         return (new BaseController)->sendResponse($data, 'employeelocation');
     }
 
+    
+
+    //    public function GetLocationEmployees(Request $request)
+    // {
+
+    //     $location = $request->input('selectedlocation');
+    //     $shift = $request->input('shift');
+    //     $attendancedate = $request->input('attendancedate');
+
+    //     $shifts = DB::table('shift_types')
+    //     ->select('shift_types.*')
+    //     ->where('shift_types.id','=', $shift)
+    //     ->get(); 
+
+    //     $todayTimedate = Carbon::parse($attendancedate)->format('Y-m-d');
+
+    //     $onTime = Carbon::parse($attendancedate)
+    //         ->setTimeFromTimeString($shifts[0]->onduty_time)
+    //         ->format('Y-m-d H:i:s');
+
+    //     $offTime = Carbon::parse($attendancedate)
+    //         ->setTimeFromTimeString($shifts[0]->offduty_time)
+    //         ->format('Y-m-d H:i:s');
+
+    //     $allocation = DB::table('job_allocation')
+    //     ->leftjoin('employees', 'job_allocation.employee_id', '=', 'employees.id')
+    //     ->leftjoin('shift_types', 'job_allocation.shiftid', '=', 'shift_types.id')
+    //     ->select('job_allocation.*','job_allocation.id As allocationid','employees.emp_name_with_initial As emp_name')
+    //     ->where('job_allocation.status',1, 2)
+    //     ->where('job_allocation.location_id', $location)
+    //     ->where('job_allocation.shiftid', $shift)
+    //     ->get();
+
+    //     $data = array(
+    //         'on_Time' => $onTime,
+    //         'off_Time' => $offTime,
+    //         'allocation' => $allocation,
+    //     );
+
+    //     return (new BaseController)->sendResponse($data, 'on_Time','off_Time','allocation');
+    // }
 }

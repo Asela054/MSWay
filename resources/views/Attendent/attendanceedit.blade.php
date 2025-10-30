@@ -11,7 +11,7 @@
                 <div class="page-header-content py-3 px-2">
                     <h1 class="page-header-title ">
                         <div class="page-header-icon"><i class="fa-light fa-calendar-pen"></i></div>
-                        <span>Attendance</span>
+                        <span>Attendance Add & Edit</span>
                     </h1>
                 </div>
             </div>
@@ -852,7 +852,26 @@
                                     existing_time_stamp_out_rfc_selector.val(value.lasttime_rfc);
                                 }
 
+                                 $('#in_' + date_no).on('change', function() {
+                                        checkForChanges(date_no.toString());
+                                    });
+                                    
+                                    $('#out_' + date_no).on('change', function() {
+                                        checkForChanges(date_no.toString());
+                                    });
+
                             });
+
+                            for (let i = 1; i <= num_of_days; i++) {
+                                    $('#in_' + i).on('change', function() {
+                                        checkForChanges(i.toString());
+                                    });
+                                    
+                                    $('#out_' + i).on('change', function() {
+                                        checkForChanges(i.toString());
+                                    });
+                                }
+
                             save_btn.html(btn_prev_text);
                             save_btn.prop("disabled", false);
 
@@ -894,6 +913,77 @@
 
             }
 
+            let changedRecords = [];
+
+            // Function to check for changes and highlight rows - optimized version
+            function checkForChanges(date_no) {
+                let in_selector = $('#in_' + date_no);
+                let out_selector = $('#out_' + date_no);
+                let existing_in = $('#existing_time_stamp_in_' + date_no).val();
+                let existing_out = $('#existing_time_stamp_out_' + date_no).val();
+                
+                let current_in = in_selector.val();
+                let current_out = out_selector.val();
+                
+                let row = $('#' + date_no);
+                
+                // Check if this specific row has changes
+                let hasChanged = false;
+                
+                if (existing_in === '' && existing_out === '') {
+                    // Both were empty, changed if any current value is filled
+                    hasChanged = (current_in !== '' || current_out !== '');
+                } else {
+                    // At least one existing value was filled
+                    // Changed if current values don't match existing values
+                    hasChanged = (current_in !== existing_in) || (current_out !== existing_out);
+                }
+                
+                if (hasChanged) {
+                    // Highlight the row
+                    row.css('background-color', '#f7c8c8');
+                    
+                    // Add to changed records array if not already present
+                    let existingRecord = changedRecords.find(record => record.date_no === date_no);
+                    if (!existingRecord) {
+                        changedRecords.push({
+                            date_no: date_no,
+                            date: $('#date_' + date_no).val(),
+                            emp_id: $('#emp_id_' + date_no).val(),
+                            uid: $('#uid_' + date_no).val(),
+                            old_in_time: existing_in,
+                            old_out_time: existing_out,
+                            new_in_time: current_in,
+                            new_out_time: current_out
+                        });
+                    } else {
+                        // Update existing record
+                        existingRecord.new_in_time = current_in;
+                        existingRecord.new_out_time = current_out;
+                    }
+                } else {
+                    // Remove highlighting if no changes
+                    row.css('background-color', '');
+                    
+                    // Remove from changed records
+                    changedRecords = changedRecords.filter(record => record.date_no !== date_no);
+                }
+                
+                console.log('Changed records:', changedRecords);
+            }
+
+            // Function to check ALL rows for changes (if needed)
+            function checkAllForChanges() {
+                changedRecords = []; // Reset the array
+                
+                for (let i = 1; i <= 31; i++) { // Adjust the upper limit as needed
+                    if ($('#in_' + i).length || $('#out_' + i).length) {
+                        checkForChanges(i.toString());
+                    }
+                }
+            }
+
+
             function tConvert (time) {
                 // Check correct time format and split into components
                 time = time.toString ().match (/^([01]\d|2[0-3])(:)([0-5]\d)(:[0-5]\d)?$/) || [time];
@@ -918,19 +1008,24 @@
 
             $('#formMonth').on('submit',function(e) {
                 e.preventDefault();
-                let formData = new FormData($('#formMonth')[0]);
+                
                 let url_text = '{{ url("/attendance_update_bulk_submit") }}';
-                $.ajaxSetup({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    }
-                })
+
+                    console.log('Submitting changed records:', changedRecords);
+
+               let formData = new FormData();
+               let emp = $('#employee_m').val(); // Get the employee ID from the form
+    
+                    formData.append('changed_records', JSON.stringify(changedRecords));
+                    formData.append('emp_id', emp); // Add employee ID to form data
+                    formData.append('_token', $('meta[name="csrf-token"]').attr('content'));
+
                 $.ajax({
                     url: url_text,
                     type: 'POST',
                     contentType: false,
-                    processData: false,
-                    data: formData,
+                processData: false,
+                data: formData,
                     success: function(res) {
                         if (res.status == 1) {
                              const actionObj = {
@@ -943,6 +1038,7 @@
                             };
                             const actionJSON = JSON.stringify(actionObj, null, 2);
                             $('#formMonth')[0].reset();
+                            changedRecords = [];
                             actionreload(actionJSON);
 
                         }else {

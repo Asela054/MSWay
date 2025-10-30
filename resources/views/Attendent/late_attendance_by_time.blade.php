@@ -477,55 +477,65 @@
                  $('#location').val(null).trigger('change');
              });
 
+             $('body').on('click', '#selectAll', function () {
+                 let isChecked = $(this).is(':checked');
+                 let table = $('#attendreporttable').DataTable();
+
+                 // Loop through all rows in the DataTable
+                 table.rows().every(function () {
+                     let row = this.node();
+                     let checkbox = $(row).find('.cb');
+
+                     // Only process checkboxes that are not already marked as late
+                     if (checkbox.length > 0 && !checkbox.closest('td').find('.fa-check').length) {
+                         if (isChecked) {
+                             // Check the checkbox
+                             checkbox.prop('checked', true);
+
+                             // Add to selected_cb array
+                             let b = {};
+                             b["id"] = checkbox.data('id');
+                             b["uid"] = checkbox.data('uid');
+                             b["emp_name_with_initial"] = checkbox.data('emp_name_with_initial');
+                             b["date"] = checkbox.data('date');
+                             b["timestamp"] = checkbox.data('timestamp');
+                             b["lasttimestamp"] = checkbox.data('lasttimestamp');
+                             b["workhours"] = checkbox.data('workhours');
+                             b["location_id"] = checkbox.data('location_id');
+                             b["dept_id"] = checkbox.data('dept_id');
+
+                             if (jQuery.inArray(b, selected_cb) === -1) {
+                                 selected_cb.push(b);
+                             }
+                             // Apply background color
+                             $(row).css('background-color', '#f7c8c8');
+                         } else {
+                             // Uncheck the checkbox
+                             checkbox.prop('checked', false);
+                             // Remove from selected_cb array by ID
+                             selected_cb = selected_cb.filter(item => item.id !== checkbox.data('id'));
+                             // Remove background color
+                             $(row).css('background-color', '');
+                         }
+                     }
+                 });
+             });
+
         });
-        $('body').on('click', '#selectAll', function () {
-            let isChecked = $(this).is(':checked');
-            let table = $('#attendreporttable').DataTable();
 
-            // Clear existing selection
-            selected_cb = [];
-
-            // Loop through all rows in the DataTable
-            table.rows().every(function () {
-                let row = this.node();
-                let checkbox = $(row).find('.cb');
-
-                // Only process checkboxes that are not already marked as late
-                if (checkbox.length > 0 && !checkbox.closest('td').find('.fa-check').length) {
-                    if (isChecked) {
-                        // Check the checkbox
-                        checkbox.prop('checked', true);
-
-                        // Add to selected_cb array
-                        let b = {};
-                        b["id"] = checkbox.data('id');
-                        b["uid"] = checkbox.data('uid');
-                        b["emp_name_with_initial"] = checkbox.data('emp_name_with_initial');
-                        b["date"] = checkbox.data('date');
-                        b["timestamp"] = checkbox.data('timestamp');
-                        b["lasttimestamp"] = checkbox.data('lasttimestamp');
-                        b["workhours"] = checkbox.data('workhours');
-                        b["location_id"] = checkbox.data('location_id');
-                        b["dept_id"] = checkbox.data('dept_id');
-
-                        if (jQuery.inArray(b, selected_cb) === -1) {
-                            selected_cb.push(b);
-                        }
-                        // Apply background color
-                        $(row).css('background-color', '#f7c8c8');
-                    } else {
-                        // Uncheck the checkbox
-                        checkbox.prop('checked', false);
-                        // Remove from selected_cb array by ID
-                        selected_cb = selected_cb.filter(item => item.id !== checkbox.data('id'));
-                        // Remove background color
-                        $(row).css('background-color', '');
+    
+        function removeA(arr, id) {
+                for (let i = 0; i < arr.length; i++) {
+                    if (arr[i].id === id) {
+                        arr.splice(i, 1);
+                        break;
                     }
                 }
-            });
-            // Update the select all checkbox state
-            $(this).prop('checked', isChecked);
-        });
+
+                // Also remove the background color from the unselected row
+                let selector = $('.cb[data-id="' + id + '"]');
+                selector.closest('tr').css('background-color', '');
+        }
 
          
     </script>

@@ -235,6 +235,7 @@ class LateAttendanceController extends Controller
 
         $selected_cb = $request->selected_cb;
 
+
         if (empty($selected_cb)) {
             return response()->json(['status' => false, 'msg' => 'Select one or more employees']);
         }
@@ -243,13 +244,36 @@ class LateAttendanceController extends Controller
         $data_arr = array();
         foreach ($selected_cb as $cr) {
 
-            if ($cr['lasttimestamp'] != '') {
+            // if ($cr['lasttimestamp'] != '') {
 
-                 $shiftType = DB::table('employees')
-                                ->join('shift_types', 'employees.emp_shift', '=', 'shift_types.id')
-                                ->select('shift_types.onduty_time')
-                                ->where('employees.emp_id', $cr['uid']) 
-                                ->first();
+
+            $empshift = DB::table('employees')
+            ->select('emp_id', 'emp_shift')
+            ->where('emp_id', $cr['uid'])
+            ->first();
+
+            if (is_null($empshift)) {
+                continue;
+            }
+
+             $emprosterinfo = DB::table('employee_roster_details')
+                    ->select('emp_id', 'shift_id')
+                    ->where('emp_id', $cr['uid'])
+                    ->where('work_date', $cr['date'])
+                    ->first();
+
+                if ($emprosterinfo) {
+                    $empshiftid = $emprosterinfo->shift_id;   
+                }
+                else {
+                    $empshiftid = $empshift->emp_shift; 
+                }
+
+            $shiftType = DB::table('shift_types')
+                ->select('shift_types.onduty_time')
+                 ->where('id', $empshiftid)
+                ->first();
+
 
 
                 if ($shiftType && $shiftType->onduty_time) {
@@ -291,7 +315,7 @@ class LateAttendanceController extends Controller
                     ->where('check_in_time', $cr['timestamp'])
                     ->where('check_out_time', $cr['lasttimestamp'])
                     ->delete();
-            }
+            // }
         }
 
         DB::table('employee_late_attendances')->insert($data_arr);
@@ -333,6 +357,7 @@ class LateAttendanceController extends Controller
         $latePolicyService = new LatePolicyService();
         $id_arr = array();
         $date = '';
+        $errors = [];
 
         foreach ($selected_cb as $cr) {
             $date = $cr['date'];
@@ -342,21 +367,30 @@ class LateAttendanceController extends Controller
             $emp_data = DB::table('employee_late_attendances')
                 ->find($cr['id']);
 
+        if (!$emp_data) {
+            $errors[] = "Record not found for ID: " . $cr['id'];
+            continue; // Skip to next iteration
+        }
+
             // Process late attendance using service
              $result = $latePolicyService->processLateAttendance($emp_data, $leave_type, $date);
 
-              if (!$result) {
-                    return response()->json([
-                        'status' => false, 
-                        'msg' => 'Employee ' . $emp_data->emp_id . ' does not have a job category assigned.'
-                    ]);
+                // Check if processing was successful
+                if (!$result) {
+                    return response()->json(['status' => false, 'msg' => "Employee " . $emp_data->emp_id . " does not have a proper job category assigned Or Late Type assigned."]);
                 }
+            
                 
           // Update late attendance as approved
             DB::table('employee_late_attendances')
                 ->where('id', $cr['id'])
                 ->update(['is_approved' => 1]);
         }
+
+         
+               return response()->json(['status' => true, 'msg' => 'Late Mark Completed successfully.']);
+            
+
 
         return response()->json(['status' => true, 'msg' => 'Late Mark Completed successfully.']);
     }
