@@ -49,7 +49,7 @@
                                     <thead>
                                         <tr>
                                             <th></th>
-                                            <th>ETF NO</th>
+                                            <th>EMP ID</th>
                                             <th>NAME</th>
                                             <th>DEPARTMENT</th>
                                             <th>DATE</th>
@@ -292,11 +292,11 @@
                 $('.checkbox_attendance:checked').each(function() {
                     let element = $(this);
 
-                    let etf_no = $(this).data('etf_no');
+                    let empid = $(this).data('empid');
                     let date = $(this).data('date');
 
                     checked.push({
-                        etf_no: etf_no,
+                        empid: empid,
                         date: date
                     });
                 });

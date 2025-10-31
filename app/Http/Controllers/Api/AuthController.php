@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
@@ -62,10 +63,70 @@ class AuthController extends Controller
             return (new BaseController)->sendError('Unauthorised', ['error' => 'Invalid Login']);
         }
 
+        $user = Auth::user();
+        
+        $employee = DB::table('employees')
+        ->leftJoin('job_categories', 'employees.job_category_id', '=', 'job_categories.id')
+        ->leftJoin('employment_statuses', 'employees.emp_status', '=', 'employment_statuses.id')
+        ->leftJoin('shift_types', 'employees.emp_shift', '=', 'shift_types.id')
+        ->leftJoin('job_titles', 'employees.emp_job_code', '=', 'job_titles.id')
+        ->leftJoin('departments', 'employees.emp_department', '=', 'departments.id')
+        ->where('employees.emp_id', $user->emp_id)
+        ->select(
+            'employees.id',
+            'employees.emp_id',
+            'employees.emp_etfno',
+            'employees.emp_name_with_initial',
+            'employees.calling_name',
+            'employees.emp_first_name',
+            'employees.emp_med_name',
+            'employees.emp_last_name',
+            'employees.emp_fullname',
+            'employees.emp_nick_name',
+            'employees.emp_birthday',
+            'employees.emp_gender',
+            'employees.emp_marital_status',
+            'employees.emp_nationality',
+            'employees.emp_salary_grade',
+            'employees.emp_join_date',
+            'employees.emp_permanent_date',
+            'employees.emp_assign_date',
+            'employees.emp_address',
+            'employees.emp_national_id',
+            'employees.emp_work_telephone',
+            'employees.emp_mobile',
+            'employees.emp_work_phone_no',
+            'employees.emp_email',
+            'employees.emp_home_no',
+            'employees.emp_city',
+            'employees.emp_province',
+            'employees.emp_country',
+            'employees.emp_postal_code',
+            'employees.emp_company',
+            'employees.factory_id',
+            'employees.job_category_id',
+            'employees.emp_location',
+            'employees.leave_approve_person',
+            'job_titles.title',
+            'employees.emp_department as department_id',
+            'departments.name as department_name',
+            'employment_statuses.emp_status',
+            'shift_types.shift_name',
+            'job_categories.category as job_category'
+        )
+        ->first();
+
+        if (!$employee) {
+            throw new \Exception("Employee not found with ID: " . $user->emp_id);
+        }
+
         $accessToken = Auth::user()->createToken('authToken')->accessToken;
 
-        $data = array(['user' => Auth::user(), 'api_key' => $accessToken]);
-
+        $data = [
+            'user' => Auth::user(),
+            'employee_details' => $employee,
+            'api_key' => $accessToken
+        ];
         return (new BaseController)->sendResponse($data, 'Login Success');
 
     }

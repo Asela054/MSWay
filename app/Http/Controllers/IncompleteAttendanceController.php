@@ -25,173 +25,357 @@ class IncompleteAttendanceController extends Controller
         return view('Attendent.incomplete_attendances');
     }
 
+    // public function get_incomplete_attendance_by_employee_data(Request $request)
+    // {
+    //     $user = Auth::user();
+    //     $permission = $user->can('incomplete-attendance-list');
+    //     if (!$permission) {
+    //         return response()->json(['error' => 'UnAuthorized'], 401);
+    //     }
+
+    //     $department = Request('department');
+    //     $employee = Request('employee');
+    //     $location = Request('location');
+    //     $from_date = Request('from_date');
+    //     $to_date = Request('to_date');
+
+    //     $dept_sql = "SELECT * FROM departments WHERE 1 = 1 ";
+
+    //     if ($department != '') {
+    //         $dept_sql .= ' AND id = "' . $department . '" ';
+    //     }
+
+    //     if ($location != '') {
+    //         $dept_sql .= 'AND company_id = "' . $location . '" ';
+    //     }
+
+    //     $departments = DB::select($dept_sql);
+
+    //     $data_arr = array();
+    //     $not_att_count = 0;
+
+    //     foreach ($departments as $department_) {
+
+    //         $query = DB::table('employees')
+    //             ->select(
+    //                 'employees.emp_id',
+    //                 'employees.emp_name_with_initial',
+    //                 'employees.calling_name',
+    //                 'employees.emp_etfno',
+    //                 'branches.location as b_location',
+    //                 'departments.name as dept_name',
+    //                 'departments.id as dept_id'
+    //             )
+    //             ->leftJoin('branches', 'employees.emp_location', '=', 'branches.id')
+    //             ->leftJoin('departments', 'employees.emp_department', '=', 'departments.id')
+    //             ->where('employees.deleted', 0)
+    //             ->where('employees.is_resigned', 0)
+    //             ->where('departments.id', $department_->id);
+
+    //         if ($employee != '') {
+    //             $query->where('employees.emp_id', $employee);
+    //         }
+    //         $employees = $query->orderBy('employees.emp_id', 'asc')->get();
+
+    //         foreach ($employees as $record) {
+    //             // Create employee object for the helper
+    //             $employeeObj = (object)[
+    //                 'emp_id' => $record->emp_id,
+    //                 'emp_name_with_initial' => $record->emp_name_with_initial,
+    //                 'calling_name' => $record->calling_name
+    //             ];
+
+    //             //dates of the month between from and to date
+    //             $period = CarbonPeriod::create($from_date, $to_date);
+
+    //             foreach ($period as $date) {
+    //                 $f_date = $date->format('Y-m-d');
+
+    //                 //check this is not a holiday
+    //                 $holiday_check = Holiday::where('date', $f_date)->first();
+
+    //                 if (empty($holiday_check)) {
+
+    //                     //check leaves from_date to date and emp_id is not a leave
+    //                     $leave_check = Leave::where('emp_id', $record->emp_id)
+    //                         ->where('leave_from', '<=', $f_date)
+    //                         ->where('leave_to', '>=', $f_date)->first();
+
+    //                     if (empty($leave_check)) {
+
+    //                     $sql = "SELECT * FROM attendances 
+    //                                         WHERE uid = '" . $record->emp_id . "' 
+    //                                         AND deleted_at IS NULL
+    //                                         AND date LIKE '" . $f_date . "%'
+    //                                         ORDER BY timestamp ASC";
+
+    //                         $attendances = DB::select($sql);
+
+    //                         if (!empty($attendances) && count($attendances) == 1) {
+    //                             $single_attendance = $attendances[0];
+
+    //                             $data_arr[$department_->id][$record->emp_id][$not_att_count]['emp_id'] = $record->emp_id;
+    //                             $data_arr[$department_->id][$record->emp_id][$not_att_count]['emp_name_with_initial'] = $record->emp_name_with_initial;
+    //                             $data_arr[$department_->id][$record->emp_id][$not_att_count]['calling_name'] = $record->calling_name;
+    //                             $data_arr[$department_->id][$record->emp_id][$not_att_count]['employee_display'] = EmployeeHelper::getDisplayName($employeeObj); // Added EmployeeHelper
+    //                             $data_arr[$department_->id][$record->emp_id][$not_att_count]['etf_no'] = $record->emp_etfno;
+    //                             $data_arr[$department_->id][$record->emp_id][$not_att_count]['b_location'] = $record->b_location;
+    //                             $data_arr[$department_->id][$record->emp_id][$not_att_count]['dept_name'] = $record->dept_name;
+    //                             $data_arr[$department_->id][$record->emp_id][$not_att_count]['dept_id'] = $record->dept_id;
+    //                             $data_arr[$department_->id][$record->emp_id][$not_att_count]['date'] = $f_date;
+    //                             $data_arr[$department_->id][$record->emp_id][$not_att_count]['timestamp'] = $single_attendance->timestamp;
+    //                             $data_arr[$department_->id][$record->emp_id][$not_att_count]['lasttimestamp'] = '-';
+    //                             $data_arr[$department_->id][$record->emp_id][$not_att_count]['workhours'] = '-';
+    //                             $data_arr[$department_->id][$record->emp_id][$not_att_count]['location'] = $record->b_location;
+
+    //                             $not_att_count++;
+    //                         }
+
+    //                     }// leave check if
+
+    //                 }//holiday if end
+
+    //             }// period loop
+
+    //         }//employees loop
+
+    //     }//departments loop
+
+    //     $department_id = 0;
+    //     $html = '';
+
+
+    //     foreach ($data_arr as $dept_key => $department_data) {
+
+    //         //if department_id is not equal to the previous department_id
+    //         if ($department_id != $dept_key) {
+    //             $department_id = $dept_key;
+    //             $department_name = Department::query()->where('id', $department_id)->first()->name;
+    //             $html .= '<tr>';
+    //             $html .= '<td colspan="9" style="background-color: #f5f5f5;"> <strong> ' . $department_name . '</strong> </td>';
+    //             $html .= '</tr>';
+    //         }
+
+    //         foreach ($department_data as $emp_data) {
+
+    //             foreach ($emp_data as $attendance) {
+
+    //                 $tr = '<tr>';
+
+    //                 $html .= $tr;
+    //                 $html .= '<td> <div class="custom-control">
+    //                             <input type="checkbox" class="custom-checkbox checkbox_attendance" name="checkbox[]" value="' . $attendance['etf_no'] . '"
+    //                                 data-etf_no="' . $attendance['etf_no'] . '" 
+    //                                 data-date = "' . $attendance['date'] . '" 
+    //                             /></div>
+    //                             </td>';
+
+    //                 $first_time = date('H:i', strtotime($attendance['timestamp']));
+    //                 $last_time = date('H:i', strtotime($attendance['lasttimestamp']));
+
+    //                 $html .= '<td>' . $attendance['etf_no'] . '</td>';
+    //                 $html .= '<td>' . $attendance['employee_display'] . '</td>'; // Changed to use employee_display
+    //                 $html .= '<td>' . $attendance['dept_name'] . '</td>';
+    //                 $html .= '<td>' . $attendance['date'] . '</td>';
+    //                 $html .= '<td>' . $first_time . '</td>';
+    //                 $html .= '<td>' . $last_time . '</td>';
+    //                 $html .= '<td>' . $attendance['workhours'] . '</td>';
+    //                 $html .= '<td>' . $attendance['location'] . '</td>';
+    //                 $html .= '</tr>';
+    //                 $department_id = $attendance['dept_id'];
+
+    //             }
+
+    //         }
+
+    //     }
+
+    //     echo $html;
+    // }
+
     public function get_incomplete_attendance_by_employee_data(Request $request)
-    {
-        $user = Auth::user();
-        $permission = $user->can('incomplete-attendance-list');
-        if (!$permission) {
-            return response()->json(['error' => 'UnAuthorized'], 401);
+{
+    $user = Auth::user();
+    $permission = $user->can('incomplete-attendance-list');
+    if (!$permission) {
+        return response()->json(['error' => 'UnAuthorized'], 401);
+    }
+
+    $department = Request('department');
+    $employee = Request('employee');
+    $location = Request('location');
+    $from_date = Request('from_date');
+    $to_date = Request('to_date');
+
+    $dept_sql = "SELECT * FROM departments WHERE 1 = 1 ";
+
+    if ($department != '') {
+        $dept_sql .= ' AND id = "' . $department . '" ';
+    }
+
+    if ($location != '') {
+        $dept_sql .= 'AND company_id = "' . $location . '" ';
+    }
+
+    $departments = DB::select($dept_sql);
+
+    $data_arr = array();
+    $not_att_count = 0;
+
+    foreach ($departments as $department_) {
+
+        $query = DB::table('employees')
+            ->select(
+                'employees.emp_id',
+                'employees.emp_name_with_initial',
+                'employees.calling_name',
+                'employees.emp_etfno',
+                'branches.location as b_location',
+                'departments.name as dept_name',
+                'departments.id as dept_id'
+            )
+            ->leftJoin('branches', 'employees.emp_location', '=', 'branches.id')
+            ->leftJoin('departments', 'employees.emp_department', '=', 'departments.id')
+            ->where('employees.deleted', 0)
+            ->where('employees.is_resigned', 0)
+            ->where('departments.id', $department_->id);
+
+        if ($employee != '') {
+            $query->where('employees.emp_id', $employee);
         }
+        $employees = $query->orderBy('employees.emp_id', 'asc')->get();
 
-        $department = Request('department');
-        $employee = Request('employee');
-        $location = Request('location');
-        $from_date = Request('from_date');
-        $to_date = Request('to_date');
+        foreach ($employees as $record) {
+            // Create employee object for the helper
+            $employeeObj = (object)[
+                'emp_id' => $record->emp_id,
+                'emp_name_with_initial' => $record->emp_name_with_initial,
+                'calling_name' => $record->calling_name
+            ];
 
-        $dept_sql = "SELECT * FROM departments WHERE 1 = 1 ";
+            //dates of the month between from and to date
+            $period = CarbonPeriod::create($from_date, $to_date);
 
-        if ($department != '') {
-            $dept_sql .= ' AND id = "' . $department . '" ';
-        }
+            foreach ($period as $date) {
+                $f_date = $date->format('Y-m-d');
 
-        if ($location != '') {
-            $dept_sql .= 'AND company_id = "' . $location . '" ';
-        }
+                //check this is not a holiday
+                $holiday_check = Holiday::where('date', $f_date)->first();
 
-        $departments = DB::select($dept_sql);
+                if (empty($holiday_check)) {
 
-        $data_arr = array();
-        $not_att_count = 0;
+                    //check leaves from_date to date and emp_id is not a leave
+                    $leave_check = Leave::where('emp_id', $record->emp_id)
+                        ->where('leave_from', '<=', $f_date)
+                        ->where('leave_to', '>=', $f_date)
+                        ->where('leave_type', '3') // No Pay Leave type
+                        ->where('status', 'Approved')
+                        ->first();
 
-        foreach ($departments as $department_) {
+                    // Check if already marked as no pay
+                    $is_marked_no_pay = !empty($leave_check);
 
-            $query = DB::table('employees')
-                ->select(
-                    'employees.emp_id',
-                    'employees.emp_name_with_initial',
-                    'employees.calling_name',
-                    'employees.emp_etfno',
-                    'branches.location as b_location',
-                    'departments.name as dept_name',
-                    'departments.id as dept_id'
-                )
-                ->leftJoin('branches', 'employees.emp_location', '=', 'branches.id')
-                ->leftJoin('departments', 'employees.emp_department', '=', 'departments.id')
-                ->where('employees.deleted', 0)
-                ->where('employees.is_resigned', 0)
-                ->where('departments.id', $department_->id);
-
-            if ($employee != '') {
-                $query->where('employees.emp_id', $employee);
-            }
-            $employees = $query->orderBy('employees.emp_id', 'asc')->get();
-
-            foreach ($employees as $record) {
-                // Create employee object for the helper
-                $employeeObj = (object)[
-                    'emp_id' => $record->emp_id,
-                    'emp_name_with_initial' => $record->emp_name_with_initial,
-                    'calling_name' => $record->calling_name
-                ];
-
-                //dates of the month between from and to date
-                $period = CarbonPeriod::create($from_date, $to_date);
-
-                foreach ($period as $date) {
-                    $f_date = $date->format('Y-m-d');
-
-                    //check this is not a holiday
-                    $holiday_check = Holiday::where('date', $f_date)->first();
-
-                    if (empty($holiday_check)) {
-
-                        //check leaves from_date to date and emp_id is not a leave
-                        $leave_check = Leave::where('emp_id', $record->emp_id)
-                            ->where('leave_from', '<=', $f_date)
-                            ->where('leave_to', '>=', $f_date)->first();
-
-                        if (empty($leave_check)) {
+                    if (empty($leave_check) || !$is_marked_no_pay) {
 
                         $sql = "SELECT * FROM attendances 
-                                            WHERE uid = '" . $record->emp_id . "' 
-                                            AND deleted_at IS NULL
-                                            AND date LIKE '" . $f_date . "%'
-                                            ORDER BY timestamp ASC";
+                                        WHERE uid = '" . $record->emp_id . "' 
+                                        AND deleted_at IS NULL
+                                        AND date LIKE '" . $f_date . "%'
+                                        ORDER BY timestamp ASC";
 
-                            $attendances = DB::select($sql);
+                        $attendances = DB::select($sql);
 
-                            if (!empty($attendances) && count($attendances) == 1) {
-                                $single_attendance = $attendances[0];
+                        if (!empty($attendances) && count($attendances) == 1) {
+                            $single_attendance = $attendances[0];
 
-                                $data_arr[$department_->id][$record->emp_id][$not_att_count]['emp_id'] = $record->emp_id;
-                                $data_arr[$department_->id][$record->emp_id][$not_att_count]['emp_name_with_initial'] = $record->emp_name_with_initial;
-                                $data_arr[$department_->id][$record->emp_id][$not_att_count]['calling_name'] = $record->calling_name;
-                                $data_arr[$department_->id][$record->emp_id][$not_att_count]['employee_display'] = EmployeeHelper::getDisplayName($employeeObj); // Added EmployeeHelper
-                                $data_arr[$department_->id][$record->emp_id][$not_att_count]['etf_no'] = $record->emp_etfno;
-                                $data_arr[$department_->id][$record->emp_id][$not_att_count]['b_location'] = $record->b_location;
-                                $data_arr[$department_->id][$record->emp_id][$not_att_count]['dept_name'] = $record->dept_name;
-                                $data_arr[$department_->id][$record->emp_id][$not_att_count]['dept_id'] = $record->dept_id;
-                                $data_arr[$department_->id][$record->emp_id][$not_att_count]['date'] = $f_date;
-                                $data_arr[$department_->id][$record->emp_id][$not_att_count]['timestamp'] = $single_attendance->timestamp;
-                                $data_arr[$department_->id][$record->emp_id][$not_att_count]['lasttimestamp'] = '-';
-                                $data_arr[$department_->id][$record->emp_id][$not_att_count]['workhours'] = '-';
-                                $data_arr[$department_->id][$record->emp_id][$not_att_count]['location'] = $record->b_location;
+                            $data_arr[$department_->id][$record->emp_id][$not_att_count]['emp_id'] = $record->emp_id;
+                            $data_arr[$department_->id][$record->emp_id][$not_att_count]['emp_name_with_initial'] = $record->emp_name_with_initial;
+                            $data_arr[$department_->id][$record->emp_id][$not_att_count]['calling_name'] = $record->calling_name;
+                            $data_arr[$department_->id][$record->emp_id][$not_att_count]['employee_display'] = EmployeeHelper::getDisplayName($employeeObj); // Added EmployeeHelper
+                            $data_arr[$department_->id][$record->emp_id][$not_att_count]['etf_no'] = $record->emp_etfno;
+                            $data_arr[$department_->id][$record->emp_id][$not_att_count]['b_location'] = $record->b_location;
+                            $data_arr[$department_->id][$record->emp_id][$not_att_count]['dept_name'] = $record->dept_name;
+                            $data_arr[$department_->id][$record->emp_id][$not_att_count]['dept_id'] = $record->dept_id;
+                            $data_arr[$department_->id][$record->emp_id][$not_att_count]['date'] = $f_date;
+                            $data_arr[$department_->id][$record->emp_id][$not_att_count]['timestamp'] = $single_attendance->timestamp;
+                            $data_arr[$department_->id][$record->emp_id][$not_att_count]['lasttimestamp'] = '-';
+                            $data_arr[$department_->id][$record->emp_id][$not_att_count]['workhours'] = '-';
+                            $data_arr[$department_->id][$record->emp_id][$not_att_count]['location'] = $record->b_location;
+                            $data_arr[$department_->id][$record->emp_id][$not_att_count]['is_marked_no_pay'] = $is_marked_no_pay;
 
-                                $not_att_count++;
-                            }
+                            $not_att_count++;
+                        }
 
-                        }// leave check if
+                    }// leave check if
 
-                    }//holiday if end
+                }//holiday if end
 
-                }// period loop
+            }// period loop
 
-            }//employees loop
+        }//employees loop
 
-        }//departments loop
+    }//departments loop
 
-        $department_id = 0;
-        $html = '';
+    $department_id = 0;
+    $html = '';
 
+    foreach ($data_arr as $dept_key => $department_data) {
 
-        foreach ($data_arr as $dept_key => $department_data) {
+        //if department_id is not equal to the previous department_id
+        if ($department_id != $dept_key) {
+            $department_id = $dept_key;
+            $department_name = Department::query()->where('id', $department_id)->first()->name;
+            $html .= '<tr>';
+            $html .= '<td colspan="9" style="background-color: #f5f5f5;"> <strong> ' . $department_name . '</strong> </td>';
+            $html .= '</tr>';
+        }
 
-            //if department_id is not equal to the previous department_id
-            if ($department_id != $dept_key) {
-                $department_id = $dept_key;
-                $department_name = Department::query()->where('id', $department_id)->first()->name;
-                $html .= '<tr>';
-                $html .= '<td colspan="9" style="background-color: #f5f5f5;"> <strong> ' . $department_name . '</strong> </td>';
-                $html .= '</tr>';
-            }
+        foreach ($department_data as $emp_data) {
 
-            foreach ($department_data as $emp_data) {
+            foreach ($emp_data as $attendance) {
 
-                foreach ($emp_data as $attendance) {
+                $tr = '<tr>';
 
-                    $tr = '<tr>';
-
-                    $html .= $tr;
+                $html .= $tr;
+                
+                // Check if already marked as no pay and show tick instead of checkbox
+                if ($attendance['is_marked_no_pay']) {
                     $html .= '<td> <div class="custom-control">
-                                <input type="checkbox" class="custom-checkbox checkbox_attendance" name="checkbox[]" value="' . $attendance['etf_no'] . '"
-                                    data-etf_no="' . $attendance['etf_no'] . '" 
+                                <span class="text-success">✓</span>
+                                </div>
+                                </td>';
+                } else {
+                    $html .= '<td> <div class="custom-control">
+                                <input type="checkbox" class="custom-checkbox checkbox_attendance" name="checkbox[]" value="' . $attendance['emp_id'] . '"
+                                    data-empid="' . $attendance['emp_id'] . '" 
                                     data-date = "' . $attendance['date'] . '" 
                                 /></div>
                                 </td>';
-
-                    $first_time = date('H:i', strtotime($attendance['timestamp']));
-                    $last_time = date('H:i', strtotime($attendance['lasttimestamp']));
-
-                    $html .= '<td>' . $attendance['etf_no'] . '</td>';
-                    $html .= '<td>' . $attendance['employee_display'] . '</td>'; // Changed to use employee_display
-                    $html .= '<td>' . $attendance['dept_name'] . '</td>';
-                    $html .= '<td>' . $attendance['date'] . '</td>';
-                    $html .= '<td>' . $first_time . '</td>';
-                    $html .= '<td>' . $last_time . '</td>';
-                    $html .= '<td>' . $attendance['workhours'] . '</td>';
-                    $html .= '<td>' . $attendance['location'] . '</td>';
-                    $html .= '</tr>';
-                    $department_id = $attendance['dept_id'];
-
                 }
+
+                $first_time = date('H:i', strtotime($attendance['timestamp']));
+                $last_time = date('H:i', strtotime($attendance['lasttimestamp']));
+
+                $html .= '<td>' . $attendance['emp_id'] . '</td>';
+                $html .= '<td>' . $attendance['employee_display'] . '</td>'; // Changed to use employee_display
+                $html .= '<td>' . $attendance['dept_name'] . '</td>';
+                $html .= '<td>' . $attendance['date'] . '</td>';
+                $html .= '<td>' . $first_time . '</td>';
+                $html .= '<td>' . $last_time . '</td>';
+                $html .= '<td>' . $attendance['workhours'] . '</td>';
+                $html .= '<td>' . $attendance['location'] . '</td>';
+                $html .= '</tr>';
+                $department_id = $attendance['dept_id'];
 
             }
 
         }
 
-        echo $html;
     }
+
+    echo $html;
+}
+
 
       public function mark_as_no_pay(Request $request)
     {
@@ -207,7 +391,7 @@ class IncompleteAttendanceController extends Controller
         foreach ($checked as $ch) {
 
             $data = array(
-                'emp_id' => $ch['etf_no'],
+                'emp_id' => $ch['empid'],
                 'leave_type' => '3',
                 'leave_from' => $ch['date'],
                 'leave_to' => $ch['date'],

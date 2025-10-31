@@ -24,33 +24,35 @@
                 <div class="card-body p-0 p-2 ">
                      <div class="row">
                         <div class="col-md-12">
+
                             <div class="row align-items-center mb-4">
-                                <div class="col-md-6 mb-2">
+                                <div class="col-md-12">
+                                    <button class="btn btn-warning btn-sm filter-btn float-right px-3" type="button"
+                                        data-toggle="offcanvas" data-target="#offcanvasRight"
+                                        aria-controls="offcanvasRight"><i class="fas fa-filter mr-1"></i> Filter
+                                        Records</button>
+                                </div>
+                                 <div class="col-12">
+                                    <hr class="border-dark">
+                                </div>
+                                <div class="col-6 mb-2">
                                     <div class="form-check">
                                         <input type="checkbox" class="form-check-input checkallocate" id="selectAll">
                                         <label class="form-check-label" for="selectAll">Select All Records</label>
                                     </div>
                                 </div>
-                                <div class="col-md-6 text-right">
-                                    <button id="approve" class="btn btn-primary float-right mt-2 btn-sm px-3"><i class="fa-light fa-light fa-clipboard-check"></i>&nbsp; Approve Late Attendance</button>
+                                <div class="col-6 text-right">
+                                     <button id="approve" class="btn btn-primary float-right mt-2 btn-sm px-3"><i class="fa-light fa-light fa-clipboard-check"></i>&nbsp; Approve Late Attendance</button>
                                 </div>
                             </div>
-                            <div class="col-12">
-                                <hr class="border-dark">
-                            </div>
-                            <div class="col-md-12">
-                                <button class="btn btn-warning btn-sm filter-btn float-right px-3" type="button"
-                                    data-toggle="offcanvas" data-target="#offcanvasRight"
-                                    aria-controls="offcanvasRight"><i class="fas fa-filter mr-1"></i> Filter
-                                    Options</button>
-                            </div><br><br>
+                           
                             <div class="center-block fix-width scroll-inner">
                                 <table class="table table-striped table-bordered table-sm small nowrap w-100"
                                     id="attendreporttable">
                                     <thead>
                                         <tr>
                                             <th></th>
-                                            <th>ID</th>
+                                            <th>EMP ID</th>
                                             <th>EMPLOYEE</th>
                                             <th>DATE</th>
                                             <th>CHECK IN TIME</th>
@@ -266,7 +268,7 @@
                                 }
                                 return data;
                             }},
-                        {data: 'id'},
+                        {data: 'emp_id'},
                         {data: 'employee_display'},
                         {data: 'date'},
                         {data: 'check_in_time'},
@@ -286,7 +288,7 @@
                         }
                     ],
                     "bDestroy": true,
-                    "order": [[1, "asc"]],
+                    "order": [[3, "desc"]],
 
                     "drawCallback": function( settings ) {
                         check_changed_text_boxes();

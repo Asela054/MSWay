@@ -15,7 +15,7 @@
          
             <li><a class="dropdown-item" href="{{ route('Attendance')}}">Attendance Sync</a></li>
          
-            <li><a class="dropdown-item" href="{{ route('AttendanceEdit')}}">Attendance</a></li>
+            <li><a class="dropdown-item" href="{{ route('AttendanceEdit')}}">Attendance Add & Edit</a></li>
         
           {{-- @if($user->can('attendance-edit'))
             <li><a class="dropdown-item" href="{{ route('AttendanceEditBulk')}}">Attendance Edit</a></li>
