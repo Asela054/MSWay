@@ -31,27 +31,6 @@ class TrainingAllocationController extends Controller
         return view('Training_Management.trainingAllocation',compact('trainingtype'));
     }
 
-    public function getData(Request $request)
-    {
-        if ($request->ajax()) {
-            $data = TrainingAllocation::orderBy('id', 'desc')
-                ->leftjoin('training_types', 'training_allocations.type_id', '=', 'training_types.id')
-                ->select('training_allocations.*', 'training_types.name as training_type')
-                ->where('training_allocations.status', 1)
-                ->get();
-
-            return Datatables::of($data)
-                ->addColumn('action', function($row){
-                    $btn = '<a href="'.route('TrainEmpShow', $row->id).'" class="Employee btn btn-info btn-sm"><i class="fas fa-users"></i></a> ';
-                    $btn .= '<button name="edit" id="'.$row->id.'" class="edit btn btn-primary btn-sm" type="submit"><i class="fas fa-pencil-alt"></i></button> ';
-                    $btn .= '<button type="submit" name="delete" id="'.$row->id.'" class="delete btn btn-danger btn-sm"><i class="far fa-trash-alt"></i></button>';
-                    return $btn;
-                })
-                ->rawColumns(['action'])
-                ->make(true);
-        }
-    }
-
     public function store(Request $request)
     {
         $user = auth()->user();
@@ -68,13 +47,6 @@ class TrainingAllocationController extends Controller
         {
             return response()->json(['errors' => $error->errors()->all()]);
         }
-
-        $form_data = array(
-            'type'   =>  $request->type,
-            'venue'   =>  $request->venue,
-            'start_time'   =>  $request->start_time,
-            'end_time'   =>  $request->end_time
-        );
 
         $allocation = new TrainingAllocation;
         $allocation->type_id = $request->type;
