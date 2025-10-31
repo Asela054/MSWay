@@ -164,7 +164,83 @@ class LocationAttendanceController extends Controller
         return (new BaseController)->sendResponse($data, 'employeelocation');
     }
 
-    
+     public function Insertsinglelocationattendance(Request $request)
+    {
+        $location = $request->input('location_id');
+        $empid = $request->input('emp_id');
+        $timestamp = $request->input('timestamp');
+        $location_status = $request->input('location_status');
+
+        if($location_status == 1){
+
+        $attendance = new Jobattendance();
+        $attendance->attendance_date = $attendancedate;
+        $attendance->employee_id = $empid;
+        $attendance->shift_id = null;
+        $attendance->on_time = $on_time;
+        $attendance->off_time = $off_time;
+        $attendance->reason = $reason;
+        $attendance->location_id = $location;
+        $attendance->allocation_id = null;
+        $attendance->status = '1';
+        $attendance->location_status = '1';
+        $attendance->approve_status = '1';
+        $attendance->created_by = $userID;
+        $attendance->updated_by = '0';
+        $attendance->save();
+
+
+        $data = array(
+            'emp_id' =>  $empid,
+            'uid' =>  $empid,
+            'state' => 1,
+            'timestamp' => $on_time,
+            'date' => $attendancedate,
+            'approved' => 0,
+            'type' => 255,
+            'devicesno' => '-',
+            'location' => $location
+        );
+         DB::table('attendances')->insert($data);
+
+        //off time
+        $data = array(
+            'emp_id' => $empid,
+            'uid' => $empid,
+            'state' => 1,
+            'timestamp' => $off_time,
+            'date' => $attendancedate,
+            'approved' => 0,
+            'type' => 255,
+            'devicesno' => '-',
+            'location' => $location
+        );
+        DB::table('attendances')->insert($data);
+
+        }else{
+
+        $attendance = new Jobattendance();
+        $attendance->attendance_date = $attendancedate;
+        $attendance->employee_id = $empid;
+        $attendance->shift_id = null;
+        $attendance->on_time = $on_time;
+        $attendance->off_time = $off_time;
+        $attendance->reason = $reason;
+        $attendance->location_id = $location;
+        $attendance->allocation_id = null;
+        $attendance->status = '1';
+        $attendance->location_status = '2';
+        $attendance->approve_status = '0';
+        $attendance->created_by = $userID;
+        $attendance->updated_by = '0';
+        $attendance->save();
+        }
+        
+        return (new BaseController)->sendResponse($attendance, 'Location Attendance Added Successfully');
+    }
+
+
+
 
     //    public function GetLocationEmployees(Request $request)
     // {
