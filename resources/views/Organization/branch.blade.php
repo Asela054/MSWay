@@ -22,7 +22,7 @@
                 <div class="row">
                     <div class="col-12">
                        
-                        <button type="button" class="btn btn-primary btn-sm fa-pull-right" name="create_record" id="create_record"><i class="fas fa-plus mr-2"></i>Add Location</button>
+                        <button type="button" class="btn btn-primary btn-sm fa-pull-right" name="create_record" id="create_record"><i class="fas fa-plus mr-2"></i>Add Branch</button>
                         
                     </div>
                     <div class="col-12">
@@ -57,7 +57,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header p-2">
-                    <h5 class="modal-title" id="staticBackdropLabel">Add Location</h5>
+                    <h5 class="modal-title" id="staticBackdropLabel">Add Branch</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -255,7 +255,7 @@ $(document).ready(function(){
     });
 
     $('#create_record').click(function(){
-        $('.modal-title').text('Add New Location');
+        $('.modal-title').text('Add New Branch');
         $('#action_button').html('Add');
         $('#action').val('Add');
         $('#form_result').html('');
@@ -333,7 +333,7 @@ $(document).ready(function(){
                         $('#outside_location').prop('checked', false);
                     }
                     $('#hidden_id').val(id);
-                    $('.modal-title').text('Edit Location');
+                    $('.modal-title').text('Edit Branch');
                     $('#action_button').html('Edit');
                     $('#action').val('Edit');
                     $('#formModal').modal('show');
