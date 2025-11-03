@@ -22,19 +22,19 @@
                 <div class="card-body p-0 p-2">
                     <div class="row">
                         <div class="col-12">
-                            <button type="button" class="btn btn-primary btn-sm fa-pull-right"
-                                    name="create_record" id="create_record"><i class="fas fa-plus mr-2"></i>Add Leave
-                            </button>
+                            <button class="btn btn-warning btn-sm filter-btn float-right px-3" type="button"
+                                data-toggle="offcanvas" data-target="#offcanvasRight" aria-controls="offcanvasRight"><i
+                                    class="fas fa-filter mr-1"></i> Filter
+                                Options</button>
                         </div>
                         <div class="col-12">
                             <hr class="border-dark">
                         </div>
                          <div class="col-md-12">
-                                    <button class="btn btn-warning btn-sm filter-btn float-right px-3" type="button"
-                                        data-toggle="offcanvas" data-target="#offcanvasRight"
-                                        aria-controls="offcanvasRight"><i class="fas fa-filter mr-1"></i> Filter
-                                        Options</button>
-                                </div><br><br>
+                             <button type="button" class="btn btn-primary btn-sm fa-pull-right" name="create_record"
+                                 id="create_record"><i class="fas fa-plus mr-2"></i>Add Leave
+                             </button>
+                         </div><br><br>
 
                         <div class="col-12">
                             <div class="center-block fix-width scroll-inner">
@@ -526,7 +526,7 @@
                 let from_date = $('#fromdate').val();
                 let to_date = $('#todate').val();
                 let half_short = $('#half_short').val() || 0;
-                let empid = $('#employee').val();
+                let empid = $('#employee_f').val();
                 
                 if (from_date && to_date) {
                     $.ajax({
