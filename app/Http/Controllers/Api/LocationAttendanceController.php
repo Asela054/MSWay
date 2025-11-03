@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
+use DateTime;
 
 class LocationAttendanceController extends Controller
 {
@@ -164,121 +165,143 @@ class LocationAttendanceController extends Controller
         return (new BaseController)->sendResponse($data, 'employeelocation');
     }
 
-     public function Insertsinglelocationattendance(Request $request)
+    public function Getattendanceshift(Request $request)
+    {
+
+         $empid = $request->input('empid');
+         $date = $request->input('date');
+
+        $attendanceinsertstatus = 1 ;
+         $attendancedate =  $date;
+
+         $empshift = DB::table('employees')
+            ->select('emp_id', 'emp_shift')
+            ->where('emp_id', $empid)
+            ->first();
+
+            if ($empshift) {
+              
+                $emprosterinfo = DB::table('employee_roster_details')
+                    ->select('emp_id', 'shift_id')
+                    ->where('emp_id', $empid)
+                    ->where('work_date', $date)
+                    ->first();
+
+                if ($emprosterinfo) {
+                    $empshiftid = $emprosterinfo->shift_id;   
+                }
+                else {
+                    $empshiftid = $empshift->emp_shift; 
+                }
+
+                   $shift = DB::table('shift_types')
+                        ->where('id', $empshiftid)
+                        ->first();
+
+                   if ($shift && $shift->off_next_day == '1') {
+                    $previous_day = (new DateTime($date))->modify('-1 day')->format('Y-m-d');
+
+                    $attendancecheckinfo = DB::table('job_attendance')
+                        ->select('*')
+                        ->where('employee_id', $empid)
+                        ->where('attendance_date', $previous_day)
+                        ->where('shift_id', $empshiftid)
+                        ->first();
+
+
+                         if ($attendancecheckinfo && $attendancecheckinfo->on_time != '' && $attendancecheckinfo->off_time == '') {
+
+                            $attendanceinsertstatus = 2 ;
+                            $attendancedate = $previous_day;
+                         }else{
+                             $attendanceinsertstatus = 1 ;
+
+                         }
+
+                    }else{
+
+                          $attendancecheckinfo = DB::table('job_attendance')
+                        ->select('*')
+                        ->where('employee_id', $empid)
+                        ->where('attendance_date', $date)
+                        ->where('shift_id', $empshiftid)
+                        ->first();
+
+
+                         if ($attendancecheckinfo && $attendancecheckinfo->on_time != '' && $attendancecheckinfo->off_time == '') {
+
+                            $attendanceinsertstatus = 2 ;
+                         }else{
+                             $attendanceinsertstatus = 1 ;
+                         }
+                    }
+
+                      $data = array(
+                            'attendaceshift' => $empshiftid,
+                            'attendancedate' => $attendancedate,
+                            'attendanceinserttype' => $attendanceinsertstatus
+                        );
+            }
+
+        return (new BaseController)->sendResponse($data, 'attendaceshift','attendancedate','attendanceinserttype');
+
+    }
+
+
+      public function Singlelocationattendanceinsert(Request $request)
     {
         $location = $request->input('location_id');
         $empid = $request->input('emp_id');
         $timestamp = $request->input('timestamp');
         $location_status = $request->input('location_status');
+        $attendaceshift = $request->input('attendaceshift');
+        $attendancedate = $request->input('attendancedate');
+        $attendanceinserttype = $request->input('attendanceinserttype');
 
-        if($location_status == 1){
+        if($attendanceinserttype == 1){
 
         $attendance = new Jobattendance();
         $attendance->attendance_date = $attendancedate;
         $attendance->employee_id = $empid;
-        $attendance->shift_id = null;
-        $attendance->on_time = $on_time;
-        $attendance->off_time = $off_time;
-        $attendance->reason = $reason;
+        $attendance->shift_id =  $attendaceshift;
+        $attendance->on_time = $timestamp;
+        $attendance->off_time = null;
+        $attendance->reason = null;
         $attendance->location_id = $location;
         $attendance->allocation_id = null;
         $attendance->status = '1';
         $attendance->location_status = '1';
-        $attendance->approve_status = '1';
-        $attendance->created_by = $userID;
+        $attendance->approve_status = '0';
+        $attendance->created_by = $empid;
         $attendance->updated_by = '0';
         $attendance->save();
-
-
-        $data = array(
-            'emp_id' =>  $empid,
-            'uid' =>  $empid,
-            'state' => 1,
-            'timestamp' => $on_time,
-            'date' => $attendancedate,
-            'approved' => 0,
-            'type' => 255,
-            'devicesno' => '-',
-            'location' => $location
-        );
-         DB::table('attendances')->insert($data);
-
-        //off time
-        $data = array(
-            'emp_id' => $empid,
-            'uid' => $empid,
-            'state' => 1,
-            'timestamp' => $off_time,
-            'date' => $attendancedate,
-            'approved' => 0,
-            'type' => 255,
-            'devicesno' => '-',
-            'location' => $location
-        );
-        DB::table('attendances')->insert($data);
 
         }else{
 
-        $attendance = new Jobattendance();
-        $attendance->attendance_date = $attendancedate;
-        $attendance->employee_id = $empid;
-        $attendance->shift_id = null;
-        $attendance->on_time = $on_time;
-        $attendance->off_time = $off_time;
-        $attendance->reason = $reason;
-        $attendance->location_id = $location;
-        $attendance->allocation_id = null;
-        $attendance->status = '1';
-        $attendance->location_status = '2';
-        $attendance->approve_status = '0';
-        $attendance->created_by = $userID;
-        $attendance->updated_by = '0';
-        $attendance->save();
+              $attendance = DB::table('job_attendance')
+                        ->select('*')
+                        ->where('employee_id', $empid)
+                        ->where('attendance_date', $attendancedate)
+                        ->where('shift_id', $attendaceshift)
+                        ->first();
+
+               if ($attendance) {
+
+                    DB::table('job_attendance')
+                        ->where('employee_id', $empid)
+                        ->where('attendance_date', $attendancedate)
+                        ->where('shift_id', $attendaceshift)
+                        ->whereNull('off_time')
+                        ->update([
+                            'off_time' => $timestamp,
+                            'updated_by' => $empid
+                        ]);
+               }
+
         }
         
         return (new BaseController)->sendResponse($attendance, 'Location Attendance Added Successfully');
     }
 
 
-
-
-    //    public function GetLocationEmployees(Request $request)
-    // {
-
-    //     $location = $request->input('selectedlocation');
-    //     $shift = $request->input('shift');
-    //     $attendancedate = $request->input('attendancedate');
-
-    //     $shifts = DB::table('shift_types')
-    //     ->select('shift_types.*')
-    //     ->where('shift_types.id','=', $shift)
-    //     ->get(); 
-
-    //     $todayTimedate = Carbon::parse($attendancedate)->format('Y-m-d');
-
-    //     $onTime = Carbon::parse($attendancedate)
-    //         ->setTimeFromTimeString($shifts[0]->onduty_time)
-    //         ->format('Y-m-d H:i:s');
-
-    //     $offTime = Carbon::parse($attendancedate)
-    //         ->setTimeFromTimeString($shifts[0]->offduty_time)
-    //         ->format('Y-m-d H:i:s');
-
-    //     $allocation = DB::table('job_allocation')
-    //     ->leftjoin('employees', 'job_allocation.employee_id', '=', 'employees.id')
-    //     ->leftjoin('shift_types', 'job_allocation.shiftid', '=', 'shift_types.id')
-    //     ->select('job_allocation.*','job_allocation.id As allocationid','employees.emp_name_with_initial As emp_name')
-    //     ->where('job_allocation.status',1, 2)
-    //     ->where('job_allocation.location_id', $location)
-    //     ->where('job_allocation.shiftid', $shift)
-    //     ->get();
-
-    //     $data = array(
-    //         'on_Time' => $onTime,
-    //         'off_Time' => $offTime,
-    //         'allocation' => $allocation,
-    //     );
-
-    //     return (new BaseController)->sendResponse($data, 'on_Time','off_Time','allocation');
-    // }
 }

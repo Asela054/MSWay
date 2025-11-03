@@ -1655,6 +1655,7 @@ private function processAttendanceRecord($cr)
                     }  
                 }
 
+                
                 if($date == $date_input){
                     $Attendance = Attendance::firstOrNew(['timestamp' => $timestamp, 'emp_id' => $full_emp_id]);
                     $Attendance->uid = $full_emp_id;
@@ -1664,6 +1665,7 @@ private function processAttendanceRecord($cr)
                     $Attendance->location = 1;
                     $is_ok = $Attendance->save();
                 }           
+
 
         }
         

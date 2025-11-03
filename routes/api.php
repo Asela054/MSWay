@@ -79,12 +79,6 @@ Route::middleware('auth:api')->group(function () {
     Route::post('v1/GetLeavesList', ['uses' => '\App\Http\Controllers\Api\MainController@GetLeavesList', 'as' => 'GetLeavesList']);
     Route::post('v1/GetLeaveBalance', ['uses' => '\App\Http\Controllers\Api\MainController@GetLeaveBalance', 'as' => 'GetLeaveBalance']);
     Route::post('v1/ApplyLeave', ['uses' => '\App\Http\Controllers\Api\MainController@ApplyLeave', 'as' => 'ApplyLeave']);
-    Route::post('v1/GetLocations', ['uses' => '\App\Http\Controllers\Api\LocationAttendanceController@GetLocations', 'as' => 'GetLocations']);
-    Route::post('v1/GetShiftType', ['uses' => '\App\Http\Controllers\Api\LocationAttendanceController@GetShiftType', 'as' => 'GetShiftType']);
-    Route::post('v1/GetLocationEmployees', ['uses' => '\App\Http\Controllers\Api\LocationAttendanceController@GetLocationEmployees', 'as' => 'GetLocationEmployees']);
-    Route::post('v1/Insertlocationattendance', ['uses' => '\App\Http\Controllers\Api\LocationAttendanceController@Insertlocationattendance', 'as' => 'Insertlocationattendance']);
-    Route::post('v1/Getlocationpoint', ['uses' => '\App\Http\Controllers\Api\LocationAttendanceController@Getlocationpoint', 'as' => 'Getlocationpoint']);
-
     Route::post('v1/GetEmployees', ['uses' => '\App\Http\Controllers\Api\MainController@Getemployees', 'as' => 'GetEmployees']);
     Route::post('v1/GetApplyLeavelist', ['uses' => '\App\Http\Controllers\Api\MainController@GetApplyLeavelist', 'as' => 'GetApplyLeavelist']);
 
@@ -99,3 +93,14 @@ Route::middleware('auth:api')->group(function () {
 Route::post('v1/gettimesheet', ['uses' => '\App\Http\Controllers\Api\V1MainController@attendance_list_for_month_edit', 'as' => 'gettimesheet']); 
 Route::post('v1/Leaverequestdetails', ['uses' => '\App\Http\Controllers\Api\V1MainController@getemployeeleaverequest', 'as' => 'Leaverequestdetails']); 
 Route::post('v1/GetApprovepersons', ['uses' => '\App\Http\Controllers\Api\V1MainController@Getapprovepersons', 'as' => 'GetApprovepersons']);
+
+Route::post('v1/GetLocations', ['uses' => '\App\Http\Controllers\Api\LocationAttendanceController@GetLocations', 'as' => 'GetLocations']);
+Route::post('v1/GetShiftType', ['uses' => '\App\Http\Controllers\Api\LocationAttendanceController@GetShiftType', 'as' => 'GetShiftType']);
+Route::post('v1/GetLocationEmployees', ['uses' => '\App\Http\Controllers\Api\LocationAttendanceController@GetLocationEmployees', 'as' => 'GetLocationEmployees']);
+Route::post('v1/Insertlocationattendance', ['uses' => '\App\Http\Controllers\Api\LocationAttendanceController@Insertlocationattendance', 'as' => 'Insertlocationattendance']);
+Route::post('v1/Getlocationpoint', ['uses' => '\App\Http\Controllers\Api\LocationAttendanceController@Getlocationpoint', 'as' => 'Getlocationpoint']);
+Route::post('v1/Getattendanceshift', ['uses' => '\App\Http\Controllers\Api\LocationAttendanceController@Getattendanceshift', 'as' => 'Getattendanceshift']);
+Route::post('v1/Singlelocationattendanceinsert', ['uses' => '\App\Http\Controllers\Api\LocationAttendanceController@Singlelocationattendanceinsert', 'as' => 'Singlelocationattendanceinsert']);
+
+
+

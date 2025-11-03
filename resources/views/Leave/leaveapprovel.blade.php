@@ -22,6 +22,15 @@
             <div class="card-body p-0 p-2">
                 <div class="row">
                     <div class="col-12">
+                        <div class="col-md-12">
+                            <button class="btn btn-warning btn-sm filter-btn float-right px-3" type="button"
+                                data-toggle="offcanvas" data-target="#offcanvasRight" aria-controls="offcanvasRight"><i
+                                    class="fas fa-filter mr-1"></i> Filter
+                                Options</button>
+                        </div><br><br>
+                        <div class="col-12">
+                            <hr class="border-dark">
+                        </div>
                         <div class="row align-items-center mb-4">
                             <div class="col-6">
                                 <div class="form-check">
@@ -30,18 +39,13 @@
                                 </div>
                             </div>
                             <div class="col-6 text-right">
-                                <button id="allapproveel" class="btn btn-primary btn-sm px-3"><i class="fa-light fa-light fa-clipboard-check"></i>&nbsp;Approve All Leave</button>
+                                <button id="allapproveel" class="btn btn-primary btn-sm px-3"><i
+                                        class="fa-light fa-light fa-clipboard-check"></i>&nbsp;Approve All
+                                    Leave</button>
                             </div>
                         </div>
-                          <div class="col-12">
-                              <hr class="border-dark">
-                          </div>
-                          <div class="col-md-12">
-                              <button class="btn btn-warning btn-sm filter-btn float-right px-3" type="button"
-                                  data-toggle="offcanvas" data-target="#offcanvasRight"
-                                  aria-controls="offcanvasRight"><i class="fas fa-filter mr-1"></i> Filter
-                                  Options</button>
-                          </div><br><br>
+                         
+                          
                         <div class="center-block fix-width scroll-inner">
                         <table class="table table-striped table-bordered table-sm small nowrap" style="width: 100%" id="divicestable">
                             <thead>
@@ -427,7 +431,6 @@ $(document).ready(function () {
                     const actionJSON = JSON.stringify(actionObj, null, 2);
                     actionreload(actionJSON);
                 }
-                 location.reload()
             }
         });
     });
@@ -483,9 +486,15 @@ $(document).ready(function () {
     var selectedRowIdsapprove = [];
 
         $('#allapproveel').click(async function () {
-            var r = await Otherconfirmation("You want to Edit this ? ");
+            var r = await Otherconfirmation("You want to Approve this ? ");
             if (r == true) {
-                selectedRowIdsapprove = [];
+                 $('#approveconfirmModal').modal('show');
+            }
+
+        });
+
+        $(document).on("click", "#approveall", function () {
+              selectedRowIdsapprove = [];
                 $('#divicestable tbody .selectCheck:checked').each(function () {
                     var rowData = $('#divicestable').DataTable().row($(this).closest('tr')).data();
 
@@ -557,10 +566,9 @@ $(document).ready(function () {
                         timer: 2500
                     });
                 }
-            }
+
 
         });
-
 
     $('#selectAll').click(function (e) {
             $('#divicestable').closest('table').find('td input:checkbox').prop('checked', this.checked);

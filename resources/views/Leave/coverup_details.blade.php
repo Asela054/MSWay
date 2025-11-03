@@ -21,20 +21,22 @@
                 <div class="card-body p-0 p-2">
                     <div class="row">
                         <div class="col-md-12">
-                            <button type="button" class="btn btn-primary btn-sm fa-pull-right"
-                                    name="create_record" id="create_record"><i class="fas fa-plus mr-2"></i>Add Covering Details
-                            </button>
+                            <div class="col-md-12">
+                                    <button class="btn btn-warning btn-sm filter-btn float-right px-3" type="button"
+                                        data-toggle="offcanvas" data-target="#offcanvasRight"
+                                        aria-controls="offcanvasRight"><i class="fas fa-filter mr-1"></i> Filter
+                                        Options</button>
+                                </div>
+
+                            
                         </div>
                         <div class="col-md-12">
                             <hr class="border-dark">
                         </div>
                         <div class="col-md-12">
-                             <div class="col-md-12">
-                                    <button class="btn btn-warning btn-sm filter-btn float-right px-3" type="button"
-                                        data-toggle="offcanvas" data-target="#offcanvasRight"
-                                        aria-controls="offcanvasRight"><i class="fas fa-filter mr-1"></i> Filter
-                                        Options</button>
-                                </div><br><br>
+                             <button type="button" class="btn btn-primary btn-sm fa-pull-right"
+                                    name="create_record" id="create_record"><i class="fas fa-plus mr-2"></i>Add Covering Details
+                            </button><br><br>
 
                             <div class="center-block fix-width scroll-inner">
                             <table class="table table-striped table-bordered table-sm small nowrap" style="width: 100%" id="divicestable">
