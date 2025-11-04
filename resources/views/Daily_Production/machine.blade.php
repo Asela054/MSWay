@@ -33,7 +33,10 @@
                                 <tr>
                                     <th>ID </th>
                                     <th>MACHINE</th>
-                                    <th>DESCRIPTION</th>
+                                    <th>BRANCH</th>
+                                    <th>COMPLETE PRICE</th>
+                                    <th>NOT COMPLETE PRICE</th>
+                                    <th>TARGET COUNT</th>
                                     <th class="text-right">ACTION</th>
                                 </tr>
                             </thead>
@@ -48,7 +51,7 @@
     <!-- Modal Area Start -->
     <div class="modal fade" id="formModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
     aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header p-2">
                     <h5 class="modal-title" id="staticBackdropLabel">Add Machine</h5>
@@ -57,27 +60,63 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div class="row">
-                        <div class="col">
-                            <span id="form_result"></span>
-                            <form method="post" id="formTitle" class="form-horizontal">
-                                {{ csrf_field() }}	
+                    <span id="form_result"></span>
+                    <form method="post" id="formTitle" class="form-horizontal">
+                        {{ csrf_field() }}
+                        <div class="row">
+                            <div class="col-md-6">
                                 <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark ">Machine</label>
-                                    <input type="text" name="machine" id="machine" class="form-control form-control-sm"  required/>
+                                    <label class="small font-weight-bolder text-dark">Company</label>
+                                    <select name="company" id="company" class="form-control form-control-sm" required>
+                                    </select>
                                 </div>
+                            </div>
+                            <div class="col-md-6">
                                 <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark ">Description</label>
+                                    <label class="small font-weight-bolder text-dark">Branch</label>
+                                    <select name="location" id="location" class="form-control form-control-sm" required>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-1">
+                                    <label class="small font-weight-bold text-dark">Machine</label>
+                                    <input type="text" name="machine" id="machine" class="form-control form-control-sm" required/>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-1">
+                                    <label class="small font-weight-bold text-dark">Target Count</label>
+                                    <input type="number" step="any" name="target_count" id="target_count" class="form-control form-control-sm" />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-1">
+                                    <label class="small font-weight-bold text-dark">Semi Complete Price</label>
+                                    <input type="number" step="any" name="semi_complete" id="semi_complete" class="form-control form-control-sm" required/>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-1">
+                                    <label class="small font-weight-bold text-dark">Full Complete Price</label>
+                                    <input type="number" step="any" name="full_complete" id="full_complete" class="form-control form-control-sm" required/>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group mb-1">
+                                    <label class="small font-weight-bold text-dark">Description</label>
                                     <input type="text" name="description" id="description" class="form-control form-control-sm" />
                                 </div>
-                                <div class="form-group mt-3">
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group mt-3 mb-0">
                                     <button type="submit" name="action_button" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
                                 </div>
-                                <input type="hidden" name="action" id="action" value="Add" />
-                                <input type="hidden" name="hidden_id" id="hidden_id" />
-                            </form>
+                            </div>
                         </div>
-                    </div>
+                        <input type="hidden" name="action" id="action" value="Add" />
+                        <input type="hidden" name="hidden_id" id="hidden_id" />
+                    </form>
                 </div>
             </div>
         </div>
@@ -96,7 +135,45 @@ $(document).ready(function(){
     $('#production_menu_link_icon').addClass('active');
     $('#dailyprocess').addClass('navbtnactive');
 
-       $('#dataTable').DataTable({
+    let company_f = $('#company');
+    let location_f = $('#location');
+
+    company_f.select2({
+        placeholder: 'Select a Company',
+        width: '100%',
+        allowClear: true,
+        ajax: {
+            url: '{{url("company_list_sel2")}}',
+            dataType: 'json',
+            data: function(params) {
+                return {
+                    term: params.term || '',
+                    page: params.page || 1
+                }
+            },
+            cache: true
+        }
+    });
+
+    location_f.select2({
+        placeholder: 'Select Location',
+        width: '100%',
+        allowClear: true,
+        ajax: {
+            url: '{{url("location_list_sel2")}}',
+            dataType: 'json',
+            data: function(params) {
+                return {
+                    term: params.term || '',
+                    page: params.page || 1,
+                    company: company_f.val(),
+                }
+            },
+            cache: true
+        }
+    });
+
+    $('#dataTable').DataTable({
         "destroy": true,
         "processing": true,
         "serverSide": true,
@@ -130,7 +207,6 @@ $(document).ready(function(){
                         .css('font-size', 'inherit');
                 },
             },
-            // 'copy', 'csv', 'excel', 'pdf', 'print'
         ],
         "order": [
             [0, "desc"]
@@ -150,8 +226,20 @@ $(document).ready(function(){
                 name: 'machine'
             },
             { 
-                data: 'description', 
-                name: 'description'
+                data: 'branch', 
+                name: 'branch'
+            },
+            { 
+                data: 'full_complete', 
+                name: 'full_complete'
+            },
+            { 
+                data: 'semi_complete', 
+                name: 'semi_complete'
+            },
+            { 
+                data: 'target_count', 
+                name: 'target_count'
             },
             {
                 data: 'id',
@@ -234,26 +322,42 @@ $(document).ready(function(){
         });
     });
 
-    $(document).on('click', '.edit',async function () {
-         var r = await Otherconfirmation("You want to Edit this ? ");
-                if (r == true) {
-                    var id = $(this).attr('id');
-                    $('#form_result').html('');
-                    $.ajax({
-                        url:"{{ url('Machine/') }}/" + id + "/edit",
-                        dataType: "json",
-                                success: function (data) {
-                                    $('#machine').val(data.result.machine);
-                                    $('#description').val(data.result.description);
+    $(document).on('click', '.edit', async function () {
+        var r = await Otherconfirmation("You want to Edit this ? ");
+        if (r == true) {
+            var id = $(this).attr('id');
+            $('#form_result').html('');
+            $.ajax({
+                url: "{{ url('Machine/') }}/" + id + "/edit",
+                dataType: "json",
+                success: function (data) {
+                    // Clear existing selections
+                    $('#company').empty();
+                    $('#location').empty();
+                    
+                    // Add and select company option
+                    var companyOption = new Option(data.result.company_name, data.result.company_id, true, true);
+                    $('#company').append(companyOption).trigger('change');
+                    
+                    // Add and select location option
+                    var locationOption = new Option(data.result.branch_name, data.result.branch_id, true, true);
+                    $('#location').append(locationOption).trigger('change');
+                    
+                    // Set other fields
+                    $('#machine').val(data.result.machine);
+                    $('#semi_complete').val(data.result.semi_complete);
+                    $('#full_complete').val(data.result.full_complete);
+                    $('#target_count').val(data.result.target_count);
+                    $('#description').val(data.result.description);
 
-                                    $('#hidden_id').val(id);
-                                    $('.modal-title').text('Edit Machine');
-                                    $('#action_button').html('Edit');
-                                    $('#action').val('Edit');
-                                    $('#formModal').modal('show');
-                                }
-                            })
+                    $('#hidden_id').val(id);
+                    $('.modal-title').text('Edit Machine');
+                    $('#action_button').html('Edit');
+                    $('#action').val('Edit');
+                    $('#formModal').modal('show');
                 }
+            })
+        }
     });
 
     var user_id;

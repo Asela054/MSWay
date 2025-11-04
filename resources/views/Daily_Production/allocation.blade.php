@@ -100,7 +100,11 @@
                                     </div>    
                                     <div class="col-sm-12 col-md-4">
                                         <label class="small font-weight-bold text-dark">Machine</label>
-                                        <select name="machine" id="machine" class="form-control form-control-sm">
+                                        <select name="machine" id="machine" class="form-control form-control-sm" style="width: 100%;" required>
+                                            <option value="">Select Machine</option>
+                                            @foreach ($machines as $machine)
+                                                <option value="{{ $machine->id }}">{{ $machine->machine }}</option>
+                                            @endforeach
                                         </select>
                                     </div>
                                     <div class="col-sm-12 col-md-4">
@@ -233,49 +237,6 @@ $(document).ready(function(){
     // Modal close handlers
     $('#viewconfirmModal .close').click(function(){
         $('#viewconfirmModal').modal('hide');
-    });
-
-    let machine = $('#machine');
-    let product = $('#product');
-
-    machine.select2({
-        placeholder: 'Select a Machine',
-        width: '100%',
-        allowClear: true,
-        ajax: {
-            url: '{{url("Machine_list_sel2")}}',
-            dataType: 'json',
-            data: function(params) {
-                return {
-                    term: params.term || '',
-                    page: params.page || 1,
-                    product: product.val(),
-                }
-            },
-            cache: true
-        }
-    });
-
-    // Product change handler to refresh machine options
-    product.on('change', function() {
-        machine.val(null).trigger('change');
-        machine.select2({
-            placeholder: 'Select a Machine',
-            width: '100%',
-            allowClear: true,
-            ajax: {
-                url: '{{url("Machine_list_sel2")}}',
-                dataType: 'json',
-                data: function(params) {
-                    return {
-                        term: params.term || '',
-                        page: params.page || 1,
-                        product: product.val(),
-                    }
-                },
-                cache: true
-            }
-        });
     });
 
     // Employee Select2 initialization
