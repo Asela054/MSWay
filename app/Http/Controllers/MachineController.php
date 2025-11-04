@@ -34,8 +34,13 @@ class MachineController extends Controller
         }
 
         $rules = array(
-            'machine'    =>  'required'
+            'company'    =>  'required',
+            'location'   =>  'required',
+            'machine'    =>  'required',
+            'semi_complete' => 'required',
+            'full_complete' => 'required'
         );
+
         $error = Validator::make($request->all(), $rules);
         if($error->fails())
         {
@@ -43,13 +48,24 @@ class MachineController extends Controller
         }
 
         $form_data = array(
+            'company_id'     =>  $request->company,
+            'branch_id'      =>  $request->location,
             'machine'        =>  $request->machine,
+            'semi_complete'  =>  $request->semi_complete,
+            'full_complete'  =>  $request->full_complete,
+            'target_count'   =>  $request->target_count,
             'description'    =>  $request->description
         );
 
         $machine=new Machine;
+        $machine->company_id=$request->input('company');
+        $machine->branch_id=$request->input('location');
         $machine->machine=$request->input('machine');
+        $machine->semi_complete=$request->input('semi_complete');
+        $machine->full_complete=$request->input('full_complete');
+        $machine->target_count = $request->input('target_count') ?? 0;
         $machine->description=$request->input('description');       
+        $machine->status=1;
         $machine->save();
 
         return response()->json(['success' => 'Machine Added Successfully.']);
@@ -65,8 +81,15 @@ class MachineController extends Controller
 
         if(request()->ajax())
         {
-            $data = Machine::findOrFail($id);
-            return response()->json(['result' => $data]);
+            $data = Machine::with(['company:id,name', 'branch:id,location'])
+                        ->findOrFail($id);
+            
+            // Add company and branch names to the response
+            $result = $data->toArray();
+            $result['company_name'] = $data->company->name ?? '';
+            $result['branch_name'] = $data->branch->location ?? '';
+            
+            return response()->json(['result' => $result]);
         }
     }
 
@@ -79,7 +102,11 @@ class MachineController extends Controller
         }
 
         $rules = array(
-            'machine'    =>  'required'
+            'company'    =>  'required',
+            'location'   =>  'required',
+            'machine'    =>  'required',
+            'semi_complete' => 'required',
+            'full_complete' => 'required'
         );
 
         $error = Validator::make($request->all(), $rules);
@@ -90,7 +117,12 @@ class MachineController extends Controller
         }
 
         $form_data = array(
+            'company_id'     =>  $request->company,
+            'branch_id'      =>  $request->location,
             'machine'    =>  $request->machine,
+            'semi_complete'  =>  $request->semi_complete,
+            'full_complete'  =>  $request->full_complete,
+            'target_count'   =>  $request->target_count,
             'description' =>  $request->description
         );
 
@@ -108,6 +140,9 @@ class MachineController extends Controller
         }
 
         $data = Machine::findOrFail($id);
-        $data->delete();
+        $data->status=3;
+        $data->save();
+
+        return response()->json(['success' => 'Machine Deleted Successfully.']);
     }
 }
