@@ -31,8 +31,13 @@ $primaryKey = 'id';
 $columns = array(
 	array( 'db' => '`u`.`id`', 'dt' => 'id', 'field' => 'id' ),
 	array( 'db' => '`u`.`machine`', 'dt' => 'machine', 'field' => 'machine' ),
+	array( 'db' => '`b`.`location`', 'dt' => 'branch', 'field' => 'location' ), 
+	array( 'db' => '`u`.`full_complete`', 'dt' => 'full_complete', 'field' => 'full_complete' ),
+	array( 'db' => '`u`.`semi_complete`', 'dt' => 'semi_complete', 'field' => 'semi_complete' ),
+	array( 'db' => '`u`.`target_count`', 'dt' => 'target_count', 'field' => 'target_count' ),
 	array( 'db' => '`u`.`description`', 'dt' => 'description', 'field' => 'description' )
 );
+
 
 // SQL server connection information
 require('config.php');
@@ -51,9 +56,11 @@ $sql_details = array(
 // require( 'ssp.class.php' );
 require('ssp.customized.class.php' );
 
-$joinQuery = "FROM `machines` AS `u`";
-	
-$extraWhere = "1=1";
+$joinQuery = "FROM `machines` AS `u` 
+              LEFT JOIN `companies` AS `c` ON `u`.`company_id` = `c`.`id`
+              LEFT JOIN `branches` AS `b` ON `u`.`branch_id` = `b`.`id`";
+
+$extraWhere = "`u`.`status` != 3";
 
 echo json_encode(
 	SSP::simple( $_POST, $sql_details, $table, $primaryKey, $columns, $joinQuery, $extraWhere)
