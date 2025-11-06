@@ -90,13 +90,28 @@
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-12 col-md-6">
-                                        <label class="small font-weight-bolder ">Note</label>
-                                        <input type="text" name="desription" id="desription" class="form-control form-control-sm"/>
-                                    </div>
+                                      <div class="row col-sm-12 col-md-6">
+                                            <div class="col-12">
+                                                <label class="small font-weight-bolder ">Finish Status*</label><br>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="radio" name="complete_status" id="completed" value="1">
+                                                    <label class="form-check-label small font-weight-bolder " for="completed" required>Completed</label>
+                                                </div>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="radio" name="complete_status" id="notcompleted" value="0">
+                                                    <label class="form-check-label small font-weight-bolder " for="notcompleted" required >Not Completed</label>
+                                                </div>
+                                            </div>
+                                        </div>
                                     <div class="col-sm-12 col-md-6">
                                         <label class="small font-weight-bolder ">Completed Time*</label>
                                         <input type="datetime-local" name="completetime" id="completetime"  class="form-control form-control-sm"  value="{{ date('Y-m-d\TH:i', strtotime('-1 day')) }}"  required/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12 col-md-12">
+                                        <label class="small font-weight-bolder ">Note</label>
+                                        <input type="text" name="desription" id="desription" class="form-control form-control-sm"/>
                                     </div>
                                 </div>
                                 <br>
