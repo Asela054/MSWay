@@ -78,8 +78,10 @@ class ProductionEndingController extends Controller
           $desription = $request->input('desription');
           $hidden_id = $request->input('hidden_id');
           $completetime = $request->input('completetime');
+          $complete_status = $request->input('complete_status');
 
         $completdate = Carbon::parse($completetime)->format('Y-m-d');
+
 
            $maindata = DB::table('emp_product_allocation')
                 ->select('emp_product_allocation.*','product.semi_price as semi_price','product.full_price as full_price')
@@ -93,35 +95,56 @@ class ProductionEndingController extends Controller
 
           // get semi and full price from price metrix
 
-           $prodcumachine = DB::table('product_machines')
-                ->select('product_machines.*')
-                ->where('product_machines.product_id', $product_id)
-                ->where('product_machines.machine_id', $machine_id)
+           $prodcumachine = DB::table('machines')
+                ->select('machines.*')
+                ->where('machines.id', $machine_id)
                 ->first(); 
 
-        $semi_price =  $prodcumachine->semi_price;
-        $full_price =  $prodcumachine->full_price;
+        $semi_price =  $prodcumachine->semi_complete;
+        $full_price =  $prodcumachine->full_complete;
+        $targetcount =  $prodcumachine->target_count;
 
+         $product_unitvalue=0;
+         $productioncomplete =0;
 
-          $product_unitvalue=0;
+        if($targetcount > 0){
 
-          if($product_type ==="Semi Completed"){
+            if($targetcount >= $fullquntity){
+
+                $product_unitvalue = $full_price;
+                $quntity =  $fullquntity;
+
+                $productioncomplete =1;
+
+            }else{
+
+                $product_unitvalue = $semi_price;
+                $quntity =  $fullquntity;
+
+                $productioncomplete =0;
+            }
+        }else{
+             $productioncomplete = $complete_status;
+
+            if($product_type ==="Semi Completed"){
 
             $product_unitvalue = $semi_price;
             $quntity =  $semiquntity;
 
-          }else if($product_type ==="Full Completed"){
+            }else if($product_type ==="Full Completed"){
 
-            $product_unitvalue = $full_price;
-            $quntity =  $fullquntity;
+                $product_unitvalue = $full_price;
+                $quntity =  $fullquntity;
 
-          }else{
+            }else{
 
-            $product_unitvalue = $full_price +  $semi_price;
-            $quntity =  $fullquntity + $semiquntity;
-          }
+                $product_unitvalue = $full_price +  $semi_price;
+                $quntity =  $fullquntity + $semiquntity;
+            }
 
+        }
 
+         
           // get employee count
            $employeeAllocations = DB::table('emp_product_allocation_details')
                             ->where('allocation_id', $hidden_id)
@@ -197,13 +220,15 @@ class ProductionEndingController extends Controller
                     'semi_amount' => $semiquntity,
                     'full_amount' => $fullquntity,
                     'production_status' => '4',
+                    'complete_status' =>  $productioncomplete,
                     'updated_by' => Auth::id(),
-                    'updated_at' => $current_date_time,
-                );
+                    'updated_at' => $current_date_time,);
         
         EmpProductAllocation::findOrFail($hidden_id)->update($form_data);
 
         }
+
+        
          return response()->json(['success' => 'Production Successfully Finished']);
     }
 

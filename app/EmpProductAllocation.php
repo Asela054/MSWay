@@ -14,6 +14,6 @@ class EmpProductAllocation extends Model
     'date', 'status', 'created_by', 'updated_by',
     'machine_id', 'product_id', 'shift_id', 'product_type',
     'semi_amount', 'full_amount', 'cancel_description',
-    'production_status'
+    'production_status','complete_status'
 ];
 }
