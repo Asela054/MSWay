@@ -28,8 +28,7 @@ class SalaryAdjustmentController extends Controller
         $salaryadjustment = SalaryAdjustment::orderBy('id', 'asc')->get();
         $job_categories=DB::table('job_categories')->select('*')->get();
         $remunerations=DB::table('remunerations')->select('*')->get();
-        $employees=DB::table('employees')->select('emp_id','emp_name_with_initial')->where('deleted',0)->get();
-        return view('Organization.salary_adjustment', compact('salaryadjustment','job_categories','remunerations','employees'));
+        return view('Organization.salary_adjustment', compact('salaryadjustment','job_categories','remunerations'));
     }
 
     public function store(Request $request)
@@ -42,9 +41,10 @@ class SalaryAdjustmentController extends Controller
 
 
         $salaryadjustment = new SalaryAdjustment;
-        $salaryadjustment->emp_id = $request->input('employee');
-        $salaryadjustment->job_id = $request->input('job_category');
+        $salaryadjustment->emp_id = $request->input('employee' , 0);
+        $salaryadjustment->job_id = $request->input('job_category' , 0);
         $salaryadjustment->remuneration_id = $request->input('remuneration_name');
+        $salaryadjustment->adjustment_type = $request->input('adjustment_type');
         $salaryadjustment->allowance_type = $request->input('allowance_type');
         $salaryadjustment->amount = $request->input('amount');
         $salaryadjustment->allowleave = $request->input('allowleave');
@@ -57,37 +57,6 @@ class SalaryAdjustmentController extends Controller
         return response()->json(['success' => 'Salary Adjustment Added successfully.']);
     }
 
-    public function letterlist ()
-    {
-        $letters = DB::table('salary_adjustments')
-        ->leftjoin('job_categories', 'salary_adjustments.job_id', '=', 'job_categories.id')
-        ->leftjoin('remunerations', 'salary_adjustments.remuneration_id', '=', 'remunerations.id')
-        ->leftjoin('employees', 'salary_adjustments.emp_id', '=', 'employees.emp_id')
-        ->select('salary_adjustments.*','job_categories.category As category','remunerations.remuneration_name As remuneration_name',
-                    DB::raw("IF(salary_adjustments.emp_id = 0, 'All Employees', employees.emp_name_with_initial) AS employee") )
-        ->get();
-        return Datatables::of($letters)
-        ->addIndexColumn()
-        ->addColumn('action', function ($row) {
-            $btn = '';
-                    if(Auth::user()->can('SalaryAdjustment-edit') && $row->approved_status == 0){
-                        $btn .= ' <button name="edit" id="'.$row->id.'" class="edit btn btn-outline-primary btn-sm" type="submit"><i class="fas fa-pencil-alt"></i></button>'; 
-                    }
-                    if(Auth::user()->can('SalaryAdjustment-approval')){
-                        if($row->approved_status == 0){
-                                $btn .= ' <button name="approve" id="'.$row->id.'" class="approve btn btn-outline-success btn-sm mr-1"><i class="fas fa-level-up-alt"></i></button>';
-                            }
-                    }
-                    if(Auth::user()->can('SalaryAdjustment-delete')){
-                        $btn .= ' <button name="delete" id="'.$row->id.'" class="delete btn btn-outline-danger btn-sm"><i class="far fa-trash-alt"></i></button>';
-                    }        
-            return $btn;
-        })
-       
-        ->rawColumns(['action'])
-        ->make(true);
-    }
-
     public function edit($id)
     {
         $user = auth()->user();
@@ -98,7 +67,10 @@ class SalaryAdjustmentController extends Controller
         }
 
         if (request()->ajax()) {
-            $data = SalaryAdjustment::findOrFail($id);
+            $data = SalaryAdjustment::leftJoin('employees', 'salary_adjustments.emp_id', '=', 'employees.emp_id')
+                ->where('salary_adjustments.id', $id)
+                ->select('salary_adjustments.*', 'employees.emp_name_with_initial')
+                ->first();
             return response()->json(['result' => $data]);
         }
     }
@@ -115,6 +87,7 @@ class SalaryAdjustmentController extends Controller
             'emp_id' => $request->employee,
             'job_id' => $request->job_category,
             'remuneration_id' => $request->remuneration_name,
+            'adjustment_type' => $request->adjustment_type,
             'allowance_type' => $request->allowance_type,
             'amount' => $request->amount,
             'allowleave' => $request->allowleave,
