@@ -32,6 +32,7 @@
                                         <thead>
                                             <tr>
                                                 <th>ID </th>
+                                                <th>Adjustment Type</th> 
                                                 <th>Employee</th>
                                                 <th>Job Category</th>
                                                 <th>Addition/Deduction Type</th>
@@ -68,20 +69,30 @@
                             <form method="post" id="formTitle" class="form-horizontal">
                                 {{ csrf_field() }}	
 
+                                <div class="form-group mb-2">
+                                    <label class="small font-weight-bold text-dark">Adjustment Type <span class="text-danger">*</span></label>
+                                    <br>
+                                    <div class="form-check-inline">
+                                        <label class="form-check-label">
+                                            <input type="radio" class="form-check-input adjustment_type" name="adjustment_type" id="adjustment_type_1" value="1" required>Employee Wise
+                                        </label>
+                                    </div>
+                                    <div class="form-check-inline">
+                                        <label class="form-check-label">
+                                            <input type="radio" class="form-check-input adjustment_type" name="adjustment_type" id="adjustment_type_2" value="2" required>Job Category Wise
+                                        </label>
+                                    </div>
+                                </div>
+
                                 <div class="form-row mb-2">
-                                    <div class="col-md-6">
+                                    <div class="col-md-6 employee_div" style="display: none;">
                                         <label class="small font-weight-bold text-dark">Select Employee</label>
-                                            <select name="employee" id="employee" class="form-control form-control-sm" >
-                                                <option value="0">Select Employee</option>
-                                                @foreach ($employees as $employee){
-                                                    <option value="{{$employee->emp_id}}" >{{$employee->emp_name_with_initial}}</option>
-                                                }  
-                                                @endforeach
+                                            <select name="employee" id="employee" class="form-control form-control-sm">
                                             </select>
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="col-md-6 job_category_div" style="display: none;">
                                         <label class="small font-weight-bold text-dark">Job Category</label>
-                                        <select id="job_category" name="job_category" class="form-control form-control-sm" required>
+                                        <select id="job_category" name="job_category" class="form-control form-control-sm">
                                         <option value="">Select Job Category</option>
                                         @foreach ($job_categories as $job_category){
                                             <option value="{{$job_category->id}}" >{{$job_category->category}}</option>
@@ -176,7 +187,24 @@ $(document).ready(function(){
     $('#organization_menu_link_icon').addClass('active');
     $('#salary_adjustmentlink').addClass('navbtnactive');
 
-    $('#employee').select2({ width: '100%' });
+    let employee = $('#employee');
+
+    employee.select2({
+        placeholder: 'Select a Employee',
+        width: '100%',
+        allowClear: true,
+        ajax: {
+            url: '{{url("employee_list_sel2")}}',
+            dataType: 'json',
+            data: function(params) {
+                return {
+                    term: params.term || '',
+                    page: params.page || 1
+                }
+            },
+            cache: true
+        }
+    });
 
     $('#dataTable').DataTable({
         "destroy": true,
@@ -227,8 +255,15 @@ $(document).ready(function(){
                 name: 'id'
             },
             {
-                data: 'emp_name_with_initial',
-                name: 'emp_name_with_initial'
+                data: 'adjustment_type', 
+                name: 'adjustment_type',
+                render: function (data, type, row) {
+                    return data == 1 ? 'Employee Wise' : 'Job Category Wise';
+                }
+            },
+            {
+                data: 'employee_display',
+                name: 'employee_display'
             },
             {
                 data: 'category',
@@ -300,7 +335,12 @@ $(document).ready(function(){
         $('#formTitle')[0].reset();
         $('#form_result').html('');
 
-        $('#employee').prop('disabled', false).parent().show();
+        $('.employee_div').css('display', 'none');
+        $('.job_category_div').css('display', 'none');
+        $('#adjustment_type_1').prop('checked', false);
+        $('#adjustment_type_2').prop('checked', false);
+
+        $('#employee').prop('disabled', false);
         $('#job_category').prop('disabled', false);
         $('#remuneration_name').prop('disabled', false);
         $('#allowance_type_0, #allowance_type_1').prop('disabled', false);
@@ -377,16 +417,31 @@ $(document).ready(function(){
                 dataType: "json",
                 success: function (data) {
 
-                    $('#employee').val(data.result.emp_id);
-                    $('#job_category').val(data.result.job_id);
+                    if (data.result.adjustment_type == 1) {
+                        $('#adjustment_type_1').prop("checked", true);
+                        $('.employee_div').css('display', 'block');
+                        $('.job_category_div').css('display', 'none');
+                        $('#job_category').val(0);
+                        
+                        if(data.result.emp_id && data.result.emp_id != 0) {
+                            var option = new Option(data.result.emp_name_with_initial, data.result.emp_id, true, true);
+                            $('#employee').append(option).trigger('change');
+                        }
+                        
+                    } else if (data.result.adjustment_type == 2) {
+                        $('#adjustment_type_2').prop("checked", true);
+                        $('.job_category_div').css('display', 'block');
+                        $('.employee_div').css('display', 'none');
+                        $('#employee').val(0);
+                        $('#job_category').val(data.result.job_id);
+                    }
+
                     $('#remuneration_name').val(data.result.remuneration_id);
 
                     if (data.result.allowance_type == '1') {
                         $('#allowance_type_0').prop("checked", true);
-                        // $('.custom_work').css('display', 'none');
                     } else if (data.result.allowance_type == '2') {
                         $('#allowance_type_1').prop("checked", true);
-                        // $('.custom_work').css('display', 'block');
                     }
 
                     $('#amount').val(data.result.amount);
@@ -410,8 +465,25 @@ $(document).ready(function(){
             dataType: "json",
             success: function (data) {
 
-                $('#employee').val(data.result.emp_id).prop('disabled', true).parent().hide();
-                $('#job_category').val(data.result.job_id).prop('disabled', true);
+                if (data.result.adjustment_type == 1) {
+                    $('#adjustment_type_1').prop("checked", true);
+                    $('.employee_div').css('display', 'block');
+                    $('.job_category_div').css('display', 'none');
+                    
+                    if(data.result.emp_id && data.result.emp_id != 0) {
+                        var option = new Option(data.result.emp_name_with_initial, data.result.emp_id, true, true);
+                        $('#employee').append(option).trigger('change');
+                    }
+                    $('#employee').prop('disabled', true).parent().show();
+                    
+                } else if (data.result.adjustment_type == 2) {
+                    $('#adjustment_type_2').prop("checked", true);
+                    $('.job_category_div').css('display', 'block');
+                    $('.employee_div').css('display', 'none');
+                    $('#job_category').val(data.result.job_id);
+                }
+
+                $('#job_category').prop('disabled', true);
                 $('#remuneration_name').val(data.result.remuneration_id).prop('disabled', true);
 
                 if (data.result.allowance_type == '1') {
@@ -461,7 +533,22 @@ $(document).ready(function(){
         }
     });
 
-
+    $(document).on('change', '.adjustment_type', function (e) {
+        let val = $(this).val();
+        if(val == 1){
+            $('.employee_div').css('display', 'block');
+            $('.job_category_div').css('display', 'none');
+            $('#job_category').val(0); 
+            $('#employee').val('').prop('required', true);
+            $('#job_category').prop('required', false);
+        }else if(val == 2){
+            $('.job_category_div').css('display', 'block');
+            $('.employee_div').css('display', 'none');
+            $('#employee').val(0); 
+            $('#job_category').val('').prop('required', true);
+            $('#employee').prop('required', false);
+        }
+    });
 
     
 });
