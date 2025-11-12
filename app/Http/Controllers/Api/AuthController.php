@@ -71,6 +71,7 @@ class AuthController extends Controller
         ->leftJoin('shift_types', 'employees.emp_shift', '=', 'shift_types.id')
         ->leftJoin('job_titles', 'employees.emp_job_code', '=', 'job_titles.id')
         ->leftJoin('departments', 'employees.emp_department', '=', 'departments.id')
+        ->leftJoin('employee_pictures', 'employees.emp_id', '=', 'employee_pictures.emp_id')
         ->where('employees.emp_id', $user->emp_id)
         ->select(
             'employees.id',
@@ -112,13 +113,19 @@ class AuthController extends Controller
             'departments.name as department_name',
             'employment_statuses.emp_status',
             'shift_types.shift_name',
-            'job_categories.category as job_category'
+            'job_categories.category as job_category',
+            'employee_pictures.emp_pic_filename as profile_picture'
         )
         ->first();
 
         if (!$employee) {
             throw new \Exception("Employee not found with ID: " . $user->emp_id);
         }
+
+        if ($employee->profile_picture) {
+            $employee->profile_picture = url('/public/images/' . $employee->profile_picture);
+        }
+        
 
         $accessToken = Auth::user()->createToken('authToken')->accessToken;
 
