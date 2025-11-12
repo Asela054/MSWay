@@ -123,7 +123,9 @@ class AuthController extends Controller
         }
 
         if ($employee->profile_picture) {
+
             $employee->profile_picture = url('/public/images/' . $employee->profile_picture);
+            
         }
         
 
