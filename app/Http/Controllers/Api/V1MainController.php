@@ -714,11 +714,13 @@ class V1MainController extends Controller
                     'employees.*',
                     'companies.name as company_name',
                     'departments.name as department_name',
-                    'shift_types.shift_name as shift_type_name'
+                    'shift_types.shift_name as shift_type_name',
+                    'employee_pictures.emp_pic_filename as profile_picture'
                         )
             ->leftJoin('companies', 'employees.emp_company', '=', 'companies.id')
             ->leftJoin('departments', 'employees.emp_department', '=', 'departments.id')
             ->leftJoin('shift_types', 'employees.emp_shift', '=', 'shift_types.id')
+            ->leftJoin('employee_pictures', 'employees.emp_id', '=', 'employee_pictures.emp_id')
             ->where('employees.emp_id', $request->employee_id)
             ->first();
 
@@ -733,6 +735,10 @@ class V1MainController extends Controller
             $emp_avail_data['session'] = $employee_availability->session;
         }
 
+        if ($employee->profile_picture) {
+            $employee->profile_picture = url('/public/images/' . $employee->profile_picture);
+        }
+        
         $data = array(
             'employee' => $employee,
             'employee_availability' => $emp_avail_data
