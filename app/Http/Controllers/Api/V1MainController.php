@@ -713,12 +713,14 @@ class V1MainController extends Controller
                 ->select(
                     'employees.*',
                     'companies.name as company_name',
+                    'companies.email as company_email',
                     'departments.name as department_name',
+                     'branches.location as employee_location',
                     'shift_types.shift_name as shift_type_name',
-                    'employee_pictures.emp_pic_filename as profile_picture'
-                        )
+                    'employee_pictures.emp_pic_filename as profile_picture' )
             ->leftJoin('companies', 'employees.emp_company', '=', 'companies.id')
             ->leftJoin('departments', 'employees.emp_department', '=', 'departments.id')
+            ->leftJoin('branches', 'employees.emp_location', '=', 'branches.id')
             ->leftJoin('shift_types', 'employees.emp_shift', '=', 'shift_types.id')
             ->leftJoin('employee_pictures', 'employees.emp_id', '=', 'employee_pictures.emp_id')
             ->where('employees.emp_id', $request->employee_id)

@@ -1174,8 +1174,6 @@
                 let date = $('#date_dept_wise').val();
                 if(dept != '' && date != '' )
                 {
-                    $('#btn-dept_wise').html('<i class="fa fa-spinner fa-spin"></i> Loading');
-                    $('#btn-dept_wise').attr('disabled', true);
 
                     fill_dept_wise_table(company, area, location, dept, date);
                 }
@@ -1231,8 +1229,6 @@
             $('#form_dept_wise').on('submit',function(e) {
                 e.preventDefault();
                 let save_btn=$("#btn-save_dept_wise");
-                save_btn.prop("disabled", true);
-                save_btn.html('<i class="fa fa-spinner fa-spin"></i> loading...' );
                 let formData = new FormData($('#form_dept_wise')[0]);
                 let url_text = '{{ url("/attendance_add_dept_wise_submit") }}';
                 $.ajaxSetup({
