@@ -29,6 +29,8 @@
          
             <li><a class="dropdown-item" href="{{ route('incomplete_attendances')}}">Incomplete Attendances</a></li>
          
+            <li><a class="dropdown-item" href="{{ route('absentnopay')}}">Absent Noapy Apply</a></li> 
+
             <li><a class="dropdown-item" href="{{ route('ot_approve')}}">OT Approve</a></li>
         
             <li><a class="dropdown-item" href="{{ route('ot_approved')}}">Approved OT</a></li>
@@ -41,7 +43,7 @@
           
           <li><a class="dropdown-item" href="{{ route('holidaydeductionapproval')}}">Leave Deduction Approval</a></li>
           
-           {{-- <li><a class="dropdown-item" href="{{ route('absentnopay')}}">Absent Noapy Apply</a></li> --}}
+          
         </ul>
   </div>
  
