@@ -71,6 +71,8 @@ class AuthController extends Controller
         ->leftJoin('shift_types', 'employees.emp_shift', '=', 'shift_types.id')
         ->leftJoin('job_titles', 'employees.emp_job_code', '=', 'job_titles.id')
         ->leftJoin('departments', 'employees.emp_department', '=', 'departments.id')
+        ->leftJoin('companies', 'employees.emp_company', '=', 'companies.id')
+        ->leftJoin('branches', 'employees.emp_location', '=', 'branches.id')
         ->leftJoin('employee_pictures', 'employees.emp_id', '=', 'employee_pictures.emp_id')
         ->where('employees.emp_id', $user->emp_id)
         ->select(
@@ -114,6 +116,9 @@ class AuthController extends Controller
             'employment_statuses.emp_status',
             'shift_types.shift_name',
             'job_categories.category as job_category',
+            'companies.name as company_name',
+            'companies.email as company_email',
+            'branches.location as employee_location',
             'employee_pictures.emp_pic_filename as profile_picture'
         )
         ->first();
