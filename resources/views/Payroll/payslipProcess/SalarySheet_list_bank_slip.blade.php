@@ -23,7 +23,7 @@
 					{{ csrf_field() }}
 					<div class="row">
 						<div class="col-12 text-right">
-							<button type="button" name="find_employee" id="find_employee" class="btn btn-success btn-sm px-3"><i class="fal fa-search mr-2"></i>Search</button>
+							<button type="button" name="find_employee" id="find_employee" class="btn btn-warning btn-sm px-3"><i class="fal fa-search mr-2"></i>Search</button>
 							<button type="submit" name="print_record" id="print_record" disabled="disabled" class="btn btn-secondary btn-sm btn-light" style="display:none;">Download</button>
 							<a href="#" class="btn btn-danger btn-sm btn-light disabled px-3" type="button" id="slip"><i class="fal fa-file-pdf mr-2"></i> Bank Report</a>
 						</div>
@@ -187,8 +187,7 @@
 									<option value="" disabled="disabled" selected="selected">Please select</option>
 									@foreach($payroll_process_type as $payroll)
 
-									<option value="{{$payroll->id}}" data-totdays="{{$payroll->total_work_days}}">
-										{{$payroll->process_name}}</option>
+									<option value="{{$payroll->id}}" data-totdays="{{$payroll->total_work_days}}">{{$payroll->process_name}}</option>
 									@endforeach
 
 								</select>
@@ -235,7 +234,7 @@
 							<div class="col-12">
 								<label class="font-weight-bolder small">Slip Type</label><br>
 								<div class="custom-control custom-radio custom-control-inline">
-									<input type="radio" id="opt_rpt_a" name="opt_rpt" class="custom-control-input" value="1">
+									<input type="radio" id="opt_rpt_a" name="opt_rpt" checked="checked" class="custom-control-input" value="1">
 									<label class="custom-control-label small" for="opt_rpt_a">Salary</label>
 								</div>
 								<div class="custom-control custom-radio custom-control-inline">
@@ -251,7 +250,7 @@
 						<div class="form-row">
 							<div class="col-12 text-right">
 								<hr>
-								<input type="submit" name="action_button" id="action_button" class="btn btn-success btn-sm px-3" value="View Payslips" />
+								<input type="submit" name="action_button" id="action_button" class="btn btn-warning btn-sm px-3" value="View Payslips" />
 								<button type="button" class="btn btn-light btn-sm px-3" data-dismiss="modal">Close</button>
 							</div>
 						</div>
