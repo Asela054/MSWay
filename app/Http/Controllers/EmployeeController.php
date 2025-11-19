@@ -484,5 +484,48 @@ class EmployeeController extends Controller
         return response()->json(['error' => 'Employee not found'], 404);
     }
 
+    public function usercreate(Request $request)
+    {
+        $permission = Auth::user()->can('employee-create');
+        if (!$permission) {
+            return response()->json(['errors' => ['Unauthorized access']], 403);
+        }
+
+        $rules = array(
+            'userid' => 'required',
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:6|confirmed'
+        );
+
+        $error = Validator::make($request->all(), $rules);
+
+        if ($error->fails()) {
+            return response()->json(['errors' => $error->errors()->all()]);
+        }
+
+        $existingUser = User::where('emp_id', $request->input('userid'))->first();
+        if ($existingUser) {
+            return response()->json(['errors' => ['User login already exists for this employee']]);
+        }
+
+        try {
+            $user = new User;
+            $user->emp_id = $request->input('userid');
+            $user->name = $request->input('name');
+            $user->email = $request->input('email');
+            $user->company_id = Auth::user()->company_id ?? Session::get('emp_company');
+            $user->password = bcrypt($request->input('password'));
+            $user->save();
+            
+            $user->assignRole('Employee');
+
+            return response()->json(['success' => 'User Login is successfully Created']);
+            
+        } catch (\Exception $e) {
+            return response()->json(['errors' => ['Failed to create user login: ' . $e->getMessage()]]);
+        }
+    }
+
      
 }
