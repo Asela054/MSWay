@@ -436,7 +436,7 @@
                                 </div>
                                 <div class="form-group mb-1">
                                     <label class="small font-weight-bold text-dark">Password</label>
-                                    <input type="password" class="form-control form-control-sm {{ $errors->has('password') ? ' has-error' : '' }} shipClass" id="inputEmail4" name="password">
+                                    <input type="password" class="form-control form-control-sm {{ $errors->has('password') ? ' has-error' : '' }} shipClass" id="userlog_password" name="password">
                                     @if ($errors->has('password'))
                                     <span class="help-block">
                                         <strong>{{ $errors->first('password') }}</strong>
@@ -508,7 +508,7 @@
                                 </div>
                                 <div class="form-group mb-1">
                                     <label class="small font-weight-bold text-dark">password: </label>
-                                    <input type="text" name="password" id="password" class="form-control form-control-sm" />
+                                    <input type="text" name="password" id="fp_password" class="form-control form-control-sm" />
                                 </div>
                                 <div class="form-group mb-1">
                                     <label class="small font-weight-bold text-dark">FP Location: </label>
@@ -1081,30 +1081,69 @@ $(document).ready(function () {
         }
     });
 
-    //userlog 
+    // userlog 
 
     $(document).on('click', '.adduserlog', function () {
         $('.modal-title').text('Add Employee User Login');
-        $('#action_button').val('Add');
-        $('#userlogform #id').val($(this).attr('data-id'));
+        $('#userlog_action_button').html('<i class="fas fa-plus"></i>&nbsp;Add');
+        $('#userlog_action_button').val('Add');
         var id = $(this).attr('id');
         var name = $(this).attr('name');
         $('#userlog_userid').val(id);
         $('#userlog_name').val(name);
         $('#userlog_action').val('Add');
         $('#userlogform_result').html('');
+        $('#userlogform')[0].reset();
+        
+        $('#email').val('');
+        $('#userlog_password').val('');
+        $('#password-confirm').val('');
 
         $('#userlogModal').modal('show');
     });
 
     $('#userlogform').on('submit', function (event) {
         event.preventDefault();
-        var action_url = '';
-
-        if ($('#userlog_action').val() == 'Add') {
-            action_url = "{{ route('addUserLogin') }}";
+        
+        $('#userlogform_result').html('');
+        
+        var email = $.trim($('#email').val());
+        var password = $.trim($('#userlog_password').val());
+        var password_confirmation = $.trim($('#password-confirm').val());
+        
+        if (email === '') {
+            var html = '<div class="alert alert-danger">Email is required</div>';
+            $('#userlogform_result').html(html);
+            return false;
         }
+        
+        if (password === '') {
+            var html = '<div class="alert alert-danger">Password is required</div>';
+            $('#userlogform_result').html(html);
+            return false;
+        }
+        
+        if (password_confirmation === '') {
+            var html = '<div class="alert alert-danger">Confirm password is required</div>';
+            $('#userlogform_result').html(html);
+            return false;
+        }
+        
+        if (password !== password_confirmation) {
+            var html = '<div class="alert alert-danger">Passwords do not match</div>';
+            $('#userlogform_result').html(html);
+            return false;
+        }
+        
+        if (password.length < 6) {
+            var html = '<div class="alert alert-danger">Password must be at least 6 characters</div>';
+            $('#userlogform_result').html(html);
+            return false;
+        }
+        
+        var action_url = "{{ route('addUserLogin') }}";
 
+        $('#userlog_action_button').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>&nbsp;Creating...');
 
         $.ajax({
             url: action_url,
@@ -1112,7 +1151,6 @@ $(document).ready(function () {
             data: $(this).serialize(),
             dataType: "json",
             success: function (data) {
-
                 var html = '';
                 if (data.errors) {
                     html = '<div class="alert alert-danger">';
@@ -1120,14 +1158,31 @@ $(document).ready(function () {
                         html += '<p>' + data.errors[count] + '</p>';
                     }
                     html += '</div>';
+                    $('#userlogform_result').html(html);
+                    $('#userlog_action_button').prop('disabled', false).html('<i class="fas fa-plus"></i>&nbsp;Add');
                 }
                 if (data.success) {
                     html = '<div class="alert alert-success">' + data.success + '</div>';
-                    // $('#fpform')[0].close();
-                    //$('#emptable').DataTable().ajax.reload();
-                    location.reload();
+                    $('#userlogform_result').html(html);
+                    $('#userlogform')[0].reset();
+                    setTimeout(function() {
+                        $('#userlogModal').modal('hide');
+                        location.reload();
+                    }, 2000);
                 }
+            },
+            error: function(xhr, status, error) {
+                var html = '<div class="alert alert-danger">';
+                if (xhr.responseJSON && xhr.responseJSON.errors) {
+                    for (var count = 0; count < xhr.responseJSON.errors.length; count++) {
+                        html += '<p>' + xhr.responseJSON.errors[count] + '</p>';
+                    }
+                } else {
+                    html += '<p>An error occurred. Please try again.</p>';
+                }
+                html += '</div>';
                 $('#userlogform_result').html(html);
+                $('#userlog_action_button').prop('disabled', false).html('<i class="fas fa-plus"></i>&nbsp;Add');
             }
         });
     });
