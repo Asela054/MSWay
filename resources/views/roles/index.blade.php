@@ -23,10 +23,8 @@
                     <div class="row">
                         <div class="col-12">
                            <div class="col-12 text-right">
-                             @can('role-create')
                                 <button type="button" class="btn btn-primary btn-sm px-4" name="create_record" id="create_record"><i class="fas fa-plus mr-2"></i>Role User</button>
-                            @endcan
-                        </div>
+                            </div>
                         </div>
                         <div class="col-12">
                             <hr class="border-dark">
