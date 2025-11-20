@@ -33,8 +33,8 @@ require('ssp.customized.class.php');
 // ✅ Proper join for Spatie + company
 $joinQuery = "
     FROM `users` AS `u`
-    LEFT JOIN `model_has_roles` AS `mr`
-        ON `mr`.`model_id` = `u`.`id` AND `mr`.`model_type` = 'App\\\\Models\\\\User'
+    LEFT JOIN `user_has_roles` AS `mr`
+        ON `mr`.`user_id` = `u`.`id` 
     LEFT JOIN `roles` AS `r` ON `r`.`id` = `mr`.`role_id`
     LEFT JOIN `companies` AS `c` ON `u`.`company_id` = `c`.`id`
 ";
