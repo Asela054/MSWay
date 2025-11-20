@@ -40,9 +40,9 @@
                             <table class="table table-striped table-sm" width="100%" id="roletable">
                                 <thead>
                                 <tr>
-                                    <th>No</th>
-                                    <th>Name</th>
-                                    <th width="280px">Action</th>
+                                    <th>NO</th>
+                                    <th>ROLE</th>
+                                    <th width="280px">ACTION</th>
                                 </tr>
                                </thead>
                             </table>
@@ -143,7 +143,7 @@
 
             $('#administrator_menu_link').addClass('active');
             $('#administrator_menu_link_icon').addClass('active');
-            $('#roles_link').addClass('navbtnactive');
+            $('#role_link').addClass('navbtnactive');
 
 
             $('#roletable').DataTable({
