@@ -26,6 +26,7 @@ $columns = array(
     array('db' => 'employees.is_resigned', 'dt' => 'is_resigned', 'field' => 'is_resigned'),
     array('db' => 'employees.emp_name_with_initial', 'dt' => 'emp_name_with_initial', 'field' => 'emp_name_with_initial'),
     array('db' => 'employees.calling_name', 'dt' => 'calling_name', 'field' => 'calling_name'),
+    array('db' => 'employees.emp_company', 'dt' => 'emp_company', 'field' => 'emp_company'),
     array('db' => 'employees.emp_id', 'dt' => 'employee_display', 'field' => 'emp_id', 
           'formatter' => function($d, $row) {
               $employee = (object)[
@@ -71,6 +72,7 @@ if (!empty($_POST['from_date']) && !empty($_POST['to_date'])) {
 
 $joinQuery = "FROM employees
 LEFT JOIN employment_statuses ON employees.emp_status = employment_statuses.id
+LEFT JOIN companies ON employees.emp_company = companies.id
 LEFT JOIN branches ON employees.emp_location = branches.id
 LEFT JOIN departments ON employees.emp_department = departments.id
 LEFT JOIN job_titles ON employees.emp_job_code = job_titles.id
