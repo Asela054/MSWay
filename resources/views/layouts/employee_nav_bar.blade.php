@@ -4,9 +4,11 @@
         Master Data <span class="caret"></span></a>
         <ul class="dropdown-menu multi-level dropdownmenucolor" role="menu" aria-labelledby="dropdownMenu">
           <li><a class="dropdown-item" href="{{ route('Skill')}}">Skill</a></li>
+          <li><a class="dropdown-item" href="{{ route('Hierarchy')}}">Company Hierarchy</a></li>
           <li><a class="dropdown-item" href="{{ route('JobTitle')}}">Job Titles</a></li>
           <li><a class="dropdown-item" href="{{ route('PayGrade')}}">Pay Grades</a></li>
           <li><a class="dropdown-item" href="{{ route('EmploymentStatus')}}">Job Employment Status</a></li>
+          <li><a class="dropdown-item" href="{{ route('Financial')}}">Financial Category</a></li>
           <li><a class="dropdown-item" href="{{ route('examsubjects')}}">Exam Subjects</a></li>
           <li><a class="dropdown-item" href="{{ route('dsdivision')}}">DS Divisions</a></li>
           <li><a class="dropdown-item" href="{{ route('gnsdivision')}}">GNS Divisions</a></li>

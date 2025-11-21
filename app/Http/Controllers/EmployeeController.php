@@ -494,6 +494,7 @@ class EmployeeController extends Controller
         $rules = array(
             'userid' => 'required',
             'name' => 'required|string|max:255',
+            'company_id' => 'required',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed'
         );
@@ -514,7 +515,7 @@ class EmployeeController extends Controller
             $user->emp_id = $request->input('userid');
             $user->name = $request->input('name');
             $user->email = $request->input('email');
-            $user->company_id = Auth::user()->company_id ?? Session::get('emp_company');
+            $user->company_id = $request->input('company_id');
             $user->password = bcrypt($request->input('password'));
             $user->save();
             

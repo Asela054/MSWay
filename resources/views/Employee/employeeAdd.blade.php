@@ -457,6 +457,7 @@
                                 </div>
                                 <input type="hidden" id="userlog_userid" name="userid">
                                 <input type="hidden" id="userlog_name" name="name">
+                                <input type="hidden" id="userlog_company" name="company_id">
                                 <input type="hidden" name="action" id="userlog_action" />
                                 <input type="hidden" name="hidden_id" id="userlog_hidden_id" />
                             </form>
@@ -835,7 +836,7 @@ $(document).ready(function () {
                         }
 
                         if (is_resigned == 0) {
-                            buttons += '<button style="margin:1px;" data-toggle="tooltip" data-placement="bottom" title="Add Employee User Login Details" class="btn btn-secondary btn-sm adduserlog" id="' + row.emp_id + '" name="' + (row.emp_name_with_initial || '') + '"><i class="fas fa-user"></i></button>';
+                            buttons += '<button style="margin:1px;" data-toggle="tooltip" data-placement="bottom" title="Add Employee User Login Details" class="btn btn-secondary btn-sm adduserlog" id="' + row.emp_id + '" name="' + (row.emp_name_with_initial || '') + '" emp_company="' + row.emp_company + '"><i class="fas fa-user"></i></button>';
                         }
 
                         if (is_resigned == 0) {
@@ -1089,8 +1090,10 @@ $(document).ready(function () {
         $('#userlog_action_button').val('Add');
         var id = $(this).attr('id');
         var name = $(this).attr('name');
+        var emp_company = $(this).attr('emp_company');
         $('#userlog_userid').val(id);
         $('#userlog_name').val(name);
+        $('#userlog_company').val(emp_company);
         $('#userlog_action').val('Add');
         $('#userlogform_result').html('');
         $('#userlogform')[0].reset();
