@@ -11,7 +11,6 @@
           Settlement</a></li>
       <li><a class="dropdown-item" href="{{ url('EmployeeTermPaymentList') }}" id="SalaryAdditions">Salary Additions /
           Deduction</a></li>
-      <li><a href="{{ url('EmployeeExtraPaymentList') }}" id="SalaryInAdvance" class="dropdown-item">Advance Payments</a></li>
       <li><a class="dropdown-item" href="{{ url('OtherFacilityPaymentList') }}" id="OtherFacilities">Other
           Facilities</a></li>
       <li><a class="dropdown-item" href="{{ url('SalaryIncrementList') }}" id="SalaryIncrements">Salary Increments</a>
@@ -31,8 +30,6 @@
       <li><a class="dropdown-item" href="{{ url('ReportPayRegister') }}" id="payregister">Pay Register</a></li>
       <li><a class="dropdown-item" href="{{ url('ReportEmpOvertime') }}" id="otreport">OT Report</a></li>
       <li><a class="dropdown-item" href="{{ url('ReportEpfEtf') }}" id="epfetf">EPF & ETF Report</a></li>
-      <li><a href="{{ url('ReportExtraPayRegister') }}" id="employeeAdvancePayRegister" class="dropdown-item">Advance Payment Register</a></li>
-      <li><a href="{{ url('ReportExtraPaymentList') }}" id="employeeAdvancePaySlips" class="dropdown-item">Advance/Bonus Sheet</a></li>
       <li><a class="dropdown-item" href="{{ url('ReportSalarySheet') }}" id="salarysheet">Salary Sheet</a></li>
       <li><a class="dropdown-item" href="{{ url('ReportSalarySheetBankSlip') }}" id="salarysheetbank">Salary Sheet -
           Bank Slip</a></li>

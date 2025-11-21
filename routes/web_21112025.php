@@ -618,15 +618,7 @@ Route::post('/checkExtraPayment ', 'EmployeeTermPaymentExtrasController@checkExt
 Route::post('addExtraPayment',['uses' => 'EmployeeTermPaymentExtrasController@store', 'as' => 'addExtraPayment']);
 Route::get('EmployeeTermPaymentExtras/review/{id}', 'EmployeeTermPaymentExtrasController@reviewPaymentList');
 Route::post('/freezeExtrasPayment', 'EmployeeTermPaymentExtrasController@freeze');
-Route::get('ReportExtraPaymentList',['uses' => 'EmployeeTermPaymentExtrasController@reportExtraPayment', 'as' => 'ReportExtraPaymentList']);
-Route::post('/checkExtraPaymentByType', 'EmployeeTermPaymentExtrasController@checkPaymentList');
-Route::post('DownloadExtrasPaysheet',['uses' => 'EmployeeTermPaymentExtrasController@downloadSalarySheet', 'as' => 'DownloadExtrasPaysheet']);
 /*-- EmployeeTermPaymentExtras-15012025 --*/
-/*-- EmployeeTermPaymentExtras-21102025 --*/
-Route::get('ReportExtraPayRegister',['uses' => 'EmployeeTermPaymentExtrasController@reportPayRegister', 'as' => 'ReportExtraPayRegister']);
-Route::post('DownloadExtraPayRegister',['uses' => 'EmployeeTermPaymentExtrasController@downloadPayRegister', 'as' => 'DownloadExtraPayRegister']);
-Route::post('/checkExtraPayRegister', 'EmployeeTermPaymentExtrasController@checkPayRegister');
-/*-- EmployeeTermPaymentExtras-21102025 --*/
 
 /* SalaryIncrements */
 Route::resource('SalaryIncrement', 'SalaryIncrementController');
@@ -666,7 +658,6 @@ Route::resource('PaymentPeriod', 'PaymentPeriodController');
 Route::get('SalaryProcessSchedule',['uses' => 'PaymentPeriodController@index', 'as' => 'SalaryProcessSchedule']); 
 Route::post('addSchedule',['uses' => 'PaymentPeriodController@store', 'as' => 'addSchedule']); 
 Route::post('PaymentPeriod/update', 'PaymentPeriodController@update')->name('PaymentPeriod.update');
-Route::get('LatestPayPeriods/{id}/review', 'PaymentPeriodController@reviewPaydayPeriods')->name('LatestPayPeriods.review');
 /*-- PaymentPeriods --*/
 
 /*-- EmployeePayslips --*/

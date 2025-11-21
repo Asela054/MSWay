@@ -184,7 +184,55 @@
                                                 <div role="tabpanel" class="tab-pane active" id="profileinfo">
                                                     <div class="card shadow-none bg-transparent">
                                                         <div class="card-body">
-                                                            Profile Info
+                                                            <div class="row">
+                                                                <div class="col-sm-12 col-md-12 col-lg-4 col-xl-4">
+                                                                    <h6 class="title-style small my-3"><span>About</span></h6>
+                                                                    <label class="small font-weight-bolder mb-0">Full Name</label>
+                                                                    <h6 class="small my-0 text-uppercase">{{$employee->emp_fullname}}</h6>
+                                                                    <label class="small font-weight-bolder mb-0">Name with Name</label>
+                                                                    <h6 class="small my-0 text-uppercase">{{$employee->emp_name_with_initial}}</h6>
+                                                                    <label class="small font-weight-bolder mb-0">Gender</label>
+                                                                    <h6 class="small my-0 text-uppercase">{{$employee->emp_gender}}</h6>
+                                                                    <label class="small font-weight-bolder mb-0">Marital Status</label>
+                                                                    <h6 class="small my-0 text-uppercase">{{$employee->emp_marital_status}}</h6>
+                                                                    <label class="small font-weight-bolder mb-0">Nationality</label>
+                                                                    <h6 class="small my-0 text-uppercase">{{$employee->emp_nationality}}</h6>
+                                                                    <label class="small font-weight-bolder mb-0">Date of Birth</label>
+                                                                    <h6 class="small my-0 text-uppercase">{{$employee->emp_birthday}}</h6>
+                                                                    <label class="small font-weight-bolder mb-0">NIC</label>
+                                                                    <h6 class="small my-0 text-uppercase">{{$employee->emp_national_id}}</h6>
+                                                                </div>
+                                                                <div class="col-sm-12 col-md-12 col-lg-4 col-xl-4">
+                                                                    <h6 class="title-style small my-3"><span>Contact</span></h6>
+                                                                    <label class="small font-weight-bolder mb-0">Permanent Address</label>
+                                                                    <h6 class="small my-0 text-uppercase">{{$employee->emp_address}}</h6>
+                                                                    <label class="small font-weight-bolder mb-0">Temporary Address</label>
+                                                                    <h6 class="small my-0 text-uppercase">{{$employee->emp_addressT1}}</h6>
+                                                                    <label class="small font-weight-bolder mb-0">Email</label>
+                                                                    <h6 class="small my-0 text-uppercase">{{$employee->emp_email}}</h6>
+                                                                    <label class="small font-weight-bolder mb-0">Mobile no</label>
+                                                                    <h6 class="small my-0 text-uppercase">{{$employee->emp_mobile}}</h6>
+                                                                    <label class="small font-weight-bolder mb-0">Office</label>
+                                                                    <h6 class="small my-0 text-uppercase">{{$employee->tp1}}</h6>
+                                                                </div>
+                                                                <div class="col-sm-12 col-md-12 col-lg-4 col-xl-4">
+                                                                    <h6 class="title-style small my-3"><span>Official</span></h6>
+                                                                    <label class="small font-weight-bolder mb-0">EPF/ETF No</label>
+                                                                    <h6 class="small my-0 text-uppercase">{{$employee->emp_etfno}}</h6>
+                                                                    <label class="small font-weight-bolder mb-0">EMP No</label>
+                                                                    <h6 class="small my-0 text-uppercase">{{$employee->emp_id}}</h6>
+                                                                    <label class="small font-weight-bolder mb-0">Join Date</label>
+                                                                    <h6 class="small my-0 text-uppercase">{{$employee->emp_join_date}}</h6>
+                                                                    <label class="small font-weight-bolder mb-0">Company</label>
+                                                                    <h6 class="small my-0 text-uppercase">{{$employee->companyname}}</h6>
+                                                                    <label class="small font-weight-bolder mb-0">Location</label>
+                                                                    <h6 class="small my-0 text-uppercase">{{$employee->location}}</h6>
+                                                                    <label class="small font-weight-bolder mb-0">Department</label>
+                                                                    <h6 class="small my-0 text-uppercase">{{$employee->departmentname}}</h6>
+                                                                    <label class="small font-weight-bolder mb-0">Job Status</label>
+                                                                    <h6 class="small my-0 text-uppercase">{{$employee->emp_statusname}}</h6>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>         
