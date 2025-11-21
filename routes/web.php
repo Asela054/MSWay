@@ -1557,6 +1557,22 @@ Route::post('/productionresume' ,'ProductionEndingController@resumeproduction')-
 Route::post('/productionaddingemployees' ,'ProductionEndingController@addingproductionemployees')->name('productionaddingemployees');
 Route::post('/productionremoveemployees' ,'ProductionEndingController@removeproductionemployees')->name('productionremoveemployees');
 
+/*-- Comany Hierarchy----*/
+Route::resource('Hierarchy', 'CompanyHierarchyController');
+Route::get('Hierarchy',['uses' => 'CompanyHierarchyController@index', 'as' => 'Hierarchy']); 
+Route::post('addHierarchy',['uses' => 'CompanyHierarchyController@store', 'as' => 'addHierarchy']); 
+Route::post('Hierarchy/update', 'CompanyHierarchyController@update')->name('Hierarchy.update');
+Route::get('Hierarchy/destroy/{id}', 'CompanyHierarchyController@destroy');
+/*-- End Comany Hierarchy----*/
+
+/*-- Financial Category----*/
+Route::resource('Financial', 'FinancialCategoryController');
+Route::get('Financial',['uses' => 'FinancialCategoryController@index', 'as' => 'Financial']); 
+Route::post('addFinancial',['uses' => 'FinancialCategoryController@store', 'as' => 'addFinancial']); 
+Route::post('Financial/update', 'FinancialCategoryController@update')->name('Financial.update');
+Route::get('Financial/destroy/{id}', 'FinancialCategoryController@destroy');
+/*-- End Financial Category----*/
+
 
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');
