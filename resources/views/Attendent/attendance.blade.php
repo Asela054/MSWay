@@ -118,15 +118,13 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header p-2">
+                     <h5 class="modal-title" id="staticBackdropLabel">If you need to download data, please confirm?</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <div class="row1">
-                        <div class="col1 text-center">
-                            <h4 class="font-weight-normal">If you need to download data, please confirm?</h4>
-                        </div>
                          <div class="form-row mb-1">
                             @if($companytype == 0)
                                 <div class="col-sm-12 col-md-6">
