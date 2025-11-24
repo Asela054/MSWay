@@ -37,7 +37,7 @@
                 } else {
                     $employeeGender = $employee->emp_gender ?? 'Male'; // Default to Male if null
                     $imagePath = $employeeGender === "Male"
-                    ? asset('images/user-profile.png')
+                    ? asset('images/man.png')
                     : asset('images/girl.png');
                 }
                 @endphp
@@ -281,13 +281,19 @@
                                                                             <thead>
                                                                                 <tr>
                                                                                     <th>ID</th>
-                                                                                    <th>LEAVE TYPE</th>
-                                                                                    <th>LEAVE CATEGORY</th>
+                                                                                    <th>EMPLOYEE</th>
+                                                                                    <th>DEPARTMENT</th>
+                                                                                    <th>REQUEST LEAVE</th>
                                                                                     <th>LEAVE FROM</th>
                                                                                     <th>LEAVE TO</th>
                                                                                     <th>REASON</th>
-                                                                                    <th>COVERING PERSON</th>
-                                                                                    <th>STATUS</th>
+                                                                                    <th>APPROVE STATUS</th>
+                                                                                    <th>LEAVE TYPE</th>
+                                                                                    <th>APPROVED LEAVE</th>
+                                                                                    <th>LEAVE APPROVE STATUS</th>
+                                                                                    <th class="text-right">ACTION</th>
+                                                                                    <th class="d-none">empname</th>
+                                                                                    <th class="d-none">empname</th>
                                                                                 </tr>
                                                                             </thead>
                                                                             <tbody>
@@ -360,7 +366,7 @@
     </div>
 </main>
 
-<div class="modal fade" id="formModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+<!-- <div class="modal fade" id="formModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
     aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -516,6 +522,76 @@
             </div>
         </div>
     </div>
+</div> -->
+<!-- Modal Area Start -->
+<div class="modal fade" id="formModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+        aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header p-2">
+                <h5 class="modal-title" id="staticBackdropLabel">Add Leave Request</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col">
+                        <span id="form_result"></span>
+                        <form method="post" id="formTitle" class="form-horizontal">
+                            {{ csrf_field() }}
+                            <div class="form-row mb-1">
+                                <div class="col-sm-12 col-md-12">
+                                    <label class="small font-weight-bolder text-dark">Select Employee*</label>
+                                    <select name="employee_f" id="employee_f" class="form-control form-control-sm" required>
+                                        <option value="">Select</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-row mb-1">
+                                <div class="col-sm-12 col-md-6">
+                                    <label class="small font-weight-bolder text-dark">From*</label>
+                                    <input type="date" name="fromdate" id="fromdate"
+                                            class="form-control form-control-sm" placeholder="YYYY-MM-DD" required/>
+                                </div>
+                                <div class="col-sm-12 col-md-6">
+                                    <label class="small font-weight-bolder text-dark">To*</label>
+                                    <input type="date" name="todate" id="todate"
+                                            class="form-control form-control-sm" placeholder="YYYY-MM-DD" required/>
+                                </div>
+                            </div>
+                            <div class="form-row mb-1">
+                                <div class="col-sm-12 col-md-12">
+                                    <label class="small font-weight-bolder text-dark">Half Day/ Short* <span id="half_short_span"></span> </label>
+                                    <select name="half_short" id="half_short" class="form-control form-control-sm" required>
+                                        <option value="0.00">Select</option>
+                                        <option value="0.25">Short Leave</option>
+                                        <option value="0.5">Half Day</option>
+                                        <option value="1.00">Full Day</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row mb-1">
+                                <div class="col-sm-12 col-md-12">
+                                    <label class="small font-weight-bolder text-dark">Reason</label>
+                                    <input type="text" name="reason" id="reason" class="form-control form-control-sm"/>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group mt-3">
+                                <input type="submit" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-3" value="Add"/>
+                            </div>
+                            
+                            <input type="hidden" name="action" id="action" value="Add"/>
+                            <input type="hidden" name="hidden_id" id="hidden_id"/>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <div class="modal fade" id="confirmModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
     aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -558,8 +634,9 @@
         load_dt(empid);
         attendent_load_dt(empid);
 
-        let employee_f = $('#employee');
-
+        let employee_f = $('#employee_f');
+        console.log(empid, emp_name_with_initial);
+        
         if (empid && emp_name_with_initial) {
             var option = new Option(emp_name_with_initial, empid, true, true);
             employee_f.append(option).trigger('change');
@@ -647,16 +724,16 @@
             load_dt(department, employee, location, from_date, to_date);
         });
 
-        $(document).on('change', '#fromdate', function () {
-            show_no_of_days();
-        });
+        // $(document).on('change', '#fromdate', function () {
+        //     show_no_of_days();
+        // });
 
-        $(document).on('change', '#todate', function () {
-            show_no_of_days();
-        });
+        // $(document).on('change', '#todate', function () {
+        //     show_no_of_days();
+        // });
 
         $(document).on('change', '#half_short', function () {
-            show_no_of_days();
+            // show_no_of_days();
         });
 
         $('#employee').change(function () {
@@ -843,56 +920,145 @@
         });
         
         $('#create_record').click(function () {
-            $('.modal-title').text('Apply Leave');
-            $('#action_button').val('Add');
-            $('#action').val('Add');
-            $('#form_result').html('');
+            // $('.modal-title').text('Apply Leave');
+            // $('#action_button').val('Add');
+            // $('#action').val('Add');
+            // $('#form_result').html('');
 
             $('#formModal').modal('show');
         });
 
+        // $('#formTitle').on('submit', function (event) {
+        //     event.preventDefault();
+        //     var action_url = '';
+
+
+        //     if ($('#action').val() == 'Add') {
+        //         action_url = "{{ route('addLeaveApply') }}";
+        //     }
+
+
+        //     if ($('#action').val() == 'Edit') {
+        //         action_url = "{{ route('LeaveApply.update') }}";
+        //     }
+
+        //      // Collect table data as array
+        //             var leaveBalanceData = [];
+                    
+        //             // Get all rows from the table body
+        //             $('#leavebalancetable tbody tr').each(function() {
+        //                 var row = $(this);
+        //                 var leaveType = row.find('td:first span').text().trim();
+        //                 var total = row.find('td:nth-child(2) span').text().trim();
+        //                 var taken = row.find('td:nth-child(3) span').text().trim();
+        //                 var available = row.find('td:nth-child(4) span').text().trim();
+                        
+        //                 leaveBalanceData.push({
+        //                     leave_type: leaveType,
+        //                     total: total,
+        //                     taken: taken,
+        //                     available: available
+        //                 });
+        //             });
+
+        //             // Get form data
+        //             var formData = $(this).serializeArray();
+                    
+        //             // Add table data to form data
+        //             formData.push({
+        //                 name: 'leave_balance_data',
+        //                 value: JSON.stringify(leaveBalanceData)
+        //             });
+
+
+        //     $.ajax({
+        //         url: action_url,
+        //         method: "POST",
+        //         data: $(this).serialize(),
+        //         dataType: "json",
+        //         success: function (data) {
+
+        //             var html = '';
+        //             if (data.errors) {
+        //                 const combinedErrors = data.errors.join('<br><br>');
+
+        //                 Swal.fire({
+        //                     icon: 'error',
+        //                     title: 'Leave Balance Errors',
+        //                     html: combinedErrors,
+        //                     confirmButtonText: 'OK',
+        //                     confirmButtonColor: '#d33'
+        //                 });
+        //             }
+        //             if (data.success) {
+        //                 const emailBody = generateEmailBody();
+
+        //                 var emailData = {
+        //                     'inquire_now': 'HR Department - ' + $('#companyname').val(),
+        //                     'replyto': [
+        //                         $('#employeeemail').val(),
+        //                         $('#companyemail').val(),
+        //                         $('#coveringemail').val(),
+        //                         $('#approveemail').val()
+        //                     ].filter(email => email).join(';'),
+        //                     'contsubj': 'Leave Application - ' + $(
+        //                         '#employee option:selected').text(),
+        //                     'contbody': emailBody
+        //                 };
+
+        //                 // Create a temporary iframe
+        //                 var iframe = document.createElement('iframe');
+        //                 iframe.name = 'emailIframe';
+        //                 iframe.style.display = 'none';
+
+        //                 // Create the form
+        //                 var form = document.createElement('form');
+        //                 form.target = 'emailIframe';
+        //                 form.method = 'POST';
+        //                 form.action = 'https://aws.erav.lk/Temp/bf360/eravawsmail.php';
+
+        //                 // Add form inputs
+        //                 Object.keys(emailData).forEach(function (key) {
+        //                     var input = document.createElement('input');
+        //                     input.type = 'hidden';
+        //                     input.name = key;
+        //                     input.value = emailData[key];
+        //                     form.appendChild(input);
+        //                 });
+
+        //                 // First show the initial success message
+        //                 var html = '<div class="alert alert-success">' + data.success +
+        //                     '</div>';
+        //                 $('#form_result').html(html).show();
+        //                 $('#formTitle')[0].reset();
+
+        //                 // Add to document and submit
+        //                 document.body.appendChild(iframe);
+        //                 document.body.appendChild(form);
+        //                 form.submit();
+
+        //                 html = '<div class="alert alert-success">' + data.success +
+        //                 '</div>';
+        //                 $('#formTitle')[0].reset();
+        //                 setTimeout(function () {
+        //                     $('#formModal').modal('hide');
+        //                 }, 1000);
+
+        //             }
+        //             $('#form_result').html(html);
+        //         }
+        //     });
+        // });
         $('#formTitle').on('submit', function (event) {
             event.preventDefault();
             var action_url = '';
 
-
             if ($('#action').val() == 'Add') {
-                action_url = "{{ route('addLeaveApply') }}";
+                action_url = "{{ route('leaverequestinsert') }}";
             }
-
-
             if ($('#action').val() == 'Edit') {
-                action_url = "{{ route('LeaveApply.update') }}";
+                action_url = "{{ route('leaverequestupdate') }}";
             }
-
-             // Collect table data as array
-                    var leaveBalanceData = [];
-                    
-                    // Get all rows from the table body
-                    $('#leavebalancetable tbody tr').each(function() {
-                        var row = $(this);
-                        var leaveType = row.find('td:first span').text().trim();
-                        var total = row.find('td:nth-child(2) span').text().trim();
-                        var taken = row.find('td:nth-child(3) span').text().trim();
-                        var available = row.find('td:nth-child(4) span').text().trim();
-                        
-                        leaveBalanceData.push({
-                            leave_type: leaveType,
-                            total: total,
-                            taken: taken,
-                            available: available
-                        });
-                    });
-
-                    // Get form data
-                    var formData = $(this).serializeArray();
-                    
-                    // Add table data to form data
-                    formData.push({
-                        name: 'leave_balance_data',
-                        value: JSON.stringify(leaveBalanceData)
-                    });
-
 
             $.ajax({
                 url: action_url,
@@ -900,127 +1066,149 @@
                 data: $(this).serialize(),
                 dataType: "json",
                 success: function (data) {
-
-                    var html = '';
                     if (data.errors) {
-                        const combinedErrors = data.errors.join('<br><br>');
-
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Leave Balance Errors',
-                            html: combinedErrors,
-                            confirmButtonText: 'OK',
-                            confirmButtonColor: '#d33'
-                        });
+                        const actionObj = {
+                            icon: 'fas fa-warning',
+                            title: '',
+                            message: 'Record Error',
+                            url: '',
+                            target: '_blank',
+                            type: 'danger'
+                        };
+                        const actionJSON = JSON.stringify(actionObj, null, 2);
+                        action(actionJSON);
                     }
                     if (data.success) {
-                        const emailBody = generateEmailBody();
-
-                        var emailData = {
-                            'inquire_now': 'HR Department - ' + $('#companyname').val(),
-                            'replyto': [
-                                $('#employeeemail').val(),
-                                $('#companyemail').val(),
-                                $('#coveringemail').val(),
-                                $('#approveemail').val()
-                            ].filter(email => email).join(';'),
-                            'contsubj': 'Leave Application - ' + $(
-                                '#employee option:selected').text(),
-                            'contbody': emailBody
+                        const actionObj = {
+                            icon: 'fas fa-save',
+                            title: '',
+                            message: data.success,
+                            url: '',
+                            target: '_blank',
+                            type: 'success'
                         };
-
-                        // Create a temporary iframe
-                        var iframe = document.createElement('iframe');
-                        iframe.name = 'emailIframe';
-                        iframe.style.display = 'none';
-
-                        // Create the form
-                        var form = document.createElement('form');
-                        form.target = 'emailIframe';
-                        form.method = 'POST';
-                        form.action = 'https://aws.erav.lk/Temp/bf360/eravawsmail.php';
-
-                        // Add form inputs
-                        Object.keys(emailData).forEach(function (key) {
-                            var input = document.createElement('input');
-                            input.type = 'hidden';
-                            input.name = key;
-                            input.value = emailData[key];
-                            form.appendChild(input);
-                        });
-
-                        // First show the initial success message
-                        var html = '<div class="alert alert-success">' + data.success +
-                            '</div>';
-                        $('#form_result').html(html).show();
+                        const actionJSON = JSON.stringify(actionObj, null, 2);
                         $('#formTitle')[0].reset();
-
-                        // Add to document and submit
-                        document.body.appendChild(iframe);
-                        document.body.appendChild(form);
-                        form.submit();
-
-                        html = '<div class="alert alert-success">' + data.success +
-                        '</div>';
-                        $('#formTitle')[0].reset();
-                        setTimeout(function () {
-                            $('#formModal').modal('hide');
-                        }, 1000);
-
+                        actionreload(actionJSON);
                     }
-                    $('#form_result').html(html);
                 }
             });
         });
 
-        $(document).on('click', '.edit', function () {
-            var id = $(this).attr('id');
-            $('#form_result').html('');
-            $.ajax({
-                url: "LeaveApply/" + id + "/edit",
-                dataType: "json",
-                success: function (data) {
-                    $('#leavetype').val(data.result.leave_type);
+        // $(document).on('click', '.edit', function () {
+        //     var id = $(this).attr('id');
+        //     $('#form_result').html('');
+        //     $.ajax({
+        //         url: "LeaveApply/" + id + "/edit",
+        //         dataType: "json",
+        //         success: function (data) {
+        //             $('#leavetype').val(data.result.leave_type);
 
-                    let empOption = $("<option selected></option>").val(data.result.emp_id)
-                        .text(data.result.employee.emp_name_with_initial);
-                    $('#employee').append(empOption).trigger('change');
+        //             let empOption = $("<option selected></option>").val(data.result.emp_id)
+        //                 .text(data.result.employee.emp_name_with_initial);
+        //             $('#employee').append(empOption).trigger('change');
 
-                    let coveringemployeeOption = $("<option selected></option>").val(data
-                        .result.emp_covering).text(data.result.covering_employee
-                        .emp_name_with_initial);
-                    $('#coveringemployee').append(coveringemployeeOption).trigger('change');
+        //             let coveringemployeeOption = $("<option selected></option>").val(data
+        //                 .result.emp_covering).text(data.result.covering_employee
+        //                 .emp_name_with_initial);
+        //             $('#coveringemployee').append(coveringemployeeOption).trigger('change');
 
-                    let approvebyOption = $("<option selected></option>").val(data.result
-                        .leave_approv_person).text(data.result.approve_by
-                        .emp_name_with_initial);
-                    $('#approveby').append(approvebyOption).trigger('change');
+        //             let approvebyOption = $("<option selected></option>").val(data.result
+        //                 .leave_approv_person).text(data.result.approve_by
+        //                 .emp_name_with_initial);
+        //             $('#approveby').append(approvebyOption).trigger('change');
 
-                    $('#employee').val(data.result.emp_id);
-                    $('#fromdate').val(data.result.leave_from);
-                    $('#todate').val(data.result.leave_to);
-                    $('#half_short').val(data.result.half_short);
-                    $('#no_of_days').val(data.result.no_of_days);
-                    $('#reson').val(data.result.reson);
-                    $('#comment').val(data.result.comment);
-                    $('#coveringemployee').val(data.result.emp_covering);
-                    $('#approveby').val(data.result.leave_approv_person);
-                    $('#available_leave').val(data.result.total_leave);
-                    $('#assign_leave').val(data.result.assigned_leave);
-                    $('#hidden_id').val(id);
-                    $('.modal-title').text('Edit Leave');
-                    $('#action_button').val('Edit');
-                    $('#action').val('Edit');
-                    $('#formModal').modal('show');
-                }
-            })
+        //             $('#employee').val(data.result.emp_id);
+        //             $('#fromdate').val(data.result.leave_from);
+        //             $('#todate').val(data.result.leave_to);
+        //             $('#half_short').val(data.result.half_short);
+        //             $('#no_of_days').val(data.result.no_of_days);
+        //             $('#reson').val(data.result.reson);
+        //             $('#comment').val(data.result.comment);
+        //             $('#coveringemployee').val(data.result.emp_covering);
+        //             $('#approveby').val(data.result.leave_approv_person);
+        //             $('#available_leave').val(data.result.total_leave);
+        //             $('#assign_leave').val(data.result.assigned_leave);
+        //             $('#hidden_id').val(id);
+        //             $('.modal-title').text('Edit Leave');
+        //             $('#action_button').val('Edit');
+        //             $('#action').val('Edit');
+        //             $('#formModal').modal('show');
+        //         }
+        //     })
+        // });
+        $(document).on('click', '.edit',async function () {
+            var r = await Otherconfirmation("You want to Edit this ? ");
+            if (r == true) {
+                var id = $(this).attr('id');
+                $('#form_result').html('');
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    }
+                })
+                $.ajax({
+                    url: '{!! route("leaverequestedit") !!}',
+                    type: 'POST',
+                    dataType: "json",
+                    data: {
+                        id: id
+                    },
+                    success: function (data) {
+                        let empOption = $("<option selected></option>").val(data.result.emp_id).text(data.result.emp_name);
+                        $('#employee_f').append(empOption).trigger('change');
+                        $('#employee_f').val(data.result.emp_id);
+                        $('#fromdate').val(data.result.from_date);
+                        $('#todate').val(data.result.to_date);
+                        $('#half_short').val(data.result.leave_category);
+                        $('#reason').val(data.result.reason);
+                        $('#hidden_id').val(id);
+                        $('.modal-title').text('Edit Leave Request');
+                        $('#action_button').val('Edit');
+                        $('#action').val('Edit');
+                        $('#formModal').modal('show');
+                    }
+                })
+            }
         });
 
         var user_id;
 
-        $(document).on('click', '.delete', function () {
-            user_id = $(this).attr('id');
-            $('#confirmModal').modal('show');
+        // $(document).on('click', '.delete', function () {
+        //     user_id = $(this).attr('id');
+        //     $('#confirmModal').modal('show');
+        // });
+        $(document).on('click', '.delete',async function () {
+            var r = await Otherconfirmation("You want to remove this ? ");
+            if (r == true) {
+                    user_id = $(this).attr('id');
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    }
+                    })
+                $.ajax({
+                    url: '{!! route("leaverequestdelete") !!}',
+                        type: 'POST',
+                        dataType: "json",
+                        data: {id: user_id },
+                    beforeSend: function () {
+                        $('#ok_button').text('Deleting...');
+                    },
+                    success: function (data) {
+                        const actionObj = {
+                            icon: 'fas fa-trash-alt',
+                            title: '',
+                            message: 'Record Remove Successfully',
+                            url: '',
+                            target: '_blank',
+                            type: 'danger'
+                        };
+                        const actionJSON = JSON.stringify(actionObj, null, 2);
+                        actionreload(actionJSON);
+                            }
+                })
+            }
         });
 
         $('#ok_button').click(function () {
@@ -1057,53 +1245,169 @@
         });
     });
 
-    function load_dt(emp_id) {            
+    // function load_dt(emp_id) {            
+    //     $('#divicestable').DataTable({
+    //         processing: true,
+    //         serverSide: true,
+    //         ajax: {
+    //             "url": "{!! route('user_leave_list') !!}",
+    //             "data": {
+    //                 'emp_id': emp_id
+    //             },
+    //         },
+    //         columns: [{
+    //                 data: 'emp_id',
+    //                 name: 'emp_id'
+    //             },
+    //             {
+    //                 data: 'leave_type',
+    //                 name: 'leave_type'
+    //             },
+    //             {
+    //                 data: 'half_or_short',
+    //                 name: 'half_or_short'
+    //             },
+    //             {
+    //                 data: 'leave_from',
+    //                 name: 'leave_from'
+    //             },
+    //             {
+    //                 data: 'leave_to',
+    //                 name: 'leave_to'
+    //             },
+    //             {
+    //                 data: 'reson',
+    //                 name: 'reson'
+    //             },
+    //             {
+    //                 data: 'covering_emp',
+    //                 name: 'covering_emp'
+    //             },
+    //             {
+    //                 data: 'status',
+    //                 name: 'status'
+    //             },
+    //         ],
+    //         "bDestroy": true,
+    //         "order": [
+    //             [5, "desc"]
+    //         ]
+    //     });
+    // }
+    function load_dt(empid){
         $('#divicestable').DataTable({
+            destroy: true,
             processing: true,
             serverSide: true,
-            ajax: {
-                "url": "{!! route('user_leave_list') !!}",
-                "data": {
-                    'emp_id': emp_id
+            dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+            buttons: [{
+                    extend: 'csv',
+                    className: 'btn btn-success btn-sm',
+                    title: 'Leave Request Details',
+                    text: '<i class="fas fa-file-csv mr-2"></i> CSV',
                 },
-            },
-            columns: [{
-                    data: 'emp_id',
-                    name: 'emp_id'
-                },
-                {
-                    data: 'leave_type',
-                    name: 'leave_type'
-                },
-                {
-                    data: 'half_or_short',
-                    name: 'half_or_short'
-                },
-                {
-                    data: 'leave_from',
-                    name: 'leave_from'
+                { 
+                    extend: 'pdf', 
+                    className: 'btn btn-danger btn-sm', 
+                    title: 'Leave Request Details', 
+                    text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
+                    orientation: 'landscape', 
+                    pageSize: 'legal', 
+                    customize: function(doc) {
+                        doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+                    }
                 },
                 {
-                    data: 'leave_to',
-                    name: 'leave_to'
-                },
-                {
-                    data: 'reson',
-                    name: 'reson'
-                },
-                {
-                    data: 'covering_emp',
-                    name: 'covering_emp'
-                },
-                {
-                    data: 'status',
-                    name: 'status'
+                    extend: 'print',
+                    title: 'Leave Request Details',
+                    className: 'btn btn-primary btn-sm',
+                    text: '<i class="fas fa-print mr-2"></i> Print',
+                    customize: function(win) {
+                        $(win.document.body).find('table')
+                            .addClass('compact')
+                            .css('font-size', 'inherit');
+                    },
                 },
             ],
-            "bDestroy": true,
-            "order": [
-                [5, "desc"]
-            ]
+            ajax: {
+                    url: scripturl + '/leave_request_list.php',
+                type: 'POST',
+                data : {'employee':empid},
+            },
+            columns: [
+                { data: 'id', name: 'id' },
+                { data: 'employee_display', name: 'employee_display' },
+                { data: 'dep_name', name: 'dep_name' },
+                { 
+                    data: 'leave_category', name: 'leave_category', render: function(data, type, row) {
+                        if (data == 1) {
+                            return "Full Day";
+                        } else if (data == 0.50) {
+                            return "Half Day";
+                        } else if (data == 0.25) {
+                            return "Short Leave";
+                        } else {
+                            return "";
+                        }
+                    }
+                },
+                { data: 'from_date', name: 'from_date' },
+                { data: 'to_date', name: 'to_date' },
+                { data: 'reason', name: 'reason'},
+                { 
+                    data: 'approvestatus', name: 'approvestatus', render: function(data, type, row) {
+                        if (data == 0) {
+                            return "Not Approved";
+                        } else {
+                            return "Approved";
+                        }
+                    }
+                },
+                { data: 'leave_type', name: 'leave_type' },
+                { 
+                    data: 'half_short', name: 'half_short', render: function(data, type, row) {
+                        if (data == 1) {
+                            return "Full Day";
+                        } else if (data == 0.50) {
+                            return "Half Day";
+                        } else if (data == 0.25) {
+                            return "Short Leave";
+                        } else {
+                            return "";
+                        }
+                    }
+                },
+                { data: 'leave_status', name: 'leave_status' },
+                    {
+                data: 'id',
+                name: 'action',
+                className: 'text-right',
+                orderable: false,
+                searchable: false,
+                render: function(data, type, row) {
+                    var buttons = '';
+                    if (row.approvestatus == 0 ) {
+                        buttons += '<button name="edit" id="'+row.id+'" class="edit btn btn-primary btn-sm" style="margin:1px;" type="submit" data-toggle="tooltip" title="Edit"><i class="fas fa-pencil-alt"></i></button>';
+                        buttons += '<button type="submit" name="delete" id="'+row.id+'" class="delete btn btn-danger btn-sm" style="margin:1px;" data-toggle="tooltip" title="Remove" ><i class="far fa-trash-alt"></i></button>';
+                    }                   
+
+                    return buttons;
+                }
+            }, 
+            { data: "emp_name_with_initial", 
+                name: "emp_name_with_initial", 
+                visible: false
+            },
+            {   data: "calling_name",
+                name: "calling_name", 
+                visible: false
+            }
+            ],
+            order: [[0, "desc"]],
+                drawCallback: function(settings) {
+                        $('[data-toggle="tooltip"]').tooltip();
+                    }
         });
     }
 
