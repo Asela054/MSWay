@@ -238,13 +238,17 @@
 										</div>
 									</div>
 									<div class="form-row mb-1">
-										<div class="col-md-6 col-sm-6 col-12 mb-2">
+										<div class="col-md-3 col-sm-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">Driver's License Number</label>
 											<input type="text" class="form-control form-control-sm" id="licensenumber" name="licensenumber" value="{{$employee->emp_drive_license}}">
 										</div>
 										<div class="col-md-3 col-sm-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">License Expiry Date</label>
 											<input type="date" class="form-control form-control-sm" id="licenseexpiredate" name="licenseexpiredate" value="{{$employee->emp_license_expire_date}}">
+										</div>
+										<div class="col-md-3 col-sm-6 col-12 mb-2">
+											<label class="small font-weight-bold text-dark">Date Assigned</label>
+											<input type="date" class="form-control form-control-sm" id="dateassign" name="dateassign" value="{{$employee->emp_assign_date}}">
 										</div>
 									</div>
 									<div class="form-row mb-1">
@@ -278,10 +282,30 @@
 									</div>
 									<div class="form-row mb-1">
 										<div class="col-md-3 col-sm-6 col-12 mb-2">
-											<label class="small font-weight-bold text-dark">Date Assigned</label>
-											<input type="date" class="form-control form-control-sm" id="dateassign" name="dateassign" value="{{$employee->emp_assign_date}}">
+											<label class="small font-weight-bold text-dark">Position</label>
+											<select id="hierarchy_id" class="form-control form-control-sm" name="hierarchy_id">
+												<option selected>Choose...</option>
+												@foreach($empposition as $emppositions)
+													<option value="{{$emppositions->id}}"
+														{{$emppositions->id== $employee->hierarchy_id  ? 'selected' : ''}}>
+														{{$emppositions->position}}
+													</option>
+												@endforeach
+											</select>
 										</div>
-										<div class="col-md-5 col-sm-6 col-12 mb-2">
+										<div class="col-md-3 col-sm-6 col-12 mb-2">
+											<label class="small font-weight-bold text-dark">Financial Category</label>
+											<select id="financial_id" class="form-control form-control-sm" name="financial_id">
+												<option selected>Choose...</option>
+												@foreach($empfinancial as $empfinancials)
+													<option value="{{$empfinancials->id}}"
+														{{$empfinancials->id== $employee->financial_id  ? 'selected' : ''}}>
+														{{$empfinancials->category}}
+													</option>
+												@endforeach
+											</select>
+										</div>
+										<div class="col-md-3 col-sm-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">Leave Approval Person</label>
 											<br>
 											<div class="form-check-inline">
