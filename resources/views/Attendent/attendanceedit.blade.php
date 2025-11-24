@@ -340,8 +340,8 @@
 
 
         <div class="modal fade" id="uploadAtModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-             aria-labelledby="staticBackdropLabel1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-lg">
+            aria-labelledby="staticBackdropLabel1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header p-2">
                         <h5 class="modal-title" id="staticBackdropLabel1">Upload Attendance</h5>
@@ -356,46 +356,58 @@
                             <div class="row">
                                 <div class="col">
                                     <div class="form-row mb-1">
-                                        <div class="col-sm-12 col-md-4">
-                                            <label class="small font-weight-bold text-dark">Date*</label>
-                                            <input required type="date" id="date_u" name="date" class="form-control form-control-sm" value="{{Date('Y-m-d')}}" />
-                                        </div>
-                                        <div class="col-sm-12 col-md-4">
+                                        @if($companytype == 1)
+                                            <div class="col-sm-12 col-md-6">
+                                                <label class="small font-weight-bold text-dark">From Date*</label>
+                                                <input required type="date" id="date_from" name="date_from"
+                                                    class="form-control form-control-sm" value="{{Date('Y-m-d')}}"/>
+                                            </div>
+                                            <div class="col-sm-12 col-md-6">
+                                                <label class="small font-weight-bold text-dark">To Date*</label>
+                                                <input required type="date" id="date_to" name="date_to"
+                                                    class="form-control form-control-sm" value="{{Date('Y-m-d')}}" />
+                                            </div>
+                                        @else
+                                            <div class="col-sm-12 col-md-12">
+                                                <label class="small font-weight-bold text-dark">Date*</label>
+                                                <input required type="date" id="date_u" name="date"
+                                                    class="form-control form-control-sm" value="{{Date('Y-m-d')}}" />
+                                            </div>
+                                        @endif
+                                       <input type="hidden" name="companytype" id="companytype" value="<?php echo $companytype; ?>" />
+
+                                        {{-- <div class="col-sm-12 col-md-4">
                                             <label class="small font-weight-bold text-dark">Machine* </label>
                                             <select id="machine" name="machine" class="form-control form-control-sm" required>
                                                 <option value="">Select Machine</option>
                                                 @foreach($fingerprints as $fingerprint)
                                                 <option value="{{$fingerprint->id}}">{{$fingerprint->name}}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        <div class="col-sm-12 col-md-4">
-                                            <label class="small font-weight-bold text-dark">TXT File*</label>
-                                            <input required type="file" id="txt_file_u" name="txt_file_u" class="form-control form-control-sm" accept="text/plain"/>
-                                        </div>
-                                    </div>
-
+                                        @endforeach
+                                        </select>
+                                    </div> --}}
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col">
-                                    <div class="loading"></div>
-
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col">
-                                    <div class="form-group mt-3">
-                                        <button type="submit" name="action_button" id="btn-upload" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-upload"></i>&nbsp;Upload </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </form>
-
                     </div>
+                    <div class="form-row mt-3">
+                        <div class="col-12">
+                            <h6 class="title-style small"><span>Upload File</span></h6>
+                            <div class="input-group input-group-sm">
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" name="txt_file_u" id="txt_file_u"
+                                        aria-describedby="inputGroupFileAddon04" accept="text/plain" required>
+                                    <label class="custom-file-label" for="txt_file_u">Choose file</label>
+                                </div>
+                                <div class="input-group-append">
+                                    <button class="btn btn-primary" type="submit" name="action_button" id="btn-upload"
+                                        required="required">Upload TXT</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </form>
                 </div>
             </div>
+        </div>
         </div>
 
         <!-- CSV Modal -->
@@ -1201,21 +1213,22 @@
 
                         var dataArray = res;
 
+                          var inDateTime = formatDateForDateTimeLocal(f_in_date, 'in');
+                          var outDateTime = formatDateForDateTimeLocal(f_in_date, 'out');
+
                         for (var i = 0; i < res.length; i++) {
                             var newRow = $("<tr>" +
                                                 "<td>" + res[i].emp_id + "</td>" +
                                                 "<td>" + res[i].emp_name_with_initial + "</td>" +
                                                 "<td>"+
                                                     "<div class='input-group'>" +
-                                                        "<input type='date' class='form-control form-control-sm date' value='" + f_in_date + "' name='in_date[]' />" +
-                                                        "<input type='time' class='form-control form-control-sm in_time' name='in_time[]' />" +
+                                                        "<input type='datetime-local' name='in_datetime[]' class='form-control form-control-sm datetime' value='" + inDateTime + "' required/>" +
                                                     "</div>" +
                                                     "<input type='hidden' value='" + res[i].emp_id + "' name='emp_id[]' />" +
                                                 "</td>" +
                                                 "<td>"+
-                                                    "<div class='input-group'>" +
-                                                        "<input type='date' class='form-control form-control-sm date' value='" + f_in_date + "' name='out_date[]' />" +
-                                                        "<input type='time' class='form-control form-control-sm out_time' name='out_time[]' />" +
+                                                     "<div class='input-group'>" +
+                                                        "<input type='datetime-local' name='out_datetime[]' class='form-control form-control-sm datetime' value='" + outDateTime + "' required/>" +
                                                     "</div>" +
                                                 "</td>" +
                                         "</tr>"); 
@@ -1961,6 +1974,50 @@
                 });
             }
         }
+
+        function formatDateForDateTimeLocal(dateString, type = 'in') {
+    if (!dateString) return '';
+    
+    // If it's already in the right format, return as is
+    if (dateString.includes('T')) {
+        return dateString;
+    }
+    
+    // If it's just a date (YYYY-MM-DD), add time component based on type
+    if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        if (type === 'in') {
+            return dateString + 'T08:00'; // 8:00 AM for in-time
+        } else {
+            return dateString + 'T17:00'; // 5:00 PM for out-time
+        }
+    }
+    
+    // Try to parse and format the date
+    try {
+        var date = new Date(dateString);
+        if (!isNaN(date.getTime())) {
+            var year = date.getFullYear();
+            var month = String(date.getMonth() + 1).padStart(2, '0');
+            var day = String(date.getDate()).padStart(2, '0');
+            
+            // Set hours and minutes based on type
+            var hours, minutes;
+            if (type === 'in') {
+                hours = '08';
+                minutes = '00';
+            } else {
+                hours = '17';
+                minutes = '00';
+            }
+            
+            return year + '-' + month + '-' + day + 'T' + hours + ':' + minutes;
+        }
+    } catch (e) {
+        console.error('Date formatting error:', e);
+    }
+    
+    return dateString; // Fallback to original
+}
     </script>
 
 @endsection

@@ -7,6 +7,7 @@ use App\AttendanceClear;
 use App\FingerprintUser;
 use App\FingerprintDevice;
 use App\Helpers\EmployeeHelper;
+use App\Services\AttendancePolicyService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -15,6 +16,14 @@ use Carbon\Carbon;
 use DateTime;
 class AttendanceSyncController extends Controller
 {
+    protected $attendancePolicyService;
+
+    public function __construct(AttendancePolicyService $attendancePolicyService)
+    {
+        $this->middleware('auth');
+
+        $this->attendancePolicyService = $attendancePolicyService;
+    }
 
     // load datatable in the attendance sync view
 
@@ -184,12 +193,17 @@ class AttendanceSyncController extends Controller
         //dd($request->device);
         $device = FingerprintDevice::where('ip', '=', $request->device)->get();
         $device = DB::table('fingerprint_devices')->where('ip', '=', $request->device)->first();
+       
         $ip = $device->ip;
         $sync_date = $request->sync_date;
+        $date_from = $request->date_from;
+        $date_to = $request->date_to;
+        $companytype = $request->companytype;
+        
         $date_input = $sync_date;
-
         $name = $device->name;
 
+        
         $name = new ZKLib(
             $ip // '112.135.69.27' //your device IP
         );
@@ -198,89 +212,47 @@ class AttendanceSyncController extends Controller
             $name->disableDevice();
 
             $attendance = $name->getAttendance();
-
-            // dd($attendance);
-            //keep timestamp like sync_date% and remove the rest (applied only for jaya farm)            
-            $attendance = array_filter($attendance, function ($item) use ($sync_date) {
-                return strpos($item['timestamp'], $sync_date) !== false;
-            });
-            // dd($attendance);
-
             $location = $device->location;
             $serial = $name->serialNumber();
             $deviceserial = substr($serial, strpos($serial, "=") + 1, -1);
 
+
+            if ($companytype == 1){
+                   // Filter for date range (from date to to date)
+                    $attendance = array_filter($attendance, function ($item) use ($date_from, $date_to) {
+                        $itemDate = date('Y-m-d', strtotime($item['timestamp']));
+                        return $itemDate >= $date_from && $itemDate <= $date_to; });
+
+            }else{
+                 //keep timestamp like sync_date% and remove the rest (applied only for jaya farm)
+                $attendance = array_filter($attendance, function ($item) use ($sync_date) {
+                                return strpos($item['timestamp'], $sync_date) !== false; });
+            }
+            
             $is_ok = true; 
+
 
             foreach ($attendance as $link) {
                 $newtimestamp = $link['timestamp'];
                 $full_emp_id = $link['id'];
                 $date = Carbon::parse($link['timestamp'])->format('Y-m-d');
                 $time = Carbon::parse($link['timestamp'])->format('H:i:s');
-                
-                $emp = DB::table('employees')
-                    ->select('emp_id', 'emp_shift')
-                    ->where('emp_id', $full_emp_id)
-                    ->first();
 
-                    if (is_null($emp)) {
-                        continue;
-                    }
+                if($companytype == 0){
+                         $this->attendancePolicyService->attendanceInsertcsv_txt( $full_emp_id,  $date_input, $time, $date );
+                }else{
 
-                $shift = DB::table('shift_types')
-                    ->where('id', $emp->emp_shift)
-                    ->first();
-
-                $previousDate = Carbon::parse($date)->subDay()->format('Y-m-d');
-                $employeeshiftdetails = DB::table('employeeshiftdetails')
-                    ->where('date_from', $previousDate)
-                    ->where('emp_id', $full_emp_id)
-                    ->first();
-
-                $period = (new DateTime($time))->format('A');
-                $timestamp = null;
-                $attendance_date = null;
-
-                if ($shift && $shift->off_next_day == '1' && $date == $date_input) {
-                    $previous_day = (new DateTime($date_input))->modify('-1 day')->format('Y-m-d');
-
-                    $hasRecord = DB::table('attendances')
-                        ->whereDate('date', $previous_day)
-                        ->where('emp_id', $full_emp_id)
-                        ->whereNull('deleted_at')
-                        ->exists();
+                         // Create date objects for from and to dates
+                          $start_date = \Carbon\Carbon::parse($date_from);
+                          $end_date = \Carbon\Carbon::parse($date_to);
                     
-                    if($hasRecord){
-                        $timestamp = $date_input . ' ' . $time;
-                        $attendance_date = ($period === 'AM') ? $previous_day : substr($timestamp, 0, 10);
-                    }
-                    else{
-                        $timestamp = $date_input . ' ' . $time;
-                        $attendance_date = substr($timestamp, 0, 10);
-                    }
-                } else if ($date == $date_input) {
-                    if($employeeshiftdetails){
-                        $previous_day = (new DateTime($date_input))->modify('-1 day')->format('Y-m-d');
-                        $timestamp = $date_input . ' ' . $time;
-                        $attendance_date = ($period === 'AM') ? $previous_day : substr($timestamp, 0, 10);
-                    }else{
-                        $timestamp = $date_input . ' ' . $time;
-                        $attendance_date = substr($timestamp, 0, 10);
-                    }  
+                        // Loop through each date between date_from and date_to
+                        for ($current_date = $start_date; $current_date->lte($end_date); $current_date->addDay()) 
+                            {
+                                $current_date_string = $current_date->format('Y-m-d');
+                                $this->attendancePolicyService->attendanceInsertcsv_txt($full_emp_id, $current_date_string, $time, $date);
+                            }
                 }
-
-                if($date == $date_input){
-                    $Attendance = Attendance::firstOrNew(['timestamp' => $timestamp, 'devicesno' => $deviceserial]);
-                    $Attendance->uid = $full_emp_id;
-                    $Attendance->emp_id = $full_emp_id;
-                    $Attendance->state = $link['state'];
-                    $Attendance->timestamp = $timestamp;
-                    $Attendance->date = $attendance_date;
-                    $Attendance->type = $link['type'];
-                    $Attendance->devicesno = $deviceserial;
-                    $Attendance->location = $location;
-                    $is_ok = $Attendance->save();
-                } 
             }
 
             $res = array(
