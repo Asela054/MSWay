@@ -115,7 +115,7 @@
 
     <div class="modal fade" id="getdataModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
        aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header p-2">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -127,10 +127,27 @@
                         <div class="col1 text-center">
                             <h4 class="font-weight-normal">If you need to download data, please confirm?</h4>
                         </div>
-                        <div class="col1 mb-3">
-                            <label>Date*</label>
-                            <input type="date" class="form-control form-control-sm" id="sync_date"  required/>
-                        </div>
+                         <div class="form-row mb-1">
+                            @if($companytype == 0)
+                                <div class="col-sm-12 col-md-6">
+                                    <label class="small font-weight-bold text-dark">From Date*</label>
+                                    <input required type="date" id="date_from" name="date_from"
+                                        class="form-control form-control-sm" value="{{Date('Y-m-d')}}"/>
+                                </div>
+                                <div class="col-sm-12 col-md-6">
+                                    <label class="small font-weight-bold text-dark">To Date*</label>
+                                    <input required type="date" id="date_to" name="date_to"
+                                        class="form-control form-control-sm" value="{{Date('Y-m-d')}}" />
+                                </div>
+                            @else
+                                <div class="col-sm-12 col-md-12">
+                                    <label class="small font-weight-bold text-dark">Date*</label>
+                                    <input required type="date" id="sync_date" name="sync_date"
+                                        class="form-control form-control-sm" value="{{Date('Y-m-d')}}" />
+                                </div>
+                            @endif
+                           <input type="hidden" name="companytype" id="companytype" value="<?php echo $companytype; ?>" />
+                         </div>
                     </div>
                 </div>
                 <div class="modal-footer p-2">
@@ -542,6 +559,9 @@ $(document).ready(function() {
                         device: device,
                         _token: '{{csrf_token()}}',
                         sync_date: $('#sync_date').val(),
+                        date_from: $('#date_from').val(),
+                        date_to: $('#date_to').val(),
+                        companytype: $('#companytype').val(),
                     },
                     success: function(data) {
                        if (data.errors) {
