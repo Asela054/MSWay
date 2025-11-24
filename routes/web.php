@@ -1582,6 +1582,14 @@ Route::post('Financial/update', 'FinancialCategoryController@update')->name('Fin
 Route::get('Financial/destroy/{id}', 'FinancialCategoryController@destroy');
 /*-- End Financial Category----*/
 
+/*-- Pay Group----*/
+Route::resource('PayGroup', 'PayGroupController');
+Route::get('PayGroup',['uses' => 'PayGroupController@index', 'as' => 'PayGroup']); 
+Route::post('addPayGroup',['uses' => 'PayGroupController@store', 'as' => 'addPayGroup']); 
+Route::post('PayGroup/update', 'PayGroupController@update')->name('PayGroup.update');
+Route::get('PayGroup/destroy/{id}', 'PayGroupController@destroy');
+/*-- Pay Group----*/
+
 
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');
