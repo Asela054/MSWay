@@ -23,6 +23,8 @@ use App\DSDivision;
 use App\GNSDivision;
 use App\PayrollProfile;
 use App\Policestation;
+use App\CompanyHierarchy;
+use App\FinancialCategory;
 use DB;
 use Excel;
 use Illuminate\Support\Facades\Auth;
@@ -57,6 +59,7 @@ class EmployeeController extends Controller
         $shift_type = ShiftType::where('deleted', 0)->orderBy('id', 'asc')->get();
         $company = Company::orderBy('id', 'asc')->get();
         $departments = Department::orderBy('id', 'asc')->get();
+        $empposition = CompanyHierarchy::orderBy('order_number', 'asc')->get();
 
         if (isset($lastid)) {
 
@@ -67,7 +70,7 @@ class EmployeeController extends Controller
         }
         $device = FingerprintDevice::orderBy('id', 'asc')->where('status', '=', 1)->get();
 
-        return view('Employee.employeeAdd', compact('newid', 'employmentstatus', 'branch', 'device', 'title', 'shift_type', 'company', 'departments'));
+        return view('Employee.employeeAdd', compact('newid', 'employmentstatus', 'branch', 'device', 'title', 'shift_type', 'company', 'departments', 'empposition'));
     }
 
     public function employeelist()
@@ -162,6 +165,7 @@ class EmployeeController extends Controller
         $Employee->emp_work_telephone = $request->input('emp_work_telephone');
         $Employee->tp1 = $request->input('telephone');
         $Employee->emp_fullname = $request->input('emp_fullname');
+        $Employee->hierarchy_id = $request->input('hierarchy_id');
         $Employee->save();
         $insertedId = $Employee->id;
 
@@ -231,9 +235,11 @@ class EmployeeController extends Controller
         $dsdivisions = DSDivision::orderBy('id', 'asc')->where('status', '=', 1)->get();
         $gsndivision = GNSDivision::orderBy('id', 'asc')->where('status', '=', 1)->get();
         $policestation = Policestation::orderBy('id', 'asc')->where('status', '=', 1)->get();
+        $empposition = CompanyHierarchy::orderBy('order_number', 'asc')->get();
+        $empfinancial = FinancialCategory::orderBy('id', 'asc')->get();
 
         return view('Employee.viewEmployee', compact( 'job_categories', 'employee', 'id', 'jobtitles', 'employmentstatus', 'branch', 'shift_type', 'company', 'departments', 'work_categories'
-          ,'dsdivisions','gsndivision','policestation'));
+          ,'dsdivisions','gsndivision','policestation', 'empposition', 'empfinancial'));
     }
 
     public function edit(REQUEST $request)
@@ -309,6 +315,8 @@ class EmployeeController extends Controller
         $gsncontactno = $request->gsncontactno;
         $policestation = $request->policestation;
         $policecontat = $request->policecontat;
+        $hierarchy_id = $request->hierarchy_id;
+        $financial_id = $request->financial_id;
         $employee = Employee::find($id);
 
         if($jobstatus != 2){
@@ -376,6 +384,10 @@ class EmployeeController extends Controller
             $employee->emp_permanent_date = $dateassign;
         }
         $employee->emp_assign_date = $dateassign;
+
+        $employee->hierarchy_id = $hierarchy_id;
+        $employee->financial_id = $financial_id;
+        
         $employee->save();
 
         $jobstatus = new JobStatus;
