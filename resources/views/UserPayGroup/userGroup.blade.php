@@ -33,7 +33,7 @@
                                 <tr>
                                     <th>USER ID</th>
                                     <th>USER NAME</th>
-                                    <th>USER GROUP</th>
+                                    <th>PAY GROUP</th>
                                     <th class="text-right">ACTION</th>
                                 </tr>
                             </thead>
