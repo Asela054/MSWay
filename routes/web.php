@@ -455,9 +455,6 @@ Route::post('OccupationGroup.update_manual', 'OccupationGroupController@update_m
 //OccupationGroup.fetch_single
 Route::get('OccupationGroup.fetch_single', 'OccupationGroupController@fetch_single')->name('OccupationGroup.fetch_single');
 
-Route::get('employee_list_sel2', 'EmployeeSelectController@employee_list_sel2')->name('employee_list_sel2');
-Route::get('location_list_sel2', 'EmployeeSelectController@location_list_sel2')->name('location_list_sel2');
-Route::post('get_dept_emp_list', 'EmployeeSelectController@get_dept_emp_list')->name('get_dept_emp_list');
 
 Auth::routes();
 

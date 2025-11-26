@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use App\Company;
 use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\Controller;
+use App\Helpers\UserHelper;
 
 class CommenGetrreordController extends Controller
 {
@@ -153,6 +154,8 @@ class CommenGetrreordController extends Controller
                 ->where('deleted', 0)
                 ->where('is_resigned', 0);
 
+            $query = UserHelper::applyEmployeeFilter($query);
+
             // Add department filter if department parameter is provided and not empty
             if ($request->has('department') && !empty($request->department)) {
                 $query->where('employees.emp_department', $request->department);
@@ -168,7 +171,7 @@ class CommenGetrreordController extends Controller
                 ->take($resultCount)
                 ->get();
 
-            $count = Count($breeds); // Get count from the actual results
+            $count = Count($breeds); 
 
             $endCount = $offset + $resultCount;
             $morePages = $endCount < $count;
