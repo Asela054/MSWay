@@ -230,23 +230,36 @@ class EmployeeController extends Controller
         if (!$permission) {
             abort(403);
         }
-        $employee = Employee::where('id', $id)->first();
-        $branch = Branch::orderBy('id', 'asc')->get();
-        $shift_type = ShiftType::where('deleted',0)->orderBy('id', 'asc')->get();
-        $employmentstatus = EmploymentStatus::orderBy('id', 'asc')->get();
-        $jobtitles = JobTitle::orderBy('id', 'asc')->get();
-        $company = Company::orderBy('id', 'asc')->get();
-        $departments = Department::orderBy('id', 'asc')->get();
-        $job_categories = JobCategory::orderBy('id', 'asc')->get();
-        $work_categories = WorkCategory::orderBy('id', 'asc')->get();
-        $dsdivisions = DSDivision::orderBy('id', 'asc')->where('status', '=', 1)->get();
-        $gsndivision = GNSDivision::orderBy('id', 'asc')->where('status', '=', 1)->get();
-        $policestation = Policestation::orderBy('id', 'asc')->where('status', '=', 1)->get();
-        $empposition = CompanyHierarchy::orderBy('order_number', 'asc')->get();
-        $empfinancial = FinancialCategory::orderBy('id', 'asc')->get();
+        
+        try {
+            $employee = Employee::where('id', $id)->first();
+            
+            if (!$employee) {
+                Session::flash('error', 'Employee not found');
+                return redirect()->route('addEmployee'); 
+            }
+            
+            $branch = Branch::orderBy('id', 'asc')->get();
+            $shift_type = ShiftType::where('deleted', 0)->orderBy('id', 'asc')->get();
+            $employmentstatus = EmploymentStatus::orderBy('id', 'asc')->get();
+            $jobtitles = JobTitle::orderBy('id', 'asc')->get();
+            $company = Company::orderBy('id', 'asc')->get();
+            $departments = Department::orderBy('id', 'asc')->get();
+            $job_categories = JobCategory::orderBy('id', 'asc')->get();
+            $work_categories = WorkCategory::orderBy('id', 'asc')->get();
+            $dsdivisions = DSDivision::orderBy('id', 'asc')->where('status', '=', 1)->get();
+            $gsndivision = GNSDivision::orderBy('id', 'asc')->where('status', '=', 1)->get();
+            $policestation = Policestation::orderBy('id', 'asc')->where('status', '=', 1)->get();
+            $empposition = CompanyHierarchy::orderBy('order_number', 'asc')->get();
+            $empfinancial = FinancialCategory::orderBy('id', 'asc')->get();
 
-        return view('Employee.viewEmployee', compact( 'job_categories', 'employee', 'id', 'jobtitles', 'employmentstatus', 'branch', 'shift_type', 'company', 'departments', 'work_categories'
-          ,'dsdivisions','gsndivision','policestation', 'empposition', 'empfinancial'));
+            return view('Employee.viewEmployee', compact('job_categories', 'employee', 'id', 'jobtitles', 'employmentstatus', 'branch', 'shift_type', 'company', 'departments', 'work_categories', 'dsdivisions', 'gsndivision', 'policestation', 'empposition', 'empfinancial'));
+            
+        } catch (\Exception $e) {
+            \Log::error('Error loading employee view: ' . $e->getMessage());
+            Session::flash('error', 'Error loading employee details. Please try again.');
+            return redirect()->back();
+        }
     }
 
     public function edit(REQUEST $request)
