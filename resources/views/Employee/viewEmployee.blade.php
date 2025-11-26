@@ -208,6 +208,11 @@
 										<div class="col-md-3 col-sm-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">Date of Birth</label>
 											<input type="date" class="form-control form-control-sm" id="birthday" name="birthday" value="{{$employee->emp_birthday}}">
+											@if ($errors->has('nic_validation'))
+												<span class="text-danger">
+													<strong>{{ $errors->first('nic_validation') }}</strong>
+												</span>
+											@endif
 										</div>
 									</div>
 								</div>
