@@ -132,6 +132,12 @@ class EmployeeController extends Controller
         if ($error->fails()) {
             return response()->json(['errors' => $error->errors()->all()]);
         }
+
+        $nicValidation = $this->validateNIC($request->input('emp_id_card'), $request->input('emp_birthday'));
+        if (!$nicValidation['valid']) {
+            return response()->json(['errors' => [$nicValidation['message']]]);
+        }
+
         if ($request->hasFile('photograph')) {
             $image = $request->file('photograph');
             $name = time() . '.' . $image->getClientOriginalExtension();
@@ -153,6 +159,7 @@ class EmployeeController extends Controller
         $Employee->emp_med_name = $request->input('middlename');
         $Employee->emp_last_name = $request->input('lastname');
         $Employee->emp_national_id = $request->input('emp_id_card');
+        $Employee->emp_birthday = $request->input('emp_birthday');
         $Employee->emp_mobile = $request->input('emp_mobile');
         $Employee->emp_status = $request->input('status');
         $Employee->emp_location = $request->input('location');
@@ -275,6 +282,13 @@ class EmployeeController extends Controller
         if ($validator->fails()) {
             return redirect()->back()
                         ->withErrors($validator)
+                        ->withInput();
+        }
+
+        $nicValidation = $this->validateNIC($request->nicnumber, $request->birthday);
+        if (!$nicValidation['valid']) {
+            return redirect()->back()
+                        ->withErrors(['nic_validation' => $nicValidation['message']])
                         ->withInput();
         }
 
@@ -538,6 +552,92 @@ class EmployeeController extends Controller
         } catch (\Exception $e) {
             return response()->json(['errors' => ['Failed to create user login: ' . $e->getMessage()]]);
         }
+    }
+
+    private function validateNIC($nicNo, $dob)
+    {
+        if (empty($nicNo) || empty($dob)) {
+            return ['valid' => true]; 
+        }
+
+        $nicLength = strlen($nicNo);
+        
+        if ($nicLength != 10 && $nicLength != 12) {
+            return ['valid' => false, 'message' => 'Invalid NIC number format'];
+        }
+        
+        if ($nicLength == 10 && !is_numeric(substr($nicNo, 0, 9))) {
+            return ['valid' => false, 'message' => 'Invalid NIC number format'];
+        }
+        
+        if ($nicLength == 10) {
+            $year = "19" . substr($nicNo, 0, 2);
+            $dayText = intval(substr($nicNo, 2, 3));
+        } else {
+            $year = substr($nicNo, 0, 4);
+            $dayText = intval(substr($nicNo, 4, 3));
+        }
+        
+        // Adjust for gender
+        if ($dayText > 500) {
+            $dayText = $dayText - 500;
+        }
+        
+        // Validate day range
+        if ($dayText < 1 || $dayText > 366) {
+            return ['valid' => false, 'message' => 'Invalid NIC number'];
+        }
+        
+        // Calculate month and day
+        if ($dayText > 335) {
+            $day = $dayText - 335;
+            $month = "12";
+        } elseif ($dayText > 305) {
+            $day = $dayText - 305;
+            $month = "11";
+        } elseif ($dayText > 274) {
+            $day = $dayText - 274;
+            $month = "10";
+        } elseif ($dayText > 244) {
+            $day = $dayText - 244;
+            $month = "09";
+        } elseif ($dayText > 213) {
+            $day = $dayText - 213;
+            $month = "08";
+        } elseif ($dayText > 182) {
+            $day = $dayText - 182;
+            $month = "07";
+        } elseif ($dayText > 152) {
+            $day = $dayText - 152;
+            $month = "06";
+        } elseif ($dayText > 121) {
+            $day = $dayText - 121;
+            $month = "05";
+        } elseif ($dayText > 91) {
+            $day = $dayText - 91;
+            $month = "04";
+        } elseif ($dayText > 60) {
+            $day = $dayText - 60;
+            $month = "03";
+        } elseif ($dayText < 32) {
+            $month = "01";
+            $day = $dayText;
+        } else {
+            $day = $dayText - 31;
+            $month = "02";
+        }
+        
+        $day = str_pad($day, 2, '0', STR_PAD_LEFT);
+        $createdDob = $year . '-' . $month . '-' . $day;
+        
+        if ($createdDob != $dob) {
+            return [
+                'valid' => false, 
+                'message' => 'Birthday does not match with NIC number. Correct birthday according to NIC is: ' . $createdDob
+            ];
+        }
+        
+        return ['valid' => true];
     }
 
      
