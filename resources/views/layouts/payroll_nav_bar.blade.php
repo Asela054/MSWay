@@ -42,7 +42,7 @@
       <li><a class="dropdown-item" href="{{ url('ReportAddition') }}" id="additionreport">Additions Report</a></li>
     </ul>
   </div>
-  {{-- <div class="dropdown">
+  <div class="dropdown">
     <a role="button" data-toggle="dropdown" class="btn navbtncolor" href="javascript:void(0);" id="payrollststement">
       Statements <span class="caret"></span></a>
     <ul class="dropdown-menu multi-level dropdownmenucolor" role="menu" aria-labelledby="dropdownMenu">
@@ -55,5 +55,5 @@
       </li>
       <li><a class="dropdown-item" href="{{ url('EmpEpfEtfJournalVoucher') }}">EPF and ETF (Journal Voucher)</a></li>
     </ul>
-  </div> --}}
+  </div>
 </div>

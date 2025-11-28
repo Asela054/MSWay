@@ -26,7 +26,7 @@
                                                 </span>
                                                 <div>
                                                     <button type="button" name="find_employee" id="find_employee" class="btn btn-success btn-sm">Search</button>
-                                                    <button type="submit" name="print_record" id="print_record" disabled="disabled" class="btn btn-secondary btn-sm btn-light">Download</button>
+                                                    <button type="button" name="print_record" id="print_record" disabled="disabled" class="btn btn-secondary btn-sm btn-light"  onclick="generatePDF();" >Download</button>
                                                 </div>
                                             </div>
                                             
@@ -37,8 +37,8 @@
                                                         <thead>
                                                             <tr>
                                                                 <th style="">A/C</th>
-                                                                <th style="text-align:right;">&nbsp;</th>
-                                                                <th style="text-align:center; width:300px;">&nbsp;</th>
+                                                                <th style="text-align:left;">Type</th>
+                                                                <th style="text-align:center; width:300px;">Amount</th>
                                                             </tr>
                                                         </thead>
                                                      
@@ -58,8 +58,7 @@
                                                         
                                                     </table>
                                                 </div>
-                                                
-                                                <input type="hidden" name="payroll_profile_id" id="payroll_profile_id" value="" /><!-- edit loans -->
+                                                <input type="hidden" name="payroll_profile_id" id="payroll_profile_id" value="" />
                                                 <input type="hidden" name="payment_period_id" id="payment_period_id" value="" />
                                                 <input type="hidden" name="payslip_process_type_id" id="payslip_process_type_id" value="" />
                                                 
@@ -72,15 +71,8 @@
                                         </div>
                                     </form>
                                 </div>
-                                
-                                
-                                
-                              
                             </div>
-                           
-                        </div>
-                        
-                        
+                        </div>    
                     </div>
                     
                     <div id="formModal" class="modal fade" role="dialog">
@@ -96,35 +88,47 @@
                                    <div class="modal-body">
                                         <span id="search_result"></span>
                                         <div class="row">
-                                            <div class="form-group col-md-6">
-                                               <label class="control-label col" >Payroll type</label>
-                                               <div class="col">
-                                                 <select name="payroll_process_type_id" id="payroll_process_type_id" class="form-control" >
-                                                    <option value="" disabled="disabled" selected="selected">Please select</option>
-                                                    @foreach($payroll_process_type as $payroll)
-                                                    
-                                                    <option value="{{$payroll->id}}" data-totdays="{{$payroll->total_work_days}}">{{$payroll->process_name}}</option>
-                                                    @endforeach
-                                                    
-                                                 </select>
-                                               </div>
-                                            </div>
+                                        
                                             <div class="form-group col-md-6">
                                                <label class="control-label col">Location</label>
                                                <div class="col">
-                                                   <select name="location_filter_id" id="location_filter_id" class="custom-select shipClass" style="" >
+                                                   <select name="location_filter_id" id="location_filter_id" class="custom-select shipClass" style="pointer-events: none;" >
                                                         <option value="" disabled="disabled" selected="selected">Please Select</option>
                                                         @foreach($branch as $branches)
                                                         
-                                                        <option value="{{$branches->id}}">{{$branches->location}}</option>
+                                                        <option value="{{$branches->id}}">{{$branches->name}}</option>
                                                         @endforeach
                                                         
                                                    </select>
                                                </div>
                                             </div>
-                                            
+                                            <div class="form-group col-md-6">
+                                                <label class="control-label col">Department</label>
+                                                <div class="col">
+                                                    <select name="department_filter_id" id="department_filter_id" class="custom-select" style="" data-nestname="deptnest" >
+                                                         <option value="" disabled="disabled" selected="selected">Please Select</option>
+                                                         <option value="All" >All</option>
+                                                         @foreach($department as $section)
+                                                         <option value="{{$section->id}}" >{{$section->name}}</option>
+                                                         @endforeach
+                                                    </select>
+                                                </div>
+                                             </div>
                                         </div>
                                         <div class="row">
+                                            <div class="form-group col-md-6">
+                                                <label class="control-label col" >Payroll type</label>
+                                                <div class="col">
+                                                  <select name="payroll_process_type_id" id="payroll_process_type_id" class="form-control" >
+                                                     <option value="" disabled="disabled" selected="selected">Please select</option>
+                                                     @foreach($payroll_process_type as $payroll)
+                                                     
+                                                     <option value="{{$payroll->id}}" data-totdays="{{$payroll->total_work_days}}">{{$payroll->process_name}}</option>
+                                                     @endforeach
+                                                     
+                                                  </select>
+                                                </div>
+                                             </div>
                                         	<div class="form-group col">
                                             	<label class="control-label col">Working Period</label>
                                                 <div class="col">
@@ -155,10 +159,7 @@
                             </form>
                         </div>
                     </div>
-                    
-                    
-                    
-                    
+
                 </main>
               
 @endsection
@@ -168,27 +169,16 @@
 
 <script>
 $(document).ready(function(){
-    $('#payrollmenu').addClass('active');
-    $('#payrollmenu_icon').addClass('active');
-    $('#payrollststement').addClass('navbtnactive');
-	/*var empTable=$("#emp_bank_table").DataTable({
-			"columns":[{data:'fig_name'}, {data:'fig_value'}, {data:'emp_cnt'}],
-			"ordering":false, "order":[],
-			"columnDefs": [{
-					"targets":1, 
-					"className":"text-right",
-					render: function(data, type, row){
-						return parseFloat(data).toFixed(2);
-					}
-				}],
-			"createdRow": function( row, data, dataIndex ){
-				//$('td', row).eq(5).attr('data-colvalue', data.loan_installments); 
-				//$('td', row).eq(0).attr('data-refemp', data.payroll_profile_id); 
-				//$( row ).attr( 'id', 'row-'+data.id );//$( row ).data( 'refid', data[3] );
-			}
-		});*/
-	
-	//var loanTable=$("#loantable").DataTable();
+    $('#payroll_menu_link').addClass('active');
+    $('#payroll_menu_link_icon').addClass('active');
+    $('#payroll_statments').addClass('navbtnactive');
+
+    var companyId = '{{ session("company_id") }}';
+    var companyName = '{{ session("company_name") }}';
+
+    if (companyId && companyName) {
+        $('#location_filter_id').val(companyId).trigger('change');
+    }
 	
 	var _token = $('#frmSearch input[name="_token"]').val();;
 	
@@ -267,9 +257,8 @@ $(document).ready(function(){
 			$("#rpt_location_id").val($("#location_filter_id").find(":selected").val());
 			$("#rpt_period_id").val($("#period_filter_id").find(":selected").val());
 			$("#rpt_info").val(data.work_date_fr+" To "+data.work_date_to+" ("+$("#payroll_process_type_id").find(":selected").text()+")");
-			
-			//$("#print_record").prop('disabled', false);
-			//$("#print_record").removeClass('btn-light');
+			$("#print_record").prop('disabled', false);
+			$("#print_record").removeClass('btn-light');
 			
 			$('#formModal').modal('hide');
 		}
@@ -290,13 +279,148 @@ $(document).ready(function(){
 			$(".show .frm_link").removeClass('sect_bg');
 		}
 	});
-	/*
-	$(".modal").on("hide.bs.modal", function(e){
-		$(this).removeClass('active');
-	});
-	*/
 	
 });
+
+function centerText(text, y, doc) {
+    var pageWidth = doc.internal.pageSize.getWidth();
+    var textWidth = doc.getTextWidth(text);
+    doc.text(text, (pageWidth - textWidth) / 2, y);
+}
+
+function rightAlignText(text, y, doc, margin = 22) {
+    var pageWidth = doc.internal.pageSize.getWidth();
+    var textWidth = doc.getTextWidth(text);
+    var xCoordinate = pageWidth - textWidth - margin; 
+
+    doc.text(text, xCoordinate, y);
+}
+
+function centerTextWithUnderline(text, y, doc) {
+    var pageWidth = doc.internal.pageSize.getWidth();
+    var textWidth = doc.getTextWidth(text);
+    var startX = (pageWidth - textWidth) / 2;
+    
+    doc.text(text, startX, y);
+
+    doc.line(startX, y + 1, startX + textWidth, y + 1); 
+}
+
+async function generatePDF() {
+    const { jsPDF } = window.jspdf; 
+    const { autoTable } = window.jspdf; 
+
+    const doc = new jsPDF();
+	const margins = { top: 35};
+
+    var companyId = '{{ session("company_id") }}';
+    var companyName = '{{ session("company_name") }}';
+    var companyAddress = '{{ session("company_address") }}';
+
+	var workfrom=$("#lbl_date_fr").text();
+	var workto=$("#lbl_date_to").text();
+    var debit_total_text=$("#debit_total_text").val();
+    var thousentseparate_debit_total=$("#thousentseparate_debit_total").val();
+
+    var date = new Date(workto);
+    var formattedDate = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+	doc.autoTable({ 
+		html: '#emp_bank_table',
+		theme: 'grid',
+		margin: margins,
+		headStyles: {
+        fillColor: [255, 255, 255], 
+        textColor: [0, 0, 0],      
+        fontStyle: 'bold'         
+		},
+		styles: {
+			lineWidth: 0,             
+			lineColor: [0, 0, 0]     
+		},
+        didParseCell: function (data) {
+            if (data.column.index === 1 || data.column.index === 2) {
+                data.cell.styles.halign = 'right';
+
+                var plainText = $(data.cell.raw).text();
+                if (!isNaN(plainText)) {
+                    if (plainText != '') {
+                        let value = parseFloat(plainText).toFixed(2); 
+                        data.cell.text = [value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")];
+                    }
+                }
+            }
+        },
+        didDrawCell: function (data) {
+            const table = data.table;
+            const lastRowIndex = table.body.length - 1;
+
+            if (data.row.index === lastRowIndex) {
+                if (data.column.index === 1 || data.column.index === 2) {
+                    doc.setLineWidth(0.5); 
+                    doc.setDrawColor(0, 0, 0); 
+                    doc.line(data.cell.x, data.cell.y, data.cell.x + data.cell.width, data.cell.y);      
+        
+                    doc.setLineWidth(0.5); 
+                    doc.line(data.cell.x, data.cell.y + data.cell.height, data.cell.x + data.cell.width, data.cell.y + data.cell.height); 
+
+                    doc.setLineWidth(0.5); 
+                    doc.line(data.cell.x, data.cell.y + data.cell.height + 1, data.cell.x + data.cell.width, data.cell.y + data.cell.height + 1); 
+                }
+            }
+        },
+		didDrawPage: function (data) {
+
+        doc.setFontSize(12);
+        doc.setFont('Helvetica', 'normal');
+        centerTextWithUnderline('Employee Incentive Payment Voucher', 15, doc);
+
+        doc.setFontSize(14);
+        doc.setTextColor(40);
+        doc.setFont('Helvetica', 'bold');
+        centerText(companyName || "Your Company Name", 22, doc);
+
+        doc.setFontSize(9);
+        doc.setFont('Helvetica', 'normal');
+        rightAlignText('NO : ....................', 22, doc);
+
+        doc.setFontSize(9);
+        doc.setFont('Helvetica', 'normal');
+        centerText(companyAddress, 27, doc);
+
+        doc.setFontSize(9);
+        doc.setFont('Helvetica', 'normal');
+        rightAlignText('Date : '+workto, 27, doc);
+
+        const signyPosition = 100;
+        doc.setFontSize(11);
+            const signpageWidth = doc.internal.pageSize.getWidth();
+            const signcolWidth = signpageWidth / 4;
+            const signtext1 = '..........................';
+            const signtext2 = '..........................';
+            const signtext3 = '..........................';
+            const signtext4 = '..........................';
+            doc.text(signtext1, 14, signyPosition); 
+            doc.text(signtext2, 14 + signcolWidth, signyPosition); 
+            doc.text(signtext3, 14 + 2 * signcolWidth, signyPosition); 
+            doc.text(signtext4, 14 + 3 * signcolWidth, signyPosition); 
+
+            doc.setFontSize(11);
+            const colWidth = signpageWidth / 4;
+            const text1 = 'Asst Accountant';
+            const text2 = 'J L Folio';
+            const text3 = 'Manager';
+            const text4 = 'Director';
+            const yPosition = signyPosition + 5;
+            doc.text(text1, 14, yPosition); 
+            doc.text(text2, 14 + colWidth, yPosition); 
+            doc.text(text3, 14 + 2 * colWidth, yPosition); 
+            doc.text(text4, 14 + 3 * colWidth, yPosition); 
+         }
+	 })
+	doc.save('Employee Incentive Payment Voucher'+workfrom+' to '+workto+'.pdf')
+
+}
 </script>
 
 @endsection

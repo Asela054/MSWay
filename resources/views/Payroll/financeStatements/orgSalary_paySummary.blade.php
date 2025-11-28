@@ -8,14 +8,12 @@
                 @include('layouts.payroll_nav_bar')
                
             </div>
-        </div>       
+        </div>
                     <div class="container-fluid mt-4">
                         <div class="row">
-                       
-                           
                             <div class="col-lg-12">
                                 <div id="default">
-                                    <form id="frmExport" method="post" action="{{ url('DownloadEpfEtf') }}">
+                                    <form id="frmExport" method="post" action="{{ url('generatepaysummarypdf') }}">
                                     {{ csrf_field() }}
                                         <div class="card card-header-actions mb-4">
                                             <div class="card-header">
@@ -26,164 +24,214 @@
                                                 </span>
                                                 <div>
                                                     <button type="button" name="find_employee" id="find_employee" class="btn btn-success btn-sm">Search</button>
-                                                    <button type="submit" name="print_record" id="print_record" disabled="disabled" class="btn btn-secondary btn-sm btn-light">Download</button>
+                                                    <button type="submit" name="print_record" id="print_record" disabled="disabled" class="btn btn-secondary btn-sm btn-light" >Download</button>
                                                 </div>
                                             </div>
                                             
                                             <div class="card-body">
-                                                
                                                 <div id="divPrint" class="datatable table-responsive" style="margin-top:0px;">
                                                     <table class="table table-bordered table-hover" id="emp_bank_table" width="100%" cellspacing="0">
                                                         <thead>
                                                             <tr>
-                                                                <th style="width:300px;">&nbsp;</th>
+                                                                <th style="width:300px;">Type</th>
                                                                 <th style="text-align:right;">Amount</th>
                                                                 <th style="text-align:center;">No. of Emp.</th>
                                                             </tr>
                                                         </thead>
-                                                     
                                                         <tbody class="">
                                                         	<tr data-figid="BASIC">
                                                             	<td>Basic Salary</td>
                                                                 <td data-cap="amt"></td>
-                                                                <td data-cap="cnt"></td>
+                                                                <td data-cap="cnt" style="text-align:center;"></td>
                                                             </tr>
                                                             <tr data-figid="NOPAY">
                                                             	<td>Nopay</td>
                                                                 <td data-cap="amt"></td>
-                                                                <td data-cap="cnt"></td>
+                                                                <td data-cap="cnt" style="text-align:center;"></td>
                                                             </tr>
                                                             <tr data-figid="SAL_AFT_NOPAY">
                                                             	<td>Salary After Nopay</td>
                                                                 <td data-cap="amt"></td>
-                                                                <td data-cap="cnt"></td>
+                                                                <td data-cap="cnt" style="text-align:center;"></td>
                                                             </tr>
-                                                            <tr data-figid="OTHRS">
+                                                            <tr data-figid="OTHRS1"><!--OTHRS-->
                                                             	<td>Overtime</td>
                                                                 <td data-cap="amt"></td>
-                                                                <td data-cap="cnt"></td>
+                                                                <td data-cap="cnt" style="text-align:center;"></td>
                                                             </tr>
-                                                            <tr data-figid="add_holiday_x">
+                                                            <tr data-figid="OTHRS2"><!--add_holiday_x-->
                                                             	<td>Holiday</td>
                                                                 <td data-cap="amt"></td>
-                                                                <td data-cap="cnt"></td>
+                                                                <td data-cap="cnt" style="text-align:center;"></td>
                                                             </tr>
-                                                            
-                                                            <tr data-figid="add_transport_x">
+                                                            <tr data-figid="TOTAL_WITH_OT">
+                                                            	<td></td>
+                                                                <td data-cap="amt" style="border-top:1px double;"></td>
+                                                                <td></td>
+                                                            </tr>
+                                                            <tr data-figid="ATTBONUS_W">
                                                             	<td>Reimburse Traveling</td>
                                                                 <td data-cap="amt"></td>
-                                                                <td data-cap="cnt"></td>
+                                                                <td data-cap="cnt" style="text-align:center;"></td>
                                                             </tr>
                                                             <tr data-figid="INCNTV_EMP">
                                                             	<td>Incentive</td>
                                                                 <td data-cap="amt"></td>
-                                                                <td data-cap="cnt"></td>
+                                                                <td data-cap="cnt" style="text-align:center;"></td>
                                                             </tr>
                                                             <tr data-figid="INCNTV_DIR">
                                                             	<td>Directors Incentive</td>
                                                                 <td data-cap="amt"></td>
-                                                                <td data-cap="cnt"></td>
+                                                                <td data-cap="cnt" style="text-align:center;"></td>
                                                             </tr>
                                                             
                                                             <tr data-figid="tot_earn">
                                                             	<td>Total Earning</td>
-                                                                <td data-cap="amt" style="border-top:1px double;"></td>
-                                                                <td data-cap="cnt"></td>
+                                                                <td data-cap="amt" style="border-top:1px double; border-bottom:2px double;"></td>
+                                                                <td data-cap="cnt" style="text-align:center;"></td>
                                                             </tr>
                                                             
                                                             <tr data-figid="EPF8">
                                                             	<td>EPF Contribution 8%</td>
                                                                 <td data-cap="amt"></td>
-                                                                <td data-cap="cnt"></td>
+                                                                <td data-cap="cnt" style="text-align:center;"></td>
                                                             </tr>
                                                             <tr data-figid="sal_adv">
                                                             	<td>Salary Advance</td>
                                                                 <td data-cap="amt"></td>
-                                                                <td data-cap="cnt"></td>
+                                                                <td data-cap="cnt" style="text-align:center;"></td>
                                                             </tr>
                                                             <tr data-figid="ded_fund_1">
                                                             	<td>Funeral Fund</td>
                                                                 <td data-cap="amt"></td>
-                                                                <td data-cap="cnt"></td>
+                                                                <td data-cap="cnt" style="text-align:center;"></td>
                                                             </tr>
                                                             <tr data-figid="ded_IOU">
                                                             	<td>I.O.U</td>
                                                                 <td data-cap="amt"></td>
-                                                                <td data-cap="cnt"></td>
+                                                                <td data-cap="cnt" style="text-align:center;"></td>
                                                             </tr>
                                                             <tr data-figid="PAYE">
                                                             	<td>PAYEE</td>
                                                                 <td data-cap="amt"></td>
-                                                                <td data-cap="cnt"></td>
+                                                                <td data-cap="cnt" style="text-align:center;"></td>
                                                             </tr>
                                                             <tr data-figid="add_transport">
                                                             	<td>Traveling</td>
                                                                 <td data-cap="amt"></td>
-                                                                <td data-cap="cnt"></td>
+                                                                <td data-cap="cnt" style="text-align:center;"></td>
                                                             </tr>
                                                             <tr data-figid="LOAN">
                                                             	<td>Loan</td>
                                                                 <td data-cap="amt"></td>
-                                                                <td data-cap="cnt"></td>
+                                                                <td data-cap="cnt" style="text-align:center;"></td>
                                                             </tr>
                                                             <tr data-figid="">
                                                             	<td>Loan-2</td>
                                                                 <td data-cap="amt"></td>
-                                                                <td data-cap="cnt"></td>
+                                                                <td data-cap="cnt" style="text-align:center;"></td>
                                                             </tr>
                                                             <tr data-figid="tot_ded">
-                                                            	<td>Total Deduction</td>
-                                                                <td data-cap="amt" style="border-top:1px double;"></td>
-                                                                <td data-cap="cnt"></td>
+                                                            	<td><strong>Total Deduction</strong></td>
+                                                                <td data-cap="amt" style="border-top:1px double; border-bottom:2px double;"></td>
+                                                                <td data-cap="cnt" style="text-align:center;"></td>
                                                             </tr>
                                                             
                                                             <tr data-figid="bal_earn">
-                                                            	<td>Balance</td>
+                                                            	<td><strong>Balance</strong></td>
                                                                 <td data-cap="amt"></td>
-                                                                <td data-cap="cnt"></td>
+                                                                <td data-cap="cnt" style="text-align:center;"></td>
                                                             </tr>
                                                             
                                                             <tr data-figid="EPF12">
                                                             	<td>Contribution EPF 12%</td>
                                                                 <td data-cap="amt"></td>
-                                                                <td data-cap="cnt"></td>
+                                                                <td data-cap="cnt" style="text-align:center;"></td>
                                                             </tr>
                                                             <tr data-figid="ETF3">
                                                             	<td>Contribution EPF 3%</td>
                                                                 <td data-cap="amt"></td>
-                                                                <td data-cap="cnt"></td>
+                                                                <td data-cap="cnt" style="text-align:center;"></td>
                                                             </tr>
-                                                            
+                                                            <tr data-figid="">
+                                                            	<td><strong> Payment Summary</strong></td>
+                                                                <td data-cap="amt"></td>
+                                                                <td data-cap="cnt" style="text-align:center;"></td>
+                                                            </tr>
+                                                            <tr data-figid="TOTAL_BANK">
+                                                            	<td>Bank</td>
+                                                                <td data-cap="amt"></td>
+                                                                <td data-cap="cnt" style="text-align:center;"></td>
+                                                            </tr>
+                                                            <tr data-figid="TOTAL_CASH">
+                                                            	<td>Cash</td>
+                                                                <td data-cap="amt"></td>
+                                                                <td data-cap="cnt" style="text-align:center;"></td>
+                                                            </tr>          
                                                             <tr data-figid="bal_earn">
-                                                            	<td>Total Payment:</td>
-                                                                <td data-cap="amt" style="border-top:1px double; border-bottom:1px double;"></td>
-                                                                <td data-cap="cnt"></td>
+                                                            	<td></td>
+                                                                <td data-cap="amt" style="border-top:1px double; border-bottom:2px double;"></td>
+                                                                <td data-cap="cnt" style="text-align:center;"></td>
                                                             </tr>
-                                                            
+                                                            <tr data-figid="tot_earn">
+                                                            	<td>Total Earning</td>
+                                                                <td></td>
+                                                                <td data-cap="amt"></td>
+                                                            </tr>
+                                                            <tr data-figid="ATTBONUS_W">
+                                                            	<td>Reimburse Traveling</td>
+                                                                <td data-cap="amt"></td>
+                                                                <td></td>
+                                                            </tr>
+                                                            <tr data-figid="INCNTV_EMP">
+                                                            	<td>Incentive</td>
+                                                                <td data-cap="amt"></td>
+                                                                <td></td>
+                                                            </tr>
+                                                            <tr data-figid="INCNTV_DIR">
+                                                            	<td>Directors Incentive</td>
+                                                                <td data-cap="amt"></td>
+                                                                <td></td>
+                                                            </tr>
+                                                            <tr data-figid="PAYE">
+                                                            	<td>PAYEE</td>
+                                                                <td data-cap="amt"></td>
+                                                                <td></td>
+                                                            </tr>
+                                                            <tr data-figid="sal_adv">
+                                                            	<td>Salary Advance</td>
+                                                                <td data-cap="amt"></td>
+                                                                <td></td>
+                                                            </tr>
+                                                            <tr data-figid="TOTAL_ALLWITHEPF">
+                                                            	<td>EPF Contribution 8%</td>
+                                                                <td data-cap="amt"></td>
+                                                                <td data-cap="cnt" style="text-align:right; border-bottom:1px double;"></td>
+                                                            </tr>
+                                                            <tr data-figid="PAYMENT_SUSPENSE">
+                                                            	<td>Salary Payment Suspense</td>
+                                                                <td data-cap="cnt"></td>
+                                                                <td data-cap="amt"></td>
+                                                            </tr>
                                                         </tbody>
-                                                        
                                                     </table>
                                                 </div>
                                                 
-                                                <input type="hidden" name="payroll_profile_id" id="payroll_profile_id" value="" /><!-- edit loans -->
+                                                <input type="hidden" name="payroll_profile_id" id="payroll_profile_id" value="" />
                                                 <input type="hidden" name="payment_period_id" id="payment_period_id" value="" />
                                                 <input type="hidden" name="payslip_process_type_id" id="payslip_process_type_id" value="" />
                                                 
-                                                <input type="hidden" name="rpt_period_id" id="rpt_period_id" value="" />
-                                                <input type="hidden" name="rpt_info" id="rpt_info" value="-" />
-                                                <input type="hidden" name="rpt_payroll_id" id="rpt_payroll_id" value="" />
                                                 <input type="hidden" name="rpt_location_id" id="rpt_location_id" value="" />
-                                                
+                                                <input type="hidden" name="rpt_department_id" id="rpt_department_id" value="" />
+                                                <input type="hidden" name="rpt_period_id" id="rpt_period_id" value="" />
+                                                <input type="hidden" name="rpt_payroll_id" id="rpt_payroll_id" value="" />
+                                            
+                                                <input type="hidden" name="rpt_info" id="rpt_info" value="-" />
                                             </div>
                                         </div>
                                     </form>
                                 </div>
-                                
-                                
-                                
-                              
                             </div>
-                           
                         </div>
                         
                         <div class="row" style="margin-top:10px; margin-left:5px;">
@@ -271,35 +319,48 @@
                                    <div class="modal-body">
                                         <span id="search_result"></span>
                                         <div class="row">
-                                            <div class="form-group col-md-6">
-                                               <label class="control-label col" >Payroll type</label>
-                                               <div class="col">
-                                                 <select name="payroll_process_type_id" id="payroll_process_type_id" class="form-control" >
-                                                    <option value="" disabled="disabled" selected="selected">Please select</option>
-                                                    @foreach($payroll_process_type as $payroll)
-                                                    
-                                                    <option value="{{$payroll->id}}" data-totdays="{{$payroll->total_work_days}}">{{$payroll->process_name}}</option>
-                                                    @endforeach
-                                                    
-                                                 </select>
-                                               </div>
-                                            </div>
+                                            
                                             <div class="form-group col-md-6">
                                                <label class="control-label col">Location</label>
                                                <div class="col">
-                                                   <select name="location_filter_id" id="location_filter_id" class="custom-select shipClass" style="" >
+                                                   <select name="location_filter_id" id="location_filter_id" class="custom-select shipClass" style="pointer-events: none;" >
                                                         <option value="" disabled="disabled" selected="selected">Please Select</option>
                                                         @foreach($branch as $branches)
                                                         
-                                                        <option value="{{$branches->id}}">{{$branches->location}}</option>
+                                                        <option value="{{$branches->id}}">{{$branches->name}}</option>
                                                         @endforeach
                                                         
                                                    </select>
                                                </div>
                                             </div>
-                                            
+
+                                            <div class="form-group col-md-6">
+                                              <label class="control-label col">Department</label>
+                                              <div class="col">
+                                                  <select name="department_filter_id" id="department_filter_id" class="custom-select" style="" data-nestname="deptnest" >
+                                                       <option value="" disabled="disabled" selected="selected">Please Select</option>
+                                                       <option value="All" >All</option>
+                                                       @foreach($department as $section)
+                                                       <option value="{{$section->id}}" >{{$section->name}}</option>
+                                                       @endforeach
+                                                  </select>
+                                              </div>
+                                           </div>
                                         </div>
                                         <div class="row">
+                                          <div class="form-group col-md-6">
+                                            <label class="control-label col" >Payroll type</label>
+                                            <div class="col">
+                                              <select name="payroll_process_type_id" id="payroll_process_type_id" class="form-control" >
+                                                 <option value="" disabled="disabled" selected="selected">Please select</option>
+                                                 @foreach($payroll_process_type as $payroll)
+                                                 
+                                                 <option value="{{$payroll->id}}" data-totdays="{{$payroll->total_work_days}}">{{$payroll->process_name}}</option>
+                                                 @endforeach
+                                                 
+                                              </select>
+                                            </div>
+                                         </div>
                                         	<div class="form-group col">
                                             	<label class="control-label col">Working Period</label>
                                                 <div class="col">
@@ -330,10 +391,6 @@
                             </form>
                         </div>
                     </div>
-                    
-                    
-                    
-                    
                 </main>
               
 @endsection
@@ -343,27 +400,17 @@
 
 <script>
 $(document).ready(function(){
-  $('#payrollmenu').addClass('active');
-    $('#payrollmenu_icon').addClass('active');
-    $('#payrollststement').addClass('navbtnactive');
-	/*var empTable=$("#emp_bank_table").DataTable({
-			"columns":[{data:'fig_name'}, {data:'fig_value'}, {data:'emp_cnt'}],
-			"ordering":false, "order":[],
-			"columnDefs": [{
-					"targets":1, 
-					"className":"text-right",
-					render: function(data, type, row){
-						return parseFloat(data).toFixed(2);
-					}
-				}],
-			"createdRow": function( row, data, dataIndex ){
-				//$('td', row).eq(5).attr('data-colvalue', data.loan_installments); 
-				//$('td', row).eq(0).attr('data-refemp', data.payroll_profile_id); 
-				//$( row ).attr( 'id', 'row-'+data.id );//$( row ).data( 'refid', data[3] );
-			}
-		});*/
-	
-	//var loanTable=$("#loantable").DataTable();
+  $('#payroll_menu_link').addClass('active');
+    $('#payroll_menu_link_icon').addClass('active');
+    $('#payroll_statments').addClass('navbtnactive');
+
+    var companyId = '{{ session("company_id") }}';
+    var companyName = '{{ session("company_name") }}';
+
+    if (companyId && companyName) {
+        $('#location_filter_id').val(companyId).trigger('change');
+    }
+
 	
 	var _token = $('#frmSearch input[name="_token"]').val();;
 	
@@ -419,11 +466,10 @@ $(document).ready(function(){
 			$('#search_result').html(html);
 		}else{
 			$("#emp_bank_table tbody tr").each(function(index, obj){
-				//console.log($(this).data('figid'));
 				if($(this).data('figid')!=''){
 					var disp_amt = parseFloat(Math.abs(data.payment_detail[$(this).data('figid')].amt)).toFixed(2);
 					$(this).children('td[data-cap="amt"]').html(disp_amt).addClass('text-right');
-					$(this).children('td[data-cap="cnt"]').html(data.payment_detail[$(this).data('figid')].cnt).addClass('text-center');
+					$(this).children('td[data-cap="cnt"]').html(data.payment_detail[$(this).data('figid')].cnt);
 				}
 			});
 			//empTable.rows.add(data.payment_detail);
@@ -441,14 +487,15 @@ $(document).ready(function(){
 			$("#payslip_process_type_id").val($("#payroll_process_type_id").find(":selected").val());
 			$("#lbl_payroll_name").html($("#payroll_process_type_id").find(":selected").text());
 			//$('#find_employee').prop('disabled', false);
-			
+
 			$("#rpt_payroll_id").val($("#payroll_process_type_id").find(":selected").val());
 			$("#rpt_location_id").val($("#location_filter_id").find(":selected").val());
 			$("#rpt_period_id").val($("#period_filter_id").find(":selected").val());
+            $("#rpt_department_id").val($("#department_filter_id").find(":selected").val());
+
 			$("#rpt_info").val(data.work_date_fr+" To "+data.work_date_to+" ("+$("#payroll_process_type_id").find(":selected").text()+")");
-			
-			//$("#print_record").prop('disabled', false);
-			//$("#print_record").removeClass('btn-light');
+			$("#print_record").prop('disabled', false);
+			$("#print_record").removeClass('btn-light');
 			
 			$('#formModal').modal('hide');
 		}
@@ -456,6 +503,29 @@ $(document).ready(function(){
 	  })
 	});
 	
+    // $("#print_record").on("click", function () {
+    //     var formData = {
+    //         location_filter_id: $('#location_filter_id').val(),
+    //         department_filter_id: $('#department_filter_id').val(),
+    //         payroll_process_type_id: $('#payroll_process_type_id').val(),
+    //         period_filter_id: $('#period_filter_id').val()
+    //     };
+
+    //     $.ajax({
+    //         url: '{{ route("generatepaysummarypdf") }}',
+    //         type: 'POST',
+    //         data: formData,
+    //         dataType: 'JSON',
+    //         headers: {
+    //             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+    //         },
+    //         success: function (data) {
+    //             if (data.status === 'success') {
+    //                 window.location.href = data.pdf_url;
+    //             }
+    //         }
+    //     });
+    // });
 	
 	$(".btn_back").on("click", function(){
 		$(".show .frm_info").addClass('sect_bg');
@@ -469,13 +539,110 @@ $(document).ready(function(){
 			$(".show .frm_link").removeClass('sect_bg');
 		}
 	});
-	/*
-	$(".modal").on("hide.bs.modal", function(e){
-		$(this).removeClass('active');
-	});
-	*/
-	
 });
+
+function centerText(text, y, doc) {
+    var pageWidth = doc.internal.pageSize.getWidth();
+    var textWidth = doc.getTextWidth(text);
+    doc.text(text, (pageWidth - textWidth) / 2, y);
+}
+
+function rightAlignText(text, y, doc, margin = 22) {
+    var pageWidth = doc.internal.pageSize.getWidth();
+    var textWidth = doc.getTextWidth(text);
+    var xCoordinate = pageWidth - textWidth - margin; 
+
+    doc.text(text, xCoordinate, y);
+}
+
+function centerTextWithUnderline(text, y, doc) {
+    var pageWidth = doc.internal.pageSize.getWidth();
+    var textWidth = doc.getTextWidth(text);
+    var startX = (pageWidth - textWidth) / 2;
+    doc.text(text, startX, y);
+    doc.line(startX, y + 1, startX + textWidth, y + 1); 
+}
+
+async function generatePDF() {
+    const { jsPDF } = window.jspdf; 
+    const { autoTable } = window.jspdf; 
+
+    const doc = new jsPDF();
+	const margins = { top: 35};
+    doc.setLineHeightFactor(1.0);
+
+    var companyId = '{{ session("company_id") }}';
+    var companyName = '{{ session("company_name") }}';
+    var companyAddress = '{{ session("company_address") }}';
+
+	var workfrom=$("#lbl_date_fr").text();
+	var workto=$("#lbl_date_to").text();
+    var debit_total_text=$("#debit_total_text").val();
+    var thousentseparate_debit_total=$("#thousentseparate_debit_total").val();
+
+    var date = new Date(workto);
+    var formattedDate = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+	doc.autoTable({ 
+		html: '#emp_bank_table',
+		theme: 'grid',
+		margin: margins,
+		headStyles: {
+        fillColor: [255, 255, 255], 
+        textColor: [0, 0, 0],      
+        fontStyle: 'bold'         
+		},
+		styles: {
+			lineWidth: 0,             
+			lineColor: [0, 0, 0]     
+		},
+        didParseCell: function (data) {
+            if (data.column.index === 1 || data.column.index === 2) {
+                data.cell.styles.halign = 'right';
+
+                var plainText = $(data.cell.raw).text();
+                if (!isNaN(plainText)) {
+                    if (plainText != '') {
+                        let value = parseFloat(plainText).toFixed(2); 
+                        data.cell.text = [value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")];
+                    }
+                }
+            }
+        },
+
+		didDrawPage: function (data) {
+
+        doc.setFontSize(12);
+        doc.setFont('Helvetica', 'normal');
+        centerTextWithUnderline('Pay Summary', 15, doc);
+
+        doc.setFontSize(14);
+        doc.setTextColor(40);
+        doc.setFont('Helvetica', 'bold');
+        centerText(companyName || "Your Company Name", 22, doc);
+
+        doc.setFontSize(9);
+        doc.setFont('Helvetica', 'normal');
+        rightAlignText('NO : ....................', 22, doc);
+
+        doc.setFontSize(9);
+        doc.setFont('Helvetica', 'normal');
+        centerText(companyAddress, 27, doc);
+
+        doc.setFontSize(9);
+        doc.setFont('Helvetica', 'normal');
+        rightAlignText('Date : '+workto, 27, doc);
+
+        const footerYPosition = data.cursor.y + 10;
+
+        const signyPosition = footerYPosition + 20;
+         }
+	 })
+
+	doc.save('Pay Summary'+workfrom+' to '+workto+'.pdf')
+
+}
+
 </script>
 
 @endsection
