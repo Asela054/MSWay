@@ -70,6 +70,11 @@ if (!empty($accessibleEmployeeIds)) {
     $extraWhere .= " AND 1 = 0";
 }
 
+if (!empty($_POST['company'])) {
+    $company = $_POST['company'];
+    $extraWhere .= " AND companies.id = '$company'";
+}
+
 if (!empty($_POST['department'])) {
     $department = $_POST['department'];
     $extraWhere .= " AND departments.id = '$department'";
