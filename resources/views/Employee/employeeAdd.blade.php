@@ -779,6 +779,7 @@ $(document).ready(function () {
                 url: scripturl + "/employee_list.php",
                 type: "POST",
                 data: {
+                    user_id: {{ Session::get('users_id') ?? 'null' }},
                     department: department,
                     employee: employee,
                     location: location,
