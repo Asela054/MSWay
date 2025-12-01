@@ -126,7 +126,7 @@
                 <div class="modal-body">
                     <div class="row1">
                          <div class="form-row mb-1">
-                            @if($companytype == 0)
+                            @if($companytype == 1)
                                 <div class="col-sm-12 col-md-6">
                                     <label class="small font-weight-bold text-dark">From Date*</label>
                                     <input required type="date" id="date_from" name="date_from"
