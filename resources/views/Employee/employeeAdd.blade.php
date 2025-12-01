@@ -736,7 +736,7 @@ $(document).ready(function () {
         }
     });
 
-    function load_dt(department, employee, location, from_date, to_date){
+    function load_dt(company, department, employee, location, from_date, to_date){
         $('#emptable').DataTable({
             "destroy": true,
             "processing": true,
@@ -780,6 +780,7 @@ $(document).ready(function () {
                 type: "POST",
                 data: {
                     user_id: {{ Session::get('users_id') ?? 'null' }},
+                    company: company,
                     department: department,
                     employee: employee,
                     location: location,
@@ -896,7 +897,7 @@ $(document).ready(function () {
         });
     }    
 
-    load_dt('', '', '', '', '');
+    load_dt('', '', '', '', '', '');
 
     $('#from_date').on('change', function() {
         let fromDate = $(this).val();
@@ -910,13 +911,14 @@ $(document).ready(function () {
 
     $('#formFilter').on('submit',function(e) {
         e.preventDefault();
+        let company = $('#company_f').val();
         let department = $('#department_f').val();
         let employee = $('#employee_f').val();
         let location = $('#location_f').val();
         let from_date = $('#from_date').val();
         let to_date = $('#to_date').val();
 
-        load_dt(department, employee, location, from_date, to_date);
+        load_dt(company, department, employee, location, from_date, to_date);
     });
 
     document.getElementById('btn-reset').addEventListener('click', function() {
