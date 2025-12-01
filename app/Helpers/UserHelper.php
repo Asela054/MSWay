@@ -114,7 +114,7 @@ class UserHelper
      */
     public static function hasHierarchyRestrictions($userId = null)
     {
-        $userId = $userId ?? Session::get('id');
+        $userId = $userId ?? Session::get('users_id');
         
         if (!$userId) {
             return false;
@@ -128,22 +128,76 @@ class UserHelper
     }
     
     /**
-     * Get accessible employee IDs for a user
+     * Get accessible employee IDs for a user (PDO version for non-Laravel)
      * 
-     * @param int|null $userId
+     * @param int $userId
+     * @param \PDO $pdo
      * @return array
      */
-    public static function getAccessibleEmployeeIds($userId = null)
+    public static function getAccessibleEmployeeIds($userId, $pdo = null)
     {
-        $userId = $userId ?? Session::get('users_id');
-        
         if (!$userId) {
             return [];
         }
         
+        if ($pdo === null) {
+            return static::getAccessibleEmployeeIdsLaravel($userId);
+        }
+        
+        $stmt = $pdo->prepare("SELECT group_id FROM user_has_pay_groups WHERE user_id = ?");
+        $stmt->execute([$userId]);
+        $userPayGroups = $stmt->fetchAll(\PDO::FETCH_COLUMN);
+        
+        if (!empty($userPayGroups)) {
+            $placeholders = implode(',', array_fill(0, count($userPayGroups), '?'));
+            $stmt = $pdo->prepare("
+                SELECT DISTINCT e.emp_id
+                FROM payroll_profiles pp
+                JOIN employees e ON pp.emp_id = e.id
+                WHERE pp.employee_payday_id IN ($placeholders)
+            ");
+            $stmt->execute($userPayGroups);
+            return $stmt->fetchAll(\PDO::FETCH_COLUMN);
+        }
+        
+        $stmt = $pdo->prepare("
+            SELECT ch.order_number 
+            FROM users u
+            JOIN employees e ON u.emp_id = e.emp_id
+            JOIN company_hierarchies ch ON e.hierarchy_id = ch.id
+            WHERE u.id = ? AND e.hierarchy_id IS NOT NULL
+        ");
+        $stmt->execute([$userId]);
+        $userHierarchy = $stmt->fetch(\PDO::FETCH_ASSOC);
+        
+        if ($userHierarchy) {
+            $stmt = $pdo->prepare("
+                SELECT e.emp_id
+                FROM employees e
+                LEFT JOIN company_hierarchies ch ON e.hierarchy_id = ch.id
+                WHERE e.deleted = 0 
+                AND (e.hierarchy_id IS NULL OR ch.order_number >= ?)
+            ");
+            $stmt->execute([$userHierarchy['order_number']]);
+            return $stmt->fetchAll(\PDO::FETCH_COLUMN);
+        }
+        
+        $stmt = $pdo->prepare("
+            SELECT emp_id 
+            FROM employees 
+            WHERE deleted = 0 
+        ");
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_COLUMN);
+    }
+
+    /**
+     * Get accessible employee IDs using Laravel DB (original method)
+     */
+    protected static function getAccessibleEmployeeIdsLaravel($userId)
+    {
         $query = DB::table('employees')
-            ->where('deleted', 0)
-            ->where('is_resigned', 0);
+            ->where('deleted', 0);
         
         $query = static::applyEmployeeFilter($query, $userId);
         
