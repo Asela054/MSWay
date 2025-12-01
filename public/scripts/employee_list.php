@@ -1,13 +1,20 @@
 <?php
 
-// Include the EmployeeHelper class
 use App\Helpers\EmployeeHelper;
+use App\Helpers\UserHelper;
 
-// Correct path resolution for Laravel - use base path or proper autoloading
 require_once __DIR__ . '/../../app/Helpers/EmployeeHelper.php';
+require_once __DIR__ . '/../../app/Helpers/UserHelper.php';
 
 require('config.php');
 require('ssp.customized.class.php');
+
+$userId = $_POST['user_id'] ?? $_GET['user_id'] ?? null;
+
+if (!$userId) {
+    echo json_encode(['error' => 'User ID is required']);
+    exit;
+}
 
 $table = 'employees';
 $primaryKey = 'id';
@@ -51,6 +58,17 @@ $current_date_time = date('Y-m-d H:i:s');
 $previous_month_date = date('Y-m-d', strtotime('-1 month'));
 
 $extraWhere = "employees.deleted = 0";
+
+// Apply UserHelper employee filter
+$pdo = new PDO("mysql:host={$db_host};dbname={$db_name}", $db_username, $db_password);
+$accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId, $pdo);
+
+if (!empty($accessibleEmployeeIds)) {
+    $empIds = implode(',', array_map('intval', $accessibleEmployeeIds));
+    $extraWhere .= " AND employees.emp_id IN ($empIds)";
+} else {
+    $extraWhere .= " AND 1 = 0";
+}
 
 if (!empty($_POST['department'])) {
     $department = $_POST['department'];
