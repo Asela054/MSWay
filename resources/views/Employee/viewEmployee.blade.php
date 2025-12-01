@@ -42,21 +42,21 @@
 									<div class="form-row mb-1">
 										<div class="col-md-4 col-sm-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">First Name</label>
-											<input type="text" class="form-control form-control-sm" id="firstname" name="firstname" placeholder="First Name" value="{{$employee->emp_first_name}}">
+											<input type="text" class="form-control form-control-sm" id="firstname" name="firstname" placeholder="First Name" value="{{$employee->emp_first_name ?? ''}}">
 										</div>
 										<div class="col-md-4 col-sm-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">Middle Name</label>
-											<input type="text" class="form-control form-control-sm" id="middlename" name="middlename" placeholder="Middle Name" value="{{$employee->emp_med_name}}">
+											<input type="text" class="form-control form-control-sm" id="middlename" name="middlename" placeholder="Middle Name" value="{{$employee->emp_med_name ?? ''}}">
 										</div>
 										<div class="col-md-4 col-sm-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">Last Name</label>
-											<input type="text" class="form-control form-control-sm" id="lastname" name="lastname" placeholder="Last Name" value="{{$employee->emp_last_name}}">
+											<input type="text" class="form-control form-control-sm" id="lastname" name="lastname" placeholder="Last Name" value="{{$employee->emp_last_name ?? ''}}">
 										</div>
 									</div>
 									<div class="form-row mb-1">
 										<div class="col-md-4 col-sm-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">Name with Initial</label>
-											<input type="text" class="form-control form-control-sm {{ $errors->has('emp_name_with_initial') ? ' has-error' : '' }}" name="emp_name_with_initial" id="emp_name_with_initial" placeholder="Name with Initial" value="{{$employee->emp_name_with_initial}}">
+											<input type="text" class="form-control form-control-sm {{ $errors->has('emp_name_with_initial') ? ' has-error' : '' }}" name="emp_name_with_initial" id="emp_name_with_initial" placeholder="Name with Initial" value="{{$employee->emp_name_with_initial ?? ''}}">
 											@if ($errors->has('emp_name_with_initial'))
 												<span class="help-block">
 													<strong>{{ $errors->first('emp_name_with_initial') }}</strong>
@@ -65,7 +65,7 @@
 										</div>
 										<div class="col-md-4 col-sm-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">Calling Name</label>
-											<input type="text" class="form-control form-control-sm {{ $errors->has('calling_name') ? ' has-error' : '' }}" name="calling_name" id="calling_name" placeholder="Calling Name" value="{{$employee->calling_name}}">
+											<input type="text" class="form-control form-control-sm {{ $errors->has('calling_name') ? ' has-error' : '' }}" name="calling_name" id="calling_name" placeholder="Calling Name" value="{{$employee->calling_name ?? ''}}">
 											@if ($errors->has('calling_name'))
 												<span class="help-block">
 													<strong>{{ $errors->first('calling_name') }}</strong>
@@ -74,13 +74,13 @@
 										</div>
 										<div class="col-md-4 col-sm-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">Identity Card No</label>
-											<input type="text" class="form-control form-control-sm" id="nicnumber" name="nicnumber" value="{{$employee->emp_national_id}}">
+											<input type="text" class="form-control form-control-sm" id="nicnumber" name="nicnumber" value="{{$employee->emp_national_id ?? ''}}">
 										</div>
 									</div>
 									<div class="form-row mb-1">
 										<div class="col-12 mb-2">
 											<label class="small font-weight-bold text-dark">Full Name</label>
-											<input type="text" class="form-control form-control-sm {{ $errors->has('emp_fullname') ? ' has-error' : '' }}" name="fullname" id="fullname" placeholder="Full Name" value="{{$employee->emp_fullname}}">
+											<input type="text" class="form-control form-control-sm {{ $errors->has('emp_fullname') ? ' has-error' : '' }}" name="fullname" id="fullname" placeholder="Full Name" value="{{$employee->emp_fullname ?? ''}}">
 											@if ($errors->has('emp_fullname'))
 												<span class="help-block">
 													<strong>{{ $errors->first('emp_fullname') }}</strong>
@@ -98,21 +98,21 @@
 									<div class="form-row mb-1">
 										<div class="col-md-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">Employee Permanent Address</label>
-											<input type="text" class="form-control form-control-sm" id="address1" name="address1" value="{{$employee->emp_address}}">
+											<input type="text" class="form-control form-control-sm" id="address1" name="address1" value="{{$employee->emp_address ?? ''}}">
 										</div>
 										<div class="col-md-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">Employee Temporary Address</label>
-											<input type="text" class="form-control form-control-sm" id="addressT1" name="addressT1" value="{{$employee->emp_addressT1}}">
+											<input type="text" class="form-control form-control-sm" id="addressT1" name="addressT1" value="{{$employee->emp_addressT1 ?? ''}}">
 										</div>
 									</div>
 									<div class="form-row mb-1">
 										<div class="col-md-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">Employee Email</label>
-											<input type="email" class="form-control form-control-sm" id="employee_mail" name="employee_mail" value="{{$employee->emp_email}}">
+											<input type="email" class="form-control form-control-sm" id="employee_mail" name="employee_mail" value="{{$employee->emp_email ?? ''}}">
 										</div>
 										<div class="col-md-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">Employee Personal Email</label>
-											<input type="email" class="form-control form-control-sm" id="employee_other_mail" name="employee_other_mail" value="{{$employee->emp_other_email}}">
+											<input type="email" class="form-control form-control-sm" id="employee_other_mail" name="employee_other_mail" value="{{$employee->emp_other_email ?? ''}}">
 										</div>
 									</div>
 									<div class="form-row mb-1">
@@ -158,15 +158,28 @@
 										<div class="col-md-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">Current Photo</label>
 											<div>
-												@if(isset($employee) && $employee->employeePicture && $employee->employeePicture->emp_pic_filename && file_exists(public_path('/images/' . $employee->employeePicture->emp_pic_filename)))
+												@php
+													$hasPhoto = false;
+													$photoPath = '';
+													
+													if(isset($employee) && $employee->employeePicture) {
+														$filename = $employee->employeePicture->emp_pic_filename ?? null;
+														if($filename && file_exists(public_path('/images/' . $filename))) {
+															$hasPhoto = true;
+															$photoPath = asset('images/' . $filename);
+														}
+													}
+												@endphp
+												
+												@if($hasPhoto)
 													<img class="img-thumbnail" style="max-width: 200px;"
-														src="{{ asset('images/' . $employee->employeePicture->emp_pic_filename) }}" 
+														src="{{ $photoPath }}" 
 														alt="Employee Photo">
 												@else
 													<p class="text-muted">No photo uploaded</p>
 												@endif
 											</div>
-										</div>					
+										</div>	
 									</div>
 								</div>
 							</div>
@@ -207,7 +220,12 @@
 									<div class="form-row mb-1">
 										<div class="col-md-3 col-sm-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">Date of Birth</label>
-											<input type="date" class="form-control form-control-sm" id="birthday" name="birthday" value="{{$employee->emp_birthday}}">
+											<input type="date" class="form-control form-control-sm" id="birthday" name="birthday" value="{{$employee->emp_birthday ? date('Y-m-d', strtotime($employee->emp_birthday)) : ''}}">
+											@if ($errors->has('nic_validation'))
+												<span class="text-danger">
+													<strong>{{ $errors->first('nic_validation') }}</strong>
+												</span>
+											@endif
 										</div>
 									</div>
 								</div>
@@ -220,7 +238,7 @@
 									<div class="form-row mb-1">
 										<div class="col-md-3 col-sm-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">Employee EPF/ETF No</label>
-											<input type="text" class="form-control form-control-sm {{ $errors->has('emp_etfno') ? ' is-invalid' : '' }}" id="emp_etfno" name="emp_etfno" value="{{$employee->emp_etfno}}">
+											<input type="text" class="form-control form-control-sm {{ $errors->has('emp_etfno') ? ' is-invalid' : '' }}" id="emp_etfno" name="emp_etfno" value="{{$employee->emp_etfno ? $employee->emp_etfno : ''}}">
 											@if ($errors->has('emp_etfno'))
 												<span class="invalid-feedback">
 													<strong>{{ $errors->first('emp_etfno') }}</strong>
@@ -229,7 +247,7 @@
 										</div>
 										<div class="col-md-3 col-sm-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">Employee No</label>
-											<input type="text" class="form-control form-control-sm {{ $errors->has('emp_id') ? ' is-invalid' : '' }}" id="emp_id" name="emp_id" value="{{$employee->emp_id}}">
+											<input type="text" class="form-control form-control-sm {{ $errors->has('emp_id') ? ' is-invalid' : '' }}" id="emp_id" name="emp_id" value="{{$employee->emp_id ? $employee->emp_id : ''}}">
 											@if ($errors->has('emp_id'))
 												<span class="invalid-feedback">
 													<strong>{{ $errors->first('emp_id') }}</strong>
@@ -240,21 +258,21 @@
 									<div class="form-row mb-1">
 										<div class="col-md-3 col-sm-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">Driver's License Number</label>
-											<input type="text" class="form-control form-control-sm" id="licensenumber" name="licensenumber" value="{{$employee->emp_drive_license}}">
+											<input type="text" class="form-control form-control-sm" id="licensenumber" name="licensenumber" value="{{$employee->emp_drive_license ? $employee->emp_drive_license : ''}}">
 										</div>
 										<div class="col-md-3 col-sm-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">License Expiry Date</label>
-											<input type="date" class="form-control form-control-sm" id="licenseexpiredate" name="licenseexpiredate" value="{{$employee->emp_license_expire_date}}">
+											<input type="date" class="form-control form-control-sm" id="licenseexpiredate" name="licenseexpiredate" value="{{$employee->emp_license_expire_date ? date('Y-m-d', strtotime($employee->emp_license_expire_date)) : ''}}">
 										</div>
 										<div class="col-md-3 col-sm-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">Date Assigned</label>
-											<input type="date" class="form-control form-control-sm" id="dateassign" name="dateassign" value="{{$employee->emp_assign_date}}">
+											<input type="date" class="form-control form-control-sm" id="dateassign" name="dateassign" value="{{$employee->emp_assign_date ? date('Y-m-d', strtotime($employee->emp_assign_date)) : ''}}">
 										</div>
 									</div>
 									<div class="form-row mb-1">
 										<div class="col-md-3 col-sm-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">Join Date</label>
-											<input type="date" class="form-control form-control-sm" id="joindate" name="joindate" value="{{$employee->emp_join_date}}">
+											<input type="date" class="form-control form-control-sm" id="joindate" name="joindate" value="{{$employee->emp_join_date ? date('Y-m-d', strtotime($employee->emp_join_date)) : ''}}">
 										</div>
 										<div class="col-md-5 col-sm-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">Job Title</label>
@@ -415,11 +433,11 @@
 									<div class="form-row" hidden>
 										<div class="col-md-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">No of Casual Leaves</label>
-											<input type="text" min="0" class="form-control form-control-sm num" id="no_of_casual_leaves" name="no_of_casual_leaves" value="{{$employee->no_of_casual_leaves}}">
+											<input type="text" min="0" class="form-control form-control-sm num" id="no_of_casual_leaves" name="no_of_casual_leaves" value="{{$employee->no_of_casual_leaves ?? ''}}">
 										</div>
 										<div class="col-md-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">No of Annual Leaves</label>
-											<input type="text" min="0" class="form-control form-control-sm num" id="no_of_annual_leaves" name="no_of_annual_leaves" value="{{$employee->no_of_annual_leaves}}">
+											<input type="text" min="0" class="form-control form-control-sm num" id="no_of_annual_leaves" name="no_of_annual_leaves" value="{{$employee->no_of_annual_leaves ?? ''}}">
 										</div>
 									</div>
 								</div>
@@ -458,11 +476,11 @@
 									<div class="form-row mb-1">
 										<div class="col-md-6 col-sm-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">GSN's Name</label>
-											<input type="text" class="form-control form-control-sm" id="gsnname" name="gsnname" value="{{$employee->gsn_name}}">
+											<input type="text" class="form-control form-control-sm" id="gsnname" name="gsnname" value="{{$employee->gsn_name ?? ''}}">
 										</div>
 										<div class="col-md-6 col-sm-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">Contact No</label>
-											<input type="text" class="form-control form-control-sm" id="gsncontactno" name="gsncontactno" value="{{$employee->gsn_contactno}}">
+											<input type="text" class="form-control form-control-sm" id="gsncontactno" name="gsncontactno" value="{{$employee->gsn_contactno ?? ''}}">
 										</div>
 									</div>
 									<div class="form-row mb-1">
@@ -480,7 +498,7 @@
 										</div>
 										<div class="col-md-6 col-sm-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">Contact No</label>
-											<input type="text" class="form-control form-control-sm" id="policecontat" name="policecontat" value="{{$employee->police_contactno}}">
+											<input type="text" class="form-control form-control-sm" id="policecontat" name="policecontat" value="{{$employee->police_contactno ?? ''}}">
 										</div>
 									</div>
 								</div>
