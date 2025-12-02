@@ -268,7 +268,8 @@
                                     </div>
                                 </div>
                                 
-                                <div class="form-group mb-1">
+                                <div class="form-row mb-1">
+                                    <div class="col">
                                     <label class="small font-weight-bolder">Photograph</label>
                                     <input type="file" data-preview="#preview" class="form-control form-control-sm {{ $errors->has('photograph') ? ' has-error' : '' }}" name="photograph" id="photograph">
                                     <img class="" id="preview" src="" style="max-width: 200px; max-height: 200px; width: auto; height: auto;">
@@ -277,9 +278,7 @@
                                             <strong>{{ $errors->first('photograph') }}</strong>
                                         </span>
                                     @endif
-                                </div>
-                                
-                                <div class="form-row mb-1">
+                                    </div>
                                     <div class="col">
                                         <label class="small font-weight-bolder">Employee Status*</label>
                                         <select name="status" id="status" class="form-control form-control-sm shipClass {{ $errors->has('status') ? ' has-error' : '' }}" required>
@@ -291,6 +290,23 @@
                                         @if ($errors->has('status'))
                                             <span class="help-block">
                                                 <strong>{{ $errors->first('status') }}</strong>
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row mb-1">
+                                    <div class="col">
+                                        <label class="small font-weight-bolder">Employee Position</label>
+                                        <select name="hierarchy_id" id="hierarchy_id" class="form-control form-control-sm shipClass {{ $errors->has('hierarchy_id') ? ' has-error' : '' }}" >
+                                            <option value="">Select</option>
+                                            @foreach($empposition as $emppositions)
+                                                <option value="{{$emppositions->id}}">{{$emppositions->position}}</option>
+                                            @endforeach
+                                        </select>
+                                        @if ($errors->has('hierarchy_id'))
+                                            <span class="help-block">
+                                                <strong>{{ $errors->first('hierarchy_id') }}</strong>
                                             </span>
                                         @endif
                                     </div>

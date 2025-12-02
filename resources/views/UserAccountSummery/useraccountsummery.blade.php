@@ -272,7 +272,7 @@
                                                         <div class="card-body">
                                                             <div class="row">
                                                                 <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12 text-right">
-                                                                    <button type="button" class="btn btn-outline-primary btn-sm fa-pull-right px-3" name="create_record" id="create_record"><i class="fas fa-plus mr-2"></i>Add Leave </button>
+                                                                    <button type="button" class="btn btn-outline-primary btn-sm fa-pull-right px-3" name="create_record" id="create_record"><i class="fas fa-plus mr-2"></i>Add Leave Request</button>
                                                                 </div>
                                                                 <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
                                                                     <hr>
