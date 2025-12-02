@@ -3,44 +3,41 @@
 @section('content')
 
 				<main>
-                    <div class="page-header page-header-light bg-white shadow">
-                        <div class="container-fluid">
+                    <div class="page-header">
+                        <div class="container-fluid d-none d-sm-block shadow">
                             @include('layouts.payroll_nav_bar')
-                           
+                        </div>
+                        <div class="container-fluid">
+                            <div class="page-header-content py-3 px-2">
+                                <h1 class="page-header-title ">
+                                    <div class="page-header-icon"><i class="fa-light fa-money-check-dollar-pen"></i></div>
+                                    <span>Bank Advice</span>
+                                </h1>
+                            </div>
                         </div>
                     </div>
-                    <div class="container-fluid mt-4">
+                    <div class="container-fluid mt-2 p-0 p-2">
                         <div class="row">
-                       
-                           
-                            <div class="col-lg-12">
+                            <div class="col-12">
                                 <div id="default">
                                     <form id="frmExport" method="post" action="{{ url('DownloadEpfEtf') }}">
                                     {{ csrf_field() }}
-                                        <div class="card card-header-actions mb-4">
-                                            <div class="card-header">
-                                                Bank Advice
-                                                <span id="lbl_duration" style="display:none; margin-right:auto; padding-left:10px;">
-                                                    <span id="lbl_date_fr">&nbsp;</span> To <span id="lbl_date_to">&nbsp;</span>
-                                                    (<span id="lbl_payroll_name">&nbsp;</span>)
-                                                </span>
-                                                <div>
-                                                    <button type="button" name="find_employee" id="find_employee" class="btn btn-success btn-sm">Search</button>
-                                                    <button type="button" name="print_record" id="print_record" disabled="disabled" class="btn btn-secondary btn-sm btn-light"  onclick="generatePDF();">Download</button>
-                                                </div>
-                                            </div>
-                                            
+                                        <div class="card">
                                             <div class="card-body">
-                                                
-                                                <div id="divPrint" class="datatable table-responsive" style="margin-top:0px;">
-                                                    <table class="table table-bordered table-hover" id="emp_bank_table" width="100%" cellspacing="0">
+                                                <div class="col-12 text-right">
+                                                    <button type="button" name="find_employee" id="find_employee" class="btn btn-success btn-sm px-3"><i class="fal fa-search mr-2"></i>Search</button>
+                                                    <button type="button" name="print_record" id="print_record" disabled="disabled" class="btn btn-danger btn-sm btn-light px-3"  onclick="generatePDF();"><i class="fal fa-file-pdf mr-2"></i>Download PDF</button>
+                                                </div>
+                                                <hr>
+                                                <div id="divPrint" class="center-block fix-width scroll-inner" style="margin-top:0px;">
+                                                    <table class="table table-bordered table-sm small w-100 nowrap table-hover" id="emp_bank_table" width="100%" cellspacing="0">
                                                         <thead>
                                                             <tr>
-                                                                <th style="width:25px;">No.</th>
-                                                                <th>Name</th>
-                                                                <th>Bank</th>
-                                                                <th>Bank A/C No.</th>
-                                                                <th>Net Pay</th>
+                                                                <th style="width:25px;">NO.</th>
+                                                                <th>NAME</th>
+                                                                <th>BANK</th>
+                                                                <th>BANK A/C N0.</th>
+                                                                <th>NET PAY</th>
                                                             </tr>
                                                         </thead>
                                                      
@@ -69,51 +66,46 @@
                         </div>
                     </div>
 
-                    <div id="formModal" class="modal fade" role="dialog">
-                        <div class="modal-dialog">
-                            <form id="frmSearch" method="post">
-                            {{ csrf_field() }}	
-                                <div class="modal-content">
-                                   <div class="modal-header">
-                                       <h5 class="modal-title" id="formModalLabel"></h5>
-                                       
-                                       <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span class="btn-sm btn-danger" aria-hidden="true">X</span></button>
-                                   </div>
-                                   <div class="modal-body">
+                   
+                      <div id="formModal" class="modal fade" role="dialog">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="formModalLabel"></h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="frmSearch" method="post">
+                                        {{ csrf_field() }}
                                         <span id="search_result"></span>
-                                        <div class="row">
-                                         
-                                            <div class="form-group col-md-6">
-                                               <label class="control-label col">Location</label>
-                                               <div class="col">
-                                                   <select name="location_filter_id" id="location_filter_id" class="custom-select shipClass" style="pointer-events: none;" >
+                                        <div class="form-row mb-1">
+                                            <div class="col">
+                                                <label class="font-weight-bolder small">Location*</label>
+                                                 <select name="location_filter_id" id="location_filter_id" class="custom-select custom-select-sm " style="pointer-events: none;" >
                                                         <option value="" disabled="disabled" selected="selected">Please Select</option>
                                                         @foreach($branch as $branches)
-                                                        
                                                         <option value="{{$branches->id}}">{{$branches->name}}</option>
                                                         @endforeach
                                                         
                                                    </select>
-                                               </div>
                                             </div>
-                                            <div class="form-group col-md-6">
-                                                <label class="control-label col">Department</label>
-                                                <div class="col">
-                                                    <select name="department_filter_id" id="department_filter_id" class="custom-select" style="" data-nestname="deptnest" >
+                                            <div class="col">
+                                                <label class="font-weight-bolder small">Department*</label>
+                                                 <select name="department_filter_id" id="department_filter_id" class="custom-select custom-select-sm" style="" data-nestname="deptnest" >
                                                          <option value="" disabled="disabled" selected="selected">Please Select</option>
                                                          <option value="All" >All</option>
                                                          @foreach($department as $section)
                                                          <option value="{{$section->id}}" >{{$section->name}}</option>
                                                          @endforeach
                                                     </select>
-                                                </div>
-                                             </div>
+                                            </div>
                                         </div>
-                                        <div class="row">
-                                            <div class="form-group col-md-6">
-                                                <label class="control-label col" >Payroll type</label>
-                                                <div class="col">
-                                                  <select name="payroll_process_type_id" id="payroll_process_type_id" class="form-control" >
+                                        <div class="form-row mb-1">
+                                            <div class="col">
+                                                <label class="font-weight-bolder small">Payroll type*</label>
+                                                 <select name="payroll_process_type_id" id="payroll_process_type_id" class="form-control form-control-sm" >
                                                      <option value="" disabled="disabled" selected="selected">Please select</option>
                                                      @foreach($payroll_process_type as $payroll)
                                                      
@@ -121,38 +113,34 @@
                                                      @endforeach
                                                      
                                                   </select>
-                                                </div>
-                                             </div>
-                                        	<div class="form-group col">
-                                            	<label class="control-label col">Working Period</label>
-                                                <div class="col">
-                                                   <select name="period_filter_id" id="period_filter_id" class="custom-select" style="" >
-                                                        <option value="" disabled="disabled" selected="selected">Please Select</option>
-                                                        @foreach($payment_period as $schedule)
-                                                        
-                                                        <option value="{{$schedule->id}}" disabled="disabled" data-payroll="{{$schedule->payroll_process_type_id}}" style="display:none;">{{$schedule->payment_period_fr}} to {{$schedule->payment_period_to}}</option>
-                                                        @endforeach
-                                                        
-                                                   </select>
-                                               </div>
                                             </div>
-                                            <!--div class="form-group col-md-6">
-                                            	<label class="control-label col">To</label>
-                                                <div class="col">
-                                                	<input type="date" class="form-control" name="work_date_to" id="work_date_to" value="" />
-                                                </div>
-                                            </div-->
+                                            <div class="col">
+                                                <label class="font-weight-bolder small">Working Period*</label>
+                                                <select name="period_filter_id" id="period_filter_id" class="custom-select custom-select-sm"
+                                                    style="" required>
+                                                    <option value="" disabled="disabled" selected="selected">Please Select</option>
+                                                    @foreach($payment_period as $schedule)
+
+                                                    <option value="{{$schedule->id}}" disabled="disabled" data-payroll="{{$schedule->payroll_process_type_id}}" style="display:none;">
+                                                        {{$schedule->payment_period_fr}} to {{$schedule->payment_period_to}}
+                                                    </option>
+                                                    @endforeach
+
+                                                </select>
+                                            </div>
                                         </div>
-                                   </div>
-                                   <div class="modal-footer" align="right">
-                                       <input type="submit" name="action_button" id="action_button" class="btn btn-warning" value="View Report" />
-                                       <button type="button" class="btn btn-light" data-dismiss="modal">Close</button>
-                                   </div>
-                                   
+                                        <div class="form-row">
+                                            <div class="col-12 text-right">
+                                                <hr>
+                                                <input type="submit" name="action_button" id="action_button" class="btn btn-success btn-sm px-3" value="View Statement" />
+                                                <button type="button" class="btn btn-light btn-sm px-3" data-dismiss="modal">Close</button>
+                                            </div>
+                                        </div>
+                                    </form>
                                 </div>
-                            </form>
+                            </div>
                         </div>
-                    </div>  
+                    </div>
                 </main>
               
 @endsection
@@ -164,7 +152,7 @@
 $(document).ready(function(){
     $('#payroll_menu_link').addClass('active');
     $('#payroll_menu_link_icon').addClass('active');
-    $('#payroll_statments').addClass('navbtnactive');
+    $('#payrollststement').addClass('navbtnactive');
 
     var companyId = '{{ session("company_id") }}';
     var companyName = '{{ session("company_name") }}';
