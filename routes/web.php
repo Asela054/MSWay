@@ -736,6 +736,7 @@ Route::post('/previewPaySummary', 'EmployeePayrollStatement@previewPaySummary');
 
 Route::get('EmpSalaryJournalVoucher',['uses' => 'EmployeePayrollStatement@glEmpSalaryVoucher', 'as' => 'EmpSalaryJournalVoucher']); 
 Route::get('EmpEpfEtfJournalVoucher',['uses' => 'EmployeePayrollStatement@glEmpEpfEtfVoucher', 'as' => 'EmpEpfEtfJournalVoucher']); 
+Route::post('/generatepaysummarypdf' ,'PaysummaryPDFController@paysummarypdf')->name('generatepaysummarypdf');
 /*-- PayrollStatements --*/
 
 // Employee Recurement details 
