@@ -145,7 +145,7 @@
 										</div>
 									</div>
 									<div class="form-row mb-1">
-										<div class="col-md-6 col-12 mb-2">
+										<div class="col-md-4 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">Photograph</label>
 											<input type="file" data-preview="#preview" class="form-control form-control-sm {{ $errors->has('photograph') ? ' has-error' : '' }}" name="photograph" id="photograph">
 											<img class="mt-2" id="preview" src="" style="max-width: 100%; display: none;">
@@ -155,31 +155,6 @@
 												</span>
 											@endif
 										</div>
-										<div class="col-md-6 col-12 mb-2">
-											<label class="small font-weight-bold text-dark">Current Photo</label>
-											<div>
-												@php
-													$hasPhoto = false;
-													$photoPath = '';
-													
-													if(isset($employee) && $employee->employeePicture) {
-														$filename = $employee->employeePicture->emp_pic_filename ?? null;
-														if($filename && file_exists(public_path('/images/' . $filename))) {
-															$hasPhoto = true;
-															$photoPath = asset('images/' . $filename);
-														}
-													}
-												@endphp
-												
-												@if($hasPhoto)
-													<img class="img-thumbnail" style="max-width: 200px;"
-														src="{{ $photoPath }}" 
-														alt="Employee Photo">
-												@else
-													<p class="text-muted">No photo uploaded</p>
-												@endif
-											</div>
-										</div>	
 									</div>
 								</div>
 							</div>
