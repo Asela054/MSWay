@@ -228,14 +228,25 @@
                                     </div>
                                 </div>
                                 
-                                <div class="form-group mb-1">
-                                    <label class="small font-weight-bolder">Identity Card No*</label>
-                                    <input type="text" name="emp_id_card" id="emp_id_card" class="form-control form-control-sm {{ $errors->has('emp_id_card') ? ' has-error' : '' }}" required />
-                                    @if ($errors->has('emp_id_card'))
-                                        <span class="help-block">
-                                            <strong>{{ $errors->first('emp_id_card') }}</strong>
-                                        </span>
-                                    @endif
+                                <div class="form-row mb-1">
+                                    <div class="col">
+                                        <label class="small font-weight-bolder">Identity Card No*</label>
+                                        <input type="text" name="emp_id_card" id="emp_id_card" class="form-control form-control-sm {{ $errors->has('emp_id_card') ? ' has-error' : '' }}" required />
+                                        @if ($errors->has('emp_id_card'))
+                                            <span class="help-block">
+                                                <strong>{{ $errors->first('emp_id_card') }}</strong>
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <div class="col">
+                                        <label class="small font-weight-bolder">Date of Birth*</label>
+                                        <input type="date" name="emp_birthday" id="emp_birthday" class="form-control form-control-sm {{ $errors->has('emp_birthday') ? ' has-error' : '' }}" required />
+                                        @if ($errors->has('emp_birthday'))
+                                            <span class="help-block">
+                                                <strong>{{ $errors->first('emp_birthday') }}</strong>
+                                            </span>
+                                        @endif
+                                    </div>
                                 </div>
                                 
                                 <div class="form-row mb-1">
@@ -725,7 +736,7 @@ $(document).ready(function () {
         }
     });
 
-    function load_dt(department, employee, location, from_date, to_date){
+    function load_dt(company, department, employee, location, from_date, to_date){
         $('#emptable').DataTable({
             "destroy": true,
             "processing": true,
@@ -768,6 +779,8 @@ $(document).ready(function () {
                 url: scripturl + "/employee_list.php",
                 type: "POST",
                 data: {
+                    user_id: {{ Session::get('users_id') ?? 'null' }},
+                    company: company,
                     department: department,
                     employee: employee,
                     location: location,
@@ -884,7 +897,7 @@ $(document).ready(function () {
         });
     }    
 
-    load_dt('', '', '', '', '');
+    load_dt('', '', '', '', '', '');
 
     $('#from_date').on('change', function() {
         let fromDate = $(this).val();
@@ -898,13 +911,14 @@ $(document).ready(function () {
 
     $('#formFilter').on('submit',function(e) {
         e.preventDefault();
+        let company = $('#company_f').val();
         let department = $('#department_f').val();
         let employee = $('#employee_f').val();
         let location = $('#location_f').val();
         let from_date = $('#from_date').val();
         let to_date = $('#to_date').val();
 
-        load_dt(department, employee, location, from_date, to_date);
+        load_dt(company, department, employee, location, from_date, to_date);
     });
 
     document.getElementById('btn-reset').addEventListener('click', function() {
@@ -956,7 +970,6 @@ $(document).ready(function () {
         event.preventDefault();
         var action_url = '';
         var formData = new FormData(this);
-        //alert(formData);
 
         if ($('#action').val() == 'Add') {
             action_url = "{{ route('empoyeeRegister') }}";
@@ -967,31 +980,48 @@ $(document).ready(function () {
         $.ajax({
             url: action_url,
             method: "POST",
-            //data:$(this).serialize(),
             data: formData,
             cache: false,
             contentType: false,
             processData: false,
             dataType: "json",
             success: function (data) {
-
-                var html = '';
                 if (data.errors) {
-                    var errorMessages = '';
+                    var errorMessages = '<ul style="text-align: left;">';
                     for (var count = 0; count < data.errors.length; count++) {
-                        errorMessages += data.errors[count] + '\n';
+                        errorMessages += '<li>' + data.errors[count] + '</li>';
                     }
-                    alert("Error(s):\n" + errorMessages); 
+                    errorMessages += '</ul>';
+                    
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        html: errorMessages,
+                        confirmButtonColor: '#d33'
+                    });
                 }
                 if (data.success) {
-                    alert("Success: " + data.success);
-                    $('#formemployee')[0].reset();
-                    setTimeout(function() {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: data.success,
+                        confirmButtonColor: '#3085d6',
+                        timer: 3000,
+                        timerProgressBar: true
+                    }).then(function() {
+                        $('#formemployee')[0].reset();
+                        $('#empModal').modal('hide');
                         location.reload();
-                    }, 3000);
-                    $('#formemployee').modal('hide');
+                    });
                 }
-                $('#form_result').html(html);
+            },
+            error: function(xhr, status, error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'An unexpected error occurred. Please try again.',
+                    confirmButtonColor: '#d33'
+                });
             }
         });
     });
