@@ -4,73 +4,63 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
-
- use Illuminate\Support\Facades\Session;
- use Auth;
- use App\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
-
+use Auth;
 
 class LoginController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Login Controller
-    |--------------------------------------------------------------------------
-    |
-    | This controller handles authenticating users for the application and
-    | redirecting them to your home screen. The controller uses a trait
-    | to conveniently provide its functionality to your applications.
-    |
-    */
-
     use AuthenticatesUsers;
-   
 
     /**
-     * Where to redirect users after login.
+     * The user has been authenticated.
      *
-     * @var string
+     * @param  \Illuminate\Http\Request  $request
+     * @param  mixed  $user
+     * @return mixed
      */
-    //protected $redirectTo = '/home';
+    protected function authenticated(Request $request, $user)
+    {
+        $employeeData = DB::table('users')
+            ->join('employees', 'users.emp_id', '=', 'employees.emp_id')
+            ->where('users.id', $user->id)
+            ->select('users.id', 'employees.emp_id', 'employees.emp_etfno', 
+                    'employees.emp_name_with_initial', 'employees.emp_location', 
+                    'employees.calling_name', 'employees.emp_department', 
+                    'employees.emp_company')
+            ->first();
+
+        if ($employeeData) {
+            Session::put([
+                'users_id' => $employeeData->id,
+                'emp_id' => $employeeData->emp_id,
+                'emp_etfno' => $employeeData->emp_etfno,
+                'emp_name_with_initial' => $employeeData->emp_name_with_initial,
+                'emp_location' => $employeeData->emp_location,
+                'emp_department' => $employeeData->emp_department,
+                'emp_company' => $employeeData->emp_company,
+            ]);
+            
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+            $_SESSION['users_id'] = $employeeData->id;
+            $_SESSION['emp_id'] = $employeeData->emp_id;
+        }
+
+        if ($user->hasRole('Employee')) {
+            return redirect('/useraccountsummery');
+        }
+        
+        return redirect('/home');
+    }
 
     protected function redirectTo()
     {
-        if (Auth::check()) {
-            $employeeData = DB::table('users')
-                ->join('employees', 'users.emp_id', '=', 'employees.emp_id')
-                ->where('users.id', Auth::id())
-                ->select('users.id','employees.emp_id','employees.emp_etfno','employees.emp_name_with_initial', 'employees.emp_location', 'employees.calling_name','employees.emp_department','employees.emp_company')
-                ->first();
-                
-        } 
-        else{
-            return '/login';
-        }   
-              
-
-        // Share with all views
-        if($employeeData){                
-            Session::put('users_id', $employeeData->id);
-            Session::put('emp_id', $employeeData->emp_id);
-            Session::put('emp_etfno', $employeeData->emp_etfno);
-            Session::put('emp_name_with_initial', $employeeData->emp_name_with_initial);
-            Session::put('emp_location', $employeeData->emp_location);
-            Session::put('emp_department', $employeeData->emp_department);
-            Session::put('emp_company', $employeeData->emp_company);
-        }
-   
-   
-        if (Auth::user()->hasRole('Employee')) {
-            return '/useraccountsummery';
-        }
-        return '/home';
+        return Auth::user()->hasRole('Employee') ? '/useraccountsummery' : '/home';
     }
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
+
     public function __construct()
     {
         $this->middleware('guest')->except('logout');
