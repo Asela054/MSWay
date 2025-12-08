@@ -1,4 +1,5 @@
 <?php
+session_start();
 
 use App\Helpers\EmployeeHelper;
 use App\Helpers\UserHelper;
@@ -8,13 +9,6 @@ require_once __DIR__ . '/../../app/Helpers/UserHelper.php';
 
 require('config.php');
 require('ssp.customized.class.php');
-
-$userId = $_POST['user_id'] ?? $_GET['user_id'] ?? null;
-
-if (!$userId) {
-    echo json_encode(['error' => 'User ID is required']);
-    exit;
-}
 
 $table = 'employees';
 $primaryKey = 'id';
@@ -59,8 +53,9 @@ $previous_month_date = date('Y-m-d', strtotime('-1 month'));
 
 $extraWhere = "employees.deleted = 0";
 
-// Apply UserHelper employee filter
+// new filter based on user access rights
 $pdo = new PDO("mysql:host={$db_host};dbname={$db_name}", $db_username, $db_password);
+$userId = UserHelper::getLoggedInUserId($pdo);
 $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId, $pdo);
 
 if (!empty($accessibleEmployeeIds)) {
@@ -69,6 +64,7 @@ if (!empty($accessibleEmployeeIds)) {
 } else {
     $extraWhere .= " AND 1 = 0";
 }
+// end of new filter
 
 if (!empty($_POST['company'])) {
     $company = $_POST['company'];
