@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Coverup_detail;
 use App\Employee;
 use App\Helpers\EmployeeHelper;
+use App\Helpers\UserHelper;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -48,12 +49,21 @@ class CoverupController extends Controller
         $employee = $request->get('employee');
         $location = $request->get('location');
 
+        // Get accessible employee IDs based on user access rights
+        $userId = Auth::id();
+        $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
+
         $query =  DB::table('coverup_details')
             // ->join('employees as ec', 'coverup_details.emp_id', '=', 'ec.emp_id')
             ->join('employees as e', 'coverup_details.emp_id', '=', 'e.emp_id')
             ->leftjoin('branches', 'e.emp_location', '=', 'branches.id')
             ->leftjoin('departments', 'e.emp_department', '=', 'departments.id')
             ->select('coverup_details.*', 'e.emp_name_with_initial','e.calling_name', 'departments.name as dep_name');
+
+         // Apply user access rights filter
+        if (!empty($accessibleEmployeeIds)) {
+            $query->whereIn('e.emp_id', $accessibleEmployeeIds);
+        }
 
         if($department != ''){
             $query->where(['departments.id' => $department]);

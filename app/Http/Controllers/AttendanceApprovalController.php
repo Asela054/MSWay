@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\employeeWorkRate;
+use App\Helpers\UserHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -38,6 +39,10 @@ class AttendanceApprovalController extends Controller
         $month = $request->get('month');
         $closedate = $request->get('closedate');
         
+        // Get accessible employee IDs based on user access rights
+        $userId = Auth::id();
+        $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
+
         $query = DB::query()
             ->select('at1.id as attendance_id',
                 'at1.emp_id',
@@ -72,6 +77,11 @@ class AttendanceApprovalController extends Controller
             })
             ->leftJoin('branches', 'at1.location', '=', 'branches.id')
             ->leftJoin('departments', 'departments.id', '=', 'employees.emp_department');
+
+        // Apply user access rights filter
+        if (!empty($accessibleEmployeeIds)) {
+            $query->whereIn('employees.emp_id', $accessibleEmployeeIds);
+        }
 
         if ($department != '' && $department != 'All') {
             $query->where(['departments.id' => $department]);
