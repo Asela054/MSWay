@@ -1,10 +1,12 @@
 <?php
-
+session_start();
 // Include the EmployeeHelper class
 use App\Helpers\EmployeeHelper;
+use App\Helpers\UserHelper;
 
 // Correct path resolution for Laravel - use base path or proper autoloading
 require_once __DIR__ . '/../../app/Helpers/EmployeeHelper.php';
+require_once __DIR__ . '/../../app/Helpers/UserHelper.php';
 
 $table = 'leaves';
 $primaryKey = 'id';
@@ -89,6 +91,19 @@ $joinQuery = "FROM (
     LEFT JOIN `branches` ON `e`.`emp_location` = `branches`.`id`
     LEFT JOIN `departments` ON `e`.`emp_department` = `departments`.`id`
 ) AS `sub`";
+
+// new filter based on user access rights
+$pdo = new PDO("mysql:host={$db_host};dbname={$db_name}", $db_username, $db_password);
+$userId = UserHelper::getLoggedInUserId($pdo);
+$accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId, $pdo);
+
+if (!empty($accessibleEmployeeIds)) {
+    $empIds = implode(',', array_map('intval', $accessibleEmployeeIds));
+    $extraWhere .= " AND sub.emp_id IN ($empIds)";
+} else {
+    $extraWhere .= " AND 1 = 0";
+}
+// end of new filter
 
 try {
     echo json_encode(

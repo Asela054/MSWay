@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\EmployeeTermPayment;
 use App\Helpers\EmployeeHelper;
+use App\Helpers\UserHelper;
 use Illuminate\Http\Request;
 use Auth;
 use App\Http\Controllers\Controller;
@@ -59,6 +60,10 @@ class LateminitesApprovelController extends Controller
             $dateRange[] = $closedateObj->format('Y-m-d');
         }
 
+        // Get accessible employee IDs based on user access rights
+        $userId = Auth::id();
+        $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
+
 
         $query = DB::query()
             ->select('at1.id as attendance_id',
@@ -86,6 +91,11 @@ class LateminitesApprovelController extends Controller
             ->leftJoin('branches', 'at1.location', '=', 'branches.id')
             ->leftJoin('departments', 'departments.id', '=', 'employees.emp_department')
             ->leftJoin('job_categories', 'job_categories.id', '=', 'employees.job_category_id');
+
+        // Apply user access rights filter
+        if (!empty($accessibleEmployeeIds)) {
+            $query->whereIn('employees.emp_id', $accessibleEmployeeIds);
+        }
 
         if ($department != '') {
             $query->where(['departments.id' => $department]);

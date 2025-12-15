@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\UserHelper;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Auth;
@@ -42,6 +43,15 @@ class EmployeeAttedanceReportContrller extends Controller
         // $to_range = max($from_range, (int) $to_range);
         // $limit = $to_range - $from_range; 
 
+          // Get accessible employee IDs based on user access rights
+        $userId = Auth::id();
+        $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
+        
+        // Return empty HTML if no accessible employees
+        if (empty($accessibleEmployeeIds)) {
+            return response()->json(['html' => '']);
+        }
+
         $employees = DB::table('employees')
             ->select(
                 'employees.id', 
@@ -54,6 +64,7 @@ class EmployeeAttedanceReportContrller extends Controller
             ->where('employees.deleted', 0)
             ->where('employees.emp_department', $department)
             ->whereBetween('attendances.date', [$from_date, $to_date])
+            ->whereIn('employees.emp_id', $accessibleEmployeeIds)
             ->groupBy('employees.id')
             ->orderBy('employees.id')
             ->get();
@@ -128,6 +139,15 @@ class EmployeeAttedanceReportContrller extends Controller
         // $to_range = max($from_range, (int) $to_range);
         // $limit = $to_range - $from_range; 
 
+           // Get accessible employee IDs based on user access rights
+        $userId = Auth::id();
+        $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
+        
+        // Return empty HTML if no accessible employees
+        if (empty($accessibleEmployeeIds)) {
+            return response()->json(['html' => '']);
+        }
+
         $employees = DB::table('employees')
             ->select(
                 'employees.id', 
@@ -140,6 +160,7 @@ class EmployeeAttedanceReportContrller extends Controller
             ->where('employees.deleted', 0)
             ->where('employees.emp_department', $department)
             ->whereBetween('attendances.date', [$from_date, $to_date])
+            ->whereIn('employees.emp_id', $accessibleEmployeeIds)
             ->groupBy('employees.id')
             ->orderBy('employees.id')
             ->get();

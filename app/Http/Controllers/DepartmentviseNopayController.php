@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\UserHelper;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Leave;
@@ -32,6 +33,15 @@ class DepartmentviseNopayController extends Controller
         $department=$request->input('department');
         $firstDate =  $request->input('from_date');
 
+        // Get accessible employee IDs based on user access rights
+            $userId = Auth::id();
+            $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
+            
+            // Return empty data if no accessible employees
+            if (empty($accessibleEmployeeIds)) {
+                return response()->json(['data' => []]);
+            }
+
         $datareturn = [];
 
         $query =  DB::table('employees')
@@ -39,6 +49,7 @@ class DepartmentviseNopayController extends Controller
             ->where('emp_department', '=', $department)
             ->where('deleted', 0)
             ->where('is_resigned', 0)
+            ->whereIn('emp_id', $accessibleEmployeeIds)
             ->get();
 
             foreach ($query as $row) {

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\Controller;
 use App\Helpers\EmployeeHelper;
+use App\Helpers\UserHelper;
 use Session;
 
 class RptLeaveController extends Controller
@@ -37,6 +38,16 @@ class RptLeaveController extends Controller
         if (!$permission) {
             return response()->json(['error' => 'UnAuthorized'], 401);
         }
+        
+        // Get accessible employee IDs based on user access rights
+        $userId = Auth::id();
+        $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
+        
+        // Return empty HTML if no accessible employees
+        if (empty($accessibleEmployeeIds)) {
+            return response()->json(['html' => '']);
+        }
+
 
         // Base query
         $query = DB::table('leaves')
@@ -55,6 +66,7 @@ class RptLeaveController extends Controller
             ->leftJoin('departments', 'departments.id', '=', 'employees.emp_department')
             ->where('employees.deleted', 0)
             ->where('employees.is_resigned', 0)
+            ->whereIn('employees.emp_id', $accessibleEmployeeIds)
             ->where('leaves.status', 'Approved');
 
         // Apply filters

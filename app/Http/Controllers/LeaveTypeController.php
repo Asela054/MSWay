@@ -14,6 +14,7 @@ use Validator;
 use DB;
 use Yajra\Datatables\Datatables;
 use App\Helpers\EmployeeHelper;
+use App\Helpers\UserHelper;
 use App\Services\LeavepolicyService;
 
 class LeaveTypeController extends Controller
@@ -191,6 +192,15 @@ class LeaveTypeController extends Controller
         $employee_sel = $request->get('employee');
         $location = $request->get('location');
 
+         // Get accessible employee IDs based on user access rights
+        $userId = Auth::id();
+        $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
+        
+        // Return empty HTML if no accessible employees
+        if (empty($accessibleEmployeeIds)) {
+            return response()->json(['html' => '']);
+        }
+
         $query = \Illuminate\Support\Facades\DB::query()
             ->select('employees.*',
                 'branches.location',
@@ -199,6 +209,7 @@ class LeaveTypeController extends Controller
             ->leftJoin('branches', 'employees.emp_location', '=', 'branches.id')
             ->leftJoin('departments', 'departments.id', '=', 'employees.emp_department')
             ->where('employees.deleted', '=', '0')
+            ->whereIn('employees.emp_id', $accessibleEmployeeIds)
             ->where('employees.is_resigned', '=', '0');
 
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\EmployeeHelper;
+use App\Helpers\UserHelper;
 use App\OtApproved;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -38,6 +39,15 @@ class OTApproveController extends Controller
         $to_date = $request->input('to_date');
 
 
+        // Get accessible employee IDs based on user access rights
+        $userId = Auth::id();
+        $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
+        
+        // Return empty data if no accessible employees
+        if (empty($accessibleEmployeeIds)) {
+            return response()->json(['ot_data' => []]);
+        }
+
          $query = DB::table('attendances as at1')
         ->select(
             'at1.*',
@@ -61,8 +71,8 @@ class OTApproveController extends Controller
         ->leftJoin('shift_types', 'employees.emp_shift', '=', 'shift_types.id')
         ->leftJoin('branches', 'at1.location', '=', 'branches.id')
         ->leftJoin('departments', 'employees.emp_department', '=', 'departments.id')
-        ->whereNull('at1.deleted_at');
-
+        ->whereNull('at1.deleted_at')
+        ->whereIn('employees.emp_id', $accessibleEmployeeIds); 
     // Apply filters
     if (!empty($department)) {
         $query->where('employees.emp_department', $department);
@@ -241,6 +251,15 @@ class OTApproveController extends Controller
         $to_date = $request->get('to_date');
         $type = $request->get('type');
 
+           // Get accessible employee IDs based on user access rights
+        $userId = Auth::id();
+        $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
+        
+        // Return empty HTML if no accessible employees
+        if (empty($accessibleEmployeeIds)) {
+            return response()->json(['html' => '']);
+        }
+
         $att_query = 'SELECT ot_approved.*,  
                 employees.emp_shift,  
                 employees.id as emp_auto_id,
@@ -256,6 +275,11 @@ class OTApproveController extends Controller
                 left join branches ON employees.emp_location = branches.id 
                 WHERE employees.deleted = 0 AND employees.is_resigned = 0
                 ';
+
+        if (!empty($accessibleEmployeeIds)) {
+            $ids = implode('","', $accessibleEmployeeIds);
+            $att_query .= 'AND employees.emp_id IN ("' . $ids . '") ';
+        }
 
         if ($department != '') {
             $att_query .= ' AND employees.emp_department = ' . $department;

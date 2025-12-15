@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\EmployeeTermPayment;
 use App\Helpers\EmployeeHelper;
+use App\Helpers\UserHelper;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Mealallowanceapproved;
@@ -45,6 +46,11 @@ class MealallowanceapproveController extends Controller
             $lastDate = $request->input('to_date');
         }
         
+        // Get accessible employee IDs based on user access rights
+        $userId = Auth::id();
+        $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
+
+
         $datareturn = [];
 
         // DB::enableQueryLog();
@@ -60,6 +66,7 @@ class MealallowanceapproveController extends Controller
         ->where('payroll_profiles.payroll_process_type_id', '=',1)
         ->where('employees.deleted', '=',0)
         ->where('employees.is_resigned', '=',0)
+        ->whereIn('employees.emp_id', $accessibleEmployeeIds)
         ->orderBy('employees.id')
         ->get();
         // dd(DB::getQueryLog());

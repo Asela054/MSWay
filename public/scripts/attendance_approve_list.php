@@ -1,10 +1,12 @@
 <?php
-
+session_start();
 // Include the EmployeeHelper class
 use App\Helpers\EmployeeHelper;
+use App\Helpers\UserHelper;
 
 // Correct path resolution for Laravel - use base path or proper autoloading
 require_once __DIR__ . '/../../app/Helpers/EmployeeHelper.php';
+require_once __DIR__ . '/../../app/Helpers/UserHelper.php';
 
 // DB table to use
 $table = 'job_attendance';
@@ -87,6 +89,20 @@ if (!empty($_POST['from_date']) && !empty($_POST['to_date'])) {
 $sql .= " AND `ja`.`location_status` = 1";
 
 $sql .= " AND `ja`.`status` = 1";
+
+// new filter based on user access rights
+$pdo = new PDO("mysql:host={$db_host};dbname={$db_name}", $db_username, $db_password);
+$userId = UserHelper::getLoggedInUserId($pdo);
+$accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId, $pdo);
+
+if (!empty($accessibleEmployeeIds)) {
+    $empIds = implode(',', array_map('intval', $accessibleEmployeeIds));
+    $sql .= " AND ja.employee_id IN ($empIds)";
+} else {
+    $sql .= " AND 1 = 0";
+}
+// end of new filter
+
 
 $joinQuery = "FROM (" . $sql . ") as `u`";
 

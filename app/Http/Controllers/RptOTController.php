@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\EmployeeHelper;
+use App\Helpers\UserHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -221,6 +222,15 @@ class RptOTController extends Controller
         $date = new DateTime("$month-01");
         $closingday = $date->format('Y-m-t');
 
+        // Get accessible employee IDs based on user access rights
+        $userId = Auth::id();
+        $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
+        
+        // Return empty HTML if no accessible employees
+        if (empty($accessibleEmployeeIds)) {
+            return response()->json(['html' => '']);
+        }
+
         $emp_query = 'SELECT  
                 employees.*,  
                 employees.id as emp_auto_id, 
@@ -235,6 +245,11 @@ class RptOTController extends Controller
                 left join departments ON employees.emp_department = departments.id 
                 WHERE employees.deleted = 0  
                 ';
+
+        if (!empty($accessibleEmployeeIds)) {
+            $ids = implode('","', $accessibleEmployeeIds);
+            $emp_query .= 'AND employees.emp_id IN ("' . $ids . '") ';
+        }
 
         if($department != ''){
             $emp_query .= ' AND employees.emp_department = '.$department;

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\EmployeeHelper;
+use App\Helpers\UserHelper;
 use App\LateAttendance;
 use App\Leave;
 use App\Services\LatePolicyService;
@@ -104,7 +105,9 @@ class LateAttendanceController extends Controller
             }
         }
 
-
+        $userId = Auth::id();
+        $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
+ 
         // Base query without late time filter (for counting)
         $baseQuery = DB::table('attendances as at1')
             ->select(
@@ -127,6 +130,19 @@ class LateAttendanceController extends Controller
             ->leftJoin('companies', 'companies.id', '=', 'departments.company_id')
             ->whereNull('at1.deleted_at')
             ->groupBy('at1.uid', 'at1.date');
+
+            // Apply user access rights filter
+            if (!empty($accessibleEmployeeIds)) {
+                $baseQuery->whereIn('employees.emp_id', $accessibleEmployeeIds);
+            } else {
+                // If no accessible employees, return empty result
+                return response()->json([
+                    'draw' => intval($draw),
+                    'iTotalRecords' => 0,
+                    'iTotalDisplayRecords' => 0,
+                    'aaData' => []
+                ]);
+            }
 
         // Apply filters to base query
         if ($searchValue) {
@@ -222,8 +238,6 @@ class LateAttendanceController extends Controller
             'aaData' => $data
         ]);
     }
-
-
 
     public function lateAttendance_mark_as_late(Request $request)
     {

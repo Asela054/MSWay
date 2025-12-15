@@ -8,6 +8,7 @@ use App\Branch;
 use App\Attendance;
 use App\EmployeePaySlip;
 use App\EmployeeSalary;
+use App\Helpers\UserHelper;
 use App\Holiday;
 use App\Leave;
 use App\PayrollProfile;
@@ -364,30 +365,46 @@ class RptAttendanceController extends Controller
         $not_att_count = 0;
 
 
+          // Get accessible employee IDs based on user access rights
+        $userId = Auth::id();
+        $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
+        
+        // Return empty HTML if no accessible employees
+        if (empty($accessibleEmployeeIds)) {
+            return response()->json(['html' => '']);
+        }
+
+
         foreach ($departments as $department_) {
             $atte_arr = [];
 
-            $query3 = 'SELECT   
-                        employees.emp_id,
-                        employees.emp_name_with_initial,
-                        employees.calling_name,
-                        employees.emp_etfno,
-                        branches.location as b_location,
-                        departments.name as dept_name,
-                        departments.id as dept_id
-                    FROM employees '; 
-            $query3 .= 'LEFT JOIN `branches` ON `employees`.`emp_location` = `branches`.`id` ';
-            $query3 .= 'LEFT JOIN `departments` ON `employees`.`emp_department` = `departments`.`id` ';
-            $query3 .= 'WHERE employees.deleted = 0 AND employees.is_resigned = 0 '; 
-            $query3 .= 'AND departments.id = "' . $department_->id . '" ';
+                 $query = DB::table('employees')
+                    ->select(
+                        'employees.emp_id',
+                        'employees.emp_name_with_initial',
+                        'employees.calling_name',
+                        'employees.emp_etfno',
+                        'branches.location as b_location',
+                        'departments.name as dept_name',
+                        'departments.id as dept_id'
+                    )
+                    ->leftJoin('branches', 'employees.emp_location', '=', 'branches.id')
+                    ->leftJoin('departments', 'employees.emp_department', '=', 'departments.id')
+                    ->where('employees.deleted', 0)
+                    ->where('employees.is_resigned', 0)
+                    ->where('departments.id', $department_->id)
+                    ->orderBy('employees.emp_id', 'asc');
 
-            if ($employee != '') {
-                $query3 .= 'AND employees.emp_id = "' . $employee . '" ';
-            }
+                // Add WHERE IN condition for accessible employees
+                if (!empty($accessibleEmployeeIds)) {
+                    $query->whereIn('employees.emp_id', $accessibleEmployeeIds);
+                }
 
-            $query3 .= 'order by employees.emp_id asc ';
+                if ($employee != '') {
+                    $query->where('employees.emp_id', $employee);
+                }
 
-            $employees = DB::select($query3);
+                $employees = $query->get();
 
            
 

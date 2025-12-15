@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\EmployeeTermPayment;
 use App\Helpers\EmployeeHelper;
+use App\Helpers\UserHelper;
 use App\Holidaydiductionapproved;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -47,6 +48,11 @@ class HolidayDeductionapproveController extends Controller
         }
         
 
+        // Get accessible employee IDs based on user access rights
+        $userId = Auth::id();
+        $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
+
+
         $datareturn = [];
 
         $query = DB::table('employees')
@@ -61,6 +67,7 @@ class HolidayDeductionapproveController extends Controller
         ->where('payroll_profiles.payroll_process_type_id', '=',1)
         ->where('employees.deleted', '=',0)
         ->where('employees.is_resigned', '=',0)
+        ->whereIn('employees.emp_id', $accessibleEmployeeIds)
         ->orderBy('employees.id')
         ->get();
 

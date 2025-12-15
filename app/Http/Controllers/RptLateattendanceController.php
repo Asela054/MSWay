@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Helpers\EmployeeHelper;
+use App\Helpers\UserHelper;
 use Excel;
 use Carbon\Carbon;
 use App\Http\Controllers\Controller;
@@ -28,6 +29,15 @@ class RptLateattendanceController extends Controller
         if (!$permission) {
             return response()->json(['error' => 'UnAuthorized'], 401);
         }
+        // Get accessible employee IDs based on user access rights
+        $userId = Auth::id();
+        $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
+        
+        // Return empty HTML if no accessible employees
+        if (empty($accessibleEmployeeIds)) {
+            return response()->json(['html' => '']);
+        }
+
 
         // Base query
         $query = DB::table('employee_late_attendances as ela')
@@ -43,6 +53,7 @@ class RptLateattendanceController extends Controller
             ->join('employees', 'ela.emp_id', '=', 'employees.emp_id')
             ->leftJoin('shift_types', 'employees.emp_shift', '=', 'shift_types.id')
             ->leftJoin('departments', 'departments.id', '=', 'employees.emp_department')
+            ->whereIn('employees.emp_id', $accessibleEmployeeIds)
             ->where('employees.deleted', 0);
 
         // Apply filters
