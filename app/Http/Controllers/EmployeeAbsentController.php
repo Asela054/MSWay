@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\EmployeeHelper;
+use App\Helpers\UserHelper;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Auth;
@@ -40,6 +41,15 @@ class EmployeeAbsentController extends Controller
 
     $absentEmployeesByDate = [];
 
+     // Get accessible employee IDs based on user access rights
+        $userId = Auth::id();
+        $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
+        
+        // Return empty HTML if no accessible employees
+        if (empty($accessibleEmployeeIds)) {
+            return response()->json(['html' => '']);
+        }
+
     if($department=='All'){
 
         $employeedata= DB::table('employees')
@@ -48,6 +58,7 @@ class EmployeeAbsentController extends Controller
         ->select('employees.emp_id', 'employees.emp_name_with_initial', 'employees.calling_name', 'employees.emp_department','departments.name AS departmentname','branches.location AS location') 
         ->where('deleted', 0)
         ->where('is_resigned', 0)
+        ->whereIn('employees.emp_id', $accessibleEmployeeIds)
         ->get();
         
         $employeeMap = [];
@@ -87,6 +98,7 @@ class EmployeeAbsentController extends Controller
         ->where('deleted', 0)
         ->where('is_resigned', 0)
         ->where('employees.emp_department', '=', $department)
+        ->whereIn('employees.emp_id', $accessibleEmployeeIds)
         ->get();
 
         $employeeMap = [];

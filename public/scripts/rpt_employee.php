@@ -1,9 +1,12 @@
 <?php
+session_start();
 // Include the EmployeeHelper class
 use App\Helpers\EmployeeHelper;
+use App\Helpers\UserHelper;
 
 // Correct path resolution for Laravel - use base path or proper autoloading
 require_once __DIR__ . '/../../app/Helpers/EmployeeHelper.php';
+require_once __DIR__ . '/../../app/Helpers/UserHelper.php';
 
 // DB table to use
 $table = 'employees';
@@ -87,8 +90,21 @@ if (!empty($_REQUEST['department']) && $_REQUEST['department'] != 'All') {
     $sql .= " AND `e`.`emp_department` = '$department'";
 }
 
+// Add user access rights filter directly to the main query
+    $pdo = new PDO("mysql:host={$db_host};dbname={$db_name}", $db_username, $db_password);
+    $userId = UserHelper::getLoggedInUserId($pdo);
+    $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId, $pdo);
+if (!empty($accessibleEmployeeIds)) {
+    $empIds = implode(',', array_map('intval', $accessibleEmployeeIds));
+    $sql .= " AND `e`.`emp_id` IN ($empIds)";
+} else {
+    $sql .= " AND 1 = 0";
+}
+
 $joinQuery = "FROM (" . $sql . ") as `u`";
 $extraWhere = "";
+
+
 
 echo json_encode(SSP::simple($_REQUEST, $sql_details, $table, $primaryKey, $columns, $joinQuery, $extraWhere));
 ?>

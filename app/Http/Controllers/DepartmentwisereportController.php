@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\UserHelper;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Auth;
@@ -179,6 +180,15 @@ class DepartmentwisereportController extends Controller
         $reporttype = $request->get('reporttype');
         $selectedmonth = $request->get('selectedmonth');
 
+          // Get accessible employee IDs based on user access rights
+        $userId = Auth::id();
+        $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
+        
+        // Return empty HTML if no accessible employees
+        if (empty($accessibleEmployeeIds)) {
+            return response()->json(['html' => '']);
+        }
+
         $query = DB::table('ot_approved')
             ->join('employees', 'ot_approved.emp_id', '=', 'employees.emp_id')
             ->select(
@@ -187,7 +197,8 @@ class DepartmentwisereportController extends Controller
                 'employees.calling_name',
                 DB::raw('SUM(ot_approved.hours) as total_ot'),
                 DB::raw('SUM(ot_approved.double_hours) as total_double_ot')
-            );
+            )
+            ->whereIn('employees.emp_id', $accessibleEmployeeIds);
 
         if ($department != 'All') {
             $query->where('employees.emp_department', '=', $department);
@@ -439,6 +450,15 @@ class DepartmentwisereportController extends Controller
         $reporttype = $request->get('reporttype');
         $selectedmonth = $request->get('selectedmonth');
 
+            // Get accessible employee IDs based on user access rights
+        $userId = Auth::id();
+        $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
+        
+        // Return empty HTML if no accessible employees
+        if (empty($accessibleEmployeeIds)) {
+            return response()->json(['html' => '']);
+        }
+
         $query = DB::table('leaves')
             ->join('employees', 'leaves.emp_id', '=', 'employees.emp_id')
             ->leftJoin('departments', 'employees.emp_department', '=', 'departments.id')
@@ -447,6 +467,7 @@ class DepartmentwisereportController extends Controller
                 'departments.name as dept_name',
                 'employees.id as empid',
                 'employees.calling_name',
+                'employees.emp_id',
                 'employees.emp_name_with_initial as emp_name',
                 DB::raw('SUM(CASE WHEN leaves.leave_type = 1 THEN leaves.no_of_days ELSE 0 END) as annual_leaves'),
                 DB::raw('SUM(CASE WHEN leaves.leave_type = 2 THEN leaves.no_of_days ELSE 0 END) as casual_leaves'),
@@ -455,7 +476,8 @@ class DepartmentwisereportController extends Controller
                 DB::raw('YEAR(leaves.leave_from) as year'),
                 DB::raw('MONTH(leaves.leave_from) as month')
             )
-            ->where('leaves.status', 'Approved');
+            ->where('leaves.status', 'Approved')
+              ->whereIn('employees.emp_id', $accessibleEmployeeIds);
 
         if ($department != '' && $department != 'All') {
             $query->where('employees.emp_department', $department);
@@ -705,6 +727,16 @@ class DepartmentwisereportController extends Controller
         $reporttype = $request->get('reporttype');
         $selectedmonth = $request->get('selectedmonth');
 
+        // Get accessible employee IDs based on user access rights
+        $userId = Auth::id();
+        $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
+        
+        // Return empty HTML if no accessible employees
+        if (empty($accessibleEmployeeIds)) {
+            return response()->json(['html' => '']);
+        }
+
+
         $query = DB::table('attendances')
             ->leftjoin('employees', 'attendances.emp_id', '=', 'employees.emp_id')
             ->leftJoin('departments', 'employees.emp_department', '=', 'departments.id')
@@ -718,7 +750,8 @@ class DepartmentwisereportController extends Controller
                 DB::raw('MONTH(attendances.date) as month'),
                 DB::raw('MIN(attendances.timestamp) as first_checkin'),
                 DB::raw('MAX(attendances.timestamp) as lasttimestamp')
-            );
+            )
+            ->whereIn('employees.emp_id', $accessibleEmployeeIds);
 
         if ($department != 'All') {
             $query->where('employees.emp_department', '=', $department);

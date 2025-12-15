@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\EmployeeHelper;
+use App\Helpers\UserHelper;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Auth;
@@ -29,6 +30,15 @@ class EmployeeResignController extends Controller
     $from_date = $request->input('from_date');
     $to_date = $request->input('to_date');
 
+    // Get accessible employee IDs based on user access rights
+        $userId = Auth::id();
+        $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
+        
+        // Return empty HTML if no accessible employees
+        if (empty($accessibleEmployeeIds)) {
+            return response()->json(['html' => '']);
+        }
+
     $types = DB::table('employees')
         ->leftJoin('departments', 'departments.id', '=', 'employees.emp_department')
         ->leftJoin('job_titles', 'employees.emp_job_code', '=', 'job_titles.id')
@@ -40,6 +50,7 @@ class EmployeeResignController extends Controller
             'branches.location AS location'
         )
         ->where('employees.deleted', '0')
+        ->whereIn('employees.emp_id', $accessibleEmployeeIds)
         ->where('employees.is_resigned', 1);
 
     if (!empty($department) && $department != 'All') {

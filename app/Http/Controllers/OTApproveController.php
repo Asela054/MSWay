@@ -251,6 +251,15 @@ class OTApproveController extends Controller
         $to_date = $request->get('to_date');
         $type = $request->get('type');
 
+           // Get accessible employee IDs based on user access rights
+        $userId = Auth::id();
+        $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
+        
+        // Return empty HTML if no accessible employees
+        if (empty($accessibleEmployeeIds)) {
+            return response()->json(['html' => '']);
+        }
+
         $att_query = 'SELECT ot_approved.*,  
                 employees.emp_shift,  
                 employees.id as emp_auto_id,
@@ -266,6 +275,11 @@ class OTApproveController extends Controller
                 left join branches ON employees.emp_location = branches.id 
                 WHERE employees.deleted = 0 AND employees.is_resigned = 0
                 ';
+
+        if (!empty($accessibleEmployeeIds)) {
+            $ids = implode('","', $accessibleEmployeeIds);
+            $att_query .= 'AND employees.emp_id IN ("' . $ids . '") ';
+        }
 
         if ($department != '') {
             $att_query .= ' AND employees.emp_department = ' . $department;

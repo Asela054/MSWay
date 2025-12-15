@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Employee;
 use App\EmployeePaySlip;
 use App\Helpers\EmployeeHelper;
+use App\Helpers\UserHelper;
 use App\Leave;
 use App\PayrollProfile;
 use Illuminate\Http\Request;
@@ -149,6 +150,16 @@ class RptNopayController extends Controller
         $closedate = date('Y-m-t', strtotime($month));
         $closedate = \Carbon\Carbon::parse($month)->endOfMonth()->format('Y-m-d');
 
+        // Get accessible employee IDs based on user access rights
+        $userId = Auth::id();
+        $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
+        
+        // Return empty HTML if no accessible employees
+        if (empty($accessibleEmployeeIds)) {
+            return response()->json(['html' => '']);
+        }
+
+
         $emp_query = 'SELECT  
                 employees.*,  
                 employees.id as emp_auto_id, 
@@ -164,6 +175,11 @@ class RptNopayController extends Controller
                 WHERE employees.deleted = 0  
                 ';
 
+        if (!empty($accessibleEmployeeIds)) {
+            $ids = implode('","', $accessibleEmployeeIds);
+            $emp_query .= 'AND employees.emp_id IN ("' . $ids . '") ';
+        }
+        
         if($department != ''){
             $emp_query .= ' AND employees.emp_department = '.$department;
         }
