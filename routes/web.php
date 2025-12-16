@@ -1588,6 +1588,9 @@ Route::post('PayGroup/update', 'PayGroupController@update')->name('PayGroup.upda
 Route::get('PayGroup/destroy/{id}', 'PayGroupController@destroy');
 /*-- Pay Group----*/
 
+// Production Reports 
+
+Route::get('/reportemployeeproduction' ,'ProductionreportController@index')->name('reportemployeeproduction');
 
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');
