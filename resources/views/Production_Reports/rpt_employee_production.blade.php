@@ -5,13 +5,13 @@
 <main> 
       <div class="page-header shadow">
             <div class="container-fluid d-none d-sm-block shadow">
-                 @include('layouts.production&task_nav_bar')
+                 @include('layouts.reports_nav_bar')
             </div>
             <div class="container-fluid">
                 <div class="page-header-content py-3 px-2">
                     <h1 class="page-header-title ">
-                        <div class="page-header-icon"><i class="fa-light fa-ballot-check"></i></div>
-                        <span>Employee Production</span>
+                        <div class="page-header-icon"><i class="fa-light fa-file-contract"></i></div>
+                        <span>Employee Production Report</span>
                     </h1>
                 </div>
             </div>
@@ -134,9 +134,9 @@
 <script>
 $(document).ready(function(){
 
-    $('#production_menu_link').addClass('active');
-    $('#production_menu_link_icon').addClass('active');
-    $('#dailyprocess').addClass('navbtnactive');
+     $('#report_menu_link').addClass('active');
+    $('#report_menu_link_icon').addClass('active');
+    $('#productionreport').addClass('navbtnactive');
 
      let employee_f = $('#employee_f');
 
@@ -167,13 +167,13 @@ $(document).ready(function(){
                     "buttons": [{
                             extend: 'csv',
                             className: 'btn btn-success btn-sm',
-                            title: 'Employee Production Information',
+                            title: 'Employee Production Report',
                             text: '<i class="fas fa-file-csv mr-2"></i> CSV',
                         },
                         { 
                             extend: 'pdf', 
                             className: 'btn btn-danger btn-sm', 
-                            title: 'Employee Production Information', 
+                            title: 'Employee Production Report', 
                             text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
                             orientation: 'landscape', 
                             pageSize: 'legal', 
@@ -183,7 +183,7 @@ $(document).ready(function(){
                         },
                         {
                             extend: 'print',
-                            title: 'Employee Production Information',
+                            title: 'Employee Production Report',
                             className: 'btn btn-primary btn-sm',
                             text: '<i class="fas fa-print mr-2"></i> Print',
                             customize: function(win) {

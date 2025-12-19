@@ -11,6 +11,6 @@ class EmployeeProduction extends Model
     protected $primarykey = 'id';
 
     protected $fillable =[
-        'allocation_id','emp_id','date','machine_id','product_id','amount','description','status','created_by', 'updated_by'
+        'allocation_id','emp_id','date','machine_id','product_id','Produce_qty','unit_price','amount','description','status','created_by', 'updated_by'
     ];
 }

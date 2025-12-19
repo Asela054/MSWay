@@ -72,9 +72,9 @@ class ProductionTaskApproveController extends Controller
                         'emp_auto_id' => $record->emp_auto_id,
                         'emp_id' => $record->emp_id,
                         'emp_name_with_initial' => $record->emp_name_with_initial,
-                        'production_total' => $productionTotal,
-                        'task_total' => $taskTotal,
-                        'overall_total' => $productionTotal + $taskTotal
+                        'production_total' =>round($productionTotal, 2),
+                        'task_total' => round($taskTotal, 2),
+                        'overall_total' =>round($productionTotal + $taskTotal, 2), 
                     ];
           }
 

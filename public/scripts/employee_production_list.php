@@ -14,6 +14,8 @@ $columns = array(
     array('db' => '`u`.`machine`', 'dt' => 'machine', 'field' => 'machine'),
     array('db' => '`u`.`productname`', 'dt' => 'product', 'field' => 'productname'),
     array('db' => '`u`.`amount`', 'dt' => 'amount', 'field' => 'amount'),
+    array('db' => '`u`.`Produce_qty`', 'dt' => 'Produce_qty', 'field' => 'Produce_qty'),
+    array('db' => '`u`.`unit_price`', 'dt' => 'unit_price', 'field' => 'unit_price'),
     array('db' => '`u`.`description`', 'dt' => 'description', 'field' => 'description')
 );
 
@@ -36,7 +38,9 @@ $sql = "SELECT
         `m`.`machine`,
         `p`.`productname`,
         `ep`.`amount`,
-        `ep`.`description`
+        `ep`.`description`,
+        `ep`.`Produce_qty`,
+        `ep`.`unit_price`
     FROM `employee_production` AS `ep`
     LEFT JOIN `machines` AS `m` ON `ep`.`machine_id` = `m`.`id`
     LEFT JOIN `product` AS `p` ON `ep`.`product_id` = `p`.`id`

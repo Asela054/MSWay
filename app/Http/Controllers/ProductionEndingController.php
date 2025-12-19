@@ -144,7 +144,7 @@ class ProductionEndingController extends Controller
 
         }
 
-         
+    
           // get employee count
            $employeeAllocations = DB::table('emp_product_allocation_details')
                             ->where('allocation_id', $hidden_id)
@@ -161,6 +161,8 @@ class ProductionEndingController extends Controller
                      $step01 = $product_unitvalue * $quntity;
             $employee_amount = round($step01 / $employeeCount, 2);
 
+            $employeeqty =  round($quntity / $employeeCount, 2);
+
             foreach ($employeeAllocations as $allocation) {
 
                 $existingRecord = EmployeeProduction::where('allocation_id', $hidden_id)
@@ -173,6 +175,8 @@ class ProductionEndingController extends Controller
                 'date' => $produtiondate,
                 'machine_id' => $machine_id,
                 'product_id' => $product_id,
+                'Produce_qty' => $employeeqty,
+                'unit_price' => $product_unitvalue,
                 'amount' => $employee_amount,
                 'description' => $desription,
                 'status' => 1,
