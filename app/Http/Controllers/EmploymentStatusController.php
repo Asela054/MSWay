@@ -127,7 +127,7 @@ class EmploymentStatusController extends Controller
         }
 
         $rules = array(
-            'emp_status'    =>  'required|unique:employment_statuses'
+            'emp_status'    =>  'required'
         );
 
         $error = Validator::make($request->all(), $rules);
