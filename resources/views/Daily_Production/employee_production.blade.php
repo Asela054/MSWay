@@ -214,7 +214,16 @@ $(document).ready(function(){
                         { data: 'product', name: 'product' },
                         { data: 'Produce_qty', name: 'Produce_qty' },
                         { data: 'unit_price', name: 'unit_price' },
-                        { data: 'amount', name: 'amount' }
+                       { 
+                            data: 'amount', 
+                            name: 'amount',
+                            render: function(data, type, row) {
+                                if (type === 'display' || type === 'filter') {
+                                    return parseFloat(data).toFixed(2);
+                                }
+                                return data;
+                            }
+                        }
                     ],
                 });
         }
