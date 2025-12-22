@@ -54,15 +54,26 @@ $previous_month_date = date('Y-m-d', strtotime('-1 month'));
 $extraWhere = "employees.deleted = 0";
 
 // new filter based on user access rights
-$pdo = new PDO("mysql:host={$db_host};dbname={$db_name}", $db_username, $db_password);
-$userId = UserHelper::getLoggedInUserId($pdo);
-$accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId, $pdo);
+$userId = UserHelper::getLoggedInUserId();
 
-if (!empty($accessibleEmployeeIds)) {
-    $empIds = implode(',', array_map('intval', $accessibleEmployeeIds));
-    $extraWhere .= " AND employees.emp_id IN ($empIds)";
-} else {
-    $extraWhere .= " AND 1 = 0";
+if ($userId) {
+    $mysqli = new mysqli($db_host, $db_username, $db_password, $db_name);
+    
+    if ($mysqli->connect_error) {
+        echo json_encode(['error' => 'Database connection failed']);
+        exit;
+    }
+    
+    $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId, $mysqli);
+    
+    if (!empty($accessibleEmployeeIds)) {
+        $empIds = implode(',', array_map('intval', $accessibleEmployeeIds));
+        $extraWhere .= " AND employees.emp_id IN ($empIds)";
+    } else {
+        $extraWhere .= " AND 1 = 0";
+    }
+    
+    $mysqli->close();
 }
 // end of new filter
 

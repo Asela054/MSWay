@@ -91,15 +91,25 @@ if (!empty($_REQUEST['department']) && $_REQUEST['department'] != 'All') {
 }
 
 // Add user access rights filter directly to the main query
-    $pdo = new PDO("mysql:host={$db_host};dbname={$db_name}", $db_username, $db_password);
-    $userId = UserHelper::getLoggedInUserId($pdo);
-    $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId, $pdo);
-if (!empty($accessibleEmployeeIds)) {
-    $empIds = implode(',', array_map('intval', $accessibleEmployeeIds));
-    $sql .= " AND `e`.`emp_id` IN ($empIds)";
-} else {
-    $sql .= " AND 1 = 0";
-}
+    $userId = UserHelper::getLoggedInUserId();
+
+    if ($userId) {
+        $mysqli = new mysqli($db_host, $db_username, $db_password, $db_name);
+        
+        if ($mysqli->connect_error) {
+            echo json_encode(['error' => 'Database connection failed']);
+            exit;
+        }
+        
+        $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId, $mysqli);
+    if (!empty($accessibleEmployeeIds)) {
+        $empIds = implode(',', array_map('intval', $accessibleEmployeeIds));
+        $sql .= " AND `e`.`emp_id` IN ($empIds)";
+    } else {
+        $sql .= " AND 1 = 0";
+    }
+    $mysqli->close();
+    }
 
 $joinQuery = "FROM (" . $sql . ") as `u`";
 $extraWhere = "";
