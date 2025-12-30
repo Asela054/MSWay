@@ -24,11 +24,12 @@ class LoginController extends Controller
     {
         $employeeData = DB::table('users')
             ->join('employees', 'users.emp_id', '=', 'employees.emp_id')
+            ->leftjoin('companies', 'employees.emp_company', '=', 'companies.id')
             ->where('users.id', $user->id)
             ->select('users.id', 'employees.emp_id', 'employees.emp_etfno', 
                     'employees.emp_name_with_initial', 'employees.emp_location', 
                     'employees.calling_name', 'employees.emp_department', 
-                    'employees.emp_company')
+                    'employees.emp_company','companies.name as company_name','companies.address as company_address')
             ->first();
 
         if ($employeeData) {
@@ -40,6 +41,8 @@ class LoginController extends Controller
                 'emp_location' => $employeeData->emp_location,
                 'emp_department' => $employeeData->emp_department,
                 'emp_company' => $employeeData->emp_company,
+                'company_name' => $employeeData->company_name,
+                'company_address' => $employeeData->company_address,
             ]);
             
             if (session_status() === PHP_SESSION_NONE) {
