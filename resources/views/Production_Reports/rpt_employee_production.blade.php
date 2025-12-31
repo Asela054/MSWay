@@ -430,206 +430,425 @@ $(document).ready(function(){
     });
 
 
- // Custom PDF generation function
-        function generatePDF() {
-            // Get current filter values for PDF header
-            const fromDate = $('#from_date').val() || 'Not specified';
-            const toDate = $('#to_date').val() || 'Not specified';
-            const currentDate = new Date().toLocaleDateString();
-            
-            // Get DataTable instance
-            const table = $('#dataTable').DataTable();
-            const tableData = table.rows({ filter: 'applied' }).data();
-            
-            // Initialize PDF in portrait mode
-            const doc = new jsPDF('p', 'mm', 'a4'); // portrait, millimeters, A4 size
-            
-            // Add report title
-            doc.setFontSize(16);
-            doc.setFont('helvetica', 'bold');
-            doc.text('Employee Production Report', doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
-            
-            // Add filter information
+    // Custom PDF generation function
+function generatePDF() {
+    // Get current filter values for PDF header
+    const fromDate = $('#from_date').val() || 'Not specified';
+    const toDate = $('#to_date').val() || 'Not specified';
+    const currentDate = new Date().toLocaleDateString();
+    
+    // Get DataTable instance
+    const table = $('#dataTable').DataTable();
+    const tableData = table.rows({ filter: 'applied' }).data();
+    
+    // Initialize PDF in portrait mode
+    const doc = new jsPDF('p', 'mm', 'a4'); // portrait, millimeters, A4 size
+    
+
+    // Assuming you have these variables available in your Blade template
+    const companyName = '{{ Session::get("company_name") }}' || 'Eco Agro Pvt Ltd';
+    
+    // Add company name and address at the top
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text(companyName, doc.internal.pageSize.getWidth() / 2, 10, { align: 'center' });
+    
+    // Add report title
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Employee Production Report', doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
+    
+    // Add filter information
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    
+    let yPos = 35;
+    doc.text(`Date Range: ${fromDate} to ${toDate}`, 15, yPos);
+    doc.text(`Generated on: ${currentDate}`, doc.internal.pageSize.getWidth() - 15, yPos, { align: 'right' });
+    
+    // Add a line separator
+    yPos += 7;
+    doc.setLineWidth(0.3);
+    doc.line(15, yPos, doc.internal.pageSize.getWidth() - 15, yPos);
+    yPos += 5;
+    
+    // Prepare table data and calculate totals
+    const headers = [
+        ['ID', 'EMPLOYEE', 'DATE', 'MACHINE', 'PRODUCT', 'QTY', 'UNIT PRICE', 'AMOUNT']
+    ];
+    
+    const body = [];
+    let totalQty = 0;
+    let totalUnitPrice = 0;
+    let totalAmount = 0;
+    let rowCount = 0;
+    
+    // Get all data from the current page (or all filtered data)
+    tableData.each(function(value, index) {
+        const qty = parseFloat(value.Produce_qty) || 0;
+        const unitPrice = parseFloat(value.unit_price) || 0;
+        const amount = parseFloat(value.amount) || 0;
+        
+        totalQty += qty;
+        totalUnitPrice += unitPrice;
+        totalAmount += amount;
+        rowCount++;
+        
+        const row = [
+            value.id || '',
+            value.emp_name || '',
+            value.date || '',
+            value.machine || '',
+            value.product || '',
+            qty !== 0 ? qty.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }) : '',
+            unitPrice !== 0 ? unitPrice.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }) : '',
+            amount !== 0 ? amount.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }) : ''
+        ];
+        body.push(row);
+    });
+    
+    // Add footer row with totals
+    if (body.length > 0) {
+        // Calculate average unit price
+        const avgUnitPrice = rowCount > 0 ? totalUnitPrice / rowCount : 0;
+        
+        // Format totals with comma separators
+        const formattedTotalQty = totalQty.toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        
+        const formattedTotalUnitPrice = totalUnitPrice.toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        
+        const formattedTotalAmount = totalAmount.toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        
+        const formattedAvgUnitPrice = avgUnitPrice.toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        
+        // Add totals row
+        body.push([
+            '', '', '', '', 'TOTALS:',
+            formattedTotalQty,
+            formattedTotalUnitPrice,
+            formattedTotalAmount
+        ]);
+    }
+    
+    // Calculate table width (100% of page width minus margins)
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 15;
+    const tableWidth = pageWidth - (2 * margin);
+    
+    // Generate table using autoTable with 100% width
+    doc.autoTable({
+        startY: yPos,
+        head: headers,
+        body: body,
+        theme: 'grid',
+        styles: {
+            fontSize: 8,
+            cellPadding: 2,
+            overflow: 'linebreak',
+            textAlign: 'left'
+        },
+        headStyles: {
+            fillColor: [41, 128, 185],
+            textColor: 255,
+            fontStyle: 'bold',
+            halign: 'center',
+            fontSize: 9
+        },
+        columnStyles: {
+            0: { cellWidth: 'auto', halign: 'center' }, // ID
+            1: { cellWidth: 'auto', halign: 'left' },    // EMPLOYEE
+            2: { cellWidth: 'auto', halign: 'center' },  // DATE
+            3: { cellWidth: 'auto', halign: 'left' },    // MACHINE
+            4: { cellWidth: 'auto', halign: 'left' },    // PRODUCT
+            5: { cellWidth: 'auto', halign: 'right' },   // QTY
+            6: { cellWidth: 'auto', halign: 'right' },   // Unit Price
+            7: { cellWidth: 'auto', halign: 'right' }    // AMOUNT
+        },
+        bodyStyles: {
+            textAlign: 'left',
+            fontSize: 8
+        },
+        alternateRowStyles: {
+            fillColor: [245, 245, 245]
+        },
+        margin: { left: margin, right: margin },
+        pageBreak: 'auto',
+        tableWidth: tableWidth,
+        showHead: 'everyPage',
+        didParseCell: function(data) {
+            if (data.row.index === body.length - 1) {
+                data.cell.styles.fontStyle = 'bold';
+                data.cell.styles.fillColor = [220, 220, 220]; 
+                data.cell.styles.textColor = [0, 0, 0]; 
+                data.cell.styles.fontSize = 9;
+            }
+        },
+        willDrawPage: function(data) {
+            // Add company name and page number on each page
             doc.setFontSize(9);
             doc.setFont('helvetica', 'normal');
+            doc.text(companyName, 15, 10);
+            doc.text(`Page ${data.pageNumber}`, doc.internal.pageSize.getWidth() - 15, 10, { align: 'right' });
             
-            let yPos = 25;
-            doc.text(`Date Range: ${fromDate} to ${toDate}`, 15, yPos);
-            doc.text(`Generated on: ${currentDate}`, doc.internal.pageSize.getWidth() - 15, yPos, { align: 'right' });
-            
-            // Add a line separator
-            yPos += 7;
-            doc.setLineWidth(0.3);
-            doc.line(15, yPos, doc.internal.pageSize.getWidth() - 15, yPos);
-            yPos += 5;
-            
-            // Prepare table data and calculate totals
-            const headers = [
-                ['ID', 'EMPLOYEE', 'DATE', 'MACHINE', 'PRODUCT', 'QTY', 'UNIT PRICE', 'AMOUNT']
-            ];
-            
-            const body = [];
-            let totalQty = 0;
-            let totalUnitPrice = 0;
-            let totalAmount = 0;
-            let rowCount = 0;
-            
-            // Get all data from the current page (or all filtered data)
-            tableData.each(function(value, index) {
-                const qty = parseFloat(value.Produce_qty) || 0;
-                const unitPrice = parseFloat(value.unit_price) || 0;
-                const amount = parseFloat(value.amount) || 0;
-                
-                totalQty += qty;
-                totalUnitPrice += unitPrice;
-                totalAmount += amount;
-                rowCount++;
-                
-                const row = [
-                    value.id || '',
-                    value.emp_name || '',
-                    value.date || '',
-                    value.machine || '',
-                    value.product || '',
-                    qty !== 0 ? qty.toLocaleString('en-US', {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2
-                    }) : '',
-                    unitPrice !== 0 ? unitPrice.toLocaleString('en-US', {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2
-                    }) : '',
-                    amount !== 0 ? amount.toLocaleString('en-US', {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2
-                    }) : ''
-                ];
-                body.push(row);
-            });
-            
-            // Add footer row with totals
-            if (body.length > 0) {
-                // Calculate average unit price
-                const avgUnitPrice = rowCount > 0 ? totalUnitPrice / rowCount : 0;
-                
-                // Format totals with comma separators
-                const formattedTotalQty = totalQty.toLocaleString('en-US', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                });
-                
-                const formattedTotalUnitPrice = totalUnitPrice.toLocaleString('en-US', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                });
-                
-                const formattedTotalAmount = totalAmount.toLocaleString('en-US', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                });
-                
-                const formattedAvgUnitPrice = avgUnitPrice.toLocaleString('en-US', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                });
-                
-                // Add totals row (you can choose to show total or average for unit price)
-                body.push([
-                    '', '', '', '', 'TOTALS:',
-                    formattedTotalQty,
-                    formattedTotalUnitPrice, // Show total unit price
-                    formattedTotalAmount
-                ]);
-                
+            // Add report title on subsequent pages
+            if (data.pageNumber > 1) {
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Employee Production Report (Continued)', doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
             }
-            
-            // Calculate table width (100% of page width minus margins)
-            const pageWidth = doc.internal.pageSize.getWidth();
-            const margin = 15;
-            const tableWidth = pageWidth - (2 * margin);
-            
-            // Calculate column widths for 100% width
-            const columnWidths = [
-                'auto',  // ID (5%)
-                'auto',  // EMPLOYEE (15%)
-                'auto',  // DATE (10%)
-                'auto',  // MACHINE (15%)
-                'auto',  // PRODUCT (15%)
-                'auto',  // QTY (10%)
-                'auto',  // Unit Price (15%)
-                'auto'   // AMOUNT (15%)
-            ];
-            
-            // Generate table using autoTable with 100% width
-            doc.autoTable({
-                startY: yPos,
-                head: headers,
-                body: body,
-                theme: 'grid',
-                styles: {
-                    fontSize: 8,
-                    cellPadding: 2,
-                    overflow: 'linebreak',
-                    textAlign: 'left'
-                },
-                headStyles: {
-                    fillColor: [41, 128, 185],
-                    textColor: 255,
-                    fontStyle: 'bold',
-                    halign: 'center',
-                    fontSize: 9
-                },
-                columnStyles: {
-                    0: { cellWidth: 'auto', halign: 'center' }, // ID
-                    1: { cellWidth: 'auto', halign: 'left' },    // EMPLOYEE
-                    2: { cellWidth: 'auto', halign: 'center' },  // DATE
-                    3: { cellWidth: 'auto', halign: 'left' },    // MACHINE
-                    4: { cellWidth: 'auto', halign: 'left' },    // PRODUCT
-                    5: { cellWidth: 'auto', halign: 'right' },   // QTY
-                    6: { cellWidth: 'auto', halign: 'right' },   // Unit Price
-                    7: { cellWidth: 'auto', halign: 'right' }    // AMOUNT
-                },
-                bodyStyles: {
-                    textAlign: 'left',
-                    fontSize: 8
-                },
-                alternateRowStyles: {
-                    fillColor: [245, 245, 245]
-                },
-                margin: { left: margin, right: margin },
-                pageBreak: 'auto',
-                tableWidth: tableWidth, // Set table to 100% width
-                showHead: 'everyPage',
-                didParseCell: function(data) {
-                    if (data.row.index === body.length - 1) {
-                        data.cell.styles.fontStyle = 'bold';
-                        data.cell.styles.fillColor = [220, 220, 220]; 
-                        data.cell.styles.textColor = [0, 0, 0]; 
-                        data.cell.styles.fontSize = 9;
-                    }
-                },
-                willDrawPage: function(data) {
-                    doc.setFontSize(9);
-                    doc.setFont('helvetica', 'normal');
-                    doc.text(`Page ${data.pageNumber}`, doc.internal.pageSize.getWidth() - 15, 10);
-                    
-                    // Add report title on subsequent pages
-                    if (data.pageNumber > 1) {
-                        doc.setFontSize(12);
-                        doc.setFont('helvetica', 'bold');
-                        doc.text('Employee Production Report (Continued)', doc.internal.pageSize.getWidth() / 2, 10, { align: 'center' });
-                    }
-                }
-            });
-            
-            // Add final page numbers
-            const totalPages = doc.internal.getNumberOfPages();
-            doc.setFontSize(8);
-            
-            // Save the PDF
-            const fileName = `Employee_Production_Report_${fromDate.replace(/-/g, '_')}_${toDate.replace(/-/g, '_')}.pdf`;
-            doc.save(fileName);
         }
+    });
+    
+    // Add summary on last page
+    const totalPages = doc.internal.getNumberOfPages();
+    if (totalPages > 0) {
+        doc.setPage(totalPages);
+        const finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : 150;
+        
+        // Add summary section
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Report Summary:', 15, finalY);
+        
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Total Records: ${rowCount}`, 15, finalY + 5);
+        doc.text(`Total Quantity: ${totalQty.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, 15, finalY + 10);
+        doc.text(`Total Amount: ${totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, 15, finalY + 15);
+        
+        // Add footer with company info
+        doc.setFontSize(8);
+        doc.text(`Generated by: {{ Session::get('emp_name_with_initial') }}`, 15, doc.internal.pageSize.getHeight() - 15);
+        doc.text(`Company: ${companyName}`, doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.getHeight() - 15, { align: 'center' });
+        doc.text(`Page ${totalPages} of ${totalPages}`, doc.internal.pageSize.getWidth() - 15, doc.internal.pageSize.getHeight() - 15, { align: 'right' });
+    }
+    
+    // Save the PDF
+    const fileName = `Employee_Production_Report_${fromDate.replace(/-/g, '_')}_${toDate.replace(/-/g, '_')}.pdf`;
+    doc.save(fileName);
+}
+
+
+//  // Custom PDF generation function
+//         function generatePDF() {
+//             // Get current filter values for PDF header
+//             const fromDate = $('#from_date').val() || 'Not specified';
+//             const toDate = $('#to_date').val() || 'Not specified';
+//             const currentDate = new Date().toLocaleDateString();
+            
+//             // Get DataTable instance
+//             const table = $('#dataTable').DataTable();
+//             const tableData = table.rows({ filter: 'applied' }).data();
+            
+//             // Initialize PDF in portrait mode
+//             const doc = new jsPDF('p', 'mm', 'a4'); // portrait, millimeters, A4 size
+            
+//             // Add report title
+//             doc.setFontSize(16);
+//             doc.setFont('helvetica', 'bold');
+//             doc.text('Employee Production Report', doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
+            
+//             // Add filter information
+//             doc.setFontSize(9);
+//             doc.setFont('helvetica', 'normal');
+            
+//             let yPos = 25;
+//             doc.text(`Date Range: ${fromDate} to ${toDate}`, 15, yPos);
+//             doc.text(`Generated on: ${currentDate}`, doc.internal.pageSize.getWidth() - 15, yPos, { align: 'right' });
+            
+//             // Add a line separator
+//             yPos += 7;
+//             doc.setLineWidth(0.3);
+//             doc.line(15, yPos, doc.internal.pageSize.getWidth() - 15, yPos);
+//             yPos += 5;
+            
+//             // Prepare table data and calculate totals
+//             const headers = [
+//                 ['ID', 'EMPLOYEE', 'DATE', 'MACHINE', 'PRODUCT', 'QTY', 'UNIT PRICE', 'AMOUNT']
+//             ];
+            
+//             const body = [];
+//             let totalQty = 0;
+//             let totalUnitPrice = 0;
+//             let totalAmount = 0;
+//             let rowCount = 0;
+            
+//             // Get all data from the current page (or all filtered data)
+//             tableData.each(function(value, index) {
+//                 const qty = parseFloat(value.Produce_qty) || 0;
+//                 const unitPrice = parseFloat(value.unit_price) || 0;
+//                 const amount = parseFloat(value.amount) || 0;
+                
+//                 totalQty += qty;
+//                 totalUnitPrice += unitPrice;
+//                 totalAmount += amount;
+//                 rowCount++;
+                
+//                 const row = [
+//                     value.id || '',
+//                     value.emp_name || '',
+//                     value.date || '',
+//                     value.machine || '',
+//                     value.product || '',
+//                     qty !== 0 ? qty.toLocaleString('en-US', {
+//                         minimumFractionDigits: 2,
+//                         maximumFractionDigits: 2
+//                     }) : '',
+//                     unitPrice !== 0 ? unitPrice.toLocaleString('en-US', {
+//                         minimumFractionDigits: 2,
+//                         maximumFractionDigits: 2
+//                     }) : '',
+//                     amount !== 0 ? amount.toLocaleString('en-US', {
+//                         minimumFractionDigits: 2,
+//                         maximumFractionDigits: 2
+//                     }) : ''
+//                 ];
+//                 body.push(row);
+//             });
+            
+//             // Add footer row with totals
+//             if (body.length > 0) {
+//                 // Calculate average unit price
+//                 const avgUnitPrice = rowCount > 0 ? totalUnitPrice / rowCount : 0;
+                
+//                 // Format totals with comma separators
+//                 const formattedTotalQty = totalQty.toLocaleString('en-US', {
+//                     minimumFractionDigits: 2,
+//                     maximumFractionDigits: 2
+//                 });
+                
+//                 const formattedTotalUnitPrice = totalUnitPrice.toLocaleString('en-US', {
+//                     minimumFractionDigits: 2,
+//                     maximumFractionDigits: 2
+//                 });
+                
+//                 const formattedTotalAmount = totalAmount.toLocaleString('en-US', {
+//                     minimumFractionDigits: 2,
+//                     maximumFractionDigits: 2
+//                 });
+                
+//                 const formattedAvgUnitPrice = avgUnitPrice.toLocaleString('en-US', {
+//                     minimumFractionDigits: 2,
+//                     maximumFractionDigits: 2
+//                 });
+                
+//                 // Add totals row (you can choose to show total or average for unit price)
+//                 body.push([
+//                     '', '', '', '', 'TOTALS:',
+//                     formattedTotalQty,
+//                     formattedTotalUnitPrice, // Show total unit price
+//                     formattedTotalAmount
+//                 ]);
+                
+//             }
+            
+//             // Calculate table width (100% of page width minus margins)
+//             const pageWidth = doc.internal.pageSize.getWidth();
+//             const margin = 15;
+//             const tableWidth = pageWidth - (2 * margin);
+            
+//             // Calculate column widths for 100% width
+//             const columnWidths = [
+//                 'auto',  // ID (5%)
+//                 'auto',  // EMPLOYEE (15%)
+//                 'auto',  // DATE (10%)
+//                 'auto',  // MACHINE (15%)
+//                 'auto',  // PRODUCT (15%)
+//                 'auto',  // QTY (10%)
+//                 'auto',  // Unit Price (15%)
+//                 'auto'   // AMOUNT (15%)
+//             ];
+            
+//             // Generate table using autoTable with 100% width
+//             doc.autoTable({
+//                 startY: yPos,
+//                 head: headers,
+//                 body: body,
+//                 theme: 'grid',
+//                 styles: {
+//                     fontSize: 8,
+//                     cellPadding: 2,
+//                     overflow: 'linebreak',
+//                     textAlign: 'left'
+//                 },
+//                 headStyles: {
+//                     fillColor: [41, 128, 185],
+//                     textColor: 255,
+//                     fontStyle: 'bold',
+//                     halign: 'center',
+//                     fontSize: 9
+//                 },
+//                 columnStyles: {
+//                     0: { cellWidth: 'auto', halign: 'center' }, // ID
+//                     1: { cellWidth: 'auto', halign: 'left' },    // EMPLOYEE
+//                     2: { cellWidth: 'auto', halign: 'center' },  // DATE
+//                     3: { cellWidth: 'auto', halign: 'left' },    // MACHINE
+//                     4: { cellWidth: 'auto', halign: 'left' },    // PRODUCT
+//                     5: { cellWidth: 'auto', halign: 'right' },   // QTY
+//                     6: { cellWidth: 'auto', halign: 'right' },   // Unit Price
+//                     7: { cellWidth: 'auto', halign: 'right' }    // AMOUNT
+//                 },
+//                 bodyStyles: {
+//                     textAlign: 'left',
+//                     fontSize: 8
+//                 },
+//                 alternateRowStyles: {
+//                     fillColor: [245, 245, 245]
+//                 },
+//                 margin: { left: margin, right: margin },
+//                 pageBreak: 'auto',
+//                 tableWidth: tableWidth, // Set table to 100% width
+//                 showHead: 'everyPage',
+//                 didParseCell: function(data) {
+//                     if (data.row.index === body.length - 1) {
+//                         data.cell.styles.fontStyle = 'bold';
+//                         data.cell.styles.fillColor = [220, 220, 220]; 
+//                         data.cell.styles.textColor = [0, 0, 0]; 
+//                         data.cell.styles.fontSize = 9;
+//                     }
+//                 },
+//                 willDrawPage: function(data) {
+//                     doc.setFontSize(9);
+//                     doc.setFont('helvetica', 'normal');
+//                     doc.text(`Page ${data.pageNumber}`, doc.internal.pageSize.getWidth() - 15, 10);
+                    
+//                     // Add report title on subsequent pages
+//                     if (data.pageNumber > 1) {
+//                         doc.setFontSize(12);
+//                         doc.setFont('helvetica', 'bold');
+//                         doc.text('Employee Production Report (Continued)', doc.internal.pageSize.getWidth() / 2, 10, { align: 'center' });
+//                     }
+//                 }
+//             });
+            
+//             // Add final page numbers
+//             const totalPages = doc.internal.getNumberOfPages();
+//             doc.setFontSize(8);
+            
+//             // Save the PDF
+//             const fileName = `Employee_Production_Report_${fromDate.replace(/-/g, '_')}_${toDate.replace(/-/g, '_')}.pdf`;
+//             doc.save(fileName);
+//         }
 
 
 });
