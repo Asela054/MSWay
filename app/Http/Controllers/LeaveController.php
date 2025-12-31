@@ -290,6 +290,7 @@ class LeaveController extends Controller
             $full_date = '2022-'.$join_month.'-'.$join_date;
             $empid = $employee->emp_id;
 
+            $job_categoryid = $employee->job_category_id;
 
             $formated_from_date = date('Y').'-01-01';
             $formated_fromto_date = date('Y').'-12-31';
@@ -303,12 +304,12 @@ class LeaveController extends Controller
 
             $leave_msg = '';
 
-            $annualData = $this->leavePolicyService->calculateAnnualLeaves($employee->emp_join_date, $employee->emp_id);
+            $annualData = $this->leavePolicyService->calculateAnnualLeaves($employee->emp_join_date, $employee->emp_id, $job_categoryid);
             $annual_leaves = $annualData['annual_leaves'];
             $leave_msg = $annualData['leave_msg'];
 
             // casual leave calculation
-            $casual_leaves = $this->leavePolicyService->calculateCasualLeaves($employee->emp_join_date);
+            $casual_leaves = $this->leavePolicyService->calculateCasualLeaves($employee->emp_join_date, $job_categoryid);
 
              // medical leave calculation
             $medical_leaves = $this->leavePolicyService->getMedicalLeaves($employee->job_category_id);
