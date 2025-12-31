@@ -608,6 +608,9 @@ $(document).ready(function() {
                 device: device,
                 _token: '{{csrf_token()}}',
                 sync_date: $('#sync_date').val(),
+                date_from: $('#date_from').val(),
+                date_to: $('#date_to').val(),
+                companytype: $('#companytype').val(),
             },
             success: function(res) {
                 var html = '';

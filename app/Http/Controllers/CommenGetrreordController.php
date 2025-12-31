@@ -237,4 +237,60 @@ class CommenGetrreordController extends Controller
         return response()->json($emp_list, 200);
     }
 
+       public function employee_list_leaverequest(Request $request)
+    {
+        if ($request->ajax())
+        {
+            $page = Input::get('page');
+            $resultCount = 25;
+            $offset = ($page - 1) * $resultCount;
+            $term = Input::get("term");
+
+          $query = DB::table('leave_request')
+                    ->leftJoin('leaves', function($join) {
+                        $join->on('leave_request.id', '=', 'leaves.request_id');
+                    })
+                    ->leftjoin('employees', 'leave_request.emp_id', '=', 'employees.emp_id')
+                    ->where(function($q) use ($term) {
+                        $q->where('employees.calling_name', 'LIKE', '%' . $term . '%')
+                        ->orWhere('employees.emp_name_with_initial', 'LIKE', '%' . $term . '%');
+                    })
+                    ->where('leave_request.status', 1)
+                    ->where('leave_request.request_approve_status', 1)
+                    ->whereNull('leaves.id');
+                  
+            $query = UserHelper::applyEmployeeFilter($query);
+            
+            // Add department filter if department parameter is provided and not empty
+            if ($request->has('department') && !empty($request->department)) {
+                $query->where('employees.emp_department', $request->department);
+            }
+
+            $breeds = $query
+                ->select(
+                    DB::raw('DISTINCT employees.emp_id as id'),
+                    DB::raw('CONCAT(employees.emp_name_with_initial, " - ", employees.calling_name) as text')
+                )
+                ->orderBy('employees.emp_name_with_initial')
+                ->skip($offset)
+                ->take($resultCount)
+                ->get();
+
+            $count = Count($breeds); 
+
+            
+            $endCount = $offset + $resultCount;
+            $morePages = $endCount < $count;
+
+            $results = [
+                "results" => $breeds,
+                "pagination" => [
+                    "more" => $morePages
+                ]
+            ];
+
+            return response()->json($results);
+        }
+    }
+
 }

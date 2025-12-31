@@ -237,6 +237,8 @@ class LeaveTypeController extends Controller
             $join_date = Carbon::parse($emp_join_date)->day;
             $empid = $employee->emp_id;
 
+             $job_categoryid = $employee->job_category_id;
+
             $formated_from_date = date('Y').'-01-01';
             $formated_fromto_date = date('Y').'-12-31';
 
@@ -247,11 +249,11 @@ class LeaveTypeController extends Controller
            $leave_msg = '';
 
 
-            $annualData = $this->leavePolicyService->calculateAnnualLeaves($employee->emp_join_date, $employee->emp_id);
+            $annualData = $this->leavePolicyService->calculateAnnualLeaves($employee->emp_join_date, $employee->emp_id, $job_categoryid);
             $annual_leaves = $annualData['annual_leaves'];
             $leave_msg = $annualData['leave_msg'];
 
-            $casual_leaves = $this->leavePolicyService->calculateCasualLeaves($employee->emp_join_date);
+            $casual_leaves = $this->leavePolicyService->calculateCasualLeaves($employee->emp_join_date, $job_categoryid);
 
 
             $total_no_of_annual_leaves = $annual_leaves;
@@ -260,9 +262,10 @@ class LeaveTypeController extends Controller
             $available_no_of_annual_leaves = $total_no_of_annual_leaves - $current_year_taken_a_l;
             $available_no_of_casual_leaves = $total_no_of_casual_leaves - $current_year_taken_c_l;
 
-            if($employee->emp_status != 2){
+         if($employee->emp_status != 2){
                 $emp_status = DB::table('employment_statuses')->where('id', $employee->emp_status)->first();
-                $leave_msg = 'Casual Leaves - '.$emp_status->emp_status.' Employee can have only a half day per month (Not a permanent employee)';
+                $status_name = $emp_status->emp_status ?? ' ';
+                $leave_msg = 'Casual Leaves - '.$status_name.' Employee can have only a half day per month (Not a permanent employee)';
             }
 
             $results = array(
