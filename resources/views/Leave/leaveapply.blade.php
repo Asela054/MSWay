@@ -337,7 +337,7 @@
                 allowClear: true,
                 parent: '#formModal',
                 ajax: {
-                    url: '{{url("employee_list_sel2")}}',
+                    url: '{{url("employee_list_leaverequest")}}',
                     dataType: 'json',
                     data: function(params) {
                         return {
@@ -754,60 +754,60 @@
                         }
                         
                        if (data.success) {
-                            const emailBody = generateEmailBody();
-                            
-                            var emailData = {
-                                'inquire_now': 'HR Department - ' + $('#companyname').val(),
-                                'replyto': [
-                                    $('#employeeemail').val(),
-                                    $('#companyemail').val(),
-                                    $('#coveringemail').val(),
-                                    $('#approveemail').val()
-                                ].filter(email => email).join(';'),
-                                'contsubj': 'Leave Application - ' + $('#employee option:selected').text(),
-                                'contbody': emailBody
-                            };
+                           const emailBody = generateEmailBody();
 
-                            // Create a temporary iframe
-                            var iframe = document.createElement('iframe');
-                            iframe.name = 'emailIframe';
-                            iframe.style.display = 'none';
-                            
-                            // Create the form
-                            var form = document.createElement('form');
-                            form.target = 'emailIframe';
-                            form.method = 'POST';
-                            form.action = 'https://aws.erav.lk/Temp/bf360/eravawsmail.php';
+                           var emailData = {
+                               'inquire_now': 'HR Department - ' + $('#companyname').val(),
+                               'replyto': [
+                                   $('#employeeemail').val(),
+                                   $('#companyemail').val(),
+                                   $('#coveringemail').val(),
+                                   $('#approveemail').val()
+                               ].filter(email => email).join(';'),
+                               'contsubj': 'Leave Application - ' + $('#employee option:selected').text(),
+                               'contbody': emailBody
+                           };
 
-                            // Add form inputs
-                            Object.keys(emailData).forEach(function(key) {
-                                var input = document.createElement('input');
-                                input.type = 'hidden';
-                                input.name = key;
-                                input.value = emailData[key];
-                                form.appendChild(input);
-                            });
+                           // Create a temporary iframe
+                           var iframe = document.createElement('iframe');
+                           iframe.name = 'emailIframe';
+                           iframe.style.display = 'none';
 
-                            // Add to document and submit
-                            document.body.appendChild(iframe);
-                            document.body.appendChild(form);
-                            form.submit();
+                           // Create the form
+                           var form = document.createElement('form');
+                           form.target = 'emailIframe';
+                           form.method = 'POST';
+                           form.action = 'https://aws.erav.lk/Temp/bf360/eravawsmail.php';
 
-                               if (data.success) {
-                                const actionObj = {
-                                    icon: 'fas fa-save',
-                                    title: '',
-                                    message: data.success,
-                                    url: '',
-                                    target: '_blank',
-                                    type: 'success'
-                                };
-                                const actionJSON = JSON.stringify(actionObj, null, 2);
-                                $('#formTitle')[0].reset();
-                                actionreload(actionJSON);
-                            }
+                           // Add form inputs
+                           Object.keys(emailData).forEach(function (key) {
+                               var input = document.createElement('input');
+                               input.type = 'hidden';
+                               input.name = key;
+                               input.value = emailData[key];
+                               form.appendChild(input);
+                           });
 
-                        }
+                           // Add to document and submit
+                           document.body.appendChild(iframe);
+                           document.body.appendChild(form);
+                           form.submit();
+
+                           if (data.success) {
+                               const actionObj = {
+                                   icon: 'fas fa-save',
+                                   title: '',
+                                   message: data.success,
+                                   url: '',
+                                   target: '_blank',
+                                   type: 'success'
+                               };
+                               const actionJSON = JSON.stringify(actionObj, null, 2);
+                               $('#formTitle')[0].reset();
+                               actionreload(actionJSON);
+                           }
+
+                       }
                         $('#form_result').html(html);
                     }
                 });

@@ -1502,6 +1502,8 @@ Route::get('employee_list_sel2', 'CommenGetrreordController@employee_list_sel2')
 Route::get('location_list_sel2', 'CommenGetrreordController@location_list_sel2')->name('location_list_sel2');
 Route::post('get_dept_emp_list', 'CommenGetrreordController@get_dept_emp_list')->name('get_dept_emp_list');
 
+Route::get('employee_list_leaverequest', 'CommenGetrreordController@employee_list_leaverequest')->name('employee_list_leaverequest');
+
 Route::get('/qr-generate', 'QRController@generateQR')->name('qr.generate');
 Route::get('/qr-custom', 'QRController@generateCustomQR')->name('qr.custom');
 Route::get('/qr-download', 'QRController@downloadQR')->name('qr.download');

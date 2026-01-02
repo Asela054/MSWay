@@ -33,23 +33,30 @@ class LoginController extends Controller
             ->first();
 
         if ($employeeData) {
-            Session::put([
-                'users_id' => $employeeData->id,
-                'emp_id' => $employeeData->emp_id,
-                'emp_etfno' => $employeeData->emp_etfno,
-                'emp_name_with_initial' => $employeeData->emp_name_with_initial,
-                'emp_location' => $employeeData->emp_location,
-                'emp_department' => $employeeData->emp_department,
-                'emp_company' => $employeeData->emp_company,
-                'company_name' => $employeeData->company_name,
-                'company_address' => $employeeData->company_address,
-            ]);
+            // Session::put([
+            //     'users_id' => $employeeData->id,
+            //     'emp_id' => $employeeData->emp_id,
+            //     'emp_etfno' => $employeeData->emp_etfno,
+            //     'emp_name_with_initial' => $employeeData->emp_name_with_initial,
+            //     'emp_location' => $employeeData->emp_location,
+            //     'emp_department' => $employeeData->emp_department,
+            //     'emp_company' => $employeeData->emp_company,
+            //     'company_name' => $employeeData->company_name,
+            //     'company_address' => $employeeData->company_address,
+            // ]);
             
             if (session_status() === PHP_SESSION_NONE) {
                 session_start();
             }
             $_SESSION['users_id'] = $employeeData->id;
             $_SESSION['emp_id'] = $employeeData->emp_id;
+            $_SESSION['emp_etfno'] = $employeeData->emp_etfno;
+            $_SESSION['emp_name_with_initial'] = $employeeData->emp_name_with_initial;
+            $_SESSION['emp_location'] = $employeeData->emp_location;
+            $_SESSION['emp_department'] = $employeeData->emp_department;
+            $_SESSION['emp_company'] = $employeeData->emp_company;
+            $_SESSION['company_name'] = $employeeData->company_name;
+            $_SESSION['company_address'] = $employeeData->company_address;
         }
 
         if ($user->hasRole('Employee')) {
