@@ -41,7 +41,7 @@ class UserAccountController extends Controller
 		$users_id = Session::get('users_id');
 		$user = Auth::user();
 		$user->hasRole('Employee');
-		$user->can('user-account-summery-list');
+		// $user->can('user-account-summery-list');
 		
         $permission = Auth::user()->can('user-account-summery-list');
         if (!$permission) {
