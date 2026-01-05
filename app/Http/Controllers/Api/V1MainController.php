@@ -9,7 +9,7 @@ use App\Leave;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\LeaveRequest;
+
 use Auth;
 use Validator;
 use Carbon\Carbon;
@@ -777,99 +777,12 @@ class V1MainController extends Controller
 
     }
 
-    public function leaverequestinsert(Request $request)
-    {
+  
 
-        $employee=$request->input('employee');
-        $fromdate=$request->input('fromdate');
-        $todate=$request->input('todate');
-        $half_short=$request->input('half_short');
-        $reason=$request->input('reason');
+   
 
-        $request = new LeaveRequest();
-        $request->emp_id=$employee;
-        $request->from_date=$fromdate;
-        $request->to_date=$todate;
-        $request->leave_category=$half_short;
-        $request->reason=$reason;
-        $request->status= '1';
-        $request->created_by=$employee;
-        $request->updated_by = '0';
-        $request->approve_status = '0';
-        $request->request_approve_status = '0';
-        $request->save();
+  
 
-        return (new BaseController)->sendResponse($request, 'Leave Request Details Successfully Insert');
-    }
-
-    public function leaverequest_list(Request $request)
-    {
-
-        $employee = $request->get('employee');
-
-        $query =  DB::table('leave_request')
-        ->leftjoin('employees as emp', 'leave_request.emp_id', '=', 'emp.emp_id')
-        ->leftjoin('departments', 'emp.emp_department', '=', 'departments.id')
-        ->leftjoin('leaves', 'leave_request.id', '=', 'leaves.request_id')
-        ->leftjoin('leave_types', 'leaves.leave_type', '=', 'leave_types.id')
-        ->select(
-            'leave_request.*', 
-            'emp.emp_name_with_initial as emp_name', 
-            'departments.name as dep_name', 
-            'leaves.leave_type as leave_type_id', 
-            'leave_types.leave_type as leave_type_name', 
-            'leaves.status as leave_status',
-            'leaves.half_short as half_short'
-        )
-        ->where('leave_request.status', 1)
-        ->where('leave_request.emp_id', $employee)
-        ->get();
-
-        $data = array(
-            'leaverequests' => $query,
-        );
-
-        return (new BaseController)->sendResponse($data, 'leaverequests');
-
-    }
-
-    public function getemployeeleaverequest(Request $request)
-    {
-         $requestid = $request->get('requestid');
-
-        $leaveRequests = DB::table('leave_request')
-            ->select('leave_request.*')
-            ->where('leave_request.id', $requestid)
-            ->where('leave_request.status', 1)
-            ->where('leave_request.approve_status', 0)
-            ->where('leave_request.request_approve_status', 1)
-            ->get()
-            ->map(function ($row) {
-                $leaveType = '';
-                if ($row->leave_category == 0.25) {
-                    $leaveType = 'Short Leave';
-                } elseif ($row->leave_category == 0.5) {
-                    $leaveType = 'Half Day';
-                } elseif ($row->leave_category == 1.0) {
-                    $leaveType = 'Full Day';
-                }
-
-                return [
-                    'id' => $row->id,
-                    'emp_id' => $row->emp_id,
-                    'from_date' => $row->from_date,
-                    'to_date' => $row->to_date,
-                    'leave_category' => $row->leave_category,
-                    'leave_type' => $leaveType
-                ];
-            });
-
-        $data = [
-            'leave_request' => $leaveRequests
-        ];
-
-        return (new BaseController)->sendResponse($data, 'Employee leave request retrieved successfully');
-    }
     public function get_employee_monthlysummery(Request $request)
     {
         $selectedmonth = $request->input('selectedmonth');

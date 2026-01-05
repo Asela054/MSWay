@@ -62,8 +62,8 @@ Route::post('v1/GetLeaveDetailsToView', ['uses' => '\App\Http\Controllers\Api\V1
 Route::post('v1/GetApprovedUpcomingLeavesForDashboard', ['uses' => '\App\Http\Controllers\Api\V1MainController@GetApprovedUpcomingLeavesForDashboard', 'as' => 'GetApprovedUpcomingLeavesForDashboard']);
 Route::post('v1/GetEmployeeProfileDetails', ['uses' => '\App\Http\Controllers\Api\V1MainController@GetEmployeeProfileDetails', 'as' => 'GetEmployeeProfileDetails']);
 Route::post('v1/UpdateLeaveStatus', ['uses' => '\App\Http\Controllers\Api\V1MainController@UpdateLeaveStatus', 'as' => 'UpdateLeaveStatus']);
-Route::post('v1/leaverequestinsert', ['uses' => '\App\Http\Controllers\Api\V1MainController@leaverequestinsert', 'as' => 'leaverequestinsert']); 
-Route::post('v1/leaverequest_list', ['uses' => '\App\Http\Controllers\Api\V1MainController@leaverequest_list', 'as' => 'leaverequest_list']); 
+
+
 Route::post('v1/getemployee_monthlysummery', ['uses' => '\App\Http\Controllers\Api\V1MainController@get_employee_monthlysummery', 'as' => 'getemployee_monthlysummery']); 
 Route::post('v1/attendance_list', ['uses' => '\App\Http\Controllers\Api\V1MainController@attendancelist', 'as' => 'attendance_list']); 
 Route::post('v1/attendance_insert', ['uses' => '\App\Http\Controllers\Api\V1MainController@attendanceinsert', 'as' => 'attendance_insert']); 
@@ -75,13 +75,12 @@ Route::middleware('auth:api')->group(function () {
     Route::post('v1/GetCustomerBranches', ['uses' => '\App\Http\Controllers\Api\MainController@getCustomerBranches', 'as' => 'GetCustomerBranches']);
     Route::post('v1/AttendanceStore', ['uses' => '\App\Http\Controllers\Api\MainController@attendanceStore', 'as' => 'AttendanceStore']);
     Route::post('v1/GetEmployeeInfo', ['uses' => '\App\Http\Controllers\Api\MainController@getEmployeeInfo', 'as' => 'GetEmployeeInfo']);
-    Route::post('v1/GetLeaveTypes', ['uses' => '\App\Http\Controllers\Api\MainController@GetLeaveTypes', 'as' => 'GetLeaveTypes']);
+
     Route::post('v1/GetLeavesList', ['uses' => '\App\Http\Controllers\Api\MainController@GetLeavesList', 'as' => 'GetLeavesList']);
-    Route::post('v1/GetLeaveBalance', ['uses' => '\App\Http\Controllers\Api\MainController@GetLeaveBalance', 'as' => 'GetLeaveBalance']);
+  
     Route::post('v1/ApplyLeave', ['uses' => '\App\Http\Controllers\Api\MainController@ApplyLeave', 'as' => 'ApplyLeave']);
     Route::post('v1/GetEmployees', ['uses' => '\App\Http\Controllers\Api\MainController@Getemployees', 'as' => 'GetEmployees']);
     Route::post('v1/GetApplyLeavelist', ['uses' => '\App\Http\Controllers\Api\MainController@GetApplyLeavelist', 'as' => 'GetApplyLeavelist']);
-
     Route::post('v3/SaveEmoji', ['uses' => '\App\Http\Controllers\Api\V3MainController@SaveEmoji', 'as' => 'SaveEmoji']);
     Route::post('v3/GetEmojies', ['uses' => '\App\Http\Controllers\Api\V3MainController@GetEmojies', 'as' => 'GetEmojies']);
     Route::post('v3/BusLogin', ['uses' => '\App\Http\Controllers\Api\V3MainController@BusLogin', 'as' => 'BusLogin']);
@@ -90,8 +89,16 @@ Route::middleware('auth:api')->group(function () {
     Route::post('v3/GetSavedEmojiCount', ['uses' => '\App\Http\Controllers\Api\V3MainController@GetSavedEmojiCount', 'as' => 'GetSavedEmojiCount']);
 });
 
+// Leave API List
+Route::post('v1/GetLeaveTypes', ['uses' => '\App\Http\Controllers\Api\APILeaveController@GetLeaveTypes', 'as' => 'GetLeaveTypes']);
+Route::post('v1/GetLeaveBalance', ['uses' => '\App\Http\Controllers\Api\APILeaveController@GetLeaveBalance', 'as' => 'GetLeaveBalance']);
+Route::post('v1/leaverequest_list', ['uses' => '\App\Http\Controllers\Api\APILeaveController@leaverequest_list', 'as' => 'leaverequest_list']); 
+Route::post('v1/Leaverequestdetails', ['uses' => '\App\Http\Controllers\Api\APILeaveController@getemployeeleaverequest', 'as' => 'Leaverequestdetails']); 
+Route::post('v1/leaverequestinsert', ['uses' => '\App\Http\Controllers\Api\APILeaveController@leaverequestinsert', 'as' => 'leaverequestinsert']); 
+
+
+
 Route::post('v1/gettimesheet', ['uses' => '\App\Http\Controllers\Api\V1MainController@attendance_list_for_month_edit', 'as' => 'gettimesheet']); 
-Route::post('v1/Leaverequestdetails', ['uses' => '\App\Http\Controllers\Api\V1MainController@getemployeeleaverequest', 'as' => 'Leaverequestdetails']); 
 Route::post('v1/GetApprovepersons', ['uses' => '\App\Http\Controllers\Api\V1MainController@Getapprovepersons', 'as' => 'GetApprovepersons']);
 
 Route::post('v1/GetLocations', ['uses' => '\App\Http\Controllers\Api\LocationAttendanceController@GetLocations', 'as' => 'GetLocations']);
@@ -102,5 +109,6 @@ Route::post('v1/Getlocationpoint', ['uses' => '\App\Http\Controllers\Api\Locatio
 Route::post('v1/Getattendanceshift', ['uses' => '\App\Http\Controllers\Api\LocationAttendanceController@Getattendanceshift', 'as' => 'Getattendanceshift']);
 Route::post('v1/Singlelocationattendanceinsert', ['uses' => '\App\Http\Controllers\Api\LocationAttendanceController@Singlelocationattendanceinsert', 'as' => 'Singlelocationattendanceinsert']);
 
+Route::post('v2/MarkEmployeeAvailability', ['uses' => '\App\Http\Controllers\Api\APIAttendanceController@MarkEmployeeAvailability', 'as' => 'MarkEmployeeAvailability']);
 
 
