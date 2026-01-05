@@ -131,22 +131,7 @@ class MainController extends Controller
     }
 
 
-    public function GetLeaveTypes(Request $request)
-    {
-        $q = "
-            SELECT * 
-            FROM  leave_types 
-        ";
-
-        $data = DB::select($q);
-
-        $data = array(
-            'leave_types' => $data
-        );
-
-        return (new BaseController)->sendResponse($data, 'leave_types');
-    }
-
+ 
     public function GetLeavesList(Request $request)
     {
         $leaves = Leave::with('leave_type')

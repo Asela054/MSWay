@@ -356,35 +356,7 @@ class V2MainController extends Controller
         return (new BaseController)->sendResponse($routes, 'Routes List');
     }
 
-    public function MarkEmployeeAvailability(Request $request)
-    {
-        $validator = \Validator::make($request->all(), [
-            'employee_id' => 'required',
-            'date' => 'required',
-            'session' => 'required',
-        ]);
-
-        if($validator->fails()){
-            return (new BaseController())->sendError('Validation Error.', $validator->errors(), '400');
-        }
-
-        //check if record find
-        $record = EmployeeAvailability::where('emp_id', $request->employee_id)->where('date', $request->date)->first();
-
-        if (EMPTY($record)){
-            $obj = new EmployeeAvailability();
-            $obj->emp_id = $request->employee_id;
-            $obj->date = $request->date;
-            $obj->session = $request->session;
-            $obj->save();
-        }else{
-            $record->session = $request->session;
-            $record->save();
-        }
-
-        return (new BaseController)->sendResponse(array(), 'Record Inserted');
-
-    }
+   
 
     public function GetLeaveListByStatus(Request $request)
     {
