@@ -362,19 +362,7 @@ class MainController extends Controller
         return (new BaseController)->sendResponse($leave, 'Success!');
     }
 
-    public function Getemployees(Request $request){
-
-        $employees = DB::table('employees')
-        ->select('emp_name_with_initial','emp_id','id')
-        ->where('deleted', 0)
-        ->get();
-
-        $data = array(
-            'employees' => $employees
-        );
-
-        return (new BaseController)->sendResponse($data, 'employees');
-    }
+ 
 
 
    public function GetApplyLeavelist(Request $request)

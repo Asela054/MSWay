@@ -115,12 +115,6 @@ class APILeaveController extends Controller
         $available_no_of_casual_leaves = $total_no_of_casual_leaves - $current_year_taken_c_l;
         $available_no_of_med_leaves = $total_no_of_med_leaves - $current_year_taken_med;
 
-         if($employee->emp_status != 2){
-                $emp_status = DB::table('employment_statuses')->where('id', $employee->emp_status)->first();
-                $status_name = $emp_status->emp_status ?? ' ';
-                $leave_msg = 'Casual Leaves - '.$status_name.' Employee can have only a half day per month (Not a permanent employee)';
-            }
-
         $casual_arr = array(
             'leave_type_id' => 1,
             'leave_type_name' => 'Casual',
@@ -248,5 +242,5 @@ class APILeaveController extends Controller
 
     }
 
-    
+
 }
