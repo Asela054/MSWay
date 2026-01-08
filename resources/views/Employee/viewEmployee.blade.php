@@ -482,9 +482,7 @@
 							<input type="hidden" class="form-control form-control-sm" id="id" name="id" value="{{$employee->id}}" readonly>
 							
 							<div class="form-group mt-3 text-right">
-								@can('employee-edit')
 									<button type="submit" class="btn btn-primary btn-sm px-4"><i class="far fa-edit"></i>&nbsp;Update</button>
-								@endcan
 							</div>
 						</form>
 					</div>
