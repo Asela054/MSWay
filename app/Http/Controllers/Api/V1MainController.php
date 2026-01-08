@@ -674,84 +674,8 @@ class V1MainController extends Controller
         return (new BaseController)->sendResponse($leaves, 'Leave Details');
     }
 
-    public function GetApprovedUpcomingLeavesForDashboard(Request $request)
-    {
-        $validator = \Validator::make($request->all(), [
-            'employee_id' => 'required',
-        ]);
+  
 
-        if($validator->fails()){
-            return (new BaseController())->sendError('Validation Error.', $validator->errors(), '400');
-        }
-            $leaves = DB::table('leaves')
-            ->join('leave_types', 'leaves.leave_type', '=', 'leave_types.id') 
-            ->select('leaves.*', 'leave_types.leave_type as leave_type_name')
-            ->where('leaves.emp_id', $request->employee_id)
-            ->where('leaves.status', 'Approved')
-            ->whereDate('leaves.leave_from', '>=', $request->date)
-            ->orderBy('leaves.id','DESC')
-            ->get();
-
-        if(EMPTY($leaves)){
-            return (new BaseController)->sendError('No Records Found', ['error' => 'Invalid Employee ID']);
-        }
-
-        return (new BaseController)->sendResponse($leaves, 'Leaves');
-    }
-
-    public function GetEmployeeProfileDetails(Request $request)
-    {
-        $validator = \Validator::make($request->all(), [
-            'employee_id' => 'required',
-        ]);
-
-        if($validator->fails()){
-            return (new BaseController())->sendError('Validation Error.', $validator->errors(), '400');
-        }
-
-        $employee = DB::table('employees')
-                ->select(
-                    'employees.*',
-                    'companies.name as company_name',
-                    'companies.email as company_email',
-                    'departments.name as department_name',
-                     'branches.location as employee_location',
-                    'shift_types.shift_name as shift_type_name',
-                    'employee_pictures.emp_pic_filename as profile_picture' )
-            ->leftJoin('companies', 'employees.emp_company', '=', 'companies.id')
-            ->leftJoin('departments', 'employees.emp_department', '=', 'departments.id')
-            ->leftJoin('branches', 'employees.emp_location', '=', 'branches.id')
-            ->leftJoin('shift_types', 'employees.emp_shift', '=', 'shift_types.id')
-            ->leftJoin('employee_pictures', 'employees.emp_id', '=', 'employee_pictures.emp_id')
-            ->where('employees.emp_id', $request->employee_id)
-            ->first();
-
-        $date = date('Y-m-d');
-        $employee_availability = EmployeeAvailability::where('emp_id', $request->employee_id)->where('date', $date)->first();
-
-        $emp_avail_data = array();
-
-        if(empty($employee_availability)){
-            $emp_avail_data['session'] = '';
-        }else{
-            $emp_avail_data['session'] = $employee_availability->session;
-        }
-
-        if ($employee->profile_picture) {
-            $employee->profile_picture = url('/public/images/' . $employee->profile_picture);
-        }
-        
-        $data = array(
-            'employee' => $employee,
-            'employee_availability' => $emp_avail_data
-        );
-
-        if(EMPTY($employee)){
-            return (new BaseController)->sendError('No Records Found', ['error' => 'Invalid Employee ID']);
-        }
-
-        return (new BaseController)->sendResponse($data, 'Employee Details');
-    }
 
     public function UpdateLeaveStatus(Request $request)
     {
@@ -1117,60 +1041,7 @@ class V1MainController extends Controller
         return (new BaseController)->sendResponse($data, 'attendance');
     }
 
-    public function attendance_list_for_month_edit(Request $request)
-    {
-
-        $emp_id = $request->get('employee');
-        $month = $request->get('month');
-
-        $attendances = DB::table('attendances as at1')
-            ->select(
-                'at1.*',
-                DB::raw('Min(at1.timestamp) as firsttimestamp'),
-                DB::raw('(CASE 
-                        WHEN Min(at1.timestamp) = Max(at1.timestamp) THEN ""  
-                        ELSE Max(at1.timestamp)
-                        END) AS lasttimestamp'),
-                'employees.emp_id'
-            )
-            ->join('employees', 'at1.uid', '=', 'employees.emp_id')
-            ->where('employees.emp_id', $emp_id)
-            ->where('date', 'like', $month . '%')
-            ->where('at1.deleted_at', null)
-            ->groupBy('at1.uid', 'at1.date')
-            ->get();
-
-        $attendances->transform(function ($attendance) {
-            $timestamp = Carbon::parse($attendance->firsttimestamp);
-            $lasttimestamp = Carbon::parse($attendance->lasttimestamp);
-
-            $attendance->firsttime_rfc = $timestamp->format('Y-m-d\TH:i');
-            $attendance->lasttime_rfc = $lasttimestamp->format('Y-m-d\TH:i');
-            $attendance->firsttime_24 = $timestamp->format('Y-m-d H:i');
-            $attendance->lasttime_24 = $lasttimestamp->format('Y-m-d H:i');
-
-            return $attendance;
-        });
-
-        $data = [
-            'attendances' => $attendances,
-        ];
-
-        return (new BaseController)->sendResponse($data, 'Attendances retrieved successfully');
-    }
+   
         
-     public function Getapprovepersons(Request $request){
-
-        $employees = DB::table('employees')
-        ->select('emp_name_with_initial','emp_id','id')
-        ->where('deleted', 0)
-        ->where('leave_approve_person', 1)
-        ->get();
-
-        $data = array(
-            'approve_persons' => $employees
-        );
-
-        return (new BaseController)->sendResponse($data, 'employees');
-    }
+  
 }

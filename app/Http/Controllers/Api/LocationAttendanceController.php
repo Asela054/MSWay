@@ -156,7 +156,14 @@ class LocationAttendanceController extends Controller
         ->leftjoin('branches', 'employees.emp_location', '=', 'branches.id')
         ->select('branches.*')
         ->where('employees.emp_id', $userID)
-        ->get();
+        ->first();
+
+         // If employee has no location, get all branches
+        if (!$location || is_null($location->id)) {
+            $location = DB::table('branches')->get();
+        } else {
+            $location = collect([$location]);
+        }
 
         $data = array(
             'employeelocation' => $location
@@ -350,7 +357,10 @@ class LocationAttendanceController extends Controller
                                 ->where('shift_id', $attendaceshift)
                                 ->whereNull('off_time')
                                 ->update([
+                                    'reason' =>  $reason,
                                     'off_time' => $timestamp,
+                                    'location_status' => '2',
+                                    'approve_status' => '0',
                                     'updated_by' => $empid ]);
                     }
                 }

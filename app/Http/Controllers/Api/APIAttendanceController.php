@@ -75,6 +75,54 @@ class APIAttendanceController extends Controller
 
     }
 
-    
+     public function attendance_list_for_month_edit(Request $request)
+    {
+
+        $emp_id = $request->get('employee');
+        $month = $request->get('month');
+
+        $attendances = DB::table('attendances as at1')
+            ->select(
+                'at1.*',
+                DB::raw('Min(at1.timestamp) as firsttimestamp'),
+                DB::raw('(CASE 
+                        WHEN Min(at1.timestamp) = Max(at1.timestamp) THEN ""  
+                        ELSE Max(at1.timestamp)
+                        END) AS lasttimestamp'),
+                'employees.emp_id'
+            )
+            ->join('employees', 'at1.uid', '=', 'employees.emp_id')
+            ->where('employees.emp_id', $emp_id)
+            ->where('date', 'like', $month . '%')
+            ->where('at1.deleted_at', null)
+            ->groupBy('at1.uid', 'at1.date')
+            ->get();
+
+        $attendances->transform(function ($attendance) {
+            $timestamp = Carbon::parse($attendance->firsttimestamp);
+            $lasttimestamp = Carbon::parse($attendance->lasttimestamp);
+
+              $totalMinutes = $timestamp->diffInMinutes($lasttimestamp);
+
+            // Convert minutes to hours with 2 decimal points
+            $attendance->duration_hours = round($totalMinutes / 60, 2);
+            
+            // Keep minutes for reference if needed
+            $attendance->duration_minutes = $totalMinutes;
+
+            $attendance->firsttime_rfc = $timestamp->format('Y-m-d\TH:i');
+            $attendance->lasttime_rfc = $lasttimestamp->format('Y-m-d\TH:i');
+            $attendance->firsttime_24 = $timestamp->format('Y-m-d H:i');
+            $attendance->lasttime_24 = $lasttimestamp->format('Y-m-d H:i');
+
+            return $attendance;
+        });
+
+        $data = [
+            'attendances' => $attendances,
+        ];
+
+        return (new BaseController)->sendResponse($data, 'Attendances retrieved successfully');
+    }
 
 }
