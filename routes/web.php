@@ -1594,6 +1594,10 @@ Route::get('PayGroup/destroy/{id}', 'PayGroupController@destroy');
 
 Route::get('/reportemployeeproduction' ,'ProductionreportController@index')->name('reportemployeeproduction');
 
+// Employee Time sheet
+Route::get('/employeetimesheet' ,'EmployeetimesheetContrller@index')->name('employeetimesheet');
+Route::post('/employeetimesheetgenerate' ,'EmployeetimesheetContrller@generatereport')->name('employeetimesheetgenerate');
+
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');
     Artisan::call('config:clear');
