@@ -113,20 +113,16 @@ class AttendanceController extends Controller
         $attendance_date = explode('T', $intime)[0];
 
         $employees = DB::table('employees')
-            ->join('branches', 'employees.emp_location', '=', 'branches.id')
-            ->join('fingerprint_devices', 'branches.id', '=', 'fingerprint_devices.location')
-            ->select('fingerprint_devices.sno', 'fingerprint_devices.location')
-            ->groupBy('fingerprint_devices.location')
+            ->select('employees.emp_location as location')
             ->where('employees.emp_id', $empid)
-            ->get();
+            ->first();
 
-        
             if ($intime != '') {
-               $this->attendancePolicyService->attendanceInsertsingle_dep($empid, $intime,$employees[0]->location , $attendance_date);
+               $this->attendancePolicyService->attendanceInsertsingle_dep($empid, $intime,$employees->location , $attendance_date);
             }
 
             if ($outtime != '') {
-                $this->attendancePolicyService->attendanceInsertsingle_dep($empid, $outtime,$employees[0]->location , $attendance_date);
+                $this->attendancePolicyService->attendanceInsertsingle_dep($empid, $outtime,$employees->location , $attendance_date);
             
             }
 
@@ -1042,13 +1038,10 @@ class AttendanceController extends Controller
                         AttendanceEdited::create($log_data);
                     }
                 } else {
-                    $employee = DB::table('employees')
-                        ->join('branches', 'employees.emp_location', '=', 'branches.id')
-                        ->join('fingerprint_devices', 'branches.id', '=', 'fingerprint_devices.location')
-                        ->select('fingerprint_devices.sno', 'fingerprint_devices.location')
-                        ->groupBy('fingerprint_devices.location')
-                        ->where('employees.emp_id', $emp_id)
-                        ->first();
+                         $employee = DB::table('employees')
+                                    ->select('employees.emp_location as location')
+                                    ->where('employees.emp_id', $emp_id)
+                                    ->first();
 
                     if ($employee) {
                         $data = [
@@ -1059,7 +1052,7 @@ class AttendanceController extends Controller
                             'date' => $full_date,
                             'approved' => 0,
                             'type' => 255,
-                            'devicesno' => $employee->sno,
+                            'devicesno' => 0,
                             'location' => $employee->location
                         ];
                         DB::table('attendances')->insert($data);
@@ -1102,13 +1095,10 @@ class AttendanceController extends Controller
                         AttendanceEdited::create($log_data);
                     }
                 } else {
-                    $employee = DB::table('employees')
-                        ->join('branches', 'employees.emp_location', '=', 'branches.id')
-                        ->join('fingerprint_devices', 'branches.id', '=', 'fingerprint_devices.location')
-                        ->select('fingerprint_devices.sno', 'fingerprint_devices.location')
-                        ->groupBy('fingerprint_devices.location')
-                        ->where('employees.emp_id', $emp_id)
-                        ->first();
+                        $employee = DB::table('employees')
+                                    ->select('employees.emp_location as location')
+                                    ->where('employees.emp_id', $emp_id)
+                                    ->first();
 
                     if ($employee) {
                         $data = [
@@ -1119,7 +1109,7 @@ class AttendanceController extends Controller
                             'date' => $full_date,
                             'approved' => 0,
                             'type' => 255,
-                            'devicesno' => $employee->sno,
+                            'devicesno' => 0,
                             'location' => $employee->location
                         ];
                         DB::table('attendances')->insert($data);
