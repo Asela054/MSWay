@@ -1598,6 +1598,11 @@ Route::get('/reportemployeeproduction' ,'ProductionreportController@index')->nam
 Route::get('/employeetimesheet' ,'EmployeetimesheetContrller@index')->name('employeetimesheet');
 Route::post('/employeetimesheetgenerate' ,'EmployeetimesheetContrller@generatereport')->name('employeetimesheetgenerate');
 
+// Salary reconsilation report
+Route::get('SalaryReconciliation',['uses' => 'LocationPayrollReport@reportSalaryReconciliation', 'as' => 'SalaryReconciliation']);
+Route::post('/checkPaySummary', 'LocationPayrollReport@checkPaySummary');
+
+
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');
     Artisan::call('config:clear');

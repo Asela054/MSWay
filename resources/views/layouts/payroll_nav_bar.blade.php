@@ -40,6 +40,7 @@
           Payments</a></li>
       <li><a class="dropdown-item" href="{{ url('ReportSixMonth') }}" id="sixmonth">Six Month Report</a></li>
       <li><a class="dropdown-item" href="{{ url('ReportAddition') }}" id="additionreport">Additions Report</a></li>
+      <li><a class="dropdown-item" href="{{ url('SalaryReconciliation') }}" id="salaryreconslationreport">Salary Reconciliation</a></li>
     </ul>
   </div>
   <div class="dropdown">
