@@ -1598,6 +1598,10 @@ Route::get('/reportemployeeproduction' ,'ProductionreportController@index')->nam
 Route::get('/employeetimesheet' ,'EmployeetimesheetContrller@index')->name('employeetimesheet');
 Route::post('/employeetimesheetgenerate' ,'EmployeetimesheetContrller@generatereport')->name('employeetimesheetgenerate');
 
+// Salary reconsilation report
+Route::get('SalaryReconciliation',['uses' => 'LocationPayrollReport@reportSalaryReconciliation', 'as' => 'SalaryReconciliation']);
+Route::post('/checkPaySummary', 'LocationPayrollReport@checkPaySummary');
+
 // RPT Clearance Report Controller routes
 Route::get('/clearanceReport', 'RptClearanceController@clearanceReport')->name('clearanceReport'); 
 Route::get('/clearance_report_list', 'RptClearanceController@clearance_report_list')->name('clearance_report_list');
