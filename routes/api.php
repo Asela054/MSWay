@@ -63,7 +63,6 @@ Route::post('v1/GetLeaveDetailsToView', ['uses' => '\App\Http\Controllers\Api\V1
 Route::post('v1/GetEmployeeProfileDetails', ['uses' => '\App\Http\Controllers\Api\V1MainController@GetEmployeeProfileDetails', 'as' => 'GetEmployeeProfileDetails']);
 Route::post('v1/UpdateLeaveStatus', ['uses' => '\App\Http\Controllers\Api\V1MainController@UpdateLeaveStatus', 'as' => 'UpdateLeaveStatus']);
 
-Route::post('v1/getemployee_monthlysummery', ['uses' => '\App\Http\Controllers\Api\V1MainController@get_employee_monthlysummery', 'as' => 'getemployee_monthlysummery']); 
 Route::post('v1/attendance_list', ['uses' => '\App\Http\Controllers\Api\V1MainController@attendancelist', 'as' => 'attendance_list']); 
 Route::post('v1/attendance_insert', ['uses' => '\App\Http\Controllers\Api\V1MainController@attendanceinsert', 'as' => 'attendance_insert']); 
 Route::post('v1/attendancelist', ['uses' => '\App\Http\Controllers\Api\V1MainController@list_attendance', 'as' => 'attendancelist']); 
@@ -115,4 +114,23 @@ Route::post('v1/GetApprovedUpcomingLeavesForDashboard', ['uses' => '\App\Http\Co
 Route::post('v1/Getdetails_maindashbord', ['uses' => '\App\Http\Controllers\Api\APIDashboardController@Getdetails_maindashbord', 'as' => 'Getdetails_maindashbord']);
 Route::post('v1/getdetails_attendancedashboard', ['uses' => '\App\Http\Controllers\Api\APIDashboardController@getdetails_attendancedashboard', 'as' => 'getdetails_attendancedashboard']);
 
-
+// Payroll API List
+Route::post('v1/getemployee_monthlysummery', ['uses' => '\App\Http\Controllers\Api\APIPayrollController@get_employee_monthlysummery', 'as' => 'getemployee_monthlysummery']);
+Route::post('v1/download_payslip', ['uses' => '\App\Http\Controllers\Api\APIPayrollController@downloadEmployeeSalarySheet', 'as' => 'download_payslip']);
+ 
+Route::get('/download-pdf/{pdfId}', function($pdfId) {
+    $pdfData = session()->get($pdfId);
+    
+    // Remove from session after retrieval
+    session()->forget($pdfId);
+    
+    return response($pdfData['content'], 200, [
+        'Content-Type' => 'application/pdf',
+        'Content-Disposition' => 'attachment; filename="' . $pdfData['filename'] . '"',
+        'Content-Length' => strlen($pdfData['content']),
+        'Cache-Control' => 'no-store, no-cache, must-revalidate',
+        'Pragma' => 'no-cache',
+        'Access-Control-Allow-Origin' => '*',
+        'Access-Control-Expose-Headers' => 'Content-Disposition'
+    ]);
+});
