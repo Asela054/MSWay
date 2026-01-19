@@ -87,10 +87,17 @@ class APIPayrollController extends Controller
         ->where('employee_payslips.payslip_cancel', '0')
         ->orderBy('employee_payslips.id', 'desc')  
         ->first();
-        
+
+
+        if (!$payment_period) {
+            return (new BaseController)->sendResponse('Your salary has not been processed for this month','failed');
+        }
+
         $payment_period_id=$payment_period->payment_period_id;
         $payment_period_fr=$payment_period->payment_period_fr;
         $payment_period_to=$payment_period->payment_period_to;
+
+
 
             $sqlslip="SELECT 
                             drv_emp.emp_payslip_id, 
