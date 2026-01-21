@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-
+use App\Employee;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -10,10 +11,18 @@ use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\Controller;
 use App\Helpers\EmployeeHelper;
 use App\Helpers\UserHelper;
+use App\Services\LeavepolicyService;
 use Session;
 
 class RptClearanceController extends Controller
 {
+     protected $leavePolicyService;
+
+      public function __construct(LeavepolicyService $leavePolicyService)
+    {
+        $this->leavePolicyService = $leavePolicyService;
+    }
+
     public function clearanceReport(Request $request)
     {
         $permission = Auth::user()->can('clearance-report');
@@ -181,6 +190,78 @@ class RptClearanceController extends Controller
                 "is_title" => false
             ];
         }
+
+
+          // Space row
+        $data_arr[] = [
+            "description" => '',
+            "quantity_balance" => '',
+            "amount" => '',
+            "is_title" => false,
+            "is_device_row" => false
+        ];
+
+        // Employee Loan Details header
+        $data_arr[] = [
+            "description" => '<strong>Employee Leave Balance</strong>',
+            "quantity_balance" => '',  
+            "amount" => '',             
+            "is_title" => true,
+            "is_device_section" => false
+        ];
+
+        $employee = Employee::where('emp_id', $empId)->first();
+
+        $emp_join_date = isset($employee->emp_join_date) ? $employee->emp_join_date : false;
+        $join_year = Carbon::parse($emp_join_date)->year;
+        $join_month = Carbon::parse($emp_join_date)->month;
+        $join_date = Carbon::parse($emp_join_date)->day;
+        $full_date = '2022-'.$join_month.'-'.$join_date;
+        $empid = $employee->emp_id;
+        $job_categoryid = $employee->job_category_id;
+
+        $formated_from_date = date('Y').'-01-01';
+        $formated_fromto_date = date('Y').'-12-31';
+
+        $current_year_taken_a_l = (new \App\Leave)->taken_annual_leaves($empid, $formated_from_date, $formated_fromto_date);
+        $current_year_taken_c_l = (new \App\Leave)->taken_casual_leaves($empid, $formated_from_date, $formated_fromto_date);
+        $current_year_taken_med = (new \App\Leave)->taken_medical_leaves($empid, $formated_from_date, $formated_fromto_date);
+
+        $annualData = $this->leavePolicyService->calculateAnnualLeaves($employee->emp_join_date, $employee->emp_id, $job_categoryid);
+        $annual_leaves = $annualData['annual_leaves'];
+
+        $casual_leaves = $this->leavePolicyService->calculateCasualLeaves($employee->emp_join_date, $job_categoryid);
+        $medical_leaves = $this->leavePolicyService->getMedicalLeaves($employee->job_category_id);
+
+
+        $total_no_of_annual_leaves = $annual_leaves;
+        $total_no_of_casual_leaves = $casual_leaves;
+        $total_no_of_med_leaves = $medical_leaves;
+
+        $available_no_of_annual_leaves = $total_no_of_annual_leaves - $current_year_taken_a_l;
+        $available_no_of_casual_leaves = $total_no_of_casual_leaves - $current_year_taken_c_l;
+        $available_no_of_med_leaves = $total_no_of_med_leaves - $current_year_taken_med;
+
+        $total_balance = $available_no_of_annual_leaves + $available_no_of_casual_leaves +  $available_no_of_med_leaves;
+
+         if ($total_balance > 0) {
+            
+                $data_arr[] = [
+                    "description" => 'Total Leave Balance',
+                    "quantity_balance" => $total_balance,
+                    "amount" => '-',
+                    "is_title" => false
+                ];
+            
+        } else {
+            $data_arr[] = [
+                "description" => 'No outstanding Leave Balance',
+                "quantity_balance" => '-',
+                "amount" => '-',
+                "is_title" => false
+            ];
+        }
+
 
         $totalRecords = count($data_arr);
 
