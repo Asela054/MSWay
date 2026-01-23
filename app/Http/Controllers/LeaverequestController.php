@@ -94,6 +94,7 @@ class LeaverequestController extends Controller
             'to_date' => $todate,
             'leave_category' => $half_short,
             'reason' => $reason,
+            'request_approve_status' => 0,
             'updated_by' => Auth::id(),
         );
 
