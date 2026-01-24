@@ -23,7 +23,7 @@
 					{{ csrf_field() }}
 					<div class="row">
 						<div class="col-12 text-right">
-							<button type="button" name="find_employee" id="find_employee" class="btn btn-success btn-sm px-3"><i class="fal fa-search mr-2"></i>Search</button>
+							<button type="button" name="find_employee" id="find_employee" class="btn btn-warning btn-sm px-3"><i class="fal fa-search mr-2"></i>Search</button>
 							<button type="submit" name="print_record" id="print_record" disabled="disabled" class="btn btn-success btn-sm px-3 btn-light" onclick="this.form.action='{{ url('DownloadHeldSalaries') }}'" style="width:auto;" value="1"><i class="fal fa-file-excel mr-2"></i>Download XLS</button>
 							<button type="submit" name="print_record" id="print_record_pdf" disabled="disabled" class="btn btn-danger btn-sm px-3 btn-light" onclick="this.form.action='{{ url('DownloadHeldSalaries') }}'" style="width:auto;" value="2"><i class="fal fa-file-pdf mr-2"></i>Download PDF</button>
 						</div>
@@ -165,7 +165,7 @@
 						<div class="form-row">
 							<div class="col-12 text-right">
 								<hr>
-								<input type="submit" name="action_button" id="action_button" class="btn btn-success btn-sm px-3" value="View Payslips" />
+								<input type="submit" name="action_button" id="action_button" class="btn btn-warning btn-sm px-3" value="View Payslips" />
 								<button type="button" class="btn btn-light btn-sm px-3" data-dismiss="modal">Close</button>
 							</div>
 						</div>

@@ -77,11 +77,18 @@ class PaySlipBank extends Controller
 				}
 			}
 
-            $error = Validator::make($request->all(), $rules);
-
-            if ($error->fails()) {
-                return response()->json(['errors' => $error->errors()->all()]);
-            }
+            if($request->opt_rpt!='4'){
+				$error = Validator::make($request->all(), $rules);
+	
+				if ($error->fails()) {
+					return response()->json(['errors' => $error->errors()->all()]);
+				}
+			}
+			
+			$payment_period_id = 0;
+			$payment_period_fr = 'X';
+			$payment_period_to = 'X';
+			$employee = NULL;
 			
 			$company_acc_info = Company::find($emp_location_val);
 			$txt_acc_name = $company_acc_info->bank_account_name;
@@ -91,70 +98,112 @@ class PaySlipBank extends Controller
 			$opt_employer_no = substr($txt_employer_no, -6);
 			$txt_zone_code = $company_acc_info->zone_code;
 
-            $payroll_process_types = array('1' => 'Monthly', '2' => 'Weekly', '3' => 'Bi-weekly', '4' => 'Daily');
-
-            $paymentPeriod = PaymentPeriod::find($request->period_filter_id);
-
-            $payment_period_id = $paymentPeriod->id;//1;
-            $payment_period_fr = $paymentPeriod->payment_period_fr;//$request->work_date_fr;
-            $payment_period_to = $paymentPeriod->payment_period_to;//$request->work_date_to;
-
-            $sqlslip = "SELECT drv_emp.emp_payslip_id, drv_emp.emp_epfno, 
-               drv_emp.emp_first_name, drv_emp.emp_national_id, drv_emp.emp_last_name, 
-               drv_emp.e_id, drv_emp.occupation_group_id, 
-               drv_emp.location,
-               drv_emp.bank_ac_no,
-               drv_emp.bank_code,
-               drv_emp.branch_code,
-               drv_emp.payslip_held,
-               drv_emp.payslip_approved, 
-			   drv_work.work_days, 
-               drv_info.fig_group_title, drv_info.fig_group,
-               drv_info.fig_value AS fig_value, drv_info.epf_payable AS epf_payable, drv_info.remuneration_pssc 
-                    FROM (SELECT employee_payslips.id AS emp_payslip_id, employees.emp_etfno AS emp_epfno,
-                                 employees.emp_name_with_initial AS emp_first_name, 
-								 employees.emp_national_id, employees.emp_last_name, 
-                                 employees.id as e_id, ifnull(job_titles.occupation_group_id, 0) as occupation_group_id, 
-                                 companies.name AS location,
-                                 ebanks.bank_ac_no,
-                                 ebanks.bank_code,
-                                 ebanks.branch_code,
-                                 employee_payslips.payslip_held, 
-                                 employee_payslips.payslip_approved 
-                                FROM `employee_payslips` 
-                                    INNER JOIN payroll_profiles ON employee_payslips.payroll_profile_id=payroll_profiles.id
-                                    INNER JOIN employees ON payroll_profiles.emp_id=employees.id
-                                    INNER JOIN companies ON employees.emp_company=companies.id 
-									inner join job_titles on employees.emp_job_code=job_titles.id 
-                                    LEFT JOIN employee_banks as ebanks ON ebanks.emp_id = employees.id 
-                                WHERE employee_payslips.payment_period_id=? 
-                                  AND ".$emp_location_col."=? 
-                                  AND ".$emp_department_col."=? 
-                                  AND employee_payslips.payslip_cancel=0 AND ".$emp_sal_held_col."='0'
-                        ) AS drv_emp 
-                    INNER JOIN (SELECT `employee_payslip_id`, SUM(`work_days`) as work_days 
-								FROM `employee_paid_rates` 
-								WHERE concat(`salary_process_year`, `salary_process_month`) in (date_format(?, '%Y%c'), date_format(?, '%Y%c')) 
-								group by employee_payslip_id 
-								having work_days>0) as drv_work ON drv_emp.emp_payslip_id=drv_work.employee_payslip_id 
-					INNER JOIN (SELECT `id` AS fig_id, 
-                                `employee_payslip_id`, 
-                                `fig_group_title`, `fig_group`, `epf_payable`, remuneration_payslip_spec_code AS remuneration_pssc, 
-                                `fig_value` AS fig_value 
-                                FROM employee_salary_payments 
-                                WHERE `payment_period_id`=? 
-                            ) AS drv_info ON drv_emp.emp_payslip_id=drv_info.employee_payslip_id 
-            ORDER BY drv_info.fig_id";
-
-            $employee = DB::select($sqlslip,
-                [
-                    $payment_period_id,
-                    $emp_location_val,
-                    $emp_department_val,
-					$payment_period_fr, $payment_period_to, 
-                    $payment_period_id
-                ]
-            );
+            if(($request->opt_rpt=='1')||($request->opt_rpt=='2')||($request->opt_rpt=='3')){
+				$payroll_process_types = array('1' => 'Monthly', '2' => 'Weekly', '3' => 'Bi-weekly', '4' => 'Daily');
+	
+				$paymentPeriod = PaymentPeriod::find($request->period_filter_id);
+	
+				$payment_period_id = $paymentPeriod->id;//1;
+				$payment_period_fr = $paymentPeriod->payment_period_fr;//$request->work_date_fr;
+				$payment_period_to = $paymentPeriod->payment_period_to;//$request->work_date_to;
+	
+				$sqlslip = "SELECT drv_emp.emp_payslip_id, drv_emp.emp_epfno, 
+				   drv_emp.emp_first_name, drv_emp.emp_national_id, drv_emp.emp_last_name, 
+				   drv_emp.e_id, drv_emp.occupation_group_id, 
+				   drv_emp.location,
+				   drv_emp.bank_ac_no,
+				   drv_emp.bank_code,
+				   drv_emp.branch_code,
+				   drv_emp.payslip_held,
+				   drv_emp.payslip_approved, 
+				   drv_work.work_days, 
+				   drv_info.fig_group_title, drv_info.fig_group,
+				   drv_info.fig_value AS fig_value, drv_info.epf_payable AS epf_payable, drv_info.remuneration_pssc 
+						FROM (SELECT employee_payslips.id AS emp_payslip_id, employees.id as employee_id, employees.emp_etfno AS emp_epfno,
+									 employees.emp_name_with_initial AS emp_first_name, 
+									 employees.emp_national_id, employees.emp_last_name, 
+									 employees.id as e_id, ifnull(job_titles.occupation_group_id, 0) as occupation_group_id, 
+									 companies.name AS location,
+									 ebanks.bank_ac_no,
+									 ebanks.bank_code,
+									 ebanks.branch_code,
+									 employee_payslips.payslip_held, 
+									 employee_payslips.payslip_approved 
+									FROM `employee_payslips` 
+										INNER JOIN payroll_profiles ON employee_payslips.payroll_profile_id=payroll_profiles.id
+										INNER JOIN employees ON payroll_profiles.emp_id=employees.id
+										INNER JOIN companies ON employees.emp_company=companies.id 
+										inner join job_titles on employees.emp_job_code=job_titles.id 
+										LEFT JOIN employee_banks as ebanks ON ebanks.emp_id = employees.id 
+									WHERE employee_payslips.payment_period_id=? 
+									  AND ".$emp_location_col."=? 
+									  AND ".$emp_department_col."=? 
+									  AND employee_payslips.payslip_cancel=0 AND ".$emp_sal_held_col."='0'
+							) AS drv_emp 
+						INNER JOIN (SELECT `employee_payslip_id`, SUM(`work_days`) as work_days 
+									FROM `employee_paid_rates` 
+									WHERE concat(`salary_process_year`, `salary_process_month`) in (date_format(?, '%Y%c'), date_format(?, '%Y%c')) 
+									group by employee_payslip_id 
+									having work_days>0) as drv_work ON drv_emp.emp_payslip_id=drv_work.employee_payslip_id 
+						INNER JOIN (SELECT `id` AS fig_id, 
+									`employee_payslip_id`, 
+									`fig_group_title`, `fig_group`, `epf_payable`, remuneration_payslip_spec_code AS remuneration_pssc, 
+									`fig_value` AS fig_value 
+									FROM employee_salary_payments 
+									WHERE `payment_period_id`=? 
+								) AS drv_info ON drv_emp.emp_payslip_id=drv_info.employee_payslip_id 
+				ORDER BY drv_emp.employee_id, drv_info.fig_id";
+	
+				$employee = DB::select($sqlslip,
+					[
+						$payment_period_id,
+						$emp_location_val,
+						$emp_department_val,
+						$payment_period_fr, $payment_period_to, 
+						$payment_period_id
+					]
+				);
+			}else if($request->opt_rpt=='4'){
+				$pay_particulars = 'Advance';
+				$sqladvance = "SELECT drv_emp.emp_payslip_id, drv_emp.emp_epfno, drv_emp.disp_epfno, 
+				   drv_emp.emp_first_name, drv_emp.emp_national_id, drv_emp.emp_last_name, 
+				   drv_emp.e_id, drv_emp.occupation_group_id, 
+				   drv_emp.location,
+				   drv_emp.bank_ac_no,
+				   drv_emp.bank_code,
+				   drv_emp.branch_code,
+				   drv_emp.payslip_held,
+				   drv_emp.payslip_approved, 
+				   drv_work.work_days, 
+				   'ADDITION' AS fig_group_title, 'ADDITION' AS fig_group,
+				   drv_emp.payment_amount AS fig_value, 0 AS epf_payable, 'OTHER_REM' AS remuneration_pssc 
+						FROM (SELECT payroll_profiles.id AS emp_payslip_id, employees.emp_id AS emp_epfno, employees.emp_etfno as disp_epfno,
+									 employees.emp_name_with_initial AS emp_first_name, 
+									 employees.emp_national_id, employees.emp_last_name, 
+									 employees.id as e_id, ifnull(job_titles.occupation_group_id, 0) as occupation_group_id, 
+									 companies.name AS location,
+									 ebanks.bank_ac_no,
+									 ebanks.bank_code,
+									 ebanks.branch_code, employee_term_payments.payment_amount, 
+									 0 AS payslip_held, 
+									 1 AS payslip_approved 
+									FROM `employee_term_payments` 
+										INNER JOIN payroll_profiles ON employee_term_payments.payroll_profile_id=payroll_profiles.id
+										INNER JOIN employees ON payroll_profiles.emp_id=employees.id
+										INNER JOIN companies ON employees.emp_company=companies.id 
+										inner join job_titles on employees.emp_job_code=job_titles.id 
+										LEFT JOIN employee_banks as ebanks ON ebanks.emp_id = employees.id 
+									WHERE DATE_FORMAT(employee_term_payments.created_at, '%Y%m')=DATE_FORMAT(NOW(), '%Y%m') 
+									  and employee_term_payments.remuneration_id IN (23, 24) 
+									  AND ".$emp_location_col."=? 
+									  AND ".$emp_department_col."=? 
+									  AND employee_term_payments.payment_cancel=0 AND ".$emp_sal_held_col."='0'
+							) AS drv_emp 
+						CROSS JOIN (SELECT 15 as work_days) as drv_work 
+				ORDER BY CAST(ifnull(nullif(drv_emp.disp_epfno, 0), '99999') AS UNSIGNED), drv_emp.emp_epfno";
+	
+				$employee = DB::select($sqladvance, [$emp_location_val, $emp_department_val]);
+			}
 
             $employee_list = array();
             $cnt = 0;

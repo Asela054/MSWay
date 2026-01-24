@@ -23,7 +23,7 @@
                     {{ csrf_field() }}
                     <div class="row">
                         <div class="col-12 text-right">
-                            <button type="button" name="find_employee" id="find_employee" class="btn btn-success btn-sm px-3"><i class="fal fa-search mr-2"></i>Search</button>
+                            <button type="button" name="find_employee" id="find_employee" class="btn btn-warning btn-sm px-3"><i class="fal fa-search mr-2"></i>Search</button>
                             <button type="submit" name="print_record" id="print_record" disabled="disabled" class="btn btn-success btn-sm btn-light px-3" onclick="this.form.action='{{ url('DownloadEpfEtf') }}'" style="width:auto;" value="1"><i class="fal fa-file-excel mr-2"></i>Download XLS</button>
                             <button type="submit" name="print_record" id="print_record_pdf" disabled="disabled" class="btn btn-danger btn-sm btn-light px-3" onclick="this.form.action='{{ url('DownloadEpfEtf') }}'" style="width:auto;" value="2"><i class="fal fa-file-pdf mr-2"></i>Download PDF</button>
                         </div>
@@ -193,15 +193,15 @@
                             <div class="col-12">
                                 <label class="font-weight-bolder small">Report Type</label><br>
                                 <div class="custom-control custom-radio custom-control-inline">
-                                    <input type="radio" id="opt_rpt_a" name="opt_rpt" class="custom-control-input" value="1">
+                                    <input type="radio" id="opt_rpt_a" name="opt_rpt" class="custom-control-input">
                                     <label class="custom-control-label small" for="opt_rpt_a">EPF & ETF</label>
                                 </div>
                                 <div class="custom-control custom-radio custom-control-inline">
-                                    <input type="radio" id="opt_rpt_b" name="opt_rpt" class="custom-control-input" value="2">
+                                    <input type="radio" id="opt_rpt_b" name="opt_rpt" class="custom-control-input">
                                     <label class="custom-control-label small" for="opt_rpt_b">EPF Only</label>
                                 </div>
                                 <div class="custom-control custom-radio custom-control-inline">
-                                    <input type="radio" id="opt_rpt_c" name="opt_rpt" class="custom-control-input" value="3">
+                                    <input type="radio" id="opt_rpt_c" name="opt_rpt" class="custom-control-input">
                                     <label class="custom-control-label small" for="opt_rpt_c">ETF Only</label>
                                 </div>
                             </div>
@@ -209,7 +209,7 @@
                         <div class="form-row">
                             <div class="col-12 text-right">
                                 <hr>
-                                <input type="submit" name="action_button" id="action_button" class="btn btn-success btn-sm px-3" value="View Payslips" />
+                                <input type="submit" name="action_button" id="action_button" class="btn btn-warning btn-sm px-3" value="View Payslips" />
                                 <button type="button" class="btn btn-light btn-sm px-3" data-dismiss="modal">Close</button>
                             </div>
                         </div>

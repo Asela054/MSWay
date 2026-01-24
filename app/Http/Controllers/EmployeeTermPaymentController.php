@@ -352,7 +352,8 @@ class EmployeeTermPaymentController extends Controller
 							->select("employee_term_payments.id", "remunerations.remuneration_name", "employee_term_payments.payment_amount", "remunerations.value_group")
 							->where(["employee_term_payments.payroll_profile_id"=>$request->payroll_profile_id, 
 									 "employee_term_payments.emp_payslip_no"=>$request->emp_payslip_no, 
-									 "employee_term_payments.payment_cancel"=>0])
+									 "employee_term_payments.payment_cancel"=>0,
+									 "remunerations.allocation_method"=>'TERMS'])
 							->get();
 				
 				

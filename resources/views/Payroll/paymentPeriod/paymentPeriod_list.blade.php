@@ -26,8 +26,10 @@
                                 <thead>
                                     <tr>
                                         <th>TYPE</th>
+                                        <th>PAY DAY</th>
                                         <th>FROM</th>
                                         <th>TO</th>
+                                        <th>DURATION</th>
                                         <th class="actlist_col">ACTIONS</th>
                                     </tr>
                                 </thead>
@@ -37,14 +39,20 @@
 
                                     <tr id="row-{{$payrolltype->payroll_process_type_id}}">
                                         <td>{{$payrolltype->process_name}}</td>
+                                        <td>{{$payrolltype->payday_name}}</td>
                                         <td>{{$payrolltype->payment_period_fr}}</td>
                                         <td>{{$payrolltype->payment_period_to}}</td>
+                                        <td>{{$payrolltype->payment_total_days_hours}}</td>
                                         <td class="actlist_col">
                                             <button class="btn btn-primary btn-sm renew"
                                                 type="button"
                                                 data-refid="{{$payrolltype->payroll_process_type_id}}">
                                                 <i class="fas fa-sync"></i>
                                             </button>
+                                            <span class="more_info_schedules details-control"
+                                                    style="font-size:20px;top:4px; color:rgba(0,100,200,0.8)" 
+                                                    data-refid="{{$payrolltype->payroll_process_type_id}}">
+                                            </span>
                                         </td>
                                     </tr>
                                     @endforeach
@@ -53,7 +61,7 @@
                             </table>
                         </div>
                     </div>
-                    <div class="col-12">
+                    <div class="col-12" style="display:none;">
                         <div class="card mt-3">
                             <div class="card-body p-3">
                                 Salary Banking - Send salary details to bank accounts of employees
@@ -133,6 +141,45 @@
                                     class="form-control form-control-sm" />
                             </div>
                         </div>
+                        <div class="row mb-1">
+                        	<div class="form-group col-md-4">
+                            	<label class="font-weight-bolder small">Pay day</label>
+                                <div class="col">
+                                    <select name="employee_payday_id" id="employee_payday_id" class="form-control form-control-sm" required>
+                                        <option value="0" selected="selected">General</option>
+                                        @foreach($paydays as $payday)
+                                        
+                                        <option value="{{$payday->id}}" disabled="disabled" data-payroll="{{$payday->payroll_process_type_id}}" style="display:none;" >{{$payday->payday_name}}</option>
+                                        @endforeach
+                                        
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group col-md-4">
+                            	<label class="font-weight-bolder small">Total days</label>
+                                <div class="col">
+                                    <input type="number" name="work_period_total_days" id="work_period_total_days"
+                                           step="0.1" class="form-control form-control-sm"/>
+                                </div>
+                            </div>
+                            <div class="form-group col-md-4">
+                            	<label class="font-weight-bolder small">Total hours</label>
+                                <div class="col">
+                                    <input type="number" name="work_period_total_hours" id="work_period_total_hours"
+                                           step="0.1" class="form-control form-control-sm"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-1">
+                        	<hr style="width: 100%;" />
+                            <div class="form-group col">
+                            	<label class="font-weight-bolder small">Advance Payment Date:</label>
+                                <div class="col">
+                                    <input type="date" name="advance_payment_date" id="advance_payment_date"
+                                           class="form-control form-control-sm" value=""/>
+                                </div>
+                            </div>
+                        </div>
                         <div class="form-row">
                             <div class="col-12 text-right">
                                 <hr>
@@ -175,9 +222,38 @@
 
 
 @section('script')
-
 <script>
-    $(document).ready(function () {
+(function() {
+	var cssMain = document.createElement('link');
+	cssMain.href = "{{ asset('/public/payroll/css/paymentPeriod_list.css') }}";
+	cssMain.rel = 'stylesheet';
+	cssMain.type = 'text/css';
+	document.getElementsByTagName('head')[0].appendChild(cssMain);
+	/*
+	
+	*/
+})();
+</script>
+<script>
+    function format(d){
+		var application_tr = '<th>Pay day</th>'+
+								'<th>From</th>'+'<th>To</th>'+
+								'<th>Duration</th>';
+		// `d` is the original data object for the row
+		$.each(d, function(index, obj){
+			application_tr += '<tr class="">'+
+						'<td>'+obj.payday_name+'</td>'+
+						'<td>'+obj.payment_period_fr+'</td>'+
+						'<td>'+obj.payment_period_to+'</td>'+
+						'<td>'+obj.payment_total_days_hours+'</td>'+
+					'</tr>';
+		});
+		return '<table cellpadding="5" cellspacing="0" border="0" width="100%" align="right" style="padding-left:50px;">'+
+			application_tr+
+		'</table>';
+	}
+	
+	$(document).ready(function () {
         $('#payrollmenu').addClass('active');
         $('#payrollmenu_icon').addClass('active');
         $('#policymanagement').addClass('navbtnactive');
@@ -191,7 +267,7 @@
             "paging": false,
             "order": [],
             "columnDefs": [{
-                "targets": 3,
+                "targets": 5,
                 "className": 'actlist_col',
                 "orderable": false
             }]
@@ -234,7 +310,13 @@
             $('#form_result').html('');
 
             $("#payroll_process_type_id").val($(this).data('refid'));
-
+			
+			$('#employee_payday_id').val('0');//select General option
+			$('#employee_payday_id option:not(:first-child)').prop("disabled", true);
+			$('#employee_payday_id option:not(:first-child)').hide();
+			$('#employee_payday_id option[data-payroll="'+$(this).data("refid")+'"]').prop("disabled", false);
+			$('#employee_payday_id option[data-payroll="'+$(this).data("refid")+'"]').show();
+			
             $('#formModal').modal('show');
         });
 
@@ -312,9 +394,12 @@
                         var d=[data.alt_obj.remuneration_name, data.alt_obj.remuneration_type, data.alt_obj.epf_payable, data.alt_obj.alt_id];
                         */
                         var d = selected_tr.data();
-                        d[1] = $("#payment_period_fr")
-                    .val(); //data.alt_obj.remuneration_type;
-                        d[2] = $("#payment_period_to").val(); //data.alt_obj.epf_payable;
+                        d[1] = $("#employee_payday_id").find(":selected").text();//'set-payday-txt';
+                        d[2] = $("#payment_period_fr").val();//data.alt_obj.remuneration_type;
+						d[3] = $("#payment_period_to").val();//data.alt_obj.epf_payable;
+						var period_tot_days=($("#work_period_total_days").val()!='')?$("#work_period_total_days").val():0;
+						var period_tot_hrs=($("#work_period_total_hours").val()!='')?$("#work_period_total_hours").val():0;
+						d[4] = period_tot_days + 'days, ' + period_tot_hrs + 'Hrs';
                         criteriaTable.row(selected_tr).data(d).draw();
 
 
@@ -323,6 +408,32 @@
                 }
             });
         });
+		
+		$('#titletable tbody').on('click', 'td .details-control', function () {
+			var tr = $(this).closest('tr');
+			var row = criteriaTable.row( tr );
+			
+			//var d = row.data();
+			//var id = d.profile_id;//alert(d.location);
+			var id = $(this).data('refid');
+
+			if ( row.child.isShown() ) {
+				// This row is already open - close it
+				row.child.hide();
+				tr.removeClass('shown');
+			}
+			else {
+				// Open this row
+				$.ajax({
+				   url :"LatestPayPeriods/"+id+"/review",
+				   dataType:"json",
+				   success:function(data){
+					row.child( format(data.paydays) ).show();
+					tr.addClass('shown');
+				   }
+				})
+			}
+		} );
 
         $(document).on('click', '.edit', function () {
             var id = $(this).data('refid');

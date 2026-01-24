@@ -6,6 +6,8 @@ use App\Branch;
 use App\Company;
 use App\Employee;
 
+use App\EmployeePayday;
+
 use App\EmployeePayslip;
 use App\EmployeeTermPayment;
 use App\EmployeeTermPaymentExtra;
@@ -51,11 +53,13 @@ class EmployeeTermPaymentExtrasController extends Controller
         $branch=Company::orderBy('id', 'asc')->get(); // Branch::orderBy('id', 'asc')->get();
 		$remuneration_extras=RemunerationExtra::where(['remuneration_extra_cancel'=>0])->orderBy('id', 'asc')->get();
 		
+		$paydays = EmployeePayday::where(['payday_cancel'=>0])->get();
+		
 		$payroll_process_type=PayrollProcessType::orderBy('id', 'asc')->get();
 		$payment_period=PaymentPeriod::orderBy('id', 'desc')->get();
 		$remuneration_list=Remuneration::whereIn('id', [23, 24])->where(['remuneration_cancel'=>0])->orderBy('id', 'asc')->get();
 		
-        return view('Payroll.termPayment.extrasPayment_list',compact('branch', 'remuneration_list', 'remuneration_extras', 'payroll_process_type', 'payment_period'));
+        return view('Payroll.termPayment.extrasPayment_list',compact('branch', 'remuneration_list', 'remuneration_extras', 'payroll_process_type', 'payment_period', 'paydays'));
     }
 
     /**
@@ -106,6 +110,16 @@ class EmployeeTermPaymentExtrasController extends Controller
 					return response()->json(['errors' => array('Payment schedule not available')]);
 				}
 				
+				
+				//2025-11-24-check-payslip-to-disallow-advance-payment-for-periods-with-employee-salaries
+				$actPeriodPayslip = EmployeePayslip::where(['payroll_profile_id'=>$request->payroll_profile_id, 
+															'payment_period_id'=>$request->input('payment_period_id')])
+										->latest()
+										->first();
+				if(!empty($actPeriodPayslip)){
+					return response()->json(['errors' => array('Advance payments cannot be issued to salary processed employees')]);
+				}
+				//--
 				
 				
 				$employeePayslip = EmployeePayslip::where(['payroll_profile_id'=>$request->payroll_profile_id])
@@ -455,7 +469,8 @@ class EmployeeTermPaymentExtrasController extends Controller
 			$empPayPeriodId = 0;
 			$empWorkRateId = 0;
 			
-			$paymentPeriod=PaymentPeriod::where(['payroll_process_type_id'=>$employeePayProfile->payroll_process_type_id])
+			$paymentPeriod=PaymentPeriod::where(['payroll_process_type_id'=>$employeePayProfile->payroll_process_type_id,
+												 'employee_payday_id'=>$employeePayProfile->employee_payday_id])
 							->latest()
 							->first();
 			
@@ -647,6 +662,20 @@ class EmployeeTermPaymentExtrasController extends Controller
 												 'msg' => array('Payment schedule not available')]
 												);
 					}
+					
+					
+					//2025-11-24-check-payslip-to-disallow-advance-payment-for-periods-with-employee-salaries
+					$actPeriodPayslip = EmployeePayslip::where(['payroll_profile_id'=>$request->payroll_profile_id, 
+																'payment_period_id'=>$request->input('payment_period_id')])
+											->latest()
+											->first();
+					if(!empty($actPeriodPayslip)){
+						return response()->json(['result'=>'error', 
+												 'msg' => array('Advance payments cannot be issued to salary processed employees')]
+												);
+					}
+					//--
+					
 					
 					$employeePayslip = EmployeePayslip::where(['payroll_profile_id'=>$request->payroll_profile_id])
 										->latest()
@@ -997,7 +1026,7 @@ class EmployeeTermPaymentExtrasController extends Controller
 			/*
 			$sql_advlist .= "LEFT OUTER JOIN (select payroll_process_type_id, MAX(id) as id from payment_periods GROUP BY payroll_process_type_id) as drv_periods ON payroll_profiles.payroll_process_type_id=drv_periods.payroll_process_type_id LEFT OUTER JOIN (select emp_id, MAX(id) as id from employee_work_rates GROUP BY emp_id) as drv_workrates ON payroll_profiles.emp_id=drv_workrates.emp_id LEFT OUTER JOIN (select id, employee_term_payment_id, payment_period_id, employee_work_rate_id, employee_term_payment_extra_cancel as payment_cancel from employee_term_payment_extras where remuneration_extra_id=?) as drv_extras ON (drv_term.id=drv_extras.employee_term_payment_id AND IFNULL(drv_periods.id, 0)=drv_extras.payment_period_id AND IFNULL(drv_workrates.id, 0)=drv_extras.employee_work_rate_id)" ;
 			*/
-			$sql_advlist .= "LEFT OUTER JOIN (select payroll_process_type_id, MAX(id) as id from payment_periods GROUP BY payroll_process_type_id) as drv_periods ON payroll_profiles.payroll_process_type_id=drv_periods.payroll_process_type_id ";
+			$sql_advlist .= "LEFT OUTER JOIN (select payroll_process_type_id, employee_payday_id, MAX(id) as id from payment_periods GROUP BY payroll_process_type_id, employee_payday_id) as drv_periods ON (payroll_profiles.payroll_process_type_id=drv_periods.payroll_process_type_id AND payroll_profiles.employee_payday_id=drv_periods.employee_payday_id) ";
 			
 			/*
 			LEFT OUTER JOIN (select emp_id, MAX(id) as id from employee_work_rates GROUP BY emp_id) as drv_workrates ON payroll_profiles.emp_id=drv_workrates.emp_id 
@@ -1008,11 +1037,14 @@ class EmployeeTermPaymentExtrasController extends Controller
 			
 			$sql_advlist .= "LEFT OUTER JOIN (select id as ent_id, payroll_profile_id, extra_entitle_amount from payroll_profile_extras where remuneration_extra_id=? and payroll_profile_extra_signout=0) AS drv_ent ON payroll_profiles.id=drv_ent.payroll_profile_id ";
 			
+			$sql_advlist .= "WHERE payroll_profiles.employee_payday_id=?";
+			
 			if($request->entopt=='1'){
-				$sql_advlist .= "WHERE drv_ent.ent_id IS NOT NULL";
+				$sql_advlist .= " ";
+				$sql_advlist .= "AND drv_ent.ent_id IS NOT NULL";
 			}
 			
-			$employee = DB::select($sql_advlist, [$remunerationExtra->remuneration_id, $request->id, $request->id]);
+			$employee = DB::select($sql_advlist, [$remunerationExtra->remuneration_id, $request->id, $request->id, $request->payment_group]);
 			
 			foreach($employee as $r){
 				$employee_list[]=array('id'=>$r->payment_id, 'payroll_profile_id'=>$r->payroll_profile_id, 'emp_first_name'=>$r->emp_first_name, 'location'=>$r->location, 'basic_salary'=>$r->basic_salary, 'process_name'=>(isset($r->process_name)?$r->process_name:''), 'head_id'=>$r->employee_term_payment_id, 'work_id'=>$r->employee_work_rate_id, 'period_id'=>$r->payment_period_id, 'ent_amount'=>$r->ent_amount, 'payment_cancel'=>$r->payment_cancel);

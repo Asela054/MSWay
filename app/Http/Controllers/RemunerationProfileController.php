@@ -130,7 +130,8 @@ class RemunerationProfileController extends Controller
 				}
 				
 				$employeePayProfile = PayrollProfile::find($request->input('payroll_profile_id'));
-				$paymentPeriod=PaymentPeriod::where(['payroll_process_type_id'=>$employeePayProfile->payroll_process_type_id])
+				$paymentPeriod=PaymentPeriod::where(['payroll_process_type_id'=>$employeePayProfile->payroll_process_type_id,
+													 'employee_payday_id'=>$employeePayProfile->employee_payday_id])
 									->latest()
 									->first();
 				
@@ -327,7 +328,8 @@ class RemunerationProfileController extends Controller
 			return DB::transaction(function() use ($id){
 				$extrasFeatPayment = PayrollProfileExtra::find($id);
 				$employeePayProfile = PayrollProfile::find($extrasFeatPayment->payroll_profile_id);
-				$paymentPeriod=PaymentPeriod::where(['payroll_process_type_id'=>$employeePayProfile->payroll_process_type_id])
+				$paymentPeriod=PaymentPeriod::where(['payroll_process_type_id'=>$employeePayProfile->payroll_process_type_id,
+													 'employee_payday_id'=>$employeePayProfile->employee_payday_id])
 									->latest()
 									->first();
 				

@@ -367,6 +367,8 @@ class EmployeePayslipController extends Controller
 						$sql_main .= "md5(concat(drv_figs.fig_name, '_', drv_figs.fig_group, '_', drv_figs.fig_group_title))";
 						$sql_main .= ") AS drv_main";
 						
+						$request_work = $request->opt_work;
+						$request_days = $request->emp_work;
 						$work_days_exclusions_val = $request->emp_work;//0;
 						
 						$res=DB::insert($sql_cols.$sql_main, [$employee_payslip_id, $form_data['payment_period_id'], $form_data['payroll_profile_id'], $form_data['emp_payslip_no'], $work_days_exclusions_val, $employee_payslip_id, $request->day_salary, $request->pay_per_day, $request->opt_work, $request->basic_salary, $salary_part_adjval, ($request->day_salary*-1), ($request->day_salary/8), (($request->day_salary*1)/8), $salary_part_adjval, $form_data['payroll_profile_id'], $request->emp_work, $request->opt_work, $request->emp_work, $request->opt_work]);
@@ -456,14 +458,71 @@ class EmployeePayslipController extends Controller
 						}
 						/* -- loan-installments-and-term-payments */
 						
+						//$pre_flag_data = array('NOPAY'=>0, 'OTHRS'=>0);
+						$salary_particular_rows = array();
+						$flag_nopay_val = 0;
+						$flag_othrs_val = 0;
+						$pre_sqls = "select remunerations.id, COALESCE(ifnull(drv_additions.new_eligible_amount, 0)*";
+						$pre_sqls .= "NULLIF(remunerations.allocation_method='TERMS', 0), ";
+						$pre_sqls .= "COALESCE(NULLIF(SUM(IFNULL(drv_blocks.pre_eligible_amount, 0)*";
+						$pre_sqls .= "(drv_blocks.work_days BETWEEN drv_blocks.min_days AND drv_blocks.max_days)*";
+						$pre_sqls .= "(remunerations.employee_work_rate_work_days_exclusions=0)+";
+						$pre_sqls .= "(IFNULL(drv_blocks.pre_eligible_amount, 0)+";
+						$pre_sqls .= "(drv_blocks.grp_increment*(drv_blocks.opt_days-drv_blocks.min_days)))*";
+						$pre_sqls .= "(drv_blocks.opt_days BETWEEN drv_blocks.min_days AND drv_blocks.max_days)*";
+						$pre_sqls .= "(remunerations.employee_work_rate_work_days_exclusions=1)), 0), ";
+						$pre_sqls .= "drv_blocks.new_eligible_amount), 0)*remunerations.value_group*";
+						$pre_sqls .= "IFNULL(NULLIF((remunerations.advanced_option_id=0)*?, 0), 1) as eligible_amount, ";
+						$pre_sqls .= "remunerations.ot_applicable, remunerations.nopay_applicable ";
+						$pre_sqls .= "from remunerations left outer join (";
+						$pre_sqls .= "select drv_empfacility.remuneration_id, ";
 						
+						$pre_sqls .= "drv_dayfacility.pre_eligible_amount, drv_dayfacility.work_days, drv_dayfacility.min_days, drv_dayfacility.max_days, drv_dayfacility.grp_increment, drv_dayfacility.opt_days, drv_empfacility.new_eligible_amount ";
+						
+						$pre_sqls .= "from (select remuneration_id, new_eligible_amount from remuneration_profiles where payroll_profile_id=? and remuneration_signout=0) as drv_empfacility left outer join (SELECT remuneration_id, pre_eligible_amount, grp_increment, min_days, max_days, (1*?) AS work_days, (1*?) AS opt_days FROM remuneration_eligibility_days WHERE ((? BETWEEN min_days AND max_days) OR (? BETWEEN min_days AND max_days))) AS drv_dayfacility on drv_empfacility.remuneration_id=drv_dayfacility.remuneration_id ";
+						
+						$pre_sqls .= ") as drv_blocks on remunerations.id=drv_blocks.remuneration_id ";
+						$pre_sqls .= "left outer join (select remuneration_id, payment_amount as new_eligible_amount from employee_term_payments where payroll_profile_id=? and payment_cancel=0 and emp_payslip_no=?) as drv_additions on remunerations.id=drv_additions.remuneration_id ";
+						$pre_sqls .= "where (remunerations.remuneration_cancel=0) and (remunerations.ot_applicable=1 or remunerations.nopay_applicable=1) ";
+						$pre_sqls .= "GROUP BY remunerations.id";
+						$salary_particular_data = DB::select($pre_sqls, [$request_days, $form_data['payroll_profile_id'], $request_days, $request_work, $request_days, $request_work, $form_data['payroll_profile_id'], $form_data['emp_payslip_no']]);
+						
+						foreach($salary_particular_data as $spr){
+							if($spr->eligible_amount!=0){
+								$salary_particular_row = array('employee_payslip_id'=>$employee_payslip_id, 
+														   'remuneration_id'=>$spr->id, 
+														   'eligible_amount'=>$spr->eligible_amount, 'particular_fig_group_title'=>''
+														);
+								if($spr->ot_applicable==1){
+									$flag_othrs_val += $spr->eligible_amount;
+									$salary_particular_row['particular_fig_group_title'] = 'OTHRS';
+									$salary_particular_rows[] = $salary_particular_row;
+								}
+								
+								if($spr->nopay_applicable==1){
+									$flag_nopay_val += $spr->eligible_amount;
+									$salary_particular_row['particular_fig_group_title'] = 'NOPAY';
+									$salary_particular_rows[] = $salary_particular_row;
+								}
+							}
+						}
+						
+						if(count($salary_particular_rows)>0){
+							$affectedRows = DB::table('employee_salary_particular_details')->insert($salary_particular_rows);
+							if($affectedRows!=count($salary_particular_rows)){
+								throw new \Exception('Unable to save no-pay and OT applicable data');
+							}
+						}
 						
 						/* update nopay, ot by taking epf-payable amount into account */
-						$sql_update="UPDATE employee_salary_payments INNER JOIN (SELECT drv_figs.id, drv_figs.fig_group, drv_figs.fig_group_title, ROUND(drv_figs.fig_value/drv_figs.fig_base_ratio, 2) AS units_total, round(((drv_calc.fig_total-IFNULL(drv_ext.fig_efv, 0))*drv_figs.fig_premium)/drv_figs.key_param, 2) AS new_base_ratio FROM (SELECT `id`, `fig_group`, `fig_group_title`, `fig_base_ratio`, `fig_value`, COALESCE(NULLIF((fig_group='OTHRS1')*1.5, 0), NULLIF((fig_group='OTHRS2')*2, 0), 1) AS fig_premium, COALESCE(NULLIF((fig_group_title='NOPAY')*?, 0), (fig_group_title='OTHRS')*?) AS key_param FROM `employee_salary_payments` WHERE `payroll_profile_id`=? AND `emp_payslip_no`=? AND `fig_group_title` IN ('NOPAY', 'OTHRS')) AS drv_figs ";
+						$sql_update="UPDATE employee_salary_payments INNER JOIN (SELECT drv_figs.id, drv_figs.fig_group, drv_figs.fig_group_title, ROUND(drv_figs.fig_value/drv_figs.fig_base_ratio, 2) AS units_total, round(((";
+						$sql_update.="COALESCE((drv_calc.fig_basic+NULLIF(?, 0))*NULLIF(drv_figs.fig_group_title='NOPAY', 0), (drv_calc.fig_basic+NULLIF(?, 0))*NULLIF(drv_figs.fig_group_title='OTHRS', 0), drv_calc.fig_total)-IFNULL(drv_ext.fig_efv, 0)";
+						$sql_update.=")*drv_figs.fig_premium)/drv_figs.key_param, 2) AS new_base_ratio FROM (SELECT `id`, `fig_group`, `fig_group_title`, `fig_base_ratio`, `fig_value`, COALESCE(NULLIF((fig_group='OTHRS1')*1.5, 0), NULLIF((fig_group='OTHRS2')*2, 0), 1) AS fig_premium, COALESCE(NULLIF((fig_group_title='NOPAY')*?, 0), (fig_group_title='OTHRS')*?) AS key_param FROM `employee_salary_payments` WHERE `payroll_profile_id`=? AND `emp_payslip_no`=? AND `fig_group_title` IN ('NOPAY', 'OTHRS')) AS drv_figs ";
 						$sql_update.="LEFT OUTER JOIN (select exemption_fig_group_title, sum(exemption_fig_value) as fig_efv from employee_salary_payment_exemptions where employee_payslip_id=? AND fig_calc_opt='SETNOPAYOT' GROUP BY exemption_fig_group_title) as drv_ext ON  drv_figs.fig_group_title=drv_ext.exemption_fig_group_title ";
-						$sql_update.="CROSS JOIN (SELECT SUM(fig_value*IFNULL(NULLIF(ABS(ROUND(fig_base_ratio, 2))>ABS(fig_value), 0)*?, 1)) AS fig_total FROM `employee_salary_payments` WHERE `payroll_profile_id`=? AND `emp_payslip_no`=? AND (epf_payable=1 OR remuneration_payslip_spec_code IN ('ATTBONUS','INCNTV_EMP', 'INCNTV_DIR'))) AS drv_calc) AS drv_info ON employee_salary_payments.id=drv_info.id SET employee_salary_payments.fig_base_ratio=drv_info.new_base_ratio, employee_salary_payments.fig_value=(drv_info.new_base_ratio*drv_info.units_total), updated_at=NOW()";
+						$sql_update.="CROSS JOIN (SELECT SUM(fig_value*IFNULL(NULLIF(ABS(ROUND(fig_base_ratio, 2))>ABS(fig_value), 0)*?, 1)) AS fig_total, fig_value*(remuneration_payslip_spec_code='BASIC') as fig_basic FROM `employee_salary_payments` ";
+						$sql_update.="WHERE `payroll_profile_id`=? AND `emp_payslip_no`=? AND epf_payable=1) AS drv_calc) AS drv_info ON employee_salary_payments.id=drv_info.id SET employee_salary_payments.fig_base_ratio=drv_info.new_base_ratio, employee_salary_payments.fig_value=(drv_info.new_base_ratio*drv_info.units_total), updated_at=NOW()";
 						$payperiod_netdays=($payperiod_workdays-$payperiod_holidays)*-1;//26*-1
-						$cnt_update=DB::update($sql_update, [$payperiod_netdays, $payperiod_workhrs, $form_data['payroll_profile_id'], $form_data['emp_payslip_no'], $employee_payslip_id, $full_pay_restoreval, $form_data['payroll_profile_id'], $form_data['emp_payslip_no']]);
+						$cnt_update=DB::update($sql_update, [$flag_nopay_val, $flag_othrs_val, $payperiod_netdays, $payperiod_workhrs, $form_data['payroll_profile_id'], $form_data['emp_payslip_no'], $employee_payslip_id, $full_pay_restoreval, $form_data['payroll_profile_id'], $form_data['emp_payslip_no']]);
 						
 						//($cnt_update!=3)
 						if(($cnt_update%3)!=0){

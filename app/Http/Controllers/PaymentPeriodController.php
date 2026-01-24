@@ -11,6 +11,7 @@ use App\PayrollProcessType;
 use App\PayrollProfile;
 use App\Remuneration;
 */
+use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
 //use Illuminate\Validation\Rule;
@@ -85,12 +86,20 @@ class PaymentPeriodController extends Controller
 								 ['employee_payday_id', '=', $request->employee_payday_id], 
 								 ['payment_period_to', '>=', $request->payment_period_fr]))->count() > 0){
 			return response()->json(['errors' => ['Invalid schedule']]);
+		}else if($request->input('advance_payment_date')){
+			$advanceDate = Carbon::parse($request->input('advance_payment_date'));
+			$schFr = Carbon::parse($request->input('payment_period_fr'));
+			$schTo = Carbon::parse($request->input('payment_period_to'));
+			if (!$advanceDate->between($schFr, $schTo)) {
+				return response()->json(['errors' => ['Advance date should fall between selected From, To dates']]);
+			}
 		}
 		
 		$schedule=new PaymentPeriod;
         $schedule->payroll_process_type_id=$request->input('payroll_process_type_id'); 
 		$schedule->payment_period_fr=$request->input('payment_period_fr');
 		$schedule->payment_period_to=$request->input('payment_period_to');
+		$schedule->advance_payment_date=$request->input('advance_payment_date');
 		$schedule->work_period_total_days=($request->input('work_period_total_days')>0)?$request->input('work_period_total_days'):0;
 		$schedule->work_period_total_hours=($request->input('work_period_total_hours')>0)?$request->input('work_period_total_hours'):0;
 		$schedule->employee_payday_id=$request->input('employee_payday_id');

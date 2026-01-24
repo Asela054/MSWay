@@ -6,14 +6,11 @@ use App\Branch;
 use App\Company;
 use App\Employee;
 
-use App\EmployeePayday;
-
 use App\JobCategory;
 use App\PayrollAct;
 use App\PayrollProcessType;
 use App\PayrollProfile;
 use App\Remuneration;
-use App\RemunerationExtra;
 
 use Datatables;
 use DB;
@@ -54,12 +51,9 @@ class PayrollProfileController extends Controller
 					->get();
 		$remuneration = Remuneration::where(['remuneration_cancel' => 0, 'allocation_method' => "FIXED"])->orderBy('id', 'asc')->get();
 		
-		$empquota = RemunerationExtra::where(['remuneration_extra_cancel' => 0, 'extra_entitlement' => 1, 'remuneration_id' => "23"])->orderBy('id', 'asc')->get();
-		$empbonus = RemunerationExtra::where(['remuneration_extra_cancel' => 0, 'extra_entitlement' => 1, 'remuneration_id' => "24"])->orderBy('id', 'asc')->get();
 		
-		$paydays = EmployeePayday::where(['payday_cancel'=>0])->get();
 		
-        return view('Payroll.payrollProfile.payrollProfile_list',compact('branch', 'payroll_process_type', 'payroll_acts', 'remuneration', 'empquota', 'empbonus', 'paydays'));
+        return view('Payroll.payrollProfile.payrollProfile_list',compact('branch', 'payroll_process_type', 'payroll_acts', 'remuneration'));
     }
 	function getEmployeeData(){
 		$employee = DB::table('employees')
@@ -160,8 +154,6 @@ class PayrollProfileController extends Controller
 		
 		$payrollProfile->epfetf_contribution=$request->input('epfetf_contribution');
 		
-		$payrollProfile->employee_payday_id=$request->input('employee_payday_id');
-		
         $payrollProfile->save();
 
        
@@ -193,7 +185,7 @@ class PayrollProfileController extends Controller
             $data = DB::table('employees')
                     ->leftjoin('payroll_profiles', 'employees.id', '=', 'payroll_profiles.emp_id')
                     //->select('employees.emp_first_name', 'employees.emp_name_with_initial', 'employees.id as employee_id', 'employees.emp_etfno as employee_etfno', 'payroll_profiles.*')
-					->select('employees.emp_first_name', 'employees.emp_name_with_initial', 'employees.id as employee_id', 'employees.emp_etfno as employee_etfno', 'payroll_profiles.id', DB::raw("COALESCE(employees.job_category_id, NULLIF(payroll_profiles.payroll_act_id, 0), '') as payroll_act_id"), 'payroll_profiles.payroll_process_type_id', 'payroll_profiles.employee_bank_id', 'payroll_profiles.employee_executive_level', 'payroll_profiles.basic_salary', 'payroll_profiles.day_salary', 'payroll_profiles.payroll_act_id AS payroll_profile_act_id', 'payroll_profiles.emp_etfno as payroll_profile_emp_etfno', 'payroll_profiles.epfetf_contribution', 'payroll_profiles.employee_payday_id')
+					->select('employees.emp_first_name', 'employees.emp_name_with_initial', 'employees.id as employee_id', 'employees.emp_etfno as employee_etfno', 'payroll_profiles.id', DB::raw("COALESCE(employees.job_category_id, NULLIF(payroll_profiles.payroll_act_id, 0), '') as payroll_act_id"), 'payroll_profiles.payroll_process_type_id', 'payroll_profiles.employee_bank_id', 'payroll_profiles.employee_executive_level', 'payroll_profiles.basic_salary', 'payroll_profiles.day_salary', 'payroll_profiles.payroll_act_id AS payroll_profile_act_id', 'payroll_profiles.emp_etfno as payroll_profile_emp_etfno', 'payroll_profiles.epfetf_contribution')
 					->where(['employees.id' => $id])
                     ->get();
 			
@@ -253,42 +245,8 @@ class PayrollProfileController extends Controller
 			'tot_rows'=>$welfare_cnt[0]->cnt
 			*/
 			
-			$extras_rows = DB::select("select remuneration_extras.id, remunerations.id as remuneration_id, drv_profile.profile_id, remuneration_extras.extras_label, drv_profile.extra_entitle_amount, drv_profile.payroll_profile_extra_signout from remuneration_extras INNER JOIN remunerations ON remuneration_extras.remuneration_id=remunerations.id left outer join (select id as profile_id, remuneration_extra_id, extra_entitle_amount, payroll_profile_extra_signout from payroll_profile_extras where payroll_profile_id=?) as drv_profile on remuneration_extras.id=drv_profile.remuneration_extra_id where remuneration_extras.extra_entitlement=1 and remuneration_extras.remuneration_extra_cancel=?", [$data[0]->id, 0]);
-			$quota_pack=array();
-			$bonus_pack=array();
-			foreach($extras_rows as $r){
-				$payroll_profile_extra_signout='-1';
-				$extra_entitle_amount='0';
-				$profile_id='';
-				if(isset($r->profile_id)){
-					$profile_id=$r->profile_id;
-					$payroll_profile_extra_signout=$r->payroll_profile_extra_signout;
-					$extra_entitle_amount=$r->extra_entitle_amount;
-					
-				}
-				
-				if($r->remuneration_id==23){
-					$quota_pack[]=array($payroll_profile_extra_signout, 
-									  $r->extras_label, 
-									  $extra_entitle_amount, $r->id, 
-									  $profile_id, 
-									  $r->remuneration_id, 
-									  '0', //fake-advanced-option-id
-									  'Q*');
-				}else if($r->remuneration_id==24){
-					$bonus_pack[]=array($payroll_profile_extra_signout, 
-									  $r->extras_label, 
-									  $extra_entitle_amount, $r->id, 
-									  $profile_id, 
-									  $r->remuneration_id, 
-									  '0', //fake-advanced-option-id
-									  'S*');
-				}
-			}
-			
             return response()->json(['pre_obj' => $data[0], 'package'=>$welfare_pack, 'bank_ac_list'=>$bank_ac, 
-									'form_result_html'=>$form_result_html, 'revw_salary'=>$revw_salary, 
-									'extra_quota'=>$quota_pack, 'bonus_figs'=>$bonus_pack]);
+									'form_result_html'=>$form_result_html, 'revw_salary'=>$revw_salary]);
         }
     }
 
@@ -343,7 +301,6 @@ class PayrollProfileController extends Controller
 			'day_salary' =>  $request->day_salary,
 			'employee_executive_level' => $request->employee_executive_level,
 			'epfetf_contribution' => $request->epfetf_contribution,
-			'employee_payday_id' => $request->employee_payday_id,
 			'updated_by' => $request->user()->id
             
         );
