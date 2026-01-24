@@ -135,7 +135,7 @@
 						<div class="form-row">
 							<div class="col-12 text-right">
 								<hr>
-								<input type="submit" name="action_button" id="action_button" class="btn btn-success btn-sm px-3" value="View Payslips" />
+								<input type="submit" name="action_button" id="action_button" class="btn btn-warning btn-sm px-3" value="View Payslips" />
 								<button type="button" class="btn btn-light btn-sm px-3" data-dismiss="modal">Close</button>
 							</div>
 						</div>

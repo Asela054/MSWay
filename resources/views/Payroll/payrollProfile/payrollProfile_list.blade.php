@@ -68,13 +68,13 @@
                                 </div>
                                 <div class="col">
                                     <label class="small font-weight-bolder">Payroll type</label>
-                                    <select name="payroll_process_type_id" id="payroll_process_type_id" class="form-control form-control-sm">
-                                        <option value="" disabled="disabled" selected="selected">Please
+                                    <select name="payroll_process_type_id" id="payroll_process_type_id" class="form-control form-control-sm nest_head"  data-findnest="paydaynest" >
+                                        <option value="" disabled="disabled" selected="selected"  data-regcode="">Please
                                             select</option>
                                         @foreach($payroll_process_type as $payroll)
 
                                         <option value="{{$payroll->id}}"
-                                            data-totdays="{{$payroll->total_work_days}}">
+                                            data-totdays="{{$payroll->total_work_days}}" data-regcode="{{$payroll->id}}" >
                                             {{$payroll->process_name}}</option>
                                         @endforeach
                                     </select>
@@ -95,6 +95,17 @@
                                         <option value="2">Factory staff</option>
                                         <option value="1">Executive staff</option>
 
+                                    </select>
+                                </div>
+                                <div class="col-sm-12 col-md-12 col-lg-4 col-xl-4">
+                                	<label class="small font-weight-bolder">Pay day</label>
+                                    <select name="employee_payday_id" id="employee_payday_id" class="form-control form-control-sm" data-nestname="paydaynest" required>
+                                    	<option value="0" selected="selected">General</option>
+                                        @foreach($paydays as $payday)
+                                        
+                                        <option value="{{$payday->id}}" data-nestcode="{{$payday->payroll_process_type_id}}" data-paydaycode="{{$payday->id}}" class="nestopt d-none" >{{$payday->payday_name}}</option>
+                                        @endforeach
+                                        
                                     </select>
                                 </div>
                                 <div class="col-sm-12 col-md-12 col-lg-4 col-xl-4">
@@ -121,31 +132,110 @@
                     </div>
                     <div class="col-12">
                         <hr>
-                        <div class="center-block fix-width scroll-inner">
-                            <table class="table table-bordered table-striped table-sm small w-100 nowrap" id="titletable" cellspacing="0">
-                                <thead>
-                                    <tr>
-                                        <th class="actlist_col">Active</th>
-                                        <th>Name</th>
-                                        <th>Value</th>
-                                        <th class="actlist_col">Action</th>
-                                    </tr>
-                                </thead>
-
-                                <tbody>
-                                    @foreach($remuneration as $remunerations)
-
-                                    <tr>
-                                        <td class="masked_col">-</td>
-                                        <td>{{$remunerations->remuneration_name}}</td>
-                                        <td>0</td>
-                                        <td class="masked_col text-right" data-refopt="{{$remunerations->advanced_option_id}}">
-                                            {{$remunerations->id}}</td>
-                                    </tr>
-                                    @endforeach
-
-                                </tbody>
-                            </table>
+                        <div style="padding:10px;"><!-- class="card" -->
+                            <div style="padding-bottom:10px;"><!-- class="card-header border-bottom" -->
+                                <ul class="nav nav-tabs card-header-tabs" id="cardTab" role="tablist">
+                                    <li class="nav-item">
+                                        <a class="nav-link active" id="overview-tab" href="#overview" data-toggle="tab" role="tab" aria-controls="overview" aria-selected="true">Privileges</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="example-tab" href="#example" data-toggle="tab" role="tab" aria-controls="example" aria-selected="false">Salary Advance</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="remarks-tab" href="#remarks" data-toggle="tab" role="tab" aria-controls="remarks" aria-selected="false">Bonuses</a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div><!-- class="card-body" -->
+                                <div id="cardTabContent" class="tab-content"><!--  -->
+                                    <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab" style="min-height:200px;">
+                        
+                                        <div class="center-block fix-width scroll-inner">
+                                            <table class="table table-bordered table-striped table-sm small w-100 nowrap" id="titletable" cellspacing="0">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="actlist_col">Active</th>
+                                                        <th>Name</th>
+                                                        <th>Value</th>
+                                                        <th class="actlist_col">Action</th>
+                                                    </tr>
+                                                </thead>
+                
+                                                <tbody>
+                                                    @foreach($remuneration as $remunerations)
+                
+                                                    <tr>
+                                                        <td class="masked_col">-</td>
+                                                        <td>{{$remunerations->remuneration_name}}</td>
+                                                        <td>0</td>
+                                                        <td class="masked_col text-right" data-refopt="{{$remunerations->advanced_option_id}}">
+                                                            {{$remunerations->id}}</td>
+                                                    </tr>
+                                                    @endforeach
+                
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    
+                                    </div>
+                                    <div class="tab-pane fade" id="example" role="tabpanel" aria-labelledby="example-tab" style="min-height:200px;">
+                                        <!--new tab 2-->
+                                        <div class="datatable table-responsive" style="margin-top:10px;">
+                                            <table class="table table-bordered table-hover" id="quotatable" width="100%" cellspacing="0">
+                                                <thead>
+                                                    <tr> 
+                                                        <th class="actlist_col">Active</th>
+                                                        <th>Name</th>
+                                                        <th>Value</th>
+                                                        <th class="actlist_col">Action</th>   
+                                                    </tr>
+                                                </thead>
+                                              
+                                                <tbody>
+                                                @foreach($empquota as $qfig)
+                                                
+                                                    <tr>
+                                                        <td class="masked_col">-</td>
+                                                        <td>{{$qfig->extras_label}}</td>
+                                                        <td>0</td>
+                                                        <td class="masked_col" data-refgrp="{{$qfig->remuneration_id}}">{{$qfig->id}}</td>
+                                                    </tr>
+                                                   @endforeach
+                                                 
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade" id="remarks" role="tabpanel" aria-labelledby="remarks-tab" style="min-height:200px;">
+                                        <!--new tab 3-->
+                                        <div class="datatable table-responsive" style="margin-top:10px;">
+                                            <table class="table table-bordered table-hover" id="bonustable" width="100%" cellspacing="0">
+                                                <thead>
+                                                    <tr> 
+                                                        <th class="actlist_col">Active</th>
+                                                        <th>Name</th>
+                                                        <th>Value</th>
+                                                        <th class="actlist_col">Action</th>   
+                                                    </tr>
+                                                </thead>
+                                              
+                                                <tbody>
+                                                @foreach($empbonus as $bfig)
+                                                
+                                                    <tr>
+                                                        <td class="masked_col">-</td>
+                                                        <td>{{$bfig->extras_label}}</td>
+                                                        <td>0</td>
+                                                        <td class="masked_col" data-refgrp="{{$bfig->remuneration_id}}">{{$bfig->id}}</td>
+                                                    </tr>
+                                                   @endforeach
+                                                 
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+								</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -231,6 +321,44 @@
                         <input type="hidden" name="subscription_id" id="subscription_id" value="" />
                         <button type="submit" name="add_amount" id="add_amount" class="btn btn-primary btn-sm px-3">Save</button>
                         <button type="button" class="btn btn-light btn-sm px-3" data-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div id="extraQuotesModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <form id="frmExtraQuotes" method="post">
+                {{ csrf_field() }}
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="">Confirmation</h5>
+                        <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span class="btn-sm btn-danger" aria-hidden="true">X</span></button>
+            
+                    </div>
+                    <div class="modal-body">
+                        <div class="row col">
+                           <span id="frm_quotes_title" class="col">&nbsp;</span>
+                        </div>
+                        <span id="checkup_result"></span>
+                        <!--h4 align="center" style="margin:0;">Are you sure you want to remove this data?</h4-->
+                        <div class="row">
+                            <div class="form-group col">
+                               <label class="control-label col" >Amount (<span id="remuneration_extra_info">Advance</span>)</label>
+                               <div class="col">
+                                 <input type="text" name="extra_entitle_amount" id="extra_entitle_amount" class="form-control" autocomplete="off" />
+                               </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <input type="hidden" name="payroll_profile_id" id="frmExtraQuotes_payroll_profile_id" value="" />
+                        <input type="hidden" name="remuneration_id" id="frmExtraQuotes_remuneration_id" value="" />
+                        <input type="hidden" name="remuneration_extra_id" id="remuneration_extra_id" value="" />
+                        <input type="hidden" name="subscription_id" id="extra_subscription_id" value="" />
+                        <button type="submit" name="add_amount" id="frmExtraQuotes_add_amount" class="btn btn-primary">Save</button>
+                        <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
                     </div>
                 </div>
             </form>
@@ -372,6 +500,102 @@
                 //$( row ).data('refpack', (data[0]=='-')?'':data[4]);
             }
         });
+		
+		var quotaTable=$("#quotatable").DataTable({
+				"order":[],
+				"columnDefs":[{
+						"targets":0,
+						"className":'actlist_col',
+						"orderable":false,
+						render:function( data, type, row ){
+							
+							if(data=='-1'){
+								data='-';
+							}
+							/**/
+							if(data=='-'){
+								return '<input type="checkbox" class="" disabled="disabled" />';
+							}else{
+								var check_str=(data==0)?' checked="checked"':'';
+								return '<input type="checkbox" class="chk_act"'+check_str+' disabled="disabled" />';
+							}
+						}
+					},{
+						"targets":3,
+						"className":'actlist_col',
+						"orderable":false,
+						render:function( data, type, row ){
+							if(row[0]=='-'){
+								return '<button class="btn btn-datatable btn-icon btn-light" type="button" disabled="disabled"><i class="fas fa-stop-circle"></i></button>';
+							}else if(row[0]=='-1'){
+								return '<button name="checkin" data-refid="'+data+'" data-feattype="'+((row[0]=='-')?'':row[7])+'" class="checkin btn btn-primary btn-datatable btn-icon" type="button">'+'<i class="fas fa-plus-square"></i></button>';
+							}else{
+								var del_str=(row[0]=='0')?'<button type="button" name="checkout" data-refid="'+data+'" data-refpack="'+((row[0]=='-')?'':row[4])+'" data-feattype="'+((row[0]=='-')?'':row[7])+'" class="checkout btn btn-danger btn-datatable btn-icon">'+'<i class="fas fa-trash"></i></button>':'';
+								return '<button name="checkup" data-refid="'+data+'" data-refpack="'+((row[0]=='-')?'':row[4])+'" data-feattype="'+((row[0]=='-')?'':row[7])+'" class="checkup btn btn-primary btn-datatable btn-icon mr-2" type="button">'+'<i class="fas fa-edit"></i></button>'+del_str;
+							}
+						}
+					}],
+				"createdRow": function( row, data, dataIndex ){
+					$('td', row).eq(0).removeClass('masked_col');
+					$('td', row).eq(3).removeClass('masked_col');
+					//if(data.length==6)
+					if(data.length == 8){
+						$('td', row).eq(3).attr('data-refgrp', data[5]);
+					}
+					$( row ).attr( 'id', 'row-'+data[3] );//$( row ).data( 'refid', data[3] );
+					//$( row ).data('refpack', (data[0]=='-')?'':data[4]);
+				}
+			});
+		 
+		var bonusTable=$("#bonustable").DataTable({
+				"order":[],
+				"columnDefs":[{
+						"targets":0,
+						"className":'actlist_col',
+						"orderable":false,
+						render:function( data, type, row ){
+							
+							if(data=='-1'){
+								data='-';
+							}
+							/**/
+							if(data=='-'){
+								return '<input type="checkbox" class="" disabled="disabled" />';
+							}else{
+								var check_str=(data==0)?' checked="checked"':'';
+								return '<input type="checkbox" class="chk_act"'+check_str+' disabled="disabled" />';
+							}
+						}
+					},{
+						"targets":3,
+						"className":'actlist_col',
+						"orderable":false,
+						render:function( data, type, row ){
+							if(row[0]=='-'){
+								return '<button class="btn btn-datatable btn-icon btn-light" type="button" disabled="disabled"><i class="fas fa-stop-circle"></i></button>';
+							}else if(row[0]=='-1'){
+								return '<button name="checkin" data-refid="'+data+'" data-feattype="'+((row[0]=='-')?'':row[7])+'" class="checkin btn btn-primary btn-datatable btn-icon" type="button">'+'<i class="fas fa-plus-square"></i></button>';
+							}else{
+								var del_str=(row[0]=='0')?'<button type="button" name="checkout" data-refid="'+data+'" data-refpack="'+((row[0]=='-')?'':row[4])+'" data-feattype="'+((row[0]=='-')?'':row[7])+'" class="checkout btn btn-danger btn-datatable btn-icon">'+'<i class="fas fa-trash"></i></button>':'';
+								return '<button name="checkup" data-refid="'+data+'" data-refpack="'+((row[0]=='-')?'':row[4])+'" data-feattype="'+((row[0]=='-')?'':row[7])+'" class="checkup btn btn-primary btn-datatable btn-icon mr-2" type="button">'+'<i class="fas fa-edit"></i></button>'+del_str;
+							}
+						}
+					}],
+				"createdRow": function( row, data, dataIndex ){
+					$('td', row).eq(0).removeClass('masked_col');
+					$('td', row).eq(3).removeClass('masked_col');
+					//if(data.length==6)
+					if(data.length == 8){
+						$('td', row).eq(3).attr('data-refgrp', data[5]);
+					}
+					$( row ).attr( 'id', 'row-'+data[3] );//$( row ).data( 'refid', data[3] );
+					//$( row ).data('refpack', (data[0]=='-')?'':data[4]);
+				}
+			});
+ 
+		$(document).on('shown.bs.tab', 'a[data-toggle="tab"]', function (e) {
+			$.fn.dataTable.tables({ visible: true, api: true }).columns.adjust();
+		});
 
         function calcDaySal() {
             var tot_days = $("#payroll_act_id").find(":selected").data("totdays"); //payroll_process_type_id
@@ -386,6 +610,46 @@
                 $("#basic_salary").val(isNaN(basic_salary) ? '0.00' : basic_salary.toFixed(2));
             }
         }
+		
+		$('.nest_head').change(function(){
+			//prep_nest($(this).data('findnest'), $(this).find(":selected").val(), 0);
+			prep_nest($(this).data('findnest'), $(this).find(":selected").data('regcode'), 0);
+		});
+		
+		function prep_nest(nestname, nestcode, selectedval){
+			//console.log(nestname+'--'+nestcode+'--'+selectedval);
+			
+			var childobj=$('select[data-nestname="'+nestname+'"]')
+			
+			var blockobj=$(childobj).find('option.nestopt');
+			$(blockobj).prop('disabled', true);
+			$(blockobj).addClass('d-none');
+			
+			var allowobj=$(childobj).find('option[data-nestcode="'+(nestcode)+'"]');
+			$(allowobj).prop('disabled', false);
+			$(allowobj).removeClass('d-none');
+			
+			var selected_val=(selectedval!=='')?selectedval:'-1';
+			//console.log(selectedval+'vs'+selected_val);
+			var selected_pos=0;
+			
+			if(selected_val=='0'){
+				var selected_opt=$(allowobj).index();
+				//selected_val=(typeof($(allowobj).val())=="undefined")?$(childobj).children('option:first').val():$(allowobj).val();
+				//console.log(typeof($(allowobj).val())=="undefined");//$(allowobj).length
+				//console.log('0--'+$(allowobj).index());
+				selected_pos = 0;//27112025 //(selected_opt>0)?selected_opt:0;
+			}else{
+				var actobj=$(childobj).find('option[data-nestcode="'+(nestcode)+'"][data-paydaycode="'+(selectedval)+'"]');
+				//console.log('1--'+$(actobj).index());
+				var selected_opt=$(actobj).index();
+				selected_pos=(selected_opt>0)?selected_opt:0;
+			}
+			
+			//$(childobj).val(selected_val);
+			$(childobj).find('option').eq(selected_pos).prop("selected", true);
+			
+		}
 
         $(".modal").on("shown.bs.modal", function () {
             var objinput = $(this).find('input[type="text"]:first-child');
@@ -414,6 +678,7 @@
         });
 
         var remuneration_id, subscription_id;
+		var remuneration_extra_id, remuneration_extra_group_id;
 
         $(document).on('click', '.signup', function () {
             $("#confirm_result").html('');
@@ -442,6 +707,31 @@
             $("#frm_confirm_title").html('<strong>' + par.children("td:nth-child(2)").html() +
                 '</strong>' + payment_info);
         });
+		
+		$(document).on('click', '.checkin', function(){
+			$("#checkup_result").html('');
+			$('#extra_entitle_amount').val('');
+			$('#action').val('Add');
+			remuneration_extra_id = $(this).data('refid');
+			remuneration_extra_group_id = $(this).parent().data('refgrp');
+			
+			var allocation_info='Bonus';
+			var payment_info = '';
+			
+			if($(this).data('feattype')==='Q*'){
+			  allocation_info='Advance';
+			}else{
+			  payment_info = '';
+			}
+			/**/
+			$("#remuneration_extra_info").html(allocation_info);
+			
+			$('#extraQuotesModal').modal('show');
+			//$('#new_eligible_amount').focus();
+			
+			var par=$(this).parent().parent();
+			$("#frm_confirm_title").html('<strong>'+par.children("td:nth-child(2)").html()+'</strong>'+payment_info);
+		});
 
         $(document).on('click', '.edit', async function () {
             var r = await Otherconfirmation("You want to Edit this ? ");
@@ -487,6 +777,41 @@
                 }) /**/
             }
         });
+		
+		$(document).on('click', '.checkup', function(){
+			var id = $(this).data('refid');//row#
+			var pack_id = $(this).data('refpack');
+			remuneration_extra_group_id = $(this).parent().data('refgrp');
+			
+			var allocation_info='Bonus';
+			var payment_info = '';
+			
+			if($(this).data('feattype')==='Q*'){
+				allocation_info='Advance';
+			}else{
+				payment_info = '';
+			}
+			/**/
+			$("#remuneration_extra_info").html(allocation_info);
+			
+			var par=$(this).parent().parent();
+			$("#frm_quotes_title").html('<strong>'+par.children("td:nth-child(2)").html()+'</strong>'+payment_info);
+			
+			$("#checkup_result").html('');
+			$.ajax({
+			   url :"RemunerationProfile/review/"+pack_id+"",
+			   dataType:"json",
+			   success:function(data){
+				$('#action').val('Edit');
+				remuneration_extra_id = id;
+				
+				$('#extra_entitle_amount').val(data.pre_obj.extra_entitle_amount);
+				$('#extra_subscription_id').val(data.pre_obj.id);
+				
+				$('#extraQuotesModal').modal('show');
+			   }
+			})
+		});
 
         $('#frmConfirm').on('submit', function (event) {
             event.preventDefault();
@@ -588,6 +913,67 @@
             });
             //}
         });
+		
+		$('#frmExtraQuotes').on('submit', function(event){
+			event.preventDefault();
+			var action_url = "{{ route('addPayrollProfileExtras') }}";
+			var payment_info = '';
+			
+			$('#frmExtraQuotes_payroll_profile_id').val($('#hidden_id').val());
+			$('#remuneration_extra_id').val(remuneration_extra_id);
+			$('#frmExtraQuotes_remuneration_id').val(remuneration_extra_group_id);
+			/*
+			if($('#action').val() == 'Add'){
+			   action_url = "{{ route('addPayrollProfileExtras') }}";
+			}else{
+			   action_url = "{{ route('addPayrollProfileExtras') }}"; // updatePayrollProfileExtras
+			}
+			*/
+			/*
+			  alert(action_url);
+			*/
+			
+			//if(x){
+				$.ajax({
+				   url: action_url,
+				   method:"POST",
+				   data:$(this).serialize(),
+				   dataType:"json",
+				   success:function(data)
+				   {   
+					var html = '';
+					if(data.errors){
+						html = '<div class="alert alert-danger">';
+						for(var count = 0; count < data.errors.length; count++){
+						  html += '<p>' + data.errors[count] + '</p>';
+						}
+						html += '</div>';
+					}
+					if(data.success){
+					 html = '<div class="alert alert-success">' + data.success + '</div>';
+					 //alert(quotaTable.row('#row-'+remuneration_extra_id+'').length);
+					 var act_table=(quotaTable.row('#row-'+remuneration_extra_id+'').length==1)?quotaTable:bonusTable;
+					 var selected_tr=act_table.row('#row-'+remuneration_extra_id+'');//quotaTable.row('#row-'+remuneration_extra_id+'');
+					 
+					 var d=selected_tr.data();
+					 d[0]=0;
+					 d[2]=$('#extra_entitle_amount').val();
+					 if($('#action').val()=='Add'){
+						d[4]=(data.new_obj.id);
+					 }
+					 
+					 act_table.row(selected_tr).data(d).draw();//quotaTable.row(selected_tr).data(d).draw();
+					 
+					 setTimeout(function(){
+						 $('#extraQuotesModal').modal('hide');
+						}, 2000);
+					 
+					}
+					$('#checkup_result').html(html);
+				   }
+				});
+			//}
+		});
 
         $('#frmInfo').on('submit', function (event) {
             event.preventDefault();
@@ -706,6 +1092,11 @@
                     $('#hidden_id').val(data.pre_obj.id);
 
                     $('#epfetf_contribution').val(data.pre_obj.epfetf_contribution);
+					
+					
+					//$('#employee_payday_id').val(data.pre_obj.employee_payday_id);
+					prep_nest('paydaynest', data.pre_obj.payroll_process_type_id, data.pre_obj.employee_payday_id);
+					
 
                     $("select[name='payroll_act_id']").children("option").prop("disabled",
                         true); //children("option[class='addr_key']")
@@ -729,6 +1120,14 @@
                     remunerationTable.clear();
                     remunerationTable.rows.add(data.package);
                     remunerationTable.draw();
+					
+					quotaTable.clear();
+					quotaTable.rows.add(data.extra_quota);
+					quotaTable.draw();
+					
+					bonusTable.clear();
+					bonusTable.rows.add(data.bonus_figs);
+					bonusTable.draw();
 
                     $('#formModal').modal('hide');
 
@@ -751,6 +1150,7 @@
             if (r == true) {
                 remuneration_id = $(this).data('refid');
                 subscription_id = $(this).data('refpack');
+				remuneration_extra_id = 'D*';
 
                 $.ajax({
                     url: "RemunerationProfile/destroy/" + subscription_id,
@@ -795,6 +1195,65 @@
                             var d = selected_tr.data();
                             d[0] = 1;
                             remunerationTable.row(selected_tr).data(d).draw();
+                        }
+                    }
+                })
+            }
+            // $('#ok_button').text('OK');
+            // $('#remunerationCancelModal').modal('show');
+        });
+		
+		$(document).on('click', '.checkout', async function () {
+            var r = await Otherconfirmation("You want to remove this ? ");
+            if (r == true) {
+                remuneration_id = $(this).data('feattype');
+                subscription_id = $(this).data('refpack');
+				remuneration_extra_id = $(this).data('refid');
+
+                $.ajax({
+                    url: "RemunerationProfile/checkout/" + subscription_id,
+                    beforeSend: function () {
+                        $('#ok_button').text('Deleting...');
+                    },
+                    success: function (data) {
+                        //alert(JSON.stringify(data));
+                        setTimeout(function () {
+                            $('#remunerationCancelModal').modal('hide');
+                            //$('#user_table').DataTable().ajax.reload();
+                            //alert('Data Deleted');
+                        }, 2000);
+                        //location.reload()
+                        if (data.errors) {
+                            const actionObj = {
+                                icon: 'fas fa-warning',
+                                title: '',
+                                message: data.errors,
+                                url: '',
+                                target: '_blank',
+                                type: 'danger'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            action(actionJSON);
+                        }
+                        if (data.result == 'success') {
+                            const actionObj = {
+                                icon: 'fas fa-trash-alt',
+                                title: '',
+                                message: 'Record Remove Successfully',
+                                url: '',
+                                target: '_blank',
+                                type: 'danger'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            action(actionJSON);
+                            
+							var act_table=(quotaTable.row('#row-'+remuneration_extra_id+'').length==1)?quotaTable:bonusTable;
+                            var selected_tr = act_table.row('#row-' + remuneration_extra_id +
+                                '');
+
+                            var d = selected_tr.data();
+                            d[0] = 1;
+                            act_table.row(selected_tr).data(d).draw();
                         }
                     }
                 })

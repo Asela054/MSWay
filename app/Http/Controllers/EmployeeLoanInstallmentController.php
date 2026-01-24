@@ -165,7 +165,7 @@ class EmployeeLoanInstallmentController extends Controller
 	public function edit($id){
 		if(request()->ajax()){
 			$data=DB::table('employee_loan_installments')
-				->select('id', 'installment_value')
+				->select('id', 'installment_value', 'collect_opt', 'collect_remarks')
 				->where(['id'=>$id])
 				->get();
 			
@@ -221,6 +221,11 @@ class EmployeeLoanInstallmentController extends Controller
 		
     }
 	
+	private function getCollectionMethodPillText($pill_opt){
+		$collect_opt_pills = array('1'=>'', '2'=>'Prepaid');
+		return $collect_opt_pills[$pill_opt];
+	}
+	
 	public function update(Request $request, EmployeeLoanInstallment $loan)
     {
 		$user = Auth::user();
@@ -266,8 +271,15 @@ class EmployeeLoanInstallmentController extends Controller
 					throw new \Exception("Total loan value exceed. Loan remaining is ".number_format((float)$emploan_balance, 3, '.', ''));
 				}
 				
+				$loan_collect_remarks = ($request->loan_modal_collect_remarks=='')?NULL:$request->loan_modal_collect_remarks;
+				
+				
+				$collect_opt_pilltxt = $this->getCollectionMethodPillText($request->loan_modal_loan_collect_opt);
+				
 				$form_data = array(
 					'installment_value' =>  $request->new_installment_amount,
+					'collect_opt' => $request->loan_modal_loan_collect_opt,
+					'collect_remarks' => $loan_collect_remarks,
 					'updated_by' => $request->user()->id
 					
 				);
@@ -296,7 +308,8 @@ class EmployeeLoanInstallmentController extends Controller
 				}
 				
 				return response()->json(['success' => 'Data is successfully updated', 
-									 'new_id'=>$request->hidden_loan_id, 'pre_installment_value'=>$pre_installment_amount]);
+									 'new_id'=>$request->hidden_loan_id, 'pre_installment_value'=>$pre_installment_amount,
+									 'opt_pilltxt'=>$collect_opt_pilltxt]);
 			});
 		}catch(\Exception $e){
 			return response()->json(array('result'=>'error', 'errors'=>array($e->getMessage())));
@@ -328,10 +341,14 @@ class EmployeeLoanInstallmentController extends Controller
 		try{
 			return DB::transaction(function() use ($request){
 				if($request->ajax()){
-					$employeePayslip = EmployeePayslip::where(['payroll_profile_id'=>$request->payroll_profile_id])
-										->latest()
-										->first();
-					$emp_payslip_no = empty($employeePayslip)?1:($employeePayslip->emp_payslip_no+1);
+					$emp_payslip_no = 0;
+					
+					if(!isset($request->opt_totpaid)){
+						$employeePayslip = EmployeePayslip::where(['payroll_profile_id'=>$request->payroll_profile_id])
+											->latest()
+											->first();
+						$emp_payslip_no = empty($employeePayslip)?1:($employeePayslip->emp_payslip_no+1);
+					}
 					
 					$form_data = array(
 						'employee_loan_id' => $request->employee_loan_id,
@@ -373,10 +390,14 @@ class EmployeeLoanInstallmentController extends Controller
 						$affectedMode=($request->installment_cancel==0)?1:0;
 					}
 					
+					if(($emp_payslip_no==0)&&($installment_id!='')){
+						throw new \Exception('Loan is already settled');
+					}
+					
 					/*
 					test="SELECT employee_loans.loan_amount, employee_loans.loan_duration, employee_loans.installment_value, IFNULL(drv_prog.loan_paid, 0) AS loan_paid, IFNULL(drv_prog.tot_installments,0) AS tot_installments, coalesce((employee_loans.loan_amount-IFNULL(drv_prog.loan_paid, 0))*NULLIF((employee_loans.loan_duration-IFNULL(drv_prog.tot_installments, 0))=1, 0), employee_loans.installment_value) AS new_installment_value FROM `employee_loans` LEFT OUTER JOIN (SELECT COUNT(*) AS tot_installments, employee_loan_id, SUM(installment_value) AS loan_paid FROM employee_loan_installments WHERE employee_loan_id=32 AND installment_cancel=0 GROUP BY employee_loan_id) AS drv_prog ON employee_loans.id=drv_prog.employee_loan_id WHERE employee_loans.id=32"
 					*/
-					$newInstallment=DB::select("SELECT employee_loans.loan_amount, IFNULL(drv_prog.loan_paid, 0) AS settle_amount, coalesce((employee_loans.loan_amount-IFNULL(drv_prog.loan_paid, 0))*NULLIF((employee_loans.loan_duration-IFNULL(drv_prog.tot_installments, 0))=1, 0), employee_loans.installment_value) AS installment_value, (employee_loans.loan_duration-IFNULL(drv_prog.tot_installments, 0)) AS installment_balance, employee_loans.loan_complete FROM `employee_loans` LEFT OUTER JOIN (SELECT COUNT(*) AS tot_installments, employee_loan_id, SUM(installment_value) AS loan_paid FROM employee_loan_installments WHERE employee_loan_id=? AND id<>? AND installment_cancel=0 GROUP BY employee_loan_id) AS drv_prog ON employee_loans.id=drv_prog.employee_loan_id WHERE employee_loans.id=?", [$loan_id, $installment_id, $loan_id]);
+					$newInstallment=DB::select("SELECT employee_loans.loan_amount, IFNULL(drv_prog.loan_paid, 0) AS settle_amount, coalesce((employee_loans.loan_amount-IFNULL(drv_prog.loan_paid, 0))*NULLIF((employee_loans.loan_duration-IFNULL(drv_prog.tot_installments, 0))=1, 0), (employee_loans.loan_amount-IFNULL(drv_prog.loan_paid, 0))*NULLIF(?=0, 0), employee_loans.installment_value) AS installment_value, (employee_loans.loan_duration-IFNULL(drv_prog.tot_installments, 0)) AS installment_balance, employee_loans.loan_complete FROM `employee_loans` LEFT OUTER JOIN (SELECT COUNT(*) AS tot_installments, employee_loan_id, SUM(installment_value) AS loan_paid FROM employee_loan_installments WHERE employee_loan_id=? AND id<>? AND installment_cancel=0 GROUP BY employee_loan_id) AS drv_prog ON employee_loans.id=drv_prog.employee_loan_id WHERE employee_loans.id=?", [$emp_payslip_no, $loan_id, $installment_id, $loan_id]);
 					
 					$installment_value=($act_installment_value==0)?$newInstallment[0]->installment_value:$act_installment_value;
 					$form_data['installment_value']=$newInstallment[0]->installment_value;
@@ -450,7 +471,7 @@ class EmployeeLoanInstallmentController extends Controller
 		if($request->ajax()){
 			$installment = DB::table("employee_loan_installments")
 							->join("employee_loans", "employee_loan_installments.employee_loan_id", "=", "employee_loans.id")
-							->select("employee_loan_installments.id", "employee_loan_installments.employee_loan_id", "employee_loans.loan_name", "employee_loan_installments.installment_value", "employee_loans.loan_complete")
+							->select("employee_loan_installments.id", "employee_loan_installments.employee_loan_id", "employee_loans.loan_name", "employee_loan_installments.installment_value", "employee_loan_installments.collect_opt", "employee_loans.loan_complete")
 							->where(["employee_loan_installments.payroll_profile_id"=>$request->payroll_profile_id, 
 									 "employee_loan_installments.emp_payslip_no"=>$request->emp_payslip_no, 
 									 "employee_loan_installments.installment_cancel"=>0])
@@ -470,12 +491,39 @@ class EmployeeLoanInstallmentController extends Controller
 			foreach($installment as $r){
 				$loan_complete=$loan_prog[$r->employee_loan_id];
 				$more_info=($loan_complete==1)?' (final installment)':'';
-				$loan_list[]=array('id'=>$r->id, 'loan_name'=>$r->loan_name, 'installment_value'=>$r->installment_value.$more_info, 'loan_complete'=>$loan_complete);
+				$collect_type_txt = $this->getCollectionMethodPillText($r->collect_opt);
+				$loan_list[]=array('id'=>$r->id, 'loan_name'=>$r->loan_name, 'installment_value'=>$r->installment_value.$more_info, 'collect_type_pill'=>$collect_type_txt, 'loan_complete'=>$loan_complete);
 				$loan_sums+=$r->installment_value;
 			}
 			
 			return response()->json(['loan_list'=>$loan_list, 'loan_sums'=>$loan_sums]);
 		}
 	}
+	
+	public function switchCollectionOptions(Request $request){
+		if($request->ajax()){
+			$installment_info=EmployeeLoanInstallment::whereId($request->loan_regid)->get();
+			/*
+			check-whether-payslip-no-is-processed-or-not-before-changing-payment-info
+			*/
+			$payslip_info=DB::select("SELECT COUNT(*) AS payment_processed FROM employee_payslips WHERE payroll_profile_id=? AND emp_payslip_no=?", [$installment_info[0]->payroll_profile_id, $installment_info[0]->emp_payslip_no]);
+			
+			if($payslip_info[0]->payment_processed==1){
+				return response()->json(['errors' => array('Payslip details already processed')]);
+			}
+			
+			$collect_opt_pilltxt = $this->getCollectionMethodPillText($request->collect_type);
+			
+			$form_data = array(
+				'collect_opt' =>  $request->collect_type,
+				'updated_by' => $request->user()->id
+				
+			);
+	
+			EmployeeLoanInstallment::whereId($request->loan_regid)->update($form_data);
+	
+			return response()->json(['success' => 'Collection method successfully updated', 'opt_pilltxt'=>$collect_opt_pilltxt]);
+		}
+    }
 
 }

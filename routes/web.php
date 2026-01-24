@@ -656,6 +656,7 @@ Route::get('EmployeeLoanInstallment/{id}/review', 'EmployeeLoanInstallmentContro
 Route::post('EmployeeLoanInstallment/update', 'EmployeeLoanInstallmentController@update')->name('EmployeeLoanInstallment.update');
 Route::post('/freezeLoanInstallment', 'EmployeeLoanInstallmentController@freeze');
 Route::post('/checkLoanInstallment', 'EmployeeLoanInstallmentController@checkInstallment');
+Route::post('/reviseCollectionMethod', 'EmployeeLoanInstallmentController@switchCollectionOptions');
 /*-- EmployeeLoanInstallments --*/
 
 /*-- PaymentPeriods --*/

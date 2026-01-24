@@ -245,7 +245,7 @@
                     var installment_cancel = (row.installment_cancel != null) ? row
                         .installment_cancel : 1;
                     var check_str = (installment_cancel == 0) ? ' checked="checked"' : '';
-                    return '<div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input freeze" data-refloan="' + row.employee_loan_id + '" data-refemp="' + row.payroll_profile_id + '" data-refid="' + row.installment_id + '"' + check_str + ' /><label class="custom-control-label mt-0" for="customCheck1"></label></div>';
+                    return '<div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input freeze" id="customCheck' + row.employee_loan_id + '" data-refloan="' + row.employee_loan_id + '" data-refemp="' + row.payroll_profile_id + '" data-refid="' + row.installment_id + '"' + check_str + ' /><label class="custom-control-label mt-0" for="customCheck' + row.employee_loan_id + '"></label></div>';
                 }
             }, {
                 "targets": 4,

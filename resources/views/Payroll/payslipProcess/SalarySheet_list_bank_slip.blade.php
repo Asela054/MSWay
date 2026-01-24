@@ -179,7 +179,7 @@
 								</select>
 							</div>
 						</div>
-						<div class="form-row mb-1">
+						<div class="form-row mb-1" id="opt_payslip">
 							<div class="col">
 								<label class="font-weight-bolder small">Payroll type</label>
 								<select name="payroll_process_type_id" id="payroll_process_type_id"
@@ -234,6 +234,10 @@
 							<div class="col-12">
 								<label class="font-weight-bolder small">Slip Type</label><br>
 								<div class="custom-control custom-radio custom-control-inline">
+									<input type="radio" id="opt_rpt_d" name="opt_rpt" class="custom-control-input" value="4">
+									<label class="custom-control-label small" for="opt_rpt_d" style="padding-right:15px;">Advance</label>
+								</div>
+                                <div class="custom-control custom-radio custom-control-inline">
 									<input type="radio" id="opt_rpt_a" name="opt_rpt" checked="checked" class="custom-control-input" value="1">
 									<label class="custom-control-label small" for="opt_rpt_a">Salary</label>
 								</div>
@@ -655,7 +659,7 @@
 					} else {
 						var optrpt = $('input[name="opt_rpt"]:checked').val();
 
-						if (optrpt == 1) {
+						if ((optrpt == 1)||(optrpt == 4)) {
 							$("#tbl_all").show();
 							$("#tbl_etf").hide();
 							$("#tbl_epf").hide();
@@ -727,9 +731,10 @@
 							.text());
 						$("#rpt_period_id").val($("#period_filter_id").find(":selected")
 					.val());
-						$("#rpt_info").val(data.work_date_fr + " To " + data.work_date_to +
-							" (" + $("#payroll_process_type_id").find(":selected").text() +
-							")");
+						
+						var payperiodstr = data.work_date_fr + " To " + data.work_date_to;
+						var filenamestr = (optrpt=='4')?'Advance':payperiodstr + " (" + $("#payroll_process_type_id").find(":selected").text() + ")";
+						$("#rpt_info").val(filenamestr);
 						/*
 						$("#print_record").prop('disabled', false);
 						$("#print_record").removeClass('btn-light');
@@ -763,6 +768,14 @@
 			$(this).removeClass('active');
 		});
 		*/
+		$('input[name="opt_rpt"]').change(function(){
+		var opt_payslip_disp=($('input[name="opt_rpt"]:checked').val()==4)?false:true;
+		if(opt_payslip_disp){
+			$("#opt_payslip").show();
+		}else{
+			$("#opt_payslip").hide();
+		}
+	});
 
 	});
 </script>

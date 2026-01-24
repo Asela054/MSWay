@@ -114,6 +114,20 @@
 								</select>
 							</div>
 						</div>
+                        <div class="form-row mb-1">
+                        	<div class="col">
+                            	<label class="font-weight-bolder small">Pay day</label>
+                                <select name="employee_payday_id" id="employee_payday_id"
+									class="custom-select custom-select-sm shipClass" style="" required >
+									<option value="0" selected="selected">General</option>
+									@foreach($paydays as $payday)
+
+									<option value="{{$payday->id}}" disabled="disabled" data-payroll="{{$payday->payroll_process_type_id}}" style="display:none;" >{{$payday->payday_name}}</option>
+									@endforeach
+
+								</select>
+                            </div>
+                        </div>
 						<!--div class="form-row mb-1">
 								<div class="col">
 									<label class="font-weight-bolder small">Working Period From</label>
@@ -127,7 +141,7 @@
 						<div class="form-row">
 							<div class="col-12 text-right">
 								<hr>
-								<input type="submit" name="action_button" id="action_button" class="btn btn-success btn-sm px-3" value="Check Attendance" />
+								<input type="submit" name="action_button" id="action_button" class="btn btn-warning btn-sm px-3" value="Check Attendance" />
 								<button type="button" class="btn btn-light btn-sm px-3" data-dismiss="modal">Close</button>
 							</div>
 						</div>
@@ -183,6 +197,13 @@
 								<label class="font-weight-bolder small">Loan</label>
 								<input type="text" name="loan_modal_loan_name" id="loan_modal_loan_name" class="form-control form-control-sm" readonly="readonly" />
 							</div>
+                            <div class="col">
+                            	<label class="font-weight-bolder small">Collection Method</label>
+                                <select name="loan_modal_loan_collect_opt" id="loan_modal_loan_collect_opt" class="form-control form-control-sm" >
+                                    <option value="1">Salary</option>
+                                    <option value="2">Prepaid</option>
+                                </select>
+                            </div>
 						</div>
 						<div class="form-row mb-1">
 							<div class="col">
@@ -194,6 +215,12 @@
 								<input type="text" name="new_installment_amount" id="new_installment_amount" class="form-control form-control-sm" />
 							</div>
 						</div>
+                        <div class="form-row mb-1">
+                        	<div class="col">
+                            	<label class="font-weight-bolder small">Remarks</label>
+                                <input type="text" name="loan_modal_collect_remarks" id="loan_modal_collect_remarks" class="form-control form-control-sm" maxlength="150" />
+                            </div>
+                        </div>
 						<div class="form-row mt-3">
 							<div class="col-12 text-right">
 								<hr>
@@ -422,21 +449,30 @@
 				data: 'id'
 			}],
 			"columnDefs": [{
-				"targets": 2,
-				"orderable": false,
-				"className": 'actlist_col text-right',
-				render: function (data, type, row) {
-					var btn_act = ' btn-primary loan_edit';
-					var block_str = '';
-
-					if (row.loan_complete == 1) {
-						btn_act = ' btn-light';
-						block_str = ' disabled="disabled"';
+					"targets":1,
+					render: function( data, type, row ){
+						var pillstr=(row.collect_type_pill!='')?'<div class="badge badge-primary badge-pill" '+
+								'style="margin-left:5px; line-height:14px; vertical-align:top;">'+row.collect_type_pill+'</div>':'';
+						return data+pillstr;
 					}
-
-					return '<button type="button" class="btn btn-primary btn-sm' +
-						btn_act + '" data-refid="' + data + '"' + block_str +
-						'><i class="fas fa-pencil-alt"></i></button>';
+				},{
+					"targets": 2,
+					"orderable": false,
+					"className": 'actlist_col text-right',
+					render: function (data, type, row) {
+						var btn_act = ' btn-primary loan_edit';
+						var block_str = '';
+	
+						if (row.loan_complete == 1) {
+							btn_act = ' btn-light';
+							block_str = ' disabled="disabled"';
+						}
+	
+						return '<button type="button" class="btn btn-primary btn-sm' +
+							btn_act + '" data-refid="' + data + '"' + block_str +
+							'><i class="fas fa-pencil-alt"></i></button>'+'&nbsp;'+
+							'<button type="button" class="btn btn-success btn-sm inst_collect_type" data-refid="'+data+'" data-regval="1" title="Collect from Salary"><i class="fas fa-user-edit"></i></button>'+'&nbsp;'+
+							'<button type="button" class="btn btn-success btn-sm inst_collect_type" data-refid="'+data+'" data-regval="2" title="Mark as Prepaid Installment"><i class="fas fa-comment-dollar"></i></button>';
 				}
 			}],
 			"createdRow": function (row, data, dataIndex) {
@@ -491,6 +527,14 @@
 
 		$('#find_employee').click(function () {
 			findEmployee();
+		});
+		
+		$("#payroll_process_type_id").on("change", function(){
+			$('#employee_payday_id').val('0');//select General option
+			$('#employee_payday_id option:not(:first-child)').prop("disabled", true);
+			$('#employee_payday_id option:not(:first-child)').hide();
+			$('#employee_payday_id option[data-payroll="'+$("#payroll_process_type_id").find(":selected").val()+'"]').prop("disabled", false);
+			$('#employee_payday_id option[data-payroll="'+$("#payroll_process_type_id").find(":selected").val()+'"]').show();
 		});
 
 		$(".modal").on("shown.bs.modal", function () {
@@ -561,7 +605,8 @@
 					.installment_value); //data.loan_obj.installment_value
 					$('#new_installment_amount').val(data.loan_obj.installment_value);
 					$('#hidden_loan_id').val(id); //update-loan-installment
-
+					$('#loan_modal_loan_collect_opt').val(data.loan_obj.collect_opt);
+					$('#loan_modal_collect_remarks').val(data.loan_obj.collect_remarks);
 				}
 			}) /**/
 		});
@@ -598,6 +643,37 @@
 			$('#loan_modal_employee_name').val(d.emp_first_name);
 
 			loanList(refemp, refpay, selected_payslip, d);
+		});
+		
+		$(document).on("click", ".inst_collect_type", function(){
+			var id = $(this).data('refid');
+			var regval = $(this).data('regval');
+			
+			$.ajax({
+				url: "reviseCollectionMethod",
+				method:"POST",
+				data:{loan_regid:id, collect_type:regval, _token:_token},
+				dataType:"json",
+				success:function(data)
+				{
+					var html = '';
+					if(data.errors){
+						html = data.errors;
+					}
+					if(data.success){
+						html = data.success;
+						
+						var selected_tr=loanTable.row('#row-'+id+'');//remunerationTable.$('tr.classname');
+						
+						var d=selected_tr.data();
+						//alert(JSON.stringify(d));
+						d.collect_type_pill=data.opt_pilltxt;
+						loanTable.row(selected_tr).data(d).draw();
+						
+					}
+					alert(html);
+				}
+			});
 		});
 
 		$(document).on("click", ".term_list", function () {
@@ -708,6 +784,7 @@
 						var d = selected_tr.data();
 						//alert(JSON.stringify(d));
 						d.installment_value = $('#new_installment_amount').val();
+						d.collect_type_pill = data.opt_pilltxt;
 						loanTable.row(selected_tr).data(d).draw();
 
 						var selected_payslip = empTable.row('#row-' + $("#payroll_profile_id")

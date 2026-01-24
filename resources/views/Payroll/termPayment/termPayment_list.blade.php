@@ -20,15 +20,15 @@
         <div class="card">
             <div class="card-body p-0 p-2">
                 <div class="row justify-content-end">
-                    <div class="col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                        <select name="location_filter" id="location_filter" class="shipClass form-control form-control-sm">
+                    <div class="col-12 text-right"><!-- class="col-sm-12 col-md-6 col-lg-3 col-xl-3 -->
+                        <select name="location_filter" id="location_filter" class="shipClass form-control form-control-sm" style="display:inline; width:300px;">
                             <option value="">Please Select</option>
                             @foreach($branch as $branches)
                             <option value="{{$branches->location}}">{{$branches->location}}</option>
                             @endforeach
                         </select>
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-3 col-xl-3 text-right">
+                    <!--/div>
+                    <div class=""--><!-- class="col-sm-12 col-md-6 col-lg-3 col-xl-3 text-right" -->
                         <button type="button" name="find_employee" id="find_employee" class="btn btn-success btn-sm px-3 mt-sm-0 mt-2"><i class="fal fa-clipboard-check mr-2"></i>Allocate</button>
                         <button type="button" name="create_record" id="create_record" class="btn btn-secondary btn-sm px-3 mt-sm-0 mt-2"><i class="fal fa-plus mr-2"></i>Add</button>
                         <button type="button" name="upload_record" id="upload_record" class="btn btn-secondary btn-sm px-3 mt-sm-0 mt-2"><i class="fal fa-upload mr-2"></i>Upload</button>
