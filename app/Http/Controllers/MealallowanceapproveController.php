@@ -11,6 +11,7 @@ use App\Mealallowanceapproved;
 use Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 
 class MealallowanceapproveController extends Controller
 {
@@ -72,7 +73,7 @@ class MealallowanceapproveController extends Controller
         // dd(DB::getQueryLog());
 
         foreach ($query as $row) {
-            // if($row->empid==267){
+            // if($row->empid==4){
                 $empId = $row->empid;
                 $empName = $row->emp_name;
                 $payrollProfileId = $row->payroll_profiles_id;
@@ -105,7 +106,7 @@ class MealallowanceapproveController extends Controller
                 $allowance = DB::table('salary_adjustments')
                     ->select('salary_adjustments.*')
                     ->where('emp_id', $empId)
-                    ->where('job_id', $jobCategoryId)
+                    // ->where('job_id', $jobCategoryId)
                     ->where('remuneration_id', $remunerationtype)
                     ->where('approved_status', 1)
                     ->first();
@@ -130,7 +131,7 @@ class MealallowanceapproveController extends Controller
                     }
 
                 }
-               
+                
                 //check meal allowance approved on given date range
                 $approvedallowance = DB::table('meal_allowances_approved')
                     ->where('emp_id', $empId)
@@ -149,70 +150,154 @@ class MealallowanceapproveController extends Controller
 
                 $totalWorkingDays;
 
-                if($remunerationtype == 21){
-                    $totalWeekDays = DB::table('leaves')
-                        ->select(DB::raw('IFNULL(SUM(no_of_days), 0) as total_days'))
-                        ->whereBetween('leave_from', [$firstDate, $lastDate])
-                        ->where('emp_id', $empId)
-                        ->where('status', 'Approved')
-                        ->where('leave_type', '!=', '7')
-                        ->where('no_of_days', '>=', 1)
-                        ->whereRaw('DAYOFWEEK(leave_from) BETWEEN 2 AND 6')
-                        ->first();
+                $leavecount = DB::table('leaves')
+                    ->select(DB::raw('IFNULL(SUM(no_of_days), 0) as total_days'))
+                    ->where('emp_id', $empId)
+                    ->whereBetween('leave_from', [$firstDate, $lastDate])
+                    ->where('status', 'Approved')
+                    ->where('leave_type', '!=', '7')
+                    ->first();
+                $totalLeaveDays = $leavecount->total_days;
 
-                    $totalWeekendDays = DB::table('leaves')
-                        ->select(DB::raw("
-                            IFNULL(SUM(CASE 
-                                WHEN no_of_days < 1 THEN 1 
-                                ELSE no_of_days 
-                            END), 0) as total_days
-                        "))
-                        ->whereBetween('leave_from', [$firstDate, $lastDate])
-                        ->where('emp_id', $empId)
-                        ->where('status', 'Approved')
-                        ->where('leave_type', '!=', '7')
-                        ->whereRaw('DAYOFWEEK(leave_from) = 7')
-                        ->first();
+                if($allowancetype==3){//Custom salary adjustment deductions
+                    if($allowleave>=$totalLeaveDays){ //Leave within allowed limit
+                        $totalamount = $allowanceamount;
+                        $monthlyremain = $totalamount;
+                    }
+                    else{ //Excess leave deductions
+                        $salaryadujestinfo = DB::table('custom_leaves')
+                            ->select('type','description','deduction')
+                            ->where('idsalary_adjustments', $empId)
+                            ->get();
 
-                    $totalLeaveDays = $totalWeekDays->total_days + $totalWeekendDays->total_days;
-                }
-                else if($remunerationtype == 22){
-                    $totalDays = DB::table('leaves')
-                        ->select(DB::raw('IFNULL(SUM(no_of_days), 0) as total_days'))
-                        ->whereBetween('leave_from', [$firstDate, $lastDate])
-                        ->where('emp_id', $empId)
-                        ->where('status', 'Approved')
-                        ->where('leave_type', '!=', '7')
-                        ->where('no_of_days', '>', $allowleave)
-                        ->first();
+                        $leaveinfo = DB::table('leaves')
+                            ->select(DB::raw('*'))
+                            ->whereBetween('leave_from', [$firstDate, $lastDate])
+                            ->where('emp_id', $empId)
+                            ->where('status', 'Approved')
+                            ->where('leave_type', '!=', '7')
+                            ->get();
 
-                    $totalLeaveDays = $totalDays->total_days;
-                }
-                // echo $totalLeaveDays."-->".$empId."<br>";
+                        $empallowleave = $allowleave;
+                        $dates = [];
+                        foreach($leaveinfo as $leave){
+                            if($leave->no_of_days > $empallowleave){
+                                $leavefromdate = $leave->leave_from;
+                                $leavetodate = $leave->leave_to;
 
-                if($allowancetype == 1){
-                    $totalamount = $totalWorkingDays * $allowanceamount;
-                    $monthlyremain = $totalamount;
-                }else{
-                    if($workingDays>0){
-                        $daliyamount = $allowanceamount /  $workingDays;
-                        
-                        if($totalWorkingDays>0 && $totalWorkingDays<20){
-                            if($joindate<$firstDate){
-                                $totalamount = ($workingDays-$totalLeaveDays) * $daliyamount;
-                            }
-                            else{
-                                $totalamount = $totalWorkingDays * $daliyamount;
+                                $leaveperiod = CarbonPeriod::create($leavefromdate, $leavetodate);
+
+                                $daycount = 0;
+                                foreach ($leaveperiod as $date) {
+                                    if($daycount < $empallowleave){
+                                        $daycount++;
+                                        continue;
+                                    }
+                                    else{
+                                        $dates[] = $date->format('Y-m-d');
+                                        $daycount++;
+                                    }
+                                }
+                                
+                                // $excessleavedays = $leave->no_of_days - $empallowleave;
+
+                                // $empallowleave = 0;
+                                // $dayno = 0;
                             }
                         }
-                        else if($totalWorkingDays>0){$totalamount = ($workingDays-$totalLeaveDays) * $daliyamount;}
-                        else{$totalamount = 0;}
-                        $monthlyremain = $totalamount;
-                        
-                        // $totalamount = $totalDays->total_days * $daliyamount;
-                        // $monthlyremain = $allowanceamount -  $totalamount;
+
+                        foreach($dates as $leavedate){
+                            $dayNumber = Carbon::parse($leavedate)->dayOfWeek;
+                            $checkholiday = DB::table('holidays')
+                                ->where('date', $leavedate)
+                                ->first();
+                            
+                            foreach($salaryadujestinfo as $salaryadj){
+                                if($checkholiday){
+                                    if($salaryadj->type == 1){
+                                        $totalamount += $salaryadj->deduction;
+                                        $monthlyremain = $totalamount;
+                                    }
+                                }
+                                else{
+                                    if($salaryadj->type == 0){
+                                        $arraydescription = explode(',', $salaryadj->description);
+                                        if (in_array($dayNumber, $arraydescription)) {
+                                            $totalamount += $salaryadj->deduction;
+                                            $monthlyremain = $allowanceamount - $totalamount;
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
+                else{//Daily or monthly salary adjustment deductions
+                    if($remunerationtype == 21){
+                        $totalWeekDays = DB::table('leaves')
+                            ->select(DB::raw('IFNULL(SUM(no_of_days), 0) as total_days'))
+                            ->whereBetween('leave_from', [$firstDate, $lastDate])
+                            ->where('emp_id', $empId)
+                            ->where('status', 'Approved')
+                            ->where('leave_type', '!=', '7')
+                            ->where('no_of_days', '>=', 1)
+                            ->whereRaw('DAYOFWEEK(leave_from) BETWEEN 2 AND 6')
+                            ->first();
+
+                        $totalWeekendDays = DB::table('leaves')
+                            ->select(DB::raw("
+                                IFNULL(SUM(CASE 
+                                    WHEN no_of_days < 1 THEN 1 
+                                    ELSE no_of_days 
+                                END), 0) as total_days
+                            "))
+                            ->whereBetween('leave_from', [$firstDate, $lastDate])
+                            ->where('emp_id', $empId)
+                            ->where('status', 'Approved')
+                            ->where('leave_type', '!=', '7')
+                            ->whereRaw('DAYOFWEEK(leave_from) = 7')
+                            ->first();
+
+                        $totalLeaveDays = $totalWeekDays->total_days + $totalWeekendDays->total_days;
+                    }
+                    else if($remunerationtype == 22){
+                        $totalDays = DB::table('leaves')
+                            ->select(DB::raw('IFNULL(SUM(no_of_days), 0) as total_days'))
+                            ->whereBetween('leave_from', [$firstDate, $lastDate])
+                            ->where('emp_id', $empId)
+                            ->where('status', 'Approved')
+                            ->where('leave_type', '!=', '7')
+                            ->where('no_of_days', '>', $allowleave)
+                            ->first();
+
+                        $totalLeaveDays = $totalDays->total_days;
+                    }
+                    // echo $totalLeaveDays."-->".$empId."<br>";
+
+                    if($allowancetype == 1){
+                        $totalamount = $totalWorkingDays * $allowanceamount;
+                        $monthlyremain = $totalamount;
+                    }else{
+                        if($workingDays>0){
+                            $daliyamount = $allowanceamount /  $workingDays;
+                            
+                            if($totalWorkingDays>0 && $totalWorkingDays<20){
+                                if($joindate<$firstDate){
+                                    $totalamount = ($workingDays-$totalLeaveDays) * $daliyamount;
+                                }
+                                else{
+                                    $totalamount = $totalWorkingDays * $daliyamount;
+                                }
+                            }
+                            else if($totalWorkingDays>0){$totalamount = ($workingDays-$totalLeaveDays) * $daliyamount;}
+                            else{$totalamount = 0;}
+                            $monthlyremain = $totalamount;
+                            
+                            // $totalamount = $totalDays->total_days * $daliyamount;
+                            // $monthlyremain = $allowanceamount -  $totalamount;
+                        }
+                    }
+                }                
                 
                 $datareturn[] = [
                     'approvedallowancestatus' => $approvedallowancestatus,
