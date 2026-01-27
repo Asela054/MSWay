@@ -23,7 +23,9 @@ class LateminitesApprovelController extends Controller
             abort(403);
         }
 
-        return view('Attendent.lateminitesapprovel');
+        $remunerations=DB::table('remunerations')->select('*')->where('remuneration_type', 'Deduction')->get();
+
+        return view('Attendent.lateminitesapprovel',compact('remunerations'));
     }
 
     public function generatelateminites(Request $request){
@@ -74,7 +76,8 @@ class LateminitesApprovelController extends Controller
                 'employees.emp_join_date',
                 'branches.location',
                 'departments.name as dept_name',
-                'job_categories.late_attend_min'                
+                'job_categories.late_attend_min',
+                'job_categories.late_deduction_type'                  
             )
             ->from('employees as employees')
             ->leftJoin('attendances as at1', function ($join) use ($month) {
@@ -129,6 +132,7 @@ class LateminitesApprovelController extends Controller
 
             $employeeid =  $record->emp_id;
 
+          
             $late_minites_total = (new \App\Employeelateattenadnaceminites)->get_lateminitescount($employeeid, $month ,$closedate);
  
             if(!empty($late_minites_total)){
@@ -142,7 +146,11 @@ class LateminitesApprovelController extends Controller
 
                 $late_minites_total = $late_minites_total - $record->late_attend_min;
                 $late_hours_total = $late_minites_total / 60;
-                $nopayamount = (new \App\Employeelateattenadnaceminites)->NopayAmountCal($record->emp_auto_id, $work_days,$leave_days,$no_pay_days,$normal_ot_hours, $double_ot_hours);
+
+                if($record->late_attend_min == 0){
+                     $nopayamount = (new \App\Employeelateattenadnaceminites)->NopayAmountCal($record->emp_auto_id, $work_days,$leave_days,$no_pay_days,$normal_ot_hours, $double_ot_hours);
+                }
+                
                 $nopayAmount = $nopayamount['nopay_base_rate']/8;
                 if($late_minites_total > 0){
                     $late_day_amount = abs($late_hours_total * $nopayAmount);
@@ -176,7 +184,9 @@ class LateminitesApprovelController extends Controller
         }
 
         $dataarry = $request->input('dataarry');
+        $remunerationid = $request->input('remunitiontype');
 
+        dd($remunerationid);
         
         $current_date_time = Carbon::now()->toDateTimeString();
 
@@ -191,8 +201,6 @@ class LateminitesApprovelController extends Controller
 
 
 
-
-
             $profiles = DB::table('payroll_profiles')
             ->join('payroll_process_types', 'payroll_profiles.payroll_process_type_id', '=', 'payroll_process_types.id')
             // ->where('payroll_profiles.emp_etfno', $empid)
@@ -202,7 +210,6 @@ class LateminitesApprovelController extends Controller
 
         if ($profiles) {
 
-            $remunerationid = 25;
 
             $paysliplast = DB::table('employee_payslips')
                 ->select('emp_payslip_no')
@@ -254,5 +261,6 @@ class LateminitesApprovelController extends Controller
 
         return response()->json(['success' => 'Late Minites Deduction is successfully Approved']);
     }
+
 
 }
