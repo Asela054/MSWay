@@ -123,6 +123,39 @@
     </div>
 
 
+    <!-- approve modal -->
+        <div class="modal fade" id="approveModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Approve  Meal Deduction</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="message_modal"></div>
+                            <form class="form-horizontal" id="formApprove">
+                                <div class="form-group mb-1">
+                                    <div class="col-12">
+                                         <label class="small font-weight-bolder text-dark">Deduction Type</label>
+                                            <select name="remunitiontype" id="remunitiontype" class="form-control form-control-sm">
+                                                <option value="">Select Remuneration</option>
+                                                    @foreach ($remunerations as $remuneration){
+                                                        <option value="{{$remuneration->id}}" >{{$remuneration->remuneration_name}}</option>
+                                                    }  
+                                                    @endforeach
+                                            </select>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary btn-sm px-3" id="btn-approve"><i class="fa-light fa-light fa-clipboard-check"></i>&nbsp;Approve</button>
+                        </div>
+                    </div>
+                </div>
+        </div>
 
 
     <!-- Modal Area End -->
@@ -266,96 +299,113 @@ $(document).ready(function () {
 
     var selectedRowIdsapprove = [];
 
-        $('#approve_att').click(async function () {
-            var r = await Otherconfirmation("You want to Edit this ? ");
-            if (r == true) {
+          $('#approve_att').click(async function () {
+              var r = await Otherconfirmation("You want to Edit this ? ");
+              if (r == true) {
+                  $('.message_modal').html('');
+                  $('#approveModal').modal('show');
 
-                selectedRowIdsapprove = [];
-                $('#attendtable tbody .selectCheck:checked').each(function () {
-                    var rowData = $('#attendtable').DataTable().row($(this).closest('tr')).data();
+                  //#btn-approve
+                  $('#btn-approve').on('click', function (e) {
+                      e.preventDefault();
+                      var remunitiontype = $('#remunitiontype').val();
+                      var department = $('#department').val();
+                      var company = $('#company').val();
+                      var month = $('#month').val();
+                      var closedate = $('#closedate').val();
 
-                    if (rowData) {
-                        selectedRowIdsapprove.push({
-                            empid: rowData[1],
-                            emp_name: rowData[2],
-                            late_hourstotal: rowData[3],
-                            nopayamount: rowData[4],
-                            total_amount: rowData[5],
-                            autoid: rowData[6],
-                        });
-                    }
-                });
+                      if (remunitiontype == '') {
+                          Swal.fire({
+                              position: "top-end",
+                              icon: 'warning',
+                              title: 'Please select Deduction Type!',
+                              showConfirmButton: false,
+                              timer: 2500
+                          });
+                          return false;
+                      } else {
+                          selectedRowIdsapprove = [];
+                          $('#attendtable tbody .selectCheck:checked').each(function () {
+                              var rowData = $('#attendtable').DataTable().row($(this).closest('tr')).data();
 
-                if (selectedRowIdsapprove.length > 0) {
-                    console.log(selectedRowIdsapprove);
+                              if (rowData) {
+                                  selectedRowIdsapprove.push({
+                                      empid: rowData[1],
+                                      emp_name: rowData[2],
+                                      late_hourstotal: rowData[3],
+                                      nopayamount: rowData[4],
+                                      total_amount: rowData[5],
+                                      autoid: rowData[6],
+                                  });
+                              }
+                          });
+                          if (selectedRowIdsapprove.length > 0) {
+                              console.log(selectedRowIdsapprove);
+                              $.ajaxSetup({
+                                  headers: {
+                                      'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                                  }
+                              });
 
+                              $.ajax({
+                                  url: '{!! route("approvelatemintes") !!}',
+                                  type: 'POST',
+                                  dataType: "json",
+                                  data: {
+                                      dataarry: selectedRowIdsapprove,
+                                      remunitiontype: remunitiontype,
+                                      department: department,
+                                      month: month,
+                                      closedate: closedate
+                                  },
+                                  success: function (data) {
+                                      $('#approve_button').html('Approve').prop('disabled', false);
 
-                    $.ajaxSetup({
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        }
-                    })
+                                      if (data.errors) {
+                                          const actionObj = {
+                                              icon: 'fas fa-warning',
+                                              title: '',
+                                              message: 'Record Error',
+                                              url: '',
+                                              target: '_blank',
+                                              type: 'danger'
+                                          };
+                                          const actionJSON = JSON.stringify(actionObj, null, 2);
+                                          action(actionJSON);
+                                      }
+                                      if (data.success) {
+                                          const actionObj = {
+                                              icon: 'fas fa-save',
+                                              title: '',
+                                              message: data.success,
+                                              url: '',
+                                              target: '_blank',
+                                              type: 'success'
+                                          };
+                                          const actionJSON = JSON.stringify(actionObj, null, 2);
+                                          actionreload(actionJSON);
+                                      }
+                                  }
+                              });
+                          } else {
+                              Swal.fire({
+                                  position: "top-end",
+                                  icon: 'warning',
+                                  title: 'Select Rows to Final Approve!',
+                                  showConfirmButton: false,
+                                  timer: 2500
+                              });
+                          }
+                      }
 
-                    var department = $('#department').val();
-                    var company = $('#company').val();
-                    var month = $('#month').val();
-                    var closedate = $('#closedate').val();
+                  });
+              }
+          });
+    
 
-                    $.ajax({
-                        url: '{!! route("approvelatemintes") !!}',
-                        type: 'POST',
-                        dataType: "json",
-                        data: {
-                            dataarry: selectedRowIdsapprove,
-                            department: department,
-                            month: month,
-                            closedate: closedate
-                        },
-                        success: function (data) {
-                          if (data.errors) {
-                                const actionObj = {
-                                    icon: 'fas fa-warning',
-                                    title: '',
-                                    message: 'Record Error',
-                                    url: '',
-                                    target: '_blank',
-                                    type: 'danger'
-                                };
-                                const actionJSON = JSON.stringify(actionObj, null, 2);
-                                action(actionJSON);
-                            }
-                            if (data.success) {
-                                const actionObj = {
-                                    icon: 'fas fa-save',
-                                    title: '',
-                                    message: data.success,
-                                    url: '',
-                                    target: '_blank',
-                                    type: 'success'
-                                };
-                                const actionJSON = JSON.stringify(actionObj, null, 2);
-                                actionreload(actionJSON);
-                            }
-
-                        }
-                    })
-                } else {
-
-                    Swal.fire({
-                        position: "top-end",
-                        icon: 'warning',
-                        title: 'Select Rows to Final Approve!',
-                        showConfirmButton: false,
-                        timer: 2500
-                        });
-                }
-            }
+        $('#selectAll').click(function (e) {
+            $('#attendtable').closest('table').find('td input:checkbox').prop('checked', this.checked);
         });
-
-
-    $('#selectAll').click(function (e) {
-        $('#attendtable').closest('table').find('td input:checkbox').prop('checked', this.checked);
-    });
 
       // Offcanvas toggle functionality - UPDATED
         $('[data-toggle="offcanvas"]').on('click', function () {
