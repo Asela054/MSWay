@@ -19,6 +19,33 @@ class Attendance extends Model
 
     public function get_work_days($emp_id, $month,$closedate)
     {
+
+         $shiftQuery = "SELECT st.onduty_time, st.offduty_time 
+                   FROM employees emp 
+                   JOIN shift_types st ON emp.emp_shift = st.id 
+                   WHERE emp.emp_id = $emp_id 
+                   LIMIT 1";
+    
+            $shiftInfo = \DB::select($shiftQuery);
+            
+            if (empty($shiftInfo)) {
+                $expectedHours = 8;
+                $halfDayHours = 4;
+            } else {
+                $shift = $shiftInfo[0];
+                
+                $ondutyTime = strtotime($shift->onduty_time);
+                $offdutyTime = strtotime($shift->offduty_time);
+                
+                if ($offdutyTime < $ondutyTime) {
+                    $offdutyTime += 24 * 3600;
+                }
+                
+                $expectedHours = ($offdutyTime - $ondutyTime) / 3600;
+                $halfDayHours = $expectedHours / 2;
+            }
+
+
         $query = "SELECT Max(at1.timestamp) as lasttimestamp,
         Min(at1.timestamp) as firsttimestamp
         FROM attendances as at1
@@ -52,11 +79,11 @@ class Attendance extends Model
             //if diff is greater than 8 hours then it is a work day
             //if diff is greater than 4 hours then it is a half day
             //if diff is greater than 2 hours then it is a half day
-            if ($diff >= 8) {
+            if ($diff >= $expectedHours) {
                 $work_days++;
-            } elseif ($diff >= 4) {
+            } elseif ($diff >= $halfDayHours) {
                 $work_days += 0.5;
-            } elseif ($diff >= 2){
+            } elseif ($diff >= ($halfDayHours / 2)){
                 //$work_days += 0.25;
             }
         }
