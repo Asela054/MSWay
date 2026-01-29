@@ -54,7 +54,7 @@
                                                 <th>EMPLOYEE NAME</th>
                                                 <th>TOTAL WORKING DAYS</th>
                                                 <th>ALLOWANCE AMOUNT</th>
-                                                <th>TOTAL AMOUNT</th>
+                                                <th>ADDITION | DEDUCTION AMOUNT</th>
                                                 <th>REMAINING AMOUNT</th>
                                                 <th class="d-none">PAYROLL PROFILE</th>
                                                 <th class="d-none">TYPE</th>

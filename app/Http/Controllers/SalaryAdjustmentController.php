@@ -27,7 +27,7 @@ class SalaryAdjustmentController extends Controller
 
         $salaryadjustment = SalaryAdjustment::orderBy('id', 'asc')->get();
         $job_categories=DB::table('job_categories')->select('*')->get();
-        $remunerations=DB::table('remunerations')->select('*')->get();
+        $remunerations=DB::table('remunerations')->select('*')->where('remuneration_cancel', 0)->where('allocation_method', 'TERMS')->get();
         return view('Organization.salary_adjustment', compact('salaryadjustment','job_categories','remunerations'));
     }
 
