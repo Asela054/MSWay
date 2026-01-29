@@ -34,15 +34,12 @@ class Attendance extends Model
             } else {
                 $shift = $shiftInfo[0];
                 
-                $ondutyTime = strtotime($shift->onduty_time);
-                $offdutyTime = strtotime($shift->offduty_time);
+                   // Parse times using Carbon
+                $ondutyTime = Carbon::parse($shift->onduty_time);
+                $offdutyTime = Carbon::parse($shift->offduty_time);
                 
-                if ($offdutyTime < $ondutyTime) {
-                    $offdutyTime += 24 * 3600;
-                }
-                
-                $expectedHours = ($offdutyTime - $ondutyTime) / 3600;
-                $halfDayHours = $expectedHours / 2;
+                 $expectedHours = $ondutyTime->diffInHours($offdutyTime);
+                 $halfDayHours = $expectedHours / 2;
             }
 
 
@@ -92,6 +89,31 @@ class Attendance extends Model
 
     public function get_working_week_days($emp_id, $month,$closedate)
     {
+
+          $shiftQuery = "SELECT st.onduty_time, st.offduty_time 
+                   FROM employees emp 
+                   JOIN shift_types st ON emp.emp_shift = st.id 
+                   WHERE emp.emp_id = $emp_id 
+                   LIMIT 1";
+    
+            $shiftInfo = \DB::select($shiftQuery);
+            
+            if (empty($shiftInfo)) {
+                $expectedHours = 8;
+                $halfDayHours = 4;
+            } else {
+                $shift = $shiftInfo[0];
+                
+                   // Parse times using Carbon
+                $ondutyTime = Carbon::parse($shift->onduty_time);
+                $offdutyTime = Carbon::parse($shift->offduty_time);
+                
+                 $expectedHours = $ondutyTime->diffInHours($offdutyTime);
+                 $halfDayHours = $expectedHours / 2;
+            }
+
+
+
         $query = "SELECT Max(at1.timestamp) as lasttimestamp,
         Min(at1.timestamp) as firsttimestamp, date
         FROM attendances as at1
@@ -150,6 +172,10 @@ class Attendance extends Model
 
             if($first_time >=$today_twelve && $first_time < $today_one ){
                 $work_hours_from = $today_one;
+            }  
+            else if($shift_off >=$today_twelve && $shift_off < $today_one){}
+            else{
+                $work_hours_to->subHours(1);
             }
 
             $work_hours_to = '';
@@ -197,7 +223,7 @@ class Attendance extends Model
             //if diff is greater than 8 hours then it is a work day
             //if diff is greater than 4 hours then it is a half day
             //if diff is greater than 2 hours then it is a half day
-            if ($diff >= 8) {
+            if ($diff >= $expectedHours) {
 
                 if (in_array($day ,$work_days_arr)){
                     if(!$is_holiday){
@@ -217,7 +243,7 @@ class Attendance extends Model
                     }
                 }
 
-            } elseif ($diff >= 3) {
+            } elseif ($diff >=  $halfDayHours) {
 
                 if (in_array($day ,$work_days_arr)){
                     if(!$is_holiday) {
@@ -262,7 +288,7 @@ class Attendance extends Model
                     }
                 }
 
-            } elseif ($diff >= 2){
+            } elseif ($diff >= ($halfDayHours / 2)){
 
 //                if (in_array($day ,$work_days_arr) || $is_holiday ){
 //                    $no_of_working_workdays += 0.25;
