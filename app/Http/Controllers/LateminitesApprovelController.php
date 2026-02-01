@@ -149,14 +149,53 @@ class LateminitesApprovelController extends Controller
 
                 if($record->late_attend_min == 0){
                      $nopayamount = (new \App\Employeelateattenadnaceminites)->NopayAmountCal($record->emp_auto_id, $work_days,$leave_days,$no_pay_days,$normal_ot_hours, $double_ot_hours);
-                }
-                
-                $nopayAmount = $nopayamount['nopay_base_rate']/8;
-                if($late_minites_total > 0){
-                    $late_day_amount = abs($late_hours_total * $nopayAmount);
-                }
-                else{
-                    $late_day_amount = 0;
+                            $nopayAmount = $nopayamount['nopay_base_rate']/8;
+                            if($late_minites_total > 0){
+                                $late_day_amount = abs($late_hours_total * $nopayAmount);
+                            }
+                            else{
+                                $late_day_amount = 0;
+                            }
+                }else{
+
+                        $latededutionamount = DB::table('late_deduction_amounts')
+                                                ->orderBy('minites', 'asc')
+                                                ->get();
+                                            
+                    if($latededutionamount->isNotEmpty()){
+                        $remaining_minutes = $late_minites_total;
+                        $previous_minutes = 0;
+                        
+                        foreach($latededutionamount as $rule){
+                            if($remaining_minutes <= 0) break;
+                            
+                            $rule_minutes = $rule->minites - $previous_minutes;
+                            
+                            if($remaining_minutes > $rule_minutes){
+                                // Use full rule amount
+                                $late_day_amount += $rule->amount;
+                                $remaining_minutes -= $rule_minutes;
+                            } else {
+                                // Calculate partial amount for last rule
+                                $rate_per_minute = $rule->amount / $rule_minutes;
+                                $late_day_amount += $remaining_minutes * $rate_per_minute;
+                                break;
+                            }
+                            
+                            $previous_minutes = $rule->minites;
+                        }
+                        
+                        // If there are still remaining minutes after all rules
+                        if($remaining_minutes > 0){
+                            // Use the last rule's rate
+                            $last_rule = $latededutionamount->last();
+                            $rule_minutes = $last_rule->minites - $previous_minutes;
+                            $rate_per_minute = $last_rule->amount / ($rule_minutes ?: 1);
+                            $late_day_amount += $remaining_minutes * $rate_per_minute;
+                        }
+                    } else {
+                        $late_day_amount = 0;
+                    }
                 }
             }
 
@@ -186,7 +225,6 @@ class LateminitesApprovelController extends Controller
         $dataarry = $request->input('dataarry');
         $remunerationid = $request->input('remunitiontype');
 
-        dd($remunerationid);
         
         $current_date_time = Carbon::now()->toDateTimeString();
 
