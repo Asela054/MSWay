@@ -626,7 +626,7 @@ class ApointmentletterPDFController extends Controller
                     </html>';
 
         $data = DB::table('appointment_letter')
-            ->leftjoin('employees', 'appointment_letter.employee_id', '=', 'employees.id')
+            ->leftjoin('employees', 'appointment_letter.employee_id', '=', 'employees.emp_id')
             ->leftjoin('job_titles', 'appointment_letter.jobtitle', '=', 'job_titles.id')
             ->leftjoin('companies', 'appointment_letter.company_id', '=', 'companies.id')
             ->select('appointment_letter.*', 'employees.*', 'job_titles.title As emptitle', 'companies.*')
