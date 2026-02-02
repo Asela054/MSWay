@@ -75,10 +75,16 @@ class AttendanceUploadController extends Controller
             $employees = \App\Employee::pluck('emp_id', 'emp_id')->toArray();
             $employeeId = $employees[$attendanceData['emp_id']] ?? null;
 
+            $employeeLocation = \App\Employee::where('emp_id', $attendanceData['emp_id'])
+                                ->value('emp_location');
+
             if (!$employeeId) {
                 return response()->json(['errors' => "Row {$rowNumber}: Invalid Employee ID: " . $attendanceData['emp_id']]);
             }
 
+             if (!$employeeLocation) {
+                return response()->json(['errors' => "Row {$rowNumber}: Invalid Employee Location : " . $attendanceData['emp_id']]);
+            }
       
                 $date = Carbon::createFromFormat('m/d/Y', $attendanceData['date'])->format('Y-m-d');
 
@@ -136,7 +142,7 @@ class AttendanceUploadController extends Controller
                 'approved' => '0',
                 'type' => '255',
                 'devicesno' => '-',
-                'location' => '1',
+                'location' => $employeeLocation,
             ]);
 
             // Insert OUT time
@@ -149,7 +155,7 @@ class AttendanceUploadController extends Controller
                 'approved' => '0',
                 'type' => '255',
                 'devicesno' => '-',
-                'location' => '1',
+                'location' => $employeeLocation,
             ]);
         }
 
