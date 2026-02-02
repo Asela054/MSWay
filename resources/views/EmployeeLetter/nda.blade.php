@@ -26,32 +26,17 @@
                         <div class="form-row mb-1">
                             <div class="col-md-3">
                                 <label class="small font-weight-bold text-dark">Company</label>
-                                <select name="company" id="company" class="form-control form-control-sm" required>
-                                    <option value="">Please Select</option>
-                                    @foreach ($companies as $company){
-                                        <option value="{{$company->id}}" data-deptid="{{$company->id}}" >{{$company->name}}</option>
-                                    }  
-                                    @endforeach
+                                <select name="company" id="company_f" class="form-control form-control-sm">
                                 </select>
                             </div>
                             <div class="col-md-3">
                                 <label class="small font-weight-bold text-dark">Department</label>
-                                <select name="department" id="department" class="form-control form-control-sm" required>
-                                    <option value="">Please Select</option>
-                                    @foreach ($departments as $department){
-                                        <option value="{{$department->id}}" >{{$department->name}}</option>
-                                    }  
-                                    @endforeach
+                                <select name="department" id="department_f" class="form-control form-control-sm">
                                 </select>
                             </div>
                             <div class="col-md-3">
                                 <label class="small font-weight-bold text-dark">Employee</label>
-                                <select name="employee_f" id="employee_f" class="form-control form-control-sm" required>
-                                    <option value="">Please Select</option>
-                                    @foreach ($employees as $employee){
-                                        <option value="{{$employee->id}}" >{{$employee->emp_name_with_initial}}</option>
-                                    }  
-                                    @endforeach
+                                <select name="employee" id="employee_f" class="form-control form-control-sm">
                                 </select>
                             </div>
                             <div class="col-md-3">
@@ -121,7 +106,63 @@
             $('#employee_menu_link_icon').addClass('active');
             $('#appointmentletter').addClass('navbtnactive');
 
-            $('#employee_f').select2({ width: '100%' });
+            let company_f = $('#company_f');
+            let department_f = $('#department_f');
+            let employee_f = $('#employee_f');
+
+            company_f.select2({
+                placeholder: 'Select a Company',
+                width: '100%',
+                allowClear: true,
+                ajax: {
+                    url: '{{url("company_list_sel2")}}',
+                    dataType: 'json',
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1
+                        }
+                    },
+                    cache: true
+                }
+            });
+
+            department_f.select2({
+                placeholder: 'Select a Department',
+                width: '100%',
+                allowClear: true,
+                ajax: {
+                    url: '{{url("department_list_sel2")}}',
+                    dataType: 'json',
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1,
+                            company: company_f.val()
+                        }
+                    },
+                    cache: true
+                }
+            });
+
+            employee_f.select2({
+                placeholder: 'Select a Employee',
+                width: '100%',
+                allowClear: true,
+                ajax: {
+                    url: '{{url("employee_list_sel2")}}',
+                    dataType: 'json',
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1,
+                            company: company_f.val(),
+                            department: department_f.val()
+                        }
+                    },
+                    cache: true
+                }
+            });
 
             $('#dataTable').DataTable({
                 "destroy": true,
@@ -186,35 +227,39 @@
             });
 
             // edit function
-            $(document).on('click', '.edit',async function () {
+            $(document).on('click', '.edit', async function () {
                 var r = await Otherconfirmation("You want to Edit this ? ");
                 if (r == true) {
-                var id = $(this).attr('id');
-               
-                $('#form_result').html('');
-                $.ajaxSetup({
+                    var id = $(this).attr('id');
+                    
+                    $('#form_result').html('');
+                    $.ajaxSetup({
                         headers: {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                         }
-                    })
+                    });
 
-                $.ajax({
-                    url: '{!! route("NDAletteredit") !!}',
+                    $.ajax({
+                        url: '{!! route("NDAletteredit") !!}',
                         type: 'POST',
                         dataType: "json",
-                        data: {id: id },
-                    success: function (data) {
-                        $('#company').val(data.result.company_id);
-                        $('#department').val(data.result.department_id);
-                        $('#employee_f').val(data.result.employee_id);
-                        $('#effect_date').val(data.result.effect_date);
-                        // $('#comment1').val(data.result.comment1);
-                        // $('#comment2').val(data.result.comment2);
-                        
-                        $('#recordID').val(id);
-                        $('#recordOption').val(2);
-                     }
-                })
+                        data: {id: id},
+                        success: function (data) {
+                            var companyOption = new Option(data.result.company_name, data.result.company_id, true, true);
+                            company_f.append(companyOption).trigger('change');
+                            
+                            var deptOption = new Option(data.result.department_name, data.result.department_id, true, true);
+                            department_f.append(deptOption).trigger('change');
+                            
+                            var empOption = new Option(data.result.employee_name, data.result.employee_id, true, true);
+                            employee_f.append(empOption).trigger('change');
+                            
+                            $('#effect_date').val(data.result.effect_date);
+                            
+                            $('#recordID').val(id);
+                            $('#recordOption').val(2);
+                        }
+                    });
                 }
             });
 
@@ -290,57 +335,6 @@
                 }
             });
         });
-
-
-            // Department filter insert part
-            $('#company').change(function () {
-            var company = $(this).val();
-            if (company !== '') {
-                $.ajax({
-                    url: '{!! route("NDAlettergetdepartmentfilter", ["company_id" => "company_id"]) !!}'
-                        .replace('company_id', company),
-                    type: 'GET',
-                    dataType: 'json',
-                    success: function (data) {
-                        $('#department').empty().append('<option value="">Select Department</option>');
-                        $.each(data, function (index, department) {
-                            $('#department').append('<option value="' + department.id + '">' + department.name + '</option>');
-                        });
-                    },
-                    error: function (xhr, status, error) {
-                        console.error(error);
-                        $('#department').html('<option>Error loading departments</option>'); // Show error message
-                    }
-                });
-            } else {
-                $('#department').empty().append('<option value="">Select Departments</option>');
-            }
-            });
-
-            // Employee filter insert part
-            $('#department').change(function () {
-            var department = $(this).val();
-            if (department !== '') {
-                $.ajax({
-                    url: '{!! route("servicelettergetemployeefilter", ["emp_department" => "emp_department"]) !!}'
-                        .replace('emp_department', department),
-                    type: 'GET',
-                    dataType: 'json',
-                    success: function (data) {
-                        $('#employee_f').empty().append('<option value="">Select Employee</option>');
-                        $.each(data, function (index, employee) {
-                            $('#employee_f').append('<option value="' + employee.id + '">' + employee.emp_name_with_initial + '</option>');
-                        });
-                    },
-                    error: function (xhr, status, error) {
-                        console.error(error);
-                        $('#employee_f').html('<option>Error loading Employee</option>'); // Show error message
-                    }
-                });
-            } else {
-                $('#employee_f').empty().append('<option value="">Select Employee</option>');
-            }
-            });
 
 
         });
