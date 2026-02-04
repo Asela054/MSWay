@@ -253,8 +253,8 @@ class EndUserletterPDFController extends Controller
         $data = DB::table('end_user_letter')
             ->leftJoin('companies', 'end_user_letter.company_id', '=', 'companies.id')
             ->leftJoin('departments', 'end_user_letter.department_id', '=', 'departments.id')
-            ->leftJoin('employees as emp', 'end_user_letter.emp_id', '=', 'emp.id')
-            ->leftJoin('employees as rep_emp', 'end_user_letter.rep_emp_id', '=', 'rep_emp.id')
+            ->leftJoin('employees as emp', 'end_user_letter.emp_id', '=', 'emp.emp_id')
+            ->leftJoin('employees as rep_emp', 'end_user_letter.rep_emp_id', '=', 'rep_emp.emp_id')
             ->leftJoin('job_titles', 'rep_emp.emp_job_code', '=', 'job_titles.id')
             ->select('end_user_letter.*',
                     'emp.emp_name_with_initial AS employee_name',
