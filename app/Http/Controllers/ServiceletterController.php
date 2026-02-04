@@ -20,14 +20,8 @@ class ServiceletterController extends Controller
         if (!$permission) {
             abort(403);
         }
-        $companies=DB::table('companies')->select('*')->get();
-        $employees=DB::table('employees')->select('id','emp_name_with_initial','emp_job_code','emp_join_date','emp_department')
-        ->where('deleted',0)
-        ->where('is_resigned',0)
-        ->get();
         $job_titles=DB::table('job_titles')->select('*')->get();
-        $departments=DB::table('departments')->select('*')->get();
-        return view('EmployeeLetter.service',compact('companies','employees','job_titles','departments'));
+        return view('EmployeeLetter.service',compact('job_titles'));
     }
 
     public function insert(Request $request){
@@ -38,7 +32,7 @@ class ServiceletterController extends Controller
 
         $company=$request->input('company');
         $department=$request->input('department');
-        $employee=$request->input('employee_f');
+        $employee=$request->input('employee');
         $jobtitle=$request->input('jobtitle');
         $joindate=$request->input('emp_join_date');
         $enddate=$request->input('end_date');
@@ -94,9 +88,9 @@ class ServiceletterController extends Controller
         $letters = DB::table('service_letter')
         ->leftjoin('companies', 'service_letter.company_id', '=', 'companies.id')
         ->leftjoin('departments', 'service_letter.department_id', '=', 'departments.id')
-        ->leftjoin('employees', 'service_letter.employee_id', '=', 'employees.id')
+        ->leftjoin('employees', 'service_letter.employee_id', '=', 'employees.emp_id')
         ->leftjoin('job_titles', 'service_letter.jobtitle', '=', 'job_titles.id')
-        ->select('service_letter.*','employees.emp_name_with_initial','employees.calling_name','job_titles.title As emptitle','companies.name As companyname','departments.name As department')
+        ->select('service_letter.*','employees.emp_name_with_initial','employees.calling_name','job_titles.title As emptitle','companies.name As companyname','departments.name As department','employees.emp_id')
         ->whereIn('service_letter.status', [1, 2])
         ->get();
         return Datatables::of($letters)
@@ -140,56 +134,44 @@ class ServiceletterController extends Controller
 
         $id = Request('id');
         if (request()->ajax()){
-        $data = DB::table('service_letter')
-        ->select('service_letter.*')
-        ->where('service_letter.id', $id)
-        ->get(); 
-        return response() ->json(['result'=> $data[0]]);
+            $data = DB::table('service_letter')
+            ->leftjoin('companies', 'service_letter.company_id', '=', 'companies.id')
+            ->leftjoin('departments', 'service_letter.department_id', '=', 'departments.id')
+            ->leftjoin('employees', 'service_letter.employee_id', '=', 'employees.emp_id')
+            ->select('service_letter.*', 
+                    'companies.name as company_name',
+                    'departments.name as department_name',
+                    'employees.emp_name_with_initial as employee_name')
+            ->where('service_letter.id', $id)
+            ->first(); 
+            
+            return response()->json(['result'=> $data]);
         }
     }
 
     public function delete(Request $request)
     {
+        $permission = \Auth::user()->can('Service-letter-delete');
+        if (!$permission) {
+            abort(403);
+        }
+        
         $id = Request('id');
         $form_data = array(
             'status' =>  '3',
-            'updated_by' => Auth::id()
+            'updated_by' => Auth::id(),
+            'updated_at' => Carbon::now()->toDateTimeString()  // Add timestamp
         );
-        Serviceletter::where('id',$id)
-        ->update($form_data);
+        Serviceletter::where('id',$id)->update($form_data);
 
-    return response()->json(['success' => 'The Employee Service is Successfully Deleted']);
-
-    }
-
-    public function getdepartmentfilter($company_id)
-    {
-        $department = DB::table('departments')
-        ->select('departments.*')
-        ->where('company_id', '=', $company_id)
-        ->get();
-
-        return response()->json($department);
-    }
-
-
-    public function getemployeefilter($department_id)
-    {
-        $employee = DB::table('employees')
-        ->select('id', 'emp_name_with_initial', 'emp_department')
-        ->where('emp_department', '=', $department_id)
-        ->where('deleted', 0)
-        ->where('is_resigned', 0)
-        ->get();
-
-        return response()->json($employee);
+        return response()->json(['success' => 'The Employee Service is Successfully Deleted']);
     }
 
     public function getEmployeeDetails($employee_id)
     {
         // Get job title based on employee's job code
         $emp_job_code = DB::table('employees')
-            ->where('id', '=', $employee_id)
+            ->where('emp_id', '=', $employee_id)
             ->value('emp_job_code');
 
         $jobTitle = DB::table('job_titles')
@@ -199,7 +181,7 @@ class ServiceletterController extends Controller
         // Get join date
         $joinDate = DB::table('employees')
             ->select('emp_join_date')
-            ->where('id', '=', $employee_id)
+            ->where('emp_id', '=', $employee_id)
             ->get();
 
         return response()->json([
