@@ -115,7 +115,7 @@ class ResignletterPDFController extends Controller
         $data = $data = DB::table('resign_letter')
         ->leftJoin('companies', 'resign_letter.company_id', '=', 'companies.id')
         ->leftJoin('departments', 'resign_letter.department_id', '=', 'departments.id')
-        ->leftJoin('employees', 'resign_letter.employee_id', '=', 'employees.id')
+        ->leftJoin('employees', 'resign_letter.employee_id', '=', 'employees.emp_id')
         ->leftJoin('job_titles', 'resign_letter.jobtitle', '=', 'job_titles.id')
         ->select('resign_letter.*', 'employees.*', 'job_titles.title As job_title', 'companies.*','departments.name AS department')
         ->where('resign_letter.id', $id)
