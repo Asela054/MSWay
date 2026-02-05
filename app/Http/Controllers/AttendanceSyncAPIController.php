@@ -14,7 +14,6 @@ class AttendanceSyncAPIController extends Controller
 
     public function __construct(AttendancePolicyService $attendancePolicyService)
     {
-        $this->middleware('auth');
 
         $this->attendancePolicyService = $attendancePolicyService;
     }
