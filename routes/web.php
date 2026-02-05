@@ -1608,7 +1608,7 @@ Route::get('/clearanceReport', 'RptClearanceController@clearanceReport')->name('
 Route::get('/clearance_report_list', 'RptClearanceController@clearance_report_list')->name('clearance_report_list');
 Route::post('/update_device_clearance', 'RptClearanceController@updateDeviceClearance')->name('update_device_clearance');
 
-Route::get('/attendancesyncAPI' ,'AttendanceSyncAPIController@index')->name('attendancesyncAPI');
+
 
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');
