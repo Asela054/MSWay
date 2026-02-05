@@ -37,7 +37,7 @@ class AttendanceSyncAPIController extends Controller
 
                  $this->attendancePolicyService->attendanceInsertcsv_txt( $full_emp_id,  $date, $time, $date );
                 
-            }
+                }
             }
     }
 }

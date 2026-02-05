@@ -118,6 +118,9 @@ Route::post('v1/getdetails_attendancedashboard', ['uses' => '\App\Http\Controlle
 Route::post('v1/getemployee_monthlysummery', ['uses' => '\App\Http\Controllers\Api\APIPayrollController@get_employee_monthlysummery', 'as' => 'getemployee_monthlysummery']);
 Route::post('v1/download_payslip', ['uses' => '\App\Http\Controllers\Api\APIPayrollController@downloadEmployeeSalarySheet', 'as' => 'download_payslip']);
  
+
+Route::post('/attendancesyncAPI', ['uses' => '\App\Http\Controllers\AttendanceSyncAPIController@index', 'as' => 'attendancesyncAPI']);
+
 Route::get('/download-pdf/{pdfId}', function($pdfId) {
     $pdfData = session()->get($pdfId);
     
