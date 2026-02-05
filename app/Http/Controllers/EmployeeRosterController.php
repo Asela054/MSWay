@@ -47,6 +47,7 @@ class EmployeeRosterController extends Controller
         $departmentId = $request->get('department_id');
         // Example: Adjust based on your DB schema
         $shifts = ShiftType::select('id', 'shift_code AS code')
+            ->where('deleted', 0)
             ->get();
         return response()->json($shifts);
         
