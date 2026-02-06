@@ -164,7 +164,7 @@
                 width: '100%',
                 allowClear: true,
                 ajax: {
-                    url: '{{url("employee_list_letter")}}',
+                    url: '{{url("employee_list_sel2")}}',
                     dataType: 'json',
                     data: function(params) {
                         return {
@@ -183,7 +183,7 @@
                 width: '100%',
                 allowClear: true,
                 ajax: {
-                    url: '{{url("employee_list_letter")}}',
+                    url: '{{url("employee_list_sel2")}}',
                     dataType: 'json',
                     data: function(params) {
                         return {
@@ -326,10 +326,11 @@
                             $('#ok_button').text('Deleting...');
                         },
                         success: function (data) {
-                             const actionObj = {
+                            $('#dataTable').DataTable().ajax.reload();
+                            const actionObj = {
                                 icon: 'fas fa-trash-alt',
                                 title: '',
-                                message: 'Record Remove Successfully',
+                                message: 'Record Removed Successfully',
                                 url: '',
                                 target: '_blank',
                                 type: 'danger'

@@ -217,7 +217,7 @@ class NDAletterPDFController extends Controller
         $data = DB::table('nda_letter')
             ->leftJoin('companies', 'nda_letter.company_id', '=', 'companies.id')
             ->leftJoin('departments', 'nda_letter.department_id', '=', 'departments.id')
-            ->leftJoin('employees', 'nda_letter.employee_id', '=', 'employees.id')
+            ->leftJoin('employees', 'nda_letter.employee_id', '=', 'employees.emp_id')
             ->select('nda_letter.*', 'employees.*', 'companies.*', 'departments.name AS department')
             ->where('nda_letter.id', $id)
             ->get();

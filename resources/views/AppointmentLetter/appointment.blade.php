@@ -38,10 +38,11 @@
                             </div>
                             <div class="col-12 col-sm-6 col-lg-3 mb-2 mb-lg-0">
                                 <label class="small font-weight-bold text-dark">Job Title</label>
-                                <select name="jobtitle" id="jobtitle" class="form-control form-control-sm">
-                                    <option value="">Please Select</option>
-                                    @foreach ($jobtitles as $jobtitle)
-                                    <option value="{{$jobtitle->id}}">{{$jobtitle->title}}</option>
+                                <select id="jobtitle" name="jobtitle" class="form-control form-control-sm" required>
+                                    <option value="">Select Job Title</option>
+                                    @foreach ($job_titles as $job_title){
+                                        <option value="{{$job_title->id}}" >{{$job_title->title}}</option>
+                                    }  
                                     @endforeach
                                 </select>
                             </div>
@@ -135,7 +136,7 @@
                                 style="width: 100%" id="dataTable">
                                 <thead>
                                     <tr>
-                                        <th>ID </th>
+                                        <th>EMP ID </th>
                                         <th>EMPLOYEE NAME</th>
                                         <th>DATE</th>
                                         <th>JOB TITLE</th>
@@ -190,7 +191,7 @@
                 width: '100%',
                 allowClear: true,
                 ajax: {
-                    url: '{{url("employee_list_letter")}}',
+                    url: '{{url("employee_list_sel2")}}',
                     dataType: 'json',
                     data: function(params) {
                         return {
@@ -247,7 +248,7 @@
                    
                 },
                 columns: [
-                    { data: 'id', name: 'id' },
+                    { data: 'emp_id', name: 'emp_id' },
                     { data: 'employee_display', name: 'employee_display' },
                     { data: 'date', name: 'date' },
                     { data: 'emptitle', name: 'emptitle' },
@@ -291,7 +292,7 @@
                         }
                         // Set Employee
                         if (data.result.employee_id && data.result.emp_name) {
-                            var employeeOption = new Option(data.result.emp_name, data.result.emp_id, true, true);
+                            var employeeOption = new Option(data.result.emp_name, data.result.employee_id, true, true);
                             $('#employee_f').append(employeeOption).trigger('change');
                         }
                         $('#jobtitle').val(data.result.jobtitle);
@@ -370,7 +371,6 @@
                     type: 'POST',
                     dataType: "json",
                     data: {
-                        _token: '{{ csrf_token() }}',
                         id: id
                     },
                     success: function (data) {
@@ -393,9 +393,6 @@
                 if (employeeId) {
                     // Get the selected option's job ID from Select2 data
                     var selectedData = $(this).select2('data')[0];
-                    if (selectedData && selectedData.jobid) {
-                        $('#jobtitle').val(selectedData.jobid);
-                    }
 
                     $.ajax({
                         url: '{!! route("getshiftdetails") !!}',
@@ -413,6 +410,41 @@
                     $('#ontime').val('');
                     $('#offtime').val('');
                     $('#jobtitle').val('');
+                }
+            });
+
+            //job title & date insert filter
+            $('#employee_f').change(function () {
+                var employee_f = $(this).val();
+                if (employee_f !== '') {
+                    $.ajax({
+                        url: '{!! route("servicelettergetdetails", ["id" => "id"]) !!}'.replace('id', employee_f),
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function (data) {
+                            // Job title handling
+                            if (data.jobTitle && data.jobTitle.length > 0) {
+                                $('#jobtitle').empty().append('<option value="' + data.jobTitle[0].id + '">' + data.jobTitle[0].title + '</option>');
+                            } else {
+                                $('#jobtitle').empty().append('<option value="">No job title found</option>');
+                            }
+
+                            // Join date handling
+                            if (data.joinDate && data.joinDate.length > 0) {
+                                $('#emp_join_date').val(data.joinDate[0].emp_join_date);
+                            } else {
+                                $('#emp_join_date').val('');
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error(error);
+                            $('#jobtitle').empty().append('<option value="">Error loading job title</option>');
+                            $('#emp_join_date').val('Error loading join date');
+                        }
+                    });
+                } else {
+                    $('#jobtitle').empty().append('<option value="">Select Job Title</option>');
+                    $('#emp_join_date').val('');
                 }
             });
 

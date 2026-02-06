@@ -20,12 +20,9 @@ class Salary_incletterController extends Controller
         if (!$permission) {
             abort(403);
         }
-        $companies=DB::table('companies')->select('*')->get();
-        $employees=DB::table('employees')->select('id','emp_name_with_initial','emp_job_code','emp_department')->where('deleted',0)->get();
         $job_titles=DB::table('job_titles')->select('*')->get();
-        $departments=DB::table('departments')->select('*')->get();
         $payroll_profiles=DB::table('payroll_profiles')->select('*')->get();
-        return view('EmployeeLetter.salary_inc',compact('companies','employees','job_titles','departments','payroll_profiles'));
+        return view('EmployeeLetter.salary_inc',compact('job_titles','payroll_profiles'));
     }
 
     public function insert(Request $request){
@@ -36,7 +33,7 @@ class Salary_incletterController extends Controller
 
         $company=$request->input('company');
         $department=$request->input('department');
-        $employee=$request->input('employee_f');
+        $employee=$request->input('employee');
         $jobtitle=$request->input('jobtitle');
         $pre_salary=$request->input('basic_salary');
         $new_salary=$request->input('new_salary');
@@ -95,9 +92,9 @@ class Salary_incletterController extends Controller
         $letters = DB::table('salary_inc_letter')
         ->leftjoin('companies', 'salary_inc_letter.company_id', '=', 'companies.id')
         ->leftjoin('departments', 'salary_inc_letter.department_id', '=', 'departments.id')
-        ->leftjoin('employees', 'salary_inc_letter.employee_id', '=', 'employees.id')
+        ->leftjoin('employees', 'salary_inc_letter.employee_id', '=', 'employees.emp_id')
         ->leftjoin('job_titles', 'salary_inc_letter.jobtitle', '=', 'job_titles.id')
-        ->select('salary_inc_letter.*','employees.emp_name_with_initial','employees.calling_name','job_titles.title As emptitle','companies.name As companyname','departments.name As department')
+        ->select('salary_inc_letter.*','employees.emp_name_with_initial','employees.calling_name','job_titles.title As emptitle','companies.name As companyname','departments.name As department', 'employees.emp_id As emp_id')
         ->whereIn('salary_inc_letter.status', [1, 2])
         ->get();
         return Datatables::of($letters)
@@ -139,11 +136,19 @@ class Salary_incletterController extends Controller
 
         $id = Request('id');
         if (request()->ajax()){
-        $data = DB::table('salary_inc_letter')
-        ->select('salary_inc_letter.*')
-        ->where('salary_inc_letter.id', $id)
-        ->get(); 
-        return response() ->json(['result'=> $data[0]]);
+            $data = DB::table('salary_inc_letter')
+                ->leftJoin('companies', 'salary_inc_letter.company_id', '=', 'companies.id')
+                ->leftJoin('departments', 'salary_inc_letter.department_id', '=', 'departments.id')
+                ->leftJoin('employees', 'salary_inc_letter.employee_id', '=', 'employees.emp_id')
+                ->select(
+                    'salary_inc_letter.*',
+                    'companies.name as company_name',
+                    'departments.name as department_name',
+                    'employees.emp_name_with_initial as employee_name'
+                )
+                ->where('salary_inc_letter.id', $id)
+                ->first(); 
+            return response()->json(['result'=> $data]);
         }
     }
 
@@ -161,38 +166,18 @@ class Salary_incletterController extends Controller
 
     }
 
-    public function getdepartmentfilter($company_id)
-    {
-        $department = DB::table('departments')
-        ->select('departments.*')
-        ->where('company_id', '=', $company_id)
-        ->get();
-
-        return response()->json($department);
-    }
-
-    public function getemployeefilter($emp_department)
-    {
-        $employee = DB::table('employees')
-        ->select('employees.*')
-        ->where('emp_department', '=', $emp_department)
-        ->get();
-
-        return response()->json($employee);
-    }
-
     public function getEmployeeDetails($employee_id)
     {
         // Get job title based on employee's job code
         $emp_job_code = DB::table('employees')
-            ->where('id', '=', $employee_id)
+            ->where('emp_id', '=', $employee_id)
             ->value('emp_job_code');
 
         $jobTitle = DB::table('job_titles')
             ->where('id', '=', $emp_job_code)
             ->get();
 
-        // Get join date
+        // Get basic salary
         $basic_salary = DB::table('payroll_profiles')
             ->select('basic_salary')
             ->where('emp_id', '=', $employee_id)

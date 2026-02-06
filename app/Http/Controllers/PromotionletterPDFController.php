@@ -130,7 +130,7 @@ class PromotionletterPDFController extends Controller
         ->leftJoin('companies', 'promotion_letter.company_id', '=', 'companies.id')
         ->leftJoin('departments as old_dept', 'promotion_letter.old_department_id', '=', 'old_dept.id')
         ->leftJoin('departments as new_dept', 'promotion_letter.new_department_id', '=', 'new_dept.id')
-        ->leftJoin('employees', 'promotion_letter.employee_id', '=', 'employees.id')
+        ->leftJoin('employees', 'promotion_letter.employee_id', '=', 'employees.emp_id')
         ->leftJoin('job_titles As old_job', 'promotion_letter.old_jobtitle', '=', 'old_job.id')
         ->leftJoin('job_titles As new_job', 'promotion_letter.new_jobtitle', '=', 'new_job.id')
         ->select('promotion_letter.*', 'employees.*', 'old_job.title As old_jobtitle', 'new_job.title As new_jobtitle', 'companies.*','old_dept.name AS old_department' ,'new_dept.name AS new_department')

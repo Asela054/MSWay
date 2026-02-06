@@ -21,8 +21,8 @@ class ApointmentletterController extends Controller
             abort(403);
         }
         
-        $jobtitles=DB::table('job_titles')->select('*')->get();
-        return view('AppointmentLetter.appointment',compact('jobtitles'));
+        $job_titles=DB::table('job_titles')->select('*')->get();
+        return view('AppointmentLetter.appointment',compact('job_titles'));
     }
 
     public function insert(Request $request){
@@ -97,10 +97,10 @@ class ApointmentletterController extends Controller
     public function letterlist ()
     {
         $letters = DB::table('appointment_letter')
-        ->leftjoin('employees', 'appointment_letter.employee_id', '=', 'employees.id')
+        ->leftjoin('employees', 'appointment_letter.employee_id', '=', 'employees.emp_id')
         ->leftjoin('job_titles', 'appointment_letter.jobtitle', '=', 'job_titles.id')
         ->leftjoin('companies', 'appointment_letter.company_id', '=', 'companies.id')
-        ->select('appointment_letter.*','employees.emp_name_with_initial','employees.calling_name','job_titles.title As emptitle','companies.name As companyname')
+        ->select('appointment_letter.*','employees.emp_name_with_initial','employees.calling_name','job_titles.title As emptitle','companies.name As companyname','employees.emp_id')
         ->whereIn('appointment_letter.status', [1, 2])
         ->get();
         return Datatables::of($letters)
@@ -151,7 +151,7 @@ class ApointmentletterController extends Controller
         if (request()->ajax()){
         $data = DB::table('appointment_letter')
         ->leftjoin('companies', 'appointment_letter.company_id', '=', 'companies.id')
-        ->leftjoin('employees as emp', 'appointment_letter.employee_id', '=', 'emp.id')
+        ->leftjoin('employees as emp', 'appointment_letter.employee_id', '=', 'emp.emp_id')
         ->select(
             'appointment_letter.*',
             'companies.name as company_name',
@@ -192,7 +192,12 @@ class ApointmentletterController extends Controller
 
     public function delete(Request $request)
     {
-        $id = Request('id');
+        $permission = \Auth::user()->can('Appointment-letter-delete');
+        if (!$permission) {
+            abort(403);
+        }
+        
+        $id = $request->input('id');
         $form_data = array(
             'status' =>  '3',
             'updated_by' => Auth::id()
@@ -200,8 +205,7 @@ class ApointmentletterController extends Controller
         Apointmentletter::where('id',$id)
         ->update($form_data);
 
-    return response()->json(['success' => 'The Employee Appointment is Successfully Deleted']);
-
+        return response()->json(['success' => 'The Employee Appointment is Successfully Deleted']);
     }
 
 
@@ -210,9 +214,9 @@ class ApointmentletterController extends Controller
         $employeeId = $request->input('emp_id');
         $employeeShift = DB::table('employees')
             ->join('shift_types', 'employees.emp_shift', '=', 'shift_types.id')
-            ->where('employees.id', $employeeId)
+            ->where('employees.emp_id', $employeeId)
             ->select(
-                'employees.id as employee_id',
+                'employees.emp_id as employee_id',
                 'employees.emp_name_with_initial',
                 'shift_types.id as shift_id',
                 'shift_types.shift_name',
@@ -228,7 +232,12 @@ class ApointmentletterController extends Controller
                     'offduty_time' => $employeeShift->offduty_time
                 ]
             ]);
-        } 
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Employee shift details not found'
+            ], 404);
+        }
     }
 
 

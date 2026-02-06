@@ -21,12 +21,7 @@ class NDAletterController extends Controller
             abort(403);
         }
         $companies=DB::table('companies')->select('*')->get();
-        $employees=DB::table('employees')->select('id','emp_name_with_initial','emp_department')
-        ->where('deleted',0)
-        ->where('is_resigned',0)
-        ->get();
-        $departments=DB::table('departments')->select('*')->get();
-        return view('EmployeeLetter.nda',compact('companies','employees','departments'));
+        return view('EmployeeLetter.nda',compact('companies'));
     }
 
     public function insert(Request $request){
@@ -37,7 +32,7 @@ class NDAletterController extends Controller
 
         $company=$request->input('company');
         $department=$request->input('department');
-        $employee=$request->input('employee_f');
+        $employee=$request->input('employee');
         $effect_date=$request->input('effect_date');
         // $comment1=$request->input('comment1');
         // $comment2=$request->input('comment2');
@@ -87,7 +82,7 @@ class NDAletterController extends Controller
         $letters = DB::table('nda_letter')
         ->leftjoin('companies', 'nda_letter.company_id', '=', 'companies.id')
         ->leftjoin('departments', 'nda_letter.department_id', '=', 'departments.id')
-        ->leftjoin('employees', 'nda_letter.employee_id', '=', 'employees.id')
+        ->leftjoin('employees', 'nda_letter.employee_id', '=', 'employees.emp_id')
         ->select('nda_letter.*','employees.emp_name_with_initial','employees.calling_name', 'employees.emp_id As emp_id', 'companies.name As companyname','departments.name As department')
         ->whereIn('nda_letter.status', [1, 2])
         ->get();
@@ -132,16 +127,27 @@ class NDAletterController extends Controller
 
         $id = Request('id');
         if (request()->ajax()){
-        $data = DB::table('nda_letter')
-        ->select('nda_letter.*')
-        ->where('nda_letter.id', $id)
-        ->get(); 
-        return response() ->json(['result'=> $data[0]]);
+            $data = DB::table('nda_letter')
+                ->leftjoin('companies', 'nda_letter.company_id', '=', 'companies.id')
+                ->leftjoin('departments', 'nda_letter.department_id', '=', 'departments.id')
+                ->leftjoin('employees', 'nda_letter.employee_id', '=', 'employees.emp_id')
+                ->select('nda_letter.*', 
+                        'companies.name as company_name',
+                        'departments.name as department_name',
+                        'employees.emp_name_with_initial as employee_name')
+                ->where('nda_letter.id', $id)
+                ->first(); 
+            return response()->json(['result'=> $data]);
         }
     }
 
     public function delete(Request $request)
     {
+        $permission = \Auth::user()->can('NDA-letter-delete');
+        if (!$permission) {
+            abort(403);
+        }
+        
         $id = Request('id');
         $form_data = array(
             'status' =>  '3',
@@ -150,8 +156,7 @@ class NDAletterController extends Controller
         NDAletter::where('id',$id)
         ->update($form_data);
 
-    return response()->json(['success' => 'The Employee NDA Letter is Successfully Deleted']);
-
+        return response()->json(['success' => 'The Employee NDA Letter is Successfully Deleted']);
     }
 
     public function getdepartmentfilter($company_id)

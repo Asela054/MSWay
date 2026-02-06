@@ -26,41 +26,25 @@
                         <div class="form-row mb-1">
                             <div class="col-md-3">
                                 <label class="small font-weight-bold text-dark">Company</label>
-                                <select name="company" id="company" class="form-control form-control-sm" required>
-                                    <option value="">Please Select</option>
-                                    @foreach ($companies as $company){
-                                        <option value="{{$company->id}}" data-deptid="{{$company->id}}" >{{$company->name}}</option>
-                                    }  
-                                    @endforeach
+                                <select name="company" id="company_f" class="form-control form-control-sm">
                                 </select>
                             </div>
                             <div class="col-md-3">
                                 <label class="small font-weight-bold text-dark">Department</label>
-                                <select name="old_department" id="old_department" class="form-control form-control-sm" required>
-                                    <option value="">Please Select</option>
-                                    @foreach ($departments as $department){
-                                        <option value="{{$department->id}}" >{{$department->name}}</option>
-                                    }  
-                                    @endforeach
+                                <select name="old_department" id="department_f" class="form-control form-control-sm">
                                 </select>
                             </div>
                             <div class="col-md-3">
                                 <label class="small font-weight-bold text-dark">Employee</label>
-                                <select name="employee_f" id="employee_f" class="form-control form-control-sm" required>
-                                    <option value="">Please Select</option>
-                                    @foreach ($employees as $employee){
-                                        <option value="{{$employee->id}}" >{{$employee->emp_name_with_initial}}</option>
-                                    }  
-                                    @endforeach
+                                <select name="employee" id="employee_f" class="form-control form-control-sm">
                                 </select>
                             </div>
                             <div class="col-md-3">
                                 <label class="small font-weight-bold text-dark">Current Job Title</label>
                                 <select id="old_jobtitle" name="old_jobtitle" class="form-control form-control-sm" required>
                                     <option value="">Select Job Title</option>
-                                    @foreach ($job_titles as $job_title){
+                                    @foreach ($job_titles as $job_title)
                                         <option value="{{$job_title->id}}" >{{$job_title->title}}</option>
-                                    }  
                                     @endforeach
                                 </select>
                             </div>
@@ -69,21 +53,15 @@
                                 <label class="small font-weight-bold text-dark">New Job Title</label>
                                 <select name="new_jobtitle" id="new_jobtitle" class="form-control form-control-sm">
                                     <option value="">Please Select</option>
-                                    @foreach ($job_titles as $job_title){
-                                    <option value="{{$job_title->id}}">{{$job_title->title}}</option>
-                                    }
+                                    @foreach ($job_titles as $job_title)
+                                        <option value="{{$job_title->id}}" >{{$job_title->title}}</option>
                                     @endforeach
                                 </select>
                             </div>
 
                             <div class="col-md-3">
                                 <label class="small font-weight-bold text-dark">New Department</label>
-                                <select name="new_department" id="new_department" class="form-control form-control-sm">
-                                    <option value="">Please Select</option>
-                                    @foreach ($departments as $department){
-                                    <option value="{{$department->id}}">{{$department->name}}</option>
-                                    }
-                                    @endforeach
+                                <select name="new_department" id="new_department_f" class="form-control form-control-sm">
                                 </select>
                             </div>
 
@@ -127,7 +105,7 @@
                             <table class="table table-striped table-bordered table-sm small nowrap display" style="width: 100%" id="dataTable">
                                 <thead>
                                 <tr>
-                                    <th>ID </th>
+                                    <th>EMP ID </th>
                                     <th>EMPLOYEE NAME</th>
                                     <th>CURRENT DEPARTMENT</th>
                                     <th>CURRENT JOB TITLE</th>
@@ -157,7 +135,82 @@
             $('#employee_menu_link_icon').addClass('active');
             $('#appointmentletter').addClass('navbtnactive');
 
-            $('#employee_f').select2({ width: '100%' });
+            let company_f = $('#company_f');
+            let department_f = $('#department_f');
+            let employee_f = $('#employee_f');
+            let new_department_f = $('#new_department_f');
+
+            company_f.select2({
+                placeholder: 'Select a Company',
+                width: '100%',
+                allowClear: true,
+                ajax: {
+                    url: '{{url("company_list_sel2")}}',
+                    dataType: 'json',
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1
+                        }
+                    },
+                    cache: true
+                }
+            });
+
+            department_f.select2({
+                placeholder: 'Select a Department',
+                width: '100%',
+                allowClear: true,
+                ajax: {
+                    url: '{{url("department_list_sel2")}}',
+                    dataType: 'json',
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1,
+                            company: company_f.val()
+                        }
+                    },
+                    cache: true
+                }
+            });
+
+            new_department_f.select2({
+                placeholder: 'Select a Department',
+                width: '100%',
+                allowClear: true,
+                ajax: {
+                    url: '{{url("department_list_sel2")}}',
+                    dataType: 'json',
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1,
+                            company: company_f.val()
+                        }
+                    },
+                    cache: true
+                }
+            });
+
+            employee_f.select2({
+                placeholder: 'Select a Employee',
+                width: '100%',
+                allowClear: true,
+                ajax: {
+                    url: '{{url("employee_list_sel2")}}',
+                    dataType: 'json',
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1,
+                            company: company_f.val(),
+                            department: department_f.val()
+                        }
+                    },
+                    cache: true
+                }
+            });
 
             $('#dataTable').DataTable({
                  "destroy": true,
@@ -203,7 +256,7 @@
                    
                 },
                 columns: [
-                    { data: 'id', name: 'id' },
+                    { data: 'emp_id', name: 'emp_id' },
                     { data: 'employee_display', name: 'employee_display' },
                     { data: 'old_department', name: 'old_department' },
                     { data: 'old_emptitle', name: 'old_emptitle' },
@@ -241,12 +294,20 @@
                         dataType: "json",
                         data: {id: id },
                     success: function (data) {
-                        $('#company').val(data.result.company_id);
-                        $('#old_department').val(data.result.old_department_id);
-                        $('#employee_f').val(data.result.employee_id);
+                        var companyOption = new Option(data.result.company_name, data.result.company_id, true, true);
+                        company_f.append(companyOption).trigger('change');
+                        
+                        var deptOption = new Option(data.result.department_name, data.result.old_department_id, true, true);
+                        department_f.append(deptOption).trigger('change');
+                        
+                        var empOption = new Option(data.result.employee_name, data.result.employee_id, true, true);
+                        employee_f.append(empOption).trigger('change');
+
+                        var newDeptOption = new Option(data.result.new_department_name, data.result.new_department_id, true, true);
+                        new_department_f.append(newDeptOption).trigger('change');
+
                         $('#old_jobtitle').val(data.result.old_jobtitle);
                         $('#new_jobtitle').val(data.result.new_jobtitle);
-                        $('#new_department').val(data.result.new_department_id);
                         $('#date').val(data.result.date);
                         $('#comment1').val(data.result.comment1);
                         $('#comment2').val(data.result.comment2);
@@ -331,91 +392,37 @@
             });
         });
 
-
-            // Department filter insert part
-            $('#company').change(function () {
-            var company = $(this).val();
-            if (company !== '') {
+        // Job title filter insert part
+        $('#employee_f').change(function () {
+            var employee_f = $(this).val();
+            if (employee_f !== '') {
                 $.ajax({
-                    url: '{!! route("promotionlettergetdepartmentfilter", ["company_id" => "company_id"]) !!}'
-                        .replace('company_id', company),
+                    url: '{!! route("promotionlettergetjobfilter", ["id" => "id"]) !!}'
+                        .replace('id', employee_f),
                     type: 'GET',
                     dataType: 'json',
                     success: function (data) {
-                        $('#old_department').empty().append('<option value="">Select Department</option>');
-                        $.each(data, function (index, department) {
-                            $('#old_department').append('<option value="' + department.id + '">' + department.name + '</option>');
-                        });
-                    },
-                    error: function (xhr, status, error) {
-                        console.error(error);
-                        $('#old_department').html('<option>Error loading departments</option>'); // Show error message
-                    }
-                });
-            } else {
-                $('#old_department').empty().append('<option value="">Select Departments</option>');
-            }
-            });
-
-            // Employee filter insert part
-            $('#old_department').change(function () {
-            var department = $(this).val();
-            if (department !== '') {
-                $.ajax({
-                    url: '{!! route("servicelettergetemployeefilter", ["emp_department" => "emp_department"]) !!}'
-                        .replace('emp_department', department),
-                    type: 'GET',
-                    dataType: 'json',
-                    success: function (data) {
-                        $('#employee_f').empty().append('<option value="">Select Employee</option>');
-                        $.each(data, function (index, employee) {
-                            $('#employee_f').append('<option value="' + employee.id + '">' + employee.emp_name_with_initial + '</option>');
-                        });
-                    },
-                    error: function (xhr, status, error) {
-                        console.error(error);
-                        $('#employee_f').html('<option>Error loading Employee</option>'); // Show error message
-                    }
-                });
-            } else {
-                $('#employee_f').empty().append('<option value="">Select Employee</option>');
-            }
-            });
-
-            // Job title filter insert part
-            $('#employee_f').change(function () {
-                var employee_f = $(this).val();
-                if (employee_f !== '') {
-                    $.ajax({
-                        url: '{!! route("promotionlettergetjobfilter", ["id" => "id"]) !!}'
-                            .replace('id', employee_f),
-                        type: 'GET',
-                        dataType: 'json',
-                        success: function (data) {
-                            if (data && data.length > 0) {
-                                $('#old_jobtitle').empty().append('<option value="">Select Job Title</option>');
-                                
-                                $.each(data, function (index, jobtitle) {
-                                    $('#old_jobtitle').append('<option value="' + jobtitle.id + '">' + jobtitle.title + '</option>');
-                                });
-                            } else {
-                                $('#old_jobtitle').empty().append('<option value="">No job title found</option>');
-                            }
-                        },
-                        error: function (xhr, status, error) {
-                            console.error(error);
-                            $('#old_jobtitle').empty().append('<option value="">Error loading job title</option>');
+                        if (data && data.length > 0) {
+                            $('#old_jobtitle').empty().append('<option value="' + data[0].id + '">' + data[0].title + '</option>');
+                            
+                        } else {
+                            $('#old_jobtitle').empty().append('<option value="">No job title found</option>');
                         }
-                    });
-                } else {
-                    $('#old_jobtitle').empty().append('<option value="">Select Job Title</option>');  
-                }
-            });
+                    },
+                    error: function (xhr, status, error) {
+                        console.error(error);
+                        $('#old_jobtitle').empty().append('<option value="">Error loading job title</option>');
+                    }
+                });
+            } else {
+                $('#old_jobtitle').empty().append('<option value="">Select Job Title</option>');  
+            }
+        });
 
-            $('#company').change(function () {
-                var deptid = $('#company option:selected').data('deptid');
-                $('#new_department').val(deptid);
-            });
+        $('#company').change(function () {
+            var deptid = $('#company option:selected').data('deptid');
+            $('#new_department').val(deptid);
+        });
 
         });
 
