@@ -53,13 +53,10 @@ Route::post('v1/leave_apply_store', ['uses' => '\App\Http\Controllers\Api\V1Main
 Route::post('v1/leave_apply_list', ['uses' => '\App\Http\Controllers\Api\V1MainController@leave_apply_list', 'as' => 'leave_apply_list']);
 Route::post('v1/leave_apply_update', ['uses' => '\App\Http\Controllers\Api\V1MainController@leave_apply_update', 'as' => 'leave_apply_update']);
 Route::post('v1/leave_apply_delete', ['uses' => '\App\Http\Controllers\Api\V1MainController@leave_apply_delete', 'as' => 'leave_apply_delete']);
-Route::post('v1/leave_apply_approve', ['uses' => '\App\Http\Controllers\Api\V1MainController@leave_apply_approve', 'as' => 'leave_apply_approve']);
-Route::post('v1/leave_apply_approved_list', ['uses' => '\App\Http\Controllers\Api\V1MainController@leave_apply_approved_list', 'as' => 'leave_apply_approved_list']);
 Route::post('v1/employee_salary_for_month', ['uses' => '\App\Http\Controllers\Api\V1MainController@employee_salary_for_month', 'as' => 'employee_salary_for_month']);
 Route::post('v1/employee_working_location', ['uses' => '\App\Http\Controllers\Api\V1MainController@employee_working_location', 'as' => 'employee_working_location']);
 Route::post('v1/GetLeaveListByStatus', ['uses' => '\App\Http\Controllers\Api\V1MainController@GetLeaveListByStatus', 'as' => 'GetLeaveListByStatus']);
 Route::post('v1/GetLeaveDetailsToView', ['uses' => '\App\Http\Controllers\Api\V1MainController@GetLeaveDetailsToView', 'as' => 'GetLeaveDetailsToView']);
-
 Route::post('v1/GetEmployeeProfileDetails', ['uses' => '\App\Http\Controllers\Api\V1MainController@GetEmployeeProfileDetails', 'as' => 'GetEmployeeProfileDetails']);
 Route::post('v1/UpdateLeaveStatus', ['uses' => '\App\Http\Controllers\Api\V1MainController@UpdateLeaveStatus', 'as' => 'UpdateLeaveStatus']);
 
@@ -75,7 +72,6 @@ Route::middleware('auth:api')->group(function () {
     Route::post('v1/GetEmployeeInfo', ['uses' => '\App\Http\Controllers\Api\MainController@getEmployeeInfo', 'as' => 'GetEmployeeInfo']);
     Route::post('v1/GetLeavesList', ['uses' => '\App\Http\Controllers\Api\MainController@GetLeavesList', 'as' => 'GetLeavesList']);
     Route::post('v1/ApplyLeave', ['uses' => '\App\Http\Controllers\Api\MainController@ApplyLeave', 'as' => 'ApplyLeave']);
-    Route::post('v1/GetApplyLeavelist', ['uses' => '\App\Http\Controllers\Api\MainController@GetApplyLeavelist', 'as' => 'GetApplyLeavelist']);
     Route::post('v3/SaveEmoji', ['uses' => '\App\Http\Controllers\Api\V3MainController@SaveEmoji', 'as' => 'SaveEmoji']);
     Route::post('v3/GetEmojies', ['uses' => '\App\Http\Controllers\Api\V3MainController@GetEmojies', 'as' => 'GetEmojies']);
     Route::post('v3/BusLogin', ['uses' => '\App\Http\Controllers\Api\V3MainController@BusLogin', 'as' => 'BusLogin']);
@@ -83,6 +79,10 @@ Route::middleware('auth:api')->group(function () {
     Route::post('v3/EmpAvailabilitySave', ['uses' => '\App\Http\Controllers\Api\V3MainController@EmpAvailabilitySave', 'as' => 'EmpAvailabilitySave']);
     Route::post('v3/GetSavedEmojiCount', ['uses' => '\App\Http\Controllers\Api\V3MainController@GetSavedEmojiCount', 'as' => 'GetSavedEmojiCount']);
 });
+
+//Leave Approve API List
+Route::post('v1/GetApplyLeavelist', ['uses' => '\App\Http\Controllers\Api\APILeaveapproveController@GetApplyLeavelist', 'as' => 'GetApplyLeavelist']);
+Route::post('v1/leave_apply_approve', ['uses' => '\App\Http\Controllers\Api\APILeaveapproveController@leave_apply_approve', 'as' => 'leave_apply_approve']);
 
 // Leave API List
 Route::post('v1/GetLeaveTypes', ['uses' => '\App\Http\Controllers\Api\APILeaveController@GetLeaveTypes', 'as' => 'GetLeaveTypes']);
