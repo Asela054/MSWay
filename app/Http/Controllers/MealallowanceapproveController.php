@@ -73,7 +73,7 @@ class MealallowanceapproveController extends Controller
         // dd(DB::getQueryLog());
 
         foreach ($query as $row) {
-            // if($row->empid==4){
+            // if($row->empid==6){
                 $empId = $row->empid;
                 $empName = $row->emp_name;
                 $payrollProfileId = $row->payroll_profiles_id;
@@ -115,6 +115,7 @@ class MealallowanceapproveController extends Controller
                     $allowancetype = $allowance->allowance_type;
                     $allowanceamount = $allowance->amount;
                     $allowleave = $allowance->allowleave;
+                    $allowanceid = $allowance->id;
                 }
                 else{
                     $allowance = DB::table('salary_adjustments')
@@ -128,6 +129,7 @@ class MealallowanceapproveController extends Controller
                         $allowancetype = $allowance->allowance_type;
                         $allowanceamount = $allowance->amount;
                         $allowleave = $allowance->allowleave;
+                        $allowanceid = $allowance->id;
                     }
 
                 }
@@ -140,7 +142,7 @@ class MealallowanceapproveController extends Controller
                     ->whereBetween('to_date', [$firstDate, $lastDate])  
                     ->first();
                 $approvedallowancestatus = $approvedallowance ? 1 : 0;
-
+                
                 $totalWorkingDays = DB::table('attendances')
                     ->where('emp_id', $empId)
                     ->whereBetween('date', [$firstDate, $lastDate])
@@ -155,10 +157,10 @@ class MealallowanceapproveController extends Controller
                     ->where('emp_id', $empId)
                     ->whereBetween('leave_from', [$firstDate, $lastDate])
                     ->where('status', 'Approved')
-                    ->where('leave_type', '!=', '7')
+                    ->whereNotIn('leave_type', ['7'])
                     ->first();
                 $totalLeaveDays = $leavecount->total_days;
-
+                
                 if($allowancetype==3){//Custom salary adjustment deductions
                     if($allowleave>=$totalLeaveDays){ //Leave within allowed limit
                         $totalamount = $allowanceamount;
@@ -167,35 +169,50 @@ class MealallowanceapproveController extends Controller
                     else{ //Excess leave deductions
                         $salaryadujestinfo = DB::table('custom_leaves')
                             ->select('type','description','deduction')
-                            ->where('idsalary_adjustments', $empId)
+                            ->where('idsalary_adjustments', $allowanceid)
                             ->get();
-
+                        
                         $leaveinfo = DB::table('leaves')
                             ->select(DB::raw('*'))
                             ->whereBetween('leave_from', [$firstDate, $lastDate])
                             ->where('emp_id', $empId)
                             ->where('status', 'Approved')
-                            ->where('leave_type', '!=', '7')
+                            ->whereNotIn('leave_type', ['7'])
                             ->get();
-
+                        
                         $empallowleave = $allowleave;
                         $dates = [];
+                        $daycount = 0;
+
                         foreach($leaveinfo as $leave){
-                            if($leave->no_of_days > $empallowleave){
+                            // if($leave->no_of_days > $empallowleave){
                                 $leavefromdate = $leave->leave_from;
                                 $leavetodate = $leave->leave_to;
 
                                 $leaveperiod = CarbonPeriod::create($leavefromdate, $leavetodate);
-
-                                $daycount = 0;
-                                foreach ($leaveperiod as $date) {
-                                    if($daycount < $empallowleave){
-                                        $daycount++;
-                                        continue;
+                                
+                                foreach ($leaveperiod as $date) { 
+                                    $checkholiday = DB::table('holidays')
+                                        ->where('date', $date)
+                                        ->first();
+                                    
+                                    if($checkholiday){
+                                        $dates[] = $date->format('Y-m-d');
+                                        // $daycount++;
+                                    }
+                                    else if (in_array(Carbon::parse($date)->dayOfWeek, [5, 6, 0])) {
+                                        $dates[] = $date->format('Y-m-d');
+                                        // $daycount++;
                                     }
                                     else{
-                                        $dates[] = $date->format('Y-m-d');
-                                        $daycount++;
+                                        if($daycount < $empallowleave){
+                                            $daycount++;
+                                            continue;
+                                        }
+                                        else{
+                                            $dates[] = $date->format('Y-m-d');
+                                            // $daycount++;
+                                        }
                                     }
                                 }
                                 
@@ -203,16 +220,17 @@ class MealallowanceapproveController extends Controller
 
                                 // $empallowleave = 0;
                                 // $dayno = 0;
-                            }
+                            // }
                         }
-
-                        foreach($dates as $leavedate){
+                        
+                        foreach($dates as $leavedate){ 
                             $dayNumber = Carbon::parse($leavedate)->dayOfWeek;
+                            
                             $checkholiday = DB::table('holidays')
                                 ->where('date', $leavedate)
                                 ->first();
                             
-                            foreach($salaryadujestinfo as $salaryadj){
+                            foreach($salaryadujestinfo as $salaryadj){ 
                                 if($checkholiday){
                                     if($salaryadj->type == 1){
                                         $totalamount += $salaryadj->deduction;
