@@ -533,50 +533,7 @@ class V1MainController extends Controller
         return (new BaseController)->sendResponse($leave, 'Leave Deleted');
     }
 
-    public function leave_apply_approve(Request $request)
-    {
-        $secret_key = $request->secret_key;
-        $auth_status = (new AuthController())->check_auth($secret_key);
-
-        if($auth_status['status'] == false){
-            return (new BaseController())->sendError($auth_status['error'], [], $auth_status['code']);
-        }
-
-        //validate request
-        $validator = \Validator::make($request->all(), [
-            'employee' => 'required',
-            'status' => 'required', // Pending or Approved
-            'leave_approv_person' => 'required',
-            'id' => 'required'
-        ]);
-
-        if($validator->fails()){
-            return (new BaseController())->sendError('Validation Error.', $validator->errors(), '400');
-        }
-
-        $form_data = array(
-            'status' => $request->status,
-            'leave_approv_person' => $request->leave_approv_person,
-            'comment' => $request->comment,
-        );
-
-        Leave::whereId($request->id)->update($form_data);
-
-        return (new BaseController)->sendResponse($request->id, 'Leave Updated');
-    }
-
-    public function leave_apply_approved_list(Request $request)
-    {
-        $secret_key = $request->secret_key;
-        $auth_status = (new AuthController())->check_auth($secret_key);
-
-        if($auth_status['status'] == false){
-            return (new BaseController())->sendError($auth_status['error'], [], $auth_status['code']);
-        }
-
-        $leave_list = \App\Leave::WHERE('status', 'approved')->get();
-        return (new BaseController)->sendResponse($leave_list, 'Leaves List');
-    }
+    
 
 
     public function employee_salary_for_month(Request $request)
