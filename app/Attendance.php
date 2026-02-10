@@ -161,7 +161,9 @@ class Attendance extends Model
             $one_pm_time = $one_pm->format('H:i');
             $today_one = Carbon::parse($date->year.'-'.$date->month.'-'.$date->day.' '.$one_pm_time);
 
-            $work_hours_from = '';
+            $work_hours_from = null;
+            $work_hours_to = null;
+
             if($first_time <= $shift_on) {
                 $work_hours_from = $today_eight;
             }
@@ -173,12 +175,16 @@ class Attendance extends Model
             if($first_time >=$today_twelve && $first_time < $today_one ){
                 $work_hours_from = $today_one;
             }  
-            else if($shift_off >=$today_twelve && $shift_off < $today_one){}
+            else if($shift_off >=$today_twelve && $shift_off < $today_one){
+
+            }
             else{
-                $work_hours_to->subHours(1);
+                if($work_hours_to !== null) {
+                        $work_hours_to->subHours(1);
+                    }
             }
 
-            $work_hours_to = '';
+            
             if($last_time > $shift_off) {
                 $work_hours_to = $shift_off;
             }else{

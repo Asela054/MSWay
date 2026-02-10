@@ -64,29 +64,51 @@
                 </button>
             </div>
             <div class="offcanvas-body">
-                
-                    <form class="form" id="formFilter">
-                    <div class="form-row mb-1">
-                        <div class="col-12">
-                            <label class="small font-weight-bold text-dark">Select Month:</label>
-                            <select id="month" class="form-control form-control-sm" required>
-                                @foreach ($months as $month)
-                                    <option value="{{ $month->format('Y-m') }}" {{ $month->isSameMonth($currentMonth) ? 'selected' : '' }}>
-                                        {{ $month->format('F Y') }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-12 mt-2">
-                            <label class="small font-weight-bold text-dark">Department</label>
-                            <select name="department" id="department" class="form-control form-control-sm" required></select>
-                        </div>
-                        <div class="col-md-12 mt-2">
-                            <button type="button" class="btn btn-primary btn-sm filter-btn " id="btn-filter"> Filter</button>
-                        </div>
-                    </div>
-                </form>
-                
+                  <ul class="list-unstyled">
+                      <form class="form-horizontal" id="formFilter">
+                        
+                              <li class="mb-2">
+                                  <div class="col-md-12">
+                                      <label class="small font-weight-bolder text-dark">Company</label>
+                                      <select name="company" id="company" class="form-control form-control-sm" required>
+                                      </select>
+                                  </div>
+                              </li>
+                              <li class="mb-2">
+                                  <div class="col-12 mt-2">
+                                      <label class="small font-weight-bolder text-dark">Department</label>
+                                      <select name="department" id="department" class="form-control form-control-sm"
+                                          required></select>
+                                  </div>
+                              </li>
+                              <li class="mb-2">
+                                  <div class="col-12">
+                                      <label class="small font-weight-bolder text-dark">Select Month:</label>
+                                      <select id="month" class="form-control form-control-sm" required>
+                                          @foreach ($months as $month)
+                                          <option value="{{ $month->format('Y-m') }}"
+                                              {{ $month->isSameMonth($currentMonth) ? 'selected' : '' }}>
+                                              {{ $month->format('F Y') }}
+                                          </option>
+                                          @endforeach
+                                      </select>
+                                  </div>
+                              </li>
+                              <li class="mb-2">
+                                  <div class="col-md-12 d-flex justify-content-between">
+                                      <button type="button" class="btn btn-danger btn-sm filter-btn px-3"
+                                          id="btn-reset">
+                                          <i class="fas fa-redo mr-1"></i> Reset
+                                      </button>
+                                      <button type="submit" class="btn btn-primary btn-sm filter-btn px-3"
+                                          id="btn-filter">
+                                          <i class="fas fa-search mr-2"></i>Search
+                                      </button>
+                                  </div>
+                              </li>
+                     
+                      </form>
+                  </ul>
             </div>
         </div>
     </div>
@@ -105,6 +127,26 @@ $(document).ready(function() {
     let employees = [];
     let shiftOptions = [];
 
+     let company = $('#company');
+
+     company.select2({
+        placeholder: 'Select...',
+        width: '100%',
+        allowClear: true,
+        ajax: {
+            url: '{{url("company_list_sel2")}}',
+            dataType: 'json',
+            data: function(params) {
+                return {
+                    term: params.term || '',
+                    page: params.page || 1
+                }
+            },
+            cache: true
+        }
+    });
+
+
     department.select2({
         placeholder: 'Select...',
         width: '100%',
@@ -116,7 +158,7 @@ $(document).ready(function() {
                 return {
                     term: params.term || '',
                     page: params.page || 1,
-                    company: 1
+                     company: company.val()
                 };
             },
             cache: true
@@ -138,6 +180,8 @@ $(document).ready(function() {
         const departmentId = $('#department').val();
         const selectedMonth = $('#month').val();
 
+         closeOffcanvasSmoothly();
+
         if (!departmentId) return;
 
         $.ajax({
@@ -146,7 +190,7 @@ $(document).ready(function() {
             success: function(data) {
                 employees = data;
                 loadRosterData(departmentId, selectedMonth).then(rosterData => {
-                    generateTable(selectedMonth, rosterData);
+                generateTable(selectedMonth, rosterData);
                 });
                 $('#save-roster').removeClass('d-none');
             },
