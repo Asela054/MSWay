@@ -14,10 +14,8 @@ class LeavepolicyService
     {
 
         $leaves = DB::table('job_categories')->where('id', $jobCategoryId)->first();
-
-        $jobleaves = DB::table('job_category_leaves')->where('job_id', $jobCategoryId)->where('leave_id',1)->first();
-
-        if($jobleaves && $leaves->annual_leaves > 0){
+        
+        if($leaves && $leaves->annual_leaves > 0){
 
                 $employee_join_date = Carbon::parse($empJoinDate);
                 $current_date = Carbon::now();
@@ -91,10 +89,7 @@ class LeavepolicyService
       public function calculateCasualLeaves($empJoinDate, $jobCategoryId)
     {
          $leaves = DB::table('job_categories')->where('id', $jobCategoryId)->first();
-
-         $jobleaves = DB::table('job_category_leaves')->where('job_id', $jobCategoryId)->where('leave_id',2)->first();
-
-        if($jobleaves && $leaves->casual_leaves > 0){
+        if($leaves && $leaves->casual_leaves > 0){
                 $join_date = new DateTime($empJoinDate);
                 $current_date = new DateTime();
                 $interval = $join_date->diff($current_date);
@@ -130,16 +125,6 @@ class LeavepolicyService
         return $leaves ? $leaves->medical_leaves : 0;
     }
 
-      public function getweeklyLeaves($jobCategoryId)
-    {
-       $jobleaves = DB::table('job_category_leaves')->where('job_id', $jobCategoryId)->where('leave_id',8)->first();
-        if($jobleaves){
-            
-             $weekly_leaves = 4;
-        }else{
-             $weekly_leaves = 0;
-        }
-        return $weekly_leaves;
-    }
+     
 
 }
