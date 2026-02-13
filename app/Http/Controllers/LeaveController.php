@@ -301,6 +301,10 @@ class LeaveController extends Controller
 
             $current_year_taken_med = (new \App\Leave)->taken_medical_leaves($empid, $formated_from_date, $formated_fromto_date);
 
+            $month_from_date = date('Y-m').'-01';
+            $month_to_date = date('Y-m-t');
+            $current_weekly_taken = (new \App\Leave)->taken_weekly_leaves($empid, $month_from_date, $month_to_date);
+
 
             $leave_msg = '';
 
@@ -314,13 +318,20 @@ class LeaveController extends Controller
              // medical leave calculation
             $medical_leaves = $this->leavePolicyService->getMedicalLeaves($employee->job_category_id);
 
+            $weekly_leaves = $this->leavePolicyService->getweeklyLeaves($employee->job_category_id);
+
+
             $total_no_of_annual_leaves = $annual_leaves;
             $total_no_of_casual_leaves = $casual_leaves;
             $total_no_of_med_leaves = $medical_leaves;
+            $total_no_of_weekly_leaves = $weekly_leaves;
 
             $available_no_of_annual_leaves = $total_no_of_annual_leaves - $current_year_taken_a_l;
             $available_no_of_casual_leaves = $total_no_of_casual_leaves - $current_year_taken_c_l;
             $available_no_of_med_leaves = $total_no_of_med_leaves - $current_year_taken_med;
+
+            $available_no_of_weekly_leaves = $total_no_of_weekly_leaves - $current_weekly_taken;
+
 
             if($employee->emp_status != 1){
                 $emp_status = DB::table('employment_statuses')->where('id', $employee->emp_status)->first();
@@ -331,12 +342,15 @@ class LeaveController extends Controller
                 "total_no_of_annual_leaves" => $total_no_of_annual_leaves,
                 "total_no_of_casual_leaves" => $total_no_of_casual_leaves,
                 "total_no_of_med_leaves" => $total_no_of_med_leaves,
+                "total_no_of_weekly_leaves" => $total_no_of_weekly_leaves,
                 "total_taken_annual_leaves" => $current_year_taken_a_l,
                 "total_taken_casual_leaves" => $current_year_taken_c_l,
                 "total_taken_med_leaves" => $current_year_taken_med,
+                "total_taken_weekly_leaves" => $current_weekly_taken,
                 "available_no_of_annual_leaves" => $available_no_of_annual_leaves,
                 "available_no_of_casual_leaves" => $available_no_of_casual_leaves,
                 "available_no_of_med_leaves" => $available_no_of_med_leaves,
+                "available_no_of_weekly_leaves" => $available_no_of_weekly_leaves,
                 "leave_msg" => $leave_msg
             );
             return response()->json($results);
