@@ -176,6 +176,34 @@ class Leave extends Model
             return $current_year_taken_med;
     }
 
+    public function taken_weekly_leaves($emp_id,$from_date,$to_date)
+    {
+         $weekly_leaves = DB::table('leaves')
+                        ->where('emp_id', $emp_id)
+                        ->whereBetween('leave_from', [$from_date, $to_date])
+                        ->where('leave_type', '8')
+                        ->get();
+
+            $total_days = 0;
+
+          foreach ($weekly_leaves as $leave) {
+                $leave_from = Carbon::parse($leave->leave_from);
+                $leave_to = Carbon::parse($leave->leave_to);
+                
+                // For monthly reset, we need to handle leaves that might span across months
+                if ($leave_from->month != $leave_to->month || $leave_from->year != $leave_to->year) {
+                    // If leave spans across months, only count days in the current month
+                    $end_of_month = Carbon::parse($from_date)->endOfMonth();
+                    $total_days += $leave_from->diffInDays($end_of_month) + 1;
+                } else {
+                    $total_days += $leave->no_of_days;
+                }
+            }
+            
+         return $total_days;
+
+    }
+
 
 
 

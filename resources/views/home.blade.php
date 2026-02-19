@@ -134,6 +134,22 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="row row-cols-1 row-cols-md-2 mt-2" style ="padding-top:50px;">
+                    <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                        <div class="card h-100 mt-sm-0 mt-3 d-none d-sm-block">
+                            <div class="card-body p-3">
+                                <h5 class="title-style"><span>DEPARTMENT WISE ATTENDANCE AND OT SUMMARY</span></h5>
+                                <div id="attendance-table-container">
+                                    <div class="text-center py-5">
+                                        <p class="mt-2">Loading attendance data...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -1128,6 +1144,179 @@ function getattend_linechart(){
 <script>
 $(document).ready( function () {
     $('#empTable').DataTable();
+
+        // Function to load attendance data via AJAX
+    function loadAttendanceData() {
+        $.ajax({
+            url: "{{ route('getattendancesummarychart') }}", 
+            method: "GET",
+            dataType: "json",
+            beforeSend: function() {
+                $('#attendance-table-container').html(`
+                    <div class="text-center py-5">
+                        <p class="mt-2">Loading attendance data...</p>
+                    </div>
+                `);
+            },
+            success: function(response) {
+                if (response.success) {
+                    renderAttendanceTable(response.data, response.dates);
+                } else {
+                    $('#attendance-table-container').html(`
+                        <div class="text-center py-5 text-danger">
+                            <i class="fas fa-exclamation-circle fa-3x"></i>
+                            <p class="mt-2">Failed to load attendance data</p>
+                        </div>
+                    `);
+                }
+            },
+            error: function(xhr, status, error) {
+                $('#attendance-table-container').html(`
+                    <div class="text-center py-5 text-danger">
+                        <i class="fas fa-exclamation-circle fa-3x"></i>
+                        <p class="mt-2">Error loading data: ${error}</p>
+                    </div>
+                `);
+            }
+        });
+    }
+
+    // Function to render the attendance table with Today/Yesterday column
+    function renderAttendanceTable(data, dates) 
+    {
+        if (!data || Object.keys(data).length === 0) {
+            $('#attendance-table-container').html(`
+                <div class="text-center py-5 text-muted">
+                    <i class="fas fa-inbox fa-3x"></i>
+                    <p class="mt-2">No attendance data available</p>
+                </div>
+            `);
+            return;
+        }
+
+        // Get company names
+        const companies = Object.keys(data);
+        
+        // Create table header
+        let tableHtml = `
+        <div class="card-body">
+            <div class="center-block fix-width scroll-inner">
+                <table class="table table-striped table-bordered table-sm small nowrap w-100">
+                    <thead>
+                        <tr>
+                            <th rowspan="3"></th>
+                            <th rowspan="3"></th>
+        `;
+        
+        // Add company headers with colspan based on number of departments
+        companies.forEach(company => {
+            const departmentCount = Object.keys(data[company].departments).length;
+            tableHtml += `<th class="text-center" colspan="${departmentCount}">${data[company].company_name}</th>`;
+        });
+        
+        tableHtml += `</tr><tr>`;
+        
+        // Add department headers under each company
+        companies.forEach(company => {
+            const departments = Object.keys(data[company].departments);
+            departments.forEach(dept => {
+                tableHtml += `<th class="text-center">${dept}</th>`;
+            });
+        });
+        
+        tableHtml += `</tr></thead><tbody>`;
+        
+        // Add rows for each metric
+        const metrics = [
+            { key: 'total_employees', label: 'TOTAL EMPLOYEES', hasDays: false },
+            { key: 'attendance', label: 'ATTENDANCE', hasDays: true },
+            { key: 'late_attendance', label: 'LATE ATTENDANCE', hasDays: true },
+            { key: 'absent', label: 'ABSENT', hasDays: true },
+            { key: 'ot_persons', label: '# OF PERSONS DONE OT', hasDays: false, yesterdayOnly: true },
+            { key: 'normal_ot_hours', label: 'NOTYH (HOURS)', hasDays: false, yesterdayOnly: true },
+            { key: 'normal_ot_amount', label: 'NOTY (NORMAL OT)', hasDays: false, yesterdayOnly: true },
+            { key: 'double_ot_hours', label: 'DOTYH (HOURS)', hasDays: false, yesterdayOnly: true },
+            { key: 'double_ot_amount', label: 'DOTY (DOUBLE OT)', hasDays: false, yesterdayOnly: true },
+            { key: 'total_ot_hours', label: 'TOTH (HOURS)', hasDays: false, yesterdayOnly: true },
+            { key: 'total_ot_amount', label: 'TOTAL OTY', hasDays: false, yesterdayOnly: true }
+        ];
+        
+        metrics.forEach(metric => {
+            if (metric.hasDays) {
+                // For metrics with both today and yesterday values
+                tableHtml += `<tr><td rowspan="2">${metric.label}</td>`;
+                tableHtml += `<td>TODAY</td>`;
+                
+                companies.forEach(company => {
+                    const departments = Object.keys(data[company].departments);
+                    departments.forEach(dept => {
+                        const todayValue = data[company].departments[dept][`${metric.key}_today`] || 0;
+                        tableHtml += `<td class="text-center">${todayValue}</td>`;
+                    });
+                });
+                
+                tableHtml += `</tr><tr><td>YESTERDAY</td>`;
+                
+                companies.forEach(company => {
+                    const departments = Object.keys(data[company].departments);
+                    departments.forEach(dept => {
+                        const yesterdayValue = data[company].departments[dept][`${metric.key}_yesterday`] || 0;
+                        tableHtml += `<td class="text-center">${yesterdayValue}</td>`;
+                    });
+                });
+                
+                tableHtml += `</tr>`;
+            } else if (metric.yesterdayOnly) {
+                // For metrics with only yesterday values
+                tableHtml += `<tr><td>${metric.label}</td>`;
+                tableHtml += `<td>YESTERDAY</td>`;
+                
+                companies.forEach(company => {
+                    const departments = Object.keys(data[company].departments);
+                    departments.forEach(dept => {
+                        const yesterdayValue = data[company].departments[dept][`${metric.key}_yesterday`] || 0;
+                        
+                        // Format numbers with commas and two decimal places for amounts
+                        let displayValue = yesterdayValue;
+                        if (metric.key.includes('amount')) {
+                            displayValue = parseFloat(yesterdayValue).toLocaleString('en-US', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                            });
+                        }
+                        
+                        tableHtml += `<td class="text-center">${displayValue}</td>`;
+                    });
+                });
+                
+                tableHtml += `</tr>`;
+            } else {
+                // For metrics with no day separation (like total employees)
+                tableHtml += `<tr><td>${metric.label}</td>`;
+                tableHtml += `<td></td>`;
+                
+                companies.forEach(company => {
+                    const departments = Object.keys(data[company].departments);
+                    departments.forEach(dept => {
+                        const value = data[company].departments[dept][metric.key] || 0;
+                        tableHtml += `<td class="text-center">${value}</td>`;
+                    });
+                });
+                
+                tableHtml += `</tr>`;
+            }
+        });
+        
+        tableHtml += `</tbody></table></div></div>`;
+        
+        $('#attendance-table-container').html(tableHtml);
+    }
+    
+
+    // Load data when page is ready
+    loadAttendanceData();
+
+
 } );
 </script>
 
