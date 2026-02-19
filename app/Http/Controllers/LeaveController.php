@@ -301,8 +301,20 @@ class LeaveController extends Controller
 
             $current_year_taken_med = (new \App\Leave)->taken_medical_leaves($empid, $formated_from_date, $formated_fromto_date);
 
-            $month_from_date = date('Y-m').'-01';
-            $month_to_date = date('Y-m-t');
+
+            
+            $fromdate = $request->fromdate;
+            $todate = $request->todate;
+
+            if (empty($fromdate) || empty($todate)) {
+                // Use current month if dates not provided
+                $month_from_date = date('Y-m-01');
+                $month_to_date = date('Y-m-t');
+            } else {
+                $month_from_date = Carbon::parse($fromdate)->startOfMonth()->format('Y-m-d');
+                $month_to_date = $todate;
+            }
+
             $current_weekly_taken = (new \App\Leave)->taken_weekly_leaves($empid, $month_from_date, $month_to_date);
 
 
