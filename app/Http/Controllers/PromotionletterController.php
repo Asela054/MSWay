@@ -20,11 +20,8 @@ class PromotionletterController extends Controller
         if (!$permission) {
             abort(403);
         }
-        $companies=DB::table('companies')->select('*')->get();
-        $employees=DB::table('employees')->select('id','emp_name_with_initial','emp_job_code','emp_join_date','emp_department')->where('deleted',0)->get();
         $job_titles=DB::table('job_titles')->select('*')->get();
-        $departments=DB::table('departments')->select('*')->get();
-        return view('EmployeeLetter.promotion',compact('companies','employees','job_titles','departments'));
+        return view('EmployeeLetter.promotion',compact('job_titles'));
     }
 
     public function insert(Request $request){
@@ -34,7 +31,7 @@ class PromotionletterController extends Controller
         }
 
         $company=$request->input('company');
-        $employee=$request->input('employee_f');
+        $employee=$request->input('employee');
         $old_department=$request->input('old_department');
         $new_department=$request->input('new_department');
         $old_jobtitle=$request->input('old_jobtitle');
@@ -94,10 +91,10 @@ class PromotionletterController extends Controller
         $letters = DB::table('promotion_letter')
         ->leftjoin('companies', 'promotion_letter.company_id', '=', 'companies.id')
         ->leftJoin('departments', 'promotion_letter.old_department_id', '=', 'departments.id')
-        ->leftjoin('employees', 'promotion_letter.employee_id', '=', 'employees.id')
+        ->leftjoin('employees', 'promotion_letter.employee_id', '=', 'employees.emp_id')
         ->leftjoin('job_titles as old_titles', 'promotion_letter.old_jobtitle', '=', 'old_titles.id')
         ->leftjoin('job_titles as new_titles', 'promotion_letter.new_jobtitle', '=', 'new_titles.id')
-        ->select('promotion_letter.*','employees.emp_name_with_initial','employees.calling_name','old_titles.title As old_emptitle' ,'new_titles.title As new_emptitle','companies.name As companyname','departments.name as old_department')
+        ->select('promotion_letter.*','employees.emp_name_with_initial','employees.calling_name','old_titles.title As old_emptitle' ,'new_titles.title As new_emptitle','companies.name As companyname','departments.name as old_department','employees.emp_id as emp_id')
         ->whereIn('promotion_letter.status', [1, 2])
         ->get();
         return Datatables::of($letters)
@@ -138,11 +135,22 @@ class PromotionletterController extends Controller
 
         $id = Request('id');
         if (request()->ajax()){
-        $data = DB::table('promotion_letter')
-        ->select('promotion_letter.*')
-        ->where('promotion_letter.id', $id)
-        ->get(); 
-        return response() ->json(['result'=> $data[0]]);
+            $data = DB::table('promotion_letter')
+            ->leftJoin('companies', 'promotion_letter.company_id', '=', 'companies.id')
+            ->leftJoin('departments as old_dept', 'promotion_letter.old_department_id', '=', 'old_dept.id')
+            ->leftJoin('departments as new_dept', 'promotion_letter.new_department_id', '=', 'new_dept.id')
+            ->leftJoin('employees', 'promotion_letter.employee_id', '=', 'employees.id')
+            ->select(
+                'promotion_letter.*',
+                'companies.name as company_name',
+                'old_dept.name as department_name',
+                'new_dept.name as new_department_name',
+                'employees.emp_name_with_initial as employee_name'
+            )
+            ->where('promotion_letter.id', $id)
+            ->first(); 
+            
+            return response()->json(['result'=> $data]);
         }
     }
 
@@ -161,39 +169,17 @@ class PromotionletterController extends Controller
 
     }
 
-    public function getdepartmentfilter($company_id)
-    {
-        $department = DB::table('departments')
-        ->select('departments.*')
-        ->where('company_id', '=', $company_id)
-        ->get();
-
-        return response()->json($department);
-    }
-
-    public function getemployeefilter($emp_department)
-    {
-        $employee = DB::table('employees')
-        ->select('employees.*')
-        ->where('emp_department', '=', $emp_department)
-        ->get();
-
-        return response()->json($employee);
-    }
-
     public function getjobfilter($employee_id)
     {
         $emp_job_code = DB::table('employees')
-            ->where('id', '=', $employee_id)
+            ->where('emp_id', '=', $employee_id)
             ->value('emp_job_code'); 
 
         $jobtitle = DB::table('job_titles')
             ->where('id', '=', $emp_job_code)
             ->get();
 
-
         return response()->json($jobtitle);
-        
     }
 
 

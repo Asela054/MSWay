@@ -79,7 +79,7 @@ class EndUserletterController extends Controller
         $letters = DB::table('end_user_letter')
         ->leftjoin('companies', 'end_user_letter.company_id', '=', 'companies.id')
         ->leftjoin('departments', 'end_user_letter.department_id', '=', 'departments.id')
-        ->leftjoin('employees', 'end_user_letter.emp_id', '=', 'employees.id')
+        ->leftjoin('employees', 'end_user_letter.emp_id', '=', 'employees.emp_id')
         ->select('end_user_letter.*','employees.emp_name_with_initial','employees.calling_name', 'employees.emp_id As emp_id', 'companies.name As companyname','departments.name As department')
         ->whereIn('end_user_letter.status', [1, 2])
         ->get();
@@ -127,8 +127,8 @@ class EndUserletterController extends Controller
             $data = DB::table('end_user_letter')
             ->leftjoin('companies', 'end_user_letter.company_id', '=', 'companies.id')
             ->leftjoin('departments', 'end_user_letter.department_id', '=', 'departments.id')
-            ->leftjoin('employees as emp', 'end_user_letter.emp_id', '=', 'emp.id')
-            ->leftjoin('employees as rep_emp', 'end_user_letter.rep_emp_id', '=', 'rep_emp.id')
+            ->leftjoin('employees as emp', 'end_user_letter.emp_id', '=', 'emp.emp_id')
+            ->leftjoin('employees as rep_emp', 'end_user_letter.rep_emp_id', '=', 'rep_emp.emp_id')
             ->select(
                 'end_user_letter.*',
                 'companies.name as company_name',
@@ -145,6 +145,11 @@ class EndUserletterController extends Controller
 
     public function delete(Request $request)
     {
+        $permission = \Auth::user()->can('end-user-letter-delete');
+        if (!$permission) {
+            abort(403);
+        }
+
         $id = Request('id');
         $form_data = array(
             'status' =>  '3',
@@ -160,7 +165,6 @@ class EndUserletterController extends Controller
     public function getDevices($id)
     {
         $devices = DB::table('employee_assigned_devices')
-            ->join('employees', 'employees.id', '=', 'employee_assigned_devices.emp_id')
             ->where('employee_assigned_devices.emp_id', $id)
             ->select(
                 'employee_assigned_devices.device_type',
@@ -172,7 +176,5 @@ class EndUserletterController extends Controller
 
         return response()->json($devices);
     }
-
-
 
 }

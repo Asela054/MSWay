@@ -12,7 +12,7 @@
                 <div class="page-header-content py-3 px-2">
                     <h1 class="page-header-title ">
                         <div class="page-header-icon"><i class="fa-light fa-users-gear"></i></div>
-                        <span>Promotion Letter</span>
+                        <span>Job Confirmation Letter</span>
                     </h1>
                 </div>
             </div>
@@ -21,7 +21,7 @@
         <div class="container-fluid mt-2 p-0 p-2">
             <div class="card mb-2">
                 <div class="card-body">
-                    <form method="POST" action="{{ route('promotionletterinsert') }}"  class="form-horizontal">
+                    <form method="POST" action="{{ route('jobconfirmationletterinsert') }}"  class="form-horizontal">
                         {{ csrf_field() }}
                         <div class="form-row mb-1">
                             <div class="col-md-3">
@@ -31,7 +31,7 @@
                             </div>
                             <div class="col-md-3">
                                 <label class="small font-weight-bold text-dark">Department</label>
-                                <select name="old_department" id="department_f" class="form-control form-control-sm">
+                                <select name="department" id="department_f" class="form-control form-control-sm">
                                 </select>
                             </div>
                             <div class="col-md-3">
@@ -40,53 +40,43 @@
                                 </select>
                             </div>
                             <div class="col-md-3">
-                                <label class="small font-weight-bold text-dark">Current Job Title</label>
-                                <select id="old_jobtitle" name="old_jobtitle" class="form-control form-control-sm" required>
+                                <label class="small font-weight-bold text-dark">Job Title</label>
+                                <select id="jobtitle" name="jobtitle" class="form-control form-control-sm" required>
                                     <option value="">Select Job Title</option>
                                     @foreach ($job_titles as $job_title)
                                         <option value="{{$job_title->id}}" >{{$job_title->title}}</option>
                                     @endforeach
                                 </select>
                             </div>
-                            
-                            <div class="col-md-3">
-                                <label class="small font-weight-bold text-dark">New Job Title</label>
-                                <select name="new_jobtitle" id="new_jobtitle" class="form-control form-control-sm">
-                                    <option value="">Please Select</option>
-                                    @foreach ($job_titles as $job_title)
-                                        <option value="{{$job_title->id}}" >{{$job_title->title}}</option>
-                                    @endforeach
-                                </select>
-                            </div>
 
                             <div class="col-md-3">
-                                <label class="small font-weight-bold text-dark">New Department</label>
-                                <select name="new_department" id="new_department_f" class="form-control form-control-sm">
-                                </select>
+                                    <label class="small font-weight-bold text-dark">Probation Start Date</label>
+                                    <div class="input-group input-group-sm mb-3">
+                                        <input type="date" id="start_date" name="start_date" class="form-control form-control-sm" required>
+                                    </div>
                             </div>
-
 
                             <div class="col-md-3 ">
-                                <label class="small font-weight-bold text-dark">Date</label>
+                                <label class="small font-weight-bold text-dark">Probation End Date</label>
                                 <div class="input-group input-group-sm mb-3">
-                                    <input type="date" id="date" name="date" class="form-control form-control-sm" placeholder="yyyy-mm-dd" required>
+                                    <input type="date" id="end_date" name="end_date" class="form-control form-control-sm" placeholder="yyyy-mm-dd" required>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="small font-weight-bold text-dark">Confirmation Date</label>
+                                <div class="input-group input-group-sm mb-3">
+                                    <input type="date" id="confirmation_date" name="confirmation_date" class="form-control form-control-sm" placeholder="yyyy-mm-dd" required>
                                 </div>
                             </div>
 
                             <div class="col-md-3 ">
                                 <label class="small font-weight-bold text-dark">Comment</label>
                                 <div class="input-group input-group-sm mb-3">
-                                    <input type="text" id="comment1" name="comment1" class="form-control form-control-sm" placeholder="review">
+                                    <input type="text" id="comment" name="comment" class="form-control form-control-sm" placeholder="review">
                                 </div>
                             </div>
-
-                            <!-- <div class="col-md-3 ">
-                                <label class="small font-weight-bold text-dark">Comment 02</label>
-                                <div class="input-group input-group-sm mb-3">
-                                    <input type="text" id="comment2" name="comment2" class="form-control form-control-sm" placeholder="review">
-                                </div>
-                            </div> -->
-                            
+                           
                         </div>
                         <input type="hidden" name="recordOption" id="recordOption" value="1">
                         <input type="hidden" name="recordID" id="recordID" value="">
@@ -107,10 +97,9 @@
                                 <tr>
                                     <th>EMP ID </th>
                                     <th>EMPLOYEE NAME</th>
-                                    <th>CURRENT DEPARTMENT</th>
-                                    <th>CURRENT JOB TITLE</th>
-                                    <th>NEW JOB TITLE</th>
-                                    <th>COMPANY</th>
+                                    <th>DEPARTMENT</th>
+                                    <th>JOB TITLE</th>
+                                    <th>CONFIRMATION DATE</th>
                                     <th class="text-right">ACTION</th>
                                 </tr>
                                 </thead>
@@ -133,12 +122,11 @@
 
             $('#employee_menu_link').addClass('active');
             $('#employee_menu_link_icon').addClass('active');
-            $('#appointmentletter').addClass('navbtnactive');
+            $('#job_confirmation').addClass('navbtnactive');
 
             let company_f = $('#company_f');
             let department_f = $('#department_f');
             let employee_f = $('#employee_f');
-            let new_department_f = $('#new_department_f');
 
             company_f.select2({
                 placeholder: 'Select a Company',
@@ -158,24 +146,6 @@
             });
 
             department_f.select2({
-                placeholder: 'Select a Department',
-                width: '100%',
-                allowClear: true,
-                ajax: {
-                    url: '{{url("department_list_sel2")}}',
-                    dataType: 'json',
-                    data: function(params) {
-                        return {
-                            term: params.term || '',
-                            page: params.page || 1,
-                            company: company_f.val()
-                        }
-                    },
-                    cache: true
-                }
-            });
-
-            new_department_f.select2({
                 placeholder: 'Select a Department',
                 width: '100%',
                 allowClear: true,
@@ -213,7 +183,7 @@
             });
 
             $('#dataTable').DataTable({
-                 "destroy": true,
+               "destroy": true,
                 "processing": true,
                 "serverSide": true,
                 dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
@@ -221,13 +191,13 @@
                 "buttons": [{
                         extend: 'csv',
                         className: 'btn btn-success btn-sm',
-                        title: 'Promotion Letter',
+                        title: 'Service Letter',
                         text: '<i class="fas fa-file-csv mr-2"></i> CSV',
                     },
                     { 
                         extend: 'pdf', 
                         className: 'btn btn-danger btn-sm', 
-                        title: 'Promotion Letter', 
+                        title: 'Service Letter', 
                         text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
                         orientation: 'portrait', 
                         pageSize: 'legal', 
@@ -237,7 +207,7 @@
                     },
                     {
                         extend: 'print',
-                        title: 'Promotion Letter',
+                        title: 'Service Letter',
                         className: 'btn btn-primary btn-sm',
                         text: '<i class="fas fa-print mr-2"></i> Print',
                         customize: function(win) {
@@ -252,16 +222,15 @@
                     [0, "desc"]
                 ],
                 ajax: {
-                    "url": "{!! route('promotionletterlist') !!}",
+                    "url": "{!! route('jobconfirmationletterlist') !!}",
                    
                 },
                 columns: [
                     { data: 'emp_id', name: 'emp_id' },
                     { data: 'employee_display', name: 'employee_display' },
-                    { data: 'old_department', name: 'old_department' },
-                    { data: 'old_emptitle', name: 'old_emptitle' },
-                    { data: 'new_emptitle', name: 'new_emptitle' },
-                    { data: 'companyname', name: 'companyname' },
+                    { data: 'department', name: 'department' },
+                    { data: 'emptitle', name: 'emptitle' },
+                    { data: 'confirmation_date', name: 'confirmation_date' },
                     {
                     data: 'action',
                     name: 'action',
@@ -276,7 +245,7 @@
             });
 
             // edit function
-           $(document).on('click', '.edit',async function () {
+             $(document).on('click', '.edit',async function () {
                 var r = await Otherconfirmation("You want to Edit this ? ");
                 if (r == true) {
                 var id = $(this).attr('id');
@@ -289,31 +258,32 @@
                     })
 
                 $.ajax({
-                    url: '{!! route("promotionletteredit") !!}',
-                        type: 'POST',
-                        dataType: "json",
-                        data: {id: id },
+                    url: '{!! route("jobconfirmationletteredit") !!}',
+                    type: 'POST',
+                    dataType: "json",
+                    data: {id: id },
                     success: function (data) {
                         var companyOption = new Option(data.result.company_name, data.result.company_id, true, true);
                         company_f.append(companyOption).trigger('change');
                         
-                        var deptOption = new Option(data.result.department_name, data.result.old_department_id, true, true);
+                        var deptOption = new Option(data.result.department_name, data.result.department_id, true, true);
                         department_f.append(deptOption).trigger('change');
                         
                         var empOption = new Option(data.result.employee_name, data.result.employee_id, true, true);
                         employee_f.append(empOption).trigger('change');
 
-                        var newDeptOption = new Option(data.result.new_department_name, data.result.new_department_id, true, true);
-                        new_department_f.append(newDeptOption).trigger('change');
-
-                        $('#old_jobtitle').val(data.result.old_jobtitle);
-                        $('#new_jobtitle').val(data.result.new_jobtitle);
-                        $('#date').val(data.result.date);
-                        $('#comment1').val(data.result.comment1);
-                        $('#comment2').val(data.result.comment2);
+                        $('#jobtitle').val(data.result.jobtitle);
+                        $('#start_date').val(data.result.start_date);
+                        $('#end_date').val(data.result.end_date);
+                        $('#confirmation_date').val(data.result.confirmation_date);
+                        $('#comment').val(data.result.comment);
                         
                         $('#recordID').val(id);
                         $('#recordOption').val(2);
+                     },
+                     error: function(xhr, status, error) {
+                        console.error('Edit failed:', error);
+                        alert('Failed to load data for editing');
                     }
                 })
                 }
@@ -331,10 +301,13 @@
                         }
                         })
                     $.ajax({
-                        url: '{!! route("promotionletterdelete") !!}',
+                        url: '{!! route("jobconfirmationletterdelete") !!}',
                             type: 'POST',
                             dataType: "json",
-                            data: {id: user_id },
+                            data: {
+                                _token: '{{ csrf_token() }}',
+                                id: user_id 
+                            },
                         beforeSend: function () {
                             $('#ok_button').text('Deleting...');
                         },
@@ -371,7 +344,7 @@
             });
 
             $.ajax({
-                url: '{!! route("promotionletterprintdata") !!}',
+                url: '{!! route("jobconfirmationletterprintdata") !!}',
                 type: 'POST',
                 dataType: "json",
                 data: {
@@ -392,37 +365,44 @@
             });
         });
 
-        // Job title filter insert part
-        $('#employee_f').change(function () {
-            var employee_f = $(this).val();
-            if (employee_f !== '') {
-                $.ajax({
-                    url: '{!! route("promotionlettergetjobfilter", ["id" => "id"]) !!}'
-                        .replace('id', employee_f),
-                    type: 'GET',
-                    dataType: 'json',
-                    success: function (data) {
-                        if (data && data.length > 0) {
-                            $('#old_jobtitle').empty().append('<option value="' + data[0].id + '">' + data[0].title + '</option>');
-                            
-                        } else {
-                            $('#old_jobtitle').empty().append('<option value="">No job title found</option>');
-                        }
-                    },
-                    error: function (xhr, status, error) {
-                        console.error(error);
-                        $('#old_jobtitle').empty().append('<option value="">Error loading job title</option>');
-                    }
-                });
-            } else {
-                $('#old_jobtitle').empty().append('<option value="">Select Job Title</option>');  
-            }
-        });
+            //job title & date insert filter
+            $('#employee_f').change(function () {
+                var employee_f = $(this).val();
+                if (employee_f !== '') {
+                    $.ajax({
+                        url: '{!! route("jobconfirmationlettergetdetails", ["id" => "id"]) !!}'.replace('id', employee_f),
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function (data) {
+                            // Job title handling
+                            if (data.jobTitle && data.jobTitle.length > 0) {
+                                $('#jobtitle').empty();
+                                $.each(data.jobTitle, function (index, job) {
+                                    $('#jobtitle').append('<option value="' + job.id + '">' + job.title + '</option>');
+                                });
+                            } else {
+                                $('#jobtitle').empty().append('<option value="">No job title found</option>');
+                            }
 
-        $('#company').change(function () {
-            var deptid = $('#company option:selected').data('deptid');
-            $('#new_department').val(deptid);
-        });
+                            // Join date handling
+                            if (data.joinDate && data.joinDate.length > 0) {
+                                $('#emp_join_date').val(data.joinDate[0].emp_join_date);
+                            } else {
+                                $('#emp_join_date').val('');
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error(error);
+                            $('#jobtitle').empty().append('<option value="">Error loading job title</option>');
+                            $('#emp_join_date').val('Error loading join date');
+                        }
+                    });
+                } else {
+                    $('#jobtitle').empty().append('<option value="">Select Job Title</option>');
+                    $('#emp_join_date').val('');
+                }
+            });
+
 
         });
 

@@ -23,6 +23,7 @@
         Employee Letters <span class="caret"></span></a>
         <ul class="dropdown-menu multi-level dropdownmenucolor" role="menu" aria-labelledby="dropdownMenu">
           <li><a class="dropdown-item" href="{{ route('appoinementletter')}}" id="">Employee Appointment Letter</a></li>
+          <li><a class="dropdown-item" href="{{ route('jobconfirmationletter')}}">Employee Job Confirmation Letter</a></li>
           <li><a class="dropdown-item" href="{{ route('NDAletter')}}">Employee NDA Letter</a></li>
           <li><a class="dropdown-item" href="{{ route('warningletter')}}">Employee Warning Letter</a></li>
           <li><a class="dropdown-item" href="{{ route('salary_incletter')}}">Employee Salary Increment Letter</a></li>

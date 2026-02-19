@@ -152,7 +152,15 @@
                                 </div>
 
                                 <div class="form-row mb-2">
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
+                                        <label class="small font-weight-bold text-dark">Applicable leave types</label>
+                                        <select class="form-control form-control-sm" id="leave_types" name="leave_types[]" multiple="multiple">
+                                            @foreach($leave_types as $leave_type)
+                                                <option value="{{ $leave_type->id }}">{{ $leave_type->leave_type }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
                                         <label class="small font-weight-bold text-dark">Working Calculation</label>
                                         <br>
                                         <div class="form-check-inline">
@@ -166,7 +174,7 @@
                                             </label>
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <label class="small font-weight-bold text-dark">Lunch Hours Deduct</label>
                                         <br>
                                         <div class="form-check-inline">
@@ -180,7 +188,7 @@
                                             </label>
                                         </div>
                                     </div>
-                                    <div class="col-md-4 custom_lunch" style="display: none">
+                                    <div class="col-md-3 custom_lunch" style="display: none">
                                     <label class="small font-weight-bold text-dark">Lunch Deduction Minutes</label>
                                         <br>
                                         <div class="form-check-inline">
@@ -479,6 +487,13 @@ $(document).ready(function(){
     $('#organization_menu_link_icon').addClass('active');
     $('#jobcategorylink').addClass('navbtnactive');
 
+    $('#leave_types').select2({
+        placeholder: 'Select Leave Type',
+        allowClear: true,
+        width: '100%',
+        dropdownParent: $('#formModal')
+    });
+
     $('#dataTable').DataTable({
         "destroy": true,
         "processing": true,
@@ -725,6 +740,8 @@ $(document).ready(function(){
         $('#action').val('Add');
         $('#form_result').html('');
         $('#formTitle')[0].reset();
+        
+        $('#leave_types').val(null).trigger('change');
 
         $('.custom_lunch').hide();
         $('.custom_sat').hide();
@@ -995,6 +1012,12 @@ $(document).ready(function(){
                     $('#late_attend_min').val(data.result.late_attend_min);
                     $('#short_leaves').val(data.result.short_leaves);
                     $('#half_days').val(data.result.half_days);
+
+                    if(data.leave_types && data.leave_types.length > 0) {
+                        $('#leave_types').val(data.leave_types).trigger('change');
+                    } else {
+                        $('#leave_types').val(null).trigger('change');
+                    }
 
                     $('#hidden_id').val(id);
                     $('.modal-title').text('Edit Job Category');

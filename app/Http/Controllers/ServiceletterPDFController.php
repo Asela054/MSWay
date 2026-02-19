@@ -125,7 +125,7 @@ class ServiceletterPDFController extends Controller
         $data = $data = DB::table('service_letter')
         ->leftJoin('companies', 'service_letter.company_id', '=', 'companies.id')
         ->leftJoin('departments', 'service_letter.department_id', '=', 'departments.id')
-        ->leftJoin('employees', 'service_letter.employee_id', '=', 'employees.id')
+        ->leftJoin('employees', 'service_letter.employee_id', '=', 'employees.emp_id')
         ->leftJoin('job_titles', 'service_letter.jobtitle', '=', 'job_titles.id')
         ->select('service_letter.*', 'employees.*', 'job_titles.title As job_title', 'companies.*','departments.name AS department')
         ->where('service_letter.id', $id)

@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Input;
 use App\JobCategory;
+use App\JobCategoryDetail;
 use Illuminate\Support\Facades\Auth;
 
 class JobCategoryController extends Controller
@@ -23,8 +24,9 @@ class JobCategoryController extends Controller
             abort(403);
         }
 
+        $leave_types = DB::table('leave_types')->get();
         $jobcategory = JobCategory::orderBy('id', 'asc')->get();
-        return view('Organization.jobCategory', compact('jobcategory'));
+        return view('Organization.jobCategory', compact('jobcategory', 'leave_types'));
     }
 
     public function store(Request $request)
@@ -85,6 +87,17 @@ class JobCategoryController extends Controller
         $jobcategory->half_days = $request->input('half_days');
 
         $jobcategory->save();
+        $jobcategory_id = $jobcategory->id;
+
+        $leave_types = $request->input('leave_types');
+        if(!empty($leave_types)){
+            foreach($leave_types as $leave_type){
+                $jobcategory_detail = new JobCategoryDetail;
+                $jobcategory_detail->job_id = $jobcategory_id;
+                $jobcategory_detail->leave_id = $leave_type;
+                $jobcategory_detail->save();
+            }
+        }
 
         return response()->json(['success' => 'Job Category Added successfully.']);
     }
@@ -100,7 +113,8 @@ class JobCategoryController extends Controller
 
         if (request()->ajax()) {
             $data = JobCategory::findOrFail($id);
-            return response()->json(['result' => $data]);
+            $leave_types = JobCategoryDetail::where('job_id', $id)->pluck('leave_id')->toArray();
+            return response()->json(['result' => $data, 'leave_types' => $leave_types]);
         }
     }
 
@@ -147,6 +161,29 @@ class JobCategoryController extends Controller
         );
 
         JobCategory::whereId($request->hidden_id)->update($form_data);
+
+        $new_leave_types = $request->input('leave_types', []);
+        $existing_leave_types = JobCategoryDetail::where('job_id', $request->hidden_id)
+                                                ->pluck('leave_id')
+                                                ->toArray();
+        
+        $to_add = array_diff($new_leave_types, $existing_leave_types);
+        $to_remove = array_diff($existing_leave_types, $new_leave_types);
+        
+        if(!empty($to_remove)) {
+            JobCategoryDetail::where('job_id', $request->hidden_id)
+                            ->whereIn('leave_id', $to_remove)
+                            ->delete();
+        }
+        
+        if(!empty($to_add)) {
+            foreach($to_add as $leave_type){
+                $jobcategory_detail = new JobCategoryDetail;
+                $jobcategory_detail->job_id = $request->hidden_id;
+                $jobcategory_detail->leave_id = $leave_type;
+                $jobcategory_detail->save();
+            }
+        }
 
         return response()->json(['success' => 'Job Category is successfully updated']);
     }

@@ -1608,6 +1608,16 @@ Route::get('/clearanceReport', 'RptClearanceController@clearanceReport')->name('
 Route::get('/clearance_report_list', 'RptClearanceController@clearance_report_list')->name('clearance_report_list');
 Route::post('/update_device_clearance', 'RptClearanceController@updateDeviceClearance')->name('update_device_clearance');
 
+// Job Confirmation Letter Routes
+Route::get('jobconfirmationletter', 'JobConfirmationLetterController@index')->name('jobconfirmationletter');
+Route::post('jobconfirmationletterinsert', 'JobConfirmationLetterController@insert')->name('jobconfirmationletterinsert');
+Route::get('jobconfirmationletterlist', 'JobConfirmationLetterController@letterlist')->name('jobconfirmationletterlist');
+Route::post('jobconfirmationletteredit', 'JobConfirmationLetterController@edit')->name('jobconfirmationletteredit');
+Route::get('/jobconfirmationletterstatus/{id}/{status}','JobConfirmationLetterController@status')->name('jobconfirmationletterstatus');
+Route::post('jobconfirmationletterdelete', 'JobConfirmationLetterController@delete')->name('jobconfirmationletterdelete');
+Route::post('jobconfirmationletterprintdata', 'JobConfirmationLetterPDFController@printdata')->name('jobconfirmationletterprintdata');
+Route::get('jobconfirmationlettergetdetails/{categoryId}', 'JobConfirmationLetterController@getEmployeeDetails')->name('jobconfirmationlettergetdetails');
+
 // Koasis Dashboard controller
 Route::get('/getattendancesummarychart', 'Additionals\DashboarddetailedController@attendacechart')->name('getattendancesummarychart');
 

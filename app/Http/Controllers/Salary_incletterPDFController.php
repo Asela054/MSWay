@@ -128,7 +128,7 @@ class Salary_incletterPDFController extends Controller
         $data = $data = DB::table('salary_inc_letter')
         ->leftJoin('companies', 'salary_inc_letter.company_id', '=', 'companies.id')
         ->leftJoin('departments', 'salary_inc_letter.department_id', '=', 'departments.id')
-        ->leftJoin('employees', 'salary_inc_letter.employee_id', '=', 'employees.id')
+        ->leftJoin('employees', 'salary_inc_letter.employee_id', '=', 'employees.emp_id')
         ->leftJoin('job_titles', 'salary_inc_letter.jobtitle', '=', 'job_titles.id')
         ->select('salary_inc_letter.*', 'employees.*', 'job_titles.title As job_title', 'companies.*','departments.name AS department')
         ->where('salary_inc_letter.id', $id)

@@ -134,7 +134,7 @@ class WarningletterPDFController extends Controller
         $data = $data = DB::table('warning_letter')
         ->leftJoin('companies', 'warning_letter.company_id', '=', 'companies.id')
         ->leftJoin('departments', 'warning_letter.department_id', '=', 'departments.id')
-        ->leftJoin('employees', 'warning_letter.employee_id', '=', 'employees.id')
+        ->leftJoin('employees', 'warning_letter.employee_id', '=', 'employees.emp_id')
         ->leftJoin('job_titles', 'warning_letter.jobtitle', '=', 'job_titles.id')
         ->select('warning_letter.*', 'employees.*', 'job_titles.title As job_title', 'companies.*','departments.name AS department')
         ->where('warning_letter.id', $id)
