@@ -1618,6 +1618,8 @@ Route::post('jobconfirmationletterdelete', 'JobConfirmationLetterController@dele
 Route::post('jobconfirmationletterprintdata', 'JobConfirmationLetterPDFController@printdata')->name('jobconfirmationletterprintdata');
 Route::get('jobconfirmationlettergetdetails/{categoryId}', 'JobConfirmationLetterController@getEmployeeDetails')->name('jobconfirmationlettergetdetails');
 
+// Koasis Dashboard controller
+Route::get('/getattendancesummarychart', 'Additionals\DashboarddetailedController@attendacechart')->name('getattendancesummarychart');
 
 
 Route::get('/clear-cache', function() {

@@ -135,6 +135,12 @@
                                                     <td> <span id="med_taken"></span> </td>
                                                     <td> <span id="med_available"></span> </td>
                                                 </tr>
+                                                <tr>
+                                                    <td> <span>Weekly</span> </td>
+                                                    <td> <span id="weekly_total"></span> </td>
+                                                    <td> <span id="weekly_taken"></span> </td>
+                                                    <td> <span id="weekly_available"></span> </td>
+                                                </tr>
                                             </tbody>
                                         </table>
                                         <span id="leave_msg"></span>
@@ -522,32 +528,6 @@
                 return (treatAsUTC(endDate) - treatAsUTC(startDate)) / millisecondsPerDay;
             }
 
-            function show_no_of_days() {
-                let from_date = $('#fromdate').val();
-                let to_date = $('#todate').val();
-                let half_short = $('#half_short').val() || 0;
-                let empid = $('#employee_f').val();
-                
-                if (from_date && to_date) {
-                    $.ajax({
-                        url: '{!! route("calculate-working-days") !!}',
-                        type: 'POST',
-                        data: {
-                            from_date: from_date,
-                            to_date: to_date,
-                            half_short: half_short,
-                            empid: empid,
-                            _token: $('meta[name="csrf-token"]').attr('content')
-                        },
-                        success: function(response) {
-                            $('#no_of_days').val(response.working_days);
-                        },
-                        error: function(xhr) {
-                            console.error(xhr.responseText);
-                        }
-                    });
-                }
-            }
 
              // Bind the function to all relevant fields
             $('#approveby').change(function() {
@@ -561,12 +541,14 @@
             var leavetype = $('#leavetype').val();
             var emp_id = $('#employee_f').val();
             var status = $('#employee_f option:selected').data('id');
+            var fromdate = $('#fromdate').val();
+            var todate = $('#todate').val();
 
             if (leavetype != '' && emp_id != '') {
                 $.ajax({
                     url: "getEmployeeLeaveStatus",
                     method: "POST",
-                    data: {status: status, emp_id: emp_id, leavetype: leavetype, _token: _token},
+                    data: {status: status, emp_id: emp_id, leavetype: leavetype, _token: _token, fromdate:fromdate, todate:todate },
                     success: function (data) {
 
                         $('#leave_msg').html('');
@@ -582,6 +564,10 @@
                         $('#med_total').html(data.total_no_of_med_leaves);
                         $('#med_taken').html(data.total_taken_med_leaves);
                         $('#med_available').html(data.available_no_of_med_leaves);
+
+                        $('#weekly_total').html(data.total_no_of_weekly_leaves);
+                        $('#weekly_taken').html(data.total_taken_weekly_leaves);
+                        $('#weekly_available').html(data.available_no_of_weekly_leaves);
 
                     }
                 });
@@ -904,33 +890,79 @@
                     $('#half_short').val(data.result.leave_category);
                     $('#reson').val(data.result.reason);
                     $('#request_id').val(id);
+
+                    var fromdate = data.result.from_date;
+                    var todate = data.result.to_date;
+
+                    var _token = $('input[name="_token"]').val();
+                    var leavetype = $('#leavetype').val();
+                    var emp_id = $('#employee_f').val();
+                    var status = $('#employee_f option:selected').data('id');
+
+                    if (leavetype != '' && emp_id != ''&& fromdate != ''&& todate != '') {
+                        $.ajax({
+                            url: "getEmployeeLeaveStatus",
+                            method: "POST",
+                            data: {status: status, 
+                                   emp_id: emp_id, 
+                                   leavetype: leavetype, 
+                                   _token: _token,
+                                   fromdate:fromdate,
+                                   todate:todate },
+                            success: function (data) {
+
+                                $('#leave_msg').html('');
+
+                                $('#annual_total').html(data.total_no_of_annual_leaves);
+                                $('#annual_taken').html(data.total_taken_annual_leaves);
+                                $('#annual_available').html(data.available_no_of_annual_leaves);
+
+                                $('#casual_total').html(data.total_no_of_casual_leaves);
+                                $('#casual_taken').html(data.total_taken_casual_leaves);
+                                $('#casual_available').html(data.available_no_of_casual_leaves);
+
+                                $('#med_total').html(data.total_no_of_med_leaves);
+                                $('#med_taken').html(data.total_taken_med_leaves);
+                                $('#med_available').html(data.available_no_of_med_leaves);
+
+                                $('#weekly_total').html(data.total_no_of_weekly_leaves);
+                                $('#weekly_taken').html(data.total_taken_weekly_leaves);
+                                $('#weekly_available').html(data.available_no_of_weekly_leaves);
+
+                            }
+                        });
+                    }
+
+                    show_no_of_days();
+
+
                 }
             })
         });
 
 
 
-        function getleaverequests(employee) {
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            })
+    function getleaverequests(employee) {
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        })
 
-            $.ajax({
-                url: '{!! route("employeeleaverequest") !!}',
-                type: 'POST',
-                dataType: "json",
-                data: {
-                    emp_id: employee
-                },
-                success: function (data) {
-                    var reuestlist = data.result;
-                    $("#requestbody").html(reuestlist);
-                }
-            });
+        $.ajax({
+            url: '{!! route("employeeleaverequest") !!}',
+            type: 'POST',
+            dataType: "json",
+            data: {
+                emp_id: employee
+            },
+            success: function (data) {
+                var reuestlist = data.result;
+                $("#requestbody").html(reuestlist);
+            }
+        });
 
-        }
+    }
       
     function generateEmailBody() {
             let body = "LEAVE APPLICATION DETAILS<br>";
@@ -996,6 +1028,33 @@
             
             $('#emailBody').val(body);
             return body;
+    }
+
+    function show_no_of_days() {
+        let from_date = $('#fromdate').val();
+        let to_date = $('#todate').val();
+        let half_short = $('#half_short').val() || 0;
+        let empid = $('#employee_f').val();
+
+        if (from_date && to_date) {
+            $.ajax({
+                url: '{!! route("calculate-working-days") !!}',
+                type: 'POST',
+                data: {
+                    from_date: from_date,
+                    to_date: to_date,
+                    half_short: half_short,
+                    empid: empid,
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function (response) {
+                    $('#no_of_days').val(response.working_days);
+                },
+                error: function (xhr) {
+                    console.error(xhr.responseText);
+                }
+            });
+        }
     }
     </script>
 

@@ -73,7 +73,7 @@ class MealallowanceapproveController extends Controller
         // dd(DB::getQueryLog());
 
         foreach ($query as $row) {
-            // if($row->empid==6){
+            // if($row->empid==7){
                 $empId = $row->empid;
                 $empName = $row->emp_name;
                 $payrollProfileId = $row->payroll_profiles_id;
