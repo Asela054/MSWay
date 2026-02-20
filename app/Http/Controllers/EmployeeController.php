@@ -273,18 +273,21 @@ class EmployeeController extends Controller
         $validator = Validator::make($request->all(), [
             'emp_id' => 'required|max:15|unique:employees,emp_id,'.$id,
             'emp_etfno' => [
-                                'nullable',
-                                Rule::unique('employees', 'emp_etfno')
-                                    ->ignore($id)
-                                    ->where('emp_company', $request->input('employeecompany'))
-                                    ->where('emp_location', $request->input('location'))
-                                    ->where(function ($query) {
-                                        $query->where('emp_etfno', '!=', '0')
-                                            ->whereNotNull('emp_etfno');
-                                    })
-                            ],
+            'nullable',
+            Rule::unique('employees', 'emp_etfno')
+                ->ignore($id)
+                ->where(function ($query) use ($request) {
+                    $query->where('emp_company', $request->input('employeecompany'))
+                        ->where('emp_etfno', '!=', '0')
+                        ->whereNotNull('emp_etfno');
+                    if ($request->input('location')) {
+                        $query->where('emp_location', $request->input('location'));
+                    }
+                })
+        ],
             'photograph' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:100',
-        ], [
+        ], 
+        [
             'emp_id.unique' => 'The employee ID already exists',
             'emp_etfno.unique' => 'The EPF number already exists',
             'photograph.image' => 'The file must be an image',
