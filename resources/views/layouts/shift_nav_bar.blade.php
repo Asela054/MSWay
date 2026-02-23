@@ -12,9 +12,9 @@
         
         <!-- <a role="button" class="btn navbtncolor" href="{{ route('empshiftextend') }}" id="employeeshift_extend_link">Employee Shift Extend Assign <span class="caret"></span></a> -->
         
-        <a role="button" class="btn navbtncolor" href="{{ route('Roster') }}" id="employeeshift_extend_link">Month Shifts <span class="caret"></span></a>
+        <a role="button" class="btn navbtncolor" href="{{ route('Roster') }}" id="monthlyshifts">Month Shifts <span class="caret"></span></a>
        
-        <a role="button" class="btn navbtncolor" href="{{ route('rosterview') }}" id="employeeshift_extend_link">Month Shifts View <span class="caret"></span></a>
+        <a role="button" class="btn navbtncolor" href="{{ route('rosterview') }}" id="monthlyshifts_view">Month Shifts View <span class="caret"></span></a>
         
 
 

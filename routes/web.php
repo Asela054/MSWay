@@ -1485,7 +1485,7 @@ Route::post('/applyabsentnopay' ,'DepartmentviseNopayController@applyabsentnopay
 
 
 // roster managment
-Route::get('Roster',['uses' => 'EmployeeRosterController@fullroster', 'as' => 'Roster']);
+Route::get('Roster',['uses' => 'EmployeeRosterController@index', 'as' => 'Roster']);
 Route::get('rosterview',['uses' => 'EmployeeRosterController@rosterView', 'as' => 'rosterview']);
 Route::get('/get-employees-by-department', 'EmployeeRosterController@employee_list');
 Route::get('get-roster-data', 'EmployeeRosterController@getRosterData');

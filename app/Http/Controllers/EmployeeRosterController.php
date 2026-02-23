@@ -24,7 +24,8 @@ class EmployeeRosterController extends Controller
         $this->middleware('auth');
     }
     
-    public function fullroster(Request $request){
+    public function index(Request $request)
+    {
 
         $user = auth()->user();
         $permission = $user->can('employee-roster');
@@ -41,11 +42,11 @@ class EmployeeRosterController extends Controller
             ];
             
          return view('roster.monthlyemployeerosterfull', compact('months','currentMonth'));
-     }
-     public function getshifts(Request $request){
+    }
 
-        $departmentId = $request->get('department_id');
-        // Example: Adjust based on your DB schema
+    // Load shift lidt for roster sheet 
+     public function getshifts(Request $request)
+     {
         $shifts = ShiftType::select('id', 'shift_code AS code')
             ->where('deleted', 0)
             ->get();
@@ -53,7 +54,8 @@ class EmployeeRosterController extends Controller
         
      }
 
-     public function employee_list(Request $request){
+     public function employee_list(Request $request)
+     {
 
         $user = Auth::user();
         $permission = $user->can('employee-roster');
@@ -63,9 +65,9 @@ class EmployeeRosterController extends Controller
       
 
         $departmentId = $request->get('department_id');
-        // Example: Adjust based on your DB schema
+
         $employees = Employee::where('emp_department', $departmentId)
-            ->select('emp_id AS id', 'calling_name As name')
+            ->select('emp_id AS id', 'emp_name_with_initial As fullname','calling_name As callingname')
             ->get();
 
         return response()->json($employees);
@@ -81,35 +83,34 @@ class EmployeeRosterController extends Controller
         }
 
         $departmentId = $request->get('department_id');
-        $month = $request->get('month'); // format: YYYY-MM
+        $month = $request->get('month');
 
         if (!$departmentId || !$month) {
             return response()->json(['error' => 'Missing department_id or month'], 400);
         }
 
         $startDate = $month . '-01';
-        $endDate = date("Y-m-t", strtotime($startDate)); // Get last date of the month
+        $endDate = date("Y-m-t", strtotime($startDate));
 
         $rosters = EmployeeRosterDetails::whereBetween('work_date', [$startDate, $endDate])
             ->whereIn('emp_id', function ($query) use ($departmentId) {
                 $query->select('emp_id')
-                    ->from('employees') // 🔁 Replace with your actual employee table name if different
+                    ->from('employees')
                     ->where('emp_department', $departmentId);
             })
             ->get()
             ->groupBy('emp_id')
             ->map(function ($records) {
                 return $records->keyBy(function ($item) {
-                    return date('j', strtotime($item->work_date)); // Day number (1–31)
+                    return date('j', strtotime($item->work_date));
                 })->map(function ($item) {
-                    return $item->shift_id; // or $item->shift_code if your shift model uses codes
+                    return $item->shift_id;
                 });
             });
 
         return response()->json($rosters);
     }
     
-
     public function rosterView(Request $request){
          $user = auth()->user();
         $permission = $user->can('employee-roster-view');

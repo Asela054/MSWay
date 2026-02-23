@@ -270,8 +270,10 @@ class LeaveController extends Controller
         $employeedetails = DB::table('employees')
             ->leftJoin('job_categories', 'job_categories.id',  '=', 'employees.job_category_id' )
             ->leftJoin('companies', 'companies.id',  '=', 'employees.emp_company' )
-            ->select('job_category_id', 'category', 'employees.emp_email AS employee_email', 'companies.email AS company_email', 'companies.name AS company_name')
-            ->where('emp_id', $empid)
+            ->leftJoin('departments', 'departments.id',  '=', 'employees.emp_department' )
+            ->leftJoin('employees as dept_heads', 'dept_heads.emp_id',  '=', 'departments.dep_head_emp_id' )
+            ->select('employees.job_category_id', 'category', 'employees.emp_email AS employee_email', 'companies.email AS company_email', 'companies.name AS company_name','dept_heads.emp_email AS department_head_email')
+            ->where('employees.emp_id', $empid)
             ->first();
 
          return response()->json(['result' => $employeedetails]);

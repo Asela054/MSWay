@@ -32,13 +32,7 @@
                     <hr class="border-dark">
                 </div>
                 </div>
-
-
-                
-
-
                 <div id="info_msg"></div>
-
                 <form id="shiftForm">
                     <div class="center-block fix-width scroll-inner my-2">
                     <table class="table table-striped table-bordered table-sm small nowrap" style="width: 100%" id="shiftTable">
@@ -66,7 +60,6 @@
             <div class="offcanvas-body">
                   <ul class="list-unstyled">
                       <form class="form-horizontal" id="formFilter">
-                        
                               <li class="mb-2">
                                   <div class="col-md-12">
                                       <label class="small font-weight-bolder text-dark">Company</label>
@@ -123,6 +116,10 @@
 <script>
 $(document).ready(function() {
 
+    $('#shift_menu_link').addClass('active');
+    $('#shift_menu_link_icon').addClass('active');
+    $('#monthlyshifts').addClass('navbtnactive');
+
     let department = $('#department');
     let employees = [];
     let shiftOptions = [];
@@ -164,25 +161,15 @@ $(document).ready(function() {
             cache: true
         }
     });
-
-    // Load shift options first
-    fetch('getrostershifts')
-        .then(response => response.json())
-        .then(data => {
-            shiftOptions = [{ id: '', code: 'NA' }, ...data];
-        })
-        .catch(error => {
-            console.error('Error loading shift options:', error);
-        });
-
+        
     // Load employees and generate table
-    $('#btn-filter').on('click', function() {
-        const departmentId = $('#department').val();
-        const selectedMonth = $('#month').val();
+    $('#formFilter').on('submit', function (event) {
+        event.preventDefault();
+        let departmentId = $('#department').val();
+        let selectedMonth = $('#month').val();
 
          closeOffcanvasSmoothly();
 
-        if (!departmentId) return;
 
         $.ajax({
             url: '{{ url("/get-employees-by-department") }}',
@@ -205,10 +192,21 @@ $(document).ready(function() {
         if (!departmentId) return;
 
         loadRosterData(departmentId, this.value).then(rosterData => {
-            generateTable(this.value, rosterData);
+        generateTable(this.value, rosterData);
+        closeOffcanvasSmoothly();
         });
     });
 
+       // Load shift options first
+    fetch('getrostershifts')
+        .then(response => response.json())
+        .then(data => {
+            shiftOptions = [{ id: '', code: 'NA' }, ...data];
+        })
+        .catch(error => {
+            console.error('Error loading shift options:', error);
+    });
+    
     function loadRosterData(departmentId, month) {
         return fetch(`get-roster-data?department_id=${departmentId}&month=${month}`)
             .then(response => response.json());
@@ -231,15 +229,16 @@ $(document).ready(function() {
         thead.innerHTML = headerRow;
 
         employees.forEach((emp, index) => {
-            let row = `<tr><td>${emp.id}</td><td class="name-col">${emp.name}</td>`;
+            let row = `<tr><td>${emp.id}</td><td class="name-col nowrap">${emp.fullname}</td>`;
             for (let d = 1; d <= daysInMonth; d++) {
                 const existingShift = (existingData[emp.id] && existingData[emp.id][d]) || '';
                row += `<td style="padding: 0px;">
-                    <select name="shifts[${emp.id}][${d}]" class="form-control form-control-sm ${existingShift ? 'bg-primary text-white' : ''}" style="width: 55px;">
+                    <select name="shifts[${emp.id}][${d}]" class="form-control form-control-sm shiftcode" style="width: 55px;">
                         
-                        ${shiftOptions.map(opt =>
-                            `<option value="${opt.id}" ${opt.id == existingShift ? 'selected' : ''}>${opt.code}</option>`
-                        ).join('')}
+                        ${shiftOptions.map(opt =>{
+                             const selectedClass = opt.id == existingShift ? 'selected-option' : '';
+                             return `<option value="${opt.id}" ${opt.id == existingShift ? 'selected' : ''} class="${selectedClass}">${opt.code}</option>`;
+                          }).join('')}
                     </select>
                 </td>`;
 
@@ -248,13 +247,19 @@ $(document).ready(function() {
             tbody.innerHTML += row;
         });
 
-        $('.shiftcode').on('change', function() {
-            if ($(this).val()) {console.log($(this).val());
-                $(this).addClass('bg-success text-light');
-            } else {
-                $(this).removeClass('bg-success text-light');
-            }
-        });
+         $('.shiftcode').on('change', function() {
+                $(this).find('option').removeClass('selected-option bg-success');
+                
+                $(this).find('option:selected').addClass('selected-option bg-success');
+                
+                if ($(this).val()) {
+                    $(this).addClass('border-success');
+                } else {
+                    $(this).removeClass('border-success');
+                }
+            });
+
+             $('.shiftcode').trigger('change');
     }
 
     // Handle form submit
@@ -287,28 +292,52 @@ $(document).ready(function() {
         }
 
         const payload = Object.values(shifts).flat();
-        const csrfToken = $('meta[name="csrf-token"]').attr('content');
 
-        // Dynamic action (optional, like your formTitle)
         let action_url = "{{ url('/fullrosterstore') }}";
-        
-
-        fetch(action_url, {
-            method: 'POST',
+         $.ajaxSetup({
             headers: {
-                'X-CSRF-TOKEN': csrfToken,
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({ shifts: payload })
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.errors) {
+
+        $.ajax({
+            url: action_url,
+            type: 'POST',
+            data:{ shifts: payload },
+            dataType: 'json',
+            success: function(response) {
+                if (response.errors) {
+                    const actionObj = {
+                        icon: 'fas fa-warning',
+                        title: '',
+                        message: 'Record Error',
+                        url: '',
+                        target: '_blank',
+                        type: 'danger'
+                    };
+                    const actionJSON = JSON.stringify(actionObj, null, 2);
+                    action(actionJSON);
+                }
+                if (response.success) {
+                    const actionObj = {
+                        icon: 'fas fa-save',
+                        title: '',
+                        message: response.success,
+                        url: '',
+                        target: '_blank',
+                        type: 'success'
+                    };
+                    const actionJSON = JSON.stringify(actionObj, null, 2);
+                    $('#shiftForm')[0].reset();
+                    actionreload(actionJSON);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
                 const actionObj = {
-                    icon: 'fas fa-warning',
+                    icon: 'fas fa-times',
                     title: '',
-                    message: 'Record Error',
+                    message: 'Something went wrong!',
                     url: '',
                     target: '_blank',
                     type: 'danger'
@@ -316,39 +345,30 @@ $(document).ready(function() {
                 const actionJSON = JSON.stringify(actionObj, null, 2);
                 action(actionJSON);
             }
-            if (data.success) {
-                const actionObj = {
-                    icon: 'fas fa-save',
-                    title: '',
-                    message: data.success,
-                    url: '',
-                    target: '_blank',
-                    type: 'success'
-                };
-                const actionJSON = JSON.stringify(actionObj, null, 2);
-                $('#shiftForm')[0].reset();
-                actionreload(actionJSON);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            const actionObj = {
-                icon: 'fas fa-times',
-                title: '',
-                message: 'Something went wrong!',
-                url: '',
-                target: '_blank',
-                type: 'danger'
-            };
-            const actionJSON = JSON.stringify(actionObj, null, 2);
-            action(actionJSON);
         });
     });
 
-    
 });
 </script>
 
+<style>
+    /* Style for selected option in dropdown */
+        select.form-control-sm option.selected-option {
+            background-color: #007bff !important;
+            color: white !important;
+        }
 
+        /* Optional: Style for the select when a value is selected */
+        select.form-control-sm.border-success {
+            border-color: #007bff !important;
+            border-width: 2px;
+        }
+
+        /* For Firefox compatibility */
+        select.form-control-sm option:checked {
+            background-color: #007bff !important;
+            color: white !important;
+        }
+</style>
 @endsection
 

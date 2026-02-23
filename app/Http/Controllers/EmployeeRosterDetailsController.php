@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\EmployeeRosterDetails;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\ShiftChangeLog;
 use Auth;
 
 class EmployeeRosterDetailsController extends Controller
@@ -28,32 +29,29 @@ class EmployeeRosterDetailsController extends Controller
         }
 
         foreach ($request->shifts as $roster) {
+
             $existing = EmployeeRosterDetails::where('emp_id', $roster['emp_id'])
                 ->where('work_date', $roster['date'])
                 ->first();
-
-            
 
             $newShiftId = $roster['shift'];
 
             if ($existing) {
                 if ($existing->shift_id != $newShiftId) {
-                    // Log change
-                
+
                     ShiftChangeLog::create([
                         'emp_id' => $roster['emp_id'],
                         'work_date' => $roster['date'],
                         'old_shift_id' => $existing->shift_id,
                         'new_shift_id' => $newShiftId,
-                        'changed_by' => Auth::id() ?? 1, // fallback if no auth
+                        'changed_by' => Auth::id() ?? 1,
                     ]);
-                    // Update shift
+
                     $existing->shift_id = $newShiftId;
                     $existing->save();
-                    // return response()->json(['message' => 'Roster updated and changes logged.']);
-                     return response()->json(['success' => 'Roster updated and changes logged.']);
                 }
             } else {
+
                 // Create new roster record
                 EmployeeRosterDetails::create([
                     'emp_id' => $roster['emp_id'],
@@ -64,7 +62,6 @@ class EmployeeRosterDetailsController extends Controller
             }
         }
 
-        // return response()->json(['message' => 'Roster Inserted Successfully!.']);
          return response()->json(['success' => 'Roster Inserted Successfully!']);
     }
 
