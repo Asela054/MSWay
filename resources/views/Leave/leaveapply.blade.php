@@ -231,6 +231,7 @@
                                 <input type="hidden" name="coveringemail" id="coveringemail"/>
                                 <input type="hidden" name="approveemail" id="approveemail"/>
                                 <input type="hidden" name="companyname" id="companyname"/>
+                                <input type="hidden" name="departmentheademail" id="departmentheademail"/>
 
                                 <input type="hidden" name="action" id="action" value="Add"/>
                                 <input type="hidden" name="hidden_id" id="hidden_id"/>
@@ -591,6 +592,7 @@
                    $('#companyemail').val(data.result.company_email);
                     $('#companyname').val(data.result.company_name);
                     $('#employeeemail').val(data.result.employee_email);
+                     $('#departmentheademail').val(data.result.department_head_email);
                     }
                 });
 
@@ -748,7 +750,8 @@
                                    $('#employeeemail').val(),
                                    $('#companyemail').val(),
                                    $('#coveringemail').val(),
-                                   $('#approveemail').val()
+                                   $('#approveemail').val(),
+                                   $('#departmentheademail').val()
                                ].filter(email => email).join(';'),
                                'contsubj': 'Leave Application - ' + $('#employee option:selected').text(),
                                'contbody': emailBody

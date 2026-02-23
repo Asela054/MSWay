@@ -113,6 +113,9 @@
 @section('script')
 <script>
 $(document).ready(function() {
+    $('#shift_menu_link').addClass('active');
+    $('#shift_menu_link_icon').addClass('active');
+    $('#monthlyshifts_view').addClass('navbtnactive');
 
     let department = $('#department');
     let employees = [];
@@ -164,12 +167,13 @@ $(document).ready(function() {
         });
 
     // Department change event
-    $('#btn-filter').on('click', function() {
-        const departmentId = $('#department').val();
-        const selectedMonth = $('#month').val();
+   
+     $('#formFilter').on('submit', function (event){
+         event.preventDefault();
+        let departmentId = $('#department').val();
+        let selectedMonth = $('#month').val();
 
          closeOffcanvasSmoothly();
-        if (!departmentId) return;
 
         $.ajax({
             url: '{{ url("/get-employees-by-department") }}',
@@ -177,7 +181,7 @@ $(document).ready(function() {
             success: function(data) {
                 employees = data;
                 loadRosterData(departmentId, selectedMonth).then(rosterData => {
-                    generateViewTable(selectedMonth, rosterData);
+                generateViewTable(selectedMonth, rosterData);
                 });
 
               
@@ -221,7 +225,7 @@ $(document).ready(function() {
 
         // Rows
         employees.forEach((emp, index) => {
-            let row = `<tr><td>${emp.id}</td><td class="name-col">${emp.name}</td>`;
+            let row = `<tr><td>${emp.id}</td><td class="name-col">${emp.fullname}</td>`;
             for (let d = 1; d <= daysInMonth; d++) {
                 const shiftId = (rosterData[emp.id] && rosterData[emp.id][d]) || '';
                 const shiftCode = shiftCodeMap[shiftId] || '';
