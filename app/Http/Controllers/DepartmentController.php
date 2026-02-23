@@ -71,7 +71,16 @@ class DepartmentController extends Controller
         }
 
         if (request()->ajax()) {
-            $data = Department::findOrFail($id);
+            $data = DB::table('departments')
+                ->leftJoin('employees', 'departments.dep_head_emp_id', '=', 'employees.emp_id')
+                ->where('departments.id', $id)
+                ->select(
+                    'departments.*',
+                    'employees.emp_id',
+                    'employees.emp_name_with_initial as emp_name'  
+                )
+                ->first();
+
             return response()->json(['result' => $data]);
         }
     }
@@ -97,9 +106,10 @@ class DepartmentController extends Controller
         $current_date_time = Carbon::now()->toDateTimeString();
 
         $form_data = array(
-            'name' => $request->name,
-            'update_by' => Auth::id(),
-            'updated_at' => $current_date_time,
+            'name'            => $request->name,
+            'dep_head_emp_id' => $request->employee,
+            'update_by'       => Auth::id(),
+            'updated_at'      => $current_date_time,
         );
 
         Department::whereId($request->hidden_id)->update($form_data);
