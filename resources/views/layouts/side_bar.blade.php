@@ -12,6 +12,7 @@
     $hasKPIPermissions = in_array('Access-KPI_Managemnt', $userPermissions);
     $hasReportPermissions = in_array('Access-Reports', $userPermissions);
     $hasproductionPermissions = in_array('Access-Production_Task', $userPermissions);
+    $hasmeterreadingPermissions = in_array('Access-Meter_Reading', $userPermissions);
 
 @endphp
 <div class="sidebar" id="sidebar">
@@ -100,6 +101,16 @@
                 <span class="links_name">Production & Task</span>
             </a>
             <span class="tooltip">Production & Task</span>
+            </li>
+        @endif
+
+        @if($hasmeterreadingPermissions)
+            <li>
+            <a href="{{ url('/meterreadingdashboard') }}" id="meter_reading_menu_link">
+                <i class="fa-light fa-tachometer-alt"></i>
+                <span class="links_name">Meter Reading</span>
+            </a>
+            <span class="tooltip">Meter Reading</span>
             </li>
         @endif
 
@@ -463,6 +474,23 @@
                             </nav>
                         </div>
                          <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('productiontaskapprove')}}" >Production & Task Approval</a>
+                    </nav>
+                </div>
+            </li>
+            @endif
+
+            @if($hasmeterreadingPermissions)
+            <li>
+                <a href="javascript:void(0);" data-toggle="collapse" data-target="#collapemeterreading" aria-expanded="false" aria-controls="collapemeterreading">
+                    <i class="fa-light fa-chart-area"></i>
+                    <span class="links_name">Meter Reading <i class="fas fa-angle-down"></i></span>
+                </a>
+                <span class="tooltip">Meter Reading</span>
+                <div class="collapse" id="collapemeterreading" data-parent="#accordionSidenav">
+                    <nav class="sidenav-menu-nested nav">
+                        <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('MeterReading')}}">Meter Reading</a>
+                        <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('meterreadingcount')}}">Meter Reading Count</a>
+                        <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('meterreadingapprove')}}">Meter Reading Approve</a>
                     </nav>
                 </div>
             </li>

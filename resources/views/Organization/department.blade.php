@@ -33,6 +33,7 @@
                                 <tr>
                                     <th>ID </th>
                                     <th>Name</th>
+                                    <th>Head</th>
                                     <th class="text-right">Action</th>
                                 </tr>
                                 </thead>
@@ -64,6 +65,11 @@
                                         <div class="col-12">
                                             <label class="small font-weight-bold text-dark">Name*</label>
                                             <input type="text" name="name" id="name" class="form-control form-control-sm" />
+                                        </div>
+                                        <div class="col-12" id="employee_f_wrapper">
+                                            <label class="small font-weight-bold text-dark">Department Head</label>
+                                            <select name="employee" id="employee_f" class="form-control form-control-sm">
+                                            </select>
                                         </div>
 {{--                                        <div class="col">--}}
 {{--                                            <label class="small font-weight-bold text-dark">Code*</label>--}}
@@ -121,6 +127,25 @@
             $('#organization_menu_link_icon').addClass('active');
             $('#companylink').addClass('navbtnactive');
 
+            let employee_f = $('#employee_f');
+
+            employee_f.select2({
+                placeholder: 'Select a Employee',
+                width: '100%',
+                allowClear: true,
+                ajax: {
+                    url: '{{url("employee_list_sel2")}}',
+                    dataType: 'json',
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1
+                        }
+                    },
+                    cache: true
+                }
+            });
+
             $('#dataTable').DataTable({
                 "destroy": true,
                 "processing": true,
@@ -176,6 +201,11 @@
                         data: 'name', 
                         name: 'name'
                     },
+                    { 
+                        data: 'emp_name', 
+                        name: 'emp_name',
+                        defaultContent: '<span class="text-muted">N/A</span>'
+                    },
                     {
                         data: 'id',
                         name: 'action',
@@ -204,6 +234,7 @@
                 $('#action').val('Add');
                 $('#form_result').html('');
                 $('#formTitle')[0].reset();
+                $('#employee_f_wrapper').hide();
 
                 $('#formModal').modal('show');
             });
@@ -264,11 +295,24 @@
                         dataType: "json",
                         success: function (data) {
                             $('#name').val(data.result.name);
-                            $('#department_id').val(data.result.department_id);
                             $('#hidden_id').val(id);
                             $('.modal-title').text('Edit Department');
                             $('#action_button').html('Edit');
                             $('#action').val('Edit');
+                            $('#employee_f_wrapper').show();
+
+                            if (data.result.emp_id) {
+                                var empOption = new Option(
+                                    data.result.emp_name,  
+                                    data.result.emp_id,
+                                    true,
+                                    true
+                                );
+                                $('#employee_f').empty().append(empOption).trigger('change');
+                            } else {
+                                $('#employee_f').empty().trigger('change');
+                            }
+
                             $('#formModal').modal('show');
                         }
                     })

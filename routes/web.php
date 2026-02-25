@@ -1618,8 +1618,31 @@ Route::post('jobconfirmationletterdelete', 'JobConfirmationLetterController@dele
 Route::post('jobconfirmationletterprintdata', 'JobConfirmationLetterPDFController@printdata')->name('jobconfirmationletterprintdata');
 Route::get('jobconfirmationlettergetdetails/{categoryId}', 'JobConfirmationLetterController@getEmployeeDetails')->name('jobconfirmationlettergetdetails');
 
-// Koasis Dashboard controller
+// Koasis 
+// Dashboard controller
 Route::get('/getattendancesummarychart', 'Additionals\DashboarddetailedController@attendacechart')->name('getattendancesummarychart');
+Route::get('/meterreadingdashboard' ,'MeterReading\MeterReadingDashboardController@index')->name('meterreadingdashboard');
+// Meter Reading Controller Routes
+Route::get('/meterreadingcount', 'MeterReading\MeterReadingController@index')->name('meterreadingcount');
+Route::post('/meter_reading_insert', 'MeterReading\MeterReadingController@insert')->name('meter_reading_insert');
+Route::post('/meter_reading_edit', 'MeterReading\MeterReadingController@edit')->name('meter_reading_edit');
+Route::post('/meter_reading_update', 'MeterReading\MeterReadingController@update')->name('meter_reading_update');
+Route::post('/meter_reading_delete', 'MeterReading\MeterReadingController@delete')->name('meter_reading_delete');
+Route::post('/meter_reading_upload_csv', 'MeterReading\MeterReadingController@meter_reading_upload_csv')->name('meter_reading_upload_csv');
+
+//Meter Reading Approve controller
+Route::get('/meterreadingapprove' ,'MeterReading\MeterReadingApproveController@index')->name('meterreadingapprove');
+Route::post('/meter_reading_approvegenerate' ,'MeterReading\MeterReadingApproveController@generatemeterreading')->name('meter_reading_approvegenerate');
+Route::post('/approvemeterreading' ,'MeterReading\MeterReadingApproveController@approvemeterreading')->name('approvemeterreading');
+
+//meter reading count details controller
+Route::resource('MeterReading', 'MeterReading\MeterReadingDetailController');
+Route::get('MeterReading',['uses' => 'MeterReading\MeterReadingDetailController@index', 'as' => 'MeterReading']);
+Route::get('MeterReadinglist', 'MeterReading\MeterReadingDetailController@readinglist')->name('MeterReadinglist'); 
+Route::post('addMeterReading',['uses' => 'MeterReading\MeterReadingDetailController@store', 'as' => 'addMeterReading']); 
+Route::post('MeterReading/update', 'MeterReading\MeterReadingDetailController@update')->name('MeterReading.update');
+Route::get('MeterReading/destroy/{id}', 'MeterReading\MeterReadingDetailController@destroy');
+// Koasis 
 
 
 Route::get('/clear-cache', function() {
