@@ -101,10 +101,11 @@ class EmployeeRosterController extends Controller
             ->get()
             ->groupBy('emp_id')
             ->map(function ($records) {
-                return $records->keyBy(function ($item) {
+                // Group by day → return array of ALL shift_ids per day
+                return $records->groupBy(function ($item) {
                     return date('j', strtotime($item->work_date));
-                })->map(function ($item) {
-                    return $item->shift_id;
+                })->map(function ($dayRecords) {
+                    return $dayRecords->pluck('shift_id')->toArray();
                 });
             });
 
