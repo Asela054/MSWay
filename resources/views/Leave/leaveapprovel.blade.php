@@ -60,6 +60,7 @@
                                     <th class="nowrap">REASON</th>
                                     <th>COVERING BY</th>
                                     <th>STATUS</th>
+                                    <th>APPROVAL STAGE</th>
                                     <th class="text-right">ACTION</th>
                                     <th class="d-none">ID</th>
                                     <th class="d-none">EMPNAME</th>
@@ -107,6 +108,7 @@
 
                     <input type="hidden" name="id" id="id" class="form-control" readonly />
                     <input type="hidden" name="emp_id" id="emp_id" class="form-control" readonly />
+                    <input type="hidden" name="app_level" id="app_level" value="1" />
                 </div>
                 <div class="modal-footer p-2">
                     <button type="submit" class="btn btn-primary px-3 btn-sm" id="approve"><i class="fas fa-plus mr-2"></i>Add</button>
@@ -145,6 +147,7 @@
   
                       <input type="hidden" name="id" id="id" class="form-control" readonly />
                       <input type="hidden" name="emp_id" id="emp_id" class="form-control" readonly />
+                      <input type="hidden" name="app_level" id="app_level" value="1" />
                   </div>
                   <div class="modal-footer p-2">
                       <button type="submit" class="btn btn-primary px-3 btn-sm" id="approveall"><i class="fas fa-plus mr-2"></i>Add</button>
@@ -327,13 +330,36 @@
                         orderable: false, 
                         searchable: false 
                     },
+                    {
+                        "className": 'text-dark',
+                        data: 'status', 
+                        name: 'approve_level',
+                        "render": function (data, type, row) {
+                            if (row.approve_01 == 1 && row.approve_02 ==0) {
+                            return '<i style="color:#f4a100" class="fas fa-level-up-alt"></i>&nbsp;&nbsp 2nd Approvel';
+                            } else if(row.approve_01 == 1 && row.approve_02 ==1) {
+                                return '<i style="color:green" class="fas fa-check"></i>&nbsp;&nbsp All Approved';
+                            }
+                            else{
+                                return '<i style="color:red" class="fas fa-level-up-alt"></i>&nbsp;&nbsp 1st Approvel';
+                            }
+                        }
+                    },
                      { 
                         data: null, 
                         name: 'action',
                          className: 'text-right',
                         render: function(data, type, row) {
                             if (row.status === 'Pending' || row.status === 'Approved' || row.status === 'Rejected') {
-                                return '<button id="view" name="view" data-id="' + row.id + '" data-empid="' + row.emp_id + '" class="view btn btn-primary btn-sm" type="submit" data-toggle="tooltip" title="Approve"><i class="fas fa-pencil-alt"></i></button>';
+                                if (row.approve_01 == 0) {
+                                      return ' <button name="appL1"  id="appL1" data-id="' + row.id + '" data-empid="' + row.emp_id + '" class="appL1 btn btn-danger btn-sm" type="submit"><i class="fas fa-level-up-alt"></i></button>';
+                                }else if(row.approve_01  == 1 && row.approve_02 ==0){
+                                       return ' <button name="appL2" id="appL2" data-id="' + row.id + '" data-empid="' + row.emp_id + '" class="appL2 btn btn-warning btn-sm" type="submit"><i class="fas fa-level-up-alt"></i></button>';
+                                }else{
+
+                                    return '<button id="view" name="view" data-id="' + row.id + '" data-empid="' + row.emp_id + '" class="view btn btn-primary btn-sm" type="submit" data-toggle="tooltip" title="Approve"><i class="fas fa-pencil-alt"></i></button>';
+                                }
+                                
                             } else {
                                 return '';
                             }
@@ -377,6 +403,28 @@
 
 $(document).ready(function () {
 
+    // Approve Level 01
+    $(document).on('click', '.appL1', function () {
+        let id = $(this).attr('data-id');
+        let emp_id = $(this).attr('data-empid');
+
+        $('#id').val(id);
+        $('#emp_id').val(emp_id);
+         $('#app_level').val(1);
+        $('#confirmModal').modal('show');
+    });
+
+    // Approve Level 02
+    $(document).on('click', '.appL2', function () {
+        let id = $(this).attr('data-id');
+        let emp_id = $(this).attr('data-empid');
+
+        $('#id').val(id);
+        $('#emp_id').val(emp_id);
+        $('#app_level').val(2);
+        $('#confirmModal').modal('show');
+    });
+
 
     $(document).on('click', '.view', function () {
         let id = $(this).attr('data-id');
@@ -384,13 +432,16 @@ $(document).ready(function () {
 
         $('#id').val(id);
         $('#emp_id').val(emp_id);
-
+        $('#app_level').val(2);
         $('#confirmModal').modal('show');
     });
+
+
 
     $(document).on("click", "#approve", function () {
         let comment = $("#comment").val();
         let emp_id = $('#emp_id').val();
+        let app_level = $('#app_level').val();
         let status = $("input[name='status']:checked").val();
 
         let id = $('#id').val();
@@ -403,6 +454,7 @@ $(document).ready(function () {
                 emp_id: emp_id,
                 status: status,
                 comment: comment,
+                app_level: app_level,
                 _token: "{{ csrf_token() }}",
 
             },
@@ -499,11 +551,20 @@ $(document).ready(function () {
                     var rowData = $('#divicestable').DataTable().row($(this).closest('tr')).data();
 
                     if (rowData) {
-                        selectedRowIdsapprove.push({
-                            empid: rowData.emp_id,
-                            emp_name: rowData.employee_display,
-                            laeaveid: rowData.id
-                        });
+
+                         let appLevel = 1;
+                            if (rowData.approve_01 == 1 && rowData.approve_02 == 0) {
+                                appLevel = 2;
+                            } else if (rowData.approve_01 == 1 && rowData.approve_02 == 1) {
+                                appLevel = 3;
+                            }
+
+                            selectedRowIdsapprove.push({
+                                empid: rowData.emp_id,
+                                emp_name: rowData.employee_display,
+                                laeaveid: rowData.id,
+                                app_level: appLevel
+                            });
                     }
                 });
 

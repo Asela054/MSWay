@@ -603,11 +603,35 @@ class LeaveController extends Controller
         }
 
         $status = $request->status;
+        $applevel = $request->app_level;
+        
+        $current_date_time = Carbon::now()->toDateTimeString();
 
-        $form_data = array(
-            'status' => $status,
-            'comment' => $request->comment
-        );
+        if($applevel == 1){
+            $form_data = array(
+               'approve_01' => 1 ,
+               'approve_01_time' => $current_date_time,
+               'approve_01_by' =>  Auth::id(),
+             );
+
+
+        }else if($applevel == 2){
+
+            $form_data = array(
+                'approve_02' => 1 ,
+                'approve_02_time' => $current_date_time,
+                'approve_02_by' =>  Auth::id(),
+                'status' => $status,
+                'comment' => $request->comment
+            );
+
+        }else{
+            $form_data = array(
+                'status' => $status,
+                'comment' => $request->comment
+            );
+        }
+       
 
         Leave::whereId($request->id)->update($form_data);
 
@@ -661,18 +685,38 @@ class LeaveController extends Controller
         $dataarry = $request->input('dataarry');
         $comment = $request->input('comment');
         $status = $request->input('status');
+        $current_date_time = Carbon::now()->toDateTimeString();
 
         foreach ($dataarry as $row) {
          
             $empid = $row['empid'];
             $emp_name = $row['emp_name'];
             $laeaveid = $row['laeaveid'];
+            $app_level = $row['app_level'];
 
+            if($app_level == 1){
+                $form_data = array(
+                'approve_01' => 1 ,
+                'approve_01_time' => $current_date_time,
+                'approve_01_by' =>  Auth::id(),
+                );
 
-            $form_data = array(
-                'status' => $status,
-                'comment' => $comment
-            );
+            }else if($app_level == 2){
+
+                $form_data = array(
+                    'approve_02' => 1 ,
+                    'approve_02_time' => $current_date_time,
+                    'approve_02_by' =>  Auth::id(),
+                    'status' => $status,
+                    'comment' => $request->comment
+                );
+
+            }else{
+                $form_data = array(
+                    'status' => $status,
+                    'comment' => $request->comment
+                );
+            }
     
             Leave::whereId($laeaveid)->update($form_data);
 

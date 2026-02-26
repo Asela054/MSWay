@@ -24,6 +24,8 @@ $columns = array(
     array('db' => '`sub`.`half_short`', 'dt' => 'half_short', 'field' => 'half_short'),
     array('db' => '`sub`.`status`', 'dt' => 'status', 'field' => 'status'),
     array('db' => '`sub`.`reson`', 'dt' => 'reson', 'field' => 'reson'),
+    array( 'db' => '`sub`.`approve_01`', 'dt' => 'approve_01', 'field' => 'approve_01' ),
+	array( 'db' => '`sub`.`approve_02`', 'dt' => 'approve_02', 'field' => 'approve_02' ),
     array('db' => '`sub`.`emp_id`', 'dt' => 'employee_display', 'field' => 'emp_id', 
           'formatter' => function($d, $row) {
               $employee = (object)[
@@ -83,7 +85,9 @@ $joinQuery = "FROM (
         `leaves`.`leave_to`,
         `leaves`.`half_short`,
         `leaves`.`status`,
-        `leaves`.`reson`
+        `leaves`.`reson`,
+        `leaves`.`approve_01`,
+        `leaves`.`approve_02`
     FROM `leaves`
     LEFT JOIN `leave_types` ON `leaves`.`leave_type` = `leave_types`.`id`
     LEFT JOIN `employees` AS `ec` ON `leaves`.`emp_covering` = `ec`.`emp_id`
