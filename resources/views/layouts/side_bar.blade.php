@@ -13,6 +13,7 @@
     $hasReportPermissions = in_array('Access-Reports', $userPermissions);
     $hasproductionPermissions = in_array('Access-Production_Task', $userPermissions);
     $hasmeterreadingPermissions = in_array('Access-Meter_Reading', $userPermissions);
+    $hasempproductionPermissions = in_array('Access-Employee_Production', $userPermissions);
 
 @endphp
 <div class="sidebar" id="sidebar">
@@ -111,6 +112,16 @@
                 <span class="links_name">Meter Reading</span>
             </a>
             <span class="tooltip">Meter Reading</span>
+            </li>
+        @endif
+
+        @if($hasempproductionPermissions)
+            <li>
+            <a href="{{ url('/empproductiondashboard') }}" id="production_employee_menu_link">
+                <i class="fa-light fa-hard-hat"></i>
+                <span class="links_name">Employee Production</span>
+            </a>
+            <span class="tooltip">Employee Production</span>
             </li>
         @endif
 
@@ -491,6 +502,23 @@
                         <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('MeterReading')}}">Meter Reading</a>
                         <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('meterreadingcount')}}">Meter Reading Count</a>
                         <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('meterreadingapprove')}}">Meter Reading Approve</a>
+                    </nav>
+                </div>
+            </li>
+            @endif
+
+            @if($hasempproductionPermissions)
+            <li>
+                <a href="javascript:void(0);" data-toggle="collapse" data-target="#collapseempproduction" aria-expanded="false" aria-controls="collapseempproduction">
+                    <i class="fa-light fa-hard-hat"></i>
+                    <span class="links_name">Employee Production <i class="fas fa-angle-down"></i></span>
+                </a>
+                <span class="tooltip">Employee Production</span>
+                <div class="collapse" id="collapseempproduction" data-parent="#accordionSidenav">
+                    <nav class="sidenav-menu-nested nav">
+                        <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('ProductionDetail')}}">Production Detail</a>
+                        <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('emp_prod_allocation')}}">Employee Production</a>
+                        <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('emp_prod_approve')}}">Production Approve</a>
                     </nav>
                 </div>
             </li>

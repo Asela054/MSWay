@@ -1645,6 +1645,30 @@ Route::get('MeterReading/destroy/{id}', 'MeterReading\MeterReadingDetailControll
 // Koasis 
 
 
+//CelonXP Employee Production Routes
+// Dashboard controller
+Route::get('/empproductiondashboard' ,'ProductionEmployee\EmpProductionDashboardController@index')->name('empproductiondashboard');
+// Production Detail Controller Routes
+Route::resource('ProductionDetail', 'ProductionEmployee\ProductionDetailController');
+Route::get('ProductionDetail',['uses' => 'ProductionEmployee\ProductionDetailController@index', 'as' => 'ProductionDetail']);
+Route::get('ProductionDetaillist', 'ProductionEmployee\ProductionDetailController@readinglist')->name('ProductionDetaillist'); 
+Route::post('addProductionDetail',['uses' => 'ProductionEmployee\ProductionDetailController@store', 'as' => 'addProductionDetail']); 
+Route::post('ProductionDetail/update', 'ProductionEmployee\ProductionDetailController@update')->name('ProductionDetail.update');
+Route::get('ProductionDetail/destroy/{id}', 'ProductionEmployee\ProductionDetailController@destroy');
+// Employee Allocation Controller Routes
+Route::get('/emp_prod_allocation', 'ProductionEmployee\EmpProductionAllocationController@index')->name('emp_prod_allocation');
+Route::post('/emp_prod_allocation_insert', 'ProductionEmployee\EmpProductionAllocationController@insert')->name('emp_prod_allocation_insert');
+Route::post('/emp_prod_allocation_edit', 'ProductionEmployee\EmpProductionAllocationController@edit')->name('emp_prod_allocation_edit');
+Route::post('/emp_prod_allocation_update', 'ProductionEmployee\EmpProductionAllocationController@update')->name('emp_prod_allocation_update');
+Route::post('/emp_prod_allocation_delete', 'ProductionEmployee\EmpProductionAllocationController@delete')->name('emp_prod_allocation_delete');
+// Production Approve Controller Routes
+Route::get('/emp_prod_approve' ,'ProductionEmployee\ProductionApproveController@index')->name('emp_prod_approve');
+Route::post('/emp_prod_approvegenerate' ,'ProductionEmployee\ProductionApproveController@generateproduction')->name('emp_prod_approvegenerate');
+Route::post('/approveproduction' ,'ProductionEmployee\ProductionApproveController@approveproduction')->name('approveproduction');
+Route::post('/emp_prod_date_details', 'ProductionEmployee\ProductionApproveController@getDateDetails')->name('emp_prod_date_details');
+//CelonXP Employee Production Routes
+
+
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');
     Artisan::call('config:clear');
