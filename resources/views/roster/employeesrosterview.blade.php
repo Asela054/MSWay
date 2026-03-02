@@ -207,35 +207,44 @@ $(document).ready(function() {
     }
 
     function generateViewTable(month, rosterData = {}) {
-        const [year, monthNum] = month.split('-');
-        const daysInMonth = new Date(year, monthNum, 0).getDate();
+            const [year, monthNum] = month.split('-');
+            const daysInMonth = new Date(year, monthNum, 0).getDate();
 
-        const thead = document.querySelector('#shiftTable thead');
-        const tbody = document.querySelector('#shiftTable tbody');
-        thead.innerHTML = '';
-        tbody.innerHTML = '';
+            const thead = document.querySelector('#shiftTable thead');
+            const tbody = document.querySelector('#shiftTable tbody');
+            thead.innerHTML = '';
+            tbody.innerHTML = '';
 
-        // Header
-        let headerRow = `<tr><th>NO</th><th>NAME OF EMPLOYEE</th>`;
-        for (let d = 1; d <= daysInMonth; d++) {
-            headerRow += `<th>${d}</th>`;
-        }
-        headerRow += `</tr>`;
-        thead.innerHTML = headerRow;
-
-        // Rows
-        employees.forEach((emp, index) => {
-            let row = `<tr><td>${emp.id}</td><td class="name-col">${emp.fullname}</td>`;
+            // Header
+            let headerRow = `<tr><th>NO</th><th>NAME OF EMPLOYEE</th>`;
             for (let d = 1; d <= daysInMonth; d++) {
-                const shiftId = (rosterData[emp.id] && rosterData[emp.id][d]) || '';
-                const shiftCode = shiftCodeMap[shiftId] || '';
-                row += `<td>${shiftCode}</td>`;
+                headerRow += `<th>${d}</th>`;
             }
-            row += `</tr>`;
-            tbody.innerHTML += row;
-        });
+            headerRow += `</tr>`;
+            thead.innerHTML = headerRow;
 
-        
+            // Rows
+            employees.forEach((emp) => {
+                let row = `<tr><td>${emp.id}</td><td class="name-col">${emp.fullname}</td>`;
+
+                for (let d = 1; d <= daysInMonth; d++) {
+                    const dayData = (rosterData[emp.id] && rosterData[emp.id][d]) || [];
+
+                    // dayData is now an array of shift ids
+                    const shiftIds = Array.isArray(dayData) ? dayData : [dayData];
+
+                    // Map each id to its code, filter out blanks, join with separator
+                    const shiftText = shiftIds
+                        .map(id => shiftCodeMap[id] || '')
+                        .filter(code => code !== '')
+                        .join(' / ');
+
+                    row += `<td>${shiftText}</td>`;
+                }
+
+                row += `</tr>`;
+                tbody.innerHTML += row;
+            });
     }
 
 });

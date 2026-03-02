@@ -201,7 +201,7 @@ $(document).ready(function() {
     fetch('getrostershifts')
         .then(response => response.json())
         .then(data => {
-            shiftOptions = [{ id: '', code: 'NA' }, ...data];
+            shiftOptions = data.filter(opt => opt.id !== '' && opt.id !== null);
         })
         .catch(error => {
             console.error('Error loading shift options:', error);
@@ -212,86 +212,162 @@ $(document).ready(function() {
             .then(response => response.json());
     }
 
+   
+    // Close dropdowns on outside click 
+    document.addEventListener('click', function() {
+        document.querySelectorAll('.ms-dropdown.open').forEach(d => {
+            d.classList.remove('open');
+            d.closest('.ms-wrap').querySelector('.ms-box').classList.remove('is-open');
+        });
+    });
+
+     // refresh the tag display inside .ms-box 
+    function refreshMsBox(wrap) {
+        const box     = wrap.querySelector('.ms-box');
+        const checked = wrap.querySelectorAll('input[type=checkbox]:checked');
+        const ph      = wrap.querySelector('.ms-placeholder');
+
+        wrap.querySelectorAll('.ms-tag').forEach(t => t.remove());
+
+        if (checked.length === 0) {
+            ph.style.display = '';
+            box.classList.remove('has-value');
+        } else {
+            ph.style.display = 'none';
+            box.classList.add('has-value');
+            checked.forEach(cb => {
+                const tag = document.createElement('span');
+                tag.className  = 'ms-tag';
+                tag.textContent = cb.dataset.code;
+                box.appendChild(tag);
+            });
+        }
+    }
+
+
     function generateTable(month, existingData = {}) {
         const [year, monthNum] = month.split('-');
         const daysInMonth = new Date(year, monthNum, 0).getDate();
-
         const thead = document.querySelector('#shiftTable thead');
         const tbody = document.querySelector('#shiftTable tbody');
         thead.innerHTML = '';
         tbody.innerHTML = '';
 
+        // Header row
         let headerRow = `<tr><th nowrap>NO</th><th nowrap>NAME OF EMPLOYEE</th>`;
-        for (let d = 1; d <= daysInMonth; d++) {
-            headerRow += `<th class="text-center">${d}</th>`;
-        }
+
+        for (let d = 1; d <= daysInMonth; d++) headerRow += `<th class="text-center">${d}</th>`;
         headerRow += `</tr>`;
         thead.innerHTML = headerRow;
 
-        employees.forEach((emp, index) => {
+        // Employee rows
+        employees.forEach(emp => {
             let row = `<tr><td>${emp.id}</td><td class="name-col nowrap">${emp.fullname}</td>`;
-            for (let d = 1; d <= daysInMonth; d++) {
-                const existingShift = (existingData[emp.id] && existingData[emp.id][d]) || '';
-               row += `<td style="padding: 0px;">
-                    <select name="shifts[${emp.id}][${d}]" class="form-control form-control-sm shiftcode" style="width: 55px;">
-                        
-                        ${shiftOptions.map(opt =>{
-                             const selectedClass = opt.id == existingShift ? 'selected-option' : '';
-                             return `<option value="${opt.id}" ${opt.id == existingShift ? 'selected' : ''} class="${selectedClass}">${opt.code}</option>`;
-                          }).join('')}
-                    </select>
-                </td>`;
 
+        for (let d = 1; d <= daysInMonth; d++) {
+                const raw = (existingData[emp.id] && existingData[emp.id][d]) || [];
+                
+                // raw is now always an array e.g. [3, 5] or [3] or []
+                const selected = (Array.isArray(raw) ? raw : (raw ? [raw] : [])).map(String);
+                
+                const optItems = shiftOptions.map(opt => {
+                    const isSel = selected.includes(String(opt.id));
+                    return `
+                        <label class="ms-opt${isSel ? ' selected' : ''}">
+                            <input type="checkbox"
+                                data-emp="${emp.id}"
+                                data-day="${d}"
+                                data-month="${month}"
+                                data-code="${opt.code}"
+                                value="${opt.id}"
+                                ${isSel ? 'checked' : ''}>
+                            ${opt.code}
+                        </label>`;
+                }).join('');
+
+                const initTags = shiftOptions
+                    .filter(opt => selected.includes(String(opt.id)))
+                    .map(opt => `<span class="ms-tag">${opt.code}</span>`)
+                    .join('');
+
+                const hasVal = selected.length > 0;
+
+                row += `
+                    <td style="padding:0">
+                        <div class="ms-wrap">
+                            <div class="ms-box${hasVal ? ' has-value' : ''}">
+                                ${initTags}
+                                <span class="ms-placeholder"${hasVal ? ' style="display:none"' : ''}>—</span>
+                            </div>
+                            <div class="ms-dropdown">${optItems}</div>
+                        </div>
+                    </td>`;
             }
+
             row += `</tr>`;
             tbody.innerHTML += row;
         });
 
-         $('.shiftcode').on('change', function() {
-                $(this).find('option').removeClass('selected-option bg-success');
-                
-                $(this).find('option:selected').addClass('selected-option bg-success');
-                
-                if ($(this).val()) {
-                    $(this).addClass('border-success');
-                } else {
-                    $(this).removeClass('border-success');
-                }
+        // ── Attach delegated events ONCE by cloning tbody (removes old listeners) ──
+        const newTbody = tbody.cloneNode(true);
+        tbody.parentNode.replaceChild(newTbody, tbody);
+        const tb = document.querySelector('#shiftTable tbody');
+
+        // Open / close dropdown
+        tb.addEventListener('click', function (e) {
+            const box = e.target.closest('.ms-box');
+            if (!box) return;
+
+            document.querySelectorAll('.ms-dropdown.open').forEach(d => {
+                d.classList.remove('open');
+                d.closest('.ms-wrap').querySelector('.ms-box').classList.remove('is-open');
             });
 
-             $('.shiftcode').trigger('change');
+            const wrap = box.closest('.ms-wrap');
+            const dropdown = wrap.querySelector('.ms-dropdown');
+            const rect = box.getBoundingClientRect();
+
+            dropdown.style.top = (rect.bottom + window.scrollY + 2) + 'px';
+            dropdown.style.left = (rect.left + window.scrollX) + 'px';
+            dropdown.classList.add('open');
+            box.classList.add('is-open');
+            e.stopPropagation();
+        });
+
+        // Checkbox toggle → refresh tags
+        tb.addEventListener('change', function (e) {
+            const cb = e.target.closest('input[type=checkbox]');
+            if (!cb) return;
+            cb.closest('.ms-opt').classList.toggle('selected', cb.checked);
+            refreshMsBox(cb.closest('.ms-wrap'));
+        });
+
+        // Keep dropdown open on internal click
+        tb.addEventListener('click', function (e) {
+            if (e.target.closest('.ms-dropdown')) e.stopPropagation();
+        });
     }
+
 
     // Handle form submit
     $('#shiftForm').on('submit', function(e) {
         e.preventDefault();
 
-        const formData = new FormData(this);
-        const month = $('#month').val();
-        const shifts = {};
+        const month   = $('#month').val();
+        const payload = [];
 
-        // Build shifts payload
-        for (const [key, value] of formData.entries()) {
-            if (key.startsWith("shifts") && value !== "") {
-                const matches = key.match(/shifts\[(\d+)\]\[(\d+)\]/);
-                if (matches) {
-                    const empId = matches[1];
-                    const day = matches[2];
-                    const date = new Date(`${month}-${String(day).padStart(2, '0')}`);
-                    const formattedDate = date.toISOString().split('T')[0];
+        // Read every checked checkbox in the table
+        document.querySelectorAll('#shiftTable tbody input[type=checkbox]:checked').forEach(cb => {
+            const empId = cb.dataset.emp;
+            const day   = String(cb.dataset.day).padStart(2, '0');
+            const date  = `${month}-${day}`;
 
-                    if (!shifts[empId]) shifts[empId] = [];
-
-                    shifts[empId].push({
-                        emp_id: empId,
-                        shift: value,
-                        date: formattedDate
-                    });
-                }
-            }
-        }
-
-        const payload = Object.values(shifts).flat();
+            payload.push({
+                emp_id : empId,
+                shift  : cb.value,   // shift id
+                date   : date        // YYYY-MM-DD  (matches backend work_date)
+            });
+        });
 
         let action_url = "{{ url('/fullrosterstore') }}";
          $.ajaxSetup({
@@ -349,6 +425,57 @@ $(document).ready(function() {
     });
 
 });
+
+
+// function generateTable(month, existingData = {}) {
+    //     const [year, monthNum] = month.split('-');
+    //     const daysInMonth = new Date(year, monthNum, 0).getDate();
+
+    //     const thead = document.querySelector('#shiftTable thead');
+    //     const tbody = document.querySelector('#shiftTable tbody');
+    //     thead.innerHTML = '';
+    //     tbody.innerHTML = '';
+
+    //     let headerRow = `<tr><th nowrap>NO</th><th nowrap>NAME OF EMPLOYEE</th>`;
+    //     for (let d = 1; d <= daysInMonth; d++) {
+    //         headerRow += `<th class="text-center">${d}</th>`;
+    //     }
+    //     headerRow += `</tr>`;
+    //     thead.innerHTML = headerRow;
+
+    //     employees.forEach((emp, index) => {
+    //         let row = `<tr><td>${emp.id}</td><td class="name-col nowrap">${emp.fullname}</td>`;
+    //         for (let d = 1; d <= daysInMonth; d++) {
+    //             const existingShift = (existingData[emp.id] && existingData[emp.id][d]) || '';
+    //            row += `<td style="padding: 0px;">
+    //                 <select name="shifts[${emp.id}][${d}]" class="form-control form-control-sm shiftcode" style="width: 55px;" muptiple>
+                        
+    //                     ${shiftOptions.map(opt =>{
+    //                          const selectedClass = opt.id == existingShift ? 'selected-option' : '';
+    //                          return `<option value="${opt.id}" ${opt.id == existingShift ? 'selected' : ''} class="${selectedClass}">${opt.code}</option>`;
+    //                       }).join('')}
+    //                 </select>
+    //             </td>`;
+
+    //         }
+    //         row += `</tr>`;
+    //         tbody.innerHTML += row;
+    //     });
+
+    //      $('.shiftcode').on('change', function() {
+    //             $(this).find('option').removeClass('selected-option bg-success');
+                
+    //             $(this).find('option:selected').addClass('selected-option bg-success');
+                
+    //             if ($(this).val()) {
+    //                 $(this).addClass('border-success');
+    //             } else {
+    //                 $(this).removeClass('border-success');
+    //             }
+    //         });
+
+    //          $('.shiftcode').trigger('change');
+    // }
 </script>
 
 <style>
@@ -369,6 +496,99 @@ $(document).ready(function() {
             background-color: #007bff !important;
             color: white !important;
         }
+        .ms-wrap {
+            position: relative;
+            width: 80px;
+        }
+        .ms-box {
+            min-height: 28px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            background: #fff;
+            cursor: pointer;
+            padding: 2px 3px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2px;
+            align-items: center;
+            transition: border-color .15s;
+        }
+        .ms-box.has-value { border-color: #0d6efd; background: #fff; }
+        .ms-box.is-open   { border-color: #0d6efd; box-shadow: 0 0 0 2px rgba(13,110,253,.2); }
+        .ms-tag {
+            background: #0d6efd;
+            color: #fff;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 1px 4px;
+            white-space: nowrap;
+            line-height: 1.4;
+        }
+        .ms-placeholder {
+            color: #aaa;
+            font-size: 10px;
+            padding: 2px;
+        }
+        .ms-dropdown {
+            display: none;
+            position: fixed;
+            z-index: 99999;
+            background: #fff;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            box-shadow: 0 4px 14px rgba(0,0,0,.15);
+            min-width: 110px;
+            padding: 3px 0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .ms-dropdown.open { display: block; }
+        .ms-opt {
+            display: block;
+            width: 100%;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 400;
+            color: #212529;
+            cursor: pointer;
+            user-select: none;
+            background: transparent;
+            border-radius: 0;
+            box-sizing: border-box;
+            margin: 0;
+            line-height: 1.4;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+        .ms-opt:hover {
+            background: #e8f0fe;
+            color: #0d6efd;
+        }
+        .ms-opt.selected {
+            background: #0d6efd;
+            color: #fff;
+            font-weight: 600;
+        }
+        .ms-opt.selected:hover {
+            background: #0b5ed7;
+            color: #fff;
+        }
+        .ms-opt input[type="checkbox"] {
+            display: none !important;
+            appearance: none !important;
+            -webkit-appearance: none !important;
+            width: 0 !important;
+            height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            border: none !important;
+            position: absolute !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
 </style>
+
+
 @endsection
 
