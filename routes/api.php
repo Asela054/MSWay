@@ -113,6 +113,7 @@ Route::post('v1/Singlelocationattendanceinsert', ['uses' => '\App\Http\Controlle
 Route::post('v1/GetApprovedUpcomingLeavesForDashboard', ['uses' => '\App\Http\Controllers\Api\APIDashboardController@GetApprovedUpcomingLeavesForDashboard', 'as' => 'GetApprovedUpcomingLeavesForDashboard']);
 Route::post('v1/Getdetails_maindashbord', ['uses' => '\App\Http\Controllers\Api\APIDashboardController@Getdetails_maindashbord', 'as' => 'Getdetails_maindashbord']);
 Route::post('v1/getdetails_attendancedashboard', ['uses' => '\App\Http\Controllers\Api\APIDashboardController@getdetails_attendancedashboard', 'as' => 'getdetails_attendancedashboard']);
+Route::post('v1/getattendance_details', ['uses' => '\App\Http\Controllers\Api\APIDashboardController@getattendance_details', 'as' => 'getattendance_details']);
 
 // Payroll API List
 Route::post('v1/getemployee_monthlysummery', ['uses' => '\App\Http\Controllers\Api\APIPayrollController@get_employee_monthlysummery', 'as' => 'getemployee_monthlysummery']);

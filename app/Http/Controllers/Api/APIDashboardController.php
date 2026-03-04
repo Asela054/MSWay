@@ -296,4 +296,39 @@ class APIDashboardController extends Controller
         return (new BaseController)->sendResponse($data_arr, 'dashborddetails');
     }
 
+    public function getattendance_details(Request $request)
+    {
+        $today = $request->input('date');
+
+        $empcount = DB::table('employees')->where('deleted', 0)->where('is_resigned', 0)->count();
+
+        // today attendance count
+        $todaycount = DB::table('attendances')
+            ->select('date', 'emp_id')
+            ->where('date', $today)
+            ->groupBy('date', 'emp_id')
+            ->get()
+            ->count();
+
+        // today late attendance count
+        $late_times = DB::table('late_types')->orderBy('id', 'desc')->first();
+        $todaylatecount = DB::table('attendances')
+            ->select('date', 'emp_id')
+            ->where('date', $today)
+            ->where('timestamp','>', $today. ' ' . $late_times->time_from)
+            ->groupBy('date', 'emp_id')
+            ->get()
+            ->count();
+
+        $data_arr = array(
+            'employee_count' => $empcount,
+            'attendance_count' => $todaycount,
+            'today_latecont' =>$todaylatecount
+        );
+
+        return (new BaseController)->sendResponse($data_arr, 'dashborddetails');
+        
+    }
+
+
 }

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use App\Leave;
+use Carbon\Carbon;
 
 class APILeaveapproveController extends Controller
 {
@@ -88,11 +89,37 @@ class APILeaveapproveController extends Controller
         if($validator->fails()){
             return (new BaseController())->sendError('Validation Error.', $validator->errors(), '400');
         }
+        $applevel = $request->app_level;
+        $emp_id = $request->emp_id;
+        $status = $request->status;
 
-        $form_data = array(
-            'status' => $request->status,
-            'comment' => $request->comment,
-        );
+        $current_date_time = Carbon::now()->toDateTimeString();
+
+
+        if($applevel == 1){
+            $form_data = array(
+               'approve_01' => 1 ,
+               'approve_01_time' => $current_date_time,
+               'approve_01_by' =>   $emp_id,
+             );
+
+
+        }else if($applevel == 2){
+
+            $form_data = array(
+                'approve_02' => 1 ,
+                'approve_02_time' => $current_date_time,
+                'approve_02_by' =>   $emp_id,
+                'status' => $status,
+                'comment' => $request->comment
+            );
+
+        }else{
+            $form_data = array(
+                'status' => $status,
+                'comment' => $request->comment
+            );
+        }
 
         Leave::whereId($request->id)->update($form_data);
 
