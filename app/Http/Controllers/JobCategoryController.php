@@ -90,6 +90,8 @@ class JobCategoryController extends Controller
         $jobcategory->custom_normal_ot_rate = $request->input('custom_normal_ot_rate');
         $jobcategory->custom_double_ot_rate = $request->input('custom_double_ot_rate');
 
+        $jobcategory->flex_ot = 0;
+
         $jobcategory->save();
         $jobcategory_id = $jobcategory->id;
 
