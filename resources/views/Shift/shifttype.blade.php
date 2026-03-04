@@ -293,10 +293,6 @@ $(document).ready(function(){
                 name: 'shift_name'
             },
             { 
-                data: 'offduty_day', 
-                name: 'offduty_day'
-            },
-            { 
                 data: 'onduty_time', 
                 name: 'onduty_time'
             },
@@ -304,6 +300,11 @@ $(document).ready(function(){
                 data: 'offduty_time', 
                 name: 'offduty_time'
             },
+            { 
+                data: 'offduty_day', 
+                name: 'offduty_day'
+            },
+           
             { 
                 data: 'saturday_onduty_time', 
                 name: 'saturday_onduty_time'
