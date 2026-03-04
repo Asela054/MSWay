@@ -439,6 +439,42 @@
                                     </div>
                                 </div>
 
+                                <div class="form-group mb-2">
+                                    <label class="small font-weight-bold text-dark">Basic OT Type</label>
+                                    <br>
+                                    <div class="form-check-inline">
+                                        <label class="form-check-label">
+                                            <input type="radio" class="form-check-input basic_ot_type" name="basic_ot_type" id="basic_ot_type_1" value="1" checked>Basic salary
+                                        </label>
+                                    </div>
+                                    <div class="form-check-inline">
+                                        <label class="form-check-label">
+                                            <input type="radio" class="form-check-input basic_ot_type" name="basic_ot_type" id="basic_ot_type_2" value="2">Custom
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="form-row mb-2">
+                                    <div class="col-md-4 normal_ot" style="display: none">
+                                        <label class="small font-weight-bold text-dark">Normal OT Rate</label>
+                                            <br>
+                                            <div class="form-check-inline">
+                                                <label class="form-check-label">
+                                                    <input type="number" step="0.01" class="form-control form-control-sm" name="custom_normal_ot_rate" id="custom_normal_ot_rate"/>
+                                                </label>
+                                            </div>
+                                    </div>
+                                    <div class="col-md-4 double_ot" style="display: none">
+                                        <label class="small font-weight-bold text-dark">Double OT Rate</label>
+                                            <br>
+                                            <div class="form-check-inline">
+                                                <label class="form-check-label">
+                                                    <input type="number" step="0.01" class="form-control form-control-sm" name="custom_double_ot_rate" id="custom_double_ot_rate"/>
+                                                </label>
+                                            </div>
+                                    </div>
+                                </div>
+
                                 <div class="form-group mt-2">
                                     <button type="submit" name="action_button" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
                                 </div>
@@ -750,6 +786,8 @@ $(document).ready(function(){
         $('.per_min').hide();
         $('.short_lev').hide();
         $('.half_day').hide();
+        $('.normal_ot').hide();
+        $('.double_ot').hide();
 
         $('#formModal').modal('show');
     });
@@ -1013,6 +1051,31 @@ $(document).ready(function(){
                     $('#short_leaves').val(data.result.short_leaves);
                     $('#half_days').val(data.result.half_days);
 
+                    if(data.result.basic_ot_type == 1) {
+                        $('#basic_ot_type_1').prop("checked", true);
+                        $('.normal_ot').css('display', 'none');
+                        $('.double_ot').css('display', 'none');
+                        $('#custom_normal_ot_rate').val(0).prop("checked", true);
+                        $('<input>').attr({
+                            type: 'hidden',
+                            name: 'custom_normal_ot_rate',
+                            value: 0
+                        });
+                        $('#custom_double_ot_rate').val(0).prop("checked", true);
+                        $('<input>').attr({
+                            type: 'hidden',
+                            name: 'custom_double_ot_rate',
+                            value: 0
+                        });
+                    } else if (data.result.basic_ot_type == 2) {
+                        $('#basic_ot_type_2').prop("checked", true);
+                        $('.normal_ot').css('display', 'block');
+                        $('.double_ot').css('display', 'block');
+                    }
+                    
+                    $('#custom_normal_ot_rate').val(data.result.custom_normal_ot_rate);
+                    $('#custom_double_ot_rate').val(data.result.custom_double_ot_rate);
+
                     if(data.leave_types && data.leave_types.length > 0) {
                         $('#leave_types').val(data.leave_types).trigger('change');
                     } else {
@@ -1156,6 +1219,30 @@ $(document).ready(function(){
             $('.short_lev').css('display', 'block');
             $('.half_day').css('display', 'block');
             $('.per_min').css('display', 'block');
+        }
+
+    });
+    
+    $(document).on('change', '.basic_ot_type', function (e) {
+        let val = $(this).val();
+        if(val == 1){
+            $('.normal_ot').css('display', 'none');
+            $('.double_ot').css('display', 'none');
+            $('#custom_normal_ot_rate').val(0).prop( "checked", true); 
+            $('<input>').attr({
+                type: 'hidden',
+                name: 'custom_normal_ot_rate',
+                value: 0
+            });
+            $('#custom_double_ot_rate').val(0).prop( "checked", true);
+            $('<input>').attr({
+                type: 'hidden',
+                name: 'custom_double_ot_rate',
+                value: 0
+            });
+        }else if(val == 2){
+            $('.normal_ot').css('display', 'block');
+            $('.double_ot').css('display', 'block');
         }
 
     });
