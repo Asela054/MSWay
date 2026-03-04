@@ -86,7 +86,12 @@ class LatePolicyService
             ->where('attendance_date', '!=', $date)
             ->first();
 
-        $totalminitescount = $totalMinutes + $attendanceminitesrecord->minites_count;
+       if ($attendanceminitesrecord) {
+            $totalminitescount = $totalMinutes + $attendanceminitesrecord->minites_count;
+        } else {
+            $totalminitescount = $totalMinutes;
+        }
+
 
         // Create leave record based on minutes threshold
         if ($minitescount < $totalminitescount) {
