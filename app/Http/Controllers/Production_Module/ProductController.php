@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Production_Module;
 
-use App\Product;
+use App\Http\Controllers\Controller;
+use App\ProductionModule\Product;
 use Illuminate\Http\Request;
 use Validator;
 

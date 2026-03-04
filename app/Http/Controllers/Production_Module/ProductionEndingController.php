@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Production_Module;
 
-use App\EmployeeProduction;
-use App\EmpProductAllocation;
-use App\EmpProductAllocationDetail;
+use App\ProductionModule\EmployeeProduction;
+use App\ProductionModule\EmpProductAllocation;
+use App\ProductionModule\EmpProductAllocationDetail;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Productionempattendace;
-use App\Productionemptransfers;
-use App\Productionstatusrecords;
+use App\ProductionModule\Productionempattendace;
+use App\ProductionModule\Productionemptransfers;
+use App\ProductionModule\Productionstatusrecords;
 use Auth;
 use Carbon\Carbon;
 use Datatables;

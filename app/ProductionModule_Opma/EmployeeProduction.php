@@ -1,0 +1,16 @@
+<?php
+
+namespace App\ProductionModule;
+
+use Illuminate\Database\Eloquent\Model;
+
+class EmployeeProduction extends Model
+{
+     protected $table = 'employee_production';
+
+    protected $primarykey = 'id';
+
+    protected $fillable =[
+        'allocation_id','emp_id','date','machine_id','product_id','Produce_qty','unit_price','amount','description','status','created_by', 'updated_by'
+    ];
+}

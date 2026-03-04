@@ -1251,26 +1251,6 @@ Route::get('/dashboard/nextmonth-birthday','HomeController@nextmonth_birthday')-
 Route::get('/password-reset', 'Auth\UserPasswordResetController@showForm')->name('password-reset');
 Route::post('/password-reset', 'Auth\UserPasswordResetController@reset')->name('manual.reset.submit');
 
-
-// Production Controller Routes
-Route::resource('Product', 'ProductController');
-Route::get('products', 'ProductController@index')->name('products');
-Route::post('addProduct',['uses' => 'ProductController@store', 'as' => 'addProduct']); 
-Route::post('Product/update', 'ProductController@update')->name('Product.update');
-Route::get('Product/destroy/{id}', 'ProductController@destroy');
-
-// Production Allocation Controller Routes
-Route::get('productionallocation', 'ProductionEmployeeAllocationController@index')->name('productionallocation');
-Route::get('/productallocationlist' ,'ProductionEmployeeAllocationController@requestlist')->name('productallocationlist');
-Route::post('/productallocationinsert' ,'ProductionEmployeeAllocationController@insert')->name('productallocationinsert');
-Route::post('/productallocationedit' ,'ProductionEmployeeAllocationController@edit')->name('productallocationedit');
-Route::post('/productallocationview' ,'ProductionEmployeeAllocationController@view')->name('productallocationview');
-Route::post('/productallocationeditdetails' ,'ProductionEmployeeAllocationController@editlist')->name('productallocationeditdetails');
-Route::post('/productallocationupdate' ,'ProductionEmployeeAllocationController@update')->name('productallocationupdate');
-Route::post('/productallocationdelete' ,'ProductionEmployeeAllocationController@delete')->name('productallocationdelete');
-Route::post('/productallocationdeletelist' ,'ProductionEmployeeAllocationController@deletelist')->name('productallocationdeletelist');
-Route::get('/productallocationstatus/{id}/{stasus}','ProductionEmployeeAllocationController@status')->name('productallocationstatus');
-
 // Employee Assigned Devices Routes
 Route::get('/viewAssignedDevices/{id}',['uses' => 'EmployeeDevicesController@show', 'as' => 'viewAssignedDevices']);
 Route::post('assignedDeviceInsert',['uses' => 'EmployeeDevicesController@create', 'as' => 'assignedDeviceInsert']);
@@ -1434,33 +1414,6 @@ Route::post('single_employeeattendance', 'JobattendanceController@single_employe
 Route::get('jobattendanceapprove', 'JobAttendaceApproveController@index')->name('jobattendanceapprove');
 Route::post('jobattendanceapprovesave', 'JobAttendaceApproveController@approveattendace')->name('jobattendanceapprovesave');
 
-
-// machine Controller Routes
-Route::resource('Machine', 'MachineController');
-Route::get('machines', 'MachineController@index')->name('machines');
-Route::post('addMachine',['uses' => 'MachineController@store', 'as' => 'addMachine']); 
-Route::post('Machine/update', 'MachineController@update')->name('Machine.update');
-Route::get('Machine/destroy/{id}', 'MachineController@destroy');
-
-
-/*-- Product Machines Info----*/
-Route::resource('productMachine', 'ProductMachineController');
-Route::get('MachineShow/{id}',['uses' => 'ProductMachineController@index', 'as' => 'MachineShow']);
-Route::post('addProductMachine',['uses' => 'ProductMachineController@store', 'as' => 'addProductMachine']);
-Route::post('productMachine/update', 'ProductMachineController@update')->name('productMachine.update');
-Route::get('productMachine/destroy/{id}', 'ProductMachineController@destroy');
-Route::get('Machine_list_sel2', 'ProductMachineController@Machine_list_sel2');
-
-// Task & Product report Controller Routes
-Route::get('/employeetaskproductreport' ,'EmployeeTaskProductController@employeetaskproduct')->name('employeetaskproductreport');
-
-Route::get('/productiontaskdashboard' ,'ProductionTaskdashboardController@index')->name('productiontaskdashboard');
-
-//Production an Task Approve controller
-Route::get('/productiontaskapprove' ,'ProductionTaskApproveController@index')->name('productiontaskapprove');
-Route::post('/productiontaskapprovegenerate' ,'ProductionTaskApproveController@generateproductiontask')->name('productiontaskapprovegenerate');
-Route::post('/approveproductiontask' ,'ProductionTaskApproveController@approveproductiontask')->name('approveproductiontask');
-
 Route::resource('LocationOt', 'LocationOtController');
 Route::get('LocationOt',['uses' => 'LocationOtController@index', 'as' => 'LocationOt']);
 Route::get('LocationOtlist', 'LocationOtController@letterlist')->name('LocationOtlist'); 
@@ -1553,19 +1506,73 @@ Route::get('trainEmp_list_sel2', 'TrainingTypeController@trainEmp_list_sel2');
 /*-- Training Management----*/
 
 
-// Production ending Controller Routes
-Route::get('productionending', 'ProductionEndingController@index')->name('productionending');
-Route::get('/productionendinglist' ,'ProductionEndingController@productionlist')->name('productionendinglist');
-Route::post('/productionendingfinish' ,'ProductionEndingController@insert')->name('productionendingfinish');
-Route::post('/productionendingcancel' ,'ProductionEndingController@cancelproduction')->name('productionendingcancel');
-Route::get('employee_list_production', 'ProductionEndingController@employee_list_production')->name('employee_list_production');
-Route::get('/employeeproductionreport' ,'ProductionEndingController@employeeproduction')->name('employeeproductionreport');
+                    // Production Section Routes
 
-Route::post('/productionstart' ,'ProductionEndingController@startproduction')->name('productionstart');
-Route::post('/productionbreakdown' ,'ProductionEndingController@breakdownproduction')->name('productionbreakdown');
-Route::post('/productionresume' ,'ProductionEndingController@resumeproduction')->name('productionresume');
-Route::post('/productionaddingemployees' ,'ProductionEndingController@addingproductionemployees')->name('productionaddingemployees');
-Route::post('/productionremoveemployees' ,'ProductionEndingController@removeproductionemployees')->name('productionremoveemployees');
+// machine Controller Routes
+Route::resource('Machine', 'Production_Module\MachineController');
+Route::get('machines', 'Production_Module\MachineController@index')->name('machines');
+Route::post('addMachine',['uses' => 'Production_Module\MachineController@store', 'as' => 'addMachine']); 
+Route::post('Machine/update', 'Production_Module\MachineController@update')->name('Machine.update');
+Route::get('Machine/destroy/{id}', 'Production_Module\MachineController@destroy');
+
+// Production Controller Routes
+Route::resource('Product', 'Production_Module\ProductController');
+Route::get('products', 'Production_Module\ProductController@index')->name('products');
+Route::post('addProduct',['uses' => 'Production_Module\ProductController@store', 'as' => 'addProduct']); 
+Route::post('Product/update', 'Production_Module\ProductController@update')->name('Product.update');
+Route::get('Product/destroy/{id}', 'Production_Module\ProductController@destroy');
+
+// Production Allocation Controller Routes
+Route::get('productionallocation', 'Production_Module\ProductionEmployeeAllocationController@index')->name('productionallocation');
+Route::get('/productallocationlist' ,'Production_Module\ProductionEmployeeAllocationController@requestlist')->name('productallocationlist');
+Route::post('/productallocationinsert' ,'Production_Module\ProductionEmployeeAllocationController@insert')->name('productallocationinsert');
+Route::post('/productallocationedit' ,'Production_Module\ProductionEmployeeAllocationController@edit')->name('productallocationedit');
+Route::post('/productallocationview' ,'Production_Module\ProductionEmployeeAllocationController@view')->name('productallocationview');
+Route::post('/productallocationeditdetails' ,'Production_Module\ProductionEmployeeAllocationController@editlist')->name('productallocationeditdetails');
+Route::post('/productallocationupdate' ,'Production_Module\ProductionEmployeeAllocationController@update')->name('productallocationupdate');
+Route::post('/productallocationdelete' ,'Production_Module\ProductionEmployeeAllocationController@delete')->name('productallocationdelete');
+Route::post('/productallocationdeletelist' ,'Production_Module\ProductionEmployeeAllocationController@deletelist')->name('productallocationdeletelist');
+Route::get('/productallocationstatus/{id}/{stasus}','Production_Module\ProductionEmployeeAllocationController@status')->name('productallocationstatus');
+
+/*-- Product Machines Info----*/
+Route::resource('productMachine', 'Production_Module\ProductMachineController');
+Route::get('MachineShow/{id}',['uses' => 'Production_Module\ProductMachineController@index', 'as' => 'MachineShow']);
+Route::post('addProductMachine',['uses' => 'Production_Module\ProductMachineController@store', 'as' => 'addProductMachine']);
+Route::post('productMachine/update', 'Production_Module\ProductMachineController@update')->name('productMachine.update');
+Route::get('productMachine/destroy/{id}', 'Production_Module\ProductMachineController@destroy');
+Route::get('Machine_list_sel2', 'Production_Module\ProductMachineController@Machine_list_sel2');
+
+// Task & Product report Controller Routes
+Route::get('/employeetaskproductreport' ,'Production_Module\EmployeeTaskProductController@employeetaskproduct')->name('employeetaskproductreport');
+
+Route::get('/productiontaskdashboard' ,'Production_Module\ProductionTaskdashboardController@index')->name('productiontaskdashboard');
+
+//Production an Task Approve controller
+Route::get('/productiontaskapprove' ,'Production_Module\ProductionTaskApproveController@index')->name('productiontaskapprove');
+Route::post('/productiontaskapprovegenerate' ,'Production_Module\ProductionTaskApproveController@generateproductiontask')->name('productiontaskapprovegenerate');
+Route::post('/approveproductiontask' ,'Production_Module\ProductionTaskApproveController@approveproductiontask')->name('approveproductiontask');
+
+// Production ending Controller Routes
+Route::get('productionending', 'Production_Module\ProductionEndingController@index')->name('productionending');
+Route::get('/productionendinglist' ,'Production_Module\ProductionEndingController@productionlist')->name('productionendinglist');
+Route::post('/productionendingfinish' ,'Production_Module\ProductionEndingController@insert')->name('productionendingfinish');
+Route::post('/productionendingcancel' ,'Production_Module\ProductionEndingController@cancelproduction')->name('productionendingcancel');
+Route::get('employee_list_production', 'Production_Module\ProductionEndingController@employee_list_production')->name('employee_list_production');
+Route::get('/employeeproductionreport' ,'Production_Module\ProductionEndingController@employeeproduction')->name('employeeproductionreport');
+
+Route::post('/productionstart' ,'Production_Module\ProductionEndingController@startproduction')->name('productionstart');
+Route::post('/productionbreakdown' ,'Production_Module\ProductionEndingController@breakdownproduction')->name('productionbreakdown');
+Route::post('/productionresume' ,'Production_Module\ProductionEndingController@resumeproduction')->name('productionresume');
+Route::post('/productionaddingemployees' ,'Production_Module\ProductionEndingController@addingproductionemployees')->name('productionaddingemployees');
+Route::post('/productionremoveemployees' ,'Production_Module\ProductionEndingController@removeproductionemployees')->name('productionremoveemployees');
+
+// Production Reports 
+Route::get('/reportemployeeproduction' ,'Production_Module\ProductionreportController@index')->name('reportemployeeproduction');
+
+
+                  // End of Production Section Routes
+
+
 
 /*-- Comany Hierarchy----*/
 Route::resource('Hierarchy', 'CompanyHierarchyController');
@@ -1590,10 +1597,6 @@ Route::post('addPayGroup',['uses' => 'PayGroupController@store', 'as' => 'addPay
 Route::post('PayGroup/update', 'PayGroupController@update')->name('PayGroup.update');
 Route::get('PayGroup/destroy/{id}', 'PayGroupController@destroy');
 /*-- Pay Group----*/
-
-// Production Reports 
-
-Route::get('/reportemployeeproduction' ,'ProductionreportController@index')->name('reportemployeeproduction');
 
 // Employee Time sheet
 Route::get('/employeetimesheet' ,'EmployeetimesheetContrller@index')->name('employeetimesheet');
@@ -1667,6 +1670,82 @@ Route::post('/emp_prod_approvegenerate' ,'ProductionEmployee\ProductionApproveCo
 Route::post('/approveproduction' ,'ProductionEmployee\ProductionApproveController@approveproduction')->name('approveproduction');
 Route::post('/emp_prod_date_details', 'ProductionEmployee\ProductionApproveController@getDateDetails')->name('emp_prod_date_details');
 //CelonXP Employee Production Routes
+
+
+
+
+
+   //Opma Production Section Routes
+
+Route::get('/opma_productiontaskdashboard' ,'Production_Module_Opma\ProductionTaskdashboardController@index')->name('opma_productiontaskdashboard');
+
+// machine Controller Routes
+Route::resource('Machine', 'Production_Module_Opma\MachineController');
+Route::get('opma_machines', 'Production_Module_Opma\MachineController@index')->name('opma_machines');
+Route::post('opma_addMachine',['uses' => 'Production_Module_Opma\MachineController@store', 'as' => 'opma_addMachine']); 
+Route::post('Machine/update', 'Production_Module_Opma\MachineController@update')->name('Machine.update');
+Route::get('Machine/destroy/{id}', 'Production_Module_Opma\MachineController@destroy');
+
+// Production Controller Routes
+
+// Route::resource('Product', 'Production_Module_Opma\ProductController');
+// Route::get('products', 'Production_Module_Opma\ProductController@index')->name('products');
+// Route::post('addProduct',['uses' => 'Production_Module_Opma\ProductController@store', 'as' => 'addProduct']); 
+// Route::post('Product/update', 'Production_Module_Opma\ProductController@update')->name('Product.update');
+// Route::get('Product/destroy/{id}', 'Production_Module_Opma\ProductController@destroy');
+
+// // Production Allocation Controller Routes
+// Route::get('productionallocation', 'Production_Module\ProductionEmployeeAllocationController@index')->name('productionallocation');
+// Route::get('/productallocationlist' ,'Production_Module\ProductionEmployeeAllocationController@requestlist')->name('productallocationlist');
+// Route::post('/productallocationinsert' ,'Production_Module\ProductionEmployeeAllocationController@insert')->name('productallocationinsert');
+// Route::post('/productallocationedit' ,'Production_Module\ProductionEmployeeAllocationController@edit')->name('productallocationedit');
+// Route::post('/productallocationview' ,'Production_Module\ProductionEmployeeAllocationController@view')->name('productallocationview');
+// Route::post('/productallocationeditdetails' ,'Production_Module\ProductionEmployeeAllocationController@editlist')->name('productallocationeditdetails');
+// Route::post('/productallocationupdate' ,'Production_Module\ProductionEmployeeAllocationController@update')->name('productallocationupdate');
+// Route::post('/productallocationdelete' ,'Production_Module\ProductionEmployeeAllocationController@delete')->name('productallocationdelete');
+// Route::post('/productallocationdeletelist' ,'Production_Module\ProductionEmployeeAllocationController@deletelist')->name('productallocationdeletelist');
+// Route::get('/productallocationstatus/{id}/{stasus}','Production_Module\ProductionEmployeeAllocationController@status')->name('productallocationstatus');
+
+// /*-- Product Machines Info----*/
+// Route::resource('productMachine', 'Production_Module\ProductMachineController');
+// Route::get('MachineShow/{id}',['uses' => 'Production_Module\ProductMachineController@index', 'as' => 'MachineShow']);
+// Route::post('addProductMachine',['uses' => 'Production_Module\ProductMachineController@store', 'as' => 'addProductMachine']);
+// Route::post('productMachine/update', 'Production_Module\ProductMachineController@update')->name('productMachine.update');
+// Route::get('productMachine/destroy/{id}', 'Production_Module\ProductMachineController@destroy');
+// Route::get('Machine_list_sel2', 'Production_Module\ProductMachineController@Machine_list_sel2');
+
+// // Task & Product report Controller Routes
+// Route::get('/employeetaskproductreport' ,'Production_Module\EmployeeTaskProductController@employeetaskproduct')->name('employeetaskproductreport');
+
+
+
+// //Production an Task Approve controller
+// Route::get('/productiontaskapprove' ,'Production_Module\ProductionTaskApproveController@index')->name('productiontaskapprove');
+// Route::post('/productiontaskapprovegenerate' ,'Production_Module\ProductionTaskApproveController@generateproductiontask')->name('productiontaskapprovegenerate');
+// Route::post('/approveproductiontask' ,'Production_Module\ProductionTaskApproveController@approveproductiontask')->name('approveproductiontask');
+
+// // Production ending Controller Routes
+// Route::get('productionending', 'Production_Module\ProductionEndingController@index')->name('productionending');
+// Route::get('/productionendinglist' ,'Production_Module\ProductionEndingController@productionlist')->name('productionendinglist');
+// Route::post('/productionendingfinish' ,'Production_Module\ProductionEndingController@insert')->name('productionendingfinish');
+// Route::post('/productionendingcancel' ,'Production_Module\ProductionEndingController@cancelproduction')->name('productionendingcancel');
+// Route::get('employee_list_production', 'Production_Module\ProductionEndingController@employee_list_production')->name('employee_list_production');
+// Route::get('/employeeproductionreport' ,'Production_Module\ProductionEndingController@employeeproduction')->name('employeeproductionreport');
+
+// Route::post('/productionstart' ,'Production_Module\ProductionEndingController@startproduction')->name('productionstart');
+// Route::post('/productionbreakdown' ,'Production_Module\ProductionEndingController@breakdownproduction')->name('productionbreakdown');
+// Route::post('/productionresume' ,'Production_Module\ProductionEndingController@resumeproduction')->name('productionresume');
+// Route::post('/productionaddingemployees' ,'Production_Module\ProductionEndingController@addingproductionemployees')->name('productionaddingemployees');
+// Route::post('/productionremoveemployees' ,'Production_Module\ProductionEndingController@removeproductionemployees')->name('productionremoveemployees');
+
+// // Production Reports 
+// Route::get('/reportemployeeproduction' ,'Production_Module\ProductionreportController@index')->name('reportemployeeproduction');
+
+
+                  // End of Opma Production Section Routes
+
+
+
 
 
 Route::get('/clear-cache', function() {
