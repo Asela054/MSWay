@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Production_Module;
 
 use App\EmployeeTermPayment;
 use Illuminate\Http\Request;

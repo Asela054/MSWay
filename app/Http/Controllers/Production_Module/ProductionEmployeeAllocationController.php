@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Production_Module;
 
-use App\EmpProductAllocation;
-use App\EmpProductAllocationDetail;
+use App\ProductionModule\EmpProductAllocation;
+use App\ProductionModule\EmpProductAllocationDetail;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Auth;

@@ -1,7 +1,9 @@
 <?php
 
-namespace App;
+namespace App\ProductionModule;
 
+use App\Branch;
+use App\Company;
 use Illuminate\Database\Eloquent\Model;
 
 class Machine extends Model

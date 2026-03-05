@@ -1721,8 +1721,8 @@
                        success: function (data) {
                             $('#AttendeditModal').modal('show');
                             var htmlhead = '';
-                            htmlhead += '<tr><td>Emp ID :' + id + '</td><td colspan="2">Name :' + emp_name_with_initial + '</td></tr>';
-                            htmlhead += '<tr> <th> Type </th> <th>Date & Time</th><th class="text-right">Action</th>';
+                            htmlhead += '<tr><th>Emp ID : ' + id + '</th><th colspan="2">Name : ' + emp_name_with_initial + '</th></tr>';
+                           htmlhead += '<tr><th>Type</th><th>Date & Time</th><th class="text-right">Action</th></tr>';
                             var html = '';
 
                             if (data.length > 0) {
