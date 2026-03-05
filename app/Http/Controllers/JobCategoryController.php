@@ -86,6 +86,12 @@ class JobCategoryController extends Controller
         $jobcategory->short_leaves = $request->input('short_leaves');
         $jobcategory->half_days = $request->input('half_days');
 
+        $jobcategory->basic_ot_type = $request->input('basic_ot_type');
+        $jobcategory->custom_normal_ot_rate = $request->input('custom_normal_ot_rate');
+        $jobcategory->custom_double_ot_rate = $request->input('custom_double_ot_rate');
+
+        $jobcategory->flex_ot = 0;
+
         $jobcategory->save();
         $jobcategory_id = $jobcategory->id;
 
@@ -157,7 +163,10 @@ class JobCategoryController extends Controller
             'late_type' => $request->late_type,
             'late_attend_min' => $request->late_attend_min,
             'short_leaves' => $request->short_leaves,
-            'half_days' => $request->half_days
+            'half_days' => $request->half_days,
+            'basic_ot_type' => $request->basic_ot_type,
+            'custom_normal_ot_rate' => $request->custom_normal_ot_rate,
+            'custom_double_ot_rate' => $request->custom_double_ot_rate
         );
 
         JobCategory::whereId($request->hidden_id)->update($form_data);
