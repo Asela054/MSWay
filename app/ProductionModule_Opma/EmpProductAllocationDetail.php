@@ -1,12 +1,12 @@
 <?php
 
-namespace App\ProductionModule;
+namespace App\ProductionModule_Opma;
 
 use Illuminate\Database\Eloquent\Model;
 
 class EmpProductAllocationDetail extends Model
 {
-    protected $table = 'emp_product_allocation_details';
+    protected $table = 'opma_emp_product_allocation_details';
 
     protected $primaryKey = 'id';
 

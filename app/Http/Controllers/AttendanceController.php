@@ -922,7 +922,7 @@ class AttendanceController extends Controller
                 }
         }
         
-        return response()->json(['status' => true, 'msg' => 'Updated successfully.']);
+        return response()->json([ 'status' => 1, 'success' => 'Updated successfully.', 'msg' => 'Updated successfully.']);
 
     }
 
@@ -1120,9 +1120,7 @@ class AttendanceController extends Controller
 
         return response()->json(['status' => true, 'msg' => 'Attendance Updated successfully.']);
     }
-
-
-
+    
     // These methods not been used by attendance function
     public function attendentUpdateLive(Request $request)
     {

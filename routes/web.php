@@ -1694,16 +1694,16 @@ Route::get('Machine/destroy/{id}', 'Production_Module_Opma\MachineController@des
 // Route::post('Product/update', 'Production_Module_Opma\ProductController@update')->name('Product.update');
 // Route::get('Product/destroy/{id}', 'Production_Module_Opma\ProductController@destroy');
 
-// // Production Allocation Controller Routes
-// Route::get('productionallocation', 'Production_Module\ProductionEmployeeAllocationController@index')->name('productionallocation');
-// Route::get('/productallocationlist' ,'Production_Module\ProductionEmployeeAllocationController@requestlist')->name('productallocationlist');
-// Route::post('/productallocationinsert' ,'Production_Module\ProductionEmployeeAllocationController@insert')->name('productallocationinsert');
-// Route::post('/productallocationedit' ,'Production_Module\ProductionEmployeeAllocationController@edit')->name('productallocationedit');
-// Route::post('/productallocationview' ,'Production_Module\ProductionEmployeeAllocationController@view')->name('productallocationview');
-// Route::post('/productallocationeditdetails' ,'Production_Module\ProductionEmployeeAllocationController@editlist')->name('productallocationeditdetails');
-// Route::post('/productallocationupdate' ,'Production_Module\ProductionEmployeeAllocationController@update')->name('productallocationupdate');
-// Route::post('/productallocationdelete' ,'Production_Module\ProductionEmployeeAllocationController@delete')->name('productallocationdelete');
-// Route::post('/productallocationdeletelist' ,'Production_Module\ProductionEmployeeAllocationController@deletelist')->name('productallocationdeletelist');
+  // Production Allocation Controller Routes
+Route::get('opma_productionallocation', 'Production_Module_Opma\ProductionEmployeeAllocationController@index')->name('opma_productionallocation');
+Route::post('opma_getMachineEmployees', 'Production_Module_Opma\ProductionEmployeeAllocationController@getMachineEmployees')->name('opma_getMachineEmployees');
+Route::post('opma_getStyleSizes', 'Production_Module_Opma\ProductionEmployeeAllocationController@getStyleSizes')->name('opma_getStyleSizes');
+Route::post('/opma_productallocationinsert' ,'Production_Module_Opma\ProductionEmployeeAllocationController@insert')->name('opma_productallocationinsert');
+Route::post('/opma_productallocationedit' ,'Production_Module_Opma\ProductionEmployeeAllocationController@edit')->name('opma_productallocationedit');
+Route::post('/opma_productallocationview' ,'Production_Module_Opma\ProductionEmployeeAllocationController@view')->name('opma_productallocationview');
+Route::post('/opma_productallocationupdate' ,'Production_Module_Opma\ProductionEmployeeAllocationController@update')->name('opma_productallocationupdate');
+Route::post('/opma_productallocationdelete' ,'Production_Module_Opma\ProductionEmployeeAllocationController@delete')->name('opma_productallocationdelete');
+Route::post('/opma_productallocationdeletelist' ,'Production_Module_Opma\ProductionEmployeeAllocationController@deletelist')->name('opma_productallocationdeletelist');
 // Route::get('/productallocationstatus/{id}/{stasus}','Production_Module\ProductionEmployeeAllocationController@status')->name('productallocationstatus');
 
 // /*-- Product Machines Info----*/
