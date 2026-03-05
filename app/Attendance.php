@@ -468,12 +468,22 @@ class Attendance extends Model
 
         $ondutyTime = Carbon::parse($shift->onduty_time);
         $offdutyTime = Carbon::parse($shift->offduty_time);
+        $saturdayondutyTime = Carbon::parse($shift->saturday_onduty_time);
+        $saturdayoffdutyTime = Carbon::parse($shift->saturday_offduty_time);
+        $shiftdiffhours = $saturdayondutyTime->diffInHours($saturdayoffdutyTime);
 
         if($emp->flex_ot==1):
-            $ondutyTime = Carbon::parse($on_time->format('H:i'));
-            $offdutyTime = $ondutyTime->copy()->addHours($emp->shift_hours);
-            $shift_start_ = $ondutyTime->format('H:i');
-            $shift_end_ = $offdutyTime->format('H:i');
+            if($record_date->dayOfWeek == 6):
+                $ondutyTime = Carbon::parse($on_time->format('H:i'));
+                $offdutyTime = $ondutyTime->copy()->addHours($shiftdiffhours);
+                $shift_start_ = $ondutyTime->format('H:i');
+                $shift_end_ = $offdutyTime->format('H:i');
+            else:
+                $ondutyTime = Carbon::parse($on_time->format('H:i'));
+                $offdutyTime = $ondutyTime->copy()->addHours($emp->shift_hours);
+                $shift_start_ = $ondutyTime->format('H:i');
+                $shift_end_ = $offdutyTime->format('H:i');
+            endif;
         endif;
 
         $leaveinfo = DB::table('leaves')
@@ -855,8 +865,10 @@ class Attendance extends Model
                 }
                 else if($day==6){//Saturday
                     if($emp->is_sat_ot_type_as_act == 1){//As act
-                        $saturday_on_duty_time = $shift->saturday_onduty_time;
-                        $saturday_off_duty_time = $shift->saturday_offduty_time;
+                        // $saturday_on_duty_time = $shift->saturday_onduty_time;
+                        // $saturday_off_duty_time = $shift->saturday_offduty_time;
+                        $saturday_on_duty_time = $ondutyTime->format('H:i:s');
+                        $saturday_off_duty_time = $offdutyTime->format('H:i:s');
 
                         $shift_start = Carbon::parse($date->year.'-'.$date->month.'-'.$date->day.' '.$saturday_on_duty_time);
                         $shift_end = Carbon::parse($date->year.'-'.$date->month.'-'.$date->day.' '.$saturday_off_duty_time);
