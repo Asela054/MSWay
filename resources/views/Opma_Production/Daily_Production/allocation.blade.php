@@ -5,7 +5,7 @@
 <main> 
    <div class="page-header shadow">
             <div class="container-fluid d-none d-sm-block shadow">
-                 @include('layouts.production&task_nav_bar')
+                 @include('layouts.production&task_nav_bar_opma')
             </div>
             <div class="container-fluid">
                 <div class="page-header-content py-3 px-2">
@@ -36,6 +36,10 @@
                                     <th>DATE</th>
                                     <th>MACHINE</th>
                                     <th>PRODUCT</th>
+                                    <th>SHIFT</th>
+                                    <th>SIZE</th>
+                                    <th>TARGET</th>
+                                    <th>SCALE</th>
                                     <th class="text-right">ACTION</th>
                                 </tr>
                             </thead>
@@ -72,34 +76,13 @@
                                 <input type="hidden" name="detailsid" id="detailsid" />
                                 
                                 <div class="row">
-                                    <div class="col-sm-12 col-md-6">
-                                        <label class="small font-weight-bold text-dark">Date*</label>
+                                    <div class="col-sm-12 col-md-4">
+                                        <label class="small font-weight-bolder">Date*</label>
                                         <input type="date" name="production_date" id="production_date"
                                             class="form-control form-control-sm" required />
                                     </div>
-                                    <div class="col-sm-12 col-md-6">
-                                        <label class="small font-weight-bold text-dark">Shift*</label>
-                                        <select name="shift" id="shift" class="form-control form-control-sm">
-                                            <option value="">Please Select</option>
-                                            @foreach($shifttype as $shifttypes)
-                                            <option value="{{$shifttypes->id}}">{{$shifttypes->shift_name}}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                </div>
-                                <hr>
-                                <div class="row">
-                                    <div class="col-sm-12 col-md-4">
-                                        <label class="small font-weight-bold text-dark">Product*</label>
-                                        <select name="product" id="product" class="form-control form-control-sm" style="width: 100%;" required>
-                                            <option value="">Select Product</option>
-                                            @foreach ($products as $product)
-                                                <option value="{{ $product->id }}">{{ $product->productname }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>    
-                                    <div class="col-sm-12 col-md-4">
-                                        <label class="small font-weight-bold text-dark">Machine</label>
+                                      <div class="col-sm-12 col-md-4">
+                                        <label class="small font-weight-bolder">Machine</label>
                                         <select name="machine" id="machine" class="form-control form-control-sm" style="width: 100%;" required>
                                             <option value="">Select Machine</option>
                                             @foreach ($machines as $machine)
@@ -108,24 +91,55 @@
                                         </select>
                                     </div>
                                     <div class="col-sm-12 col-md-4">
-                                        <label class="small font-weight-bold text-dark">Employee*</label>
-                                        <select class="employee form-control form-control-sm" name="employee" id="employee" style="width:100%"></select>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-sm-12 col-md-4">
-                                        <button type="button" id="addtolist" class="btn btn-primary btn-sm px-4" style="margin-top:30px;"><i class="fas fa-plus"></i>&nbsp;Add to list</button>
-                                    </div>
-                                    <div class="col-sm-12 col-md-4">
-                                        <button type="button" id="Btnupdatelist" class="btn btn-success btn-sm px-3" style="margin-top:30px; display:none;"><i class="fas fa-edit"></i>&nbsp;Update</button>
+                                        <label class="small font-weight-bolder">Shift*</label>
+                                        <select name="shift" id="shift" class="form-control form-control-sm">
+                                            <option value="">Please Select</option>
+                                            @foreach($shifttype as $shifttypes)
+                                            <option value="{{$shifttypes->id}}">{{$shifttypes->shift_name}}</option>
+                                            @endforeach
+                                        </select>
                                     </div>
                                 </div>
 
+                                <div class="row">
+                                    <div class="col-sm-12 col-md-4">
+                                        <label class="small font-weight-bolder ">Style*</label>
+                                        <select name="product" id="product" class="form-control form-control-sm" style="width: 100%;" required>
+                                            <option value="">Select Style</option>
+                                            @foreach ($products as $product)
+                                                <option value="{{ $product->id }}">{{ $product->title }} - {{ $product->code }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>    
+                                    <div class="col-sm-12 col-md-4 ">
+                                        <label class="small font-weight-bolder ">Target QTY*</label>
+                                        <input type="number" step="any" name="targetqty" id="targetqty" class="form-control form-control-sm" required />
+                                    </div>
+                                     <div class="col-sm-12 col-md-4 ">
+                                        <label class="small font-weight-bolder ">Scale</label>
+                                        <input type="text" name="scale" id="scale" class="form-control form-control-sm" />
+                                    </div>
+                                    
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12 col-md-4">
+                                        <label class="small font-weight-bolder">Size*</label>
+                                        <select class="form-control form-control-sm" name="size" id="size" style="width:100%">
+                                            <option value="">Select Size</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-12 col-md-8 ">
+                                        <label class="small font-weight-bolder ">Remark </label>
+                                        <input type="text" name="remark" id="remark" class="form-control form-control-sm" />
+                                    </div>
+
+                                </div>
                                 <br>
                                 <div class="center-block fix-width scroll-inner">
                                 <table class="table table-striped table-bordered table-sm small nowrap display" id="allocationtbl" style="width:100%;">
                                     <thead>
                                         <tr>
+                                            <th></th>
                                             <th>EMP ID</th>
                                             <th>EMPLOYEE NAME</th>
                                             <th style="white-space: nowrap;">ACTION</th>
@@ -163,40 +177,68 @@
                     <form class="form-horizontal">
                         <div class="row">
                             <div class="col-12">
-                                <div class="form-row mb-1">
-                                    <div class="col-sm-12 col-md-6">
-                                        <label class="small font-weight-bolder ">Date</label>
-                                        <input type="date" name="view_production_date" id="view_production_date"
-                                            class="form-control form-control-sm" readonly />
+                               
+                                        <div class="row">
+                                            <div class="col-sm-12 col-md-4">
+                                            <label class="small font-weight-bolder ">Date</label>
+                                            <input type="date" name="view_production_date" id="view_production_date"
+                                                class="form-control form-control-sm" readonly />
+                                        </div>
+                                        <div class="col-sm-12 col-md-4">
+                                            <label class="small font-weight-bolder ">Shift</label>
+                                            <select name="view_shift" id="view_shift" class="form-control form-control-sm" disabled>
+                                                <option value="">Please Select</option>
+                                                @foreach($shifttype as $shifttypes)
+                                                <option value="{{$shifttypes->id}}">{{$shifttypes->shift_name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-12 col-md-4">
+                                            <label class="small font-weight-bolder ">Machine</label>
+                                            <select name="view_machine" id="view_machine" class="form-control form-control-sm" style="width: 100%;" disabled>
+                                                <option value="">Select Machine</option>
+                                                @foreach ($machines as $machine)
+                                                    <option value="{{ $machine->id }}">{{ $machine->machine }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
                                     </div>
-                                    <div class="col-sm-12 col-md-6">
-                                        <label class="small font-weight-bolder ">Shift</label>
-                                        <select name="view_shift" id="view_shift" class="form-control form-control-sm" disabled>
-                                            <option value="">Please Select</option>
-                                            @foreach($shifttype as $shifttypes)
-                                            <option value="{{$shifttypes->id}}">{{$shifttypes->shift_name}}</option>
-                                            @endforeach
-                                        </select>
+                                    <div class="row">
+                                         <div class="col-sm-12 col-md-4">
+                                            <label class="small font-weight-bolder ">Style</label>
+                                            <select name="view_product" id="view_product" class="form-control form-control-sm" style="width: 100%;" disabled>
+                                                <option value="">Select Product</option>
+                                                @foreach ($products as $product)
+                                                    <option value="{{ $product->id }}">{{ $product->title }} - {{ $product->code }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                         <div class="col-sm-12 col-md-4 ">
+                                            <label class="small font-weight-bolder ">Target QTY*</label>
+                                            <input type="number" step="any" name="view_targetqty" id="view_targetqty" class="form-control form-control-sm" disabled />
+                                        </div>
+                                        <div class="col-sm-12 col-md-4 ">
+                                            <label class="small font-weight-bolder ">Scale</label>
+                                            <input type="text" name="view_scale" id="view_scale" class="form-control form-control-sm" disabled/>
+                                        </div>
                                     </div>
-                                    <div class="col-sm-12 col-md-6">
-                                        <label class="small font-weight-bolder ">Machine</label>
-                                        <select name="view_machine" id="view_machine" class="form-control form-control-sm" style="width: 100%;" disabled>
-                                            <option value="">Select Machine</option>
-                                            @foreach ($machines as $machine)
-                                                <option value="{{ $machine->id }}">{{ $machine->machine }}</option>
-                                            @endforeach
-                                        </select>
+                                    <div class="row">
+                                        <div class="col-sm-12 col-md-4">
+                                            <label class="small font-weight-bolder">Size*</label>
+                                            <select class="form-control form-control-sm" name="view_size" id="view_size" style="width:100%" disabled>
+                                                <option value="">Select Size</option>
+                                                 @foreach ($sizes as $size)
+                                                    <option value="{{ $size->id }}">{{ $size->size }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-12 col-md-8 ">
+                                            <label class="small font-weight-bolder ">Remark </label>
+                                            <input type="text" name="view_remark" id="view_remark" class="form-control form-control-sm" disabled/>
+                                        </div>
                                     </div>
-                                    <div class="col-sm-12 col-md-6">
-                                        <label class="small font-weight-bolder ">Product</label>
-                                        <select name="view_product" id="view_product" class="form-control form-control-sm" style="width: 100%;" disabled>
-                                            <option value="">Select Product</option>
-                                            @foreach ($products as $product)
-                                                <option value="{{ $product->id }}">{{ $product->productname }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                </div>
+                                   
+                                
                             </div>
                         </div>
                         <hr>
@@ -230,32 +272,13 @@
 @section('script')
 <script>
 $(document).ready(function(){
-    $('#production_menu_link').addClass('active');
+    $('#production_menu_link_opma').addClass('active');
     $('#production_menu_link_icon').addClass('active');
-    $('#dailyprocess').addClass('navbtnactive');
+    $('#dailyprocess_opma').addClass('navbtnactive');
 
     // Modal close handlers
     $('#viewconfirmModal .close').click(function(){
         $('#viewconfirmModal').modal('hide');
-    });
-
-    // Employee Select2 initialization
-    let employee = $('#employee');
-    employee.select2({
-        placeholder: 'Select...',
-        width: '100%',
-        allowClear: true,
-        ajax: {
-            url: '{{url("employee_list_sel2")}}',
-            dataType: 'json',
-            data: function(params) {
-                return {
-                    term: params.term || '',
-                    page: params.page || 1
-                }
-            },
-            cache: true
-        }
     });
 
     // DataTable initialization
@@ -299,7 +322,7 @@ $(document).ready(function(){
             [0, "desc"]
         ],
         ajax: {
-            url: scripturl + "/production_allocation_list.php",
+            url: scripturl + "/Opma_Production/production_allocation_list.php",
             type: "POST",
             data: {},
         },
@@ -316,8 +339,24 @@ $(document).ready(function(){
                 name: 'machine'
             },
             {
-                data: 'productname',
+                data: 'title',
                 name: 'product'
+            },
+             {
+                data: 'shift_name',
+                name: 'shift_name'
+            },
+             {
+                data: 'size',
+                name: 'size'
+            },
+             {
+                data: 'target',
+                name: 'target'
+            },
+             {
+                data: 'scale',
+                name: 'scale'
             },
             {
                 data: 'action',
@@ -356,66 +395,78 @@ $(document).ready(function(){
         $('#formModal').modal('show');
     });
 
-    // Add to list functionality
-    $('#addtolist').click(function () {
-        if (!$('#employee').val()) {
-             Swal.fire({
-                position: "top-end",
-                icon: 'warning',
-                title: 'Please select an employee!',
-                showConfirmButton: false,
-                timer: 2500
-            });
-
-
-            return;
-        }
-        
-        if (!$('#machine').val() || !$('#product').val()) {
-              Swal.fire({
-                position: "top-end",
-                icon: 'warning',
-                title: 'Please select machine and product!',
-                showConfirmButton: false,
-                timer: 2500
-            });
-            return;
-        }
-
-        var emp_id = $('#employee').val();
-        var selectedText = $('#employee option:selected').text();
-
-        var exists = false;
-        $('#emplistbody tr').each(function() {
-            if ($(this).find('td:first').text() == emp_id) {
-                exists = true;
-                return false;
+    // Load Employees according to selected machines
+    $('#machine').on('change', function() {
+            var machineId = $(this).val();
+            if (machineId) {
+                $.ajax({
+                    url: '{{ route("opma_getMachineEmployees") }}',
+                    type: 'POST',
+                    data: {
+                        machine_id: machineId,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        var tbody = $('#emplistbody');
+                        tbody.empty();
+                        
+                        if (response.length > 0) {
+                            $.each(response, function(index, employee) {
+                                var row = '<tr>' +
+                                    '<td class="text-center">' +
+                                    '<input type="checkbox" class="employee-checkbox" name="employee_ids[]" value="' + employee.emp_id + '">' +
+                                    '</td>' +
+                                    '<td>' + employee.emp_id + '</td>' +
+                                    '<td>' + employee.emp_name_with_initial + '</td>' +
+                                    '<td>' +
+                                    '<button type="button" onclick="productDelete(this);" class="btn btn-danger btn-sm">' +
+                                    '<i class="fas fa-trash-alt"></i>' +
+                                    '</button>' +
+                                    '</td>' +
+                                    '</tr>';
+                                tbody.append(row);
+                            });
+                        } else {
+                            tbody.append('<tr><td colspan="4" class="text-center">No employees allocated to this machine</td></tr>');
+                        }
+                    }
+                });
+            } else {
+                $('#emplistbody').empty();
             }
-        });
+    });
 
-        if (exists) {
-             Swal.fire({
-                position: "top-end",
-                icon: 'warning',
-                title: 'Employee already added to the list!',
-                showConfirmButton: false,
-                timer: 2500
+    // When style is selected, load sizes
+    $('#product').on('change', function() {
+        var styleId = $(this).val();
+        var sizeDropdown = $('#size');
+        
+        if (styleId) {
+            $.ajax({
+                url: '{{ route("opma_getStyleSizes") }}',
+                type: 'POST',
+                data: {
+                    style_id: styleId,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    sizeDropdown.empty().append('<option value="">Select Size</option>');
+                    
+                    if (response.length > 0) {
+                        $.each(response, function(index, size) {
+                            sizeDropdown.append('<option value="' + size.id + '">' + size.size + '</option>');
+                        });
+                    } else {
+                        sizeDropdown.append('<option value="">No sizes available</option>');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error loading sizes:', error);
+                }
             });
-            return;
+        } else {
+            sizeDropdown.empty().append('<option value="">Select Size</option>');
         }
-
-        $('#emplistbody').append('<tr class="pointer">' +
-            '<td>' + emp_id + '</td>' +
-            '<td>' + selectedText + '</td>' +
-            '<td class="text-right">' +
-                '<button type="button" onclick="productDelete(this);" class="btn btn-danger btn-sm">' +
-                    '<i class="fas fa-trash-alt"></i>' +
-                '</button>' +
-            '</td>' +
-            '<td class="d-none">NewData</td>' +
-        '</tr>');
-
-        $('#employee').val('').trigger('change');
     });
 
     // Form submission
@@ -423,10 +474,10 @@ $(document).ready(function(){
         var action_url = '';
         
         if ($('#action').val() == 'Add') {
-            action_url = "{{ route('productallocationinsert') }}";
+            action_url = "{{ route('opma_productallocationinsert') }}";
         }
         if ($('#action').val() == 'Edit') {
-            action_url = "{{ route('productallocationupdate') }}";
+            action_url = "{{ route('opma_productallocationupdate') }}";
         }
 
         $('#action_button').prop('disabled', true).html(
@@ -435,21 +486,34 @@ $(document).ready(function(){
         var tbody = $("#emplistbody");
 
         if (tbody.children().length > 0) {
-            var jsonObj = [];
-            $("#emplistbody tr").each(function () {
-                var item = {};
-                $(this).find('td').each(function (col_idx) {
-                    if (col_idx !== 2) {
-                        item["col_" + (col_idx + 1)] = $(this).text();
+               var jsonObj = [];
+                $("#emplistbody tr").each(function () {
+                    var $row = $(this);
+                    var $checkbox = $row.find('.employee-checkbox');
+                    if ($checkbox.is(':checked')) {
+
+                        var item = {};
+                        $row.find('td').each(function (col_idx) {
+                            if (col_idx !== 2) {
+                                item["col_" + (col_idx + 1)] = $(this).text();
+                            }
+                        });
+                        jsonObj.push(item);
+
+
                     }
                 });
-                jsonObj.push(item);
-            });
 
+            console.log('Checked employee IDs:', jsonObj);
+
+            var date = $('#production_date').val();
             var machine = $('#machine').val();
-            var product = $('#product').val();
             var shift = $('#shift').val();
-            var date = $('#production_date').val(); 
+            var product = $('#product').val();
+            var targetqty = $('#targetqty').val();
+            var scale = $('#scale').val();
+            var size = $('#size').val();
+            var remark = $('#remark').val();
             var hidden_id = $('#hidden_id').val();
 
             $.ajax({
@@ -462,6 +526,10 @@ $(document).ready(function(){
                     product: product,
                     shift: shift,
                     date: date,
+                    targetqty: targetqty,
+                    scale: scale,
+                    size: size,
+                    remark: remark,
                     hidden_id: hidden_id,
                 },
                 url: action_url,
@@ -519,7 +587,7 @@ $(document).ready(function(){
             })
 
             $.ajax({
-                url: '{!! route("productallocationedit") !!}',
+                url: '{!! route("opma_productallocationedit") !!}',
                 type: 'POST',
                 dataType: "json",
                 data: {
@@ -527,19 +595,18 @@ $(document).ready(function(){
                 },
                 success: function (data) {
                     $('#production_date').val(data.result.mainData.date);
-                    setTimeout(function() {
-                        var machineId = data.result.mainData.machine_id;
-                        var machineName = data.result.mainData.machine_name || 'Selected Machine'; 
-                        
-                        if (machine.find("option[value='" + machineId + "']").length === 0) {
-                            var newOption = new Option(machineName, machineId, true, true);
-                            machine.append(newOption);
-                        }
-                        machine.val(machineId).trigger('change');
-                    }, 500); 
-                    
+                    $('#targetqty').val(data.result.mainData.target);
+                    $('#scale').val(data.result.mainData.scale);
+                    $('#remark').val(data.result.mainData.remark);
+                    $('#machine').val(data.result.mainData.machine_id);
+                    $('#machine').prop('disabled', true);
                     $('#product').val(data.result.mainData.product_id).trigger('change');
                     $('#shift').val(data.result.mainData.shift_id).trigger('change'); 
+                     
+                    setTimeout(function() {
+                        $('#size').val(data.result.mainData.size);
+                    }, 500);
+
                     $('#emplistbody').html(data.result.requestdata);
                     $('#hidden_id').val(id);
                     $('.modal-title').text('Edit Production Allocation');
@@ -549,74 +616,6 @@ $(document).ready(function(){
                 }
             })
          }
-    });
-
-    // Edit list item
-    $(document).on('click', '.btnEditlist', function () {
-        var id = $(this).attr('id');
-        $('#employee').val('').trigger('change');
-
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        })
-
-        $.ajax({
-            url: '{!! route("productallocationeditdetails") !!}',
-            type: 'POST',
-            dataType: "json",
-            data: {
-                id: id
-            },
-            success: function (data) {
-                $('#employee').val(data.result.emp_id).trigger('change');
-                $('#detailsid').val(data.result.id);
-                $('#Btnupdatelist').show();
-                $('#addtolist').hide();
-            }
-        })
-    });
-
-    // Update list item
-    $(document).on("click", "#Btnupdatelist", function () {
-        if (!$('#employee').val()) {
-             Swal.fire({
-                position: "top-end",
-                icon: 'warning',
-                title: 'Please select an employee!',
-                showConfirmButton: false,
-                timer: 2500
-            });
-            return;
-        }
-
-        var emp_id = $('#employee').val();
-        var selectedText = $('#employee option:selected').text();
-        var detailid = $('#detailsid').val();
-
-        $("#emplistbody tr").each(function () {
-            var hiddenInputs = $(this).find('input[name="hiddenid"]');
-            if (hiddenInputs.length > 0 && hiddenInputs.val() == detailid) {
-                $(this).remove();
-            }
-        });
-
-        $('#emplistbody').append('<tr class="pointer">' +
-            '<td>' + emp_id + '</td>' +
-            '<td>' + selectedText + '</td>' +
-            '<td class="text-right">' +
-                '<button type="button" class="btn btn-danger btn-sm">' +
-                    '<i class="fas fa-trash-alt"></i>' +
-                '</button>' +
-            '</td>' +
-            '<td class="d-none">Updated</td>' +
-            '<td class="d-none"><input type="hidden" name="hiddenid" value="' + detailid + '"></td>' +
-        '</tr>');
-
-        $('#employee').val('').trigger('change');
-        $('#Btnupdatelist').hide();
-        $('#addtolist').show();
     });
 
     // Delete list item
@@ -632,7 +631,7 @@ $(document).ready(function(){
             })
 
             $.ajax({
-                url: '{!! route("productallocationdeletelist") !!}',
+                url: '{!! route("opma_productallocationdeletelist") !!}',
                 type: 'POST',
                 dataType: "json",
                 data: {
@@ -667,7 +666,7 @@ $(document).ready(function(){
             })
             
             $.ajax({
-                url: '{!! route("productallocationdelete") !!}',
+                url: '{!! route("opma_productallocationdelete") !!}',
                 type: 'POST',
                 dataType: "json",
                 data: {
@@ -698,7 +697,7 @@ $(document).ready(function(){
             }
         })
         $.ajax({
-            url: '{!! route("productallocationview") !!}',
+            url: '{!! route("opma_productallocationview") !!}',
             type: 'POST',
             dataType: "json",
             data: {
@@ -706,14 +705,19 @@ $(document).ready(function(){
             },
             success: function (data) {
                 $('#view_production_date').val(data.result.mainData.date);
+                $('#view_targetqty').val(data.result.mainData.target);
+                $('#view_scale').val(data.result.mainData.scale);
+                $('#view_remark').val(data.result.mainData.remark);
                 $('#view_machine').val(data.result.mainData.machine_id).trigger('change');
                 $('#view_product').val(data.result.mainData.product_id).trigger('change');
                 $('#view_shift').val(data.result.mainData.shift_id).trigger('change');
+                 $('#view_size').val(data.result.mainData.size).trigger('change');
                 $('#view_tableorderlist').html(data.result.requestdata);
                 $('#viewconfirmModal').modal('show');
             }
         })
     });
+
 });
 
  function productDelete(ctl) {
