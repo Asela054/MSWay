@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Production_Module_Opma;
 
 use App\Http\Controllers\Controller;
 use App\ProductionModule_Opma\Machine;
+use App\ProductionModule_Opma\MachineEmployee;
 use Illuminate\Http\Request;
 use Validator;
 
@@ -22,8 +23,8 @@ class MachineController extends Controller
             abort(403);
         }
 
-        $machine= Machine::orderBy('id', 'asc')->get();
-        return view('Opma_Production.Daily_Production.machine',compact('machine'));
+        $machines = Machine::orderBy('id', 'asc')->get();
+        return view('Opma_Production.Daily_Production.machine', compact('machines'));
     }
 
     public function store(Request $request)
@@ -37,9 +38,7 @@ class MachineController extends Controller
         $rules = array(
             'company'    =>  'required',
             'location'   =>  'required',
-            'machine'    =>  'required',
-            'semi_complete' => 'required',
-            'full_complete' => 'required'
+            'machine'    =>  'required'
         );
 
         $error = Validator::make($request->all(), $rules);
@@ -52,9 +51,6 @@ class MachineController extends Controller
             'company_id'     =>  $request->company,
             'branch_id'      =>  $request->location,
             'machine'        =>  $request->machine,
-            'semi_complete'  =>  $request->semi_complete,
-            'full_complete'  =>  $request->full_complete,
-            'target_count'   =>  $request->target_count,
             'description'    =>  $request->description
         );
 
@@ -62,9 +58,6 @@ class MachineController extends Controller
         $machine->company_id=$request->input('company');
         $machine->branch_id=$request->input('location');
         $machine->machine=$request->input('machine');
-        $machine->semi_complete=$request->input('semi_complete');
-        $machine->full_complete=$request->input('full_complete');
-        $machine->target_count = $request->input('target_count') ?? 0;
         $machine->description=$request->input('description');       
         $machine->status=1;
         $machine->save();
@@ -85,7 +78,6 @@ class MachineController extends Controller
             $data = Machine::with(['company:id,name', 'branch:id,location'])
                         ->findOrFail($id);
             
-            // Add company and branch names to the response
             $result = $data->toArray();
             $result['company_name'] = $data->company->name ?? '';
             $result['branch_name'] = $data->branch->location ?? '';
@@ -94,37 +86,30 @@ class MachineController extends Controller
         }
     }
 
-    public function update(Request $request, Machine $machine)
+    public function update(Request $request)   
     {
         $user = auth()->user();
         $permission = $user->can('machine-edit');
-        if(!$permission) {
+        if (!$permission) {
             return response()->json(['error' => 'UnAuthorized'], 401);
         }
 
         $rules = array(
-            'company'    =>  'required',
-            'location'   =>  'required',
-            'machine'    =>  'required',
-            'semi_complete' => 'required',
-            'full_complete' => 'required'
+            'company'    => 'required',
+            'location'   => 'required',
+            'machine'    => 'required'
         );
 
         $error = Validator::make($request->all(), $rules);
-
-        if($error->fails())
-        {
+        if ($error->fails()) {
             return response()->json(['errors' => $error->errors()->all()]);
         }
 
         $form_data = array(
-            'company_id'     =>  $request->company,
-            'branch_id'      =>  $request->location,
-            'machine'    =>  $request->machine,
-            'semi_complete'  =>  $request->semi_complete,
-            'full_complete'  =>  $request->full_complete,
-            'target_count'   =>  $request->target_count,
-            'description' =>  $request->description
+            'company_id'  => $request->company,
+            'branch_id'   => $request->location,
+            'machine'     => $request->machine,
+            'description' => $request->description
         );
 
         Machine::whereId($request->hidden_id)->update($form_data);
@@ -145,5 +130,69 @@ class MachineController extends Controller
         $data->save();
 
         return response()->json(['success' => 'Machine Deleted Successfully.']);
+    }
+
+    public function getEmployees($id)
+    {
+        $employees = MachineEmployee::with('employee')
+            ->where('opma_machine_id', $id)
+            ->get()
+            ->map(function ($me) {
+                return [
+                    'id'       => $me->id,
+                    'emp_id'   => $me->employee->emp_id ?? $me->emp_id,
+                    'emp_name' => $me->employee
+                        ? $me->employee->emp_name_with_initial . ' - ' . $me->employee->calling_name : 'Unknown Employee',
+                ];
+            });
+
+        return response()->json(['employees' => $employees]);
+    }
+
+    public function storeEmployees(Request $request)
+    {
+        $user = auth()->user();
+        $permission = $user->can('machine-edit');
+        if (!$permission) {
+            return response()->json(['error' => 'UnAuthorized'], 401);
+        }
+
+        $rules = [
+            'machine_id' => 'required',
+            'employees'  => 'required|array',
+        ];
+
+        $error = Validator::make($request->all(), $rules);
+        if ($error->fails()) {
+            return response()->json(['errors' => $error->errors()->all()]);
+        }
+
+        foreach ($request->employees as $emp_id) {
+            $exists = MachineEmployee::where('opma_machine_id', $request->machine_id)
+                ->where('emp_id', $emp_id)
+                ->exists();
+
+            if (!$exists) {
+                MachineEmployee::create([
+                    'opma_machine_id' => $request->machine_id,
+                    'emp_id'          => $emp_id,
+                ]);
+            }
+        }
+
+        return response()->json(['success' => 'Employees added successfully.']);
+    }
+
+    public function destroyEmployee($id)
+    {
+        $user = auth()->user();
+        $permission = $user->can('machine-edit');
+        if (!$permission) {
+            return response()->json(['error' => 'UnAuthorized'], 401);
+        }
+
+        MachineEmployee::findOrFail($id)->delete();
+
+        return response()->json(['success' => 'Employee removed successfully.']);
     }
 }
