@@ -5,13 +5,13 @@
 <main> 
      <div class="page-header shadow">
             <div class="container-fluid d-none d-sm-block shadow">
-                 @include('layouts.production&task_nav_bar')
+                 @include('layouts.production&task_nav_bar_opma')
             </div>
             <div class="container-fluid">
                 <div class="page-header-content py-3 px-2">
                     <h1 class="page-header-title ">
                         <div class="page-header-icon"><i class="fa-light fa-ballot-check"></i></div>
-                        <span>Products</span>
+                        <span>Styles</span>
                     </h1>
                 </div>
             </div>
@@ -21,7 +21,7 @@
             <div class="card-body p-0 p-2">
                 <div class="row">
                     <div class="col-12">
-                            <button type="button" class="btn btn-primary btn-sm fa-pull-right" name="create_record" id="create_record"><i class="fas fa-plus mr-2"></i>Add Product</button>
+                            <button type="button" class="btn btn-primary btn-sm fa-pull-right" name="create_record" id="create_record"><i class="fas fa-plus mr-2"></i>Add Style</button>
                     </div>
                     <div class="col-12">
                         <hr class="border-dark">
@@ -32,8 +32,10 @@
                             <thead>
                                 <tr>
                                     <th>ID </th>
-                                    <th>PRODUCT</th>
-                                    <th>DESCRIPTION</th>
+                                    <th>TITLE</th>
+                                    <th>CODE</th>
+                                    <th>FROM DATE</th>
+                                    <th>TO DATE</th>
                                     <th class="text-right">ACTION</th>
                                 </tr>
                             </thead>
@@ -53,7 +55,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header p-2">
-                    <h5 class="modal-title" id="staticBackdropLabel">Add Product</h5>
+                    <h5 class="modal-title" id="staticBackdropLabel">Add Style</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -65,21 +67,29 @@
                             <form method="post" id="formTitle" class="form-horizontal">
                                 {{ csrf_field() }}	
                                 <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">Product Name</label>
-                                    <input type="text" name="productname" id="productname" class="form-control form-control-sm"  required/>
+                                    <label class="small font-weight-bold text-dark">Title</label>
+                                    <input type="text" name="title" id="title" class="form-control form-control-sm"  required/>
                                 </div>
                                 <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">Product Description</label>
-                                    <input type="text" name="description" id="description" class="form-control form-control-sm" />
-                                </div>
-                                <!-- <div class="form-group mb-1">
-                                    <label class="small font-weight-bold ">Semi Finished Price</label>
-                                    <input type="number" step="any" name="semi_price" id="semi_price" class="form-control form-control-sm" />
+                                    <label class="small font-weight-bold text-dark">Code</label>
+                                    <input type="text" name="code" id="code" class="form-control form-control-sm" />
                                 </div>
                                 <div class="form-group mb-1">
-                                    <label class="small font-weight-bold ">Full Finished Price</label>
-                                    <input type="number" step="any" name="full_price" id="full_price" class="form-control form-control-sm" />
-                                </div> -->
+                                    <label class="small font-weight-bold text-dark">From Date</label>
+                                    <input type="date" name="from_date" id="from_date" class="form-control form-control-sm" />
+                                </div>
+                                <div class="form-group mb-1">
+                                    <label class="small font-weight-bold text-dark">To Date</label>
+                                    <input type="date" name="to_date" id="to_date" class="form-control form-control-sm" />
+                                </div>
+                                <div class="form-group mb-1">
+                                    <label class="small font-weight-bold text-dark">Applicable Sizes</label>
+                                    <select class="form-control form-control-sm" id="sizes" name="sizes[]" multiple="multiple">
+                                        @foreach($sizes as $size)
+                                            <option value="{{ $size->id }}">{{ $size->size }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
                                 <div class="form-group mt-3">
                                     <button type="submit" name="action_button" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
                                 </div>
@@ -103,7 +113,14 @@ $(document).ready(function(){
 
     $('#production_menu_link').addClass('active');
     $('#production_menu_link_icon').addClass('active');
-    $('#dailyprocess').addClass('navbtnactive');
+    $('#dailymaster').addClass('navbtnactive');
+
+    $('#sizes').select2({
+        placeholder: 'Select Sizes',
+        allowClear: true,
+        width: '100%',
+        dropdownParent: $('#formModal')
+    });
 
      $('#dataTable').DataTable({
         "destroy": true,
@@ -114,15 +131,15 @@ $(document).ready(function(){
         "buttons": [{
                 extend: 'csv',
                 className: 'btn btn-success btn-sm',
-                title: 'Products  Information',
+                title: 'Style  Information',
                 text: '<i class="fas fa-file-csv mr-2"></i> CSV',
             },
             { 
                 extend: 'pdf', 
                 className: 'btn btn-danger btn-sm', 
-                title: 'Products Information', 
+                title: 'Style Information', 
                 text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
-                orientation: 'landscape', 
+                orientation: 'portrait', 
                 pageSize: 'legal', 
                 customize: function(doc) {
                     doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
@@ -130,7 +147,7 @@ $(document).ready(function(){
             },
             {
                 extend: 'print',
-                title: 'Products  Information',
+                title: 'Style  Information',
                 className: 'btn btn-primary btn-sm',
                 text: '<i class="fas fa-print mr-2"></i> Print',
                 customize: function(win) {
@@ -145,7 +162,7 @@ $(document).ready(function(){
             [0, "desc"]
         ],
         ajax: {
-            url: scripturl + "/productlist.php",
+            url: scripturl + "/Opma_Production/productlist.php",
             type: "POST",
             data: {},
         },
@@ -155,12 +172,20 @@ $(document).ready(function(){
                 name: 'id'
             },
             { 
-                data: 'productname', 
-                name: 'productname'
+                data: 'title', 
+                name: 'title'
             },
             { 
-                data: 'description', 
-                name: 'description'
+                data: 'code', 
+                name: 'code'
+            },
+            { 
+                data: 'from_date', 
+                name: 'from_date'
+            },
+            { 
+                data: 'to_date', 
+                name: 'to_date'
             },
             {
                 data: 'id',
@@ -190,6 +215,7 @@ $(document).ready(function(){
         $('#action').val('Add');
         $('#form_result').html('');
         $('#formModal').modal('show');
+        $('#sizes').val(null).trigger('change');
     });
 
 
@@ -199,11 +225,11 @@ $(document).ready(function(){
 
 
         if ($('#action').val() == 'Add') {
-            action_url = "{{ route('addProduct') }}";
+            action_url = "{{ route('opma_addStyle') }}";
         }
 
         if ($('#action').val() == 'Edit') {
-            action_url = "{{ route('Product.update') }}";
+            action_url = "{{ route('OpmaStyle.update') }}";
         }
 
 
@@ -247,16 +273,22 @@ $(document).ready(function(){
              var id = $(this).attr('id');
              $('#form_result').html('');
              $.ajax({
-                 url: "{{ url('Product/') }}/" + id + "/edit",
+                 url: "{{ url('OpmaStyle/') }}/" + id + "/edit",
                  dataType: "json",
                  success: function (data) {
-                     $('#productname').val(data.result.productname);
-                     $('#description').val(data.result.description);
-                     $('#semi_price').val(data.result.semi_price);
-                     $('#full_price').val(data.result.full_price);
+                     $('#title').val(data.result.title);
+                     $('#code').val(data.result.code);
+                     $('#from_date').val(data.result.from_date);
+                     $('#to_date').val(data.result.to_date);
+
+                    if(data.sizes && data.sizes.length > 0) {
+                        $('#sizes').val(data.sizes).trigger('change');
+                    } else {
+                        $('#sizes').val(null).trigger('change');
+                    }
 
                      $('#hidden_id').val(id);
-                     $('.modal-title').text('Edit Product');
+                     $('.modal-title').text('Edit Style');
                      $('#action_button').html('Edit');
                      $('#action').val('Edit');
                      $('#formModal').modal('show');
@@ -272,7 +304,7 @@ $(document).ready(function(){
         var r = await Otherconfirmation("You want to remove this ? ");
         if (r == true) {
             $.ajax({
-                url: "{{ url('Product/destroy/') }}/" + user_id,
+                url: "{{ url('OpmaStyle/destroy/') }}/" + user_id,
                 success: function (data) {
                    const actionObj = {
                         icon: 'fas fa-trash-alt',
