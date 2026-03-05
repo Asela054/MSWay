@@ -14,6 +14,7 @@
     $hasproductionPermissions = in_array('Access-Production_Task', $userPermissions);
     $hasmeterreadingPermissions = in_array('Access-Meter_Reading', $userPermissions);
     $hasempproductionPermissions = in_array('Access-Employee_Production', $userPermissions);
+    $hasproductionPermissions_Opma = in_array('Access-Production_Task_Opma', $userPermissions);
 
 @endphp
 <div class="sidebar" id="sidebar">
@@ -97,13 +98,24 @@
 
         @if($hasproductionPermissions)
             <li>
-            <a href="{{ url('/opma_productiontaskdashboard') }}" id="production_menu_link">
+            <a href="{{ url('/productiontaskdashboard') }}" id="production_menu_link">
                 <i class="fa-light fa-ballot-check"></i>
                 <span class="links_name">Production & Task</span>
             </a>
             <span class="tooltip">Production & Task</span>
             </li>
         @endif
+
+        @if($hasproductionPermissions_Opma)
+            <li>
+            <a href="{{ url('/opma_productiontaskdashboard') }}" id="production_menu_link_opma">
+                <i class="fa-light fa-ballot-check"></i>
+                <span class="links_name">Production & Task</span>
+            </a>
+            <span class="tooltip">Production & Task</span>
+            </li>
+        @endif
+
 
         @if($hasmeterreadingPermissions)
             <li>

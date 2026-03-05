@@ -44,7 +44,7 @@
 
 <script>
 $(document).ready(function(){
-    $('#production_menu_link').addClass('active');
+    $('#production_menu_link_opma').addClass('active');
     $('#production_menu_link_icon').addClass('active');
 });
 </script>
