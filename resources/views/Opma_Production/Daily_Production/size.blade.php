@@ -3,7 +3,7 @@
 @section('content')
 
 <main> 
-     <div class="page-header shadow">
+    <div class="page-header shadow">
             <div class="container-fluid d-none d-sm-block shadow">
                  @include('layouts.production&task_nav_bar_opma')
             </div>
@@ -11,7 +11,7 @@
                 <div class="page-header-content py-3 px-2">
                     <h1 class="page-header-title ">
                         <div class="page-header-icon"><i class="fa-light fa-ballot-check"></i></div>
-                        <span>Styles</span>
+                        <span>Sizes</span>
                     </h1>
                 </div>
             </div>
@@ -21,7 +21,7 @@
             <div class="card-body p-0 p-2">
                 <div class="row">
                     <div class="col-12">
-                            <button type="button" class="btn btn-primary btn-sm fa-pull-right" name="create_record" id="create_record"><i class="fas fa-plus mr-2"></i>Add Style</button>
+                            <button type="button" class="btn btn-primary btn-sm fa-pull-right" name="create_record" id="create_record"><i class="fas fa-plus mr-2"></i>Add Size</button>
                     </div>
                     <div class="col-12">
                         <hr class="border-dark">
@@ -32,15 +32,11 @@
                             <thead>
                                 <tr>
                                     <th>ID </th>
-                                    <th>TITLE</th>
-                                    <th>CODE</th>
-                                    <th>FROM DATE</th>
-                                    <th>TO DATE</th>
+                                    <th>SIZE</th>
+                                    <th>REMARK</th>
                                     <th class="text-right">ACTION</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                            </tbody>
                         </table>
                         </div>
                     </div>
@@ -52,59 +48,48 @@
     <!-- Modal Area Start -->
     <div class="modal fade" id="formModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
     aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header p-2">
-                    <h5 class="modal-title" id="staticBackdropLabel">Add Style</h5>
+                    <h5 class="modal-title" id="staticBackdropLabel">Add Size</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div class="row">
-                        <div class="col">
-                            <span id="form_result"></span>
-                            <form method="post" id="formTitle" class="form-horizontal">
-                                {{ csrf_field() }}	
+                    <span id="form_result"></span>
+                    <form method="post" id="formTitle" class="form-horizontal">
+                        {{ csrf_field() }}
+                        <div class="row">
+                            <div class="col-md-6">
                                 <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">Title</label>
-                                    <input type="text" name="title" id="title" class="form-control form-control-sm"  required/>
+                                    <label class="small font-weight-bold text-dark">Size</label>
+                                    <input type="text" name="size" id="size" class="form-control form-control-sm" required/>
                                 </div>
+                            </div>
+                            <div class="col-md-6">
                                 <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">Code</label>
-                                    <input type="text" name="code" id="code" class="form-control form-control-sm" />
+                                    <label class="small font-weight-bold text-dark">Remark</label>
+                                    <input type="text" name="remark" id="remark" class="form-control form-control-sm" />
                                 </div>
-                                <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">From Date</label>
-                                    <input type="date" name="from_date" id="from_date" class="form-control form-control-sm" />
-                                </div>
-                                <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">To Date</label>
-                                    <input type="date" name="to_date" id="to_date" class="form-control form-control-sm" />
-                                </div>
-                                <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">Applicable Sizes</label>
-                                    <select class="form-control form-control-sm" id="sizes" name="sizes[]" multiple="multiple">
-                                        @foreach($sizes as $size)
-                                            <option value="{{ $size->id }}">{{ $size->size }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="form-group mt-3">
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group mt-3 mb-0">
                                     <button type="submit" name="action_button" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
                                 </div>
-                                <input type="hidden" name="action" id="action" value="Add" />
-                                <input type="hidden" name="hidden_id" id="hidden_id" />
-                            </form>
+                            </div>
                         </div>
-                    </div>
+                        <input type="hidden" name="action" id="action" value="Add" />
+                        <input type="hidden" name="hidden_id" id="hidden_id" />
+                    </form>
                 </div>
             </div>
         </div>
-    </div>   
+    </div>
 </main>
               
 @endsection
+
 
 @section('script')
 
@@ -115,14 +100,7 @@ $(document).ready(function(){
     $('#production_menu_link_icon').addClass('active');
     $('#dailymaster').addClass('navbtnactive');
 
-    $('#sizes').select2({
-        placeholder: 'Select Sizes',
-        allowClear: true,
-        width: '100%',
-        dropdownParent: $('#formModal')
-    });
-
-     $('#dataTable').DataTable({
+    $('#dataTable').DataTable({
         "destroy": true,
         "processing": true,
         "serverSide": true,
@@ -131,13 +109,13 @@ $(document).ready(function(){
         "buttons": [{
                 extend: 'csv',
                 className: 'btn btn-success btn-sm',
-                title: 'Style  Information',
+                title: 'Size  Information',
                 text: '<i class="fas fa-file-csv mr-2"></i> CSV',
             },
             { 
                 extend: 'pdf', 
                 className: 'btn btn-danger btn-sm', 
-                title: 'Style Information', 
+                title: 'Size Information', 
                 text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
                 orientation: 'portrait', 
                 pageSize: 'legal', 
@@ -147,7 +125,7 @@ $(document).ready(function(){
             },
             {
                 extend: 'print',
-                title: 'Style  Information',
+                title: 'Size  Information',
                 className: 'btn btn-primary btn-sm',
                 text: '<i class="fas fa-print mr-2"></i> Print',
                 customize: function(win) {
@@ -156,13 +134,12 @@ $(document).ready(function(){
                         .css('font-size', 'inherit');
                 },
             },
-            // 'copy', 'csv', 'excel', 'pdf', 'print'
         ],
         "order": [
             [0, "desc"]
         ],
         ajax: {
-            url: scripturl + "/Opma_Production/productlist.php",
+            url: scripturl + "/Opma_Production/sizelist.php",
             type: "POST",
             data: {},
         },
@@ -172,20 +149,12 @@ $(document).ready(function(){
                 name: 'id'
             },
             { 
-                data: 'title', 
-                name: 'title'
+                data: 'size', 
+                name: 'size'
             },
             { 
-                data: 'code', 
-                name: 'code'
-            },
-            { 
-                data: 'from_date', 
-                name: 'from_date'
-            },
-            { 
-                data: 'to_date', 
-                name: 'to_date'
+                data: 'remark', 
+                name: 'remark'
             },
             {
                 data: 'id',
@@ -210,12 +179,14 @@ $(document).ready(function(){
     });
  
     $('#create_record').click(function () {
-        $('.modal-title').text('Add Product');
+        $('.modal-title').text('Add Size');
         $('#action_button').val('Add');
         $('#action').val('Add');
         $('#form_result').html('');
+        $('#size').val('');
+        $('#remark').val('');
+
         $('#formModal').modal('show');
-        $('#sizes').val(null).trigger('change');
     });
 
 
@@ -225,11 +196,11 @@ $(document).ready(function(){
 
 
         if ($('#action').val() == 'Add') {
-            action_url = "{{ route('opma_addStyle') }}";
+            action_url = "{{ route('opma_addSize') }}";
         }
 
         if ($('#action').val() == 'Edit') {
-            action_url = "{{ route('OpmaStyle.update') }}";
+            action_url = "{{ route('OpmaSize.update') }}";
         }
 
 
@@ -239,6 +210,7 @@ $(document).ready(function(){
             data: $(this).serialize(),
             dataType: "json",
             success: function (data) {
+
                 if (data.errors) {
                     const actionObj = {
                         icon: 'fas fa-warning',
@@ -267,46 +239,41 @@ $(document).ready(function(){
         });
     });
 
-     $(document).on('click', '.edit', async function () {
-         var r = await Otherconfirmation("You want to Edit this ? ");
-         if (r == true) {
-             var id = $(this).attr('id');
-             $('#form_result').html('');
-             $.ajax({
-                 url: "{{ url('OpmaStyle/') }}/" + id + "/edit",
-                 dataType: "json",
-                 success: function (data) {
-                     $('#title').val(data.result.title);
-                     $('#code').val(data.result.code);
-                     $('#from_date').val(data.result.from_date);
-                     $('#to_date').val(data.result.to_date);
+    $(document).on('click', '.edit', async function () {
+        var r = await Otherconfirmation("You want to Edit this ? ");
+        if (r == true) {
+            var id = $(this).attr('id');
+            $('#form_result').html('');
+            $.ajax({
+                url: "{{ url('OpmaSize/') }}/" + id + "/edit",
+                dataType: "json",
+                success: function (data) {
+                    $('#size').val(data.result.size);
+                    $('#remark').val(data.result.remark);
 
-                    if(data.sizes && data.sizes.length > 0) {
-                        $('#sizes').val(data.sizes).trigger('change');
-                    } else {
-                        $('#sizes').val(null).trigger('change');
-                    }
-
-                     $('#hidden_id').val(id);
-                     $('.modal-title').text('Edit Style');
-                     $('#action_button').html('Edit');
-                     $('#action').val('Edit');
-                     $('#formModal').modal('show');
-                 }
-             })
-         }
-     });
+                    $('#hidden_id').val(id);
+                    $('.modal-title').text('Edit Size');
+                    $('#action_button').html('Edit');
+                    $('#action').val('Edit');
+                    $('#formModal').modal('show');
+                }
+            })
+        }
+    });
 
     var user_id;
 
     $(document).on('click', '.delete', async function () {
-        user_id = $(this).attr('id');
         var r = await Otherconfirmation("You want to remove this ? ");
         if (r == true) {
+            user_id = $(this).attr('id');
             $.ajax({
-                url: "{{ url('OpmaStyle/destroy/') }}/" + user_id,
+                url: "{{ url('OpmaSize/destroy/') }}/" + user_id,
+                beforeSend: function () {
+                    $('#ok_button').text('Deleting...');
+                },
                 success: function (data) {
-                   const actionObj = {
+                    const actionObj = {
                         icon: 'fas fa-trash-alt',
                         title: '',
                         message: 'Record Remove Successfully',
@@ -319,6 +286,7 @@ $(document).ready(function(){
                 }
             })
         }
+
     });
 
 });

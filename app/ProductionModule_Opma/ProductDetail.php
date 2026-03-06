@@ -4,8 +4,8 @@ namespace App\ProductionModule_Opma;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Product extends Model
+class ProductDetail extends Model
 {
-    protected $table = 'opma_styles';
+    protected $table = 'opma_style_sizes';
 
 }

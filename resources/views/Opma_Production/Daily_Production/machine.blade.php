@@ -34,9 +34,6 @@
                                     <th>ID </th>
                                     <th>MACHINE</th>
                                     <th>BRANCH</th>
-                                    <th>COMPLETE PRICE</th>
-                                    <th>NOT COMPLETE PRICE</th>
-                                    <th>TARGET COUNT</th>
                                     <th class="text-right">ACTION</th>
                                 </tr>
                             </thead>
@@ -84,24 +81,6 @@
                                     <input type="text" name="machine" id="machine" class="form-control form-control-sm" required/>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">Target Count</label>
-                                    <input type="number" step="any" name="target_count" id="target_count" class="form-control form-control-sm" />
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">Semi Complete Price</label>
-                                    <input type="number" step="any" name="semi_complete" id="semi_complete" class="form-control form-control-sm" required/>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">Full Complete Price</label>
-                                    <input type="number" step="any" name="full_complete" id="full_complete" class="form-control form-control-sm" required/>
-                                </div>
-                            </div>
                             <div class="col-12">
                                 <div class="form-group mb-1">
                                     <label class="small font-weight-bold text-dark">Description</label>
@@ -121,6 +100,77 @@
             </div>
         </div>
     </div>
+
+    <!-- Add employee Modal -->
+    <div class="modal fade" id="empModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+    aria-labelledby="empModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header p-2">
+                    <h5 class="modal-title" id="empModalLabel">Add Employee</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col">
+                            <span id="emp_form_result"></span>
+                            <form method="post" id="empFormTitle" class="form-horizontal">
+                                {{ csrf_field() }}
+                                <input type="hidden" name="emp_action" id="emp_action" />
+                                <input type="hidden" name="emp_hidden_id" id="emp_hidden_id" />
+                                <input type="hidden" name="detailsid" id="detailsid" />
+
+                                <div class="row">
+                                    <div class="col-sm-12 col-md-6">
+                                        <label class="small font-weight-bold text-dark">Machine</label>
+                                        <select name="emp_machine" id="emp_machine" class="form-control form-control-sm" style="width: 100%;" disabled>
+                                            @foreach ($machines as $m)
+                                                <option value="{{ $m->id }}">{{ $m->machine }}</option>
+                                            @endforeach
+                                        </select>
+                                        <input type="hidden" name="emp_machine" id="emp_machine_hidden" />
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-sm-12 col-md-4">
+                                        <label class="small font-weight-bold text-dark">Employee*</label>
+                                        <select class="form-control form-control-sm" name="employee" id="employee" style="width:100%" required></select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12 col-md-4">
+                                        <button type="button" id="addtolist" class="btn btn-primary btn-sm px-4" style="margin-top:30px;"><i class="fas fa-plus"></i>&nbsp;Add to list</button>
+                                    </div>
+                                </div>
+
+                                <br>
+                                <div class="center-block fix-width scroll-inner">
+                                <table class="table table-striped table-bordered table-sm small nowrap display" id="allocationtbl" style="width:100%;">
+                                    <thead>
+                                        <tr>
+                                            <th>EMP ID</th>
+                                            <th>EMPLOYEE NAME</th>
+                                            <th style="white-space: nowrap;">ACTION</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="emplistbody">
+                                    </tbody>
+                                </table>
+                                </div>
+                                <div class="form-group mt-3">
+                                    <button type="button" name="emp_action_button" id="emp_action_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Save</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </main>
               
 @endsection
@@ -166,7 +216,26 @@ $(document).ready(function(){
                 return {
                     term: params.term || '',
                     page: params.page || 1,
-                    company: company_f.val(),
+                    company: company_f.val()
+                }
+            },
+            cache: true
+        }
+    });
+
+    // Employee Select2 Initialization
+    let employee = $('#employee');
+    employee.select2({
+        placeholder: 'Select...',
+        width: '100%',
+        allowClear: true,
+        ajax: {
+            url: '{{url("employee_list_sel2")}}',
+            dataType: 'json',
+            data: function(params) {
+                return {
+                    term: params.term || '',
+                    page: params.page || 1
                 }
             },
             cache: true
@@ -212,7 +281,7 @@ $(document).ready(function(){
             [0, "desc"]
         ],
         ajax: {
-            url: scripturl + "/machinelist.php",
+            url: scripturl + "/Opma_Production/machinelist.php",
             type: "POST",
             data: {},
         },
@@ -229,18 +298,6 @@ $(document).ready(function(){
                 data: 'branch', 
                 name: 'branch'
             },
-            { 
-                data: 'full_complete', 
-                name: 'full_complete'
-            },
-            { 
-                data: 'semi_complete', 
-                name: 'semi_complete'
-            },
-            { 
-                data: 'target_count', 
-                name: 'target_count'
-            },
             {
                 data: 'id',
                 name: 'action',
@@ -249,6 +306,8 @@ $(document).ready(function(){
                 searchable: false,
                 render: function(data, type, row) {
                     var buttons = '';
+
+                    buttons += '<button type="submit" name="addemployee" id="'+row.id+'" class="view btn btn-info btn-sm mr-1" data-toggle="tooltip" title="Employees"><i class="fas fa-users"></i></button>';
 
                     buttons += '<button name="edit" id="'+row.id+'" class="edit btn btn-primary btn-sm  mr-1" type="submit" data-toggle="tooltip" title="Edit"><i class="fas fa-pencil-alt"></i></button>';
 
@@ -268,6 +327,11 @@ $(document).ready(function(){
         $('#action_button').val('Add');
         $('#action').val('Add');
         $('#form_result').html('');
+        $('#formTitle')[0].reset();
+        $('#company').val(null).trigger('change');
+        $('#location').val(null).trigger('change');
+        $('#machine').val(null).trigger('change');
+        $('#description').val(null).trigger('change');
 
         $('#formModal').modal('show');
     });
@@ -279,11 +343,11 @@ $(document).ready(function(){
 
 
         if ($('#action').val() == 'Add') {
-            action_url = "{{ route('addMachine') }}";
+            action_url = "{{ route('opma_addMachine') }}";
         }
 
         if ($('#action').val() == 'Edit') {
-            action_url = "{{ route('Machine.update') }}";
+            action_url = "{{ route('OpmaMachine.update') }}";
         }
 
 
@@ -328,26 +392,19 @@ $(document).ready(function(){
             var id = $(this).attr('id');
             $('#form_result').html('');
             $.ajax({
-                url: "{{ url('Machine/') }}/" + id + "/edit",
+                url: "{{ url('OpmaMachine/') }}/" + id + "/edit",
                 dataType: "json",
                 success: function (data) {
-                    // Clear existing selections
                     $('#company').empty();
                     $('#location').empty();
                     
-                    // Add and select company option
                     var companyOption = new Option(data.result.company_name, data.result.company_id, true, true);
                     $('#company').append(companyOption).trigger('change');
                     
-                    // Add and select location option
                     var locationOption = new Option(data.result.branch_name, data.result.branch_id, true, true);
                     $('#location').append(locationOption).trigger('change');
                     
-                    // Set other fields
                     $('#machine').val(data.result.machine);
-                    $('#semi_complete').val(data.result.semi_complete);
-                    $('#full_complete').val(data.result.full_complete);
-                    $('#target_count').val(data.result.target_count);
                     $('#description').val(data.result.description);
 
                     $('#hidden_id').val(id);
@@ -367,7 +424,7 @@ $(document).ready(function(){
         if (r == true) {
             user_id = $(this).attr('id');
             $.ajax({
-                url: "{{ url('Machine/destroy/') }}/" + user_id,
+                url: "{{ url('OpmaMachine/destroy/') }}/" + user_id,
                 beforeSend: function () {
                     $('#ok_button').text('Deleting...');
                 },
@@ -386,6 +443,150 @@ $(document).ready(function(){
             })
         }
 
+    });
+
+
+    var currentMachineId = null;
+    var empList = [];
+    var deleteList = []; 
+
+    $(document).on('click', '.view', function () {
+        currentMachineId = $(this).attr('id');
+        empList = [];
+        deleteList = [];
+        $('#emplistbody').empty();
+
+        $('#emp_machine').val(currentMachineId);
+        $('#emp_machine_hidden').val(currentMachineId);
+
+        $.ajax({
+            url: '{{ url("OpmaMachine") }}/' + currentMachineId + '/employees',
+            dataType: 'json',
+            success: function (data) {
+                $.each(data.employees, function (i, emp) {
+                    appendSavedEmployee(emp);
+                });
+            }
+        });
+
+        $('#empModal').modal('show');
+    });
+
+    function appendSavedEmployee(emp) {
+        var row = '<tr id="saved_row_' + emp.id + '">' +
+            '<td>' + emp.emp_id + '</td>' +
+            '<td>' + emp.emp_name + '</td>' +
+            '<td>' +
+                '<button type="button" class="btn btn-danger btn-sm remove-saved-emp" data-id="' + emp.id + '">' +
+                    '<i class="far fa-trash-alt"></i>' +
+                '</button>' +
+            '</td>' +
+            '</tr>';
+        $('#emplistbody').append(row);
+    }
+
+    $(document).on('click', '.remove-saved-emp', function () {
+        var rowId = $(this).data('id');
+
+        var alreadyMarked = deleteList.indexOf(rowId) !== -1;
+        if (alreadyMarked) {
+            deleteList = deleteList.filter(function (id) { return id !== rowId; });
+            $('#saved_row_' + rowId).css('opacity', '1');
+            $(this).removeClass('btn-secondary').addClass('btn-danger');
+        } else {
+            deleteList.push(rowId);
+            $('#saved_row_' + rowId).css('opacity', '0.4');
+            $(this).removeClass('btn-danger').addClass('btn-secondary');
+        }
+    });
+
+    $('#addtolist').click(function () {
+        var empSelect = $('#employee');
+        var emp_id   = empSelect.val();
+        var emp_name = empSelect.find('option:selected').text();
+
+        if (!emp_id) {
+            alert('Please select an employee.');
+            return;
+        }
+
+        var duplicate = empList.some(function (e) { return e.emp_id == emp_id; });
+        if (duplicate) {
+            alert('Employee already in the list.');
+            return;
+        }
+
+        empList.push({ emp_id: emp_id, emp_name: emp_name });
+
+        var row = '<tr id="staging_row_' + emp_id + '">' +
+            '<td>' + emp_id + '</td>' +
+            '<td>' + emp_name + '</td>' +
+            '<td>' +
+                '<button type="button" class="btn btn-danger btn-sm remove-staging-emp" data-empid="' + emp_id + '">' +
+                    '<i class="far fa-trash-alt"></i>' +
+                '</button>' +
+            '</td>' +
+            '</tr>';
+        $('#emplistbody').append(row);
+
+        empSelect.val(null).trigger('change');
+    });
+
+    $(document).on('click', '.remove-staging-emp', function () {
+        var emp_id = $(this).data('empid');
+        empList = empList.filter(function (e) { return e.emp_id != emp_id; });
+        $('#staging_row_' + emp_id).remove();
+    });
+
+    $('#emp_action_button').click(function () {
+        if (empList.length === 0 && deleteList.length === 0) {
+            alert('No changes to save.');
+            return;
+        }
+
+        var requests = [];
+
+        $.each(deleteList, function (i, rowId) {
+            requests.push(
+                $.ajax({
+                    url: '{{ url("OpmaMachine/destroyEmployee") }}/' + rowId,
+                    dataType: 'json'
+                })
+            );
+        });
+
+        if (empList.length > 0) {
+            var empIds = empList.map(function (e) { return e.emp_id; });
+            requests.push(
+                $.ajax({
+                    url: "{{ route('OpmaMachine.storeEmployees') }}",
+                    method: 'POST',
+                    data: {
+                        _token: $('meta[name="csrf-token"]').attr('content'),
+                        machine_id: currentMachineId,
+                        employees: empIds
+                    },
+                    dataType: 'json'
+                })
+            );
+        }
+
+        $.when.apply($, requests).then(function () {
+            empList = [];
+            deleteList = [];
+
+            const actionObj = {
+                icon: 'fas fa-save',
+                title: '',
+                message: 'Changes saved successfully.',
+                url: '',
+                target: '_blank',
+                type: 'success'
+            };
+            action(JSON.stringify(actionObj));
+
+            $('#empModal').modal('hide');   
+        });
     });
 
 });
