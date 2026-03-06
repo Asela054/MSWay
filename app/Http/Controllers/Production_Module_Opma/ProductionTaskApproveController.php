@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Production_Module;
+namespace App\Http\Controllers\Production_Module_Opma;
 
 use App\EmployeeTermPayment;
 use Illuminate\Http\Request;
@@ -19,7 +19,9 @@ class ProductionTaskApproveController extends Controller
             return response()->json(['error' => 'UnAuthorized'], 401);
         }
 
-        return view('Daily_Production.task_production_approve');
+         $remunerations=DB::table('remunerations')->select('*')->where('remuneration_type', 'Addition')->get();
+
+        return view('Opma_Production.Daily_Production.task_production_approve',compact('remunerations'));
     }
 
     public function generateproductiontask(Request $request){
@@ -52,19 +54,13 @@ class ProductionTaskApproveController extends Controller
 
           foreach ($results as $record) {
 
-            $productionQuery = DB::table('employee_production')
+            $productionQuery = DB::table('opma_employee_production')
             ->where('emp_id', $record->emp_id)
             ->whereBetween('date', [$from_date, $to_date]);
         
             $productionTotal = $productionQuery->sum('amount');
 
-            $taskQuery = DB::table('employee_task')
-            ->where('emp_id', $record->emp_id)
-            ->whereBetween('date', [$from_date, $to_date]);
-        
-            $taskTotal = $taskQuery->sum('amount');
-
-            if ($productionTotal == 0 && $taskTotal == 0) {
+            if ($productionTotal == 0) {
                     continue;
                 }
 
@@ -72,9 +68,7 @@ class ProductionTaskApproveController extends Controller
                         'emp_auto_id' => $record->emp_auto_id,
                         'emp_id' => $record->emp_id,
                         'emp_name_with_initial' => $record->emp_name_with_initial,
-                        'production_total' =>round($productionTotal, 2),
-                        'task_total' => round($taskTotal, 2),
-                        'overall_total' =>round($productionTotal + $taskTotal, 2), 
+                        'production_total' =>round($productionTotal, 2) 
                     ];
           }
 
@@ -91,6 +85,7 @@ class ProductionTaskApproveController extends Controller
         }
 
         $dataarry = $request->input('dataarry');
+        $productionremunerationid = $request->input('remunitiontype');
 
         
         $current_date_time = Carbon::now()->toDateTimeString();
@@ -99,7 +94,6 @@ class ProductionTaskApproveController extends Controller
 
             $empid = $row['empid'];
             $empname = $row['emp_name'];
-            $task_total = str_replace([','], '', $row['task_total']);
             $production_total = str_replace([','], '', $row['production_total']);
             $autoid = $row['emp_auto_id'];
 
@@ -110,9 +104,6 @@ class ProductionTaskApproveController extends Controller
             ->first();
 
         if ($profiles) {
-
-            $productionremunerationid = 22;
-            $taskremunerationid = 31;
 
             $paysliplast = DB::table('employee_payslips')
                 ->select('emp_payslip_no')
@@ -126,40 +117,6 @@ class ProductionTaskApproveController extends Controller
                 $newpaylispno =  $emp_payslipno +1;
             }else{
                 $newpaylispno = 1;
-            }
-
-
-        
-            if($task_total != 0){
-
-                $termpaymentcheck = DB::table('employee_term_payments')
-                ->select('id')
-                ->where('payroll_profile_id', $profiles->payroll_profile_id)
-                ->where('emp_payslip_no', $newpaylispno)
-                ->where('remuneration_id', $taskremunerationid)
-                ->first();
-            
-                if($termpaymentcheck){
-                    DB::table('employee_term_payments')
-                    ->where('id', $termpaymentcheck->id)
-                    ->update([
-                        'payment_amount' => $task_total,
-                        'payment_cancel' => '0',
-                        'updated_by' => Auth::id(),
-                        'updated_at' => $current_date_time
-                    ]);
-                }
-                else{
-                    $termpayment = new EmployeeTermPayment();
-                    $termpayment->remuneration_id = $taskremunerationid;
-                    $termpayment->payroll_profile_id = $profiles->payroll_profile_id;
-                    $termpayment->emp_payslip_no = $newpaylispno;
-                    $termpayment->payment_amount = $task_total;
-                    $termpayment->payment_cancel = 0;
-                    $termpayment->created_by = Auth::id();
-                    $termpayment->created_at = $current_date_time;
-                    $termpayment->save(); 
-                }
             }
 
 

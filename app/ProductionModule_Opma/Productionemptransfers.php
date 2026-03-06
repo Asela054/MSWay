@@ -1,6 +1,6 @@
 <?php
 
-namespace App\ProductionModule;
+namespace App\ProductionModule_Opma;
 
 use Illuminate\Database\Eloquent\Model;
 

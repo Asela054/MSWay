@@ -1816,7 +1816,7 @@
                            const actionObj = {
                                 icon: 'fas fa-save',
                                 title: '',
-                                message: data.success,
+                                message: res.success,
                                 url: '',
                                 target: '_blank',
                                 type: 'success'

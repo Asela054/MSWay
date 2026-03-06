@@ -5,7 +5,7 @@
 <main> 
       <div class="page-header shadow">
             <div class="container-fluid d-none d-sm-block shadow">
-                 @include('layouts.production&task_nav_bar')
+                  @include('layouts.production&task_nav_bar_opma')
             </div>
             <div class="container-fluid">
                 <div class="page-header-content py-3 px-2">
@@ -38,7 +38,7 @@
                                     <th>MACHINE</th>
                                     <th>PRODUCT</th>
                                     <th>QTY</th>
-                                    <th>Unit Price</th>
+                                    <th>PRECENTAGE</th>
                                     <th>AMOUNT</th>
                                 </tr>
                             </thead>
@@ -79,7 +79,7 @@
                                     <select name="product" id="product" class="form-control form-control-sm">
                                         <option value="">Select Product</option>
                                         @foreach ($products as $product)
-                                            <option value="{{ $product->id }}">{{ $product->productname }}</option>
+                                            <option value="{{ $product->id }}">{{ $product->title }}</option>
                                         @endforeach
                                     </select>
                               </div>
@@ -134,9 +134,9 @@
 <script>
 $(document).ready(function(){
 
-    $('#production_menu_link').addClass('active');
+    $('#production_menu_link_opma').addClass('active');
     $('#production_menu_link_icon').addClass('active');
-    $('#dailyprocess').addClass('navbtnactive');
+    $('#dailyprocess_opma').addClass('navbtnactive');
 
      let employee_f = $('#employee_f');
 
@@ -145,7 +145,7 @@ $(document).ready(function(){
             width: '100%',
             allowClear: true,
             ajax: {
-                url: '{{url("employee_list_production")}}',
+                url: '{{url("employee_list_sel2")}}',
                 dataType: 'json',
                 data: function(params) {
                     return {
@@ -197,7 +197,7 @@ $(document).ready(function(){
                         [0, "desc"]
                     ],
                     ajax: {
-                         url: scripturl + '/employee_production_list.php',
+                         url: scripturl + '/Opma_Production/employee_production_list.php',
                          type: 'POST',
                          data : 
                             {machine :machine, 
@@ -213,7 +213,16 @@ $(document).ready(function(){
                         { data: 'machine', name: 'machine' },
                         { data: 'product', name: 'product' },
                         { data: 'Produce_qty', name: 'Produce_qty' },
-                        { data: 'unit_price', name: 'unit_price' },
+                        { 
+                            data: 'precentage', 
+                            name: 'precentage',
+                            render: function(data, type, row) {
+                                if (type === 'display' || type === 'filter') {
+                                    return parseFloat(data).toFixed(2) + '%';
+                                }
+                                return data;
+                            }
+                        },
                        { 
                             data: 'amount', 
                             name: 'amount',

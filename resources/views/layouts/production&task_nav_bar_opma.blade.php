@@ -19,15 +19,15 @@
 
       <li><a class="dropdown-item" href="{{ route('opma_productionallocation')}}">Employee Allocation</a></li>
 
-      <li><a class="dropdown-item" href="{{ route('productionending')}}">Daily Process Ending</a></li>
+      <li><a class="dropdown-item" href="{{ route('opma_productionending')}}">Daily Process Ending</a></li>
 
-      <li><a class="dropdown-item" href="{{ route('employeeproductionreport')}}">Employee Production </a></li>
+      <li><a class="dropdown-item" href="{{ route('opma_employeeproductionreport')}}">Employee Production </a></li>
 
     </ul>
   </div>
 
   
-   <a role="button" class="btn navbtncolor" href="{{ route('productiontaskapprove') }}" id="taskapprove">Production Approval <span class="caret"></span></a>
+   <a role="button" class="btn navbtncolor" href="{{ route('opma_productiontaskapprove') }}" id="opmataskapprove">Production Approval <span class="caret"></span></a>
  
 </div>
 

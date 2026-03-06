@@ -1,12 +1,12 @@
 <?php
 
-namespace App\ProductionModule;
+namespace App\ProductionModule_Opma;
 
 use Illuminate\Database\Eloquent\Model;
 
 class Productionempattendace extends Model
 {
-    protected $table = 'production_emp_attendance';
+    protected $table = 'opma_production_emp_attendance';
 
     protected $primaryKey = 'id';
 
