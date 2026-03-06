@@ -1713,7 +1713,6 @@ Route::post('/opma_productallocationview' ,'Production_Module_Opma\ProductionEmp
 Route::post('/opma_productallocationupdate' ,'Production_Module_Opma\ProductionEmployeeAllocationController@update')->name('opma_productallocationupdate');
 Route::post('/opma_productallocationdelete' ,'Production_Module_Opma\ProductionEmployeeAllocationController@delete')->name('opma_productallocationdelete');
 Route::post('/opma_productallocationdeletelist' ,'Production_Module_Opma\ProductionEmployeeAllocationController@deletelist')->name('opma_productallocationdeletelist');
-// Route::get('/productallocationstatus/{id}/{stasus}','Production_Module\ProductionEmployeeAllocationController@status')->name('productallocationstatus');
 
 // /*-- Product Machines Info----*/
 // Route::resource('productMachine', 'Production_Module\ProductMachineController');
@@ -1727,25 +1726,20 @@ Route::post('/opma_productallocationdeletelist' ,'Production_Module_Opma\Product
 // Route::get('/employeetaskproductreport' ,'Production_Module\EmployeeTaskProductController@employeetaskproduct')->name('employeetaskproductreport');
 
 
+  //Production an Task Approve controller
+   Route::get('/opma_productiontaskapprove' ,'Production_Module_Opma\ProductionTaskApproveController@index')->name('opma_productiontaskapprove');
+   Route::post('/opma_productiontaskapprovegenerate' ,'Production_Module_Opma\ProductionTaskApproveController@generateproductiontask')->name('opma_productiontaskapprovegenerate');
+   Route::post('/opma_approveproductiontask' ,'Production_Module_Opma\ProductionTaskApproveController@approveproductiontask')->name('opma_approveproductiontask');
 
-// //Production an Task Approve controller
-// Route::get('/productiontaskapprove' ,'Production_Module\ProductionTaskApproveController@index')->name('productiontaskapprove');
-// Route::post('/productiontaskapprovegenerate' ,'Production_Module\ProductionTaskApproveController@generateproductiontask')->name('productiontaskapprovegenerate');
-// Route::post('/approveproductiontask' ,'Production_Module\ProductionTaskApproveController@approveproductiontask')->name('approveproductiontask');
+ // Production ending Controller Routes
+   Route::get('opma_productionending', 'Production_Module_Opma\ProductionEndingController@index')->name('opma_productionending');
+   Route::post('/opma_productionendingcancel' ,'Production_Module_Opma\ProductionEndingController@cancelproduction')->name('opma_productionendingcancel');
+   Route::post('/opma_productionstart' ,'Production_Module_Opma\ProductionEndingController@startproduction')->name('opma_productionstart');
+   Route::post('/opma_productionendingfinish' ,'Production_Module_Opma\ProductionEndingController@insert')->name('opma_productionendingfinish');
+ 
+   Route::get('/opma_employeeproductionreport' ,'Production_Module_Opma\ProductionEndingController@employeeproduction')->name('opma_employeeproductionreport');
 
-// // Production ending Controller Routes
-// Route::get('productionending', 'Production_Module\ProductionEndingController@index')->name('productionending');
-// Route::get('/productionendinglist' ,'Production_Module\ProductionEndingController@productionlist')->name('productionendinglist');
-// Route::post('/productionendingfinish' ,'Production_Module\ProductionEndingController@insert')->name('productionendingfinish');
-// Route::post('/productionendingcancel' ,'Production_Module\ProductionEndingController@cancelproduction')->name('productionendingcancel');
-// Route::get('employee_list_production', 'Production_Module\ProductionEndingController@employee_list_production')->name('employee_list_production');
-// Route::get('/employeeproductionreport' ,'Production_Module\ProductionEndingController@employeeproduction')->name('employeeproductionreport');
-
-// Route::post('/productionstart' ,'Production_Module\ProductionEndingController@startproduction')->name('productionstart');
-// Route::post('/productionbreakdown' ,'Production_Module\ProductionEndingController@breakdownproduction')->name('productionbreakdown');
-// Route::post('/productionresume' ,'Production_Module\ProductionEndingController@resumeproduction')->name('productionresume');
-// Route::post('/productionaddingemployees' ,'Production_Module\ProductionEndingController@addingproductionemployees')->name('productionaddingemployees');
-// Route::post('/productionremoveemployees' ,'Production_Module\ProductionEndingController@removeproductionemployees')->name('productionremoveemployees');
+  
 
 // // Production Reports 
 // Route::get('/reportemployeeproduction' ,'Production_Module\ProductionreportController@index')->name('reportemployeeproduction');

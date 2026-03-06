@@ -5,7 +5,7 @@
 <main> 
      <div class="page-header shadow">
             <div class="container-fluid d-none d-sm-block shadow">
-                 @include('layouts.production&task_nav_bar')
+                  @include('layouts.production&task_nav_bar_opma')
             </div>
             <div class="container-fluid">
                 <div class="page-header-content py-3 px-2">
@@ -52,7 +52,6 @@
                                         <th></th>
                                         <th>EMPLOYEE ID</th>
                                         <th>EMPLOYEE</th>
-                                        <th>TASK AMOUNT</th>
                                         <th>PRODUCTION AMOUNT</th>
                                         <th class="d-none">Employee auto id</th>
                                     </tr>
@@ -113,8 +112,44 @@
                   </ul>
               </div>
         </div>
-
     </div>
+
+    <!-- approve modal -->
+        <div class="modal fade" id="approveModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Approve  Meal Deduction</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="message_modal"></div>
+                            <form class="form-horizontal" id="formApprove">
+                                <div class="form-group mb-1">
+                                    <div class="col-12">
+                                         <label class="small font-weight-bolder text-dark">Deduction Type</label>
+                                            <select name="remunitiontype" id="remunitiontype" class="form-control form-control-sm">
+                                                <option value="">Select Remuneration</option>
+                                                    @foreach ($remunerations as $remuneration){
+                                                        <option value="{{$remuneration->id}}" >{{$remuneration->remuneration_name}}</option>
+                                                    }  
+                                                    @endforeach
+                                            </select>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary btn-sm px-3" id="btn-approve"><i class="fa-light fa-light fa-clipboard-check"></i>&nbsp;Approve</button>
+                        </div>
+                    </div>
+                </div>
+        </div>
+
+
+    <!-- Modal Area End -->
 </main>
               
 @endsection
@@ -125,9 +160,9 @@
 <script>
 $(document).ready(function(){
 
-    $('#production_menu_link').addClass('active');
+    $('#production_menu_link_opma').addClass('active');
     $('#production_menu_link_icon').addClass('active');
-    $('#taskapprove').addClass('navbtnactive');
+    $('#opmataskapprove').addClass('navbtnactive');
 
     showInitialMessage()
     
@@ -138,7 +173,7 @@ $(document).ready(function(){
             width: '100%',
             allowClear: true,
             ajax: {
-                url: '{{url("employee_list_task")}}',
+                url: '{{url("employee_list_sel2")}}',
                 dataType: 'json',
                 data: function(params) {
                     return {
@@ -152,7 +187,7 @@ $(document).ready(function(){
 
         function load_dt(employee, from_date, to_date) {
             $('#dataTable').DataTable({
-               "destroy": true,
+                    "destroy": true,
                     "processing": true,
                     "serverSide": true,
                     dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
@@ -190,7 +225,7 @@ $(document).ready(function(){
                         [1, "desc"]
                     ],
                 ajax: {
-                    url:  "{{url('/productiontaskapprovegenerate')}}",
+                    url:  "{{url('/opma_productiontaskapprovegenerate')}}",
                     type: 'POST',
                     data: { 
                          _token: '{{ csrf_token() }}',
@@ -211,7 +246,6 @@ $(document).ready(function(){
                     },
                     { data: 'emp_id', name: 'emp_id' },
                     { data: 'emp_name_with_initial', name: 'emp_name_with_initial' },
-                    { data: 'task_total', name: 'task_total' },
                     { data: 'production_total', name: 'production_total' },
                     {
                         data: 'emp_auto_id',
@@ -219,8 +253,7 @@ $(document).ready(function(){
                         visible: false
                     }
                     
-                ],
-                "bDestroy": true,
+                ]
             });
         }
 
@@ -240,81 +273,97 @@ $(document).ready(function(){
     $('#approve_att').click(async function () {
         var r = await Otherconfirmation("You want to Approve this ? ");
         if (r == true) {
-            selectedRowIdsapprove = [];
-            $('#dataTable tbody .selectCheck:checked').each(function () {
-                var rowData = $('#dataTable').DataTable().row($(this).closest('tr')).data();
+             $('.message_modal').html('');
+            $('#approveModal').modal('show');
 
-                if (rowData) {
-                    selectedRowIdsapprove.push({
-                        empid: rowData.emp_id,
-                        emp_name: rowData.emp_name_with_initial,
-                        task_total: rowData.task_total,
-                        production_total: rowData.production_total,
-                        emp_auto_id: rowData.emp_auto_id
+            $('#btn-approve').on('click', function (e) {
+                  e.preventDefault();
+                var remunitiontype = $('#remunitiontype').val();
+                var employee_f = $('#employee_f').val();
+                var from_date = $('#from_date').val();
+                var to_date = $('#to_date').val();
+
+                if (remunitiontype == '') {
+                        Swal.fire({
+                            position: "top-end",
+                            icon: 'warning',
+                            title: 'Please select Deduction Type!',
+                            showConfirmButton: false,
+                            timer: 2500
+                        });
+                        return false;
+                } else {
+                    selectedRowIdsapprove = [];
+                    $('#dataTable tbody .selectCheck:checked').each(function () {
+                        var rowData = $('#dataTable').DataTable().row($(this).closest('tr')).data();
+                        if (rowData) {
+                            selectedRowIdsapprove.push({
+                                empid: rowData.emp_id,
+                                emp_name: rowData.emp_name_with_initial,
+                                production_total: rowData.production_total,
+                                emp_auto_id: rowData.emp_auto_id
+                            });
+                        }
                     });
+
+                        if (selectedRowIdsapprove.length > 0) {
+                                console.log(selectedRowIdsapprove);
+                                $.ajaxSetup({
+                                    headers: {
+                                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                                    }
+                                })
+
+                                $.ajax({
+                                    url: '{!! route("opma_approveproductiontask") !!}',
+                                    type: 'POST',
+                                    dataType: "json",
+                                    data: {
+                                        dataarry: selectedRowIdsapprove,
+                                        remunitiontype: remunitiontype,
+                                        employee_f: employee_f,
+                                        from_date: from_date,
+                                        to_date: to_date
+                                    },
+                                    success: function (data) {
+                                        if (data.errors) {
+                                            const actionObj = {
+                                                icon: 'fas fa-warning',
+                                                title: '',
+                                                message: 'Record Error',
+                                                url: '',
+                                                target: '_blank',
+                                                type: 'danger'
+                                            };
+                                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                                            action(actionJSON);
+                                        }
+                                        if (data.success) {
+                                            const actionObj = {
+                                                icon: 'fas fa-save',
+                                                title: '',
+                                                message: data.success,
+                                                url: '',
+                                                target: '_blank',
+                                                type: 'success'
+                                            };
+                                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                                            actionreload(actionJSON);
+                                        }
+
+                                    }
+                                })
+                            } else {
+                                Swal.fire({
+                                    position: "top-end",
+                                    icon: 'warning',
+                                    title: 'Select Rows to Final Approve!',
+                                    showConfirmButton: false,
+                                    timer: 2500
+                                });
+                            }
                 }
-            });
-
-            if (selectedRowIdsapprove.length > 0) {
-                console.log(selectedRowIdsapprove);
-               
-                  $.ajaxSetup({
-                      headers: {
-                          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                      }
-                  })
-
-                  var employee_f = $('#employee_f').val();
-                  var from_date = $('#from_date').val();
-                  var to_date = $('#to_date').val();
-
-                  $.ajax({
-                      url: '{!! route("approveproductiontask") !!}',
-                      type: 'POST',
-                      dataType: "json",
-                      data: {
-                          dataarry: selectedRowIdsapprove,
-                          employee_f: employee_f,
-                          from_date: from_date,
-                          to_date: to_date
-                      },
-                      success: function (data) {
-                         if (data.errors) {
-                            const actionObj = {
-                                icon: 'fas fa-warning',
-                                title: '',
-                                message: 'Record Error',
-                                url: '',
-                                target: '_blank',
-                                type: 'danger'
-                            };
-                            const actionJSON = JSON.stringify(actionObj, null, 2);
-                            action(actionJSON);
-                        }
-                        if (data.success) {
-                            const actionObj = {
-                                icon: 'fas fa-save',
-                                title: '',
-                                message: data.success,
-                                url: '',
-                                target: '_blank',
-                                type: 'success'
-                            };
-                            const actionJSON = JSON.stringify(actionObj, null, 2);
-                            actionreload(actionJSON);
-                        }
-
-                      }
-                  })
-            } else {
-                Swal.fire({
-                    position: "top-end",
-                    icon: 'warning',
-                    title: 'Select Rows to Final Approve!',
-                    showConfirmButton: false,
-                    timer: 2500
-                });
-            }
+            }); 
         }
     });
 
@@ -328,7 +377,7 @@ $(document).ready(function(){
 function showInitialMessage() {
         $('#dataTable tbody').html(
             '<tr>' +
-            '<td colspan="5" class="text-center py-5">' + // Changed colspan to 9 to match your columns
+            '<td colspan="4" class="text-center py-5">' + // Changed colspan to 9 to match your columns
             '<div class="d-flex flex-column align-items-center">' +
             '<i class="fas fa-filter fa-3x text-muted mb-2"></i>' +
             '<h4 class="text-muted mb-2">No Records Found</h4>' +
