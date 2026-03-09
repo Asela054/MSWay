@@ -326,6 +326,15 @@ $(document).ready(function(){
 
                     return buttons;
                 }
+            },
+            {data: "emp_name_with_initial", 
+                visible: false
+            },
+            {data: "calling_name",
+            visible: false
+            },
+            {data: "emp_id", 
+                visible: false
             }
         ],
         drawCallback: function (settings) {
