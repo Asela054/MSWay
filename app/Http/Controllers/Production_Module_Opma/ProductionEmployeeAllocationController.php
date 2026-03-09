@@ -139,30 +139,75 @@ class ProductionEmployeeAllocationController extends Controller
     private function reqestcountlist($id)
     {
         $recordID = $id;
-        $data = DB::table('opma_emp_product_allocation_details as ead')
-            ->leftJoin('employees as e', 'ead.emp_id', '=', 'e.emp_id')
-            ->select(
-                'ead.*', 
-                'e.emp_name_with_initial as employee_name'
-            )
+        $allocation = DB::table('opma_emp_product_allocation')
+            ->where('id', $recordID)
+            ->where('status', '!=', 3)
+            ->first();
+        
+        if (!$allocation) {
+            return ''; 
+        }
+        
+        $productiondate = $allocation->date;
+        $shiftId = $allocation->shift_id;
+        
+        // Get EXISTING allocated employees for this allocation (locked)
+        $existingEmployees = DB::table('opma_emp_product_allocation_details as ead')
+            ->join('employees as e', 'ead.emp_id', '=', 'e.emp_id')
             ->where('ead.allocation_id', $recordID)
             ->where('ead.status', 1)
-            ->get(); 
-
+            ->select('e.emp_id', 'e.emp_name_with_initial', 'ead.id as allocatedid')
+            ->get();
+        
+        // Get NEW available employees (not allocated for this date and shift)
+        $newAvailableEmployees = DB::table('opma_machine_employees as me')
+            ->join('employees as e', 'me.emp_id', '=', 'e.emp_id')
+            ->where('me.opma_machine_id', $allocation->machine_id)
+            ->whereNotExists(function($query) use ($productiondate, $shiftId, $recordID) {
+                $query->select(DB::raw(1))
+                    ->from('opma_emp_product_allocation_details as details')
+                    ->join('opma_emp_product_allocation as allocation', 'allocation.id', '=', 'details.allocation_id')
+                    ->whereColumn('details.emp_id', 'me.emp_id')
+                    ->where('details.date', $productiondate)
+                    ->where('details.status', '!=', 3)
+                    ->where('allocation.shift_id', $shiftId)
+                    ->where('allocation.status', '!=', 3);
+            })
+            ->whereNotIn('e.emp_id', $existingEmployees->pluck('emp_id'))
+            ->select('e.emp_id', 'e.emp_name_with_initial')
+            ->orderBy('e.emp_name_with_initial')
+            ->get();
+        
         $htmlTable = '';
-        foreach ($data as $row) {
-            $htmlTable .= '<tr>';
-            $htmlTable .= '<td><input type="checkbox" class="employee-checkbox" name="employee_ids[]" value="'. $row->emp_id . '" checked></td>'; 
+        
+        // First, add EXISTING employees (locked, checked, ExistingData)
+        foreach ($existingEmployees as $row) {
+            $htmlTable .= '<tr class="existing-employee">';
+            $htmlTable .= '<td><input type="checkbox" class="employee-checkbox" name="employee_ids[]" value="'. $row->emp_id . '" checked disabled></td>'; 
             $htmlTable .= '<td>' . $row->emp_id . '</td>'; 
-            $htmlTable .= '<td>' . ($row->employee_name ?? $row->employee_name) . '</td>'; 
+            $htmlTable .= '<td>' . $row->emp_name_with_initial . '</td>'; 
             $htmlTable .= '<td class="text-right">';
-            $htmlTable .= '<button type="button" rowid="'.$row->id.'" class="btnDeletelist btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i></button>';
+            $htmlTable .= '<button type="button" rowid="'.$row->allocatedid.'" class="btnDeletelist btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i></button>';
             $htmlTable .= '</td>'; 
             $htmlTable .= '<td class="d-none">ExistingData</td>';
-            $htmlTable .= '<td class="d-none">'.$row->id.'</td>'; 
+            $htmlTable .= '<td class="d-none">'.$row->allocatedid.'</td>'; 
             $htmlTable .= '</tr>';
         }
-
+        
+        // Then, add NEW available employees (unchecked, enabled, NewData)
+        foreach ($newAvailableEmployees as $row) {
+            $htmlTable .= '<tr class="new-employee">';
+            $htmlTable .= '<td><input type="checkbox" class="employee-checkbox" name="employee_ids[]" value="'. $row->emp_id . '"></td>';
+            $htmlTable .= '<td>' . $row->emp_id . '</td>'; 
+            $htmlTable .= '<td>' . $row->emp_name_with_initial . '</td>'; 
+            $htmlTable .= '<td class="text-right">';
+            $htmlTable .= '<span class="badge badge-success"></span>';
+            $htmlTable .= '</td>'; 
+            $htmlTable .= '<td class="d-none">NewData</td>';
+            $htmlTable .= '<td class="d-none"></td>'; 
+            $htmlTable .= '</tr>';
+        }
+        
         return $htmlTable;
     }
    
@@ -202,17 +247,16 @@ class ProductionEmployeeAllocationController extends Controller
         
             foreach ($tableData as $rowtabledata) {
             $emp_id = $rowtabledata['col_2'];
-            $actionStatus = isset($rowtabledata['col_5']) ? $rowtabledata['col_6'] : 'NewData';
+            $actionStatus = isset($rowtabledata['col_5']) ? $rowtabledata['col_5'] : '';
             
-            if($actionStatus == "Updated" || $actionStatus == "ExistingData") {
-                $detailID = null;
-                if(isset($rowtabledata['col_5'])) {
-                    preg_match('/value="(\d+)"/', $rowtabledata['col_5'], $matches);
-                    if(isset($matches[1])) {
-                        $detailID = $matches[1];
-                    }
-                }
+            if($actionStatus == "ExistingData") {
 
+                $detailID = null;
+                 if($actionStatus == "ExistingData" && isset($rowtabledata['col_6']) && !empty($rowtabledata['col_6'])) {
+                        $detailID = $rowtabledata['col_6'];
+                    }
+
+                    
                 if($detailID) {
                     $EmpProductAllocationDetail = EmpProductAllocationDetail::find($detailID);
                     if($EmpProductAllocationDetail) {
@@ -369,14 +413,25 @@ class ProductionEmployeeAllocationController extends Controller
         }
     }
 
-    
-
-    public function getMachineEmployees(Request $request)
+   public function getMachineEmployees(Request $request)
     {
         $machineId = $request->machine_id;
+        $productiondate = $request->productiondate;
+        $shiftId = $request->shiftId;
+        
         $employees = DB::table('opma_machine_employees as me')
             ->join('employees as e', 'me.emp_id', '=', 'e.emp_id')
             ->where('me.opma_machine_id', $machineId)
+            ->whereNotExists(function($query) use ($productiondate, $shiftId) {
+                $query->select(DB::raw(1))
+                    ->from('opma_emp_product_allocation_details as details')
+                    ->join('opma_emp_product_allocation as allocation', 'allocation.id', '=', 'details.allocation_id')
+                    ->whereRaw('details.emp_id = me.emp_id')
+                    ->where('details.date', '=', $productiondate)
+                    ->where('details.status', '=', 1)
+                    ->where('allocation.shift_id', '=', $shiftId)
+                    ->where('allocation.status', '=', 1);
+            })
             ->select('e.emp_id as emp_id', 'e.emp_name_with_initial')
             ->get();
         
