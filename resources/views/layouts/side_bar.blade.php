@@ -502,6 +502,43 @@
             </li>
             @endif
 
+              @if($hasproductionPermissions_Opma)
+            <li>
+                <a href="javascript:void(0);" data-toggle="collapse" data-target="#collapseproduction_opma" aria-expanded="false" aria-controls="collapseproduction_opma">
+                    <i class="flaticon-381-background-1"></i>
+                    <span class="links_name">Production & Task<i class="fas fa-angle-down"></i></span>
+                </a>
+                <span class="tooltip">Production & Task</span>
+                <div class="collapse" id="collapseproduction_opma" data-parent="#accordionSidenav">
+                    <nav class="sidenav-menu-nested nav accordion" id="accordionSubproduction_opma">
+                        <a href="javascript:void(0);" data-toggle="collapse" data-target="#collapsdailypro" aria-expanded="false" aria-controls="collapsdailypro" class="py-1">
+                            <span class="links_name">Master Data<i class="fas fa-angle-down"></i></span>
+                        </a>
+                        <div class="collapse" id="collapsdailypro" data-parent="#accordionSubproduction_opma">
+                            <nav class="sidenav-menu-nested nav">
+                                <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('opma_machines')}}">Machines</a>
+                                <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('opma_sizes')}}">Sizes</a>
+                                <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('opma_styles')}}">Styles</a>
+                            </nav>
+                        </div>
+                        <a href="javascript:void(0);" data-toggle="collapse" data-target="#collapstask" aria-expanded="false" aria-controls="collapstask" class="py-1">
+                            <span class="links_name">Daily Production Process<i class="fas fa-angle-down"></i></span>
+                        </a>
+                        <div class="collapse" id="collapstask" data-parent="#accordionSubproduction_opma">
+                            <nav class="sidenav-menu-nested nav">
+                                <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('opma_productionallocation')}}">Employee Allocation</a>
+                                <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('opma_productionending')}}">Daily Process Ending</a>
+                                <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('opma_employeeproductionreport')}}">Employee Production</a>
+                                <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('opma_timechanging')}}">Machine Downtime Log</a>
+                            </nav>
+                        </div>
+                         <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('opma_productiontaskapprove')}}" >Production Approval</a>
+                    </nav>
+                </div>
+            </li>
+            @endif
+
+
             @if($hasmeterreadingPermissions)
             <li>
                 <a href="javascript:void(0);" data-toggle="collapse" data-target="#collapemeterreading" aria-expanded="false" aria-controls="collapemeterreading">
