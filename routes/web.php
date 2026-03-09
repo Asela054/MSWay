@@ -1736,6 +1736,14 @@ Route::post('/opma_productallocationdeletelist' ,'Production_Module_Opma\Product
    Route::post('/opma_productionendingcancel' ,'Production_Module_Opma\ProductionEndingController@cancelproduction')->name('opma_productionendingcancel');
    Route::post('/opma_productionstart' ,'Production_Module_Opma\ProductionEndingController@startproduction')->name('opma_productionstart');
    Route::post('/opma_productionendingfinish' ,'Production_Module_Opma\ProductionEndingController@insert')->name('opma_productionendingfinish');
+   Route::get('/opma_employeeproductionreport' ,'Production_Module_Opma\ProductionEndingController@employeeproduction')->name('opma_employeeproductionreport');
+
+// Machine Downtime Log Section Routes
+   Route::get('opma_timechanging', 'Production_Module_Opma\TimechangingController@index')->name('opma_timechanging');
+   Route::post('opma_timechanginginsert', 'Production_Module_Opma\TimechangingController@store')->name('opma_timechanginginsert');
+   Route::post('opma_timechangingedit', 'Production_Module_Opma\TimechangingController@edit')->name('opma_timechangingedit');
+   Route::post('opma_timechangingupdate', 'Production_Module_Opma\TimechangingController@update')->name('opma_timechangingupdate');
+   Route::post('opma_timechangingdelete', 'Production_Module_Opma\TimechangingController@destroy')->name('opma_timechangingdelete');
  
    Route::get('/opma_employeeproductionreport' ,'Production_Module_Opma\ProductionEndingController@employeeproduction')->name('opma_employeeproductionreport');
 
@@ -1746,10 +1754,6 @@ Route::post('/opma_productallocationdeletelist' ,'Production_Module_Opma\Product
 
 
                   // End of Opma Production Section Routes
-
-
-
-
 
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');

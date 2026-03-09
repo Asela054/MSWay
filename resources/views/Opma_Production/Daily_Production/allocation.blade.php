@@ -81,15 +81,6 @@
                                         <input type="date" name="production_date" id="production_date"
                                             class="form-control form-control-sm" required />
                                     </div>
-                                      <div class="col-sm-12 col-md-4">
-                                        <label class="small font-weight-bolder">Machine</label>
-                                        <select name="machine" id="machine" class="form-control form-control-sm" style="width: 100%;" required>
-                                            <option value="">Select Machine</option>
-                                            @foreach ($machines as $machine)
-                                                <option value="{{ $machine->id }}">{{ $machine->machine }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
                                     <div class="col-sm-12 col-md-4">
                                         <label class="small font-weight-bolder">Shift*</label>
                                         <select name="shift" id="shift" class="form-control form-control-sm">
@@ -99,6 +90,16 @@
                                             @endforeach
                                         </select>
                                     </div>
+                                      <div class="col-sm-12 col-md-4">
+                                        <label class="small font-weight-bolder">Machine*</label>
+                                        <select name="machine" id="machine" class="form-control form-control-sm" style="width: 100%;" required>
+                                            <option value="">Select Machine</option>
+                                            @foreach ($machines as $machine)
+                                                <option value="{{ $machine->id }}">{{ $machine->machine }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    
                                 </div>
 
                                 <div class="row">
@@ -387,6 +388,7 @@ $(document).ready(function(){
         $('.modal-title').text('Add Production Allocation');
         $('#action').val('Add');
         $('#form_result').html('');
+        $('#machine').prop('disabled', false);
         $('#formTitle')[0].reset();
         $('#action_button').prop('disabled', false).html('<i class="fas fa-plus"></i>&nbsp;Add');
         $('#emplistbody').empty();
@@ -398,12 +400,16 @@ $(document).ready(function(){
     // Load Employees according to selected machines
     $('#machine').on('change', function() {
             var machineId = $(this).val();
+            var productiondate = $('#production_date').val();
+            var shiftId = $('#shift').val();
             if (machineId) {
                 $.ajax({
                     url: '{{ route("opma_getMachineEmployees") }}',
                     type: 'POST',
                     data: {
                         machine_id: machineId,
+                        productiondate: productiondate,
+                        shiftId: shiftId,
                         _token: '{{ csrf_token() }}'
                     },
                     success: function(response) {
