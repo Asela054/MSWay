@@ -867,8 +867,13 @@ class Attendance extends Model
                     if($emp->is_sat_ot_type_as_act == 1){//As act
                         // $saturday_on_duty_time = $shift->saturday_onduty_time;
                         // $saturday_off_duty_time = $shift->saturday_offduty_time;
-                        $saturday_on_duty_time = $ondutyTime->format('H:i:s');
-                        $saturday_off_duty_time = $offdutyTime->format('H:i:s');
+                        if($emp->flex_ot==1):
+                            $saturday_on_duty_time = $ondutyTime->format('H:i:s');
+                            $saturday_off_duty_time = $offdutyTime->format('H:i:s');
+                        else:
+                            $saturday_on_duty_time = $shift->saturday_onduty_time;
+                            $saturday_off_duty_time = $shift->saturday_offduty_time;
+                        endif;
 
                         $shift_start = Carbon::parse($date->year.'-'.$date->month.'-'.$date->day.' '.$saturday_on_duty_time);
                         $shift_end = Carbon::parse($date->year.'-'.$date->month.'-'.$date->day.' '.$saturday_off_duty_time);

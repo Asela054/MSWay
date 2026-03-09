@@ -183,7 +183,7 @@ class MealallowanceapproveController extends Controller
                         $empallowleave = $allowleave;
                         $dates = [];
                         $daycount = 0;
-
+                        
                         foreach($leaveinfo as $leave){
                             // if($leave->no_of_days > $empallowleave){
                                 $leavefromdate = $leave->leave_from;
@@ -191,11 +191,11 @@ class MealallowanceapproveController extends Controller
 
                                 $leaveperiod = CarbonPeriod::create($leavefromdate, $leavetodate);
                                 
-                                foreach ($leaveperiod as $date) { 
+                                foreach ($leaveperiod as $date) {                                     
                                     $checkholiday = DB::table('holidays')
-                                        ->where('date', $date)
+                                        ->where('date', $date->format('Y-m-d'))
                                         ->first();
-                                    
+                                        
                                     if($checkholiday){
                                         $dates[] = $date->format('Y-m-d');
                                         // $daycount++;
