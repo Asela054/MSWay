@@ -15,6 +15,7 @@ $columns = array(
     array( 'db' => 'u.id', 'dt' => 'id', 'field' => 'id' ),
     array( 'db' => 'u.adjustment_type', 'dt' => 'adjustment_type', 'field' => 'adjustment_type' ),
     array( 'db' => 'ua.emp_name_with_initial', 'dt' => 'emp_name_with_initial', 'field' => 'emp_name_with_initial' ),
+    array( 'db' => 'ua.emp_id', 'dt' => 'emp_id', 'field' => 'emp_id' ),
     array( 'db' => 'ub.category', 'dt' => 'category', 'field' => 'category' ),
     array( 'db' => 'uc.remuneration_name', 'dt' => 'remuneration_name', 'field' => 'remuneration_name' ),
     array( 'db' => 'u.allowance_type', 'dt' => 'allowance_type', 'field' => 'allowance_type' ),
