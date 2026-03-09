@@ -1744,6 +1744,8 @@ Route::post('/opma_productallocationdeletelist' ,'Production_Module_Opma\Product
    Route::post('opma_timechangingedit', 'Production_Module_Opma\TimechangingController@edit')->name('opma_timechangingedit');
    Route::post('opma_timechangingupdate', 'Production_Module_Opma\TimechangingController@update')->name('opma_timechangingupdate');
    Route::post('opma_timechangingdelete', 'Production_Module_Opma\TimechangingController@destroy')->name('opma_timechangingdelete');
+ 
+   Route::get('/opma_employeeproductionreport' ,'Production_Module_Opma\ProductionEndingController@employeeproduction')->name('opma_employeeproductionreport');
 
   
 

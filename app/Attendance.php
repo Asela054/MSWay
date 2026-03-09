@@ -475,12 +475,12 @@ class Attendance extends Model
         if($emp->flex_ot==1):
             if($record_date->dayOfWeek == 6):
                 $ondutyTime = Carbon::parse($on_time->format('H:i'));
-                $offdutyTime = $ondutyTime->copy()->addHours($shiftdiffhours);
+                $offdutyTime = $ondutyTime->copy()->addMinutes($shiftdiffhours * 60);
                 $shift_start_ = $ondutyTime->format('H:i');
                 $shift_end_ = $offdutyTime->format('H:i');
             else:
                 $ondutyTime = Carbon::parse($on_time->format('H:i'));
-                $offdutyTime = $ondutyTime->copy()->addHours($emp->shift_hours);
+                $offdutyTime = $ondutyTime->copy()->addMinutes($emp->shift_hours * 60);
                 $shift_start_ = $ondutyTime->format('H:i');
                 $shift_end_ = $offdutyTime->format('H:i');
             endif;
@@ -524,7 +524,7 @@ class Attendance extends Model
             $begining_checkin= $ondutyTime->format('H:i'); //Please add database column
             $onduty_time=$ondutyTime->format('H:i'); //Please add database column
             $earlystart=$offdutyTime->format('H:i'); //Please add database column
-            $earlyend=$ondutyTime->copy()->addHours(($emp->shift_hours/2))->format('H:i:s'); //Please add database column
+            $earlyend = $ondutyTime->copy()->addMinutes($emp->shift_hours * 30)->format('H:i:s'); //Please add database column
         endif;
 
         $shifthours= $offdutyTime->diffInHours($ondutyTime); //Get shift different

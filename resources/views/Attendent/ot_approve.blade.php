@@ -314,7 +314,7 @@
 
             //document btn_approve_ot click
             $(document).on('click', '#btn_approve_ot', async function (e) {
-                var r = await Otherconfirmation("You want to Edit this ? ");
+                var r = await Otherconfirmation("You want to approve this ? ");
                 if (r == true) {
 
                     let btn = $(this);
