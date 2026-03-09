@@ -6,9 +6,9 @@
 
       <li><a class="dropdown-item" href="{{ route('opma_machines')}}">Machines</a></li>
 
-      <li><a class="dropdown-item" href="{{ route('products')}}">Styles</a></li>
+      <li><a class="dropdown-item" href="{{ route('opma_sizes')}}">Sizes</a></li>
 
-      <li><a class="dropdown-item" href="{{ route('products')}}">Sizes</a></li>
+      <li><a class="dropdown-item" href="{{ route('opma_styles')}}">Styles</a></li>
 
     </ul>
   </div>

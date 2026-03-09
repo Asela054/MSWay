@@ -1680,19 +1680,28 @@ Route::post('/emp_prod_date_details', 'ProductionEmployee\ProductionApproveContr
 Route::get('/opma_productiontaskdashboard' ,'Production_Module_Opma\ProductionTaskdashboardController@index')->name('opma_productiontaskdashboard');
 
 // machine Controller Routes
-Route::resource('Machine', 'Production_Module_Opma\MachineController');
+Route::resource('OpmaMachine', 'Production_Module_Opma\MachineController');
 Route::get('opma_machines', 'Production_Module_Opma\MachineController@index')->name('opma_machines');
 Route::post('opma_addMachine',['uses' => 'Production_Module_Opma\MachineController@store', 'as' => 'opma_addMachine']); 
-Route::post('Machine/update', 'Production_Module_Opma\MachineController@update')->name('Machine.update');
-Route::get('Machine/destroy/{id}', 'Production_Module_Opma\MachineController@destroy');
+Route::post('OpmaMachine/update', 'Production_Module_Opma\MachineController@update')->name('OpmaMachine.update');
+Route::get('OpmaMachine/destroy/{id}', 'Production_Module_Opma\MachineController@destroy');
+Route::get('OpmaMachine/{id}/employees', 'Production_Module_Opma\MachineController@getEmployees')->name('OpmaMachine.getEmployees');
+Route::post('OpmaMachine/storeEmployees', 'Production_Module_Opma\MachineController@storeEmployees')->name('OpmaMachine.storeEmployees');
+Route::get('OpmaMachine/destroyEmployee/{id}', 'Production_Module_Opma\MachineController@destroyEmployee')->name('OpmaMachine.destroyEmployee');
 
-// Production Controller Routes
+// size Controller Routes
+Route::resource('OpmaSize', 'Production_Module_Opma\SizeController');
+Route::get('opma_sizes', 'Production_Module_Opma\SizeController@index')->name('opma_sizes');
+Route::post('opma_addSize',['uses' => 'Production_Module_Opma\SizeController@store', 'as' => 'opma_addSize']); 
+Route::post('OpmaSize/update', 'Production_Module_Opma\SizeController@update')->name('OpmaSize.update');
+Route::get('OpmaSize/destroy/{id}', 'Production_Module_Opma\SizeController@destroy');
 
-// Route::resource('Product', 'Production_Module_Opma\ProductController');
-// Route::get('products', 'Production_Module_Opma\ProductController@index')->name('products');
-// Route::post('addProduct',['uses' => 'Production_Module_Opma\ProductController@store', 'as' => 'addProduct']); 
-// Route::post('Product/update', 'Production_Module_Opma\ProductController@update')->name('Product.update');
-// Route::get('Product/destroy/{id}', 'Production_Module_Opma\ProductController@destroy');
+// style Controller Routes
+Route::resource('OpmaStyle', 'Production_Module_Opma\ProductController');
+Route::get('opma_styles', 'Production_Module_Opma\ProductController@index')->name('opma_styles');
+Route::post('opma_addStyle',['uses' => 'Production_Module_Opma\ProductController@store', 'as' => 'opma_addStyle']); 
+Route::post('OpmaStyle/update', 'Production_Module_Opma\ProductController@update')->name('OpmaStyle.update');
+Route::get('OpmaStyle/destroy/{id}', 'Production_Module_Opma\ProductController@destroy');
 
   // Production Allocation Controller Routes
 Route::get('opma_productionallocation', 'Production_Module_Opma\ProductionEmployeeAllocationController@index')->name('opma_productionallocation');

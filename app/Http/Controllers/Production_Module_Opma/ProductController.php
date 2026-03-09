@@ -1,9 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\Production_Module;
+namespace App\Http\Controllers\Production_Module_Opma;
 
 use App\Http\Controllers\Controller;
-use App\ProductionModule\Product;
+use App\ProductionModule_Opma\Product;
+use App\ProductionModule_Opma\ProductDetail;
+use App\ProductionModule_Opma\Size;
 use Illuminate\Http\Request;
 use Validator;
 
@@ -22,8 +24,8 @@ class ProductController extends Controller
             abort(403);
         }
 
-        $product= Product::orderBy('id', 'asc')->get();
-        return view('Daily_Production.Product',compact('product'));
+        $sizes= Size::orderBy('id', 'asc')->get();
+        return view('Opma_Production.Daily_Production.Product',compact('sizes'));
     }
 
     public function store(Request $request)
@@ -35,7 +37,7 @@ class ProductController extends Controller
         }
 
         $rules = array(
-            'productname'    =>  'required'
+            'title'    =>  'required'
         );
         $error = Validator::make($request->all(), $rules);
         if($error->fails())
@@ -44,21 +46,31 @@ class ProductController extends Controller
         }
 
         $form_data = array(
-            'productname'   =>  $request->productname,
-            'description'   =>  $request->description
-            // 'semi_price'    =>  $request->semi_price,
-            // 'full_price'    =>  $request->full_price
+            'title'   =>  $request->title,
+            'code' =>  $request->code,
+            'from_date' =>  $request->from_date,
+            'to_date' =>  $request->to_date,
+            'sizes' =>  $request->sizes
         );
 
         $product=new Product;
-        $product->productname=$request->input('productname');
-        $product->description=$request->input('description'); 
-        $product->semi_price=0;
-        $product->full_price=0;
-        $product->status=1;      
+        $product->title=$request->input('title');
+        $product->code=$request->input('code');
+        $product->from_date=$request->input('from_date');
+        $product->to_date=$request->input('to_date');  
         $product->save();
+        $opma_style_id=$product->id;
 
-        return response()->json(['success' => 'Product Added Successfully.']);
+        if(!empty($request->sizes)) {
+            foreach($request->sizes as $size_id) {
+                $productDetail = new ProductDetail;
+                $productDetail->opma_style_id = $opma_style_id;
+                $productDetail->opma_size_id = $size_id;
+                $productDetail->save();
+            }
+        }
+
+        return response()->json(['success' => 'Styles Added Successfully.']);
     }
 
     public function edit($id)
@@ -72,7 +84,8 @@ class ProductController extends Controller
         if(request()->ajax())
         {
             $data = Product::findOrFail($id);
-            return response()->json(['result' => $data]);
+            $sizes = ProductDetail::where('opma_style_id', $id)->pluck('opma_size_id')->toArray();
+            return response()->json(['result' => $data, 'sizes' => $sizes]);
         }
     }
 
@@ -84,7 +97,7 @@ class ProductController extends Controller
             return response()->json(['error' => 'UnAuthorized'], 401);
         }
         $rules = array(
-            'productname'    =>  'required'
+            'title'    =>  'required'
         );
         $error = Validator::make($request->all(), $rules);
 
@@ -94,13 +107,36 @@ class ProductController extends Controller
         }
 
         $form_data = array(
-            'productname'    =>  $request->productname,
-            'description' =>  $request->description
-            // 'semi_price'    =>  $request->semi_price,
-            // 'full_price'    =>  $request->full_price
+            'title'   =>  $request->title,
+            'code' =>  $request->code,
+            'from_date' =>  $request->from_date,
+            'to_date' =>  $request->to_date
         );
 
         Product::whereId($request->hidden_id)->update($form_data);
+
+        $new_sizes = $request->input('sizes', []);
+        $existing_sizes = ProductDetail::where('opma_style_id', $request->hidden_id)
+                                        ->pluck('opma_size_id')
+                                        ->toArray();
+
+        $to_add = array_diff($new_sizes, $existing_sizes);
+        $to_remove = array_diff($existing_sizes, $new_sizes);
+        
+        if(!empty($to_remove)) {
+            ProductDetail::where('opma_style_id', $request->hidden_id)
+                         ->whereIn('opma_size_id', $to_remove)
+                         ->delete();
+        }
+        
+        if(!empty($to_add)) {
+            foreach($to_add as $size_id){
+                $product_detail = new ProductDetail;
+                $product_detail->opma_style_id = $request->hidden_id;
+                $product_detail->opma_size_id = $size_id;
+                $product_detail->save();
+            }
+        }
 
         return response()->json(['success' => 'Data is successfully updated']);
     }
@@ -114,8 +150,8 @@ class ProductController extends Controller
         }
 
         $data = Product::findOrFail($id);
-        $data->status = 3;
-        $data->save();
+        ProductDetail::where('opma_style_id', $id)->delete();
+        $data->delete();
         return response()->json(['success' => 'Data is successfully deleted']);
     }
 }
