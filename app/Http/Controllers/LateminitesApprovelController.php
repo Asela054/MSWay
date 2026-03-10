@@ -149,7 +149,7 @@ class LateminitesApprovelController extends Controller
 
                 if($record->late_attend_min == 0){
                      $nopayamount = (new \App\Employeelateattenadnaceminites)->NopayAmountCal($record->emp_auto_id, $work_days,$leave_days,$no_pay_days,$normal_ot_hours, $double_ot_hours);
-                            $nopayAmount = $nopayamount['nopay_base_rate']/8;
+                            $nopayAmount = $nopayamount['othrs1_base_rate']/8;
                             if($late_minites_total > 0){
                                 $late_day_amount = abs($late_hours_total * $nopayAmount);
                             }

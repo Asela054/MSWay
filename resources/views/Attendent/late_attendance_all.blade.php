@@ -41,6 +41,9 @@
                             <th>LOCATION</th>
                             <th>DEPARTMENT</th>
                             <th>ACTION</th>
+                             <th class="d-none">EMPNAME</th>
+                            <th class="d-none">CALLING</th>
+                             <th class="d-none">EMPID</th>
                         </tr>
                         </thead>
                         <tbody>

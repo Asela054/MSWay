@@ -55,17 +55,6 @@ $extraWhere = "u.deleted = 0";
 	
 $extraWhere = "1=1";
 
-// new filter based on user access rights
-$pdo = new PDO("mysql:host={$db_host};dbname={$db_name}", $db_username, $db_password);
-$userId = UserHelper::getLoggedInUserId($pdo);
-$accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId, $pdo);
-
-if (!empty($accessibleEmployeeIds)) {
-    $empIds = implode(',', array_map('intval', $accessibleEmployeeIds));
-    $extraWhere .= " AND u.userid IN ($empIds)";
-} else {
-    $extraWhere .= " AND 1 = 0";
-}
 // end of new filter
 
 echo json_encode(

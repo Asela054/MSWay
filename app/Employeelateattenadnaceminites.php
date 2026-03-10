@@ -106,8 +106,16 @@ class Employeelateattenadnaceminites extends Model
 			}
 
 			// dd(['nopay_val' => $figs_list['NOPAY']['fig_val']]);
-			return ['nopay_val' => $figs_list['NOPAY']['fig_val'], 'nopay_base_rate' => $figs_list['NOPAY']['fig_base_rate']];
+			//return ['nopay_val' => $figs_list['NOPAY']['fig_val'], 'nopay_base_rate' => $figs_list['NOPAY']['fig_base_rate']];
 		
+			return [
+						'nopay_val' => $figs_list['NOPAY']['fig_val'],
+						'nopay_base_rate' => $figs_list['NOPAY']['fig_base_rate'],
+						'othrs1_val' => $figs_list['OTHRS1']['fig_val'],
+						'othrs1_base_rate' => $figs_list['OTHRS1']['fig_base_rate'],
+						'othrs2_val' => $figs_list['OTHRS2']['fig_val'],
+						'othrs2_base_rate' => $figs_list['OTHRS2']['fig_base_rate']
+					];
 	}
 
 }
