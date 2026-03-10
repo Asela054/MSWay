@@ -82,13 +82,13 @@ class AttendanceUploadController extends Controller
             }
 
             // Optimization: Consider moving this outside the loop if the CSV is large
-           $employeeExists = \App\Employee::where('emp_id', $attendanceData['emp_id'])->select('id', 'emp_id', 'location')->first();
+           $employeeExists = \App\Employee::where('emp_id', $attendanceData['emp_id'])->select('id', 'emp_id', 'emp_location')->first();
 
 
             if (!$employeeExists) {
                 return response()->json(['errors' => "Row {$rowNumber}: Invalid Employee ID: " . $attendanceData['emp_id']]);
             }
-            $employeeLocation = $employeeExists->location;
+            $employeeLocation = $employeeExists->emp_location;
 
             $date = $attendanceData['date']; // Already in Y-m-d from the while loop
 

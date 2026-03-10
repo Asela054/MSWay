@@ -16,7 +16,7 @@ class AttendancePolicyService
     {
         
          $empshift = DB::table('employees')
-            ->select('emp_id', 'emp_shift','location')
+            ->select('emp_id', 'emp_shift','emp_location')
             ->where('emp_id', $full_emp_id)
             ->first();
 
@@ -24,7 +24,7 @@ class AttendancePolicyService
                 return false;
             }
 
-             $employeeLocation = $empshift->location;
+             $employeeLocation = $empshift->emp_location;
 
              $emprosterinfo = DB::table('employee_roster_details')
                     ->select('emp_id', 'shift_id')
