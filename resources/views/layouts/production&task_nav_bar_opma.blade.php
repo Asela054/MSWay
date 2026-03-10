@@ -25,7 +25,6 @@
 
       <li><a class="dropdown-item" href="{{ route('opma_timechanging')}}">Machine Downtime Log</a></li>
 
-
     </ul>
   </div>
 
