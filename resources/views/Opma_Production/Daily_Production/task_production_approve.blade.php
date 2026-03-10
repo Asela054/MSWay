@@ -23,6 +23,15 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="row align-items-center mb-4">
+                            <div class="col-md-12">
+                                <button class="btn btn-warning btn-sm filter-btn float-right px-3" type="button"
+                                    data-toggle="offcanvas" data-target="#offcanvasRight"
+                                    aria-controls="offcanvasRight"><i class="fas fa-filter mr-1"></i> Filter
+                                    Records</button>
+                            </div>
+                             <div class="col-12">
+                                <hr class="border-dark">
+                            </div>
                             <div class="col-6 mb-2">
                                 <div class="form-check">
                                     <input type="checkbox" class="form-check-input checkallocate" id="selectAll">
@@ -33,15 +42,8 @@
                                 <button id="approve_att" class="btn btn-primary btn-sm px-3"><i
                                         class="fa-light fa-light fa-clipboard-check"></i>&nbsp;&nbsp;Approve All</button>
                             </div>
-                            <div class="col-12">
-                                <hr class="border-dark">
-                            </div>
-                            <div class="col-md-12">
-                                <button class="btn btn-warning btn-sm filter-btn float-right px-3" type="button"
-                                    data-toggle="offcanvas" data-target="#offcanvasRight"
-                                    aria-controls="offcanvasRight"><i class="fas fa-filter mr-1"></i> Filter
-                                    Records</button>
-                            </div>
+                           
+                            
                         </div>
 
                         <div class="center-block fix-width scroll-inner">
@@ -119,7 +121,7 @@
                 <div class="modal-dialog modal-dialog-centered" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="exampleModalLabel">Approve  Meal Deduction</h5>
+                            <h5 class="modal-title" id="exampleModalLabel">Approve  Employee Production</h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
