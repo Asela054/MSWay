@@ -16,13 +16,15 @@ class AttendancePolicyService
     {
         
          $empshift = DB::table('employees')
-            ->select('emp_id', 'emp_shift')
+            ->select('emp_id', 'emp_shift','location')
             ->where('emp_id', $full_emp_id)
             ->first();
 
             if (is_null($empshift)) {
                 return false;
             }
+
+             $employeeLocation = $empshift->location;
 
              $emprosterinfo = DB::table('employee_roster_details')
                     ->select('emp_id', 'shift_id')
@@ -34,7 +36,7 @@ class AttendancePolicyService
                     $empshiftid = $emprosterinfo->shift_id;   
                 }
                 else {
-                    $empshiftid = $empshift->emp_shift; // Use the shift from employees table
+                    $empshiftid = $empshift->emp_shift;
                 }
 
             $shift = DB::table('shift_types')
@@ -83,7 +85,7 @@ class AttendancePolicyService
                     $Attendance->emp_id = $full_emp_id;
                     $Attendance->timestamp = $timestamp;
                     $Attendance->date = $attendance_date;
-                    $Attendance->location = 1;
+                    $Attendance->location = $employeeLocation;
                     $Attendance->save();
                 }           
                 return true;
