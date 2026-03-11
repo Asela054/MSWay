@@ -90,6 +90,10 @@ class JobCategoryController extends Controller
         $jobcategory->custom_normal_ot_rate = $request->input('custom_normal_ot_rate');
         $jobcategory->custom_double_ot_rate = $request->input('custom_double_ot_rate');
 
+        $jobcategory->salary_advance_type = $request->input('salary_advance_type');
+        $jobcategory->salary_advance_value = $request->input('salary_advance_value');
+        $jobcategory->salary_advance_min_date = $request->input('salary_advance_min_date');
+
         $jobcategory->flex_ot = 0;
 
         $jobcategory->save();
@@ -166,7 +170,10 @@ class JobCategoryController extends Controller
             'half_days' => $request->half_days,
             'basic_ot_type' => $request->basic_ot_type,
             'custom_normal_ot_rate' => $request->custom_normal_ot_rate,
-            'custom_double_ot_rate' => $request->custom_double_ot_rate
+            'custom_double_ot_rate' => $request->custom_double_ot_rate,
+            'salary_advance_type' => $request->salary_advance_type,
+            'salary_advance_value' => $request->salary_advance_value,
+            'salary_advance_min_date' => $request->salary_advance_min_date,
         );
 
         JobCategory::whereId($request->hidden_id)->update($form_data);

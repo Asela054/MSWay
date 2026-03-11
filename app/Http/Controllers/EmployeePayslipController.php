@@ -34,6 +34,8 @@ use Illuminate\Http\Request;
 use PDF; 
 
 use Validator;
+use Mpdf\Mpdf;
+
 use Illuminate\Support\Facades\Auth;
 
 class EmployeePayslipController extends Controller
@@ -1886,6 +1888,7 @@ class EmployeePayslipController extends Controller
         $companyRegInfo = Company::find($request->rpt_location_id);
 		$company_name = $companyRegInfo->name;
 		$company_addr = $companyRegInfo->address;
+		$paysheet_language = $companyRegInfo->paysheet_language;
 
         $paymentPeriod=PaymentPeriod::find($request->rpt_period_id);
 			
@@ -2007,8 +2010,65 @@ class EmployeePayslipController extends Controller
 		ini_set("max_execution_time", "999");
 		
 		// return view('Payroll.payslipProcess.SalarySheet_pdf', compact('emp_array', 'more_info', 'sect_name', 'paymonth_name', 'company_addr'));
-		$pdf = PDF::loadView('Payroll.payslipProcess.SalarySheet_pdf', compact('emp_array', 'more_info', 'sect_name', 'paymonth_name','company_name',  'company_addr'));
-        return $pdf->download('salary-list.pdf');
+		// $pdf = PDF::loadView('Payroll.payslipProcess.SalarySheet_pdf', compact('emp_array', 'more_info', 'sect_name', 'paymonth_name','company_name',  'company_addr'));
+        // return $pdf->download('salary-list.pdf');
+
+		$defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
+		$fontDirs = $defaultConfig['fontDir'];
+
+		$defaultFontConfig = (new \Mpdf\Config\FontVariables())->getDefaults();
+		$fontData = $defaultFontConfig['fontdata'];
+
+		$mpdf = new \Mpdf\Mpdf([
+			'mode' => 'utf-8',
+			'format' => [220, 140],
+
+			'fontDir' => array_merge($fontDirs, [
+				public_path('fonts'), // MUST contain the TTF files
+			]),
+
+			'fontdata' => $fontData + [
+				'iskpota' => [
+					'R' => 'Iskoola-Pota-Regular.ttf',
+					'B' => 'Iskoola-Pota-Bold.ttf',
+					'useOTL' => 0xFF,   // ✅ REQUIRED
+					'useKashida' => 0,
+				],
+				'arial' => [
+					'R' => 'arial.ttf',
+					'B' => 'arialbd.ttf',
+				],
+			],
+
+			'default_font' => 'arial',
+
+			'autoScriptToLang' => true,
+			'autoLangToFont' => false, // ❗ IMPORTANT
+		]);
+
+
+		$html = view('Payroll.payslipProcess.SalarySheet_pdf', compact(
+			'emp_array', 'emp_increments_array', 'more_info', 'sect_name', 'paymonth_name',
+			'company_name', 'company_addr', 'paysheet_language'
+		))->render();
+		// Force UTF-8 encoding
+		// $html = mb_convert_encoding($html, 'UTF-8', 'auto');
+		$css = '<style>
+			body {
+				/* Arial first for English; iskpota second for Sinhala */
+				font-family: iskpota, arial, sans-serif;
+			}
+			.sinhala-text {
+				font-family: iskpota !important; 
+				font-size: 11pt;
+				line-height: 1;
+				font-weight: bold;
+			}
+		</style>';
+		$html = $css . $html;
+		$mpdf->WriteHTML($html);
+
+		return $mpdf->Output('salary-list.pdf', 'I');
 
     }
 }

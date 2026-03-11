@@ -11,7 +11,7 @@ class Company extends Model
 
     protected $fillable = [
         'name', 'code', 'address', 'mobile','ref_no','vat_reg_no','svat_no','bank_account_name','bank_account_number',
-        'bank_account_branch_code','employer_number','zone_code'
+        'bank_account_branch_code','employer_number','zone_code','paysheet_language'
     ];
 
     // Append the custom 'location' attribute

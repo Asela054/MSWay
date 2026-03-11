@@ -140,7 +140,7 @@
                                     </div>
                                     <div class="col-md-3">
                                         <label class="small font-weight-bold text-dark">Holiday Work Hours</label>
-                                        <input type="number" name="holiday_work_hours" id="holiday_work_hours"
+                                        <input type="number" step="0.01" name="holiday_work_hours" id="holiday_work_hours"
                                             class="form-control form-control-sm" required />
                                     </div>
                                     <div class="col-md-3">
@@ -475,6 +475,42 @@
                                     </div>
                                 </div>
 
+                                <div class="form-group mb-2">
+                                    <label class="small font-weight-bold text-dark">Salary Advance Type</label>
+                                    <br>
+                                    <div class="form-check-inline">
+                                        <label class="form-check-label">
+                                            <input type="radio" class="form-check-input salary_advance_type" name="salary_advance_type" id="salary_advance_type_1" value="1" >Precentage
+                                        </label>
+                                    </div>
+                                    <div class="form-check-inline">
+                                        <label class="form-check-label">
+                                            <input type="radio" class="form-check-input salary_advance_type" name="salary_advance_type" id="salary_advance_type_2" value="2">Fixed Amount
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="form-row mb-2">
+                                    <div class="col-md-4 advance_value" style="display: none">
+                                        <label class="small font-weight-bold text-dark">Advance Value</label>
+                                            <br>
+                                            <div class="form-check-inline">
+                                                <label class="form-check-label">
+                                                    <input type="number" step="0.01" class="form-control form-control-sm" name="salary_advance_value" id="salary_advance_value"/>
+                                                </label>
+                                            </div>
+                                    </div>
+                                    <div class="col-md-4 advance_min_date" style="display: none">
+                                        <label class="small font-weight-bold text-dark">Minimum Working Dates</label>
+                                            <br>
+                                            <div class="form-check-inline">
+                                                <label class="form-check-label">
+                                                    <input type="number" step="0.01" class="form-control form-control-sm" name="salary_advance_min_date" id="salary_advance_min_date"/>
+                                                </label>
+                                            </div>
+                                    </div>
+                                </div>
+
                                 <div class="form-group mt-2">
                                     <button type="submit" name="action_button" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
                                 </div>
@@ -788,6 +824,9 @@ $(document).ready(function(){
         $('.half_day').hide();
         $('.normal_ot').hide();
         $('.double_ot').hide();
+        $('.advance_value').hide();
+        $('.advance_min_date').hide();
+
 
         $('#formModal').modal('show');
     });
@@ -1076,6 +1115,19 @@ $(document).ready(function(){
                     $('#custom_normal_ot_rate').val(data.result.custom_normal_ot_rate);
                     $('#custom_double_ot_rate').val(data.result.custom_double_ot_rate);
 
+                    if(data.result.salary_advance_type == 1) {
+                        $('#salary_advance_type_1').prop("checked", true);
+                        $('.advance_value').css('display', 'block');
+                        $('.advance_min_date').css('display', 'block');
+                    } else if (data.result.salary_advance_type == 2) {
+                        $('#salary_advance_type_2').prop("checked", true);
+                        $('.advance_value').css('display', 'block');
+                        $('.advance_min_date').css('display', 'block');
+                    }
+                    
+                    $('#salary_advance_value').val(data.result.salary_advance_value);
+                    $('#salary_advance_min_date').val(data.result.salary_advance_min_date);
+
                     if(data.leave_types && data.leave_types.length > 0) {
                         $('#leave_types').val(data.leave_types).trigger('change');
                     } else {
@@ -1243,6 +1295,30 @@ $(document).ready(function(){
         }else if(val == 2){
             $('.normal_ot').css('display', 'block');
             $('.double_ot').css('display', 'block');
+        }
+
+    });
+
+    $(document).on('change', '.salary_advance_type', function (e) {
+        let val = $(this).val();
+        if(val == 1 || val == 2){
+            $('.advance_value').css('display', 'block');
+            $('.advance_min_date').css('display', 'block');
+        }else{
+            $('.advance_value').css('display', 'none');
+            $('.advance_min_date').css('display', 'none');
+            $('#salary_advance_value').val(0).prop( "checked", true); 
+            $('<input>').attr({
+                type: 'hidden',
+                name: 'salary_advance_value',
+                value: 0
+            });
+            $('#salary_advance_min_date').val(0).prop( "checked", true);
+            $('<input>').attr({
+                type: 'hidden',
+                name: 'salary_advance_min_date',
+                value: 0
+            });
         }
 
     });
