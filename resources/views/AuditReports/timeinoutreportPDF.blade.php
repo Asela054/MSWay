@@ -47,7 +47,7 @@
                 <th class="nowrap">In Time</th>
                 <th class="nowrap">Out Time</th>
                 <th class="nowrap">Duration</th>
-                <th class="nowrap">Ot Hours</th>
+                {{-- <th class="nowrap">Ot Hours</th> --}}
             </tr>
         </thead>
         <tbody>
@@ -59,7 +59,7 @@
                 <td>{{ $attendance['in_time'] }}</td>
                 <td>{{ $attendance['out_time'] }}</td>
                 <td>{{ $attendance['duration'] }}</td>
-                <td>{{ $attendance['ot_hours'] }}</td>
+                {{-- <td>{{ $attendance['ot_hours'] }}</td> --}}
             </tr>
         @endforeach
         </tbody>

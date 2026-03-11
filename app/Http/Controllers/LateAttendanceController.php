@@ -403,9 +403,7 @@ class LateAttendanceController extends Controller
 
          
                return response()->json(['status' => true, 'msg' => 'Late Mark Completed successfully.']);
-            
-
-
+               
         return response()->json(['status' => true, 'msg' => 'Late Mark Completed successfully.']);
     }
 

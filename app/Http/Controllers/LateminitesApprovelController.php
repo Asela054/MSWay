@@ -110,9 +110,6 @@ class LateminitesApprovelController extends Controller
 
         foreach ($results as $record) {
 
-        if (empty($record->late_attend_min)) {
-            continue;
-        }
 
         $joinDate = new DateTime($record->emp_join_date);
         if ($joinDate >= $startDate && $joinDate <= $endDate) {
@@ -131,10 +128,10 @@ class LateminitesApprovelController extends Controller
             $nopayAmount = 0;
 
             $employeeid =  $record->emp_id;
-
+           
           
             $late_minites_total = (new \App\Employeelateattenadnaceminites)->get_lateminitescount($employeeid, $month ,$closedate);
- 
+           
             if(!empty($late_minites_total)){
 
                 $work_days = (new \App\Attendance)->get_work_days($employeeid, $month, $closedate);
@@ -145,11 +142,16 @@ class LateminitesApprovelController extends Controller
 
 
                 $late_minites_total = $late_minites_total - $record->late_attend_min;
+                
                 $late_hours_total = $late_minites_total / 60;
+                
+                
 
                 if($record->late_attend_min == 0){
+
                      $nopayamount = (new \App\Employeelateattenadnaceminites)->NopayAmountCal($record->emp_auto_id, $work_days,$leave_days,$no_pay_days,$normal_ot_hours, $double_ot_hours);
-                            $nopayAmount = $nopayamount['othrs1_base_rate']/8;
+                    
+                     $nopayAmount = $nopayamount['othrs1_base_rate'];
                             if($late_minites_total > 0){
                                 $late_day_amount = abs($late_hours_total * $nopayAmount);
                             }
@@ -158,9 +160,9 @@ class LateminitesApprovelController extends Controller
                             }
                 }else{
 
-                        $latededutionamount = DB::table('late_deduction_amounts')
-                                                ->orderBy('minites', 'asc')
-                                                ->get();
+                    $latededutionamount = DB::table('late_deduction_amounts')
+                                            ->orderBy('minites', 'asc')
+                                            ->get();
                                             
                     if($latededutionamount->isNotEmpty()){
                         $remaining_minutes = $late_minites_total;

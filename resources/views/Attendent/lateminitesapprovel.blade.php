@@ -51,7 +51,7 @@
                                     <th>EMPLOYEE ID</th>
                                     <th>EMPLOYEE NAME</th>
                                     <th>LATE MINITES TOTAL</th>
-                                    <th>NOPAY AMOUNT</th>
+                                    <th>DEDUCTION RATE</th>
                                     <th>TOTAL AMOUNT</th>
                                     <th class="d-none">EMPLOYEE auto ID</th>
                                 </tr>
