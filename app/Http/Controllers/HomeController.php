@@ -240,7 +240,7 @@ class HomeController extends Controller
         $leavedatalist = DB::table('leaves')
             ->leftJoin('leave_types', 'leave_types.id', '=', 'leaves.leave_type')
             ->leftJoin('employees', 'employees.emp_id', '=', 'leaves.emp_id')
-            ->leftJoin('employee_pictures', 'employee_pictures.emp_id', '=', 'employees.emp_id')
+            ->leftJoin('employee_pictures', 'employee_pictures.emp_id', '=', 'employees.id')
             ->leftJoin('departments', 'departments.id', '=', 'employees.emp_department')
             ->whereMonth('leaves.leave_from', $currentMonth)
             ->whereYear('leaves.leave_from', $currentYear)
@@ -414,10 +414,12 @@ class HomeController extends Controller
 
         $attendance= DB::table('attendances')
         ->leftjoin('employees', 'attendances.emp_id', '=', 'employees.emp_id')
+        ->leftJoin('employee_pictures', 'employee_pictures.emp_id', '=', 'employees.id')
         ->select(
             'employees.emp_id', 
             'employees.emp_name_with_initial', 
             'employees.emp_department', 
+            'employee_pictures.emp_pic_filename',
             DB::raw('MIN(attendances.timestamp) as first_checkin'), 
             DB::raw('MAX(attendances.timestamp) as lasttimestamp')
         )
@@ -443,7 +445,8 @@ class HomeController extends Controller
                 $employeesByDepartment[$departmentMap[$departmentId]][] = [
                     'emp_id' => $employee->emp_id,
                     'emp_name_with_initial' => $employee->emp_name_with_initial,
-                    'first_checkin' => $first_time
+                    'first_checkin' => $first_time,
+                    'emp_pic_filename' => $employee->emp_pic_filename
                 ];
             }
         }
@@ -458,14 +461,29 @@ class HomeController extends Controller
                     $htmlTables .= '<table class="table table-striped table-bordered table-sm small">';
 
                     $htmlTables .= '<h5>' . $departmentName . '</h5>';
-                    $htmlTables .= '<tr><th>#</th><th>Employee ID</th><th>Employee Name with Initial</th><th>In Time</th></tr>';
+                    $htmlTables .= '<tr><th>#</th><th>Photo</th><th>Employee ID</th><th>Employee Name with Initial</th><th>In Time</th></tr>';
                 
                     foreach ($employees as $employee) {
+                        $employeePicture = $employee['emp_pic_filename'];
+                        $imagePath = '';
+                        if (file_exists(public_path("images/{$employeePicture}")) && !empty($employeePicture)) {
+                            $imagePath = asset("images/{$employeePicture}");
+                        } else {
+                            $employeeGender = \App\Employee::where('emp_id', $employee['emp_id'])->pluck('emp_gender')->first();
+                            if(empty($employeeGender)){
+                                $employeeGender = "Male";
+                            }
+                            $imagePath = $employeeGender == "Male" 
+                                ? asset("images/man.png") 
+                                : asset("images/girl.png");
+                        }
+
                         $htmlTables .= '<tr>';
-                        $htmlTables .= '<td>' . $count . '</td>';
-                        $htmlTables .= '<td>' . $employee['emp_id'] . '</td>';
-                        $htmlTables .= '<td>' . $employee['emp_name_with_initial'] . '</td>';
-                        $htmlTables .= '<td>' . $employee['first_checkin'] . '</td>';
+                        $htmlTables .= '<td class="align-middle text-center">' . $count . '</td>';
+                        $htmlTables .= '<td class="align-middle text-center"><img style="height: 2.5rem;width: 2.5rem;border-radius: 100%;" src="' . $imagePath . '" alt="Employee Photo"/></td>';
+                        $htmlTables .= '<td class="align-middle text-center">' . $employee['emp_id'] . '</td>';
+                        $htmlTables .= '<td class="align-middle text-center">' . $employee['emp_name_with_initial'] . '</td>';
+                        $htmlTables .= '<td class="align-middle">' . $employee['first_checkin'] . '</td>';
                         $htmlTables .= '</tr>';
 
                         $count=$count+1;
@@ -492,10 +510,12 @@ class HomeController extends Controller
         $late_times = DB::table('late_types')->where('id', 1)->first();
         $attendance= DB::table('attendances')
         ->leftjoin('employees', 'attendances.emp_id', '=', 'employees.emp_id')
+        ->leftJoin('employee_pictures', 'employee_pictures.emp_id', '=', 'employees.id')
         ->select(
             'employees.emp_id', 
             'employees.emp_name_with_initial', 
             'employees.emp_department', 
+            'employee_pictures.emp_pic_filename',
             DB::raw('MIN(attendances.timestamp) as first_checkin'), 
             DB::raw('MAX(attendances.timestamp) as lasttimestamp')
         )
@@ -522,7 +542,8 @@ class HomeController extends Controller
                 $employeesByDepartment[$departmentMap[$departmentId]][] = [
                     'emp_id' => $employee->emp_id,
                     'emp_name_with_initial' => $employee->emp_name_with_initial,
-                    'first_checkin' => $first_time
+                    'first_checkin' => $first_time,
+                    'emp_pic_filename' => $employee->emp_pic_filename
                 ];
             }
         }
@@ -537,14 +558,29 @@ class HomeController extends Controller
                     $htmlTables .= '<table class="table table-striped table-bordered table-sm small">';
 
                     $htmlTables .= '<h5>' . $departmentName . '</h5>';
-                    $htmlTables .= '<tr><th>#</th><th>Employee ID</th><th>Employee Name with Initial</th><th>In Time</th></tr>';
+                    $htmlTables .= '<tr><th>#</th><th>Photo</th><th>Employee ID</th><th>Employee Name with Initial</th><th>In Time</th></tr>';
                 
                     foreach ($employees as $employee) {
+                        $employeePicture = $employee['emp_pic_filename'];
+                        $imagePath = '';
+                        if (file_exists(public_path("images/{$employeePicture}")) && !empty($employeePicture)) {
+                            $imagePath = asset("images/{$employeePicture}");
+                        } else {
+                            $employeeGender = \App\Employee::where('emp_id', $employee['emp_id'])->pluck('emp_gender')->first();
+                            if(empty($employeeGender)){
+                                $employeeGender = "Male";
+                            }
+                            $imagePath = $employeeGender == "Male" 
+                                ? asset("images/man.png") 
+                                : asset("images/girl.png");
+                        }
+
                         $htmlTables .= '<tr>';
-                        $htmlTables .= '<td>' . $count . '</td>';
-                        $htmlTables .= '<td>' . $employee['emp_id'] . '</td>';
-                        $htmlTables .= '<td>' . $employee['emp_name_with_initial'] . '</td>';
-                        $htmlTables .= '<td>' . $employee['first_checkin'] . '</td>';
+                        $htmlTables .= '<td class="align-middle text-center">' . $count . '</td>';
+                        $htmlTables .= '<td class="align-middle text-center"><img style="height: 2.5rem;width: 2.5rem;border-radius: 100%;" src="' . $imagePath . '" alt="Employee Photo"/></td>';
+                        $htmlTables .= '<td class="align-middle text-center">' . $employee['emp_id'] . '</td>';
+                        $htmlTables .= '<td class="align-middle text-center">' . $employee['emp_name_with_initial'] . '</td>';
+                        $htmlTables .= '<td class="align-middle">' . $employee['first_checkin'] . '</td>';
                         $htmlTables .= '</tr>';
 
                         $count=$count+1;
@@ -577,7 +613,8 @@ class HomeController extends Controller
         ->get();
 
         $employeedata= DB::table('employees')
-        ->select('employees.emp_id', 'employees.emp_name_with_initial','employees.emp_department') 
+        ->select('employees.emp_id', 'employees.emp_name_with_initial','employees.emp_department', 'employee_pictures.emp_pic_filename') 
+        ->leftJoin('employee_pictures', 'employee_pictures.emp_id', '=', 'employees.id')
         ->where('deleted', 0)
         ->where('is_resigned', 0)
         ->get();
@@ -587,7 +624,8 @@ class HomeController extends Controller
             $employeeMap[$employee->emp_id] = [
                 'emp_id' => $employee->emp_id,
                 'emp_name_with_initial' => $employee->emp_name_with_initial,
-                'emp_department' => $employee->emp_department
+                'emp_department' => $employee->emp_department,
+                'emp_pic_filename' => $employee->emp_pic_filename
             ];
         }
        
@@ -607,7 +645,7 @@ class HomeController extends Controller
         foreach ($departmentdata as $department) {
             $departmentMap[$department->id] = $department->name;
         }
-
+        
         $employeesByDepartment = [];
         foreach ($uniqueEmployeeData as $employee) {
             $departmentId = $employee['emp_department'];
@@ -619,7 +657,8 @@ class HomeController extends Controller
                 
                 $employeesByDepartment[$departmentMap[$departmentId]][] = [
                     'emp_id' => $employee['emp_id'],
-                    'emp_name_with_initial' => $employee['emp_name_with_initial']
+                    'emp_name_with_initial' => $employee['emp_name_with_initial'],
+                    'emp_pic_filename' => $employee['emp_pic_filename']
                 ];
             }
         }
@@ -627,18 +666,34 @@ class HomeController extends Controller
 
             $htmlTables = '';
 
-                foreach ($employeesByDepartment as $departmentName => $employees) {
+                foreach ($employeesByDepartment as $departmentName => $employees) {                  
                     $count=1;
                     $htmlTables .= '<table class="table table-striped table-bordered table-sm small">';
 
                     $htmlTables .= '<h5>' . $departmentName . '</h5>';
-                    $htmlTables .= '<tr><th>#</th><th>Employee ID</th><th>Employee Name with Initial</th></tr>';
+                    $htmlTables .= '<tr><th>#</th><th>Photo</th><th>Employee ID</th><th>Employee Name with Initial</th></tr>';
                 
                     foreach ($employees as $employee) {
+                        $employeePicture = $employee['emp_pic_filename'];
+                        $imagePath = '';
+                        if (file_exists(public_path("images/{$employeePicture}")) && !empty($employeePicture)) {
+                            $imagePath = asset("images/{$employeePicture}");
+                        } else {
+                            $employeeGender = \App\Employee::where('emp_id', $employee['emp_id'])->pluck('emp_gender')->first();
+                            if(empty($employeeGender)){
+                                $employeeGender = "Male";
+                            }
+                            $imagePath = $employeeGender == "Male" 
+                                ? asset("images/man.png") 
+                                : asset("images/girl.png");
+                        }
+                        
                         $htmlTables .= '<tr>';
-                        $htmlTables .= '<td>' . $count . '</td>';
-                        $htmlTables .= '<td>' . $employee['emp_id'] . '</td>';
-                        $htmlTables .= '<td>' . $employee['emp_name_with_initial'] . '</td>';
+                        $htmlTables .= '<td class="align-middle text-center">' . $count . '</td>';
+                        $htmlTables .= '<td class="align-middle text-center"><img style="height: 2.5rem;width: 2.5rem;border-radius: 100%;" src="' . $imagePath . '" alt="Employee Photo"/></td>';
+                        
+                        $htmlTables .= '<td class="align-middle text-center">' . $employee['emp_id'] . '</td>';
+                        $htmlTables .= '<td class="align-middle">' . $employee['emp_name_with_initial'] . '</td>';
                         $htmlTables .= '</tr>';
 
                         $count=$count+1;
@@ -665,10 +720,12 @@ class HomeController extends Controller
 
         $attendance= DB::table('attendances')
         ->leftjoin('employees', 'attendances.emp_id', '=', 'employees.emp_id')
+        ->leftJoin('employee_pictures', 'employee_pictures.emp_id', '=', 'employees.id')
         ->select(
             'employees.emp_id', 
             'employees.emp_name_with_initial', 
             'employees.emp_department', 
+            'employee_pictures.emp_pic_filename',
             DB::raw('MIN(attendances.timestamp) as first_checkin'), 
             DB::raw('MAX(attendances.timestamp) as lasttimestamp')
         )
@@ -700,7 +757,8 @@ class HomeController extends Controller
                     'emp_id' => $employee->emp_id,
                     'emp_name_with_initial' => $employee->emp_name_with_initial,
                     'first_checkin' => $first_time,
-                    'lasttimestamp' => $last_time
+                    'lasttimestamp' => $last_time,
+                    'emp_pic_filename' => $employee->emp_pic_filename
                 ];
             }
         }
@@ -715,15 +773,30 @@ class HomeController extends Controller
                     $htmlTables .= '<table class="table table-striped table-bordered table-sm small">';
 
                     $htmlTables .= '<h5>' . $departmentName . '</h5>';
-                    $htmlTables .= '<tr><th>#</th><th>Employee ID</th><th>Employee Name with Initial</th><th>In Time</th><th>Out Time</th></tr>';
+                    $htmlTables .= '<tr><th>#</th><th>Photo</th><th>Employee ID</th><th>Employee Name with Initial</th><th>In Time</th><th>Out Time</th></tr>';
                 
                     foreach ($employees as $employee) {
+                        $employeePicture = $employee['emp_pic_filename'];
+                        $imagePath = '';
+                        if (file_exists(public_path("images/{$employeePicture}")) && !empty($employeePicture)) {
+                            $imagePath = asset("images/{$employeePicture}");
+                        } else {
+                            $employeeGender = \App\Employee::where('emp_id', $employee['emp_id'])->pluck('emp_gender')->first();
+                            if(empty($employeeGender)){
+                                $employeeGender = "Male";
+                            }
+                            $imagePath = $employeeGender == "Male" 
+                                ? asset("images/man.png") 
+                                : asset("images/girl.png");
+                        }
+
                         $htmlTables .= '<tr>';
-                        $htmlTables .= '<td>' . $count . '</td>';
-                        $htmlTables .= '<td>' . $employee['emp_id'] . '</td>';
-                        $htmlTables .= '<td>' . $employee['emp_name_with_initial'] . '</td>';
-                        $htmlTables .= '<td>' . $employee['first_checkin'] . '</td>';
-                        $htmlTables .= '<td>' . $employee['lasttimestamp'] . '</td>';
+                        $htmlTables .= '<td class="align-middle text-center">' . $count . '</td>';
+                        $htmlTables .= '<td class="align-middle text-center"><img style="height: 2.5rem;width: 2.5rem;border-radius: 100%;" src="' . $imagePath . '" alt="Employee Photo"/></td>';
+                        $htmlTables .= '<td class="align-middle text-center">' . $employee['emp_id'] . '</td>';
+                        $htmlTables .= '<td class="align-middle text-center">' . $employee['emp_name_with_initial'] . '</td>';
+                        $htmlTables .= '<td class="align-middle text-center">' . $employee['first_checkin'] . '</td>';
+                        $htmlTables .= '<td class="align-middle">' . $employee['lasttimestamp'] . '</td>';
                         $htmlTables .= '</tr>';
 
                         $count=$count+1;
@@ -750,10 +823,12 @@ class HomeController extends Controller
         $late_times = DB::table('late_types')->where('id', 1)->first();
         $attendance= DB::table('attendances')
         ->leftjoin('employees', 'attendances.emp_id', '=', 'employees.emp_id')
+        ->leftJoin('employee_pictures', 'employee_pictures.emp_id', '=', 'employees.id')
         ->select(
             'employees.emp_id', 
             'employees.emp_name_with_initial', 
             'employees.emp_department', 
+            'employee_pictures.emp_pic_filename',
             DB::raw('MIN(attendances.timestamp) as first_checkin'), 
             DB::raw('MAX(attendances.timestamp) as lasttimestamp')
         )
@@ -786,7 +861,8 @@ class HomeController extends Controller
                     'emp_id' => $employee->emp_id,
                     'emp_name_with_initial' => $employee->emp_name_with_initial,
                     'first_checkin' => $first_time,
-                    'lasttimestamp' => $last_time
+                    'lasttimestamp' => $last_time,
+                    'emp_pic_filename' => $employee->emp_pic_filename
                 ];
             }
         }
@@ -801,15 +877,30 @@ class HomeController extends Controller
                     $htmlTables .= '<table class="table table-striped table-bordered table-sm small">';
 
                     $htmlTables .= '<h5>' . $departmentName . '</h5>';
-                    $htmlTables .= '<tr><th>#</th><th>Employee ID</th><th>Employee Name with Initial</th><th>In Time</th><th>Out Time</th></tr>';
+                    $htmlTables .= '<tr><th>#</th><th>Photo</th><th>Employee ID</th><th>Employee Name with Initial</th><th>In Time</th><th>Out Time</th></tr>';
                 
                     foreach ($employees as $employee) {
+                        $employeePicture = $employee['emp_pic_filename'];
+                        $imagePath = '';
+                        if (file_exists(public_path("images/{$employeePicture}")) && !empty($employeePicture)) {
+                            $imagePath = asset("images/{$employeePicture}");
+                        } else {
+                            $employeeGender = \App\Employee::where('emp_id', $employee['emp_id'])->pluck('emp_gender')->first();
+                            if(empty($employeeGender)){
+                                $employeeGender = "Male";
+                            }
+                            $imagePath = $employeeGender == "Male" 
+                                ? asset("images/man.png") 
+                                : asset("images/girl.png");
+                        }
+
                         $htmlTables .= '<tr>';
-                        $htmlTables .= '<td>' . $count . '</td>';
-                        $htmlTables .= '<td>' . $employee['emp_id'] . '</td>';
-                        $htmlTables .= '<td>' . $employee['emp_name_with_initial'] . '</td>';
-                        $htmlTables .= '<td>' . $employee['first_checkin'] . '</td>';
-                        $htmlTables .= '<td>' . $employee['lasttimestamp'] . '</td>';
+                        $htmlTables .= '<td class="align-middle text-center">' . $count . '</td>';
+                        $htmlTables .= '<td class="align-middle text-center"><img style="height: 2.5rem;width: 2.5rem;border-radius: 100%;" src="' . $imagePath . '" alt="Employee Photo"/></td>';
+                        $htmlTables .= '<td class="align-middle text-center">' . $employee['emp_id'] . '</td>';
+                        $htmlTables .= '<td class="align-middle text-center">' . $employee['emp_name_with_initial'] . '</td>';
+                        $htmlTables .= '<td class="align-middle text-center">' . $employee['first_checkin'] . '</td>';
+                        $htmlTables .= '<td class="align-middle">' . $employee['lasttimestamp'] . '</td>';
                         $htmlTables .= '</tr>';
 
                         $count=$count+1;
@@ -842,7 +933,8 @@ class HomeController extends Controller
         ->get();
 
         $employeedata= DB::table('employees')
-        ->select('employees.emp_id', 'employees.emp_name_with_initial','employees.emp_department') 
+        ->select('employees.emp_id', 'employees.emp_name_with_initial','employees.emp_department', 'employee_pictures.emp_pic_filename') 
+        ->leftJoin('employee_pictures', 'employee_pictures.emp_id', '=', 'employees.id')
         ->where('deleted', 0)
         ->where('is_resigned', 0)
         ->get();
@@ -852,7 +944,8 @@ class HomeController extends Controller
             $employeeMap[$employee->emp_id] = [
                 'emp_id' => $employee->emp_id,
                 'emp_name_with_initial' => $employee->emp_name_with_initial,
-                'emp_department' => $employee->emp_department
+                'emp_department' => $employee->emp_department,
+                'emp_pic_filename' => $employee->emp_pic_filename
             ];
         }
        
@@ -884,7 +977,8 @@ class HomeController extends Controller
                 
                 $employeesByDepartment[$departmentMap[$departmentId]][] = [
                     'emp_id' => $employee['emp_id'],
-                    'emp_name_with_initial' => $employee['emp_name_with_initial']
+                    'emp_name_with_initial' => $employee['emp_name_with_initial'],
+                    'emp_pic_filename' => $employee['emp_pic_filename']
                 ];
             }
         }
@@ -897,13 +991,28 @@ class HomeController extends Controller
                     $htmlTables .= '<table class="table table-striped table-bordered table-sm small">';
 
                     $htmlTables .= '<h5>' . $departmentName . '</h5>';
-                    $htmlTables .= '<tr><th>#</th><th>Employee ID</th><th>Employee Name with Initial</th></tr>';
+                    $htmlTables .= '<tr><th>#</th><th>Photo</th><th>Employee ID</th><th>Employee Name with Initial</th></tr>';
                 
                     foreach ($employees as $employee) {
+                        $employeePicture = $employee['emp_pic_filename'];
+                        $imagePath = '';
+                        if (file_exists(public_path("images/{$employeePicture}")) && !empty($employeePicture)) {
+                            $imagePath = asset("images/{$employeePicture}");
+                        } else {
+                            $employeeGender = \App\Employee::where('emp_id', $employee['emp_id'])->pluck('emp_gender')->first();
+                            if(empty($employeeGender)){
+                                $employeeGender = "Male";
+                            }
+                            $imagePath = $employeeGender == "Male" 
+                                ? asset("images/man.png") 
+                                : asset("images/girl.png");
+                        }
+
                         $htmlTables .= '<tr>';
-                        $htmlTables .= '<td>' . $count . '</td>';
-                        $htmlTables .= '<td>' . $employee['emp_id'] . '</td>';
-                        $htmlTables .= '<td>' . $employee['emp_name_with_initial'] . '</td>';
+                        $htmlTables .= '<td class="align-middle text-center">' . $count . '</td>';
+                        $htmlTables .= '<td class="align-middle text-center"><img style="height: 2.5rem;width: 2.5rem;border-radius: 100%;" src="' . $imagePath . '" alt="Employee Photo"/></td>';
+                        $htmlTables .= '<td class="align-middle text-center">' . $employee['emp_id'] . '</td>';
+                        $htmlTables .= '<td class="align-middle">' . $employee['emp_name_with_initial'] . '</td>';
                         $htmlTables .= '</tr>';
 
                         $count=$count+1;
