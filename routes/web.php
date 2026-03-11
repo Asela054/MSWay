@@ -958,6 +958,7 @@ Route::post('/employeeshiftupdate' ,'EmployeeShiftController@update')->name('emp
 Route::post('/employeeshiftdelete' ,'EmployeeShiftController@delete')->name('employeeshiftdelete');
 Route::post('/employeeshiftdeletelist' ,'EmployeeShiftController@deletelist')->name('employeeshiftdeletelist');
 Route::get('/employeeshiftstatus/{id}/{stasus}','EmployeeShiftController@status')->name('employeeshiftstatus');
+Route::post('/night_shiftallocate_csv' ,'EmployeeShiftController@night_shiftallocate_csv')->name('night_shiftallocate_csv');
 
 Route::get('/functionalmanagementdashboard' ,'FunctionalmanagementdashboardController@index')->name('functionalmanagementdashboard');
 
