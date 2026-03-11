@@ -86,6 +86,8 @@ class JobCategoryController extends Controller
         $jobcategory->short_leaves = $request->input('short_leaves');
         $jobcategory->half_days = $request->input('half_days');
 
+        $jobcategory->late_deduct_calculation = $request->input('late_deduct_calculation');
+
         $jobcategory->basic_ot_type = $request->input('basic_ot_type');
         $jobcategory->custom_normal_ot_rate = $request->input('custom_normal_ot_rate');
         $jobcategory->custom_double_ot_rate = $request->input('custom_double_ot_rate');
@@ -168,6 +170,7 @@ class JobCategoryController extends Controller
             'late_attend_min' => $request->late_attend_min,
             'short_leaves' => $request->short_leaves,
             'half_days' => $request->half_days,
+            'late_deduct_calculation' => $request->late_deduct_calculation,
             'basic_ot_type' => $request->basic_ot_type,
             'custom_normal_ot_rate' => $request->custom_normal_ot_rate,
             'custom_double_ot_rate' => $request->custom_double_ot_rate,
