@@ -85,8 +85,60 @@
                         <div class="row">
                             <div class="col">
                                 <span id="form_result"></span>
+                                 <div class="col-sm-12 col-md-12">
+                                        <table class="table table-sm small">
+                                            <thead>
+                                                <tr>
+                                                    <th>Leave Type</th>
+                                                    <th>Total</th>
+                                                    <th>Taken</th>
+                                                    <th>Available</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td> <span> Annual </span> </td>
+                                                    <td> <span id="annual_total"></span> </td>
+                                                    <td> <span id="annual_taken"></span> </td>
+                                                    <td> <span id="annual_available"></span> </td>
+                                                </tr>
+                                                <tr>
+                                                    <td> <span> Casual </span> </td>
+                                                    <td> <span id="casual_total"></span> </td>
+                                                    <td> <span id="casual_taken"></span> </td>
+                                                    <td> <span id="casual_available"></span> </td>
+                                                </tr>
+                                                <tr>
+                                                    <td> <span>Medical</span> </td>
+                                                    <td> <span id="med_total"></span> </td>
+                                                    <td> <span id="med_taken"></span> </td>
+                                                    <td> <span id="med_available"></span> </td>
+                                                </tr>
+                                                <tr>
+                                                    <td> <span>Weekly</span> </td>
+                                                    <td> <span id="weekly_total"></span> </td>
+                                                    <td> <span id="weekly_taken"></span> </td>
+                                                    <td> <span id="weekly_available"></span> </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <span id="leave_msg"></span>
+                                    </div>
                                 <form method="post" id="formTitle" class="form-horizontal">
                                     {{ csrf_field() }}
+                                     <div class="form-row mb-1">
+                                          <div class="col-sm-12 col-md-12">
+                                              <label class="small font-weight-bolder text-dark">Leave Type *</label>
+                                              <select name="leavetype" id="leavetype"
+                                                  class="form-control form-control-sm"required>
+                                                  <option value="">Select</option>
+                                                    @foreach($leavetype as $leavetypes)
+                                                    <option value="{{$leavetypes->id}}">{{$leavetypes->leave_type}}
+                                                    </option>
+                                                    @endforeach
+                                              </select>
+                                          </div>
+                                      </div>
                                     <div class="form-row mb-1">
                                         <div class="col-sm-12 col-md-12">
                                             <label class="small font-weight-bolder text-dark">Select Employee*</label>
@@ -96,7 +148,7 @@
                                             </select>
                                         </div>
                                     </div>
-
+                                     
                                     <div class="form-row mb-1">
                                         <div class="col-sm-12 col-md-6">
                                             <label class="small font-weight-bolder text-dark">From*</label>
@@ -109,6 +161,7 @@
                                                    class="form-control form-control-sm" placeholder="YYYY-MM-DD" required/>
                                         </div>
                                     </div>
+
                                     <div class="form-row mb-1">
                                         <div class="col-sm-12 col-md-12">
                                             <label class="small font-weight-bolder text-dark">Half Day/ Short* <span id="half_short_span"></span> </label>
@@ -118,6 +171,16 @@
                                                 <option value="0.5">Half Day</option>
                                                 <option value="1.00">Full Day</option>
                                             </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-row mb-1" id="short_leave_time_range" style="display: none;">
+                                        <div class="col-sm-12 col-md-6">
+                                            <label class="small font-weight-bolder text-dark">From Time</label>
+                                            <input type="time" name="from_time" id="from_time" class="form-control form-control-sm"/>
+                                        </div>
+                                        <div class="col-sm-12 col-md-6">
+                                            <label class="small font-weight-bolder text-dark">To Time</label>
+                                            <input type="time" name="to_time" id="to_time" class="form-control form-control-sm"/>
                                         </div>
                                     </div>
                                     <div class="form-row mb-1">
@@ -217,24 +280,23 @@
             });
 
             location.select2({
-            placeholder: 'Select...',
-            width: '100%',
-            allowClear: true,
-            ajax: {
-                url: '{{url("location_list_sel2")}}',
-                dataType: 'json',
-                data: function (params) {
-                    return {
-                        term: params.term || '',
-                        page: params.page || 1
-                    }
-                },
-                cache: true
-            }
-        });
+                placeholder: 'Select...',
+                width: '100%',
+                allowClear: true,
+                ajax: {
+                    url: '{{url("location_list_sel2")}}',
+                    dataType: 'json',
+                    data: function (params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1
+                        }
+                    },
+                    cache: true
+                }
+            });
 
-              let employee_f = $('#employee_f');
-
+            let employee_f = $('#employee_f');
             employee_f.select2({
                 placeholder: 'Select...',
                 width: '100%',
@@ -390,6 +452,95 @@
 
             });
 
+
+            // calculate leave balance when employee selected
+              $('#employee_f').change(function () {
+                  var _token = $('input[name="_token"]').val();
+                  var leavetype = $('#leavetype').val();
+                  var emp_id = $('#employee_f').val();
+                  var status = $('#employee_f option:selected').data('id');
+                  var fromdate = $('#fromdate').val();
+                  var todate = $('#todate').val();
+
+                  if (leavetype != '' && emp_id != '') {
+                      $.ajax({
+                          url: "getEmployeeLeaveStatus",
+                          method: "POST",
+                          data: {
+                              status: status,
+                              emp_id: emp_id,
+                              leavetype: leavetype,
+                              _token: _token,
+                              fromdate: fromdate,
+                              todate: todate
+                          },
+                          success: function (data) {
+                              $('#annual_total').html(data.total_no_of_annual_leaves);
+                              $('#annual_taken').html(data.total_taken_annual_leaves);
+                              $('#annual_available').html(data.available_no_of_annual_leaves);
+
+                              $('#casual_total').html(data.total_no_of_casual_leaves);
+                              $('#casual_taken').html(data.total_taken_casual_leaves);
+                              $('#casual_available').html(data.available_no_of_casual_leaves);
+
+                              $('#med_total').html(data.total_no_of_med_leaves);
+                              $('#med_taken').html(data.total_taken_med_leaves);
+                              $('#med_available').html(data.available_no_of_med_leaves);
+
+                              $('#weekly_total').html(data.total_no_of_weekly_leaves);
+                              $('#weekly_taken').html(data.total_taken_weekly_leaves);
+                              $('#weekly_available').html(data.available_no_of_weekly_leaves);
+
+                          }
+                      });
+                  }
+
+              });
+
+            // calculate leave balance when date range is selected
+            $('#todate').change(function () {
+                var _token = $('input[name="_token"]').val();
+                var leavetype = $('#leavetype').val();
+                var emp_id = $('#employee_f').val();
+                var status = $('#employee_f option:selected').data('id');
+                var fromdate = $('#fromdate').val();
+                var todate = $('#todate').val();
+
+                if (leavetype != '' && emp_id != '') {
+                    $.ajax({
+                        url: "getEmployeeLeaveStatus",
+                        method: "POST",
+                        data: {
+                            status: status,
+                            emp_id: emp_id,
+                            leavetype: leavetype,
+                            _token: _token,
+                            fromdate: fromdate,
+                            todate: todate
+                        },
+                        success: function (data) {
+                            $('#annual_total').html(data.total_no_of_annual_leaves);
+                            $('#annual_taken').html(data.total_taken_annual_leaves);
+                            $('#annual_available').html(data.available_no_of_annual_leaves);
+
+                            $('#casual_total').html(data.total_no_of_casual_leaves);
+                            $('#casual_taken').html(data.total_taken_casual_leaves);
+                            $('#casual_available').html(data.available_no_of_casual_leaves);
+
+                            $('#med_total').html(data.total_no_of_med_leaves);
+                            $('#med_taken').html(data.total_taken_med_leaves);
+                            $('#med_available').html(data.available_no_of_med_leaves);
+
+                            $('#weekly_total').html(data.total_no_of_weekly_leaves);
+                            $('#weekly_taken').html(data.total_taken_weekly_leaves);
+                            $('#weekly_available').html(data.available_no_of_weekly_leaves);
+
+                        }
+                    });
+                }
+            });
+
+
         });
 
 
@@ -476,6 +627,16 @@
                             $('#todate').val(data.result.to_date);
                             $('#half_short').val(data.result.leave_category);
                             $('#reason').val(data.result.reason);
+                            $('#leavetype').val(data.result.leave_type);
+                            $('#from_time').val(data.result.from_time);
+                            $('#to_time').val(data.result.to_time);
+
+                           setTimeout(function() {
+                               document.getElementById('half_short').dispatchEvent(new Event('change'));
+                                $('#employee_f').trigger('change');
+                            }, 100);
+
+
                             $('#hidden_id').val(id);
                             $('.modal-title').text('Edit Leave Request');
                             $('#action_button').val('Edit');
@@ -572,6 +733,26 @@
             });
 
         });
+
+        document.getElementById('half_short').addEventListener('change', function() {
+            const timeRangeDiv = document.getElementById('short_leave_time_range');
+            const fromTimeInput = document.getElementById('from_time');
+            const toTimeInput = document.getElementById('to_time');
+            
+            if (this.value === '0.25') { // Short Leave selected
+                timeRangeDiv.style.display = 'flex';
+                fromTimeInput.required = true;
+                toTimeInput.required = true;
+            } else {
+                timeRangeDiv.style.display = 'none';
+                fromTimeInput.required = false;
+                toTimeInput.required = false;
+            
+                fromTimeInput.value = '';
+                toTimeInput.value = '';
+            }
+        });
+
     </script>
 
 @endsection
