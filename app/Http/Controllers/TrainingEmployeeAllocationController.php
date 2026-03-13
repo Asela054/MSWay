@@ -43,21 +43,20 @@ class TrainingEmployeeAllocationController extends Controller
             abort(403);
         }
 
-        $type = TrainingType::where('status', 1)
-            ->where('id', $allocation_id)
-            ->first();
-
-        if (!$type) {
-            abort(404, 'Training type not found');
-        }
-
-        $allocation = TrainingAllocation::where('type_id', $type->id)
-            ->where('id', $allocation_id)
+        $allocation = TrainingAllocation::where('id', $allocation_id)
             ->where('status', 1)
             ->first();
 
         if (!$allocation) {
             abort(404, 'Training allocation not found');
+        }
+
+        $type = TrainingType::where('status', 1)
+            ->where('id', $allocation->type_id)
+            ->first();
+
+        if (!$type) {
+            abort(404, 'Training type not found');
         }
 
         $empallocation = TrainingEmpAllocation::where('allocation_id', $allocation->id)
