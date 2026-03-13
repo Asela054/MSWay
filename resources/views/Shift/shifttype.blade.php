@@ -39,9 +39,7 @@
                                     <th>SATURDAY ONDUTY TIME</th>
                                     <th>SATURDAY OFFDUTY TIME</th>                                               
                                     <th>BEGINING CHECKIN</th>                                                
-                                    <th>BEGINING CHECKOUT</th>                                                
-                                    <th>ENDING CHECKIN</th>                                                
-                                    <th>ENDING CHECKOUT</th>                                                
+                                    <th>BEGINING CHECKOUT</th>                                                                                       
                                     <th class="text-right">ACTION</th>                                      
                                 </tr>
                             </thead>                          
@@ -116,7 +114,7 @@
                                         <input type="time" name="beginingcheckout" id="beginingcheckout" class="form-control form-control-sm" required/>
                                     </div>                                    
                                 </div>
-                                <div class="form-row mb-1">
+                                {{-- <div class="form-row mb-1">
                                     <div class="col">
                                         <label class="small font-weight-bold text-dark">Ending Checkin</label>
                                         <input type="time" name="endingcheckin" id="endingcheckin" class="form-control form-control-sm" required/>
@@ -125,7 +123,7 @@
                                         <label class="small font-weight-bold text-dark">Ending Checkout</label>
                                         <input type="time" name="endingcheckout" id="endingcheckout" class="form-control form-control-sm" required/>
                                     </div>                                    
-                                </div>
+                                </div> --}}
                                 <div class="form-row mb-1">
                                     <div class="col">
                                         <label class="small font-weight-bold text-dark">Workdays Count</label>
@@ -176,12 +174,13 @@
                                             </label>
                                         </div>
                                     </div>
-                                    <div class="col">
+                                    {{-- <div class="col">
                                         <label class="small font-weight-bold text-dark">Color</label>
                                         <input type="color" name="color" id="color" class="form-control form-control-sm" required/>
-                                    </div>    
+                                    </div>     --}}
                                 </div>
-                                <div class="form-row mb-1">
+
+                                {{-- <div class="form-row mb-1">
                                     <div class="col">
                                         <div class="custom-control custom-checkbox">
                                           <input type="checkbox" class="custom-control-input" id="mustcheckin" name="mustcheckin">
@@ -192,7 +191,7 @@
                                           <label class="custom-control-label" for="mustcheckout">Must CheckOut</label>
                                         </div>
                                     </div>
-                                </div>
+                                </div> --}}
                                 <div class="form-group mt-3">
                                     <button type="submit" name="action_button" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-pen"></i>&nbsp;</button>
                                 </div>
@@ -321,14 +320,6 @@ $(document).ready(function(){
                 data: 'begining_checkout', 
                 name: 'begining_checkout'
             },
-             { 
-                data: 'ending_checkin', 
-                name: 'ending_checkin'
-            },
-             { 
-                data: 'ending_checkout', 
-                name: 'ending_checkout'
-            },
             {
                 data: 'id',
                 name: 'action',
@@ -437,8 +428,6 @@ $(document).ready(function(){
                 $('#leaveearlytime').val(data.result.leave_early_time);
                 $('#beginingcheckin').val(data.result.begining_checkin);
                 $('#beginingcheckout').val(data.result.begining_checkout);
-                $('#endingcheckin').val(data.result.ending_checkin);
-                $('#endingcheckout').val(data.result.ending_checkout);
                 $('#workdayscount').val(data.result.workdays_count);
                 $('#minutecount').val(data.result.minute_count);
 
@@ -466,19 +455,22 @@ $(document).ready(function(){
 
                 $('#ot_calculate_time').val(data.result.ot_calculate_time);
 
-                if(data.result.must_checkin == "on"){
-                    $('#mustcheckin').prop( "checked", true );
-                }else{
-                    $('#mustcheckin').prop( "checked", false );
-                }
+                //  $('#endingcheckin').val(data.result.ending_checkin);
+                // $('#endingcheckout').val(data.result.ending_checkout);
+                // if(data.result.must_checkin == "on"){
+                //     $('#mustcheckin').prop( "checked", true );
+                // }else{
+                //     $('#mustcheckin').prop( "checked", false );
+                // }
 
-                if(data.result.must_checkout == "on"){
-                    $('#mustcheckout').prop( "checked", true );
-                }else {
-                    $('#mustcheckout').prop( "checked", false );
-                }
+                // if(data.result.must_checkout == "on"){
+                //     $('#mustcheckout').prop( "checked", true );
+                // }else {
+                //     $('#mustcheckout').prop( "checked", false );
+                // }
 
-                $('#color').val(data.result.color);
+               // $('#color').val(data.result.color);
+
                 $('#hidden_id').val(id);
                 $('.modal-title').text('Edit  Work Shift');
                 $('#action_button').text('Edit');
