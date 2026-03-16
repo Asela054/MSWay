@@ -38,6 +38,9 @@ class LeaverequestController extends Controller
         $todate=$request->input('todate');
         $half_short=$request->input('half_short');
         $reason=$request->input('reason');
+        $leavetype=$request->input('leavetype');
+        $from_time=$request->input('from_time');
+        $to_time=$request->input('to_time');
 
         $request = new LeaveRequest();
         $request->emp_id=$employee;
@@ -45,6 +48,9 @@ class LeaverequestController extends Controller
         $request->to_date=$todate;
         $request->leave_category=$half_short;
         $request->reason=$reason;
+        $request->leave_type=$leavetype;
+        $request->from_time=$from_time;
+        $request->to_time=$to_time;
         $request->status= '1';
         $request->created_by=Auth::id();
         $request->updated_by = '0';
@@ -86,6 +92,10 @@ class LeaverequestController extends Controller
         $todate=$request->input('todate');
         $half_short=$request->input('half_short');
         $reason=$request->input('reason');
+        $leavetype=$request->input('leavetype');
+        $from_time=$request->input('from_time');
+        $to_time=$request->input('to_time');
+
         $hidden_id=$request->input('hidden_id');
 
         $data = array(
@@ -94,6 +104,9 @@ class LeaverequestController extends Controller
             'to_date' => $todate,
             'leave_category' => $half_short,
             'reason' => $reason,
+            'leave_type' => $leavetype,
+            'from_time' => $from_time,
+            'to_time' => $to_time,
             'request_approve_status' => 0,
             'updated_by' => Auth::id(),
         );

@@ -77,7 +77,8 @@ class LateminitesApprovelController extends Controller
                 'branches.location',
                 'departments.name as dept_name',
                 'job_categories.late_attend_min',
-                'job_categories.late_deduction_type'                  
+                'job_categories.late_deduction_type',
+                'job_categories.late_deduct_calculation'                   
             )
             ->from('employees as employees')
             ->leftJoin('attendances as at1', function ($join) use ($month) {
@@ -145,13 +146,33 @@ class LateminitesApprovelController extends Controller
                 
                 $late_hours_total = $late_minites_total / 60;
                 
-                
+                if($record->late_deduct_calculation == 1){
 
-                if($record->late_attend_min == 0){
+                     $nopayamount = (new \App\Employeelateattenadnaceminites)->NopayAmountCal($record->emp_auto_id, $work_days,$leave_days,$no_pay_days,$normal_ot_hours, $double_ot_hours);
+                    
+                     $nopayAmount = $nopayamount['nopay_base_rate']/8;
+                            if($late_minites_total > 0){
+                                $late_day_amount = abs($late_hours_total * $nopayAmount);
+                            }
+                            else{
+                                $late_day_amount = 0;
+                            }
+                } elseif($record->late_deduct_calculation == 2){
 
                      $nopayamount = (new \App\Employeelateattenadnaceminites)->NopayAmountCal($record->emp_auto_id, $work_days,$leave_days,$no_pay_days,$normal_ot_hours, $double_ot_hours);
                     
                      $nopayAmount = $nopayamount['othrs1_base_rate'];
+                            if($late_minites_total > 0){
+                                $late_day_amount = abs($late_hours_total * $nopayAmount);
+                            }
+                            else{
+                                $late_day_amount = 0;
+                            }
+                } elseif($record->late_deduct_calculation == 3){
+
+                     $nopayamount = (new \App\Employeelateattenadnaceminites)->NopayAmountCal($record->emp_auto_id, $work_days,$leave_days,$no_pay_days,$normal_ot_hours, $double_ot_hours);
+                    
+                     $nopayAmount = $nopayamount['othrs2_base_rate'];
                             if($late_minites_total > 0){
                                 $late_day_amount = abs($late_hours_total * $nopayAmount);
                             }
