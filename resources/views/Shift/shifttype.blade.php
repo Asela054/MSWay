@@ -72,7 +72,11 @@
                                     <div class="col">
                                         <label class="small font-weight-bold text-dark">Shift Name</label>
                                         <input type="text" name="shiftname" id="shiftname" class="form-control form-control-sm"  required/>
-                                    </div>                                  
+                                    </div>   
+                                    <div class="col">
+                                        <label class="small font-weight-bold text-dark">Shift Code</label>
+                                        <input type="text" name="shiftcode" id="shiftcode" class="form-control form-control-sm" required/>
+                                    </div>
                                 </div>
                                 <div class="form-row mb-1">
                                     <div class="col">
@@ -133,7 +137,7 @@
                                         <label class="small font-weight-bold text-dark">Minute Count</label>
                                         <input type="text" name="minutecount" id="minutecount" class="form-control form-control-sm" required/>
                                     </div>                                    
-                                </div>
+                                </div>--}}
                                 <div class="form-row mb-1">
                                     <div class="col">
                                         <label class="small font-weight-bold text-dark">Actual OT calculation</label>
@@ -301,7 +305,16 @@ $(document).ready(function(){
             },
             { 
                 data: 'offduty_day', 
-                name: 'offduty_day'
+                name: 'offduty_day',
+                render: function(data, type, row) {
+                    if (data == 1) {
+                        return 'Today';
+                    } else if (data == 0) {
+                        return 'Next day';
+                    } else {
+                        return '';
+                    }
+                }
             },
            
             { 
@@ -420,6 +433,7 @@ $(document).ready(function(){
             dataType: "json",
             success: function (data) {
                 $('#shiftname').val(data.result.shift_name);
+                $('#shiftcode').val(data.result.shift_code);
                 $('#ondutytime').val(data.result.onduty_time);
                 $('#offdutytime').val(data.result.offduty_time);
                 $('#saturday_ondutytime').val(data.result.saturday_onduty_time);

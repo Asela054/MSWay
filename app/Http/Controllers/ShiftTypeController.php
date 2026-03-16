@@ -72,7 +72,8 @@ class ShiftTypeController extends Controller
         }
 
        $shifttype=new ShiftType;
-       $shifttype->shift_name=$request->input('shiftname');       
+       $shifttype->shift_name=$request->input('shiftname'); 
+       $shifttype->shift_code=$request->input('shiftcode');      
        $shifttype->onduty_time=$request->input('ondutytime');       
        $shifttype->offduty_time=$request->input('offdutytime');
        $shifttype->saturday_onduty_time=$request->input('saturday_ondutytime');    
@@ -164,6 +165,7 @@ class ShiftTypeController extends Controller
 
         $form_data = array(
             'shift_name'        =>  $request->shiftname,
+            'shift_code'        =>  $request->shiftcode,
             'onduty_time'        =>  $request->ondutytime,
             'offduty_time'        =>  $request->offdutytime,
             'saturday_onduty_time'        =>  $request->saturday_ondutytime,
