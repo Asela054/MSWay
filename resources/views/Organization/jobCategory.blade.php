@@ -440,6 +440,26 @@
                                 </div>
 
                                 <div class="form-group mb-2">
+                                    <label class="small font-weight-bold text-dark">Late Deduction Calculation</label>
+                                    <br>
+                                    <div class="form-check-inline">
+                                        <label class="form-check-label">
+                                            <input type="radio" class="form-check-input late_deduct_calculation" name="late_deduct_calculation" id="late_deduct_calculation_1" value="1" checked>Nopay
+                                        </label>
+                                    </div>
+                                    <div class="form-check-inline">
+                                        <label class="form-check-label">
+                                            <input type="radio" class="form-check-input late_deduct_calculation" name="late_deduct_calculation" id="late_deduct_calculation_2" value="2">Normal OT
+                                        </label>
+                                    </div>
+                                    <div class="form-check-inline">
+                                        <label class="form-check-label">
+                                            <input type="radio" class="form-check-input late_deduct_calculation" name="late_deduct_calculation" id="late_deduct_calculation_3" value="3">Double OT
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="form-group mb-2">
                                     <label class="small font-weight-bold text-dark">Basic OT Type</label>
                                     <br>
                                     <div class="form-check-inline">
@@ -1089,6 +1109,14 @@ $(document).ready(function(){
                     $('#late_attend_min').val(data.result.late_attend_min);
                     $('#short_leaves').val(data.result.short_leaves);
                     $('#half_days').val(data.result.half_days);
+
+                    if(data.result.late_deduct_calculation == 1) {
+                        $('#late_deduct_calculation_1').prop("checked", true);
+                    } else if (data.result.late_deduct_calculation == 2) {
+                        $('#late_deduct_calculation_2').prop("checked", true);
+                    } else if (data.result.late_deduct_calculation == 3) {
+                        $('#late_deduct_calculation_3').prop("checked", true);
+                    }
 
                     if(data.result.basic_ot_type == 1) {
                         $('#basic_ot_type_1').prop("checked", true);

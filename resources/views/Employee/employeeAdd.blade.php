@@ -423,6 +423,7 @@
                                 <div class="form-group mt-3">
                                     <button type="submit" name="action_button" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
                                 </div>
+                                <input type="hidden" name="emp_gender" id="emp_gender" />
                                 <input type="hidden" name="action" id="action" value="Add" />
                                 <button type="reset" class="btn btn-danger btn-sm fa-pull-right px-4"><i class="far fa-trash-alt"></i>&nbsp;Clear</button>   
                                 <input type="hidden" name="hidden_id" id="hidden_id" />
@@ -655,6 +656,55 @@ $(document).ready(function () {
     $("#etfno").focusout(function(){
         let val = $(this).val();
         $('#emp_id').val(val);
+    });
+
+    $("#emp_id_card").on("input", function () {
+        var nic = $(this).val().trim();
+        var nicLength = nic.length;
+
+        if (nicLength !== 10 && nicLength !== 12) return;
+
+        var year, dayText;
+
+        if (nicLength === 10) {
+            if (!/^\d{9}[VvXx]$/.test(nic)) return;
+            year = "19" + nic.substring(0, 2);
+            dayText = parseInt(nic.substring(2, 5));
+        } else {
+            if (!/^\d{12}$/.test(nic)) return;
+            year = nic.substring(0, 4);
+            dayText = parseInt(nic.substring(4, 7));
+        }
+
+        // Adjust for female
+        if (dayText > 500) {
+            dayText -= 500;
+            $("#emp_gender").val("Female");
+        } else {
+            $("#emp_gender").val("Male");
+        }
+
+        if (dayText < 1 || dayText > 366) return;
+
+        // Calculate month and day
+        var month, day;
+        if      (dayText > 335) { day = dayText - 335; month = "12"; }
+        else if (dayText > 305) { day = dayText - 305; month = "11"; }
+        else if (dayText > 274) { day = dayText - 274; month = "10"; }
+        else if (dayText > 244) { day = dayText - 244; month = "09"; }
+        else if (dayText > 213) { day = dayText - 213; month = "08"; }
+        else if (dayText > 182) { day = dayText - 182; month = "07"; }
+        else if (dayText > 152) { day = dayText - 152; month = "06"; }
+        else if (dayText > 121) { day = dayText - 121; month = "05"; }
+        else if (dayText > 91)  { day = dayText - 91;  month = "04"; }
+        else if (dayText > 60)  { day = dayText - 60;  month = "03"; }
+        else if (dayText < 32)  { day = dayText;        month = "01"; }
+        else                    { day = dayText - 31;   month = "02"; }
+
+        day = String(day).padStart(2, "0");
+        var dob = year + "-" + month + "-" + day;
+
+        $("#emp_birthday").val(dob);
     });
 
     let company_f = $('#company_f');

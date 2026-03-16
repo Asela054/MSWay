@@ -56,6 +56,7 @@ class ShiftTypeController extends Controller
         }
         $rules = array(
             'shiftname'    =>  '',
+            'shiftcode'    =>  '',
             'ondutytime'    =>  '',
             'offdutytime'    =>  '',
             'saturday_ondutytime'    =>  '',
@@ -81,6 +82,7 @@ class ShiftTypeController extends Controller
 
         $form_data = array(
             'shift_name'        =>  $request->shiftname,
+            'shift_code'        =>  $request->shiftcode,
             'onduty_time'        =>  $request->ondutytime,
             'offduty_time'        =>  $request->offdutytime,
             'saturday_onduty_time'        =>  $request->saturday_ondutytime,
@@ -103,7 +105,8 @@ class ShiftTypeController extends Controller
         );
 
        $shifttype=new ShiftType;
-       $shifttype->shift_name=$request->input('shiftname');       
+       $shifttype->shift_name=$request->input('shiftname'); 
+       $shifttype->shift_code=$request->input('shiftcode');      
        $shifttype->onduty_time=$request->input('ondutytime');       
        $shifttype->offduty_time=$request->input('offdutytime');
        $shifttype->saturday_onduty_time=$request->input('saturday_ondutytime');    
@@ -114,14 +117,14 @@ class ShiftTypeController extends Controller
        $shifttype->begining_checkout=$request->input('beginingcheckout');    
        $shifttype->ending_checkin=$request->input('endingcheckin');    
        $shifttype->ending_checkout=$request->input('endingcheckout');    
-       $shifttype->workdays_count=$request->input('workdayscount');    
-       $shifttype->minute_count=$request->input('minutecount');
+       $shifttype->workdays_count=0;    
+       $shifttype->minute_count=0;
        $shifttype->offduty_day=$request->input('offduty_day');   
        $shifttype->ot_calculate_type=$request->input('ot_calculate_type');    
        $shifttype->ot_calculate_time=$request->input('ot_calculate_time'); 
        $shifttype->must_checkin=$request->input('mustcheckin');    
        $shifttype->must_checkout=$request->input('mustcheckout');    
-       $shifttype->color=$request->input('color'); 
+       $shifttype->color=0; 
        $shifttype->save();
 
        
@@ -178,20 +181,20 @@ class ShiftTypeController extends Controller
 
         $rules = array(
             'shiftname'    =>  'required',
-            'ondutytime'    =>  'required',
-            'offdutytime'    =>  'required',
-            'saturday_ondutytime'    =>  'required',
-            'saturday_offdutytime'    =>  'required',
-            'latetime'    =>  'required',            
-            'leaveearlytime'    =>  'required',         
-            'beginingcheckin'    =>  'required',          
-            'beginingcheckout'    =>  'required',          
-            'endingcheckin'    =>  'required',        
-            'endingcheckout'    =>  'required',        
-            'workdayscount'    =>  'required',        
-            'minutecount'    =>  'required',
+            'ondutytime'    =>  '',
+            'offdutytime'    =>  '',
+            'saturday_ondutytime'    =>  '',
+            'saturday_offdutytime'    =>  '',
+            'latetime'    =>  '',            
+            'leaveearlytime'    =>  '',         
+            'beginingcheckin'    =>  '',          
+            'beginingcheckout'    =>  '',          
+            'endingcheckin'    =>  '',        
+            'endingcheckout'    =>  '',        
+            'workdayscount'    =>  '',        
+            'minutecount'    =>  '',
             'offduty_day'    =>  '',         
-            'color'    =>  'required'          
+            'color'    =>  ''          
         );
 
         $error = Validator::make($request->all(), $rules);
@@ -203,6 +206,7 @@ class ShiftTypeController extends Controller
 
         $form_data = array(
             'shift_name'        =>  $request->shiftname,
+            'shift_code'        =>  $request->shiftcode,
             'onduty_time'        =>  $request->ondutytime,
             'offduty_time'        =>  $request->offdutytime,
             'saturday_onduty_time'        =>  $request->saturday_ondutytime,

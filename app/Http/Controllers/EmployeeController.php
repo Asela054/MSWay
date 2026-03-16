@@ -161,6 +161,7 @@ class EmployeeController extends Controller
         $Employee->emp_national_id = $request->input('emp_id_card');
         $Employee->emp_birthday = $request->input('emp_birthday');
         $Employee->emp_mobile = $request->input('emp_mobile');
+        $Employee->emp_gender = $request->input('emp_gender');
         $Employee->emp_status = $request->input('status');
         $Employee->emp_location = $request->input('location');
         $Employee->emp_job_code = $request->input('employeejob');
