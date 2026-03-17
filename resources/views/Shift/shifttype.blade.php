@@ -137,7 +137,7 @@
                                         <label class="small font-weight-bold text-dark">Minute Count</label>
                                         <input type="text" name="minutecount" id="minutecount" class="form-control form-control-sm" required/>
                                     </div>                                    
-                                </div>--}}
+                                </div>
                                 <div class="form-row mb-1">
                                     <div class="col">
                                         <label class="small font-weight-bold text-dark">Actual OT calculation</label>
