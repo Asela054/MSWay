@@ -318,20 +318,26 @@ $(document).ready(function() {
             const box = e.target.closest('.ms-box');
             if (!box) return;
 
-            document.querySelectorAll('.ms-dropdown.open').forEach(d => {
+           document.querySelectorAll('.ms-dropdown.open').forEach(d => {
                 d.classList.remove('open');
                 d.closest('.ms-wrap').querySelector('.ms-box').classList.remove('is-open');
             });
 
             const wrap = box.closest('.ms-wrap');
             const dropdown = wrap.querySelector('.ms-dropdown');
-            const rect = box.getBoundingClientRect();
 
-            dropdown.style.top = (rect.bottom + window.scrollY + 2) + 'px';
-            dropdown.style.left = (rect.left + window.scrollX) + 'px';
-            dropdown.classList.add('open');
-            box.classList.add('is-open');
-            e.stopPropagation();
+
+                    // Make sure the wrap has position relative for absolute positioning to work
+                wrap.style.position = 'relative';
+                
+                // Reset any inline styles that might interfere
+                dropdown.style.top = '';
+                dropdown.style.left = '';
+                
+                // Toggle current dropdown
+                dropdown.classList.add('open');
+                box.classList.add('is-open');
+                e.stopPropagation();
         });
 
         // Checkbox toggle → refresh tags
@@ -426,56 +432,6 @@ $(document).ready(function() {
 
 });
 
-
-// function generateTable(month, existingData = {}) {
-    //     const [year, monthNum] = month.split('-');
-    //     const daysInMonth = new Date(year, monthNum, 0).getDate();
-
-    //     const thead = document.querySelector('#shiftTable thead');
-    //     const tbody = document.querySelector('#shiftTable tbody');
-    //     thead.innerHTML = '';
-    //     tbody.innerHTML = '';
-
-    //     let headerRow = `<tr><th nowrap>NO</th><th nowrap>NAME OF EMPLOYEE</th>`;
-    //     for (let d = 1; d <= daysInMonth; d++) {
-    //         headerRow += `<th class="text-center">${d}</th>`;
-    //     }
-    //     headerRow += `</tr>`;
-    //     thead.innerHTML = headerRow;
-
-    //     employees.forEach((emp, index) => {
-    //         let row = `<tr><td>${emp.id}</td><td class="name-col nowrap">${emp.fullname}</td>`;
-    //         for (let d = 1; d <= daysInMonth; d++) {
-    //             const existingShift = (existingData[emp.id] && existingData[emp.id][d]) || '';
-    //            row += `<td style="padding: 0px;">
-    //                 <select name="shifts[${emp.id}][${d}]" class="form-control form-control-sm shiftcode" style="width: 55px;" muptiple>
-                        
-    //                     ${shiftOptions.map(opt =>{
-    //                          const selectedClass = opt.id == existingShift ? 'selected-option' : '';
-    //                          return `<option value="${opt.id}" ${opt.id == existingShift ? 'selected' : ''} class="${selectedClass}">${opt.code}</option>`;
-    //                       }).join('')}
-    //                 </select>
-    //             </td>`;
-
-    //         }
-    //         row += `</tr>`;
-    //         tbody.innerHTML += row;
-    //     });
-
-    //      $('.shiftcode').on('change', function() {
-    //             $(this).find('option').removeClass('selected-option bg-success');
-                
-    //             $(this).find('option:selected').addClass('selected-option bg-success');
-                
-    //             if ($(this).val()) {
-    //                 $(this).addClass('border-success');
-    //             } else {
-    //                 $(this).removeClass('border-success');
-    //             }
-    //         });
-
-    //          $('.shiftcode').trigger('change');
-    // }
 </script>
 
 <style>
@@ -532,7 +488,7 @@ $(document).ready(function() {
         }
         .ms-dropdown {
             display: none;
-            position: fixed;
+            position: absolute;
             z-index: 99999;
             background: #fff;
             border: 1px solid #ced4da;
