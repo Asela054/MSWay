@@ -65,33 +65,49 @@
                                 <form method="post" id="formTitle" class="form-horizontal">
                                 {{ csrf_field() }}	
                                 <div class="row">
-                                    <div class="row col-sm-12 col-md-6">
+                                    <div class="col-sm-12 col-md-6">
+                                        <div class="row">
                                             <div class="col-12">
-                                                <label class="small font-weight-bolder ">Finish Status*</label><br>
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" name="complete_status" id="completed" value="1">
-                                                    <label class="form-check-label small font-weight-bolder " for="completed" required>Completed</label>
-                                                </div>
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" name="complete_status" id="notcompleted" value="0">
-                                                    <label class="form-check-label small font-weight-bolder " for="notcompleted" required >Not Completed</label>
+                                                <label class="small font-weight-bolder">Finish Status*</label>
+                                                <div class="d-flex">
+                                                    <div class="form-check form-check-inline me-3">
+                                                        <input class="form-check-input" type="radio" name="complete_status" id="completed" value="1" required>
+                                                        <label class="form-check-label small font-weight-bolder" for="completed">Completed</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio" name="complete_status" id="notcompleted" value="0" required>
+                                                        <label class="form-check-label small font-weight-bolder" for="notcompleted">Not Completed</label>
+                                                    </div>
                                                 </div>
                                             </div>
-                                    </div>
-                                     <div class="col-sm-12 col-md-3 quantity-field hidden-field" id="semiQtyField">
-                                        <label class="small font-weight-bolder ">Produce Quntity*</label>
-                                        <input type="number" step="any" name="quntity" id="quntity" class="form-control form-control-sm" required />
-                                    </div>
-                                      <div class="col-sm-12 col-md-3">
-                                        <label class="small font-weight-bolder ">Completed Time*</label>
-                                        <input type="datetime-local" name="completetime" id="completetime"  class="form-control form-control-sm"  value="{{ date('Y-m-d\TH:i', strtotime('-1 day')) }}"  required/>
+                                        </div>
                                     </div>
                                     
+                                    <div class="col-sm-12 col-md-3">
+                                        <label class="small font-weight-bolder">Produce Quantity*</label>
+                                        <input type="number" step="any" name="quantity" id="quantity" class="form-control form-control-sm" required />
+                                    </div>
+                                    
+                                    <div class="col-sm-12 col-md-3">
+                                        <label class="small font-weight-bolder">Completed Time*</label>
+                                        <input type="datetime-local" name="completetime" id="completetime" class="form-control form-control-sm" value="{{ date('Y-m-d\TH:i', strtotime('-1 day')) }}" required/>
+                                    </div>
                                 </div>
-                                <div class="row">
-                                    <div class="col-sm-12 col-md-12">
-                                        <label class="small font-weight-bolder ">Note</label>
-                                        <input type="text" name="desription" id="desription" class="form-control form-control-sm"/>
+
+                                <div class="row mt-3">
+                                    <div class="col-sm-12 col-md-3">
+                                        <label class="small font-weight-bolder">Damage Percentage</label>
+                                        <input type="text" name="damage_percentage" id="damage_percentage" class="form-control form-control-sm"/>
+                                    </div>
+                                    
+                                    <div class="col-sm-12 col-md-3">
+                                        <label class="small font-weight-bolder">Damage Quantity</label>
+                                        <input type="number" step="any" name="damage_qty" id="damage_qty" class="form-control form-control-sm"/>
+                                    </div>
+                                    
+                                    <div class="col-sm-12 col-md-6">
+                                        <label class="small font-weight-bolder">Note</label>
+                                        <input type="text" name="description" id="description" class="form-control form-control-sm"/>
                                     </div>
                                 </div>
                                 <br>

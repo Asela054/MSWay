@@ -385,7 +385,8 @@ $(document).ready(function() {
         $.ajax({
             url: action_url,
             type: 'POST',
-            data:{ shifts: payload },
+            data: JSON.stringify({ shifts: payload }),
+            contentType: 'application/json',
             dataType: 'json',
             success: function(response) {
                 if (response.errors) {

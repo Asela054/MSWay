@@ -38,11 +38,13 @@ class ProductionEndingController extends Controller
 
          $current_date_time = Carbon::now()->toDateTimeString();
 
-          $quntity = $request->input('quntity');
+          $quntity = $request->input('quantity');
           $desription = $request->input('desription');
           $hidden_id = $request->input('hidden_id');
           $completetime = $request->input('completetime');
           $complete_status = $request->input('complete_status');
+          $damage_percentage = $request->input('damage_percentage');
+          $damage_qty = $request->input('damage_qty');
 
         $completdate = Carbon::parse($completetime)->format('Y-m-d');
 
@@ -83,6 +85,7 @@ class ProductionEndingController extends Controller
           $employeeCount = $employeeAllocations->count();
           $employeeIds = $employeeAllocations->pluck('emp_id')->toArray();
           
+          
 
         if ($employeeCount > 0) {
 
@@ -92,6 +95,8 @@ class ProductionEndingController extends Controller
                 $existingRecord = EmployeeProduction::where('allocation_id', $hidden_id)
                                             ->where('emp_id', $allocation->emp_id)
                                             ->first();
+
+              
 
                 $data = [
                 'allocation_id' => $hidden_id,
@@ -103,11 +108,14 @@ class ProductionEndingController extends Controller
                 'precentage' => $percentage_for_query,
                 'amount' => $employee_amount,
                 'description' => $desription,
+                'damage_precentage' => $damage_percentage,
+                'damage_qty' => $damage_qty,
                 'status' => 1,
                 'created_by' => Auth::id(),
                 'updated_at' => $current_date_time
                  ];
 
+                 
 
                     if ($existingRecord) {
                         $existingRecord->update($data);
@@ -119,6 +127,7 @@ class ProductionEndingController extends Controller
             }
 
 
+             
         // Create record in production_status_records table
         Productionstatusrecords::create([
             'production_id' => $hidden_id,
