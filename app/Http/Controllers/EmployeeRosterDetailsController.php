@@ -28,18 +28,22 @@ class EmployeeRosterDetailsController extends Controller
              return response()->json(['error' => 'UnAuthorized']);
         }
 
+         $shifts = $request->json('shifts');
+
         // Group incoming shifts by emp_id + date
         // payload: [{ emp_id, shift, date }, { emp_id, shift, date }, ...]
         $grouped = [];
-        foreach ($request->shifts as $roster) {
+        foreach ($shifts as $roster) {
             $key = $roster['emp_id'] . '_' . $roster['date'];
+            
             if (!isset($grouped[$key])) {
                 $grouped[$key] = [
-                    'emp_id'    => $roster['emp_id'],
-                    'date'      => $roster['date'],
+                    'emp_id' => $roster['emp_id'],
+                    'date' => $roster['date'],
                     'shift_ids' => []
                 ];
             }
+            
             $grouped[$key]['shift_ids'][] = $roster['shift'];
         }
 

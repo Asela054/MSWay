@@ -68,6 +68,7 @@ class EmployeeRosterController extends Controller
 
         $employees = Employee::where('emp_department', $departmentId)
             ->select('emp_id AS id', 'emp_name_with_initial As fullname','calling_name As callingname')
+            ->where('deleted', 0)
             ->get();
 
         return response()->json($employees);
