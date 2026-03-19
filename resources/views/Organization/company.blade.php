@@ -34,6 +34,7 @@
                                         <th>ID </th>
                                         <th>NAME</th>
                                         <th>CODE</th>
+                                        <th>LOGO</th>
                                         <th>ADDRESS</th>
                                         <th>CONTACT NO</th>
                                         <th>EPF NO</th>
@@ -65,7 +66,7 @@
                     <div class="row">
                         <div class="col">
                             <span id="form_result"></span>
-                            <form method="post" id="formTitle">
+                            <form method="post" id="formTitle" enctype="multipart/form-data">
                                 {{ csrf_field() }}
                                 	
                                 <div class="form-row mb-1">
@@ -145,9 +146,22 @@
                                         <input type="text" name="account_branchcode" id="account_branchcode" class="form-control form-control-sm" />
                                     </div>
                                 </div>
-                                <div class="form-group mb-1">
-                                    <label class="small font-weight-bolder">Employee No</label>
-                                    <input type="text" name="employeeno" id="employeeno" class="form-control form-control-sm" />
+                                <div class="form-row mb-1">
+                                    <div class="col">
+                                        <label class="small font-weight-bolder">Employee No</label>
+                                        <input type="text" name="employeeno" id="employeeno" class="form-control form-control-sm" />
+                                    </div>
+                                    <div class="col">
+                                        <label class="small font-weight-bolder">Logo</label>
+                                        <input type="file" data-preview="#preview" class="form-control form-control-sm" name="logo" id="logo">
+                                        <div class="mt-1">
+                                            <img class="" id="preview" src="" style="max-width: 200px; max-height: 200px; width: auto; height: auto;">
+                                            <button type="button" id="remove_logo" class="btn btn-danger btn-sm mt-1" style="display:none;">
+                                                <i class="fas fa-trash-alt mr-1"></i>
+                                            </button>
+                                        </div>
+                                        <input type="hidden" name="remove_logo" id="remove_logo_flag" value="0" />
+                                    </div>
                                 </div>
 
                                 <div class="form-group mt-3">
@@ -198,6 +212,25 @@ $(document).ready(function(){
     $('#organization_menu_link').addClass('active');
     $('#organization_menu_link_icon').addClass('active');
     $('#companylink').addClass('navbtnactive');
+
+    $('#logo').on('change', function() {
+        var file = this.files[0];
+        if (file) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                $('#preview').attr('src', e.target.result);
+                $('#remove_logo').show();
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    $('#remove_logo').on('click', function() {
+        $('#preview').attr('src', '');
+        $('#logo').val('');
+        $('#remove_logo').hide();
+        $('#remove_logo_flag').val('1'); 
+    });
 
     $('#dataTable').DataTable({
         "destroy": true,
@@ -255,6 +288,13 @@ $(document).ready(function(){
             { 
                 data: 'code', 
                 name: 'code'
+            },
+            { 
+                data: 'logo', 
+                name: 'logo',
+                render: function(data) {
+                    return data ? '<img src="/' + data + '" style="max-height:40px;">' : '';
+                }
             },
             { 
                 data: 'address', 
@@ -333,11 +373,15 @@ $(document).ready(function(){
             action_url = "{{ route('Company.update') }}";
         }
 
+        var formData = new FormData(this); 
+
         $.ajax({
             url: action_url,
             method: "POST",
-            data: $(this).serialize(),
+            data: formData,
             dataType: "json",
+            processData: false,          
+            contentType: false,  
             success: function (data) {//alert(data);        
                 if (data.errors) {
                     const actionObj = {
@@ -394,6 +438,16 @@ $(document).ready(function(){
                     $('#account_branchcode').val(data.result.bank_account_branch_code);
                     $('#employeeno').val(data.result.employer_number);
                     $('#zone_code').val(data.result.zone_code);
+
+                    if (data.result.logo) {
+                        $('#preview').attr('src', '/' + data.result.logo);
+                        $('#remove_logo').show();
+                    } else {
+                        $('#preview').attr('src', '');
+                        $('#remove_logo').hide();
+                    }
+                    $('#remove_logo_flag').val('0'); 
+
                     $('#hidden_id').val(id);
                     $('.modal-title').text('Edit Company');
                     $('#action_button').html('Edit');
