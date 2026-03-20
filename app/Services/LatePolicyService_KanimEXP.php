@@ -2,15 +2,27 @@
 
 namespace App\Services;
 
+use App\Employee;
 use DB;
 use App\Leave;
 use Illuminate\Support\Facades\Auth;
+use App\Services\LeavepolicyService;
+use Carbon\Carbon;
 
 class LatePolicyService
 {
     /**
      * Process late attendance approval for an employee
      */
+
+     protected $leavePolicyService;
+
+    public function __construct(LeavepolicyService $leavePolicyService)
+    {
+        $this->leavePolicyService = $leavePolicyService;
+    }
+
+
     public function processLateAttendance($empData, $leaveType, $date)
     {
         // Get job category late policy
@@ -43,8 +55,8 @@ class LatePolicyService
 
 
         // Count late occurrences for this employee on this date
-        $d_count = DB::table('employee_late_attendances')
-             ->whereMonth('date', $month)
+         $d_count = DB::table('employee_late_attendances')
+            ->whereMonth('date', $month)
             ->whereYear('date', $year)
             ->where('emp_id', $empData->emp_id)
             ->count();
@@ -128,22 +140,77 @@ class LatePolicyService
     /**
      * Process Late Type 3 - Count based policy with minutes check
      */
+
     private function processLateType3($empData, $leaveType, $d_count, $shortleave, $halfday, $minitescount)
     {
         if ($d_count <= $shortleave) {
             $leaveamount = 0.25;
             $this->createLeaveRecord($empData, $leaveType, $leaveamount, $leaveamount);
-        } elseif ($d_count <= $halfday) {
-            $leaveamount = 0.5;
-            $this->createLeaveRecord($empData, $leaveType, $leaveamount, $leaveamount);
+
         } else {
-            if (!empty($minitescount)) {
-                $this->createLeaveRecord($empData, $leaveType, 0, 0);
-            }
-        }
+            $leaveamount = 0.5;
+
+            $balances = $this->getEmployeeLeaveBalances($empData->emp_id, $empData->date);
+            $applyLeaveType = ($balances && $balances[$leaveType] >= $leaveamount) ? $leaveType : 3;
+
+            $this->createLeaveRecord($empData, $applyLeaveType, $leaveamount, $leaveamount);
+        } 
     }
 
-    /**
+    private function getEmployeeLeaveBalances($emp_id,$date)
+    {
+        $employee = Employee::where('emp_id', $emp_id)->first();
+        
+        if (!$employee) {
+            return null;
+        }
+        
+        $empid = $employee->emp_id;
+        $job_categoryid = $employee->job_category_id;
+        $emp_join_date = $employee->emp_join_date;
+        
+        // Set current year dates
+        $formated_from_date = date('Y').'-01-01';
+        $formated_to_date = date('Y').'-12-31';
+        
+        // Get taken leaves for current year
+        $current_year_taken_a_l = (new \App\Leave)->taken_annual_leaves($empid, $formated_from_date, $formated_to_date);
+        $current_year_taken_c_l = (new \App\Leave)->taken_casual_leaves($empid, $formated_from_date, $formated_to_date);
+        $current_year_taken_med = (new \App\Leave)->taken_medical_leaves($empid, $formated_from_date, $formated_to_date);
+        
+
+        // Get current month's weekly leaves
+        $month_from_date = Carbon::parse($date)->startOfMonth()->format('Y-m-d');
+        $month_to_date = Carbon::parse($date)->endOfMonth()->format('Y-m-d');
+
+        $current_weekly_taken = (new \App\Leave)->taken_weekly_leaves($empid, $month_from_date, $month_to_date);
+        
+        // Calculate total available leaves
+        $annualData = $this->leavePolicyService->calculateAnnualLeaves($emp_join_date, $empid, $job_categoryid);
+        $total_annual_leaves = $annualData['annual_leaves'];
+        
+        $total_casual_leaves = $this->leavePolicyService->calculateCasualLeaves($emp_join_date, $job_categoryid);
+        $total_medical_leaves = $this->leavePolicyService->getMedicalLeaves($job_categoryid);
+        $total_weekly_leaves = $this->leavePolicyService->getweeklyLeaves($job_categoryid);
+        
+        // Calculate available balances
+        $available_annual = $total_annual_leaves - $current_year_taken_a_l;
+        $available_casual = $total_casual_leaves - $current_year_taken_c_l;
+        $available_medical = $total_medical_leaves - $current_year_taken_med;
+        $available_weekly = $total_weekly_leaves - $current_weekly_taken;
+        
+        // Return balances based on leave type or all balances
+        $balances = [
+                    1 => max(0, $available_annual),
+                    2 => max(0, $available_casual),
+                    4 => max(0, $available_medical),
+                    5 => max(0, $available_weekly),
+                ];
+        
+        return $balances;
+    }
+
+        /**
      * Create leave record
      */
     private function createLeaveRecord($empData, $leaveType, $noOfDays, $halfShort)
@@ -162,4 +229,6 @@ class LatePolicyService
         $leave->status = 'Pending';
         $leave->save();
     }
+
+
 }

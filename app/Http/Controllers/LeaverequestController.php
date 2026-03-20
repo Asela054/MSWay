@@ -135,23 +135,39 @@ class LeaverequestController extends Controller
     }
 
     public function getemployeeleaverequest(Request $request){
-        $emp_id = Request('emp_id');
 
         $data = DB::table('leave_request')
-        ->select('leave_request.*')
-        ->where('leave_request.emp_id', $emp_id)
-        ->where('leave_request.status', 1)
-        ->where('leave_request.approve_status',0)
-        ->where('leave_request.request_approve_status',1)
-        ->get(); 
+                ->select(
+                    'leave_request.id',
+                    'emp.emp_id',
+                    'emp.emp_name_with_initial',
+                    'emp.calling_name',
+                    'departments.name as department_name',
+                    'leave_types.leave_type',
+                    'leave_request.from_date as leave_from',
+                    'leave_request.to_date as leave_to',
+                    'leave_request.request_approve_status as approvestatus',
+                    'leave_request.leave_category',
+                    'leave_request.reason',
+                    'leaves.half_short',
+                    'leaves.status as leave_status'
+                )
+                ->join('employees as emp', 'leave_request.emp_id', '=', 'emp.emp_id')
+                ->leftJoin('departments', 'emp.emp_department', '=', 'departments.id')
+                ->leftJoin('leaves', 'leave_request.id', '=', 'leaves.request_id')
+                ->leftJoin('leave_types', 'leaves.leave_type', '=', 'leave_types.id')
+                ->where('leave_request.status', 1)
+                ->where('leave_request.approve_status', 0)
+                ->where('leave_request.request_approve_status', 1)
+                ->get();
 
         $html = '';
 
         foreach ($data as $row) {
             $html .= '<tr>';
-            $html .= '<td>' . $row->from_date . '</td>';  
-            $html .= '<td>' . $row->to_date . '</td>'; 
-            
+            $html .= '<td>' . $row->emp_id . '</td>'; 
+            $html .= '<td>' . $row->emp_name_with_initial. ' - ' . $row->calling_name. '</td>';  
+            $html .= '<td>' . $row->department_name . '</td>';  
             $leaveType = '';
             if ($row->leave_category == 0.25) {
                 $leaveType = 'Short Leave';
@@ -160,9 +176,11 @@ class LeaverequestController extends Controller
             } elseif ($row->leave_category == 1.0) {
                 $leaveType = 'Full Day';
             }
-        
-            $html .= '<td>' . $leaveType . '</td>'; 
-            $html .= '<td class="text-right"><button name="addrequest" id="' . $row->id . '" class="addrequest btn btn-outline-primary btn-sm"><i class="fas fa-plus"></i></button></td>';
+            $html .= '<td>' . $leaveType . '</td>';
+            $html .= '<td>' .$row->leave_from . '</td>';  
+            $html .= '<td>' . $row->leave_to . '</td>'; 
+            $html .= '<td>' . $row->reason . '</td>';  
+            $html .= '<td class="text-right"><button name="addrequest" id="' . $row->id . '" class="addrequest btn btn-primary btn-sm"><i class="fas fa-plus"></i></button></td>';
             $html .= '</tr>';
         }
         
