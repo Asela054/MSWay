@@ -16,6 +16,9 @@ $columns = array(
     array('db' => '`u`.`amount`', 'dt' => 'amount', 'field' => 'amount'),
     array('db' => '`u`.`Produce_qty`', 'dt' => 'Produce_qty', 'field' => 'Produce_qty'),
     array('db' => '`u`.`precentage`', 'dt' => 'precentage', 'field' => 'precentage'),
+    array('db' => '`u`.`damage_precentage`', 'dt' => 'damage_precentage', 'field' => 'damage_precentage'),
+    array('db' => '`u`.`damage_qty`', 'dt' => 'damage_qty', 'field' => 'damage_qty'),
+    array('db' => '`u`.`perfomance`', 'dt' => 'perfomance', 'field' => 'perfomance'),
     array('db' => '`u`.`description`', 'dt' => 'description', 'field' => 'description')
 );
 
@@ -41,7 +44,10 @@ $sql = "SELECT
         `ep`.`amount`,
         `ep`.`description`,
         `ep`.`Produce_qty`,
-        `ep`.`precentage`
+        `ep`.`precentage`,
+        `ep`.`damage_precentage`,
+        `ep`.`damage_qty`,
+        `ep`.`perfomance`
     FROM `opma_employee_production` AS `ep`
     LEFT JOIN `opma_machines` AS `m` ON `ep`.`machine_id` = `m`.`id`
     LEFT JOIN `opma_styles` AS `p` ON `ep`.`product_id` = `p`.`id`

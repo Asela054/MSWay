@@ -38,8 +38,9 @@
                                         <th>DATE</th>
                                         <th>MACHINE</th>
                                         <th>PRODUCT</th>
+                                        <th>PERFORMANCE</th>
                                         <th>QTY</th>
-                                        <th>Unit Price</th>
+                                        <th>DAMAGE QTY</th>
                                         <th>AMOUNT</th>
                                     </tr>
                                 </thead>
@@ -47,7 +48,7 @@
                                 </tbody>
                                 <tfoot>
                                     <tr>
-                                        <th colspan="5" style="text-align: right">Totals:</th>
+                                        <th colspan="6" style="text-align: right">Totals:</th>
                                         <th></th>
                                         <th></th>
                                         <th></th>
@@ -204,7 +205,7 @@ $(document).ready(function(){
                         $(win.document.body).find('table')
                             .addClass('compact')
                             .css('font-size', 'inherit')
-                            .find('td:nth-child(6), td:nth-child(7), td:nth-child(8), th:nth-child(6), th:nth-child(7), th:nth-child(8)')
+                            .find('td:nth-child(7), td:nth-child(8), td:nth-child(9), th:nth-child(7), th:nth-child(8), th:nth-child(9)')
                             .css('text-align', 'right');
                         
                         // Style the footer in print
@@ -220,7 +221,7 @@ $(document).ready(function(){
                 
                 // Calculate total for Produce_qty (column 5)
                 var produceQtyTotal = api
-                    .column( 5, { page: 'current'} )
+                    .column( 6, { page: 'current'} )
                     .data()
                     .reduce( function (a, b) {
                         var aNum = parseFloat(a) || 0;
@@ -230,7 +231,7 @@ $(document).ready(function(){
                 
                 // Calculate total for amount (column 7)
                 var amountTotal = api
-                    .column( 7, { page: 'current'} )
+                    .column( 8, { page: 'current'} )
                     .data()
                     .reduce( function (a, b) {
                         var aNum = parseFloat(a) || 0;
@@ -240,7 +241,7 @@ $(document).ready(function(){
                 
                 // Calculate total for unit_price (column 6)
                 var unitPriceTotal = api
-                    .column( 6, { page: 'current'} )
+                    .column( 7, { page: 'current'} )
                     .data()
                     .reduce( function (a, b) {
                         var aNum = parseFloat(a) || 0;
@@ -275,15 +276,15 @@ $(document).ready(function(){
                 }
                 
                 // Update footer
-                $( api.column( 5 ).footer() ).html(
+                $( api.column( 6 ).footer() ).html(
                     formattedProduceQty ? '<strong>' + formattedProduceQty + '</strong>' : ''
                 );
                 
-                $( api.column( 6 ).footer() ).html(
+                $( api.column( 7 ).footer() ).html(
                     formattedUnitPriceTotal ? '<strong>' + formattedUnitPriceTotal + '</strong>' : ''
                 );
                 
-                $( api.column( 7 ).footer() ).html(
+                $( api.column( 8 ).footer() ).html(
                     formattedAmount ? '<strong>' + formattedAmount + '</strong>' : ''
                 );
             },
@@ -291,7 +292,7 @@ $(document).ready(function(){
                 [0, "desc"]
             ],
             ajax: {
-                url: scripturl + '/employee_production_list.php',
+                url: scripturl + "/Opma_Production/employee_production_list.php",
                 type: 'POST',
                 data : 
                     {machine :machine, 
@@ -306,6 +307,30 @@ $(document).ready(function(){
                 { data: 'date', name: 'date' },
                 { data: 'machine', name: 'machine' },
                 { data: 'product', name: 'product' },
+                { 
+                    data: 'perfomance', 
+                    name: 'perfomance',
+                    className: 'text-right',
+                    render: function(data, type, row) {
+                        if (data === null || data === undefined || data === '' || isNaN(data)) {
+                            if (type === 'display' || type === 'filter') {
+                                return '';
+                            }
+                            return 0;
+                        }
+                        
+                        if (type === 'display' || type === 'filter') {
+                            return parseFloat(data).toLocaleString('en-US', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                            }) + '%';
+                        }
+                        if (type === 'sort' || type === 'type') {
+                            return parseFloat(data);
+                        }
+                        return data;
+                    }
+                },
                 { 
                     data: 'Produce_qty', 
                     name: 'Produce_qty',
@@ -331,8 +356,8 @@ $(document).ready(function(){
                     }
                 },
                 { 
-                    data: 'unit_price', 
-                    name: 'unit_price',
+                    data: 'damage_qty', 
+                    name: 'damage_qty',
                     className: 'text-right',
                     render: function(data, type, row) {
                         if (data === null || data === undefined || data === '' || isNaN(data)) {
@@ -381,7 +406,7 @@ $(document).ready(function(){
             ],
             "columnDefs": [
                 {
-                    "targets": [5, 6, 7],
+                    "targets": [6, 7,8],
                     "type": "num",
                     "render": function(data, type, row) {
                         if (data === null || data === undefined || data === '' || isNaN(data)) {

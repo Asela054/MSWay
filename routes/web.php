@@ -1748,10 +1748,8 @@ Route::post('/opma_productallocationdeletelist' ,'Production_Module_Opma\Product
  
    Route::get('/opma_employeeproductionreport' ,'Production_Module_Opma\ProductionEndingController@employeeproduction')->name('opma_employeeproductionreport');
 
-  
-
-// // Production Reports 
-// Route::get('/reportemployeeproduction' ,'Production_Module\ProductionreportController@index')->name('reportemployeeproduction');
+ // Production Reports 
+Route::get('/opma_reportemployeeproduction' ,'Production_Module_Opma\ProductionreportController@index')->name('opma_reportemployeeproduction');
 
 
                   // End of Opma Production Section Routes

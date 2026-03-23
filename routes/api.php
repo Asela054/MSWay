@@ -121,6 +121,11 @@ Route::post('v1/download_payslip', ['uses' => '\App\Http\Controllers\Api\APIPayr
 
 Route::post('/attendancesyncAPI', ['uses' => '\App\Http\Controllers\AttendanceSyncAPIController@index', 'as' => 'attendancesyncAPI']);
 
+
+//Production API list
+Route::post('v1/GetproductionList_opma', ['uses' => '\App\Http\Controllers\Api\OPMA_APIProductionDashboardController@GetproductionList', 'as' => 'GetproductionList_opma']);
+
+
 Route::get('/download-pdf/{pdfId}', function($pdfId) {
     $pdfData = session()->get($pdfId);
     
