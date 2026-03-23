@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Production_Module;
+namespace App\Http\Controllers\Production_Module_Opma;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -12,7 +12,7 @@ class ProductionreportController extends Controller
      public function index()
     {
         $user = Auth::user();
-        $permission = $user->can('employee-production-report');
+        $permission = $user->can('opma-employee-production-report');
           if (!$permission) {
             abort(403);
         }
@@ -25,6 +25,6 @@ class ProductionreportController extends Controller
             ->select('id', 'productname')
             ->get();
 
-        return view('Production_Reports.rpt_employee_production', compact('machines', 'products'));
+        return view('Opma_Production.Production_Reports.rpt_employee_production', compact('machines', 'products'));
     }
 }

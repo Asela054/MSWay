@@ -101,8 +101,8 @@
                                     </div>
                                     
                                     <div class="col-sm-12 col-md-3">
-                                        <label class="small font-weight-bolder">Damage Quantity</label>
-                                        <input type="number" step="any" name="damage_qty" id="damage_qty" class="form-control form-control-sm"/>
+                                        <label class="small font-weight-bolder">Damage Quantity*</label>
+                                        <input type="number" step="any" name="damage_qty" id="damage_qty" class="form-control form-control-sm" required/>
                                     </div>
                                     
                                     <div class="col-sm-12 col-md-6">
