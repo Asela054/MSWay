@@ -32,6 +32,7 @@ $columns = array(
 	array( 'db' => '`u`.`id`', 'dt' => 'id', 'field' => 'id' ),
 	array( 'db' => '`u`.`name`', 'dt' => 'name', 'field' => 'name' ),
 	array( 'db' => '`u`.`code`', 'dt' => 'code', 'field' => 'code' ),
+	array( 'db' => '`u`.`logo`', 'dt' => 'logo', 'field' => 'logo' ),
 	array( 'db' => '`u`.`address`', 'dt' => 'address', 'field' => 'address' ),
 	array( 'db' => '`u`.`mobile`', 'dt' => 'mobile', 'field' => 'mobile' ),
 	array( 'db' => '`u`.`land`', 'dt' => 'land', 'field' => 'land' ),

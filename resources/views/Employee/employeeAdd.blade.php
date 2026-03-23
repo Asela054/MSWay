@@ -260,8 +260,8 @@
                                         @endif
                                     </div>
                                     <div class="col">
-                                        <label class="small font-weight-bolder">Mobile Number*</label>
-                                        <input type="text" name="emp_mobile" id="emp_mobile" class="form-control form-control-sm {{ $errors->has('emp_mobile') ? ' has-error' : '' }}" required />
+                                        <label class="small font-weight-bolder">Mobile Number</label>
+                                        <input type="text" name="emp_mobile" id="emp_mobile" class="form-control form-control-sm {{ $errors->has('emp_mobile') ? ' has-error' : '' }}" />
                                         @if ($errors->has('emp_mobile'))
                                             <span class="help-block">
                                                 <strong>{{ $errors->first('emp_mobile') }}</strong>

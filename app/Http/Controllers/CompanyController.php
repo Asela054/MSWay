@@ -83,6 +83,15 @@ class CompanyController extends Controller
         $company->ref_no = $request->input('ref_no');
         $company->vat_reg_no = $request->input('vat_reg_no');
         $company->svat_no = $request->input('svat_no');
+
+        if ($request->hasFile('logo')) {
+            $companyName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $request->input('name'));
+            $extension = $request->file('logo')->getClientOriginalExtension();
+            $fileName = $companyName . '.' . $extension;
+            $request->file('logo')->move(public_path('images'), $fileName);
+            $company->logo = 'images/' . $fileName;
+        }
+    
         $company->save();
 
         return response()->json(['success' => 'Company Added successfully.']);
@@ -155,6 +164,30 @@ class CompanyController extends Controller
             'vat_reg_no' => $request->vat_reg_no,
             'svat_no' => $request->svat_no
         );
+
+        if ($request->hasFile('logo')) {
+            $companyName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $request->name);
+            $extension = $request->file('logo')->getClientOriginalExtension();
+            $fileName = $companyName . '.' . $extension;
+            $request->file('logo')->move(public_path('images'), $fileName);
+            $form_data['logo'] = 'images/' . $fileName;
+
+        } elseif ($request->input('remove_logo') == '1') {
+            $existing = Company::find($request->hidden_id);
+            if ($existing && $existing->logo) {
+                $oldPath = public_path($existing->logo);
+                if (file_exists($oldPath)) {
+                    unlink($oldPath); 
+                }
+            }
+            $form_data['logo'] = null;
+
+        } else {
+            $existing = Company::find($request->hidden_id);
+            if ($existing && $existing->logo) {
+                $form_data['logo'] = $existing->logo;
+            }
+        }
 
         Company::whereId($request->hidden_id)->update($form_data);
 
