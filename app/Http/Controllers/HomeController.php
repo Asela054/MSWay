@@ -420,6 +420,7 @@ class HomeController extends Controller
             'employees.emp_name_with_initial', 
             'employees.emp_department', 
             'employee_pictures.emp_pic_filename',
+            'employees.emp_shift',
             DB::raw('MIN(attendances.timestamp) as first_checkin'), 
             DB::raw('MAX(attendances.timestamp) as lasttimestamp')
         )
@@ -437,6 +438,24 @@ class HomeController extends Controller
             $departmentId = $employee->emp_department;
             $first_time = date('H:i', strtotime($employee->first_checkin));
 
+            $emprosterinfo = DB::table('employee_roster_details')
+                ->select('emp_id', 'shift_id')
+                ->where('emp_id', $employee->emp_id)
+                ->where('work_date', $today)
+                ->first();
+
+            if ($emprosterinfo) {
+                $empshiftid = $emprosterinfo->shift_id;   
+            }
+            else {
+                $empshiftid = $employee->emp_shift;
+            }
+
+            $shiftinfo = DB::table('shift_types')
+                ->select('off_next_day')
+                ->where('id', $empshiftid)
+                ->first();
+
             if (isset($departmentMap[$departmentId])) {
                 if (!isset($employeesByDepartment[$departmentMap[$departmentId]])) {
                     $employeesByDepartment[$departmentMap[$departmentId]] = [];
@@ -446,11 +465,11 @@ class HomeController extends Controller
                     'emp_id' => $employee->emp_id,
                     'emp_name_with_initial' => $employee->emp_name_with_initial,
                     'first_checkin' => $first_time,
-                    'emp_pic_filename' => $employee->emp_pic_filename
+                    'emp_pic_filename' => $employee->emp_pic_filename,
+                    'off_next_day' => $shiftinfo ? $shiftinfo->off_next_day : 0
                 ];
             }
         }
-
 
             $htmlTables = '';
 
@@ -478,7 +497,7 @@ class HomeController extends Controller
                                 : asset("images/girl.png");
                         }
 
-                        $htmlTables .= '<tr>';
+                        $htmlTables .= '<tr class="' . ($employee['off_next_day'] == 1 ? 'table-warning' : '') . '">';
                         $htmlTables .= '<td class="align-middle text-center">' . $count . '</td>';
                         $htmlTables .= '<td class="align-middle text-center"><img style="height: 2.5rem;width: 2.5rem;border-radius: 100%;" src="' . $imagePath . '" alt="Employee Photo"/></td>';
                         $htmlTables .= '<td class="align-middle text-center">' . $employee['emp_id'] . '</td>';
@@ -516,6 +535,7 @@ class HomeController extends Controller
             'employees.emp_name_with_initial', 
             'employees.emp_department', 
             'employee_pictures.emp_pic_filename',
+            'employees.emp_shift',
             DB::raw('MIN(attendances.timestamp) as first_checkin'), 
             DB::raw('MAX(attendances.timestamp) as lasttimestamp')
         )
@@ -534,6 +554,24 @@ class HomeController extends Controller
             $departmentId = $employee->emp_department;
             $first_time = date('H:i', strtotime($employee->first_checkin));
 
+            $emprosterinfo = DB::table('employee_roster_details')
+                ->select('emp_id', 'shift_id')
+                ->where('emp_id', $employee->emp_id)
+                ->where('work_date', $today)
+                ->first();
+
+            if ($emprosterinfo) {
+                $empshiftid = $emprosterinfo->shift_id;   
+            }
+            else {
+                $empshiftid = $employee->emp_shift;
+            }
+
+            $shiftinfo = DB::table('shift_types')
+                ->select('off_next_day')
+                ->where('id', $empshiftid)
+                ->first();
+
             if (isset($departmentMap[$departmentId])) {
                 if (!isset($employeesByDepartment[$departmentMap[$departmentId]])) {
                     $employeesByDepartment[$departmentMap[$departmentId]] = [];
@@ -543,7 +581,8 @@ class HomeController extends Controller
                     'emp_id' => $employee->emp_id,
                     'emp_name_with_initial' => $employee->emp_name_with_initial,
                     'first_checkin' => $first_time,
-                    'emp_pic_filename' => $employee->emp_pic_filename
+                    'emp_pic_filename' => $employee->emp_pic_filename,
+                    'off_next_day' => $shiftinfo ? $shiftinfo->off_next_day : 0
                 ];
             }
         }
@@ -575,7 +614,7 @@ class HomeController extends Controller
                                 : asset("images/girl.png");
                         }
 
-                        $htmlTables .= '<tr>';
+                        $htmlTables .= '<tr class="' . ($employee['off_next_day'] == 1 ? 'table-warning' : '') . '">';
                         $htmlTables .= '<td class="align-middle text-center">' . $count . '</td>';
                         $htmlTables .= '<td class="align-middle text-center"><img style="height: 2.5rem;width: 2.5rem;border-radius: 100%;" src="' . $imagePath . '" alt="Employee Photo"/></td>';
                         $htmlTables .= '<td class="align-middle text-center">' . $employee['emp_id'] . '</td>';
@@ -726,6 +765,7 @@ class HomeController extends Controller
             'employees.emp_name_with_initial', 
             'employees.emp_department', 
             'employee_pictures.emp_pic_filename',
+            'employees.emp_shift',
             DB::raw('MIN(attendances.timestamp) as first_checkin'), 
             DB::raw('MAX(attendances.timestamp) as lasttimestamp')
         )
@@ -744,6 +784,24 @@ class HomeController extends Controller
             $first_time = date('H:i', strtotime($employee->first_checkin));
             $last_time = date('H:i', strtotime($employee->lasttimestamp));
 
+            $emprosterinfo = DB::table('employee_roster_details')
+                ->select('emp_id', 'shift_id')
+                ->where('emp_id', $employee->emp_id)
+                ->where('work_date', $yesterdayDate)
+                ->first();
+
+            if ($emprosterinfo) {
+                $empshiftid = $emprosterinfo->shift_id;   
+            }
+            else {
+                $empshiftid = $employee->emp_shift;
+            }
+
+            $shiftinfo = DB::table('shift_types')
+                ->select('off_next_day')
+                ->where('id', $empshiftid)
+                ->first();
+
             if($first_time==$last_time){
                 $last_time='00-00';
             }
@@ -758,7 +816,8 @@ class HomeController extends Controller
                     'emp_name_with_initial' => $employee->emp_name_with_initial,
                     'first_checkin' => $first_time,
                     'lasttimestamp' => $last_time,
-                    'emp_pic_filename' => $employee->emp_pic_filename
+                    'emp_pic_filename' => $employee->emp_pic_filename,
+                    'off_next_day' => $shiftinfo ? $shiftinfo->off_next_day : 0
                 ];
             }
         }
@@ -790,7 +849,7 @@ class HomeController extends Controller
                                 : asset("images/girl.png");
                         }
 
-                        $htmlTables .= '<tr>';
+                        $htmlTables .= '<tr class="' . ($employee['off_next_day'] == 1 ? 'table-warning' : '') . '">';
                         $htmlTables .= '<td class="align-middle text-center">' . $count . '</td>';
                         $htmlTables .= '<td class="align-middle text-center"><img style="height: 2.5rem;width: 2.5rem;border-radius: 100%;" src="' . $imagePath . '" alt="Employee Photo"/></td>';
                         $htmlTables .= '<td class="align-middle text-center">' . $employee['emp_id'] . '</td>';
@@ -829,6 +888,7 @@ class HomeController extends Controller
             'employees.emp_name_with_initial', 
             'employees.emp_department', 
             'employee_pictures.emp_pic_filename',
+            'employees.emp_shift',
             DB::raw('MIN(attendances.timestamp) as first_checkin'), 
             DB::raw('MAX(attendances.timestamp) as lasttimestamp')
         )
@@ -848,6 +908,24 @@ class HomeController extends Controller
             $first_time = date('H:i', strtotime($employee->first_checkin));
             $last_time = date('H:i', strtotime($employee->lasttimestamp));
 
+            $emprosterinfo = DB::table('employee_roster_details')
+                ->select('emp_id', 'shift_id')
+                ->where('emp_id', $employee->emp_id)
+                ->where('work_date', $yesterdayDate)
+                ->first();
+
+            if ($emprosterinfo) {
+                $empshiftid = $emprosterinfo->shift_id;   
+            }
+            else {
+                $empshiftid = $employee->emp_shift;
+            }
+
+            $shiftinfo = DB::table('shift_types')
+                ->select('off_next_day')
+                ->where('id', $empshiftid)
+                ->first();
+
             if($first_time==$last_time){
                 $last_time='00-00';
             }
@@ -862,7 +940,8 @@ class HomeController extends Controller
                     'emp_name_with_initial' => $employee->emp_name_with_initial,
                     'first_checkin' => $first_time,
                     'lasttimestamp' => $last_time,
-                    'emp_pic_filename' => $employee->emp_pic_filename
+                    'emp_pic_filename' => $employee->emp_pic_filename,
+                    'off_next_day' => $shiftinfo ? $shiftinfo->off_next_day : 0
                 ];
             }
         }
@@ -894,7 +973,7 @@ class HomeController extends Controller
                                 : asset("images/girl.png");
                         }
 
-                        $htmlTables .= '<tr>';
+                        $htmlTables .= '<tr class="' . ($employee['off_next_day'] == 1 ? 'table-warning' : '') . '">';
                         $htmlTables .= '<td class="align-middle text-center">' . $count . '</td>';
                         $htmlTables .= '<td class="align-middle text-center"><img style="height: 2.5rem;width: 2.5rem;border-radius: 100%;" src="' . $imagePath . '" alt="Employee Photo"/></td>';
                         $htmlTables .= '<td class="align-middle text-center">' . $employee['emp_id'] . '</td>';
