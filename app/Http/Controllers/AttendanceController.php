@@ -885,12 +885,12 @@ class AttendanceController extends Controller
         fclose($content);
 
         $unique_arr = array_unique($data);
-
+        
         foreach ($unique_arr as $line){
 
                     // Split the line into parts using whitespace or tabs
                     $parts = preg_split('/\s+/', trim($line));
-
+                    
                     if (count($parts) < 2) {
                         continue;
                     }
@@ -903,7 +903,7 @@ class AttendanceController extends Controller
                     $full_emp_id = $emp_id;
            
                     $timestamp = $time_h . ':' . $time_m . ':' . $time_s;
-
+    
                     if($companytype == 0){
                          $this->attendancePolicyService->attendanceInsertcsv_txt( $full_emp_id,  $date_input, $timestamp, $date );
                     }else{

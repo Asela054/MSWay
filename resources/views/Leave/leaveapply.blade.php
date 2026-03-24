@@ -71,7 +71,7 @@
          <!-- Modal Area Start -->
          <div class="modal fade" id="formModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
          aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header p-2">
                     <h5 class="modal-title" id="staticBackdropLabel">Add Leave</h5>
@@ -86,7 +86,7 @@
                             <form method="post" id="formTitle" class="form-horizontal">
                                 {{ csrf_field() }}
                                 <div class="form-row mb-1">
-                                    <div class="col-sm-12 col-md-6">
+                                    <div class="col-sm-12 col-md-12">
                                         <label class="small font-weight-bolder text-dark">Leave Type</label>
                                         <select name="leavetype" id="leavetype"
                                                 class="form-control form-control-sm">
@@ -97,16 +97,24 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                    <div class="col-sm-12 col-md-6">
-                                        <label class="small font-weight-bolder text-dark">Select Employee</label>
-                                        <select name="employee" id="employee_f" class="form-control form-control-sm">
-                                            <option value="">Select</option>
-
+                                </div>
+                                <div class="form-row mb-1">
+                                    <div class="col-sm-12 col-md-12">
+                                      <label class="small font-weight-bolder text-dark">Select Employee</label>
+                                        <select name="employee" id="employee_f" class="form-control form-control-sm" readonly>
+                                            <option value="">Select Employee</option>
+                                            @foreach($leaveemployees as $leaveemployee)
+                                            <option value="{{ $leaveemployee->emp_id }}">
+                                                {{ $leaveemployee->emp_name_with_initial }}
+                                                {{ $leaveemployee->calling_name ? ' - ' . $leaveemployee->calling_name : '' }}
+                                            </option>
+                                            @endforeach
                                         </select>
                                     </div>
                                 </div>
+
                                 <div class="form-row mb-1">
-                                    <div class="col-sm-12 col-md-6">
+                                    <div class="col-sm-12 col-md-12">
                                         <table class="table table-sm small">
                                             <thead>
                                                 <tr>
@@ -145,24 +153,10 @@
                                         </table>
                                         <span id="leave_msg"></span>
                                     </div>
-                                    <div class="col-sm-12 col-md-6">
-                                        <table class="table table-sm small">
-                                            <thead>
-                                                <tr>
-                                                    <th>From Date</th>
-                                                    <th>To Date</th>
-                                                    <th>Type</th>
-                                                    <th>Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="requestbody">
-                                            </tbody>
-                                        </table>
-                                    </div>
                                 </div>
 
                                 <div class="form-row mb-1">
-                                    <div class="col-sm-12 col-md-6">
+                                    <div class="col-sm-12 col-md-12">
                                         <label class="small font-weight-bolder text-dark">Covering Employee</label>
                                         <select name="coveringemployee" id="coveringemployee"
                                             class="form-control form-control-sm">
@@ -171,12 +165,12 @@
                                     </div>
                                 </div>
                                 <div class="form-row mb-1">
-                                    <div class="col-sm-6 col-md-3">
+                                    <div class="col-sm-12 col-md-6">
                                         <label class="small font-weight-bolder text-dark">From</label>
                                         <input type="date" name="fromdate" id="fromdate"
                                             class="form-control form-control-sm" placeholder="YYYY-MM-DD" />
                                     </div>
-                                    <div class="col-sm-6 col-md-3">
+                                    <div class="col-sm-12 col-md-6">
                                         <label class="small font-weight-bolder text-dark">To</label>
                                         <input type="date" name="todate" id="todate"
                                             class="form-control form-control-sm" placeholder="YYYY-MM-DD" />
@@ -200,13 +194,25 @@
                                             class="form-control form-control-sm" required />
                                     </div>
                                 </div>
-                                <div class="row">
+                                <div class="form-row mb-1" id="short_leave_time_range" style="display: none;">
                                     <div class="col-sm-12 col-md-6">
+                                        <label class="small font-weight-bolder text-dark">From Time</label>
+                                        <input type="time" name="from_time" id="from_time" class="form-control form-control-sm"/>
+                                    </div>
+                                    <div class="col-sm-12 col-md-6">
+                                        <label class="small font-weight-bolder text-dark">To Time</label>
+                                        <input type="time" name="to_time" id="to_time" class="form-control form-control-sm"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12 col-md-12">
                                         <label class="small font-weight-bolder text-dark">Reason</label>
                                         <input type="text" name="reson" id="reson"
                                             class="form-control form-control-sm" />
                                     </div>
-                                    <div class="col-sm-12 col-md-6">
+                                </div>
+                                 <div class="form-row mb-1">
+                                    <div class="col-sm-12 col-md-12">
                                         <label class="small font-weight-bolder text-dark">Approve Person</label>
                                         <select name="approveby" id="approveby" class="form-control form-control-sm">
                                             <option value="">Select</option>
@@ -216,7 +222,7 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                </div>
+                                 </div>
 
                                 <div class="form-group d-none">
                                     <label class="small font-weight-bolder text-dark">Email Body</label>
@@ -244,6 +250,45 @@
         </div>
     </div>
 
+
+     <div class="modal fade" id="formModalleaverequests" data-backdrop="static" data-keyboard="false" tabindex="-1"
+         aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content">
+                <div class="modal-header p-2">
+                    <h5 class="modal-title" id="staticBackdropLabel">Add Leave</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col">
+                            <span id="form_result"></span>
+                           <div class="center-block fix-width scroll-inner">
+                            <table class="table table-striped table-bordered table-sm small nowrap display" style="width: 100%" id="divicestable">
+                                <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>EMPLOYEE</th>
+                                    <th>DEPARTMENT</th>
+                                    <th>REQUEST LEAVE</th>
+                                    <th>LEAVE FROM</th>
+                                    <th>LEAVE TO</th>
+                                    <th>REASON</th>
+                                    <th class="text-right">ACTION</th>
+                                </tr>
+                                </thead>
+                               <tbody id="requestbody">
+                                </tbody>
+                            </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
         <!-- Modal Area End -->
     </main>
 
@@ -264,6 +309,8 @@
             let department_f = $('#department');
             let employee_f = $('#employee');
             let location_f = $('#location');
+
+            getleaverequests();
 
             company_f.select2({
                 placeholder: 'Select...',
@@ -326,25 +373,6 @@
                 allowClear: true,
                 ajax: {
                     url: '{{url("location_list_sel2")}}',
-                    dataType: 'json',
-                    data: function(params) {
-                        return {
-                            term: params.term || '',
-                            page: params.page || 1
-                        }
-                    },
-                    cache: true
-                }
-            });
-
-            let employee = $('#employee_f');
-            employee.select2({
-                placeholder: 'Select...',
-                width: '100%',
-                allowClear: true,
-                parent: '#formModal',
-                ajax: {
-                    url: '{{url("employee_list_leaverequest")}}',
                     dataType: 'json',
                     data: function(params) {
                         return {
@@ -595,8 +623,6 @@
                      $('#departmentheademail').val(data.result.department_head_email);
                     }
                 });
-
-                getleaverequests(emp_id);
             }
 
         });
@@ -672,13 +698,9 @@
         });
 
         $(document).ready(function () {
-            $('#create_record').click(function () {
-                $('.modal-title').text('Apply Leave');
-                $('#action_button').val('Add');
-                $('#action').val('Add');
-                $('#form_result').html('');
 
-                $('#formModal').modal('show');
+            $('#create_record').click(function () {
+                $('#formModalleaverequests').modal('show');
             });
 
             $('#formTitle').on('submit', function (event) {
@@ -826,7 +848,7 @@
                             $('#employee_f').val(data.result.emp_id);
                             $('#fromdate').val(data.result.leave_from);
                             $('#todate').val(data.result.leave_to);
-                            $('#half_short').val(data.result.half_short);
+                            $('#half_short').val(data.result.half_short).trigger('change');
                             $('#no_of_days').val(data.result.no_of_days);
                             $('#reson').val(data.result.reson);
                             $('#comment').val(data.result.comment);
@@ -888,20 +910,24 @@
                     id: id
                 },
                 success: function (data) {
+                    $('#leavetype').val(data.result.leave_type);
+                    $('#employee_f').val(data.result.emp_id).trigger('change');
                     $('#fromdate').val(data.result.from_date);
                     $('#todate').val(data.result.to_date);
-                    $('#half_short').val(data.result.leave_category);
                     $('#reson').val(data.result.reason);
                     $('#request_id').val(id);
+                    $('#half_short').val(data.result.leave_category).trigger('change');
+                    $('#from_time').val(data.result.from_time);
+                    $('#to_time').val(data.result.to_time);
 
                     var fromdate = data.result.from_date;
                     var todate = data.result.to_date;
-
                     var _token = $('input[name="_token"]').val();
                     var leavetype = $('#leavetype').val();
                     var emp_id = $('#employee_f').val();
                     var status = $('#employee_f option:selected').data('id');
 
+                    
                     if (leavetype != '' && emp_id != ''&& fromdate != ''&& todate != '') {
                         $.ajax({
                             url: "getEmployeeLeaveStatus",
@@ -938,14 +964,41 @@
 
                     show_no_of_days();
 
-
+                    $('#formModal').modal('show');
+                     $('#formModalleaverequests').modal('hide');
                 }
             })
         });
 
+        $('#half_short').on('change', function() {
+            const timeRangeDiv = document.getElementById('short_leave_time_range');
+            const fromTimeInput = document.getElementById('from_time');
+            const toTimeInput = document.getElementById('to_time');
+            
+            if (this.value === '0.25') {
+                timeRangeDiv.style.display = 'flex';
+                fromTimeInput.required = true;
+                toTimeInput.required = true;
+
+                if ($('#from_time').val()) {
+                    fromTimeInput.value = $('#from_time').val();
+                }
+                if ($('#to_time').val()) {
+                    toTimeInput.value = $('#to_time').val();
+                }
+            } else {
+                timeRangeDiv.style.display = 'none';
+                fromTimeInput.required = false;
+                toTimeInput.required = false;
+                fromTimeInput.value = '';
+                toTimeInput.value = '';
+            }
+        });
 
 
-    function getleaverequests(employee) {
+
+
+    function getleaverequests() {
         $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -956,9 +1009,6 @@
             url: '{!! route("employeeleaverequest") !!}',
             type: 'POST',
             dataType: "json",
-            data: {
-                emp_id: employee
-            },
             success: function (data) {
                 var reuestlist = data.result;
                 $("#requestbody").html(reuestlist);
@@ -1059,6 +1109,8 @@
             });
         }
     }
+
+    
     </script>
 
 @endsection

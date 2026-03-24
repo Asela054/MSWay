@@ -44,8 +44,23 @@ class LeaveController extends Controller
 
        $leavetype = LeaveType::whereNotIn('id', [7])->orderBy('id', 'asc')->get();
        $employees = Employee::where('leave_approve_person', 1)->get();
+      $leaveemployees = DB::table('leave_request')
+                        ->select(
+                            'employees.emp_id',
+                            'employees.emp_name_with_initial',
+                            'employees.calling_name'
+                        )
+                        ->leftJoin('leaves', function($join) {
+                            $join->on('leave_request.id', '=', 'leaves.request_id');
+                        })
+                        ->leftJoin('employees', 'leave_request.emp_id', '=', 'employees.emp_id')
+                        ->where('leave_request.status', 1)
+                        ->where('leave_request.request_approve_status', 1)
+                        ->whereNull('leaves.id')
+                        ->distinct()
+                        ->get();
 
-        return view('Leave.leaveapply', compact('leavetype', 'employees'));
+        return view('Leave.leaveapply', compact('leavetype', 'employees','leaveemployees'));
     }
 
     public function leave_list_dt(Request $request)
@@ -744,8 +759,6 @@ class LeaveController extends Controller
             'success' => $status == 'Rejected' ? 'Leave Rejected' : 'Leave Approved'
         ]);
     }
-
-
 
     public function calculateWorkingDays(Request $request)
     {

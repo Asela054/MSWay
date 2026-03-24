@@ -13,8 +13,7 @@ class AttendancePolicyService
 {
 
     public function attendanceInsertcsv_txt($full_emp_id, $date_input, $timestamp, $date)
-    {
-        
+    { 
          $empshift = DB::table('employees')
             ->select('emp_id', 'emp_shift','emp_location')
             ->where('emp_id', $full_emp_id)
@@ -36,24 +35,35 @@ class AttendancePolicyService
                     $empshiftid = $emprosterinfo->shift_id;   
                 }
                 else {
-                    $empshiftid = $empshift->emp_shift;
-                }
+                    $previous_day = (new DateTime($date_input))->modify('-1 day')->format('Y-m-d');
+                    $emprosterinfo = DB::table('employee_roster_details')
+                        ->select('emp_id', 'shift_id')
+                        ->where('emp_id', $full_emp_id)
+                        ->where('work_date', $previous_day)
+                        ->first();
 
+                     if ($emprosterinfo) {
+                        $empshiftid = $emprosterinfo->shift_id;   
+                    }
+                    else {
+                        $empshiftid = $empshift->emp_shift;
+                    }
+                }
+            
             $shift = DB::table('shift_types')
                 ->where('id', $empshiftid)
                 ->first();
-
+            
             $previousDate = Carbon::parse($date)->subDay()->format('Y-m-d');
             $employeeshiftdetails = DB::table('employeeshiftdetails')
                 ->where('date_from', $previousDate)
                 ->where('emp_id', $full_emp_id)
                 ->first();
-
+            
 
                 $period = (new DateTime($timestamp))->format('A');
                 $timestamp = $date_input . ' ' . $timestamp;
                 $attendance_date = null;
-
 
                 if ($shift && $shift->off_next_day == '1' && $date == $date_input) {
                     $previous_day = (new DateTime($date_input))->modify('-1 day')->format('Y-m-d');
@@ -67,7 +77,6 @@ class AttendancePolicyService
                     else{
                         $attendance_date = substr($timestamp, 0, 10);
                     }
-                    
                     
                 } else if ($date == $date_input) {
                     if($employeeshiftdetails){

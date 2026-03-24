@@ -156,6 +156,9 @@ class APILeaveController extends Controller
         $todate=$request->input('todate');
         $half_short=$request->input('half_short');
         $reason=$request->input('reason');
+        $leavetype=$request->input('leavetype');
+        $from_time=$request->input('from_time');
+        $to_time=$request->input('to_time');
 
         $request = new LeaveRequest();
         $request->emp_id=$employee;
@@ -163,6 +166,9 @@ class APILeaveController extends Controller
         $request->to_date=$todate;
         $request->leave_category=$half_short;
         $request->reason=$reason;
+        $request->leave_type=$leavetype;
+        $request->from_time=$from_time;
+        $request->to_time=$to_time;
         $request->status= '1';
         $request->created_by=$employee;
         $request->updated_by = '0';

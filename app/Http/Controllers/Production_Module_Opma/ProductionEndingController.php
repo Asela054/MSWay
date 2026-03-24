@@ -75,6 +75,9 @@ class ProductionEndingController extends Controller
            $employee_amount = $amountData ? $amountData->amount : 0;
     
 
+           
+          $performance = ($target > 0) ? round((($quntity - $damage_qty) / $target) * 100) : 0;
+
           // get employee count
            $employeeAllocations = DB::table('opma_emp_product_allocation_details')
                             ->where('allocation_id', $hidden_id)
@@ -110,6 +113,7 @@ class ProductionEndingController extends Controller
                 'description' => $desription,
                 'damage_precentage' => $damage_percentage,
                 'damage_qty' => $damage_qty,
+                'perfomance' => $performance,
                 'status' => 1,
                 'created_by' => Auth::id(),
                 'updated_at' => $current_date_time
