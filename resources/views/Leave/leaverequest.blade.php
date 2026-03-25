@@ -128,9 +128,9 @@
                                     {{ csrf_field() }}
                                      <div class="form-row mb-1">
                                           <div class="col-sm-12 col-md-12">
-                                              <label class="small font-weight-bolder text-dark">Leave Type *</label>
+                                              <label class="small font-weight-bolder text-dark">Leave Type</label>
                                               <select name="leavetype" id="leavetype"
-                                                  class="form-control form-control-sm"required>
+                                                  class="form-control form-control-sm">
                                                   <option value="">Select</option>
                                                     @foreach($leavetype as $leavetypes)
                                                     <option value="{{$leavetypes->id}}">{{$leavetypes->leave_type}}
