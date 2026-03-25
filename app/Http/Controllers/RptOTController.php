@@ -288,12 +288,90 @@ class RptOTController extends Controller
 
                 return number_format($normal_ot_hours, 2);
             })
+            ->addColumn('normal_rate_otwork_hrsrate', function ($row) use ($month, $closingday) {
+                $work_days = (new \App\Attendance)->get_work_days($row->emp_id, $month, $closingday);
+                $leave_days = (new \App\Leave)->get_leave_days($row->emp_id, $month, $closingday);
+                $no_pay_days = (new \App\Leave)->get_no_pay_days($row->emp_id, $month, $closingday);
+                $ot_hours = (new \App\Attendance)->get_ot_hours_approved($row->emp_id, $month);
+                $normal_ot_hours = $ot_hours['normal_rate_otwork_hrs'];
+                $double_ot_hours = $ot_hours['double_rate_otwork_hrs'];
+
+                $otinfo = (new \App\Employeelateattenadnaceminites)->NopayAmountCal($row->emp_auto_id, $work_days,$leave_days,$no_pay_days,$normal_ot_hours, $double_ot_hours);
+
+                $ot_amount = $otinfo['othrs1_base_rate'];
+                $normalottotal = $ot_amount * $normal_ot_hours;
+
+                return number_format($ot_amount, 2);
+            })
+            ->addColumn('normal_rate_otwork_amount', function ($row) use ($month, $closingday) {
+                $work_days = (new \App\Attendance)->get_work_days($row->emp_id, $month, $closingday);
+                $leave_days = (new \App\Leave)->get_leave_days($row->emp_id, $month, $closingday);
+                $no_pay_days = (new \App\Leave)->get_no_pay_days($row->emp_id, $month, $closingday);
+                $ot_hours = (new \App\Attendance)->get_ot_hours_approved($row->emp_id, $month);
+                $normal_ot_hours = $ot_hours['normal_rate_otwork_hrs'];
+                $double_ot_hours = $ot_hours['double_rate_otwork_hrs'];
+
+                $otinfo = (new \App\Employeelateattenadnaceminites)->NopayAmountCal($row->emp_auto_id, $work_days,$leave_days,$no_pay_days,$normal_ot_hours, $double_ot_hours);
+
+                $ot_amount = $otinfo['othrs1_base_rate'];
+                $normalottotal = $ot_amount * $normal_ot_hours;
+
+                return number_format($normalottotal, 2);
+            })
             ->addColumn('double_rate_otwork_hrs', function ($row) use ($month) {
 
                 $ot_hours = (new \App\Attendance)->get_ot_hours_approved($row->emp_id, $month);
                 $double_ot_hours = $ot_hours['double_rate_otwork_hrs'];
 
                 return number_format($double_ot_hours, 2);
+            })
+             ->addColumn('double_rate_otwork_hrsrate', function ($row) use ($month, $closingday) {
+                $work_days = (new \App\Attendance)->get_work_days($row->emp_id, $month, $closingday);
+                $leave_days = (new \App\Leave)->get_leave_days($row->emp_id, $month, $closingday);
+                $no_pay_days = (new \App\Leave)->get_no_pay_days($row->emp_id, $month, $closingday);
+                $ot_hours = (new \App\Attendance)->get_ot_hours_approved($row->emp_id, $month);
+                $normal_ot_hours = $ot_hours['normal_rate_otwork_hrs'];
+                $double_ot_hours = $ot_hours['double_rate_otwork_hrs'];
+
+                $otinfo = (new \App\Employeelateattenadnaceminites)->NopayAmountCal($row->emp_auto_id, $work_days,$leave_days,$no_pay_days,$normal_ot_hours, $double_ot_hours);
+
+                $doubleot_amount = $otinfo['othrs2_base_rate'];
+                $doubleottotal = $doubleot_amount * $normal_ot_hours;
+
+                return number_format($doubleot_amount, 2);
+            })
+            ->addColumn('double_rate_otwork_amount', function ($row) use ($month, $closingday) {
+                $work_days = (new \App\Attendance)->get_work_days($row->emp_id, $month, $closingday);
+                $leave_days = (new \App\Leave)->get_leave_days($row->emp_id, $month, $closingday);
+                $no_pay_days = (new \App\Leave)->get_no_pay_days($row->emp_id, $month, $closingday);
+                $ot_hours = (new \App\Attendance)->get_ot_hours_approved($row->emp_id, $month);
+                $normal_ot_hours = $ot_hours['normal_rate_otwork_hrs'];
+                $double_ot_hours = $ot_hours['double_rate_otwork_hrs'];
+
+                $otinfo = (new \App\Employeelateattenadnaceminites)->NopayAmountCal($row->emp_auto_id, $work_days,$leave_days,$no_pay_days,$normal_ot_hours, $double_ot_hours);
+
+                $doubleot_amount = $otinfo['othrs2_base_rate'];
+                $doubleottotal = $doubleot_amount * $normal_ot_hours;
+
+                return number_format($doubleottotal, 2);
+            })
+            ->addColumn('otwork_amount_total', function ($row) use ($month, $closingday) {
+                $work_days = (new \App\Attendance)->get_work_days($row->emp_id, $month, $closingday);
+                $leave_days = (new \App\Leave)->get_leave_days($row->emp_id, $month, $closingday);
+                $no_pay_days = (new \App\Leave)->get_no_pay_days($row->emp_id, $month, $closingday);
+                $ot_hours = (new \App\Attendance)->get_ot_hours_approved($row->emp_id, $month);
+                $normal_ot_hours = $ot_hours['normal_rate_otwork_hrs'];
+                $double_ot_hours = $ot_hours['double_rate_otwork_hrs'];
+
+                $otinfo = (new \App\Employeelateattenadnaceminites)->NopayAmountCal($row->emp_auto_id, $work_days,$leave_days,$no_pay_days,$normal_ot_hours, $double_ot_hours);
+
+                $ot_amount = $otinfo['othrs1_base_rate'];
+                $normalottotal = $ot_amount * $normal_ot_hours;
+
+                $doubleot_amount = $otinfo['othrs2_base_rate'];
+                $doubleottotal = $doubleot_amount * $normal_ot_hours;
+
+                return number_format($doubleottotal+$normalottotal, 2);
             })
              ->addColumn('employee_display', function ($row) {
                    return EmployeeHelper::getDisplayName($row);
