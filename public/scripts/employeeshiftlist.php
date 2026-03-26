@@ -1,42 +1,22 @@
 <?php
 
-/*
- * DataTables example server-side processing script.
- *
- * Please note that this script is intentionally extremely simply to show how
- * server-side processing can be implemented, and probably shouldn't be used as
- * the basis for a large complex system. It is suitable for simple use cases as
- * for learning.
- *
- * See http://datatables.net/usage/server-side for full details on the server-
- * side processing requirements of DataTables.
- *
- * @license MIT - http://datatables.net/license_mit
- */
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Easy set variables
- */
-
-// DB table to use
 $table = 'employeeshifts';
 
-// Table's primary key
 $primaryKey = 'id';
 
-// Array of database columns which should be read and sent back to DataTables.
-// The `db` parameter represents the column name in the database, while the `dt`
-// parameter represents the DataTables column identifier. In this case simple
-// indexes
+
 $columns = array(
-	array( 'db' => '`s`.`id`', 'dt' => 'id', 'field' => 'id' ),
-	array( 'db' => '`s`.`shift_id`', 'dt' => 'shift_id', 'field' => 'shift_id' ),
-	array( 'db' => '`s`.`date_from`', 'dt' => 'date_from', 'field' => 'date_from' ),
-	array( 'db' => '`s`.`date_to`', 'dt' => 'date_to', 'field' => 'date_to' ),
-	array( 'db' => '`s`.`status`', 'dt' => 'status', 'field' => 'status' )
+    array( 'db' => '`s`.`id`', 'dt' => 'id', 'field' => 'id' ),
+    array( 'db' => '`st`.`shift_name`', 'dt' => 'shift_name', 'field' => 'shift_name' ),
+    array( 'db' => '`s`.`date_from`', 'dt' => 'date_from', 'field' => 'date_from' ),
+    array( 'db' => '`s`.`date_to`', 'dt' => 'date_to', 'field' => 'date_to' ),
+    array( 'db' => '`s`.`status`', 'dt' => 'status', 'field' => 'status' )
 );
 
-// SQL server connection information
+$joinQuery = "FROM `employeeshifts` AS `s` LEFT JOIN `shift_types` AS `st` ON `st`.`id` = `s`.`shift_id`";
+
+$extraWhere = "`s`.`status` IN (1,2)";
+
 require('config.php');
 $sql_details = array(
 	'user' => $db_username,
@@ -45,17 +25,9 @@ $sql_details = array(
 	'host' => $db_host
 );
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * If you just want to use the basic configuration for DataTables with PHP
- * server-side, there is no need to edit below this line.
- */
 
 // require( 'ssp.class.php' );
 require('ssp.customized.class.php' );
-
-$joinQuery = "FROM `employeeshifts` AS `s`";
-	
-$extraWhere = "1=1";
 
 echo json_encode(
 	SSP::simple( $_POST, $sql_details, $table, $primaryKey, $columns, $joinQuery, $extraWhere)
