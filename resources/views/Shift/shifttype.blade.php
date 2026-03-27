@@ -70,51 +70,51 @@
                                 {{ csrf_field() }}	
                                 <div class="form-row mb-1">
                                     <div class="col">
-                                        <label class="small font-weight-bold text-dark">Shift Name</label>
+                                        <label class="small font-weight-bold text-dark">Shift Name*</label>
                                         <input type="text" name="shiftname" id="shiftname" class="form-control form-control-sm"  required/>
                                     </div>   
                                     <div class="col">
-                                        <label class="small font-weight-bold text-dark">Shift Code</label>
+                                        <label class="small font-weight-bold text-dark">Shift Code*</label>
                                         <input type="text" name="shiftcode" id="shiftcode" class="form-control form-control-sm" required/>
                                     </div>
                                 </div>
                                 <div class="form-row mb-1">
                                     <div class="col">
-                                        <label class="small font-weight-bold text-dark">On Duty time</label>
+                                        <label class="small font-weight-bold text-dark">On Duty time*</label>
                                         <input type="time" name="ondutytime" id="ondutytime" class="form-control form-control-sm"  required/>
                                     </div>
                                     <div class="col">
-                                        <label class="small font-weight-bold text-dark">Off Duty time</label>
+                                        <label class="small font-weight-bold text-dark">Off Duty time*</label>
                                         <input type="time" name="offdutytime" id="offdutytime" class="form-control form-control-sm" required/>
                                     </div>                                    
                                 </div>
                                 <div class="form-row mb-1">
                                     <div class="col">
-                                        <label class="small font-weight-bold text-dark">Saturday On Duty time</label>
+                                        <label class="small font-weight-bold text-dark">Saturday On Duty time*</label>
                                         <input type="time" name="saturday_ondutytime" id="saturday_ondutytime" class="form-control form-control-sm"  required/>
                                     </div>
                                     <div class="col">
-                                        <label class="small font-weight-bold text-dark">Saturday Off Duty time</label>
+                                        <label class="small font-weight-bold text-dark">Saturday Off Duty time*</label>
                                         <input type="time" name="saturday_offdutytime" id="saturday_offdutytime" class="form-control form-control-sm" required/>
                                     </div>                                    
                                 </div>
                                 <div class="form-row mb-1">
                                     <div class="col">
-                                        <label class="small font-weight-bold text-dark">Late Grace Time</label>
+                                        <label class="small font-weight-bold text-dark">Late Grace Time*</label>
                                         <input type="time" name="latetime" id="latetime" class="form-control form-control-sm" required/>
                                     </div>
                                     <div class="col">
-                                        <label class="small font-weight-bold text-dark">Leave Early Time</label>
+                                        <label class="small font-weight-bold text-dark">Leave Early Time*</label>
                                         <input type="time" name="leaveearlytime" id="leaveearlytime" class="form-control form-control-sm" required/>
                                     </div>                                    
                                 </div>
                                 <div class="form-row mb-1">
                                     <div class="col">
-                                        <label class="small font-weight-bold text-dark">Begining Checkin</label>
+                                        <label class="small font-weight-bold text-dark">Begining Checkin*</label>
                                         <input type="time" name="beginingcheckin" id="beginingcheckin" class="form-control form-control-sm" required/>
                                     </div>
                                     <div class="col">
-                                        <label class="small font-weight-bold text-dark">Begining Checkout</label>
+                                        <label class="small font-weight-bold text-dark">Begining Checkout*</label>
                                         <input type="time" name="beginingcheckout" id="beginingcheckout" class="form-control form-control-sm" required/>
                                     </div>                                    
                                 </div>
@@ -130,12 +130,22 @@
                                 </div> --}}
                                 <div class="form-row mb-1">
                                     <div class="col">
-                                        <label class="small font-weight-bold text-dark">Workdays Count</label>
+                                        <label class="small font-weight-bold text-dark">Workdays Count*</label>
                                         <input type="text" name="workdayscount" id="workdayscount" class="form-control form-control-sm" required/>
                                     </div>
                                     <div class="col">
-                                        <label class="small font-weight-bold text-dark">Minute Count</label>
+                                        <label class="small font-weight-bold text-dark">Minute Count*</label>
                                         <input type="text" name="minutecount" id="minutecount" class="form-control form-control-sm" required/>
+                                    </div>                                    
+                                </div>
+                                <div class="form-row mb-1">
+                                    <div class="col">
+                                        <label class="small font-weight-bold text-dark">Maximum Normal OT</label>
+                                        <input type="text" name="max_normal_ot_hrs" id="max_normal_ot_hrs" class="form-control form-control-sm" />
+                                    </div>
+                                    <div class="col">
+                                        <label class="small font-weight-bold text-dark">Maximum Double OT</label>
+                                        <input type="text" name="max_double_ot_hrs" id="max_double_ot_hrs" class="form-control form-control-sm" />
                                     </div>                                    
                                 </div>
                                 <div class="form-row mb-1">
@@ -444,6 +454,8 @@ $(document).ready(function(){
                 $('#beginingcheckout').val(data.result.begining_checkout);
                 $('#workdayscount').val(data.result.workdays_count);
                 $('#minutecount').val(data.result.minute_count);
+                $('#max_normal_ot_hrs').val(data.result.max_normal_ot_hrs);
+                $('#max_double_ot_hrs').val(data.result.max_double_ot_hrs);
 
                 if(data.result.offduty_day == 1){
                     $('#offduty_day_1').prop( "checked", true );

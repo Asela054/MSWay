@@ -87,6 +87,8 @@ class ShiftTypeController extends Controller
        $shifttype->offduty_day=$request->input('offduty_day');   
        $shifttype->ot_calculate_type=$request->input('ot_calculate_type');    
        $shifttype->ot_calculate_time=$request->input('ot_calculate_time'); 
+       $shifttype->max_normal_ot_hrs=$request->input('max_normal_ot_hrs'); 
+       $shifttype->max_double_ot_hrs=$request->input('max_double_ot_hrs'); 
     //    $shifttype->ending_checkin=$request->input('endingcheckin');    
     //    $shifttype->ending_checkout=$request->input('endingcheckout');   
     //    $shifttype->must_checkin=$request->input('mustcheckin');    
@@ -181,6 +183,8 @@ class ShiftTypeController extends Controller
             'offduty_day'        =>  $request->offduty_day, 
             'ot_calculate_type'        =>  $request->ot_calculate_type, 
             'ot_calculate_time'        =>  $request->ot_calculate_time,
+            'max_normal_ot_hrs'        =>  $request->max_normal_ot_hrs,
+            'max_double_ot_hrs'        =>  $request->max_double_ot_hrs,
             // 'must_checkin'        =>  $request->mustcheckin, 
             // 'must_checkout'        =>  $request->mustcheckout,          
             // 'color'        =>  $request->color  

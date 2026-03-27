@@ -385,7 +385,7 @@ class Attendance extends Model
                 ->select('employeeshiftdetails.*', 'shift_types.onduty_time', 'shift_types.offduty_time') 
                 ->where('employeeshiftdetails.emp_id',222 )
                 ->whereDate('employeeshiftdetails.date_from', '<=', $record_date)
-                ->whereDate('employeeshiftdetails.date_to', '>=', $record_date)
+                ->whereDate('employeeshiftdetails.until_time', '>=', $record_date)
                 ->first();
 
                 if ($shift_detail) {

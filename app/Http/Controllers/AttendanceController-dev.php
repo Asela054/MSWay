@@ -3703,7 +3703,7 @@ class AttendanceController extends Controller
                 ->select('employeeshiftdetails.*', 'shift_types.onduty_time', 'shift_types.offduty_time') 
                 ->where('employeeshiftdetails.emp_id', $emp_id)
                 ->whereDate('employeeshiftdetails.date_from', '<=', $date)
-                ->whereDate('employeeshiftdetails.date_to', '>=', $date)
+                ->whereDate('employeeshiftdetails.until_time', '>=', $date)
                 ->first();
 
                 if ($shift_detail) {
@@ -3811,7 +3811,7 @@ class AttendanceController extends Controller
                 ->select('employeeshiftdetails.*', 'shift_types.onduty_time', 'shift_types.offduty_time') 
                 ->where('employeeshiftdetails.emp_id', $emp_id)
                 ->whereDate('employeeshiftdetails.date_from', '<=', $date)
-                ->whereDate('employeeshiftdetails.date_to', '>=', $date)
+                ->whereDate('employeeshiftdetails.until_time', '>=', $date)
                 ->first();
 
                 if ($shift_detail) {
