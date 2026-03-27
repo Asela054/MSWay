@@ -108,7 +108,7 @@ class ProductionEndingController extends Controller
                 'machine_id' => $machine_id,
                 'product_id' => $product_id,
                 'Produce_qty' => $quntity,
-                'precentage' => $percentage_for_query,
+                'precentage' => $produced_percentage,
                 'amount' => $employee_amount,
                 'description' => $desription,
                 'damage_precentage' => $damage_percentage,
