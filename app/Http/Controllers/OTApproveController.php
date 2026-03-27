@@ -64,6 +64,7 @@ class OTApproveController extends Controller
             'shift_types.saturday_onduty_time',
             'shift_types.saturday_offduty_time',
             'shift_types.shift_name',
+            'shift_types.id as shift_id',
             'branches.location as b_location',
             'departments.name as dept_name'
         )
@@ -118,7 +119,7 @@ class OTApproveController extends Controller
 
             $shift_detail = DB::table('employeeshiftdetails')
                 ->join('shift_types', 'employeeshiftdetails.shift_id', '=', 'shift_types.id')
-                ->select('employeeshiftdetails.*', 'shift_types.onduty_time', 'shift_types.offduty_time') 
+                ->select('employeeshiftdetails.*', 'shift_types.onduty_time', 'shift_types.offduty_time','shift_types.id as shiftid') 
                 ->where('employeeshiftdetails.emp_id', $emp_id)
                 ->whereDate('employeeshiftdetails.date_from', '<=', $date)
                 ->whereDate('employeeshiftdetails.date_to', '>=', $date)
@@ -127,13 +128,27 @@ class OTApproveController extends Controller
                 if ($shift_detail) {
                     $on_duty_time = $shift_detail->onduty_time;
                     $off_duty_time = $shift_detail->offduty_time;
+                    $emp_shift_id = $shift_detail->shiftid;
                 }
                 else{
-                    $on_duty_time = $att->onduty_time;
-                    $off_duty_time =  $att->offduty_time;
+                    $roster_detail = DB::table('employee_roster_details')
+                    ->join('shift_types', 'employee_roster_details.shift_id', '=', 'shift_types.id')
+                    ->select('employee_roster_details.*', 'shift_types.onduty_time', 'shift_types.offduty_time','shift_types.id as shiftid') 
+                    ->where('employee_roster_details.emp_id', $emp_id)
+                    ->where('employee_roster_details.work_date', $date)
+                    ->first();
+                    if($roster_detail){
+                        $on_duty_time = $roster_detail->onduty_time;
+                        $off_duty_time = $roster_detail->offduty_time;
+                        $emp_shift_id = $roster_detail->shiftid;
+                    }else{
+                        $on_duty_time = $att->onduty_time;
+                        $off_duty_time =  $att->offduty_time;
+                        $emp_shift_id = $att->shift_id;
+                    }
                 }
 
-            $ot_hours = (new \App\Attendance)->get_ot_hours_by_date($emp_id, $att->lasttimestamp, $att->first_checkin, $date,  $on_duty_time, $off_duty_time, $att->emp_department);
+            $ot_hours = (new \App\Attendance)->get_ot_hours_by_date($emp_id, $att->lasttimestamp, $att->first_checkin, $date,  $on_duty_time, $off_duty_time, $att->emp_department,$emp_shift_id);
             //$ot_hours = (new \App\Attendance)->get_ot_hours_by_date_morning_evening($emp_id, $att->lasttimestamp, $att->first_checkin, $date, $att->onduty_time, $att->offduty_time, $att->emp_department);
             // $is_approved = (new \App\OtApproved)->is_exists_in_ot_approved($emp_id, $date);
             // //if ot_breakdown is a key in the array
