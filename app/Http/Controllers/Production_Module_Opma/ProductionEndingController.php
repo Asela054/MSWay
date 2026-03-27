@@ -63,9 +63,11 @@ class ProductionEndingController extends Controller
          $product_unitvalue=0;
          $productioncomplete =0;
 
-          $produced_percentage = ($target > 0) ? round(($quntity / $target) * 100, 2) : 0;
+          //$produced_percentage = ($target > 0) ? round(($quntity / $target) * 100, 2) : 0;
 
-          $percentage_for_query = ($produced_percentage > 100) ? 100 : $produced_percentage;
+          $performance = ($target > 0) ? round((($quntity - $damage_qty) / $target) * 100) : 0;
+
+          $percentage_for_query = ($performance > 100) ? 100 : $performance;
 
           $amountData = DB::table('opma_production_amount')
                             ->where('start_precentage', '<=', $percentage_for_query)
@@ -76,7 +78,7 @@ class ProductionEndingController extends Controller
     
 
            
-          $performance = ($target > 0) ? round((($quntity - $damage_qty) / $target) * 100) : 0;
+         
 
           // get employee count
            $employeeAllocations = DB::table('opma_emp_product_allocation_details')
@@ -108,7 +110,7 @@ class ProductionEndingController extends Controller
                 'machine_id' => $machine_id,
                 'product_id' => $product_id,
                 'Produce_qty' => $quntity,
-                'precentage' => $produced_percentage,
+                'precentage' => $performance,
                 'amount' => $employee_amount,
                 'description' => $desription,
                 'damage_precentage' => $damage_percentage,
