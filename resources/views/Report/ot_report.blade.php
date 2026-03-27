@@ -56,14 +56,20 @@
                                 <tr id="dt_head_month">
                                     <th>EMP ID</th> 
                                     <th>EMPLOYEE</th>
+                                    <th>LOCATION</th>
+                                    <th>DEPARTMENT</th>
                                     <th>MONTH</th> 
                                     <th>WORK DAYS</th> 
                                     <th>LEAVE DAYS</th>
                                     <th>NO PAY DAYS</th>
                                     <th>O.T. HOURS</th> 
+                                    <th>O.T. HOURS RATE</th> 
+                                    <th>O.T. HOURS AMOUNT</th> 
                                     <th>DOUBLE O.T. HOURS</th>
-                                    <th>LOCATION</th>
-                                    <th>DEPARTMENT</th>
+                                    <th>DOUBLE O.T. HOURS RATE</th>
+                                    <th>DOUBLE O.T. HOURS AMOUNT</th>
+                                    <th>TOTAL</th>
+                                
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -414,14 +420,20 @@
                         columns: [
                             { data: 'emp_id' },
                             { data: 'employee_display' },
+                            { data: 'b_location' },
+                            { data: 'dept_name' },
                             { data: 'month' },
                             { data: 'work_days' },
                             { data: 'leave_days' },
                             { data: 'no_pay_days' },
                             { data: 'normal_rate_otwork_hrs' },
+                            { data: 'normal_rate_otwork_hrsrate' },
+                            { data: 'normal_rate_otwork_amount' },
                             { data: 'double_rate_otwork_hrs' },
-                            { data: 'b_location' },
-                            { data: 'dept_name' }
+                            { data: 'double_rate_otwork_hrsrate' },
+                            { data: 'double_rate_otwork_amount' },
+                            { data: 'otwork_amount_total' }
+                            
                         ],
                         "bDestroy": true,
                         "order": [[ 2, "desc" ]],
@@ -545,7 +557,7 @@
         function showInitialMessage() {
         $('#ot_report_monthly_dt tbody').html(
             '<tr>' +
-            '<td colspan="10" class="text-center py-5">' + // Changed colspan to 9 to match your columns
+            '<td colspan="15" class="text-center py-5">' + // Changed colspan to 9 to match your columns
             '<div class="d-flex flex-column align-items-center">' +
             '<i class="fas fa-filter fa-3x text-muted mb-2"></i>' +
             '<h4 class="text-muted mb-2">No Records Found</h4>' +

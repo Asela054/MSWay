@@ -565,7 +565,7 @@
             
         });
 
-        $('#employee_f').change(function () {
+        $('#leavetype').change(function () {
             var _token = $('input[name="_token"]').val();
             var leavetype = $('#leavetype').val();
             var emp_id = $('#employee_f').val();
