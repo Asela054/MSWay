@@ -176,6 +176,7 @@
                                                 <li role="presentation"><a href="#attendanceinfo" aria-controls="attendanceinfo" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-calendar"></i></span>Attendance</a><span class="bgcolor-major-gradient-overlay"></span></li>
                                                 <li role="presentation"><a href="#leaveinfo" aria-controls="leaveinfo" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-calendar-week"></i></span>Leave Info</a><span class="bgcolor-major-gradient-overlay"></span></li>
                                                 <li role="presentation"><a href="#salaryslip" aria-controls="salaryslip" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-receipt"></i></span>Salary Slips</a><span class="bgcolor-major-gradient-overlay"></span></li>
+                                                <li role="presentation"><a href="#production" aria-controls="production" role="tab" data-toggle="tab"><span class="icon"><i class="fa-light fa-ballot-check"></i></span>Production</a><span class="bgcolor-major-gradient-overlay"></span></li>
                                             </ul>
                                         </div>
                                         <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
@@ -352,7 +353,36 @@
                                                             </div>
                                                         </div>
                                                     </div>   
-                                                </div>         
+                                                </div>  
+                                                 <div role="tabpanel" class="tab-pane" id="production"> 
+                                                    <div class="card shadow-none bg-transparent">
+                                                        <div class="card-body">
+                                                            <div class="row">
+                                                                <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                                                                    <div class="center-block fix-width scroll-inner">
+                                                                        <table class="table table-striped table-sm small nowrap" style="width: 100%" id="productiondataTable">
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    <th>ID</th>
+                                                                                    <th>EMPLOYEE</th>
+                                                                                    <th>DATE</th>
+                                                                                    <th>MACHINE</th>
+                                                                                    <th>PRODUCT</th>
+                                                                                    <th>PERFORMANCE</th>
+                                                                                    <th>QTY</th>
+                                                                                    <th>DAMAGE QTY</th>
+                                                                                    <th>AMOUNT</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>  
+                                                </div>  
                                             </div>
                                         </div>
                                     </div>      
@@ -1243,6 +1273,265 @@
         $('#attendancemonth').change(function () {
             attendent_load_dt(empid);
         });
+
+
+        $('#productiondataTable').DataTable({
+            "destroy": true,
+            "processing": true,
+            "serverSide": true,
+            dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+            "buttons": [
+                {
+                    extend: 'csv',
+                    className: 'btn btn-success btn-sm',
+                    title: 'Employee Production Report',
+                    text: '<i class="fas fa-file-csv mr-2"></i> CSV',
+                    footer: true
+                },
+                {
+                    text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
+                    className: 'btn btn-danger btn-sm',
+                    action: function (e, dt, node, config) {
+                        generatePDF();
+                    }
+                },
+                {
+                    extend: 'print',
+                    title: 'Employee Production Report',
+                    className: 'btn btn-primary btn-sm',
+                    text: '<i class="fas fa-print mr-2"></i> Print',
+                    footer: true,
+                    customize: function(win) {
+                        $(win.document.body).find('table')
+                            .addClass('compact')
+                            .css('font-size', 'inherit')
+                            .find('td:nth-child(7), td:nth-child(8), td:nth-child(9), th:nth-child(7), th:nth-child(8), th:nth-child(9)')
+                            .css('text-align', 'right');
+                        
+                        // Style the footer in print
+                        $(win.document.body).find('tfoot tr').css({
+                            'background-color': '#f8f9fa',
+                            'font-weight': 'bold'
+                        });
+                    },
+                },
+            ],
+            "footerCallback": function ( row, data, start, end, display ) {
+                var api = this.api();
+                
+                // Calculate total for Produce_qty (column 5)
+                var produceQtyTotal = api
+                    .column( 6, { page: 'current'} )
+                    .data()
+                    .reduce( function (a, b) {
+                        var aNum = parseFloat(a) || 0;
+                        var bNum = parseFloat(b) || 0;
+                        return aNum + bNum;
+                    }, 0 );
+                
+                // Calculate total for amount (column 7)
+                var amountTotal = api
+                    .column( 8, { page: 'current'} )
+                    .data()
+                    .reduce( function (a, b) {
+                        var aNum = parseFloat(a) || 0;
+                        var bNum = parseFloat(b) || 0;
+                        return aNum + bNum;
+                    }, 0 );
+                
+                // Calculate total for unit_price (column 6)
+                var unitPriceTotal = api
+                    .column( 7, { page: 'current'} )
+                    .data()
+                    .reduce( function (a, b) {
+                        var aNum = parseFloat(a) || 0;
+                        var bNum = parseFloat(b) || 0;
+                        return aNum + bNum;
+                    }, 0 );
+                
+                // Format the totals
+                var formattedProduceQty = '';
+                var formattedAmount = '';
+                var formattedUnitPriceTotal = '';
+                
+                if (!isNaN(produceQtyTotal) && produceQtyTotal !== 0) {
+                    formattedProduceQty = produceQtyTotal.toLocaleString('en-US', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                }
+                
+                if (!isNaN(amountTotal) && amountTotal !== 0) {
+                    formattedAmount = amountTotal.toLocaleString('en-US', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                }
+                
+                if (!isNaN(unitPriceTotal) && unitPriceTotal !== 0) {
+                    formattedUnitPriceTotal = unitPriceTotal.toLocaleString('en-US', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                }
+                
+                // Update footer
+                $( api.column( 6 ).footer() ).html(
+                    formattedProduceQty ? '<strong>' + formattedProduceQty + '</strong>' : ''
+                );
+                
+                $( api.column( 7 ).footer() ).html(
+                    formattedUnitPriceTotal ? '<strong>' + formattedUnitPriceTotal + '</strong>' : ''
+                );
+                
+                $( api.column( 8 ).footer() ).html(
+                    formattedAmount ? '<strong>' + formattedAmount + '</strong>' : ''
+                );
+            },
+            "order": [
+                [0, "desc"]
+            ],
+            ajax: {
+                url: scripturl + "/Opma_Production/employee_production_list.php",
+                type: 'POST',
+                data : 
+                    { employee :empid},
+            },
+            columns: [
+                { data: 'id', name: 'id' },
+                { data: 'emp_name', name: 'emp_name' },
+                { data: 'date', name: 'date' },
+                { data: 'machine', name: 'machine' },
+                { data: 'product', name: 'product' },
+                { 
+                    data: 'perfomance', 
+                    name: 'perfomance',
+                    className: 'text-right',
+                    render: function(data, type, row) {
+                        if (data === null || data === undefined || data === '' || isNaN(data)) {
+                            if (type === 'display' || type === 'filter') {
+                                return '';
+                            }
+                            return 0;
+                        }
+                        
+                        if (type === 'display' || type === 'filter') {
+                            return parseFloat(data).toLocaleString('en-US', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                            }) + '%';
+                        }
+                        if (type === 'sort' || type === 'type') {
+                            return parseFloat(data);
+                        }
+                        return data;
+                    }
+                },
+                { 
+                    data: 'Produce_qty', 
+                    name: 'Produce_qty',
+                    className: 'text-right',
+                    render: function(data, type, row) {
+                        if (data === null || data === undefined || data === '' || isNaN(data)) {
+                            if (type === 'display' || type === 'filter') {
+                                return '';
+                            }
+                            return 0;
+                        }
+                        
+                        if (type === 'display' || type === 'filter') {
+                            return parseFloat(data).toLocaleString('en-US', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                            });
+                        }
+                        if (type === 'sort' || type === 'type') {
+                            return parseFloat(data);
+                        }
+                        return data;
+                    }
+                },
+                { 
+                    data: 'damage_qty', 
+                    name: 'damage_qty',
+                    className: 'text-right',
+                    render: function(data, type, row) {
+                        if (data === null || data === undefined || data === '' || isNaN(data)) {
+                            if (type === 'display' || type === 'filter') {
+                                return '';
+                            }
+                            return 0;
+                        }
+                        
+                        if (type === 'display' || type === 'filter') {
+                            return parseFloat(data).toLocaleString('en-US', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                            });
+                        }
+                        if (type === 'sort' || type === 'type') {
+                            return parseFloat(data);
+                        }
+                        return data;
+                    }
+                },
+                { 
+                    data: 'amount', 
+                    name: 'amount',
+                    className: 'text-right',
+                    render: function(data, type, row) {
+                        if (data === null || data === undefined || data === '' || isNaN(data)) {
+                            if (type === 'display' || type === 'filter') {
+                                return '';
+                            }
+                            return 0;
+                        }
+                        
+                        if (type === 'display' || type === 'filter') {
+                            return parseFloat(data).toLocaleString('en-US', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                            });
+                        }
+                        if (type === 'sort' || type === 'type') {
+                            return parseFloat(data);
+                        }
+                        return data;
+                    }
+                }
+            ],
+            "columnDefs": [
+                {
+                    "targets": [6, 7,8],
+                    "type": "num",
+                    "render": function(data, type, row) {
+                        if (data === null || data === undefined || data === '' || isNaN(data)) {
+                            if (type === 'display') {
+                                return '';
+                            }
+                            return 0;
+                        }
+                        
+                        if (type === 'display') {
+                            return parseFloat(data).toLocaleString('en-US', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                            });
+                        }
+                        return parseFloat(data);
+                    }
+                }
+            ],
+            "initComplete": function() {
+                this.api().columns().every(function() {
+                    var column = this;
+                    $(column.footer()).addClass('text-right');
+                });
+            }
+        });
+
+
     });
 
     // function load_dt(emp_id) {            
