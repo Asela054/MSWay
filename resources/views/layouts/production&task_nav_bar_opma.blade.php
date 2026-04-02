@@ -19,9 +19,11 @@
 
       <li><a class="dropdown-item" href="{{ route('opma_productionallocation')}}">Employee Allocation</a></li>
 
-      <li><a class="dropdown-item" href="{{ route('opma_productionending')}}">Daily Process Ending</a></li>
+      <li><a class="dropdown-item" href="{{ route('opma_productionending')}}">Production Ending</a></li>
 
-      <li><a class="dropdown-item" href="{{ route('opma_employeeproductionreport')}}">Employee Production </a></li>
+      <li><a class="dropdown-item" href="{{ route('opma_dailyproductionapprove')}}">Daily Production Summary Approve</a></li>
+
+      <li><a class="dropdown-item" href="{{ route('opma_employeeproductionreport')}}">Employee Daily Production Summary</a></li>
 
       <li><a class="dropdown-item" href="{{ route('opma_timechanging')}}">Machine Downtime Log</a></li>
 

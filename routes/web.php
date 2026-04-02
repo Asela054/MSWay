@@ -1748,8 +1748,14 @@ Route::post('/opma_productallocationdeletelist' ,'Production_Module_Opma\Product
  
    Route::get('/opma_employeeproductionreport' ,'Production_Module_Opma\ProductionEndingController@employeeproduction')->name('opma_employeeproductionreport');
 
+// Daily Production Ending Summary
+   Route::get('/opma_dailyproductionapprove' ,'Production_Module_Opma\ProductionDailyApproveController@index')->name('opma_dailyproductionapprove');
+   Route::post('/opma_daliyproductionsummarygenerate' ,'Production_Module_Opma\ProductionDailyApproveController@generatedailysummary')->name('opma_daliyproductionsummarygenerate');
+   Route::post('/opma_approvedailysummary' ,'Production_Module_Opma\ProductionDailyApproveController@approvedailysummary')->name('opma_approvedailysummary');
+
  // Production Reports 
-Route::get('/opma_reportemployeeproduction' ,'Production_Module_Opma\ProductionreportController@index')->name('opma_reportemployeeproduction');
+   Route::get('/opma_reportemployeeproduction' ,'Production_Module_Opma\ProductionreportController@index')->name('opma_reportemployeeproduction');
+ 
 
 
                   // End of Opma Production Section Routes

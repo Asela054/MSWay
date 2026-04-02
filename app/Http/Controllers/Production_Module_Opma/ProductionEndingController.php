@@ -49,43 +49,31 @@ class ProductionEndingController extends Controller
         $completdate = Carbon::parse($completetime)->format('Y-m-d');
 
 
-           $maindata = DB::table('opma_emp_product_allocation')
-                ->select('opma_emp_product_allocation.*')
-                ->where('opma_emp_product_allocation.id', $hidden_id)
-                ->first(); 
+        $maindata = DB::table('opma_emp_product_allocation')
+            ->select('opma_emp_product_allocation.*')
+            ->where('opma_emp_product_allocation.id', $hidden_id)
+            ->first(); 
 
           $produtiondate = $maindata->date;
           $machine_id = $maindata->machine_id;
           $product_id = $maindata->product_id;
           $target = $maindata->target;
 
-
-         $product_unitvalue=0;
          $productioncomplete =0;
 
-          //$produced_percentage = ($target > 0) ? round(($quntity / $target) * 100, 2) : 0;
+          $production_differnce = $quntity - $target; 
+          $produced_percentage = ($target > 0) ? round(($quntity / $target) * 100, 2) : 0;
+
 
           $performance = ($target > 0) ? round((($quntity - $damage_qty) / $target) * 100) : 0;
 
-          $percentage_for_query = ($performance > 100) ? 100 : $performance;
-
-          $amountData = DB::table('opma_production_amount')
-                            ->where('start_precentage', '<=', $percentage_for_query)
-                            ->where('end_precentage', '>=', $percentage_for_query)
-                            ->first();
-
-           $employee_amount = $amountData ? $amountData->amount : 0;
     
-
-           
-         
-
           // get employee count
-           $employeeAllocations = DB::table('opma_emp_product_allocation_details')
-                            ->where('allocation_id', $hidden_id)
-                             ->where('status', 1)
-                             ->select('id', 'emp_id')
-                            ->get();
+        $employeeAllocations = DB::table('opma_emp_product_allocation_details')
+                        ->where('allocation_id', $hidden_id)
+                            ->where('status', 1)
+                            ->select('id', 'emp_id')
+                        ->get();
 
           $employeeCount = $employeeAllocations->count();
           $employeeIds = $employeeAllocations->pluck('emp_id')->toArray();
@@ -94,14 +82,31 @@ class ProductionEndingController extends Controller
 
         if ($employeeCount > 0) {
 
-
             foreach ($employeeAllocations as $allocation) {
 
+
+                if($produced_percentage > 90){
+                      $employeedetails = DB::table('employees')
+                        ->where('emp_id', $allocation->emp_id)
+                        ->select('emp_department','emp_job_code')
+                        ->first();
+                    
+                    $empdepartment = $employeedetails->emp_department;
+                    $emp_jobtitle = $employeedetails->emp_job_code;
+
+                    $amountData = DB::table('opma_production_amount')
+                            ->where('department_id',$empdepartment )
+                            ->where('jobtitle',$emp_jobtitle )
+                            ->first();
+
+                    $employee_amount = $amountData ? $amountData->amount : 0;
+
+                }else{
+                    $employee_amount = 0;
+                }
                 $existingRecord = EmployeeProduction::where('allocation_id', $hidden_id)
                                             ->where('emp_id', $allocation->emp_id)
                                             ->first();
-
-              
 
                 $data = [
                 'allocation_id' => $hidden_id,
@@ -109,8 +114,10 @@ class ProductionEndingController extends Controller
                 'date' => $produtiondate,
                 'machine_id' => $machine_id,
                 'product_id' => $product_id,
+                'target' => $target,
                 'Produce_qty' => $quntity,
-                'precentage' => $performance,
+                'difference' => $production_differnce,
+                'precentage' => $produced_percentage,
                 'amount' => $employee_amount,
                 'description' => $desription,
                 'damage_precentage' => $damage_percentage,
@@ -261,9 +268,6 @@ class ProductionEndingController extends Controller
 
         return response()->json(['success' => 'Production Start Successfully']);
     }
-
-
-  
 
      public function employeeproduction()
     {
