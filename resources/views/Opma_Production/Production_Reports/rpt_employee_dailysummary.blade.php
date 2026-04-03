@@ -11,7 +11,7 @@
             <div class="page-header-content py-3 px-2">
                 <h1 class="page-header-title ">
                     <div class="page-header-icon"><i class="fa-light fa-file-contract"></i></div>
-                    <span>Employee Production Report</span>
+                    <span>Employee Daily Production Summary Report</span>
                 </h1>
             </div>
         </div>
@@ -36,9 +36,6 @@
                                         <th>ID</th>
                                         <th>EMPLOYEE</th>
                                         <th>DATE</th>
-                                        <th>MACHINE</th>
-                                        <th>PRODUCT</th>
-                                        <th>PRECENTAGE</th>
                                         <th>TARGET</th>
                                         <th>PRODUCE</th>
                                         <th>DIFFRENCE</th>
@@ -50,7 +47,7 @@
                                 </tbody>
                                 <tfoot>
                                     <tr>
-                                        <th colspan="6" style="text-align: right">Totals:</th>
+                                        <th colspan="3" style="text-align: right">Totals:</th>
                                         <th></th>
                                         <th></th>
                                         <th></th>
@@ -76,28 +73,6 @@
             <div class="offcanvas-body">
                 <ul class="list-unstyled">
                     <form class="form-horizontal" id="formFilter">
-                        <li class="mb-2">
-                            <div class="col-md-12">
-                                <label class="small font-weight-bolder text-dark">Machine</label>
-                                <select name="machine" id="machine" class="form-control form-control-sm">
-                                    <option value="">Select Machine</option>
-                                    @foreach ($machines as $machine)
-                                        <option value="{{ $machine->id }}">{{ $machine->machine }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </li>
-                        <li class="mb-2">
-                            <div class="col-md-12">
-                                <label class="small font-weight-bolder text-dark">Product</label>
-                                <select name="product" id="product" class="form-control form-control-sm">
-                                    <option value="">Select Product</option>
-                                    @foreach ($products as $product)
-                                        <option value="{{ $product->id }}">{{ $product->title }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </li>
                         <li class="mb-2">
                             <div class="col-md-12">
                                 <label class="small font-weight-bolder text-dark">Employee</label>
@@ -177,7 +152,7 @@ $(document).ready(function(){
 
 
     // Add custom PDF button to DataTable
-    function load_dt(machine, employee, product, from_date, to_date){
+    function load_dt(employee, from_date, to_date){
         $('#dataTable').DataTable({
             "destroy": true,
             "processing": true,
@@ -188,7 +163,7 @@ $(document).ready(function(){
                 {
                     extend: 'csv',
                     className: 'btn btn-success btn-sm',
-                    title: 'Employee Production Report',
+                    title: 'Employee Production Daily Summary Report',
                     text: '<i class="fas fa-file-csv mr-2"></i> CSV',
                     footer: true
                 },
@@ -201,7 +176,7 @@ $(document).ready(function(){
                 },
                 {
                     extend: 'print',
-                    title: 'Employee Production Report',
+                    title: 'Employee Production Daily Summary Report',
                     className: 'btn btn-primary btn-sm',
                     text: '<i class="fas fa-print mr-2"></i> Print',
                     footer: true,
@@ -225,7 +200,7 @@ $(document).ready(function(){
                 
                 // Calculate total for Produce_qty (column 5)
                 var Targetqty = api
-                    .column( 6, { page: 'current'} )
+                    .column( 3, { page: 'current'} )
                     .data()
                     .reduce( function (a, b) {
                         var aNum = parseFloat(a) || 0;
@@ -234,7 +209,7 @@ $(document).ready(function(){
                     }, 0 );
 
                     var produceTotal = api
-                    .column( 7, { page: 'current'} )
+                    .column( 4, { page: 'current'} )
                     .data()
                     .reduce( function (a, b) {
                         var aNum = parseFloat(a) || 0;
@@ -244,7 +219,7 @@ $(document).ready(function(){
 
 
                     var diffrenceTotal = api
-                    .column( 8, { page: 'current'} )
+                    .column( 5, { page: 'current'} )
                     .data()
                     .reduce( function (a, b) {
                         var aNum = parseFloat(a) || 0;
@@ -253,7 +228,7 @@ $(document).ready(function(){
                     }, 0 );
 
                     var damageTotal = api
-                    .column( 9, { page: 'current'} )
+                    .column( 6, { page: 'current'} )
                     .data()
                     .reduce( function (a, b) {
                         var aNum = parseFloat(a) || 0;
@@ -262,7 +237,7 @@ $(document).ready(function(){
                     }, 0 );
 
                     var amountTotal = api
-                    .column( 10, { page: 'current'} )
+                    .column( 7, { page: 'current'} )
                     .data()
                     .reduce( function (a, b) {
                         var aNum = parseFloat(a) || 0;
@@ -314,21 +289,21 @@ $(document).ready(function(){
                 }
                 
                 // Update footer
-                $( api.column( 6 ).footer() ).html(
+                $( api.column( 3 ).footer() ).html(
                     formattedtargetQty ? '<strong>' + formattedtargetQty + '</strong>' : ''
                 );
                 
-                $( api.column( 7 ).footer() ).html(
+                $( api.column( 4 ).footer() ).html(
                     formattedproduced ? '<strong>' + formattedproduced + '</strong>' : ''
                 );
                 
-                $( api.column( 8 ).footer() ).html(
+                $( api.column( 5 ).footer() ).html(
                     formatteddifferenceTotal ? '<strong>' + formatteddifferenceTotal + '</strong>' : ''
                 );
-                 $( api.column( 9 ).footer() ).html(
+                 $( api.column( 6 ).footer() ).html(
                     formattedDamage ? '<strong>' + formattedDamage + '</strong>' : ''
                 );
-                 $( api.column( 10 ).footer() ).html(
+                 $( api.column( 7).footer() ).html(
                     formattedAmount ? '<strong>' + formattedAmount + '</strong>' : ''
                 );
             },
@@ -336,12 +311,10 @@ $(document).ready(function(){
                 [0, "desc"]
             ],
             ajax: {
-                url: scripturl + "/Opma_Production/employee_production_list.php",
+                url: scripturl + "/Opma_Production/daily_employee_productionsummary_list.php",
                 type: 'POST',
                 data : 
-                    {machine :machine, 
-                    employee :employee, 
-                    product: product,
+                    {employee :employee, 
                     from_date: from_date,
                     to_date: to_date},
             },
@@ -349,32 +322,6 @@ $(document).ready(function(){
                 { data: 'id', name: 'id' },
                 { data: 'emp_name', name: 'emp_name' },
                 { data: 'date', name: 'date' },
-                { data: 'machine', name: 'machine' },
-                { data: 'product', name: 'product' },
-                { 
-                    data: 'precentage', 
-                    name: 'precentage',
-                    className: 'text-right',
-                    render: function(data, type, row) {
-                        if (data === null || data === undefined || data === '' || isNaN(data)) {
-                            if (type === 'display' || type === 'filter') {
-                                return '';
-                            }
-                            return 0;
-                        }
-                        
-                        if (type === 'display' || type === 'filter') {
-                            return parseFloat(data).toLocaleString('en-US', {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2
-                            }) + '%';
-                        }
-                        if (type === 'sort' || type === 'type') {
-                            return parseFloat(data);
-                        }
-                        return data;
-                    }
-                },
                 { 
                     data: 'target', 
                     name: 'target',
@@ -400,8 +347,8 @@ $(document).ready(function(){
                     }
                 },
                 { 
-                    data: 'Produce_qty', 
-                    name: 'Produce_qty',
+                    data: 'produce', 
+                    name: 'produce',
                     className: 'text-right',
                     render: function(data, type, row) {
                         if (data === null || data === undefined || data === '' || isNaN(data)) {
@@ -448,8 +395,8 @@ $(document).ready(function(){
                     }
                 },
                 { 
-                    data: 'damage_qty', 
-                    name: 'damage_qty',
+                    data: 'damage', 
+                    name: 'damage',
                     className: 'text-right',
                     render: function(data, type, row) {
                         if (data === null || data === undefined || data === '' || isNaN(data)) {
@@ -472,8 +419,8 @@ $(document).ready(function(){
                     }
                 },
                 { 
-                    data: 'amount', 
-                    name: 'amount',
+                    data: 'bonus', 
+                    name: 'bonus',
                     className: 'text-right',
                     render: function(data, type, row) {
                         if (data === null || data === undefined || data === '' || isNaN(data)) {
@@ -498,7 +445,7 @@ $(document).ready(function(){
             ],
             "columnDefs": [
                 {
-                    "targets": [6, 7,8,9,10],
+                    "targets": [3,4,5,6,7],
                     "type": "num",
                     "render": function(data, type, row) {
                         if (data === null || data === undefined || data === '' || isNaN(data)) {
@@ -527,17 +474,15 @@ $(document).ready(function(){
         });
     }
 
-    load_dt('', '', '', '', '');
+    load_dt( '', '', '');
 
     $('#formFilter').on('submit',function(e) {
         e.preventDefault();
-        let machine = $('#machine').val();
         let employee = $('#employee_f').val();
-        let product = $('#product').val();
         let from_date = $('#from_date').val();
         let to_date = $('#to_date').val();
 
-        load_dt(machine, employee, product, from_date, to_date);
+        load_dt(employee,from_date, to_date);
         closeOffcanvasSmoothly();
     });
 
@@ -552,9 +497,6 @@ function generatePDF() {
     // Get current filter values for PDF header
     const fromDate = $('#from_date').val() || 'Not specified';
     const toDate = $('#to_date').val() || 'Not specified';
-    const machine = $('#machine').val() || 'All';
-    const employee = $('#employee').val() || 'All';
-    const product = $('#product').val() || 'All';
     const currentDate = new Date().toLocaleDateString();
     
     // Get DataTable instance
@@ -564,7 +506,7 @@ function generatePDF() {
     // Initialize PDF in portrait mode
     const doc = new jsPDF('p', 'mm', 'a4');
     
-    // Company name
+    // Company name (replace with your actual variable)
     const companyName = 'OPMA EMBROIDERY ( PVT ) LTD';
     
     // Add company name at the top
@@ -575,7 +517,7 @@ function generatePDF() {
     // Add report title
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.text('Employee Production Report', doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
+    doc.text('Employee Production Daily Summary Report', doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
     
     // Add filter information
     doc.setFontSize(9);
@@ -583,20 +525,17 @@ function generatePDF() {
     
     let yPos = 35;
     doc.text(`Date Range: ${fromDate} to ${toDate}`, 15, yPos);
-    doc.text(`Machine: ${machine}`, 15, yPos + 5);
-    doc.text(`Employee: ${employee}`, 15, yPos + 10);
-    doc.text(`Product: ${product}`, 15, yPos + 15);
     doc.text(`Generated on: ${currentDate}`, doc.internal.pageSize.getWidth() - 15, yPos, { align: 'right' });
     
     // Add a line separator
-    yPos += 22;
+    yPos += 7;
     doc.setLineWidth(0.3);
     doc.line(15, yPos, doc.internal.pageSize.getWidth() - 15, yPos);
     yPos += 5;
     
     // Prepare table data and calculate totals
     const headers = [
-        ['ID', 'EMPLOYEE', 'DATE', 'MACHINE', 'PRODUCT', 'PERCENTAGE', 'TARGET', 'PRODUCE', 'DIFFERENCE', 'DAMAGE QTY', 'AMOUNT']
+        ['ID', 'EMPLOYEE', 'DATE', 'TARGET', 'PRODUCE', 'DIFFERENCE', 'DAMAGE QTY', 'AMOUNT']
     ];
     
     const body = [];
@@ -610,11 +549,10 @@ function generatePDF() {
     // Get all data from filtered rows
     tableData.each(function(value, index) {
         const target = parseFloat(value.target) || 0;
-        const produce = parseFloat(value.Produce_qty) || 0;
+        const produce = parseFloat(value.produce) || 0;
         const difference = parseFloat(value.difference) || 0;
-        const damage = parseFloat(value.damage_qty) || 0;
-        const amount = parseFloat(value.amount) || 0;
-        const percentage = parseFloat(value.precentage) || 0;
+        const damage = parseFloat(value.damage) || 0;
+        const amount = parseFloat(value.bonus) || 0;
         
         totalTarget += target;
         totalProduce += produce;
@@ -627,12 +565,6 @@ function generatePDF() {
             value.id || '',
             value.emp_name || '',
             value.date || '',
-            value.machine || '',
-            value.product || '',
-            percentage !== 0 ? percentage.toLocaleString('en-US', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }) + '%' : '0%',
             target !== 0 ? target.toLocaleString('en-US', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
@@ -683,7 +615,7 @@ function generatePDF() {
         
         // Add totals row
         body.push([
-            '', '', '', '', '', 'TOTALS:',
+            '', '', 'TOTALS:',
             formattedTotalTarget,
             formattedTotalProduce,
             formattedTotalDifference,
@@ -694,7 +626,7 @@ function generatePDF() {
     
     // Calculate table width
     const pageWidth = doc.internal.pageSize.getWidth();
-    const margin = 10;
+    const margin = 15;
     const tableWidth = pageWidth - (2 * margin);
     
     // Generate table using autoTable
@@ -704,8 +636,8 @@ function generatePDF() {
         body: body,
         theme: 'grid',
         styles: {
-            fontSize: 7,
-            cellPadding: 1.5,
+            fontSize: 8,
+            cellPadding: 2,
             overflow: 'linebreak',
             textAlign: 'left'
         },
@@ -714,24 +646,21 @@ function generatePDF() {
             textColor: 255,
             fontStyle: 'bold',
             halign: 'center',
-            fontSize: 8
+            fontSize: 9
         },
         columnStyles: {
-            0: { cellWidth: 'auto', halign: 'center' },  // ID
+            0: { cellWidth: 'auto', halign: 'center' }, // ID
             1: { cellWidth: 'auto', halign: 'left' },    // EMPLOYEE
             2: { cellWidth: 'auto', halign: 'center' },  // DATE
-            3: { cellWidth: 'auto', halign: 'left' },    // MACHINE
-            4: { cellWidth: 'auto', halign: 'left' },    // PRODUCT
-            5: { cellWidth: 'auto', halign: 'right' },   // PERCENTAGE
-            6: { cellWidth: 'auto', halign: 'right' },   // TARGET
-            7: { cellWidth: 'auto', halign: 'right' },   // PRODUCE
-            8: { cellWidth: 'auto', halign: 'right' },   // DIFFERENCE
-            9: { cellWidth: 'auto', halign: 'right' },   // DAMAGE QTY
-            10: { cellWidth: 'auto', halign: 'right' }   // AMOUNT
+            3: { cellWidth: 'auto', halign: 'right' },   // TARGET
+            4: { cellWidth: 'auto', halign: 'right' },   // PRODUCE
+            5: { cellWidth: 'auto', halign: 'right' },   // DIFFERENCE
+            6: { cellWidth: 'auto', halign: 'right' },   // DAMAGE QTY
+            7: { cellWidth: 'auto', halign: 'right' }    // AMOUNT
         },
         bodyStyles: {
             textAlign: 'left',
-            fontSize: 7
+            fontSize: 8
         },
         alternateRowStyles: {
             fillColor: [245, 245, 245]
@@ -746,25 +675,25 @@ function generatePDF() {
                 data.cell.styles.fontStyle = 'bold';
                 data.cell.styles.fillColor = [220, 220, 220]; 
                 data.cell.styles.textColor = [0, 0, 0]; 
-                data.cell.styles.fontSize = 8;
-                // Right align the "TOTALS:" text
-                if (data.column.index === 5) {
+                data.cell.styles.fontSize = 9;
+                // Center align the "TOTALS:" text
+                if (data.column.index === 2) {
                     data.cell.styles.halign = 'right';
                 }
             }
         },
         willDrawPage: function(data) {
             // Add company name and page number on each page
-            doc.setFontSize(8);
+            doc.setFontSize(9);
             doc.setFont('helvetica', 'normal');
-            doc.text(companyName, margin, 10);
-            doc.text(`Page ${data.pageNumber}`, doc.internal.pageSize.getWidth() - margin, 10, { align: 'right' });
+            doc.text(companyName, 15, 10);
+            doc.text(`Page ${data.pageNumber}`, doc.internal.pageSize.getWidth() - 15, 10, { align: 'right' });
             
             // Add report title on subsequent pages
             if (data.pageNumber > 1) {
-                doc.setFontSize(11);
+                doc.setFontSize(12);
                 doc.setFont('helvetica', 'bold');
-                doc.text('Employee Production Report (Continued)', doc.internal.pageSize.getWidth() / 2, 18, { align: 'center' });
+                doc.text('Employee Production Daily Summary Report (Continued)', doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
             }
         }
     });
@@ -775,35 +704,31 @@ function generatePDF() {
         doc.setPage(totalPages);
         const finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : 150;
         
-        // Only add summary if there's enough space
-        if (finalY < doc.internal.pageSize.getHeight() - 40) {
+        // Add summary section if there's space
+        if (finalY < doc.internal.pageSize.getHeight() - 50) {
             doc.setFontSize(9);
             doc.setFont('helvetica', 'bold');
-            doc.text('Report Summary:', margin, finalY);
+            doc.text('Report Summary:', 15, finalY);
             
             doc.setFont('helvetica', 'normal');
-            doc.setFontSize(8);
-            doc.text(`Total Records: ${rowCount}`, margin, finalY + 6);
-            doc.text(`Total Target: ${totalTarget.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, margin, finalY + 12);
-            doc.text(`Total Produce: ${totalProduce.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, margin, finalY + 18);
-            doc.text(`Total Difference: ${totalDifference.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, margin, finalY + 24);
-            doc.text(`Total Damage: ${totalDamage.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, margin, finalY + 30);
-            doc.text(`Total Amount: ${totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, margin, finalY + 36);
+            doc.text(`Total Records: ${rowCount}`, 15, finalY + 5);
+            doc.text(`Total Target: ${totalTarget.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, 15, finalY + 10);
+            doc.text(`Total Produce: ${totalProduce.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, 15, finalY + 15);
+            doc.text(`Total Amount: ${totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, 15, finalY + 20);
         }
         
         // Add footer
-        doc.setFontSize(7);
-        const generatedBy = $('#emp_name').val() || 'System';
-        doc.text(`Generated by: ${generatedBy}`, margin, doc.internal.pageSize.getHeight() - 10);
-        doc.text(`Date: ${currentDate}`, doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.getHeight() - 10, { align: 'center' });
-        doc.text(`${companyName}`, doc.internal.pageSize.getWidth() - margin, doc.internal.pageSize.getHeight() - 10, { align: 'right' });
+        doc.setFontSize(8);
+        const empName = $('#emp_name').val() || 'System';
+        doc.text(`Generated by: ${empName}`, 15, doc.internal.pageSize.getHeight() - 15);
+        doc.text(`Company: ${companyName}`, doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.getHeight() - 15, { align: 'center' });
+        doc.text(`Page ${totalPages} of ${totalPages}`, doc.internal.pageSize.getWidth() - 15, doc.internal.pageSize.getHeight() - 15, { align: 'right' });
     }
     
     // Save the PDF
-    const fileName = `Employee_Production_Report_${fromDate.replace(/-/g, '_')}_${toDate.replace(/-/g, '_')}.pdf`;
+    const fileName = `Employee_Production_Summary_${fromDate.replace(/-/g, '_')}_${toDate.replace(/-/g, '_')}.pdf`;
     doc.save(fileName);
 }
-
 
 
 });

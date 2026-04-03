@@ -37,38 +37,68 @@ class ProductionTaskApproveController extends Controller
         $to_date = $request->get('to_date');
 
 
-          $query = DB::query()
-            ->select('employees.id as emp_auto_id',
-                'employees.emp_id',
-                'employees.emp_name_with_initial',
-                'employees.emp_join_date'               
-            )
-            ->from('employees as employees');
+            $query = DB::table('employees')
+        ->select(
+            'employees.id as emp_auto_id',
+            'employees.emp_id',
+            'employees.emp_name_with_initial'
+        )
+        ->join('opma_daily_production_summary', 'employees.emp_id', '=', 'opma_daily_production_summary.emp_id')
+        ->where('employees.deleted', 0)
+        ->where('employees.is_resigned', 0);
         if ($employee != '') {
-            $query->where(['employees.emp_id' => $employee]);
+            $query->where('employees.emp_id', $employee);
         }
-        $query->where('employees.deleted', 0);
-         $query->where('employees.is_resigned',0);
         $query->groupBy('employees.emp_id');
         $results = $query->get();
+        
 
           foreach ($results as $record) {
 
-            $productionQuery = DB::table('opma_employee_production')
+            $productionQuery = DB::table('opma_daily_production_summary')
             ->where('emp_id', $record->emp_id)
             ->whereBetween('date', [$from_date, $to_date]);
         
-            $productionTotal = $productionQuery->sum('amount');
+            $targetTotal = $productionQuery->sum('target');
+            $produceTotal = $productionQuery->sum('produce');
+            $bonusTotal = $productionQuery->sum('bonus');
 
-            if ($productionTotal == 0) {
-                    continue;
-                }
+            $emp_perfomance = ($targetTotal > 0) ? round(($produceTotal / $targetTotal) * 100) : 0;
+
+            if($emp_perfomance > 50){
+
+                  $performanceAmount = DB::table('opma_performance_amount')
+                            ->where('emp_id', $record->emp_id)
+                            ->select('amount')
+                            ->first();
+                        
+                        if($performanceAmount) {
+                            $baseAmount = $performanceAmount->amount;
+                            // Check if performance is 90% or more
+                            if($emp_perfomance >= 90) {
+                                // Full amount
+                                $emp_perf_amount = $baseAmount;
+                            } else {
+                                // Calculate based on performance percentage for 50% to 89%
+                                $emp_perf_amount = ($emp_perfomance / 100) * $baseAmount;
+                            }
+                        } else {
+                            $emp_perf_amount = 0;
+                        }
+
+            }else{
+                 $emp_perf_amount = 0;
+            }
 
             $data[] = [
                         'emp_auto_id' => $record->emp_auto_id,
                         'emp_id' => $record->emp_id,
                         'emp_name_with_initial' => $record->emp_name_with_initial,
-                        'production_total' =>round($productionTotal, 2) 
+                        'target_total' =>round($targetTotal, 2),
+                        'produce_total' =>round($produceTotal, 2),
+                        'bonus_total' =>round($bonusTotal, 2),
+                        'perfomance' =>round($emp_perfomance, 2), 
+                        'perfomance_total' =>round($emp_perf_amount, 2), 
                     ];
           }
 
@@ -85,7 +115,8 @@ class ProductionTaskApproveController extends Controller
         }
 
         $dataarry = $request->input('dataarry');
-        $productionremunerationid = $request->input('remunitiontype');
+         $profomanceremunerationid = $request->input('remunitiontype');
+         $bonusremunerationid = $request->input('remunitiontypebonus');
 
         
         $current_date_time = Carbon::now()->toDateTimeString();
@@ -94,7 +125,8 @@ class ProductionTaskApproveController extends Controller
 
             $empid = $row['empid'];
             $empname = $row['emp_name'];
-            $production_total = str_replace([','], '', $row['production_total']);
+            $perfomance_total = str_replace([','], '', $row['perfomance_total']);
+            $bonus_total = str_replace([','], '', $row['bonus_total']);
             $autoid = $row['emp_auto_id'];
 
             $profiles = DB::table('payroll_profiles')
@@ -120,20 +152,21 @@ class ProductionTaskApproveController extends Controller
             }
 
 
-             if($production_total != 0){
+            // Apply Performance total
+             if($perfomance_total != 0){
 
                 $termpaymentcheck = DB::table('employee_term_payments')
                 ->select('id')
                 ->where('payroll_profile_id', $profiles->payroll_profile_id)
                 ->where('emp_payslip_no', $newpaylispno)
-                ->where('remuneration_id', $productionremunerationid)
+                ->where('remuneration_id', $profomanceremunerationid)
                 ->first();
             
                 if($termpaymentcheck){
                     DB::table('employee_term_payments')
                     ->where('id', $termpaymentcheck->id)
                     ->update([
-                        'payment_amount' => $production_total,
+                        'payment_amount' => $perfomance_total,
                         'payment_cancel' => '0',
                         'updated_by' => Auth::id(),
                         'updated_at' => $current_date_time
@@ -141,10 +174,44 @@ class ProductionTaskApproveController extends Controller
                 }
                 else{
                     $termpayment = new EmployeeTermPayment();
-                    $termpayment->remuneration_id = $productionremunerationid;
+                    $termpayment->remuneration_id = $profomanceremunerationid;
                     $termpayment->payroll_profile_id = $profiles->payroll_profile_id;
                     $termpayment->emp_payslip_no = $newpaylispno;
-                    $termpayment->payment_amount = $production_total;
+                    $termpayment->payment_amount = $perfomance_total;
+                    $termpayment->payment_cancel = 0;
+                    $termpayment->created_by = Auth::id();
+                    $termpayment->created_at = $current_date_time;
+                    $termpayment->save(); 
+                }
+            }
+
+
+             // Apply Bonus  total
+             if($bonus_total != 0){
+
+                $termpaymentcheck = DB::table('employee_term_payments')
+                ->select('id')
+                ->where('payroll_profile_id', $profiles->payroll_profile_id)
+                ->where('emp_payslip_no', $newpaylispno)
+                ->where('remuneration_id', $bonusremunerationid)
+                ->first();
+            
+                if($termpaymentcheck){
+                    DB::table('employee_term_payments')
+                    ->where('id', $termpaymentcheck->id)
+                    ->update([
+                        'payment_amount' => $bonus_total,
+                        'payment_cancel' => '0',
+                        'updated_by' => Auth::id(),
+                        'updated_at' => $current_date_time
+                    ]);
+                }
+                else{
+                    $termpayment = new EmployeeTermPayment();
+                    $termpayment->remuneration_id = $bonusremunerationid;
+                    $termpayment->payroll_profile_id = $profiles->payroll_profile_id;
+                    $termpayment->emp_payslip_no = $newpaylispno;
+                    $termpayment->payment_amount = $bonus_total;
                     $termpayment->payment_cancel = 0;
                     $termpayment->created_by = Auth::id();
                     $termpayment->created_at = $current_date_time;
@@ -159,7 +226,7 @@ class ProductionTaskApproveController extends Controller
 
         }
 
-        return response()->json(['success' => 'Production and Task Insentive is successfully Approved']);
+        return response()->json(['success' => 'Production Insentive is successfully Approved']);
     }
 
 
