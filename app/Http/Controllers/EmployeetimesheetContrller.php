@@ -28,14 +28,14 @@ class EmployeetimesheetContrller extends Controller
         $department = $request->get('department');
         $from_date = $request->get('from_date');
         $to_date = $request->get('to_date');
-        $lastEmpId = $request->get('last_emp_id', 0); // Start from last loaded employee
+        $lastEmpId = $request->get('last_emp_id', 0);
 
-        $limit = 100; // Load one employee at a time
+        $limit = 100;
 
-        // Step 1: Fetch Employee Data (unchanged)
+        // Step 1: Fetch Employee Data
         $employees = DB::select("
             SELECT emp.id, emp.emp_id, emp.emp_etfno, emp.emp_fullname, emp.emp_gender, 
-                dept.name AS departmentname,cam.name AS companyname, job.title AS jobtitlename, emp.emp_shift, 
+                dept.name AS departmentname, cam.name AS companyname, job.title AS jobtitlename, emp.emp_shift, 
                 COALESCE(esd_shift.shift_name, st.shift_name) AS shiftname
             FROM employees emp
             LEFT JOIN departments dept ON emp.emp_department = dept.id
@@ -61,7 +61,7 @@ class EmployeetimesheetContrller extends Controller
             ]);
         }
 
-        // Step 2: Generate date range in PHP (alternative to recursive CTE)
+        // Step 2: Generate date range in PHP
         $startDate = new DateTime($from_date);
         $endDate = new DateTime($to_date);
         $dateRange = [];
@@ -73,7 +73,25 @@ class EmployeetimesheetContrller extends Controller
 
         $employeeData = [];
         foreach ($employees as $employee) {
-            if(!empty($employee->emp_shift)){
+
+            // Check roster first, then employeeshiftdetails, then default shift
+            $hasShift = DB::selectOne("
+                SELECT 1 FROM employee_roster_details erd
+                WHERE erd.emp_id = ? AND erd.work_date BETWEEN ? AND ?
+                UNION
+                SELECT 1 FROM employeeshiftdetails esd
+                WHERE esd.emp_id = ? AND esd.date_from <= ? AND esd.until_time >= ?
+                UNION
+                SELECT 1 FROM employees emp
+                WHERE emp.id = ? AND emp.emp_shift IS NOT NULL AND emp.emp_shift != ''
+                LIMIT 1
+            ", [
+                $employee->emp_id, $from_date, $to_date,
+                $employee->emp_id, $to_date, $from_date,
+                $employee->id
+            ]);
+
+            if (!empty($hasShift)) {
                 // Initialize attendance records array
                 $attendanceRecords = [];
                 
@@ -86,7 +104,7 @@ class EmployeetimesheetContrller extends Controller
                             COALESCE(h.holiday_name, 
                                 CASE WHEN WEEKDAY(?) IN (5,6) THEN DAYNAME(?) 
                                 ELSE 'Weekday' END) AS day_type,
-                            COALESCE(esd_shift.shift_name, st.shift_name) AS shift,
+                            COALESCE(roster_shift.shift_name, esd_shift.shift_name, st.shift_name) AS shift,
                             DATE_FORMAT(MIN(att.timestamp), '%h:%i %p') AS in_time, 
                             DATE_FORMAT(MAX(att.timestamp), '%h:%i %p') AS out_time,
                             ROUND(COALESCE(la.minites_count, 0), 2) AS late_min, 
@@ -96,6 +114,9 @@ class EmployeetimesheetContrller extends Controller
                             ROUND(COALESCE(ot.double_hours, 0), 2) AS double_ot,
                             ROUND(COALESCE(ot.triple_hours, 0), 2) AS triple_ot
                         FROM (SELECT ? AS date) dr
+                        LEFT JOIN employee_roster_details erd
+                            ON erd.emp_id = ? AND erd.work_date = ?
+                        LEFT JOIN shift_types roster_shift ON roster_shift.id = erd.shift_id
                         LEFT JOIN attendances att ON att.emp_id = ? AND att.date = ?
                         LEFT JOIN shift_types st ON st.id = ?
                         LEFT JOIN employeeshiftdetails esd 
@@ -117,18 +138,19 @@ class EmployeetimesheetContrller extends Controller
                         LEFT JOIN holidays h ON h.date = ?
                         GROUP BY dr.date
                     ", [
-                        $date, $date, $date, $date, // For date formatting and weekday check
-                        $date, // For the dr alias
-                        $employee->emp_id, $date, // For attendance join
-                        $employee->emp_shift, // For shift_types join
-                        $employee->emp_id, $date, // For employeeshiftdetails join
-                        $employee->emp_id, $date, // For late attendance join
-                        $employee->emp_id, $date, // For OT join
-                        $employee->emp_id, $date, // For leave join
-                        $date, // For holiday join
+                        $date, $date, $date, $date,     // For date formatting and weekday check
+                        $date,                           // For the dr alias
+                        $employee->emp_id, $date,        // For roster join
+                        $employee->emp_id, $date,        // For attendance join
+                        $employee->emp_shift,             // For shift_types join
+                        $employee->emp_id, $date,        // For employeeshiftdetails join
+                        $employee->emp_id, $date,        // For late attendance join
+                        $employee->emp_id, $date,        // For OT join
+                        $employee->emp_id, $date,        // For leave join
+                        $date,                           // For holiday join
                     ]);
 
-                    // Add the record (we take the first result since we're querying one date at a time)
+                    // Add the record
                     $attendanceRecords[] = $record[0] ?? [
                         'in_date' => $date,
                         'out_date' => $date,
