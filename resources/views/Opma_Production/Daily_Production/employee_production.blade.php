@@ -34,7 +34,7 @@
                                 <tr>
                                     <th>ID</th>
                                     <th>EMPLOYEE</th>
-                                     <th>DATE</th>
+                                    <th>DATE</th>
                                     <th>TARGET</th>
                                     <th>DAY PRODUCE</th>
                                     <th>PLUS/MINUS</th>

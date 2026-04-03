@@ -11,7 +11,7 @@
                 <div class="page-header-content py-3 px-2">
                     <h1 class="page-header-title ">
                         <div class="page-header-icon"><i class="fa-light fa-ballot-check"></i></div>
-                        <span>Employee Production</span>
+                        <span>Production Final Approval</span>
                     </h1>
                 </div>
             </div>
@@ -54,7 +54,11 @@
                                         <th></th>
                                         <th>EMPLOYEE ID</th>
                                         <th>EMPLOYEE</th>
-                                        <th>PRODUCTION AMOUNT</th>
+                                        <th>TOTAL TARGET</th>
+                                        <th>TOTAL PRODUCE</th>
+                                        <th>PERFOMANCE</th>
+                                        <th>PERFOMANCE INCENTIVE</th>
+                                        <th>BONUS AMOUNT</th>
                                         <th class="d-none">Employee auto id</th>
                                     </tr>
                                 </thead>
@@ -131,8 +135,20 @@
                             <form class="form-horizontal" id="formApprove">
                                 <div class="form-group mb-1">
                                     <div class="col-12">
-                                         <label class="small font-weight-bolder text-dark">Deduction Type</label>
+                                         <label class="small font-weight-bolder text-dark">Remuneration Type For Perfomance Incentive</label>
                                             <select name="remunitiontype" id="remunitiontype" class="form-control form-control-sm">
+                                                <option value="">Select Remuneration</option>
+                                                    @foreach ($remunerations as $remuneration){
+                                                        <option value="{{$remuneration->id}}" >{{$remuneration->remuneration_name}}</option>
+                                                    }  
+                                                    @endforeach
+                                            </select>
+                                    </div>
+                                </div>
+                                 <div class="form-group mb-1">
+                                    <div class="col-12">
+                                         <label class="small font-weight-bolder text-dark">Remuneration Type For Production Bonus</label>
+                                            <select name="remunitiontypebonus" id="remunitiontypebonus" class="form-control form-control-sm">
                                                 <option value="">Select Remuneration</option>
                                                     @foreach ($remunerations as $remuneration){
                                                         <option value="{{$remuneration->id}}" >{{$remuneration->remuneration_name}}</option>
@@ -248,7 +264,11 @@ $(document).ready(function(){
                     },
                     { data: 'emp_id', name: 'emp_id' },
                     { data: 'emp_name_with_initial', name: 'emp_name_with_initial' },
-                    { data: 'production_total', name: 'production_total' },
+                    { data: 'target_total', name: 'target_total' },
+                    { data: 'produce_total', name: 'produce_total' },
+                    { data: 'perfomance', name: 'perfomance' },
+                    { data: 'perfomance_total', name: 'perfomance_total' },
+                    { data: 'bonus_total', name: 'bonus_total' },
                     {
                         data: 'emp_auto_id',
                         name: 'emp_auto_id',
@@ -281,11 +301,12 @@ $(document).ready(function(){
             $('#btn-approve').on('click', function (e) {
                   e.preventDefault();
                 var remunitiontype = $('#remunitiontype').val();
+                 var remunitiontypebonus = $('#remunitiontypebonus').val();
                 var employee_f = $('#employee_f').val();
                 var from_date = $('#from_date').val();
                 var to_date = $('#to_date').val();
 
-                if (remunitiontype == '') {
+               if (remunitiontype == '' || remunitiontypebonus == ''){
                         Swal.fire({
                             position: "top-end",
                             icon: 'warning',
@@ -302,7 +323,11 @@ $(document).ready(function(){
                             selectedRowIdsapprove.push({
                                 empid: rowData.emp_id,
                                 emp_name: rowData.emp_name_with_initial,
-                                production_total: rowData.production_total,
+                                target_total: rowData.target_total,
+                                produce_total: rowData.produce_total,
+                                perfomance: rowData.perfomance,
+                                perfomance_total: rowData.perfomance_total,
+                                bonus_total: rowData.bonus_total,
                                 emp_auto_id: rowData.emp_auto_id
                             });
                         }
@@ -323,6 +348,7 @@ $(document).ready(function(){
                                     data: {
                                         dataarry: selectedRowIdsapprove,
                                         remunitiontype: remunitiontype,
+                                        remunitiontypebonus: remunitiontypebonus,
                                         employee_f: employee_f,
                                         from_date: from_date,
                                         to_date: to_date
@@ -379,7 +405,7 @@ $(document).ready(function(){
 function showInitialMessage() {
         $('#dataTable tbody').html(
             '<tr>' +
-            '<td colspan="4" class="text-center py-5">' + // Changed colspan to 9 to match your columns
+            '<td colspan="8" class="text-center py-5">' + // Changed colspan to 9 to match your columns
             '<div class="d-flex flex-column align-items-center">' +
             '<i class="fas fa-filter fa-3x text-muted mb-2"></i>' +
             '<h4 class="text-muted mb-2">No Records Found</h4>' +

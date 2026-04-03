@@ -1755,6 +1755,7 @@ Route::post('/opma_productallocationdeletelist' ,'Production_Module_Opma\Product
 
  // Production Reports 
    Route::get('/opma_reportemployeeproduction' ,'Production_Module_Opma\ProductionreportController@index')->name('opma_reportemployeeproduction');
+   Route::get('/opma_reportemployeeproductiondailyreport' ,'Production_Module_Opma\ProductionreportController@dailyreport')->name('opma_reportemployeeproductiondailyreport');
  
 
 
