@@ -168,11 +168,16 @@
                 <table id="maintable">
                     <tbody>
                         <tr>
-                            <td colspan="3"><strong style="font-size: 14px;">{{ $company_name }}</strong></td>
+                            <td colspan="2"><strong style="font-size: 14px;">{{ $company_name }}</strong></td>
+                            <td rowspan="2">
+                                @if (!empty($row['companylogo']))
+                                <img src="{{ $row['companylogo'] }}" width="60" height="60" alt="" srcset="">
+                                @endif
+                            </td>
                             <td colspan="3" style="text-align:right;" class="{{ $fontcss }}"><strong>{{ $lang['pay_advice'] }} {{$paymonth_name}}</strong></td>
                         </tr>
                         <tr>
-                            <td style="border-top: none; border-right:none;" colspan="3"><b>{{ $company_addr }}</b></td>
+                            <td style="border-top: none; border-right:none;" colspan="2"><b>{{ $company_addr }}</b></td>
                             <td style="border-top: none; border-right:none;text-align:right;" colspan="3"><b></b></td>
                         </tr>
                         <tr>
