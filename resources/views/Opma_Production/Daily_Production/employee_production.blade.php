@@ -11,7 +11,7 @@
                 <div class="page-header-content py-3 px-2">
                     <h1 class="page-header-title ">
                         <div class="page-header-icon"><i class="fa-light fa-ballot-check"></i></div>
-                        <span>Employee Production</span>
+                        <span>Employee Daily Production Summary</span>
                     </h1>
                 </div>
             </div>
@@ -35,11 +35,11 @@
                                     <th>ID</th>
                                     <th>EMPLOYEE</th>
                                      <th>DATE</th>
-                                    <th>MACHINE</th>
-                                    <th>PRODUCT</th>
-                                    <th>QTY</th>
-                                    <th>PRECENTAGE</th>
-                                    <th>AMOUNT</th>
+                                    <th>TARGET</th>
+                                    <th>DAY PRODUCE</th>
+                                    <th>PLUS/MINUS</th>
+                                    <th>BONUS AMOUNT</th>
+                                    <th>DAMAGE QTY</th>
                                 </tr>
                             </thead>
                             <tbody>   
@@ -62,28 +62,6 @@
               <div class="offcanvas-body">
                   <ul class="list-unstyled">
                       <form class="form-horizontal" id="formFilter">
-                          <li class="mb-2">
-                              <div class="col-md-12">
-                                  <label class="small font-weight-bolder text-dark">Machine</label>
-                                <select name="machine" id="machine" class="form-control form-control-sm">
-                                    <option value="">Select Machine</option>
-                                    @foreach ($machines as $machine)
-                                        <option value="{{ $machine->id }}">{{ $machine->machine }}</option>
-                                    @endforeach
-                                </select>
-                              </div>
-                          </li>
-                          <li class="mb-2">
-                              <div class="col-md-12">
-                                  <label class="small font-weight-bolder text-dark">Product</label>
-                                    <select name="product" id="product" class="form-control form-control-sm">
-                                        <option value="">Select Product</option>
-                                        @foreach ($products as $product)
-                                            <option value="{{ $product->id }}">{{ $product->title }}</option>
-                                        @endforeach
-                                    </select>
-                              </div>
-                          </li>
                            <li class="mb-2">
                               <div class="col-md-12">
                                    <label class="small font-weight-bolder text-dark">Employee</label>
@@ -157,7 +135,7 @@ $(document).ready(function(){
             }
        });
 
-         function load_dt(machine, employee, product, from_date, to_date){
+         function load_dt(employee, from_date, to_date){
                 $('#dataTable').DataTable({
                    "destroy": true,
                     "processing": true,
@@ -167,13 +145,13 @@ $(document).ready(function(){
                     "buttons": [{
                             extend: 'csv',
                             className: 'btn btn-success btn-sm',
-                            title: 'Employee Production Information',
+                            title: 'Employee Daily Production Summary Information',
                             text: '<i class="fas fa-file-csv mr-2"></i> CSV',
                         },
                         { 
                             extend: 'pdf', 
                             className: 'btn btn-danger btn-sm', 
-                            title: 'Employee Production Information', 
+                            title: 'Employee Daily Production Summary Information', 
                             text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
                             orientation: 'landscape', 
                             pageSize: 'legal', 
@@ -183,7 +161,7 @@ $(document).ready(function(){
                         },
                         {
                             extend: 'print',
-                            title: 'Employee Production Information',
+                            title: 'Employee Daily Production Summary Information',
                             className: 'btn btn-primary btn-sm',
                             text: '<i class="fas fa-print mr-2"></i> Print',
                             customize: function(win) {
@@ -197,12 +175,10 @@ $(document).ready(function(){
                         [0, "desc"]
                     ],
                     ajax: {
-                         url: scripturl + '/Opma_Production/employee_production_list.php',
+                         url: scripturl + '/Opma_Production/daily_employee_productionsummary_list.php',
                          type: 'POST',
                          data : 
-                            {machine :machine, 
-                            employee :employee, 
-                            product: product,
+                            { employee :employee, 
                             from_date: from_date,
                             to_date: to_date},
                     },
@@ -210,29 +186,20 @@ $(document).ready(function(){
                         { data: 'id', name: 'id' },
                         { data: 'emp_name', name: 'emp_name' },
                         { data: 'date', name: 'date' },
-                        { data: 'machine', name: 'machine' },
-                        { data: 'product', name: 'product' },
-                        { data: 'Produce_qty', name: 'Produce_qty' },
-                        { 
-                            data: 'precentage', 
-                            name: 'precentage',
-                            render: function(data, type, row) {
-                                if (type === 'display' || type === 'filter') {
-                                    return parseFloat(data).toFixed(2) + '%';
-                                }
-                                return data;
-                            }
-                        },
+                        { data: 'target', name: 'target' },
+                        { data: 'produce', name: 'produce' },
+                        { data: 'difference', name: 'difference' },
                        { 
-                            data: 'amount', 
-                            name: 'amount',
+                            data: 'bonus', 
+                            name: 'bonus',
                             render: function(data, type, row) {
                                 if (type === 'display' || type === 'filter') {
                                     return parseFloat(data).toFixed(2);
                                 }
                                 return data;
                             }
-                        }
+                        },
+                          { data: 'damage', name: 'damage' }
                     ],
                 });
         }
@@ -241,13 +208,10 @@ $(document).ready(function(){
 
         $('#formFilter').on('submit',function(e) {
             e.preventDefault();
-            let machine = $('#machine').val();
             let employee = $('#employee_f').val();
-            let product = $('#product').val();
             let from_date = $('#from_date').val();
             let to_date = $('#to_date').val();
-
-            load_dt(machine, employee, product, from_date, to_date);
+            load_dt(employee,from_date, to_date);
              closeOffcanvasSmoothly();
         });
 
