@@ -1909,11 +1909,11 @@ class EmployeePayslipController extends Controller
 
 		$sqlslip="SELECT drv_emp.emp_payslip_id, drv_emp.payroll_profile_id, drv_emp.disp_epfno AS emp_epfno, drv_emp.emp_national_id, 
 		IFNULL(employee_banks.bank_ac_no, '') AS bank_ac_no, IFNULL(employee_banks.bank_name, '') as bank_name, IFNULL(employee_banks.bank_branch_name, '') as bank_branch_name, drv_emp.emp_first_name, drv_emp.emp_designation, 
-		drv_emp.location, drv_emp.department_name, drv_info.fig_group_title, drv_info.fig_value AS fig_value, drv_info.epf_payable 
+		drv_emp.location, drv_emp.department_name, drv_emp.logo, drv_info.fig_group_title, drv_info.fig_value AS fig_value, drv_info.epf_payable 
 		AS epf_payable, drv_info.remuneration_pssc, drv_info.remuneration_tcsc, drv_catinfo.emp_otamt1, drv_catinfo.emp_otamt2, drv_catinfo.emp_nopaydays, drv_catinfo.work_days, drv_catinfo.working_week_days 
 		FROM (SELECT employee_payslips.id AS emp_payslip_id, employee_payslips.payroll_profile_id, employees.emp_id AS emp_epfno, employees.emp_etfno as disp_epfno, 
 		ifnull(employees.emp_national_id, '') AS emp_national_id, employees.emp_name_with_initial AS emp_first_name, job_titles.title 
-		AS emp_designation, companies.name AS location, departments.name AS department_name  FROM `employee_payslips` INNER JOIN payroll_profiles ON employee_payslips.payroll_profile_id=payroll_profiles.id 
+		AS emp_designation, companies.name AS location, departments.name AS department_name, companies.logo  FROM `employee_payslips` INNER JOIN payroll_profiles ON employee_payslips.payroll_profile_id=payroll_profiles.id 
 		INNER JOIN employees ON payroll_profiles.emp_id=employees.id INNER JOIN companies ON employees.emp_company=companies.id INNER JOIN departments ON employees.emp_department=departments.id LEFT OUTER JOIN job_titles ON employees.emp_job_code=job_titles.id WHERE employee_payslips.payment_period_id=? AND employees.emp_company=? AND ".$emp_department_col."=? AND employee_payslips.payslip_cancel=0) AS drv_emp 
 		INNER JOIN (select employee_payslip_id, employee_bank_id, sum(normal_rate_otwork_hrs) AS emp_otamt1, sum(double_rate_otwork_hrs) AS emp_otamt2, 
 		sum(nopay_days) AS emp_nopaydays, SUM(work_days) as work_days, SUM(work_days_exclusions) as working_week_days from employee_paid_rates GROUP BY employee_payslip_id) AS drv_catinfo ON drv_emp.emp_payslip_id=drv_catinfo.employee_payslip_id 
@@ -1955,7 +1955,7 @@ class EmployeePayslipController extends Controller
 				$emp_fig_tottax = 0;
 			}
 			if(!isset($emp_array[$cnt-1])){
-				$emp_array[] = array('emp_epfno'=>$r->emp_epfno,'emp_national_id'=>$r->emp_national_id, 'bank_name'=>$r->bank_name, 'bank_branch'=>$r->bank_branch_name,'bank_accno'=>$r->bank_ac_no, 'emp_first_name'=>$r->emp_first_name, 'emp_designation'=>$r->emp_designation,'emp_department' => $r->department_name, 'Office'=>$r->location, 'BASIC'=>0, 'BRA_I'=>'0', 'add_bra2'=>'0', 'NOPAY'=>0, 'tot_bnp'=>0, 'sal_arrears1'=>0, 'tot_fortax'=>0, 'ATTBONUS'=>0, 'ATTBONUS_W'=>0, 'INCNTV_EMP'=>0, 'INCNTV_DIR'=>0, 'add_transport'=>0, 'add_other'=>0, 'sal_arrears2'=>0, 'OTAMT1'=>$r->emp_otamt1, 'OTAMT2'=>$r->emp_otamt2,'work_tot_days'=>$r->work_days, 'work_week_days'=>$r->working_week_days, 'NOPAYCNT'=>$r->emp_nopaydays, 'OTHRS1'=>0, 'OTHRS2'=>0, 'tot_earn'=>0, 'EPF8'=>0, 'EPF12'=>0, 'ETF3'=>0, 'sal_adv'=>0, 'ded_tp'=>0, 'ded_IOU'=>0, 'ded_fund_1'=>0, 'ded_other'=>0, 'PAYE'=>0, 'LOAN'=>0, 'tot_ded'=>0, 'NETSAL'=>0, 'OTHER_REM'=>0);
+				$emp_array[] = array('emp_epfno'=>$r->emp_epfno,'emp_national_id'=>$r->emp_national_id, 'bank_name'=>$r->bank_name, 'bank_branch'=>$r->bank_branch_name,'bank_accno'=>$r->bank_ac_no, 'emp_first_name'=>$r->emp_first_name, 'emp_designation'=>$r->emp_designation,'emp_department' => $r->department_name, 'companylogo'=>$r->logo, 'Office'=>$r->location, 'BASIC'=>0, 'BRA_I'=>'0', 'add_bra2'=>'0', 'NOPAY'=>0, 'tot_bnp'=>0, 'sal_arrears1'=>0, 'tot_fortax'=>0, 'ATTBONUS'=>0, 'ATTBONUS_W'=>0, 'INCNTV_EMP'=>0, 'INCNTV_DIR'=>0, 'add_transport'=>0, 'add_other'=>0, 'sal_arrears2'=>0, 'OTAMT1'=>$r->emp_otamt1, 'OTAMT2'=>$r->emp_otamt2,'work_tot_days'=>$r->work_days, 'work_week_days'=>$r->working_week_days, 'NOPAYCNT'=>$r->emp_nopaydays, 'OTHRS1'=>0, 'OTHRS2'=>0, 'tot_earn'=>0, 'EPF8'=>0, 'EPF12'=>0, 'ETF3'=>0, 'sal_adv'=>0, 'ded_tp'=>0, 'ded_IOU'=>0, 'ded_fund_1'=>0, 'ded_other'=>0, 'PAYE'=>0, 'LOAN'=>0, 'tot_ded'=>0, 'NETSAL'=>0, 'OTHER_REM'=>0);
 				
 			}
 			
