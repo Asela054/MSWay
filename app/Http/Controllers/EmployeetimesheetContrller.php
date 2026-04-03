@@ -99,7 +99,7 @@ class EmployeetimesheetContrller extends Controller
                         LEFT JOIN attendances att ON att.emp_id = ? AND att.date = ?
                         LEFT JOIN shift_types st ON st.id = ?
                         LEFT JOIN employeeshiftdetails esd 
-                            ON esd.emp_id = ? AND ? BETWEEN esd.date_from AND esd.date_to
+                            ON esd.emp_id = ? AND ? BETWEEN esd.date_from AND esd.until_time
                         LEFT JOIN shift_types esd_shift ON esd.shift_id = esd_shift.id
                         LEFT JOIN employee_late_attendance_minites la 
                             ON la.emp_id = ? AND la.attendance_date = ?
