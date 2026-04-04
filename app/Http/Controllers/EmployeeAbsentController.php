@@ -74,6 +74,11 @@ class EmployeeAbsentController extends Controller
         }
 
         for ($date = $selectdatefrom; $date->lte($selectdateto); $date->addDay()) {
+
+         if ($date->dayOfWeek == Carbon::SUNDAY) {
+                continue; // Skip this date and move to next day
+            }
+
             $attendances = DB::table('attendances')
                 ->leftJoin('employees', 'attendances.emp_id', '=', 'employees.emp_id')
                 ->select('employees.emp_id')
@@ -114,6 +119,10 @@ class EmployeeAbsentController extends Controller
         }
 
         for ($date = $selectdatefrom; $date->lte($selectdateto); $date->addDay()) {
+
+            if ($date->dayOfWeek == Carbon::SUNDAY) {
+                continue; // Skip this date and move to next day
+            }
             $attendances = DB::table('attendances')
                 ->leftJoin('employees', 'attendances.emp_id', '=', 'employees.emp_id')
                 ->select('employees.emp_id')

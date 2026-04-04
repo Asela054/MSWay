@@ -23,6 +23,7 @@ class RptOTController extends Controller
         return view('Report.ot_report' );
     }
 
+    // THis method is not been used
     public function ot_report_list(Request $request)
     {
         $permission = Auth::user()->can('ot-report');
