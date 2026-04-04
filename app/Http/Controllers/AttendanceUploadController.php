@@ -11,7 +11,8 @@ use Illuminate\Support\Facades\DB;
 
 class AttendanceUploadController extends Controller
 {
-    public function importCSV(Request $request)
+
+        public function importCSV(Request $request)
     {
         $permission = Auth::user()->can('attendance-create');
         if (!$permission) {
@@ -31,7 +32,7 @@ class AttendanceUploadController extends Controller
 
         $attendances = [];
         $firstRow = true;
-        $rowNumber = 1; // Track row number for error reporting
+        $rowNumber = 1;
 
         while (($datalist = fgetcsv($file)) !== FALSE) {
             if ($firstRow) {
@@ -40,105 +41,230 @@ class AttendanceUploadController extends Controller
                 continue;
             }
 
-            if(empty($datalist[2]) || empty($datalist[3])) {
-                continue;
-            }   
-
-            $date = Carbon::createFromFormat('d/m/Y', $datalist[1]);
-            $date = $date->format('Y-m-d');
-            $inTime = Carbon::createFromFormat('H:i:s', $datalist[2]);
-            $inTime = $inTime->format('H:i:s');
-            $outTime = Carbon::createFromFormat('H:i:s', $datalist[3]);
-            $outTime = $outTime->format('H:i:s');
-
             $attendances[] = [
-                'row' => $rowNumber, // Store row number for error reporting
+                'row' => $rowNumber,
                 'emp_id' => $datalist[0],
-                'date' => $date,
-                'in_time' => $inTime,
-                'out_time' => $outTime,
+                'date' => $datalist[1],
+                'in_time' => $datalist[2],
+                'out_time' => $datalist[3],
             ];
-            
             $rowNumber++;
         }
         
         fclose($file);
-        
+
+        $errors = [];
+        $successCount = 0;
+
         // Validate and insert data for each attendance
         foreach ($attendances as $attendanceData) {
-            $rowNumber = $attendanceData['row'];
-            
-            // Note: Since you already converted the date to Y-m-d in the while loop,
-            // we validate against that format here.
+
             $rowValidator = Validator::make($attendanceData, [
-                'emp_id'   => 'required',
-                'date'     => ['required', 'date_format:Y-m-d'], 
-                'in_time'  => ['required', 'regex:/^\d{1,2}:\d{2}:\d{2}$/'], 
-                'out_time' => ['required', 'regex:/^\d{1,2}:\d{2}:\d{2}$/'], 
+                'emp_id' => 'required',
+                'date' => 'required',
+                'in_time' => 'required',
+                'out_time' => 'required',
             ]);
 
             if ($rowValidator->fails()) {
-                return response()->json(['errors' => $rowValidator->errors()->all()]);
+                $errors[] = "Row {$attendanceData['row']}: " . implode(', ', $rowValidator->errors()->all());
+                continue;
             }
 
-            // Optimization: Consider moving this outside the loop if the CSV is large
-           $employeeExists = \App\Employee::where('emp_id', $attendanceData['emp_id'])->select('id', 'emp_id', 'emp_location')->first();
+            $employees = \App\Employee::pluck('emp_id', 'emp_id')->toArray();
+            $employeeId = $employees[$attendanceData['emp_id']] ?? null;
 
 
-            if (!$employeeExists) {
-                return response()->json(['errors' => "Row {$rowNumber}: Invalid Employee ID: " . $attendanceData['emp_id']]);
+            if (!$employeeId) {
+                $errors[] = "Row {$attendanceData['row']}: Invalid Employee ID: " . $attendanceData['emp_id'];
+                continue;
             }
-            $employeeLocation = $employeeExists->emp_location;
-
-            $date = $attendanceData['date']; // Already in Y-m-d from the while loop
 
             try {
-                // Create Carbon instances for comparison and storage
-                $inDateTime = Carbon::parse($date . ' ' . $attendanceData['in_time']);
-                $outDateTime = Carbon::parse($date . ' ' . $attendanceData['out_time']);
-
-                // Handle overnight shifts (e.g., In 22:00, Out 06:00)
-                if ($outDateTime->lessThan($inDateTime)) {
-                    $outDateTime->addDay();
+                // Parse and format date
+                $date = $this->parseDate($attendanceData['date']);
+                if (!$date) {
+                    $errors[] = "Row {$attendanceData['row']}: Invalid date format: " . $attendanceData['date'];
+                    continue;
                 }
+
+                
+            
+                // Parse and format in_time
+                $inTime = $this->parseTimestamp($attendanceData['in_time'], $date);
+                if (!$inTime) {
+                    $errors[] = "Row {$attendanceData['row']}: Invalid in_time format: " . $attendanceData['in_time'];
+                    continue;
+                }
+
+            
+                // Parse and format out_time
+                $outTime = $this->parseTimestamp($attendanceData['out_time'], $date);
+                if (!$outTime) {
+                    $errors[] = "Row {$attendanceData['row']}: Invalid out_time format: " . $attendanceData['out_time'];
+                    continue;
+                }
+                
+                // Get employee device info
+                $employee = DB::table('employees')
+                    ->join('branches', 'employees.emp_location', '=', 'branches.id')
+                    ->join('fingerprint_devices', 'branches.id', '=', 'fingerprint_devices.location')
+                    ->select('fingerprint_devices.sno', 'fingerprint_devices.location')
+                    ->groupBy('fingerprint_devices.location')
+                    ->where('employees.emp_id', $employeeId)
+                    ->first();
+
+                $deviceSno = $employee->sno ?? '-';
+                $location = $employee->location ?? '1';
 
                 // Insert IN time
                 Attendance::create([
-                    'emp_id'    => $attendanceData['emp_id'],
-                    'uid'       => $attendanceData['emp_id'],
-                    'state'     => '1',
-                    'timestamp' => $inDateTime->format('Y-m-d H:i:s'),
-                    'date'      => $date,
-                    'approved'  => '0',
-                    'type'      => '255',
-                    'devicesno' => '-',
-                    'location'  => $employeeLocation,
+                    'emp_id' => $employeeId,
+                    'uid' => $employeeId,
+                    'state' => '1',
+                    'timestamp' => $inTime,
+                    'date' => $date,
+                    'approved' => '0',
+                    'type' => '255',
+                    'devicesno' => $deviceSno,
+                    'location' => $location,
                 ]);
 
                 // Insert OUT time
                 Attendance::create([
-                    'emp_id'    => $attendanceData['emp_id'],
-                    'uid'       => $attendanceData['emp_id'],
-                    'state'     => '1', 
-                    'timestamp' => $outDateTime->format('Y-m-d H:i:s'),
-                    'date'      => $outDateTime->format('Y-m-d'), // Use outDateTime date in case of overnight
-                    'approved'  => '0',
-                    'type'      => '255',
-                    'devicesno' => '-',
-                    'location'  => $employeeLocation,
+                    'emp_id' => $employeeId,
+                    'uid' => $employeeId,
+                    'state' => '1', 
+                    'timestamp' => $outTime,
+                    'date' => $date,
+                    'approved' => '0',
+                    'type' => '255',
+                    'devicesno' => $deviceSno,
+                    'location' => $location,
                 ]);
 
+                $successCount++;
+
             } catch (\Exception $e) {
-                return response()->json(['errors' => "Row {$rowNumber}: Data processing error."]);
+                $errors[] = "Row {$attendanceData['row']}: " . $e->getMessage();
             }
         }
 
-        return response()->json(['success' => 'Attendance records uploaded successfully.']);
+        $response = [];
+
+    
+
+        if ($successCount > 0) {
+            $response['success'] = "Successfully imported attendance records.";
+        }
+        if (!empty($errors)) {
+            $response['errors'] = $errors;
+        }
+
+        return response()->json($response);
     }
+
+    /**
+     * Parse date and convert to standard format Y-m-d
+     */
+    private function parseDate($dateString)
+    {
+        try {
+            // Remove any extra spaces
+            $dateString = trim($dateString);
+            
+            // Try different date formats
+            $formats = [
+                'Y-m-d',
+                'd/m/Y',
+                'm/d/Y',
+                'd-m-Y',
+                'm-d-Y',
+                'Y/m/d',
+            ];
+
+            foreach ($formats as $format) {
+                $date = \DateTime::createFromFormat($format, $dateString);
+                if ($date !== false) {
+                    return $date->format('Y-m-d');
+                }
+            }
+
+            // If none of the formats work, try Carbon parse
+            return Carbon::parse($dateString)->format('Y-m-d');
+            
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Parse timestamp and convert to standard format Y-m-d H:i:s
+     * Handles both full timestamps and time-only values
+     */
+    /**
+     * Parse timestamp and convert to standard format Y-m-d H:i:s
+     * Handles both full timestamps and time-only values
+     */
+    private function parseTimestamp($timeString, $date)
+    {
+        try {
+            // Remove any extra spaces
+            $timeString = trim($timeString);
+            
+            // Handle the specific format with extra slash: "9/26/2025/ 09:51"
+            if (preg_match('/^(\d{1,2})\/(\d{1,2})\/(\d{4})\/\s*(\d{1,2}:\d{2}(?::\d{2})?)$/', $timeString, $matches)) {
+                $month = $matches[1];
+                $day = $matches[2];
+                $year = $matches[3];
+                $time = $matches[4];
+                
+                // Create proper timestamp
+                $combined = "{$year}-{$month}-{$day} {$time}";
+                return Carbon::parse($combined)->format('Y-m-d H:i:s');
+            }
+            
+            // If it's already a full timestamp with date
+            if (strtotime($timeString) !== false) {
+                $fullTimestamp = Carbon::parse($timeString);
+                // Check if it has a date part
+                if ($fullTimestamp->format('Y-m-d') != '1970-01-01') {
+                    return $fullTimestamp->format('Y-m-d H:i:s');
+                }
+            }
+
+            // Handle time-only formats
+            $timeFormats = [
+                'H:i:s',
+                'H:i',
+                'h:i:s A',
+                'h:i A',
+                'g:i:s A',
+                'g:i A',
+            ];
+
+            foreach ($timeFormats as $format) {
+                $time = \DateTime::createFromFormat($format, $timeString);
+                if ($time !== false) {
+                    // Combine with the provided date
+                    $combined = $date . ' ' . $time->format('H:i:s');
+                    return Carbon::parse($combined)->format('Y-m-d H:i:s');
+                }
+            }
+
+            // Try Carbon parse for time
+            $timeOnly = Carbon::parse($timeString);
+            $combined = $date . ' ' . $timeOnly->format('H:i:s');
+            return Carbon::parse($combined)->format('Y-m-d H:i:s');
+            
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
 
     // public function importCSV(Request $request)
     // {
-
     //     $permission = Auth::user()->can('attendance-create');
     //     if (!$permission) {
     //         return response()->json(['errors' => 'UnAuthorized'], 401);
@@ -147,96 +273,119 @@ class AttendanceUploadController extends Controller
     //     $validator = Validator::make($request->all(), [
     //         'import_csv' => 'required|file|mimes:csv,txt',
     //     ]);
-    
+
     //     if ($validator->fails()) {
     //         return response()->json(['errors' => $validator->errors()->all()]);
     //     }
-    
+
     //     $filename = $request->file('import_csv');
     //     $file = fopen($filename, 'r');
 
     //     $attendances = [];
     //     $firstRow = true;
+    //     $rowNumber = 1; // Track row number for error reporting
 
     //     while (($datalist = fgetcsv($file)) !== FALSE) {
     //         if ($firstRow) {
     //             $firstRow = false; 
+    //             $rowNumber++;
     //             continue;
     //         }
 
+    //         if(empty($datalist[2]) || empty($datalist[3])) {
+    //             continue;
+    //         }   
+
+    //         $date = Carbon::createFromFormat('d/m/Y', $datalist[1]);
+    //         $date = $date->format('Y-m-d');
+    //         $inTime = Carbon::createFromFormat('H:i:s', $datalist[2]);
+    //         $inTime = $inTime->format('H:i:s');
+    //         $outTime = Carbon::createFromFormat('H:i:s', $datalist[3]);
+    //         $outTime = $outTime->format('H:i:s');
+
     //         $attendances[] = [
+    //             'row' => $rowNumber, // Store row number for error reporting
     //             'emp_id' => $datalist[0],
-    //             'date' => $datalist[1],
-    //             'in_time' => $datalist[2],
-    //             'out_time' => $datalist[3],
+    //             'date' => $date,
+    //             'in_time' => $inTime,
+    //             'out_time' => $outTime,
     //         ];
+            
+    //         $rowNumber++;
     //     }
         
     //     fclose($file);
-
+        
     //     // Validate and insert data for each attendance
     //     foreach ($attendances as $attendanceData) {
-
+    //         $rowNumber = $attendanceData['row'];
+            
+    //         // Note: Since you already converted the date to Y-m-d in the while loop,
+    //         // we validate against that format here.
     //         $rowValidator = Validator::make($attendanceData, [
-    //             'emp_id' => 'required',
-    //             'date' => 'required',
-    //             'in_time' => 'required',
-    //             'out_time' => 'required',
+    //             'emp_id'   => 'required',
+    //             'date'     => ['required', 'date_format:Y-m-d'], 
+    //             'in_time'  => ['required', 'regex:/^\d{1,2}:\d{2}:\d{2}$/'], 
+    //             'out_time' => ['required', 'regex:/^\d{1,2}:\d{2}:\d{2}$/'], 
     //         ]);
 
     //         if ($rowValidator->fails()) {
     //             return response()->json(['errors' => $rowValidator->errors()->all()]);
     //         }
 
-    //         $employees = \App\Employee::pluck('emp_id', 'emp_id')->toArray();
-    //         $employeeId = $employees[$attendanceData['emp_id']] ?? null;
+    //         // Optimization: Consider moving this outside the loop if the CSV is large
+    //        $employeeExists = \App\Employee::where('emp_id', $attendanceData['emp_id'])->select('id', 'emp_id', 'emp_location')->first();
 
-    //         if (!$employeeId) {
-    //             return response()->json(['errors' => 'Invalid Empid:' . $attendanceData['emp_id']]);
+
+    //         if (!$employeeExists) {
+    //             return response()->json(['errors' => "Row {$rowNumber}: Invalid Employee ID: " . $attendanceData['emp_id']]);
     //         }
+    //         $employeeLocation = $employeeExists->emp_location;
 
-    //         $date = Carbon::parse($attendanceData['date'])->format('Y-m-d');
-    //         if (!$date) {
-    //             return response()->json(['errors' => 'Invalid date format']);
+    //         $date = $attendanceData['date']; // Already in Y-m-d from the while loop
+
+    //         try {
+    //             // Create Carbon instances for comparison and storage
+    //             $inDateTime = Carbon::parse($date . ' ' . $attendanceData['in_time']);
+    //             $outDateTime = Carbon::parse($date . ' ' . $attendanceData['out_time']);
+
+    //             // Handle overnight shifts (e.g., In 22:00, Out 06:00)
+    //             if ($outDateTime->lessThan($inDateTime)) {
+    //                 $outDateTime->addDay();
+    //             }
+
+    //             // Insert IN time
+    //             Attendance::create([
+    //                 'emp_id'    => $attendanceData['emp_id'],
+    //                 'uid'       => $attendanceData['emp_id'],
+    //                 'state'     => '1',
+    //                 'timestamp' => $inDateTime->format('Y-m-d H:i:s'),
+    //                 'date'      => $date,
+    //                 'approved'  => '0',
+    //                 'type'      => '255',
+    //                 'devicesno' => '-',
+    //                 'location'  => $employeeLocation,
+    //             ]);
+
+    //             // Insert OUT time
+    //             Attendance::create([
+    //                 'emp_id'    => $attendanceData['emp_id'],
+    //                 'uid'       => $attendanceData['emp_id'],
+    //                 'state'     => '1', 
+    //                 'timestamp' => $outDateTime->format('Y-m-d H:i:s'),
+    //                 'date'      => $outDateTime->format('Y-m-d'), // Use outDateTime date in case of overnight
+    //                 'approved'  => '0',
+    //                 'type'      => '255',
+    //                 'devicesno' => '-',
+    //                 'location'  => $employeeLocation,
+    //             ]);
+
+    //         } catch (\Exception $e) {
+    //             return response()->json(['errors' => "Row {$rowNumber}: Data processing error."]);
     //         }
-
-    //            // Combine date with in_time
-    //             $inDateTime = Carbon::createFromFormat('Y-m-d H:i:s', $date . ' ' . $attendanceData['in_time']);
-                
-    //             // Combine date with out_time
-    //             $outDateTime = Carbon::createFromFormat('Y-m-d H:i:s', $date . ' ' . $attendanceData['out_time']);
-
-    //              if ($outDateTime->lessThan($inDateTime)) {
-    //                     $outDateTime->addDay();
-    //                 }
-
-    //         // Insert IN time
-    //         Attendance::create([
-    //             'emp_id' => $employeeId,
-    //             'uid' => $employeeId,
-    //             'state' => '1',
-    //             'timestamp' => $inDateTime->format('Y-m-d H:i:s'),
-    //             'date' => $date,
-    //             'approved' => '0',
-    //             'type' => '255',
-    //             'devicesno' => '-',
-    //             'location' => '1',
-    //         ]);
-
-    //         // Insert OUT time
-    //         Attendance::create([
-    //             'emp_id' => $employeeId,
-    //             'uid' => $employeeId,
-    //             'state' => '1', 
-    //             'timestamp' => $outDateTime->format('Y-m-d H:i:s'),
-    //             'date' => $date,
-    //             'approved' => '0',
-    //             'type' => '255',
-    //             'devicesno' => '-',
-    //             'location' => '1',
-    //         ]);
     //     }
 
     //     return response()->json(['success' => 'Attendance records uploaded successfully.']);
     // }
+
 }
