@@ -54,12 +54,13 @@
                                         <th></th>
                                         <th>EMPLOYEE ID</th>
                                         <th>EMPLOYEE</th>
+                                        <th>DATE</th>
                                         <th>TARGET</th>
                                         <th>DAY PRODUCE</th>
                                         <th>PLUS/MINUS</th>
+                                        <th>AVERAGE</th>
                                         <th>BONUS AMOUNT</th>
                                         <th>DAMAGE QTY</th>
-                                        <th class="d-none">Employee auto id</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -207,21 +208,32 @@ $(document).ready(function(){
                         orderable: false,
                         searchable: false,
                         render: function(data, type, row) {
-                            return '<input type="checkbox"  class="row-checkbox selectCheck removeIt" data-id="' + row.emp_auto_id + '">';
+                            if (row.status == 0) {
+                                    return '<input type="checkbox" class="row-checkbox selectCheck removeIt" data-id="' + row.emp_auto_id + '">';
+                                } else if (row.status == 1) {
+                                    return '<i class="fa fa-check text-success"></i>';
+                                }
                         }
                     },
                     { data: 'emp_id', name: 'emp_id' },
                     { data: 'emp_name_with_initial', name: 'emp_name_with_initial' },
+                    { data: 'recorddate', name: 'recorddate' },
                     { data: 'total_target', name: 'total_target' },
                     { data: 'total_produce_qty', name: 'total_produce_qty' },
                     { data: 'total_difference', name: 'total_difference' },
+                    { 
+                        data: 'daily_aveg', 
+                        name: 'daily_aveg',
+                        className: 'text-right',
+                        render: function(data, type, row) {
+                            if (type === 'display' || type === 'filter') {
+                                return data + '%';
+                            }
+                            return data;
+                        }
+                    },
                     { data: 'total_amount', name: 'total_amount' },
-                    { data: 'total_damage', name: 'total_damage' },
-                    {
-                        data: 'emp_auto_id',
-                        name: 'emp_auto_id',
-                        visible: false
-                    }
+                    { data: 'total_damage', name: 'total_damage' }
                     
                 ]
             });
@@ -257,7 +269,6 @@ $(document).ready(function(){
                                 total_difference: rowData.total_difference,
                                 total_amount: rowData.total_amount,
                                 total_damage: rowData.total_damage,
-                                emp_auto_id: rowData.emp_auto_id
                             });
                         }
                     });

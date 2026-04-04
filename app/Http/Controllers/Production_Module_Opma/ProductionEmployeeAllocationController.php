@@ -422,16 +422,6 @@ class ProductionEmployeeAllocationController extends Controller
         $employees = DB::table('opma_machine_employees as me')
             ->join('employees as e', 'me.emp_id', '=', 'e.emp_id')
             ->where('me.opma_machine_id', $machineId)
-            ->whereNotExists(function($query) use ($productiondate, $shiftId) {
-                $query->select(DB::raw(1))
-                    ->from('opma_emp_product_allocation_details as details')
-                    ->join('opma_emp_product_allocation as allocation', 'allocation.id', '=', 'details.allocation_id')
-                    ->whereRaw('details.emp_id = me.emp_id')
-                    ->where('details.date', '=', $productiondate)
-                    ->where('details.status', '=', 1)
-                    ->where('allocation.shift_id', '=', $shiftId)
-                    ->where('allocation.status', '=', 1);
-            })
             ->select('e.emp_id as emp_id', 'e.emp_name_with_initial')
             ->get();
         

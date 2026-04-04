@@ -69,16 +69,31 @@ class ProductionDailyApproveController extends Controller
                     $totaldamage += $production->damage_qty ?? 0;
                 }
                 
+                $dailyAverage = 0;
+                    if ($totalTarget > 0) {
+                        $dailyAverage = ($totalProduceQty / $totalTarget) * 100;
+                    }
                 
+              $dailysummary = DB::table('opma_daily_production_summary')
+                ->select('opma_daily_production_summary.*')
+                ->where('emp_id', $record->emp_id)
+                ->where('date',  $from_date)
+                ->first();
+
+                $status = $dailysummary ? 1 : 0;
+
                 $data[] = [
                     'emp_auto_id' => $record->emp_auto_id,
                     'emp_id' => $record->emp_id,
+                    'recorddate' => $from_date,
                     'emp_name_with_initial' => $record->emp_name_with_initial,
                     'total_target' => round($totalTarget, 2),
                     'total_produce_qty' => round($totalProduceQty, 2),
                     'total_difference' => round($totalDifference, 2),
                     'total_amount' => round($totalAmount, 2),
                     'total_damage' => round($totaldamage, 2),
+                    'daily_aveg' => round($dailyAverage),
+                     'status' => $status,
                 ];
             }
 
@@ -106,7 +121,6 @@ class ProductionDailyApproveController extends Controller
             $total_difference = $row['total_difference'];
             $total_amount = str_replace([','], '', $row['total_amount']);
             $total_damage = $row['total_damage'];
-            $autoid = $row['emp_auto_id'];
 
             if($total_target != 0){
 
