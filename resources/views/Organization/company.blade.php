@@ -95,8 +95,8 @@
                                 </div>
                                 <div class="form-row mb-1">
                                     <div class="col">
-                                        <label class="small font-weight-bolder">Email</label>
-                                        <input type="text" name="email" id="email" class="form-control form-control-sm" />
+                                        <label class="small font-weight-bolder">Email*</label>
+                                        <input type="text" name="email" id="email" class="form-control form-control-sm" required />
                                     </div>
                                     <div class="col">
                                         <label class="small font-weight-bolder">Domain Name</label>
@@ -208,6 +208,7 @@
 @section('script')
 
 <script>
+var assetUrl = "{{ rtrim(asset(''), '/') }}";
 $(document).ready(function(){
     $('#organization_menu_link').addClass('active');
     $('#organization_menu_link_icon').addClass('active');
@@ -293,7 +294,7 @@ $(document).ready(function(){
                 data: 'logo', 
                 name: 'logo',
                 render: function(data) {
-                    return data ? '<img src="/' + data + '" style="max-height:40px;">' : '';
+                    return data ? '<img src="' + assetUrl + '/' + data + '" style="max-height:40px;">' : '';
                 }
             },
             { 
@@ -440,7 +441,7 @@ $(document).ready(function(){
                     $('#zone_code').val(data.result.zone_code);
 
                     if (data.result.logo) {
-                        $('#preview').attr('src', '/' + data.result.logo);
+                        $('#preview').attr('src', assetUrl + '/' + data.result.logo);
                         $('#remove_logo').show();
                     } else {
                         $('#preview').attr('src', '');
