@@ -4,11 +4,15 @@
       Master Data<span class="caret"></span></a>
     <ul class="dropdown-menu multi-level dropdownmenucolor" role="menu" aria-labelledby="dropdownMenu">
 
+      <li><a class="dropdown-item" href="{{ route('opma_employee_performance')}}">Employee Performance</a></li>
+
       <li><a class="dropdown-item" href="{{ route('opma_machines')}}">Machines</a></li>
 
       <li><a class="dropdown-item" href="{{ route('opma_sizes')}}">Sizes</a></li>
 
       <li><a class="dropdown-item" href="{{ route('opma_styles')}}">Styles</a></li>
+
+      <li><a class="dropdown-item" href="{{ route('opma_production_amount')}}">Production Amount</a></li>
 
     </ul>
   </div>
