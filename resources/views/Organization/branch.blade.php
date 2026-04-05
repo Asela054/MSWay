@@ -69,7 +69,7 @@
                             <form method="post" id="formTitle" class="form-horizontal">
                                 {{ csrf_field() }}	
                                 <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">Location</label>
+                                    <label class="small font-weight-bold text-dark">Location*</label>
                                     <input type="text" name="location" id="location" class="form-control form-control-sm" />
                                 </div>
                                 
@@ -78,15 +78,15 @@
                                     <input type="text" name="code" id="code" class="form-control form-control-sm" />
                                 </div>
                                 <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">Contact No</label>
+                                    <label class="small font-weight-bold text-dark">Contact No*</label>
                                     <input type="text" name="contactno" id="contactno" class="form-control form-control-sm" />
                                 </div>
                                 <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">EPF No</label>
+                                    <label class="small font-weight-bold text-dark">EPF No*</label>
                                     <input type="text" name="epf" id="epf" class="form-control form-control-sm" />
                                 </div>
                                 <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">ETF No</label>
+                                    <label class="small font-weight-bold text-dark">ETF No*</label>
                                     <input type="text" name="etf" id="etf" class="form-control form-control-sm" />
                                 </div>
                                 <div class="form-group mb-1">
