@@ -21,7 +21,7 @@
             <div class="card">
                 <div class="card-body p-0 p-2">
                     <div class="col-md-12">
-                        <div class="row align-items-center mb-4">
+                        <div class="row align-items-center">
                             <div class="col-md-12">
                                     <button class="btn btn-warning btn-sm filter-btn float-right px-3" type="button"
                                         data-toggle="offcanvas" data-target="#offcanvasRight"
@@ -31,19 +31,28 @@
                                  <div class="col-12">
                                     <hr class="border-dark">
                                 </div>
-                                <div class="col-6 mb-2">
+                        </div>
+                        <div class="row align-items-center mb-2">
+                            <div class="col-auto">
                                 <div class="form-check">
                                     <input type="checkbox" class="form-check-input checkallocate" id="selectAll">
                                     <label class="form-check-label" for="selectAll">Select All Records</label>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <button type="button" class="btn btn-primary btn-sm float-right px-3"
-                                    id="btn_mark_as_no_pay"><i class="fas fa-plus mr-2"></i>Mark as NO Pay Leave</button>
+                            <div class="col text-center">
+                                <button type="button" id="export_pdf_btn" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-file-pdf mr-2"></i> Export PDF
+                                </button>
+                            </div>
+                            <div class="col-auto">
+                                <button type="button" class="btn btn-primary btn-sm px-3" id="btn_mark_as_no_pay">
+                                    <i class="fas fa-plus mr-2"></i>Mark as NO Pay Leave
+                                </button>
                             </div>
                         </div>
                         <div class="col-md-12">
                             <div class="center-block fix-width scroll-inner">
+                                
                                 <table class="table table-striped table-bordered table-sm small nowrap w-100"
                                     id="attendance_report_table">
                                     <thead>
@@ -370,6 +379,12 @@
                 }
             });
 
+           
+            $('#export_pdf_btn').on('click', function() {
+                generatePDF();
+            });
+     
+
         });
           function closeOffcanvasSmoothly(offcanvasId = '#offcanvasRight') {
              const offcanvas = $(offcanvasId);
@@ -386,6 +401,238 @@
                  $('body').removeClass('offcanvas-open');
              }, 900); // Match this with your CSS transition duration
          }
+
+
+        function generatePDF() {
+    // Get current filter values for PDF header
+    const fromDate = $('#from_date').val() || 'Not specified';
+    const toDate = $('#to_date').val() || 'Not specified';
+    const department = $('#department').val() || 'All';
+    const employee = $('#employee').val() || 'All';
+    const location = $('#location').val() || 'All';
+    const currentDate = new Date().toLocaleDateString();
+    
+    // Get table data directly from HTML (not DataTable)
+    const table = $('#attendance_report_table');
+    const rows = table.find('tbody tr');
+    
+    // Initialize PDF in landscape mode
+    const doc = new jsPDF('l', 'mm', 'a4');
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 10;
+    
+    // Add report title
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Incomplete Attendance Report', pageWidth / 2, 15, { align: 'center' });
+    
+    // Add filter information
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    
+    let yPos = 25;
+    doc.text(`Date Range: ${fromDate} to ${toDate}`, margin, yPos);
+    doc.text(`Generated on: ${currentDate}`, pageWidth - margin, yPos, { align: 'right' });
+    
+    if (employee !== 'All') {
+        yPos += 5;
+        doc.text(`Employee: ${employee}`, margin, yPos);
+    }
+    
+    // Add line separator
+    yPos += 8;
+    doc.setLineWidth(0.3);
+    doc.line(margin, yPos, pageWidth - margin, yPos);
+    yPos += 5;
+    
+    // Check if there's data
+    if (!rows || rows.length === 0) {
+        doc.setFontSize(10);
+        doc.setTextColor(255, 0, 0);
+        doc.text('No data available for the selected filters', pageWidth / 2, yPos + 20, { align: 'center' });
+        doc.save('Incomplete_Attendance_Report_No_Data.pdf');
+        return;
+    }
+    
+    // Prepare data from HTML table rows
+    const body = [];
+    let rowCount = 0;
+    let totalWorkingHours = 0;
+    let departmentRows = {};
+    
+    // Parse each row
+    rows.each(function() {
+        const $row = $(this);
+        const $cells = $row.find('td');
+        
+        // Check if this is a department header row (has colspan)
+        if ($cells.length === 1 && $cells.attr('colspan')) {
+            const deptName = $cells.eq(0).text().trim();
+            body.push({
+                isDepartmentHeader: true,
+                departmentName: deptName,
+                colSpan: 8
+            });
+        } 
+        // Regular data row
+        else if ($cells.length >= 9) {
+            const rowData = {
+                checkbox: $cells.eq(0).find('input').length > 0 ? true : false,
+                empId: $cells.eq(1).text().trim(),
+                name: $cells.eq(2).text().trim(),
+                department: $cells.eq(3).text().trim(),
+                date: $cells.eq(4).text().trim(),
+                checkIn: $cells.eq(5).text().trim(),
+                checkOut: $cells.eq(6).text().trim(),
+                workHours: $cells.eq(7).text().trim(),
+                location: $cells.eq(8).text().trim()
+            };
+            
+            // Calculate total working hours
+            let workHoursDecimal = 0;
+            if (rowData.workHours && rowData.workHours !== '-' && rowData.workHours !== 'N/A') {
+                if (rowData.workHours.includes(':')) {
+                    const parts = rowData.workHours.split(':');
+                    workHoursDecimal = parseFloat(parts[0]) + (parseFloat(parts[1]) / 60);
+                } else {
+                    workHoursDecimal = parseFloat(rowData.workHours) || 0;
+                }
+                totalWorkingHours += workHoursDecimal;
+            }
+            
+            body.push({
+                isDepartmentHeader: false,
+                empId: rowData.empId,
+                name: rowData.name,
+                department: rowData.department,
+                date: rowData.date,
+                checkIn: rowData.checkIn,
+                checkOut: rowData.checkOut,
+                workHours: rowData.workHours,
+                location: rowData.location
+            });
+            rowCount++;
+        }
+    });
+    
+    // Define headers (without checkbox column)
+    const headers = [[
+        'EMP ID', 'NAME', 'DEPARTMENT', 'DATE', 
+        'CHECK IN', 'CHECK OUT', 'WORK HOURS', 'LOCATION'
+    ]];
+    
+    // Generate table using autoTable
+    doc.autoTable({
+        startY: yPos,
+        head: headers,
+        body: body.map(row => {
+            if (row.isDepartmentHeader) {
+                return [{ content: row.departmentName, colSpan: 8, styles: { fillColor: [230, 242, 255], fontStyle: 'bold', halign: 'left', textColor: [41, 128, 185] } }];
+            }
+            return [
+                row.empId,
+                row.name,
+                row.department,
+                row.date,
+                row.checkIn,
+                row.checkOut,
+                row.workHours,
+                row.location
+            ];
+        }),
+        theme: 'grid',
+        styles: {
+            fontSize: 8,
+            cellPadding: { top: 2, bottom: 2, left: 3, right: 3 },
+            overflow: 'linebreak',
+            valign: 'middle',
+            lineColor: [200, 200, 200],
+            lineWidth: 0.1
+        },
+        headStyles: {
+            fillColor: [41, 128, 185],
+            textColor: 255,
+            fontStyle: 'bold',
+            halign: 'center',
+            fontSize: 9,
+            cellPadding: { top: 3, bottom: 3, left: 3, right: 3 }
+        },
+        columnStyles: {
+            0: { cellWidth: 18, halign: 'center' },   // EMP ID
+            1: { cellWidth: 65, halign: 'left' },     // NAME
+            2: { cellWidth: 50, halign: 'left' },     // DEPARTMENT
+            3: { cellWidth: 32, halign: 'center' },   // DATE
+            4: { cellWidth: 25, halign: 'center' },   // CHECK IN
+            5: { cellWidth: 25, halign: 'center' },   // CHECK OUT
+            6: { cellWidth: 25, halign: 'right' },    // WORK HOURS
+            7: { cellWidth: 40, halign: 'left' }      // LOCATION
+        },
+        bodyStyles: {
+            textColor: [0, 0, 0],
+            fontSize: 8
+        },
+        alternateRowStyles: {
+            fillColor: [248, 248, 248]
+        },
+        margin: { left: margin, right: margin },
+        pageBreak: 'auto',
+        showHead: 'everyPage',
+        didParseCell: function(data) {
+            // Style for missing check out time
+            if (data.column.index === 5 && data.cell.text === '-') {
+                data.cell.styles.textColor = [255, 0, 0];
+                data.cell.styles.fontStyle = 'italic';
+            }
+            
+            // Style for missing work hours
+            if (data.column.index === 6 && (data.cell.text === '-' || data.cell.text === 'N/A')) {
+                data.cell.styles.textColor = [255, 0, 0];
+                data.cell.styles.fontStyle = 'italic';
+            }
+            
+            // Right align work hours with bold if > 8 hours
+            if (data.column.index === 6 && data.cell.text !== '-' && data.cell.text !== 'N/A' && !isNaN(parseFloat(data.cell.text))) {
+                data.cell.styles.halign = 'right';
+                const hours = parseFloat(data.cell.text);
+                if (hours > 8) {
+                    data.cell.styles.fontStyle = 'bold';
+                    data.cell.styles.textColor = [0, 150, 0];
+                }
+            }
+            
+            // Center align date
+            if (data.column.index === 3) {
+                data.cell.styles.halign = 'center';
+            }
+        },
+        willDrawPage: function(data) {
+            const companyName = $('#company_name').val() || 'Company Name';
+            doc.setFontSize(7);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(100, 100, 100);
+            doc.text(companyName, margin, 10);
+            doc.text(`Page ${data.pageNumber}`, pageWidth - margin, 10, { align: 'right' });
+            
+            if (data.pageNumber > 1) {
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(0, 0, 0);
+                doc.text('Incomplete Attendance Report (Continued)', pageWidth / 2, 18, { align: 'center' });
+            }
+        },
+        didDrawPage: function(data) {
+            // Add bottom border on each page
+            doc.setDrawColor(200, 200, 200);
+            doc.setLineWidth(0.2);
+            doc.line(margin, doc.internal.pageSize.getHeight() - 12, pageWidth - margin, doc.internal.pageSize.getHeight() - 12);
+        }
+    });
+    
+    // Save the PDF
+    const safeDept = department.replace(/[^a-zA-Z0-9]/g, '_') || 'Report';
+    const fileName = `Incomplete_Attendance_Report_${safeDept}_${currentDate.replace(/[^0-9]/g, '')}.pdf`;
+    doc.save(fileName);
+}
     </script>
 
 @endsection
