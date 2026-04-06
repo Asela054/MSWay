@@ -337,7 +337,7 @@ class RptOTController extends Controller
                 $otinfo = (new \App\Employeelateattenadnaceminites)->NopayAmountCal($row->emp_auto_id, $work_days,$leave_days,$no_pay_days,$normal_ot_hours, $double_ot_hours);
 
                 $doubleot_amount = $otinfo['othrs2_base_rate'];
-                $doubleottotal = $doubleot_amount * $normal_ot_hours;
+                //$doubleottotal = $doubleot_amount * $normal_ot_hours;
 
                 return number_format($doubleot_amount, 2);
             })
@@ -352,7 +352,7 @@ class RptOTController extends Controller
                 $otinfo = (new \App\Employeelateattenadnaceminites)->NopayAmountCal($row->emp_auto_id, $work_days,$leave_days,$no_pay_days,$normal_ot_hours, $double_ot_hours);
 
                 $doubleot_amount = $otinfo['othrs2_base_rate'];
-                $doubleottotal = $doubleot_amount * $normal_ot_hours;
+                $doubleottotal = $doubleot_amount * $double_ot_hours;
 
                 return number_format($doubleottotal, 2);
             })
@@ -370,7 +370,7 @@ class RptOTController extends Controller
                 $normalottotal = $ot_amount * $normal_ot_hours;
 
                 $doubleot_amount = $otinfo['othrs2_base_rate'];
-                $doubleottotal = $doubleot_amount * $normal_ot_hours;
+                $doubleottotal = $doubleot_amount * $double_ot_hours;
 
                 return number_format($doubleottotal+$normalottotal, 2);
             })
