@@ -235,7 +235,8 @@
                         },
                     ],
                     ajax: {
-                        "url": "{{url('/leave_report_list')}}",
+                        url: scripturl + '/leave_apply_list.php',
+                         type: 'POST',
                         "data": {
                             'department': department,
                             'employee': employee,
@@ -245,14 +246,14 @@
                     },
 
                     columns: [{
-                            data: 'id'
+                            data: 'emp_id'
                         },
                         {
                             data: 'employee_display',
                             name: 'employee_display'
                         },
                         {
-                            data: 'dept_name'
+                            data: 'dep_name'
                         },
                         {
                             data: 'leave_from'
@@ -261,10 +262,10 @@
                             data: 'leave_to'
                         },
                         {
-                            data: 'leave_type_name'
+                            data: 'leave_type'
                         },
                         {
-                            data: 'emp_covering_name'
+                            data: 'covering_emp'
                         },
                         {
                             data: 'reson'

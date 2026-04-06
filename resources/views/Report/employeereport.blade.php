@@ -103,6 +103,8 @@
               
 @endsection
 @section('script')
+
+
 <script>
 $(document).ready(function() {
 
@@ -162,15 +164,11 @@ $(document).ready(function() {
                             title: 'Employee Reports',
                             text: '<i class="fas fa-file-csv mr-2"></i> CSV',
                         },
-                        { 
-                            extend: 'pdf', 
-                            className: 'btn btn-danger btn-sm', 
-                            title: 'Employee Reports', 
+                         {
                             text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
-                            orientation: 'landscape', 
-                            pageSize: 'legal', 
-                            customize: function(doc) {
-                                doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+                            className: 'btn btn-danger btn-sm',
+                            action: function (e, dt, node, config) {
+                                generatePDF();
                             }
                         },
                         {
@@ -228,6 +226,230 @@ $(document).ready(function() {
              });
 
 } );
+
+    function generatePDF() {
+        // Get current filter values for PDF header
+        const fromDate = $('#from_date').val() || 'Not specified';
+        const toDate = $('#to_date').val() || 'Not specified';
+        const department = $('#department').val() || 'All';
+        const employee = $('#employee').val() || 'All';
+        const location = $('#location').val() || 'All';
+        const currentDate = new Date().toLocaleDateString();
+        
+        // Get DataTable instance
+        const table = $('#emptable').DataTable();
+        const tableData = table.rows({ filter: 'applied' }).data();
+        
+        // Initialize PDF in landscape mode for better fit
+        const doc = new jsPDF('l', 'mm', 'a4');
+        
+        // Add report title
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Employee Report', doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
+        
+        // Add filter information
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        
+        let yPos = 25;
+        doc.text(`Date Range: ${fromDate} to ${toDate}`, 15, yPos);
+        doc.text(`Generated on: ${currentDate}`, doc.internal.pageSize.getWidth() - 15, yPos, { align: 'right' });
+        
+        // Add employee filter on next line if specified
+        if (employee !== 'All') {
+            yPos += 5;
+            doc.text(`Employee: ${employee}`, 15, yPos);
+        }
+        
+        // Add a line separator
+        yPos += 8;
+        doc.setLineWidth(0.3);
+        doc.line(15, yPos, doc.internal.pageSize.getWidth() - 15, yPos);
+        yPos += 5;
+        
+        // Prepare table headers
+        const headers = [[
+            'ID', 'EMPLOYEE', 'LOCATION', 'DEPARTMENT', 'DOB',
+            'MOBILE NO', 'TELEPHONE', 'NIC', 'GENDER', 'EMAIL',
+            'ADDRESS', 'TEMP ADDRESS', 'CATEGORY',
+            'STATUS', 'PERMANENT'
+        ]];
+        
+        const body = [];
+        let rowCount = 0;
+        
+        // Check if there's data
+        if (!tableData || tableData.length === 0) {
+            doc.setFontSize(8);
+            doc.setTextColor(255, 0, 0);
+            doc.text('No data available for the selected filters', doc.internal.pageSize.getWidth() / 2, yPos + 20, { align: 'center' });
+            doc.save('Employee_Report_No_Data.pdf');
+            return;
+        }
+        
+        // Get all data from filtered rows
+        tableData.each(function(value, index) {
+            // Format date of birth if exists
+            let dob = value.emp_birthday || '';
+            if (dob && dob !== '0000-00-00') {
+                const dateParts = dob.split('-');
+                if (dateParts.length === 3) {
+                    dob = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`;
+                }
+            } else {
+                dob = '';
+            }
+            
+            // Format permanent date if exists
+            let permanentDate = value.emp_permanent_date || '';
+            if (permanentDate && permanentDate !== '0000-00-00') {
+                const dateParts = permanentDate.split('-');
+                if (dateParts.length === 3) {
+                    permanentDate = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`;
+                }
+            } else {
+                permanentDate = '';
+            }
+            
+            const row = [
+                value.id || '',
+                value.employee_display || '',
+                value.location || '',
+                value.dept_name || '',
+                dob,
+                value.emp_mobile || '',
+                value.emp_work_telephone || '',
+                value.emp_national_id || '',
+                value.emp_gender || '',
+                value.emp_email || '',
+                value.emp_address || '',
+                value.emp_addressT || '',
+                value.title || '',
+                value.e_status || '',
+                permanentDate
+            ];
+            body.push(row);
+            rowCount++;
+        });
+        
+        // Calculate table width
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const margin = 2;
+        
+        // Generate table using autoTable
+        doc.autoTable({
+            startY: yPos,
+            head: headers,
+            body: body,
+            theme: 'grid',
+            styles: {
+                fontSize: 5,
+                cellPadding: 2,
+                overflow: 'linebreak',
+                textAlign: 'left',
+                valign: 'middle'
+            },
+            headStyles: {
+                fillColor: [41, 128, 185],
+                textColor: 255,
+                fontStyle: 'bold',
+                halign: 'center',
+                fontSize: 4,
+                cellPadding: 3
+            },
+            columnStyles: {
+                0: { cellWidth: 8, halign: 'center' },   // ID
+                1: { cellWidth: 25, halign: 'left' },     // EMPLOYEE
+                2: { cellWidth: 18, halign: 'left' },     // LOCATION
+                3: { cellWidth: 20, halign: 'left' },     // DEPARTMENT
+                4: { cellWidth: 18, halign: 'center' },   // DATE OF BIRTH
+                5: { cellWidth: 18, halign: 'center' },   // MOBILE NO
+                6: { cellWidth: 18, halign: 'center' },   // TELEPHONE
+                7: { cellWidth: 18, halign: 'center' },   // NIC
+                8: { cellWidth: 12, halign: 'center' },   // GENDER
+                9: { cellWidth: 28, halign: 'left' },     // EMAIL
+                10: { cellWidth: 30, halign: 'left' },    // PERMANENT ADDRESS
+                11: { cellWidth: 30, halign: 'left' },    // TEMPORARY ADDRESS
+                12: { cellWidth: 18, halign: 'left' },    // JOB CATEGORY
+                13: { cellWidth: 15, halign: 'center' },  // JOB STATUS
+                14: { cellWidth: 18, halign: 'center' }   // PERMANENT DATE
+            },
+            bodyStyles: {
+                textAlign: 'left',
+                fontSize: 5
+            },
+            alternateRowStyles: {
+                fillColor: [245, 245, 245]
+            },
+            margin: { left: margin, right: margin },
+            pageBreak: 'auto',
+            tableWidth: 'auto',
+            showHead: 'everyPage',
+            didParseCell: function(data) {
+                // Truncate long email addresses if needed
+                if (data.column.index === 9 && data.cell.text && data.cell.text.length > 30) {
+                    data.cell.text = data.cell.text.substring(0, 27) + '...';
+                }
+                // Truncate long addresses if needed
+                if ((data.column.index === 10 || data.column.index === 11) && data.cell.text && data.cell.text.length > 35) {
+                    data.cell.text = data.cell.text.substring(0, 32) + '...';
+                }
+            },
+            willDrawPage: function(data) {
+                // Add company name and page number on each page
+                const companyName = $('#company_name').val() || 'Company Name';
+                doc.setFontSize(7);
+                doc.setFont('helvetica', 'normal');
+                doc.text(companyName, margin, 10);
+                doc.text(`Page ${data.pageNumber}`, doc.internal.pageSize.getWidth() - margin, 10, { align: 'right' });
+                
+                // Add report title on subsequent pages
+                if (data.pageNumber > 1) {
+                    doc.setFontSize(9);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('Employee Report (Continued)', doc.internal.pageSize.getWidth() / 2, 18, { align: 'center' });
+                }
+            }
+        });
+        
+        // Add summary on last page
+        const totalPages = doc.internal.getNumberOfPages();
+        if (totalPages > 0) {
+            doc.setPage(totalPages);
+            const finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : 150;
+            
+            // Only add summary if there's enough space
+            if (finalY < doc.internal.pageSize.getHeight() - 40 && rowCount > 0) {
+                doc.setFontSize(8);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Report Summary:', margin, finalY);
+                
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(7);
+                let summaryY = finalY + 7;
+                
+                doc.text(`Total Employees: ${rowCount}`, margin, summaryY);
+            }
+            
+            // Add footer on last page
+            doc.setFontSize(6);
+            const generatedBy = $('#emp_name').val() || 'System User';
+            const companyName = $('#company_name').val() || 'Company Name';
+            const footerY = doc.internal.pageSize.getHeight() - 10;
+            
+            if (footerY > 20) {
+                doc.text(`Generated by: ${generatedBy}`, margin, footerY);
+                doc.text(`Date: ${currentDate}`, doc.internal.pageSize.getWidth() / 2, footerY, { align: 'center' });
+                doc.text(companyName, doc.internal.pageSize.getWidth() - margin, footerY, { align: 'right' });
+            }
+        }
+        
+        // Save the PDF
+        const safeDept = department.replace(/[^a-zA-Z0-9]/g, '_') || 'Report';
+        const fileName = `Employee_Report_${safeDept}_${currentDate.replace(/[^0-9]/g, '')}.pdf`;
+        doc.save(fileName);
+    }
 </script>
 
 @endsection
