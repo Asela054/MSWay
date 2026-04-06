@@ -1756,7 +1756,20 @@ Route::post('/opma_productallocationdeletelist' ,'Production_Module_Opma\Product
  // Production Reports 
    Route::get('/opma_reportemployeeproduction' ,'Production_Module_Opma\ProductionreportController@index')->name('opma_reportemployeeproduction');
    Route::get('/opma_reportemployeeproductiondailyreport' ,'Production_Module_Opma\ProductionreportController@dailyreport')->name('opma_reportemployeeproductiondailyreport');
- 
+
+ // Employee performance    
+ Route::resource('opma_employee_performance', 'Production_Module_Opma\EmployeePerformanceController');
+ Route::get('opma_employee_performance',['uses' => 'Production_Module_Opma\EmployeePerformanceController@index', 'as' => 'opma_employee_performance']); 
+ Route::post('addopma_employee_performance',['uses' => 'Production_Module_Opma\EmployeePerformanceController@store', 'as' => 'addopma_employee_performance']); 
+ Route::post('opma_employee_performance/update', 'Production_Module_Opma\EmployeePerformanceController@update')->name('opma_employee_performance.update');
+ Route::get('opma_employee_performance/destroy/{id}', 'Production_Module_Opma\EmployeePerformanceController@destroy');
+
+ // Production Amount
+ Route::resource('opma_production_amount', 'Production_Module_Opma\ProductionAmountController');
+ Route::get('opma_production_amount',['uses' => 'Production_Module_Opma\ProductionAmountController@index', 'as' => 'opma_production_amount']); 
+ Route::post('addopma_production_amount',['uses' => 'Production_Module_Opma\ProductionAmountController@store', 'as' => 'addopma_production_amount']); 
+ Route::post('opma_production_amount/update', 'Production_Module_Opma\ProductionAmountController@update')->name('opma_production_amount.update');
+ Route::get('opma_production_amount/destroy/{id}', 'Production_Module_Opma\ProductionAmountController@destroy');
 
 
                   // End of Opma Production Section Routes
