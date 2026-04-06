@@ -226,7 +226,7 @@ class RptNopayController extends Controller
                 $work_days = (new \App\Attendance)->get_work_days($row->emp_id, $month,$closedate);
                 $leave_days = (new \App\Leave)->get_leave_days($row->emp_id, $month,$closedate);
 
-                $ot_hours = (new \App\Attendance)->get_ot_hours($row->emp_id, $month);
+                $ot_hours = (new \App\Attendance)->get_ot_hours_approved($row->emp_id, $month);
                 $normal_rate_otwork_hrs = $ot_hours['normal_rate_otwork_hrs'];
                 $double_rate_otwork_hrs = $ot_hours['double_rate_otwork_hrs'];
 
