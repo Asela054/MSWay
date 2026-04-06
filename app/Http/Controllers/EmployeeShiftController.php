@@ -20,16 +20,15 @@ class EmployeeShiftController extends Controller
     public function index()
     {
        
-         $user = Auth::user();
+        $user = Auth::user();
         $permission = $user->can('employee-shift-allocation-list');
         if(!$permission) {
             abort(403);
         }
 
-        $employees = DB::table('employees')->select('employees.*')->get();
-        $shifttypes = DB::table('shift_types')->select('shift_types.*')->get();
+        $shifts = DB::table('shift_types')->select('shift_types.*')->get();
 
-        return view('EmployeeShift.employeeshift',compact('shifttypes','employees'));
+        return view('EmployeeShift.employeeshift',compact('shifts'));
     }
     public function insert(Request $request){
 
@@ -42,7 +41,7 @@ class EmployeeShiftController extends Controller
         $Employeeshift = new Employeeshift();
         $Employeeshift->shift_id = $request->input('shift');
         $Employeeshift->date_from = $request->input('datefrom');
-        $Employeeshift->date_to = $request->input('dateto');
+        $Employeeshift->date_to = $request->input('datefrom');
         $Employeeshift->status = '1';
         $Employeeshift->created_by = Auth::id();
         $Employeeshift->updated_by = '0';
@@ -51,7 +50,8 @@ class EmployeeShiftController extends Controller
         $requestID=$Employeeshift->id;
         $shift_id=$request->input('shift');
         $date_from=$request->input('datefrom');
-        $date_to=$request->input('dateto');
+        $until_time=$request->input('until_time');
+        $off_next_day=$request->input('off_next_day');
 
         $tableData = $request->input('tableData');
 
@@ -62,7 +62,8 @@ class EmployeeShiftController extends Controller
         $Employeeshiftdetail = new Employeeshiftdetail();
         $Employeeshiftdetail->shift_id = $shift_id;
         $Employeeshiftdetail->date_from = $date_from;
-        $Employeeshiftdetail->date_to = $date_to;
+        $Employeeshiftdetail->until_time = $until_time;
+        $Employeeshiftdetail->off_next_day = $off_next_day;
         $Employeeshiftdetail->emp_id = $emp_id;
         $Employeeshiftdetail->employee_name = $empname;
         $Employeeshiftdetail->employeeshift_id = $requestID;
@@ -114,65 +115,72 @@ class EmployeeShiftController extends Controller
     }
 
     public function edit(Request $request){
-
-
         $id = Request('id');
         if (request()->ajax()){
-        $data = DB::table('employeeshifts')
-        ->select('employeeshifts.*')
-        ->where('employeeshifts.id', $id)
-        ->get(); 
-        $requestlist = $this->reqestcountlist($id); 
-    
-        $responseData = array(
-            'mainData' => $data[0],
-            'requestdata' => $requestlist,
-        );
+            $data = DB::table('employeeshifts')
+                ->select('employeeshifts.*')
+                ->where('employeeshifts.id', $id)
+                ->get();
+            $requestlist = $this->reqestcountlist($id);
 
-    return response() ->json(['result'=>  $responseData]);
+            $firstDetail = DB::table('employeeshiftdetails')
+                ->where('employeeshift_id', $id)
+                ->where('status', 1)
+                ->first();
+
+            $responseData = array(
+                'mainData'     => $data[0],
+                'requestdata'  => $requestlist,
+                'until_time'   => $firstDetail ? $firstDetail->until_time : '',
+                'off_next_day' => $firstDetail ? $firstDetail->off_next_day : 0,
+            );
+
+            return response()->json(['result' => $responseData]);
+        }
     }
-    }
+
     private function reqestcountlist($id){
+    $recordID = $id;
+    $data = DB::table('employeeshiftdetails')
+        ->select('employeeshiftdetails.*')
+        ->where('employeeshiftdetails.employeeshift_id', $recordID)
+        ->where('employeeshiftdetails.status', 1)
+        ->get();
 
-        $recordID =$id ;
-       $data = DB::table('employeeshiftdetails')
-       ->select('employeeshiftdetails.*')
-       ->where('employeeshiftdetails.employeeshift_id', $recordID)
-       ->where('employeeshiftdetails.status', 1)
-       ->get(); 
-
-
-       $htmlTable = '';
-       foreach ($data as $row) {
-          
+    $htmlTable = '';
+    foreach ($data as $row) {
         $htmlTable .= '<tr>';
-        $htmlTable .= '<td>' . $row->emp_id . '</td>'; 
-        $htmlTable .= '<td>' . $row->employee_name . '</td>'; 
-        $htmlTable .= '<td class="d-none">ExistingData</td>'; 
-        $htmlTable .= '<td name="detailsId" class="d-none">' . $row->id . '</td>'; 
-        $htmlTable .= '<td class="text-right" id ="actionrow"><button type="button" id="'.$row->id.'" class="btnEditlist btn btn-primary btn-sm ">
-            <i class="fas fa-pen"></i>
+        $htmlTable .= '<td>' . $row->emp_id . '</td>';
+        $htmlTable .= '<td>' . $row->employee_name . '</td>';
+        $htmlTable .= '<td>' . $row->until_time . '</td>';
+        $htmlTable .= '<td>' . ($row->off_next_day == 1 ? 'Yes' : 'No') . '</td>';
+        $htmlTable .= '<td class="d-none">ExistingData</td>';
+        $htmlTable .= '<td name="detailsId" class="d-none">' . $row->id . '</td>';
+        $htmlTable .= '<td class="text-right" id="actionrow">
+            <button type="button" id="' . $row->id . '" class="btnEditlist btn btn-primary btn-sm">
+                <i class="fas fa-pen"></i>
             </button>&nbsp;
-            <button type="button" rowid="'.$row->id.'" id="btnDeleterow"  class="btnDeletelist btn btn-danger btn-sm " >
-            <i class="fas fa-trash-alt"></i>
-            </button></td>'; 
-        $htmlTable .= '<td class="d-none"><input type ="hidden" id ="hiddenid" name="hiddenid" value="'.$row->id.'"></td>'; 
-        $htmlTable .= '</tr>';
-       }
+            <button type="button" rowid="' . $row->id . '" id="btnDeleterow" class="btnDeletelist btn btn-danger btn-sm">
+                <i class="fas fa-trash-alt"></i>
+            </button></td>';
+        $htmlTable .= '<td class="d-none"><input type="hidden" id="hiddenid" name="hiddenid" value="' . $row->id . '"></td>';
+            $htmlTable .= '</tr>';
+        }
 
-       return $htmlTable;
+        return $htmlTable;
+    }
 
-   }
+
    public function editlist(Request $request){
         $id = Request('id');
         if (request()->ajax()){
-        $data = DB::table('employeeshiftdetails')
-        ->select('employeeshiftdetails.*')
-        ->where('employeeshiftdetails.id', $id)
-        ->get(); 
-        return response() ->json(['result'=> $data[0]]);
+            $data = DB::table('employeeshiftdetails')
+                ->select('employeeshiftdetails.*')
+                ->where('employeeshiftdetails.id', $id)
+                ->get();
+            return response()->json(['result' => $data[0]]);
         }
-   }
+    }
 
    public function deletelist(Request $request){
 
@@ -198,69 +206,68 @@ class EmployeeShiftController extends Controller
 
 
     public function update(Request $request){
-
         $user = Auth::user();
         $permission = $user->can('employee-shift-allocation-edit');
         if (!$permission) {
             return response()->json(['error' => 'UnAuthorized'], 401);
         }
-       
-        $current_date_time = Carbon::now()->toDateTimeString();
 
-        $id =  $request->hidden_id ;
+        $current_date_time = Carbon::now()->toDateTimeString();
+        $id = $request->hidden_id;
 
         $form_data = array(
-                'shift_id' => $request->shift,
-                'date_from' => $request->datefrom,
-                'date_to' => $request->dateto,
-                'updated_by' => Auth::id(),
-                'updated_at' => $current_date_time,
-            );
+            'shift_id'   => $request->shift,
+            'date_from'  => $request->datefrom,
+            'date_to'    => $request->datefrom,
+            'updated_by' => Auth::id(),
+            'updated_at' => $current_date_time,
+        );
 
-            Employeeshift::findOrFail($id)
-        ->update($form_data);
+        Employeeshift::findOrFail($id)->update($form_data);
 
         $tableData = $request->input('tableData');
-    
+
         foreach ($tableData as $rowtabledata) {
-            if($rowtabledata['col_3'] == "Updated" || $rowtabledata['col_3'] == "ExistingData"){
-       
-                $emp_id = $rowtabledata['col_1'];
-                $empname = $rowtabledata['col_2'];
-                $detailID = $rowtabledata['col_4'];
+            $emp_id     = $rowtabledata['col_1'];
+            $empname    = $rowtabledata['col_2'];
+            $until_time = $rowtabledata['col_3'];  
+            $off_next_day_label = $rowtabledata['col_4']; 
+            $flag       = $rowtabledata['col_5'];  
+            $detailID   = isset($rowtabledata['col_6']) ? $rowtabledata['col_6'] : null;
 
-    
+            $off_next_day = ($off_next_day_label === 'Yes') ? 1 : 0;
+
+            if ($flag == "Updated" || $flag == "ExistingData") {
                 $Employeeshiftdetail = Employeeshiftdetail::where('id', $detailID)->first();
-                $Employeeshiftdetail->shift_id = $request->shift;
-                $Employeeshiftdetail->date_from = $request->datefrom;
-                $Employeeshiftdetail->date_to = $request->dateto;
-                $Employeeshiftdetail->emp_id = $emp_id;
+                if (!$Employeeshiftdetail) continue;
+
+                $Employeeshiftdetail->shift_id      = $request->shift;
+                $Employeeshiftdetail->date_from     = $request->datefrom;
+                $Employeeshiftdetail->until_time    = $until_time;
+                $Employeeshiftdetail->off_next_day  = $off_next_day;
+                $Employeeshiftdetail->emp_id        = $emp_id;
                 $Employeeshiftdetail->employee_name = $empname;
-                $Employeeshiftdetail->updated_by = Auth::id();
+                $Employeeshiftdetail->updated_by    = Auth::id();
                 $Employeeshiftdetail->save();
 
-                
-            }else if($rowtabledata['col_3'] == "NewData") {
-                $emp_id = $rowtabledata['col_1'];
-                $empname = $rowtabledata['col_2'];
-    
+            } else if ($flag == "NewData") {
                 $Employeeshiftdetail = new Employeeshiftdetail();
-                $Employeeshiftdetail->shift_id = $request->shift;
-                $Employeeshiftdetail->date_from = $request->datefrom;
-                $Employeeshiftdetail->date_to = $request->dateto;
-                $Employeeshiftdetail->emp_id = $emp_id;
-                $Employeeshiftdetail->employee_name = $empname;
+                $Employeeshiftdetail->shift_id         = $request->shift;
+                $Employeeshiftdetail->date_from        = $request->datefrom;
+                $Employeeshiftdetail->until_time       = $until_time;
+                $Employeeshiftdetail->off_next_day     = $off_next_day;
+                $Employeeshiftdetail->emp_id           = $emp_id;
+                $Employeeshiftdetail->employee_name    = $empname;
                 $Employeeshiftdetail->employeeshift_id = $id;
-                $Employeeshiftdetail->status = '1';
-                $Employeeshiftdetail->created_by = Auth::id();
-                $Employeeshiftdetail->updated_by = '0';
+                $Employeeshiftdetail->status           = '1';
+                $Employeeshiftdetail->created_by       = Auth::id();
+                $Employeeshiftdetail->updated_by       = '0';
                 $Employeeshiftdetail->save();
-              }
             }
-        
+        }
+
         return response()->json(['success' => 'Employee Shift is Successfully Updated']);
     }
-
 
     public function view(Request $request){
 
@@ -281,29 +288,25 @@ class EmployeeShiftController extends Controller
         return response() ->json(['result'=>  $responseData]);
         }
     }
+
     private function view_reqestcountlist($id){
-
-        $recordID =$id ;
+        $recordID = $id;
         $data = DB::table('employeeshiftdetails')
-        ->select('employeeshiftdetails.*')
-        ->where('employeeshiftdetails.employeeshift_id', $recordID)
-        ->where('employeeshiftdetails.status', 1)
-        ->get(); 
-
+            ->select('employeeshiftdetails.*')
+            ->where('employeeshiftdetails.employeeshift_id', $recordID)
+            ->where('employeeshiftdetails.status', 1)
+            ->get();
 
         $htmlTable = '';
         foreach ($data as $row) {
-            
             $htmlTable .= '<tr>';
-            $htmlTable .= '<td>' . $row->emp_id . '</td>'; 
-            $htmlTable .= '<td>' . $row->employee_name . '</td>'; 
-            $htmlTable .= '<td class="d-none">ExistingData</td>'; 
-            $htmlTable .= '<td name="detailsId" class="d-none">' . $row->id . '</td>'; 
+            $htmlTable .= '<td>' . $row->emp_id . '</td>';
+            $htmlTable .= '<td>' . $row->employee_name . '</td>';
+            $htmlTable .= '<td>' . $row->until_time . '</td>';
             $htmlTable .= '</tr>';
         }
 
         return $htmlTable;
-
     }
 
     public function delete(Request $request){
@@ -374,8 +377,8 @@ class EmployeeShiftController extends Controller
             $data = str_getcsv($line);
             
             $emp_id = trim(preg_replace('/^\xEF\xBB\xBF/', '', $data[0]));
-            $date = trim($data[2]);
-            // $date_to = trim($data[2]);
+            $date = trim($data[1]);
+            $until_time = trim($data[2]);
             $emp_id = trim($emp_id);
             $emp = DB::table('employees')
                 ->select('emp_id', 'emp_name_with_initial')
@@ -408,7 +411,8 @@ class EmployeeShiftController extends Controller
                 [
                     'shift_id' => $shiftType,
                     'date_from' => $date,
-                    'date_to' => $date,
+                    'until_time' => $until_time,
+                    'off_next_day' => 0,
                     'emp_id' => $emp_id,
                 ],
                 [

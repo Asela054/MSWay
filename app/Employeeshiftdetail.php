@@ -10,6 +10,6 @@ class Employeeshiftdetail extends Model
 
     protected $fillable =[
 
-        'employeeshift_id','shift_id','date_from','date_to','emp_id','employee_name','status','created_by', 'updated_by'
+        'employeeshift_id','shift_id','date_from','until_time','off_next_day','emp_id','employee_name','status','created_by', 'updated_by'
     ];
 }

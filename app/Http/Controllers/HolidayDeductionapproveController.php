@@ -72,7 +72,7 @@ class HolidayDeductionapproveController extends Controller
         ->get();
 
         foreach ($query as $row) {
-            // if($row->empid==250){
+            // if($row->empid==400){
                 $empId = $row->empid;
                 $empName = $row->emp_name;
                 $payrollProfileId = $row->payroll_profiles_id;
@@ -99,10 +99,10 @@ class HolidayDeductionapproveController extends Controller
                 $daycount = 0;
                 
                 $emp = DB::table('employees')
-                ->leftJoin('job_categories', 'job_categories.id' , '=', 'employees.job_category_id')
-                ->select('job_categories.id as job_categoryid','job_categories.emp_payroll_workdays as workingdays')
-                ->where('employees.emp_id', $empId)
-                ->first();
+                    ->leftJoin('job_categories', 'job_categories.id' , '=', 'employees.job_category_id')
+                    ->select('job_categories.id as job_categoryid','job_categories.emp_payroll_workdays as workingdays')
+                    ->where('employees.emp_id', $empId)
+                    ->first();
 
                 if ($emp) {
                     $jobCategoryId = $emp->job_categoryid;
@@ -110,19 +110,25 @@ class HolidayDeductionapproveController extends Controller
 
                 //check holiday deductions approved on given date range
                 $approveholidayductions = DB::table('holiday_deductions_approved')
-                ->where('emp_id', $empId)
-                ->where('remuneration_id', $remunerationtype)
-                ->whereBetween('from_date', [$firstDate, $lastDate]) 
-                ->whereBetween('to_date', [$firstDate, $lastDate])  
-                ->first();
+                    ->where('emp_id', $empId)
+                    ->where('remuneration_id', $remunerationtype)
+                    ->whereBetween('from_date', [$firstDate, $lastDate]) 
+                    ->whereBetween('to_date', [$firstDate, $lastDate])  
+                    ->first();
                 $approveholidayductionsstatus = $approveholidayductions ? 1 : 0;
 
                 $leavededutionamount = DB::table('holiday_deductions')
-                ->select('amount', 'day_count')
-                ->where('job_id', $jobCategoryId)
-                ->where('remuneration_id', $remunerationtype)
-                ->orderBy('day_count', 'desc')
-                ->first();
+                    ->select('amount', 'day_count')
+                    ->where('job_id', $jobCategoryId)
+                    ->where('remuneration_id', $remunerationtype)
+                    ->orderBy('day_count', 'desc')
+                    ->first();
+
+                $maxmindayscount = DB::table('holiday_deductions')
+                    ->selectRaw('MAX(day_count) as max_day_count, MIN(day_count) as min_day_count')
+                    ->where('job_id', $jobCategoryId)
+                    ->where('remuneration_id', $remunerationtype)
+                    ->first();
                 
                 if($leavededutionamount){
                     $monthlytotal = $leavededutionamount->amount;
@@ -134,16 +140,22 @@ class HolidayDeductionapproveController extends Controller
                     ->where('remuneration_id', $remunerationtype)
                     ->orderBy('day_count', 'desc')
                     ->get();
-
+                    
                     foreach($leavededuction as $dataleavededuction){
-                        if($dataleavededuction->day_count==$totalDays->total_days){
+                        if($maxmindayscount->min_day_count > $totalDays->total_days){
+                            $totalAmount = $monthlytotal;
+                            $deductionamount = $monthlytotal;
+                            break;
+                        }
+                        else if($maxmindayscount->max_day_count < $totalDays->total_days){
                             $totalAmount = $monthlytotal-$dataleavededuction->amount;
                             $deductionamount = $dataleavededuction->amount;
                             break;
                         }
-                        else{
-                            $totalAmount = 0;
-                            $deductionamount = $monthlytotal;
+                        if($dataleavededuction->day_count==$totalDays->total_days){
+                            $totalAmount = $monthlytotal-$dataleavededuction->amount;
+                            $deductionamount = $dataleavededuction->amount;
+                            break;
                         }
                     }
 
@@ -164,7 +176,7 @@ class HolidayDeductionapproveController extends Controller
                     'total_amount' => number_format($deductionamount, 2),
                     'monthly_remain' => number_format($totalAmount, 2)  
                 ];  
-            // }   
+            // } 
         }
         return response()->json([ 'data' => $datareturn ]);
     }

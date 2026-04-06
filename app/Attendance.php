@@ -385,7 +385,7 @@ class Attendance extends Model
                 ->select('employeeshiftdetails.*', 'shift_types.onduty_time', 'shift_types.offduty_time') 
                 ->where('employeeshiftdetails.emp_id',222 )
                 ->whereDate('employeeshiftdetails.date_from', '<=', $record_date)
-                ->whereDate('employeeshiftdetails.date_to', '>=', $record_date)
+                ->whereDate('employeeshiftdetails.until_time', '>=', $record_date)
                 ->first();
 
                 if ($shift_detail) {
@@ -413,7 +413,7 @@ class Attendance extends Model
 
     }
 
-    public function get_ot_hours_by_date($emp_id, $off_time, $on_time, $record_date, $shift_start_, $shift_end_, $emp_department ){
+    public function get_ot_hours_by_date($emp_id, $off_time, $on_time, $record_date, $shift_start_, $shift_end_, $emp_department, $allocateshiftID){
         $off_time = Carbon::parse($off_time);
         $on_time = Carbon::parse($on_time);
         $record_date = Carbon::parse($record_date);
@@ -463,23 +463,29 @@ class Attendance extends Model
             ->first();
 
         $shift = DB::table('shift_types')
-            ->where('id', $emp->emp_shift)
+            ->where('id', $allocateshiftID)
             ->first();
 
-        $ondutyTime = Carbon::parse($shift->onduty_time);
-        $offdutyTime = Carbon::parse($shift->offduty_time);
-        $saturdayondutyTime = Carbon::parse($shift->saturday_onduty_time);
-        $saturdayoffdutyTime = Carbon::parse($shift->saturday_offduty_time);
+        $ondutyTime = Carbon::parse($record_date->year.'-'.$record_date->month.'-'.$record_date->day.' '.$shift->onduty_time);
+        $offdutyTime = Carbon::parse($record_date->year.'-'.$record_date->month.'-'.$record_date->day.' '.$shift->offduty_time);
+        $saturdayondutyTime = Carbon::parse($record_date->year.'-'.$record_date->month.'-'.$record_date->day.' '.$shift->saturday_onduty_time);
+        $saturdayoffdutyTime = Carbon::parse($record_date->year.'-'.$record_date->month.'-'.$record_date->day.' '.$shift->saturday_offduty_time);
         $shiftdiffhours = $saturdayondutyTime->diffInHours($saturdayoffdutyTime);
-
+        if($shift->off_next_day == 1):
+            $saturdayoffdutyTime->addDay();
+            $shiftdiffhours = $saturdayondutyTime->diffInHours($saturdayoffdutyTime);
+        else:
+            $shiftdiffhours = $saturdayondutyTime->diffInHours($saturdayoffdutyTime);
+        endif;
+        
         if($emp->flex_ot==1):
             if($record_date->dayOfWeek == 6):
-                $ondutyTime = Carbon::parse($on_time->format('H:i'));
+                $ondutyTime = Carbon::parse($record_date->year.'-'.$record_date->month.'-'.$record_date->day.' '.$on_time->format('H:i'));
                 $offdutyTime = $ondutyTime->copy()->addMinutes($shiftdiffhours * 60);
                 $shift_start_ = $ondutyTime->format('H:i');
                 $shift_end_ = $offdutyTime->format('H:i');
             else:
-                $ondutyTime = Carbon::parse($on_time->format('H:i'));
+                $ondutyTime = Carbon::parse($record_date->year.'-'.$record_date->month.'-'.$record_date->day.' '.$on_time->format('H:i'));
                 $offdutyTime = $ondutyTime->copy()->addMinutes($emp->shift_hours * 60);
                 $shift_start_ = $ondutyTime->format('H:i');
                 $shift_end_ = $offdutyTime->format('H:i');
@@ -527,7 +533,8 @@ class Attendance extends Model
             $earlyend = $ondutyTime->copy()->addMinutes($emp->shift_hours * 30)->format('H:i:s'); //Please add database column
         endif;
 
-        $shifthours= $offdutyTime->diffInHours($ondutyTime); //Get shift different
+        // $shifthours= $offdutyTime->diffInHours($ondutyTime); //Remove this line on 27/03/2026
+        $shifthours= $emp->shift_hours; //Get by job category
         $otafterhours= $emp->ot_app_hours;//Please add database column
         $emplyeeworkhours= $on_time->diffInHours($off_time);//Differents of in time & out time
         $totalworkinghours=$emplyeeworkhours+$halfshorthours;
@@ -583,6 +590,9 @@ class Attendance extends Model
 
             $shift_start =  Carbon::parse($date->year.'-'.$date->month.'-'.$date->day.' '.$shift_start_);
             $shift_end = Carbon::parse($date->year.'-'.$date->month.'-'.$date->day.' '.$shift_end_);
+            if($shift->off_next_day == 1):
+                $shift_end->addDay();
+            endif;
             $s_date = $date->format('Y-m-d');
 
             $holiday_check = Holiday::where('date', $s_date)
@@ -878,6 +888,10 @@ class Attendance extends Model
                         $shift_start = Carbon::parse($date->year.'-'.$date->month.'-'.$date->day.' '.$saturday_on_duty_time);
                         $shift_end = Carbon::parse($date->year.'-'.$date->month.'-'.$date->day.' '.$saturday_off_duty_time);
 
+                        if($shift->off_next_day == 1):
+                            $shift_end->addDay();
+                        endif;
+
                         $ot_hours = 0;
                         $double_ot_hours=0;
                         $one_point_five_ot_hours = 0;
@@ -940,7 +954,9 @@ class Attendance extends Model
 
                             $ot_from = Carbon::parse($ot_from);
                             $ot_to = Carbon::parse($ot_to);
-                            $ot_from = Carbon::parse($ot_from)->setDate($record_date->year,$record_date->month,$record_date->day);
+                            if($shift->off_next_day == 0):
+                                $ot_from = Carbon::parse($ot_from)->setDate($record_date->year,$record_date->month,$record_date->day);
+                            endif;
 
                             $ot_minutes = $ot_from->diffInMinutes($ot_to);
                             if($spedeductpresent>0){
