@@ -1622,6 +1622,20 @@ Route::post('jobconfirmationletterdelete', 'JobConfirmationLetterController@dele
 Route::post('jobconfirmationletterprintdata', 'JobConfirmationLetterPDFController@printdata')->name('jobconfirmationletterprintdata');
 Route::get('jobconfirmationlettergetdetails/{categoryId}', 'JobConfirmationLetterController@getEmployeeDetails')->name('jobconfirmationlettergetdetails');
 
+// Salary Advance Controller Routes
+Route::resource('salaryAdvance', 'SalaryAdvanceController');
+Route::get('salaryAdvance',['uses' => 'SalaryAdvanceController@index', 'as' => 'salaryAdvance']);
+Route::post('addSalaryAdvance',['uses' => 'SalaryAdvanceController@store', 'as' => 'addSalaryAdvance']); 
+Route::post('salaryAdvance/update', 'SalaryAdvanceController@update')->name('salaryAdvance.update');
+Route::get('salaryAdvance/destroy/{id}', 'SalaryAdvanceController@destroy');
+Route::get('SalaryAdvance/available-amount/{emp_id}', 'SalaryAdvanceController@getAvailableAmount')->name('salaryAdvance.availableAmount');
+Route::get('SalaryAdvance/get-paid-amount', 'SalaryAdvanceController@getPaidAmount')->name('SalaryAdvance/get-paid-amount');
+Route::post('SalaryAdvance/paid-amount', 'SalaryAdvanceController@storePaidAmount')->name('SalaryAdvance/paid-amount');
+// Salary Advance Approval Controller Routes
+Route::get('/salaryAdvanceApproval' ,'SalaryAdvanceApprovalController@index')->name('salaryAdvanceApproval');
+Route::post('/salaryAdvanceApprovalgenerate' ,'SalaryAdvanceApprovalController@generatesalaryadvance')->name('salaryAdvanceApprovalgenerate');
+Route::post('/salaryAdvanceApprovalapprove' ,'SalaryAdvanceApprovalController@approvesalaryadvance')->name('salaryAdvanceApprovalapprove');
+
 // Koasis 
 // Dashboard controller
 Route::get('/getattendancesummarychart', 'Additionals\DashboarddetailedController@attendacechart')->name('getattendancesummarychart');
