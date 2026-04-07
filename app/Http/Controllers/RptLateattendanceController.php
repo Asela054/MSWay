@@ -54,6 +54,7 @@ class RptLateattendanceController extends Controller
             ->leftJoin('shift_types', 'employees.emp_shift', '=', 'shift_types.id')
             ->leftJoin('departments', 'departments.id', '=', 'employees.emp_department')
             ->whereIn('employees.emp_id', $accessibleEmployeeIds)
+            ->where('ela.is_approved', 1)
             ->where('employees.deleted', 0);
 
         // Apply filters
