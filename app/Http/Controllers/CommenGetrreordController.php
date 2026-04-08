@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\DB;
 use App\Company;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use App\Helpers\UserHelper;
 
@@ -19,9 +20,11 @@ class CommenGetrreordController extends Controller
         return response()->json($departments);
     }
 
-    // Company List
-    public function company_list_sel2(Request $request)
+    // // Company List
+        public function company_list_sel2(Request $request)
     {
+        $id = Auth::user()->id;
+
         if ($request->ajax())
         {
             $page = Input::get('page');
@@ -29,13 +32,33 @@ class CommenGetrreordController extends Controller
 
             $offset = ($page - 1) * $resultCount;
 
-            $breeds = Company::where('name', 'LIKE',  '%' . Input::get("term"). '%')
-                ->orderBy('name')
+            // Get the company IDs that the user has permission for
+        $userCompanyIds = DB::table('user_has_companies')->where('user_id', $id)
+                    ->pluck('company_id')
+                    ->toArray();
+
+            $breedsQuery = Company::where('name', 'LIKE', '%' . Input::get("term") . '%');
+            
+            // If user has specific company permissions, filter by those companies
+            if (!empty($userCompanyIds)) {
+                $breedsQuery->whereIn('id', $userCompanyIds);
+            }
+            // If no records in user_has_companies, show all companies (no additional filter)
+            
+            $breeds = $breedsQuery->orderBy('name')
                 ->skip($offset)
                 ->take($resultCount)
-                ->get([DB::raw('id as id'),DB::raw('name as text'), DB::raw('name as name')]);
+                ->get([DB::raw('id as id'), DB::raw('name as text'), DB::raw('name as name')]);
 
-            $count = Company::count();
+            // Update count to respect the permission filter
+            $countQuery = Company::where('name', 'LIKE', '%' . Input::get("term") . '%');
+            
+            if (!empty($userCompanyIds)) {
+                $countQuery->whereIn('id', $userCompanyIds);
+            }
+            
+            $count = $countQuery->count();
+            
             $endCount = $offset + $resultCount;
             $morePages = $endCount < $count;
 
@@ -49,7 +72,6 @@ class CommenGetrreordController extends Controller
             return response()->json($results);
         }
     }
-
 
     public function department_list_sel2(Request $request)
     {
@@ -141,10 +163,18 @@ class CommenGetrreordController extends Controller
     {
         if ($request->ajax())
         {
+             $id = Auth::user()->id;
+
             $page = Input::get('page');
             $resultCount = 25;
             $offset = ($page - 1) * $resultCount;
             $term = Input::get("term");
+
+             $userCompanyIds = DB::table('user_has_companies')
+            ->where('user_id', $id)
+            ->pluck('company_id')
+            ->toArray();
+
 
             $query = DB::table('employees')
                 ->where(function($q) use ($term) {
@@ -154,6 +184,9 @@ class CommenGetrreordController extends Controller
                 ->where('deleted', 0)
                 ->where('is_resigned', 0);
 
+            if (!empty($userCompanyIds)) {
+                $query->whereIn('employees.emp_company', $userCompanyIds);
+            }
             $query = UserHelper::applyEmployeeFilter($query);
 
             // Add department filter if department parameter is provided and not empty

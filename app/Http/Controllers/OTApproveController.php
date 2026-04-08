@@ -125,10 +125,22 @@ class OTApproveController extends Controller
                 ->whereDate('employeeshiftdetails.until_time', '>=', $date)
                 ->first();
 
+                // Check if date is Saturday (Carbon::SATURDAY = 6)
+                $isSaturday = Carbon::parse($date)->isSaturday();
+
                 if ($shift_detail) {
-                    $on_duty_time = $shift_detail->onduty_time;
-                    $off_duty_time = $shift_detail->offduty_time;
-                    $emp_shift_id = $shift_detail->shiftid;
+                     // Custom logic for Saturday with shift is night in opma
+                    if($isSaturday && $shift_detail->shiftid == 2){
+                        $on_duty_time = $att->onduty_time;
+                        $off_duty_time =  $att->offduty_time;
+                        $emp_shift_id = $att->shift_id;
+
+                    }else{
+                        $on_duty_time = $shift_detail->onduty_time;
+                        $off_duty_time = $shift_detail->offduty_time;
+                        $emp_shift_id = $shift_detail->shiftid;
+                    }
+                   
                 }
                 else{
                     $roster_detail = DB::table('employee_roster_details')
