@@ -187,8 +187,8 @@
                                         @endif
                                     </div>
                                     <div class="col">
-                                        <label class="small font-weight-bolder">Last Name</label>
-                                        <input type="text" name="lastname" id="lastname" class="form-control form-control-sm {{ $errors->has('lastname') ? ' has-error' : '' }}" />
+                                        <label class="small font-weight-bolder">Last Name*</label>
+                                        <input type="text" name="lastname" id="lastname" class="form-control form-control-sm {{ $errors->has('lastname') ? ' has-error' : '' }}" required />
                                         @if ($errors->has('lastname'))
                                             <span class="help-block">
                                                 <strong>{{ $errors->first('lastname') }}</strong>
@@ -198,8 +198,8 @@
                                 </div>
                                 
                                 <div class="form-group mb-1">
-                                    <label class="small font-weight-bolder">Full Name</label>
-                                    <input type="text" name="emp_fullname" id="emp_fullname" class="form-control form-control-sm {{ $errors->has('emp_fullname') ? ' has-error' : '' }}" />
+                                    <label class="small font-weight-bolder">Full Name*</label>
+                                    <input type="text" name="emp_fullname" id="emp_fullname" class="form-control form-control-sm {{ $errors->has('emp_fullname') ? ' has-error' : '' }}" required />
                                     @if ($errors->has('emp_fullname'))
                                         <span class="help-block">
                                             <strong>{{ $errors->first('emp_fullname') }}</strong>
