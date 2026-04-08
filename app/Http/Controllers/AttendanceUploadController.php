@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 class AttendanceUploadController extends Controller
 {
 
-        public function importCSV(Request $request)
+    public function importCSV(Request $request)
     {
         $permission = Auth::user()->can('attendance-create');
         if (!$permission) {
@@ -74,31 +74,26 @@ class AttendanceUploadController extends Controller
             $employees = \App\Employee::pluck('emp_id', 'emp_id')->toArray();
             $employeeId = $employees[$attendanceData['emp_id']] ?? null;
 
-
             if (!$employeeId) {
                 $errors[] = "Row {$attendanceData['row']}: Invalid Employee ID: " . $attendanceData['emp_id'];
                 continue;
             }
 
             try {
-                // Parse and format date
+                // Parse and format date - FIXED: Use m/d/Y format for your CSV (1/2/2026 = Jan 2, 2026)
                 $date = $this->parseDate($attendanceData['date']);
                 if (!$date) {
                     $errors[] = "Row {$attendanceData['row']}: Invalid date format: " . $attendanceData['date'];
                     continue;
                 }
-
                 
-            
-                // Parse and format in_time
+                // Parse in_time and out_time using the correct date
                 $inTime = $this->parseTimestamp($attendanceData['in_time'], $date);
                 if (!$inTime) {
                     $errors[] = "Row {$attendanceData['row']}: Invalid in_time format: " . $attendanceData['in_time'];
                     continue;
                 }
 
-            
-                // Parse and format out_time
                 $outTime = $this->parseTimestamp($attendanceData['out_time'], $date);
                 if (!$outTime) {
                     $errors[] = "Row {$attendanceData['row']}: Invalid out_time format: " . $attendanceData['out_time'];
@@ -117,13 +112,13 @@ class AttendanceUploadController extends Controller
                 $deviceSno = $employee->sno ?? '-';
                 $location = $employee->location ?? '1';
 
-                // Insert IN time
+                // Insert IN time - FIXED: Use the actual date for the timestamp
                 Attendance::create([
                     'emp_id' => $employeeId,
                     'uid' => $employeeId,
                     'state' => '1',
-                    'timestamp' => $inTime,
-                    'date' => $date,
+                    'timestamp' => $inTime, // This now has the correct date
+                    'date' => $date, // This is now Y-m-d format
                     'approved' => '0',
                     'type' => '255',
                     'devicesno' => $deviceSno,
@@ -135,8 +130,8 @@ class AttendanceUploadController extends Controller
                     'emp_id' => $employeeId,
                     'uid' => $employeeId,
                     'state' => '1', 
-                    'timestamp' => $outTime,
-                    'date' => $date,
+                    'timestamp' => $outTime, // This now has the correct date
+                    'date' => $date, // This is now Y-m-d format
                     'approved' => '0',
                     'type' => '255',
                     'devicesno' => $deviceSno,
@@ -152,10 +147,8 @@ class AttendanceUploadController extends Controller
 
         $response = [];
 
-    
-
         if ($successCount > 0) {
-            $response['success'] = "Successfully imported attendance records.";
+            $response['success'] = "Successfully imported {$successCount} attendance records.";
         }
         if (!empty($errors)) {
             $response['errors'] = $errors;
@@ -166,6 +159,7 @@ class AttendanceUploadController extends Controller
 
     /**
      * Parse date and convert to standard format Y-m-d
+     * Fixed to properly handle m/d/Y format
      */
     private function parseDate($dateString)
     {
@@ -173,20 +167,25 @@ class AttendanceUploadController extends Controller
             // Remove any extra spaces
             $dateString = trim($dateString);
             
-            // Try different date formats
+            // Try different date formats - reordered to prioritize your CSV format
             $formats = [
-                'Y-m-d',
-                'd/m/Y',
-                'm/d/Y',
-                'd-m-Y',
-                'm-d-Y',
-                'Y/m/d',
+                'm/d/Y',      // 1/2/2026 (month/day/year) - YOUR CSV FORMAT
+                'n/j/Y',      // 1/2/2026 (month/day/year without leading zeros)
+                'd/m/Y',      // 2/1/2026 (day/month/year)
+                'Y-m-d',      // 2026-01-02
+                'Y/m/d',      // 2026/01/02
+                'd-m-Y',      // 02-01-2026
+                'm-d-Y',      // 01-02-2026
             ];
 
             foreach ($formats as $format) {
                 $date = \DateTime::createFromFormat($format, $dateString);
                 if ($date !== false) {
-                    return $date->format('Y-m-d');
+                    // Validate that the parsed date is reasonable
+                    $errors = \DateTime::getLastErrors();
+                    if ($errors && $errors['warning_count'] === 0 && $errors['error_count'] === 0) {
+                        return $date->format('Y-m-d');
+                    }
                 }
             }
 
@@ -200,11 +199,7 @@ class AttendanceUploadController extends Controller
 
     /**
      * Parse timestamp and convert to standard format Y-m-d H:i:s
-     * Handles both full timestamps and time-only values
-     */
-    /**
-     * Parse timestamp and convert to standard format Y-m-d H:i:s
-     * Handles both full timestamps and time-only values
+     * Fixed to properly combine date and time
      */
     private function parseTimestamp($timeString, $date)
     {
@@ -212,50 +207,43 @@ class AttendanceUploadController extends Controller
             // Remove any extra spaces
             $timeString = trim($timeString);
             
-            // Handle the specific format with extra slash: "9/26/2025/ 09:51"
-            if (preg_match('/^(\d{1,2})\/(\d{1,2})\/(\d{4})\/\s*(\d{1,2}:\d{2}(?::\d{2})?)$/', $timeString, $matches)) {
-                $month = $matches[1];
-                $day = $matches[2];
-                $year = $matches[3];
-                $time = $matches[4];
-                
-                // Create proper timestamp
-                $combined = "{$year}-{$month}-{$day} {$time}";
-                return Carbon::parse($combined)->format('Y-m-d H:i:s');
+            // If the timeString already contains a date, extract just the time part
+            if (preg_match('/(\d{1,2}:\d{2}(?::\d{2})?)/', $timeString, $matches)) {
+                $timeString = $matches[1];
             }
             
-            // If it's already a full timestamp with date
-            if (strtotime($timeString) !== false) {
-                $fullTimestamp = Carbon::parse($timeString);
-                // Check if it has a date part
-                if ($fullTimestamp->format('Y-m-d') != '1970-01-01') {
-                    return $fullTimestamp->format('Y-m-d H:i:s');
-                }
-            }
-
             // Handle time-only formats
             $timeFormats = [
-                'H:i:s',
-                'H:i',
-                'h:i:s A',
-                'h:i A',
-                'g:i:s A',
-                'g:i A',
+                'H:i:s',     // 17:30:00
+                'H:i',       // 17:30
+                'G:i:s',     // 8:30:00 (without leading zero)
+                'G:i',       // 8:30 (without leading zero)
+                'h:i:s A',   // 05:30:00 PM
+                'h:i A',     // 05:30 PM
+                'g:i:s A',   // 5:30:00 PM
+                'g:i A',     // 5:30 PM
             ];
 
+            $parsedTime = null;
+            
             foreach ($timeFormats as $format) {
                 $time = \DateTime::createFromFormat($format, $timeString);
                 if ($time !== false) {
-                    // Combine with the provided date
-                    $combined = $date . ' ' . $time->format('H:i:s');
-                    return Carbon::parse($combined)->format('Y-m-d H:i:s');
+                    $parsedTime = $time;
+                    break;
                 }
             }
-
-            // Try Carbon parse for time
-            $timeOnly = Carbon::parse($timeString);
-            $combined = $date . ' ' . $timeOnly->format('H:i:s');
-            return Carbon::parse($combined)->format('Y-m-d H:i:s');
+            
+            // If still not parsed, try Carbon
+            if (!$parsedTime) {
+                $parsedTime = Carbon::parse($timeString);
+            }
+            
+            // Combine with the provided date - FIXED: Use the date parameter correctly
+            $combined = $date . ' ' . $parsedTime->format('H:i:s');
+            $result = Carbon::parse($combined);
+            
+            return $result->format('Y-m-d H:i:s');
             
         } catch (\Exception $e) {
             return null;
