@@ -7,8 +7,9 @@
       <li><a class="dropdown-item" href="{{ url('PayrollProfileList') }}" id="payrollprofile">Payroll Profile</a></li>
       <li><a class="dropdown-item" href="{{ url('EmployeeLoanList') }}" id="loans">Loans</a></li>
       <li><a class="dropdown-item" href="{{ url('EmployeeLoanAdmin') }}">Loan Approval</a></li>
-      <li><a class="dropdown-item" href="{{ url('EmployeeLoanInstallmentList') }}" id="loanSettlement">Loan
-          Settlement</a></li>
+      <li><a class="dropdown-item" href="{{ url('EmployeeLoanInstallmentList') }}" id="loanSettlement">Loan Settlement</a></li>
+      <li><a class="dropdown-item" href="{{ url('salaryAdvance') }}" id="salaryAdvance">Salary Advances</a></li>
+      <li><a class="dropdown-item" href="{{ url('salaryAdvanceApproval') }}" id="salaryAdvanceApproval">Salary Advance Approval</a></li>
       <li><a class="dropdown-item" href="{{ url('EmployeeTermPaymentList') }}" id="SalaryAdditions">Salary Additions /
           Deduction</a></li>
       <li><a href="{{ url('EmployeeExtraPaymentList') }}" id="SalaryInAdvance" class="dropdown-item">Advance Payments</a></li>
