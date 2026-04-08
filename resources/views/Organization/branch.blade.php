@@ -70,7 +70,7 @@
                                 {{ csrf_field() }}	
                                 <div class="form-group mb-1">
                                     <label class="small font-weight-bold text-dark">Location*</label>
-                                    <input type="text" name="location" id="location" class="form-control form-control-sm" />
+                                    <input type="text" name="location" id="location" class="form-control form-control-sm" required />
                                 </div>
                                 
                                 <div class="form-group mb-1">
@@ -79,15 +79,15 @@
                                 </div>
                                 <div class="form-group mb-1">
                                     <label class="small font-weight-bold text-dark">Contact No*</label>
-                                    <input type="text" name="contactno" id="contactno" class="form-control form-control-sm" />
+                                    <input type="text" name="contactno" id="contactno" class="form-control form-control-sm" required />
                                 </div>
                                 <div class="form-group mb-1">
                                     <label class="small font-weight-bold text-dark">EPF No*</label>
-                                    <input type="text" name="epf" id="epf" class="form-control form-control-sm" />
+                                    <input type="text" name="epf" id="epf" class="form-control form-control-sm" required />
                                 </div>
                                 <div class="form-group mb-1">
                                     <label class="small font-weight-bold text-dark">ETF No*</label>
-                                    <input type="text" name="etf" id="etf" class="form-control form-control-sm" />
+                                    <input type="text" name="etf" id="etf" class="form-control form-control-sm" required />
                                 </div>
                                 <div class="form-group mb-1">
                                     <label class="small font-weight-bold text-dark">Latitude</label>
@@ -109,6 +109,7 @@
                                     <button type="submit" name="action_button" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
                                 </div>
                                 <input type="hidden" name="action" id="action" value="Add" />
+                                <input type="hidden" name="company_id" id="company_id" value="{{$company->id}}" />
                                 <input type="hidden" name="hidden_id" id="hidden_id" />
                             </form>
                         </div>
@@ -153,7 +154,7 @@ $(document).ready(function(){
 
     $('#organization_menu_link').addClass('active');
     $('#organization_menu_link_icon').addClass('active');
-    $('#branchlink').addClass('navbtnactive');
+    $('#companylink').addClass('navbtnactive');
 
     $('#dataTable').DataTable({
         "destroy": true,
@@ -197,7 +198,9 @@ $(document).ready(function(){
         ajax: {
             url: scripturl + "/branchlist.php",
             type: "POST",
-            data: {},
+            data: {
+                company_id: $('#company_id').val()
+            },
         },
         columns: [
             { 
@@ -316,7 +319,7 @@ $(document).ready(function(){
             var id = $(this).attr('id');
             $('#form_result').html('');
             $.ajax({
-                url: "Branch/" + id + "/edit",
+                url: "{{ url('Branch') }}/" + id + "/edit",
                 dataType: "json",
                 success: function (data) {
                     $('#location').val(data.result.location);
@@ -349,7 +352,7 @@ $(document).ready(function(){
         if (r == true) {
             user_id = $(this).attr('id');
             $.ajax({
-                url: "Branch/destroy/" + user_id,
+                url: "{{ url('Branch/destroy') }}/" + user_id,
                 beforeSend: function () {
                     $('#ok_button').text('Deleting...');
                 },

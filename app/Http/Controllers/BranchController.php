@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Branch;
+use App\Company;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Validator;
@@ -20,7 +21,7 @@ class BranchController extends Controller
         $this->middleware('auth');
     }
     
-    public function index()
+    public function index($company_id)
     {
         $user = auth()->user();
         $permission = $user->can('location-list');
@@ -29,7 +30,8 @@ class BranchController extends Controller
         }
 
         $branch= Branch::orderBy('id', 'asc')->get();
-        return view('Organization.branch',compact('branch'));
+        $company = Company::where('id', $company_id)->first();
+        return view('Organization.branch',compact('branch', 'company'))->with('id', $company_id);
     }
 
     /**
@@ -72,6 +74,7 @@ class BranchController extends Controller
         }
 
         $branch=new Branch;
+        $branch->company_id = $request->input('company_id');
         $branch->location=$request->input('location');   
         $branch->code=$request->input('code');       
         $branch->contactno=$request->input('contactno');       
