@@ -129,17 +129,24 @@ class OTApproveController extends Controller
                 $isSaturday = Carbon::parse($date)->isSaturday();
 
                 if ($shift_detail) {
-                     // Custom logic for Saturday with shift is night in opma
-                    if($isSaturday && $shift_detail->shiftid == 2){
-                        $on_duty_time = $att->onduty_time;
-                        $off_duty_time =  $att->offduty_time;
-                        $emp_shift_id = $att->shift_id;
 
-                    }else{
-                        $on_duty_time = $shift_detail->onduty_time;
-                        $off_duty_time = $shift_detail->offduty_time;
-                        $emp_shift_id = $shift_detail->shiftid;
-                    }
+                    $on_duty_time = $att->onduty_time;
+                    $off_duty_time =  $att->offduty_time;
+                    $emp_shift_id = $att->shift_id;
+                    $shift_until_time = $shift_detail->until_time;
+
+                    //  // Custom logic for Saturday with shift is night in opma
+                    // if($isSaturday && $shift_detail->shiftid == 2){
+                    //     $on_duty_time = $att->onduty_time;
+                    //     $off_duty_time =  $att->offduty_time;
+                    //     $emp_shift_id = $att->shift_id;
+
+                    // }else{
+                    //     $on_duty_time = $shift_detail->onduty_time;
+                    //     $off_duty_time = $shift_detail->offduty_time;
+                    //     $emp_shift_id = $shift_detail->shiftid;
+                    // }
+                   
                    
                 }
                 else{
@@ -153,14 +160,16 @@ class OTApproveController extends Controller
                         $on_duty_time = $roster_detail->onduty_time;
                         $off_duty_time = $roster_detail->offduty_time;
                         $emp_shift_id = $roster_detail->shiftid;
+                         $shift_until_time = null;
                     }else{
                         $on_duty_time = $att->onduty_time;
                         $off_duty_time =  $att->offduty_time;
                         $emp_shift_id = $att->shift_id;
+                        $shift_until_time = null;
                     }
                 }
 
-            $ot_hours = (new \App\Attendance)->get_ot_hours_by_date($emp_id, $att->lasttimestamp, $att->first_checkin, $date,  $on_duty_time, $off_duty_time, $att->emp_department,$emp_shift_id);
+            $ot_hours = (new \App\Attendance)->get_ot_hours_by_date($emp_id, $att->lasttimestamp, $att->first_checkin, $date,  $on_duty_time, $off_duty_time, $att->emp_department,$emp_shift_id ,$shift_until_time);
             //$ot_hours = (new \App\Attendance)->get_ot_hours_by_date_morning_evening($emp_id, $att->lasttimestamp, $att->first_checkin, $date, $att->onduty_time, $att->offduty_time, $att->emp_department);
             // $is_approved = (new \App\OtApproved)->is_exists_in_ot_approved($emp_id, $date);
             // //if ot_breakdown is a key in the array
