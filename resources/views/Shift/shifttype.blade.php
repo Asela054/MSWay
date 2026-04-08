@@ -131,21 +131,31 @@
                                 <div class="form-row mb-1">
                                     <div class="col">
                                         <label class="small font-weight-bold text-dark">Workdays Count*</label>
-                                        <input type="text" name="workdayscount" id="workdayscount" class="form-control form-control-sm" required/>
+                                        <input type="number" step="0.01" name="workdayscount" id="workdayscount" class="form-control form-control-sm" required/>
                                     </div>
                                     <div class="col">
                                         <label class="small font-weight-bold text-dark">Minute Count*</label>
-                                        <input type="text" name="minutecount" id="minutecount" class="form-control form-control-sm" required/>
+                                        <input type="number" step="0.01" name="minutecount" id="minutecount" class="form-control form-control-sm" required/>
                                     </div>                                    
                                 </div>
                                 <div class="form-row mb-1">
                                     <div class="col">
-                                        <label class="small font-weight-bold text-dark">Maximum Normal OT</label>
-                                        <input type="text" name="max_normal_ot_hrs" id="max_normal_ot_hrs" class="form-control form-control-sm" />
+                                        <label class="small font-weight-bold text-dark">Weekly Maximum Normal OT</label>
+                                        <input type="number" step="0.01" name="max_normal_ot_hrs" id="max_normal_ot_hrs" class="form-control form-control-sm" />
                                     </div>
                                     <div class="col">
-                                        <label class="small font-weight-bold text-dark">Maximum Double OT</label>
-                                        <input type="text" name="max_double_ot_hrs" id="max_double_ot_hrs" class="form-control form-control-sm" />
+                                        <label class="small font-weight-bold text-dark">Weekly Maximum Double OT</label>
+                                        <input type="number" step="0.01" name="max_double_ot_hrs" id="max_double_ot_hrs" class="form-control form-control-sm" />
+                                    </div>                                    
+                                </div>
+                                <div class="form-row mb-1">
+                                    <div class="col">
+                                        <label class="small font-weight-bold text-dark">Weekend Maximum Normal OT</label>
+                                        <input type="number" step="0.01" name="weekend_max_normal_ot_hrs" id="weekend_max_normal_ot_hrs" class="form-control form-control-sm" />
+                                    </div>
+                                    <div class="col">
+                                        <label class="small font-weight-bold text-dark">Weekend Maximum Double OT</label>
+                                        <input type="number" step="0.01" name="weekend_max_double_ot_hrs" id="weekend_max_double_ot_hrs" class="form-control form-control-sm" />
                                     </div>                                    
                                 </div>
                                 <div class="form-row mb-1">
@@ -456,6 +466,8 @@ $(document).ready(function(){
                 $('#minutecount').val(data.result.minute_count);
                 $('#max_normal_ot_hrs').val(data.result.max_normal_ot_hrs);
                 $('#max_double_ot_hrs').val(data.result.max_double_ot_hrs);
+                $('#weekend_max_normal_ot_hrs').val(data.result.weekend_max_normal_ot_hrs);
+                $('#weekend_max_double_ot_hrs').val(data.result.weekend_max_double_ot_hrs);
 
                 if(data.result.offduty_day == 1){
                     $('#offduty_day_1').prop( "checked", true );
