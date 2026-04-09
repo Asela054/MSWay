@@ -102,6 +102,10 @@ class DepartmentviseNopayController extends Controller
 
         $current_date_time = Carbon::now()->toDateTimeString();
 
+        $isSaturday = Carbon::parse($leavedate)->isSaturday();
+
+        $no_of_days = $isSaturday ? '0.5' : '1'; 
+
         foreach ($dataarry as $row) {
 
             $empid = $row['empid'];
@@ -116,7 +120,7 @@ class DepartmentviseNopayController extends Controller
               ->first();
               if ($leave) {
                 $leave->update([
-                    'no_of_days' => '1',
+                    'no_of_days' => $no_of_days,
                     'reson' => 'No Covering',
                     'leave_approv_person' => Auth::id(),
                     'status' => 'Approved',
@@ -129,8 +133,8 @@ class DepartmentviseNopayController extends Controller
             $leave->leave_type = '3';
             $leave->leave_from = $leavedate;
             $leave->leave_to = $leavedate;
-            $leave->no_of_days = '1';
-            $leave->half_short = '0';
+            $leave->no_of_days = $no_of_days;
+            $leave->half_short = $no_of_days;
             $leave->reson = 'No Covering';
             $leave->comment = '';
             $leave->emp_covering = '';
