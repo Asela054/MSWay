@@ -58,6 +58,7 @@ require('ssp.customized.class.php' );
         `leaves`.`emp_id`,
         `e`.`emp_name_with_initial`,
         `e`.`calling_name`,
+        `e`.`emp_company`,
         `leave_types`.`leave_type`,
         `ec`.`emp_name_with_initial` AS `covering_emp_name`,
         `departments`.`name` AS `dep_name`,
@@ -105,8 +106,25 @@ require('ssp.customized.class.php' );
             exit;
         }
         
-        $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId, $mysqli);
+          $companyIds = [];
+        $companyQuery = "SELECT company_id FROM user_has_companies WHERE user_id = ?";
+        $stmt = $mysqli->prepare($companyQuery);
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        while ($row = $result->fetch_assoc()) {
+            $companyIds[] = $row['company_id'];
+        }
+        $stmt->close();
+        
+        if (!empty($companyIds)) {
+            $companyIdsList = implode(',', array_map('intval', $companyIds));
+            $sql .= " AND `e`.`emp_company` IN ($companyIdsList)";
+        }
 
+
+        $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId, $mysqli);
     if (!empty($accessibleEmployeeIds)) {
         $empIds = implode(',', array_map('intval', $accessibleEmployeeIds));
         $sql .= " AND `e`.`emp_id` IN ($empIds)";

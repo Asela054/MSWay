@@ -45,6 +45,7 @@ class CoverupController extends Controller
             return response()->json(['error' => 'UnAuthorized'], 401);
         }
 
+         $company = $request->get('company');
         $department = $request->get('department');
         $employee = $request->get('employee');
         $location = $request->get('location');
@@ -53,16 +54,28 @@ class CoverupController extends Controller
         $userId = Auth::id();
         $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
 
+        $userCompanyIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('company_id')
+            ->toArray();
+
+
         $query =  DB::table('coverup_details')
             // ->join('employees as ec', 'coverup_details.emp_id', '=', 'ec.emp_id')
             ->join('employees as e', 'coverup_details.emp_id', '=', 'e.emp_id')
             ->leftjoin('branches', 'e.emp_location', '=', 'branches.id')
             ->leftjoin('departments', 'e.emp_department', '=', 'departments.id')
-            ->select('coverup_details.*', 'e.emp_name_with_initial','e.calling_name', 'departments.name as dep_name');
+            ->select('coverup_details.*', 'e.emp_company', 'e.emp_name_with_initial','e.calling_name', 'departments.name as dep_name');
 
          // Apply user access rights filter
         if (!empty($accessibleEmployeeIds)) {
             $query->whereIn('e.emp_id', $accessibleEmployeeIds);
+        }
+
+        if ($company) {
+            $query->where('e.emp_company', $company);
+        }else{
+             $query->whereIn('e.emp_company', $userCompanyIds);
         }
 
         if($department != ''){

@@ -8,6 +8,7 @@ use App\Helpers\UserHelper;
 require_once __DIR__ . '/../../app/Helpers/EmployeeHelper.php';
 require_once __DIR__ . '/../../app/Helpers/UserHelper.php';
 
+
 $table = 'attendances';
 $primaryKey = 'id';
 
@@ -84,25 +85,55 @@ LEFT JOIN `departments` ON `employees`.`emp_department` = `departments`.`id`";
 // new filter based on user access rights
 $userId = UserHelper::getLoggedInUserId();
 
-if ($userId) {
-    $mysqli = new mysqli($db_host, $db_username, $db_password, $db_name);
-    
-    if ($mysqli->connect_error) {
-        echo json_encode(['error' => 'Database connection failed']);
-        exit;
-    }
-    
-    $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId, $mysqli);
+    if ($userId) {
+        $mysqli = new mysqli($db_host, $db_username, $db_password, $db_name);
+        
+        if ($mysqli->connect_error) {
+            echo json_encode(['error' => 'Database connection failed']);
+            exit;
+        }
 
-    if (!empty($accessibleEmployeeIds)) {
-        $empIds = implode(',', array_map('intval', $accessibleEmployeeIds));
-        $extraWhere .= " AND employees.emp_id IN ($empIds)";
-    } else {
-        $extraWhere .= " AND 1 = 0";
+         // Get company IDs - considering they might be VARCHAR values
+        $companyIds = [];
+        $companyQuery = "SELECT company_id FROM user_has_companies WHERE user_id = ?";
+        $stmt = $mysqli->prepare($companyQuery);
+        
+        if ($stmt) {
+            $stmt->bind_param('i', $userId);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            while ($row = $result->fetch_assoc()) {
+                $companyIds[] = $row['company_id'];
+            }
+            $stmt->close();
+        }
+    
+        // Apply company filter with proper escaping for VARCHAR values
+        if (!empty($companyIds)) {
+            // Escape each company ID and wrap in quotes
+            $escapedCompanyIds = array_map(function($id) use ($mysqli) {
+                return "'" . $mysqli->real_escape_string($id) . "'";
+            }, $companyIds);
+            
+            $companyIdsList = implode(',', $escapedCompanyIds);
+            $extraWhere .= " AND `employees`.`emp_company` IN ($companyIdsList)";
+        }
+
+          $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId, $mysqli);
+
+        // If no company records found, show all (no additional filter)
+        if (!empty($accessibleEmployeeIds)) {
+            $empIds = implode(',', array_map('intval', $accessibleEmployeeIds));
+            $extraWhere .= " AND employees.emp_id IN ($empIds)";
+        } else {
+            $extraWhere .= " AND 1 = 0";
+        }
+
+
+        $mysqli->close();
     }
 
-    $mysqli->close();
-}
 // end of new filter
 
 try {

@@ -125,6 +125,24 @@ if ($userId) {
     
     $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId, $mysqli);
 
+	$companyIds = [];
+    $companyQuery = "SELECT company_id FROM user_has_companies WHERE user_id = ?";
+    $stmt = $mysqli->prepare($companyQuery);
+    $stmt->bind_param('i', $userId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    while ($row = $result->fetch_assoc()) {
+        $companyIds[] = $row['company_id'];
+    }
+    $stmt->close();
+    
+    if (!empty($companyIds)) {
+        $companyIdsList = implode(',', array_map('intval', $companyIds));
+        $extraWhere .= " AND `employees`.`emp_company` IN ($companyIdsList)";
+    }
+
+
 	if (!empty($accessibleEmployeeIds)) {
 		$empIds = implode(',', array_map('intval', $accessibleEmployeeIds));
 		$extraWhere .= " AND emp.emp_id IN ($empIds)";

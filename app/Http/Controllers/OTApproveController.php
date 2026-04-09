@@ -32,6 +32,7 @@ class OTApproveController extends Controller
             return response()->json(['error' => 'UnAuthorized'], 401);
         }
 
+        $company = $request->input('company');
         $department = $request->input('department');
         $employee = $request->input('employee');
         $location = $request->input('location');
@@ -43,10 +44,16 @@ class OTApproveController extends Controller
         $userId = Auth::id();
         $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
         
+
         // Return empty data if no accessible employees
         if (empty($accessibleEmployeeIds)) {
             return response()->json(['ot_data' => []]);
         }
+
+         $userCompanyIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('company_id')
+            ->toArray();
 
          $query = DB::table('attendances as at1')
         ->select(
@@ -57,6 +64,7 @@ class OTApproveController extends Controller
             'employees.id as emp_auto_id',
             'employees.emp_name_with_initial',
             'employees.emp_department',
+            'employees.emp_company',
             'employees.calling_name',
             'employees.emp_id',
             'shift_types.onduty_time',
@@ -78,6 +86,12 @@ class OTApproveController extends Controller
     if (!empty($department)) {
         $query->where('employees.emp_department', $department);
     }
+
+     if ($company) {
+            $query->where('employees.emp_company', $company);
+        }else{
+             $query->whereIn('employees.emp_company', $userCompanyIds);
+        }
 
     if (!empty($employee)) {
         $query->where('employees.emp_id', $employee);
