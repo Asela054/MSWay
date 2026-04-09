@@ -56,37 +56,12 @@
 
         </div>
 
-
-        <div class="modal fade" id="confirmModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-    aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content">
-                <div class="modal-header p-2">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col text-center">
-                            <h4 class="font-weight-normal">Are you sure you want to remove this data?</h4>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer p-2">
-                    <button type="button" name="ok_button" id="ok_button" class="btn btn-danger px-3 btn-sm">OK</button>
-                    <button type="button" class="btn btn-dark px-3 btn-sm" data-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Modal Area Start -->
     <div class="modal fade" id="formModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-md">
             <div class="modal-content">
                 <div class="modal-header p-2">
-                    <h6 class="modal-title" id="staticBackdropLabel">Add Company</h6>
+                    <h6 class="modal-title" id="staticBackdropLabel">Add New User</h6>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -94,37 +69,42 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col">
-                            <span id="form_result"></span>
+                            <div id="form_result"></div>
                             <form method="post" id="formTitle">
                              {{ csrf_field() }}
 
                             <div class="form-group">
-                                <strong>Name:</strong>
-                                <input type="text" name="name" id="name" class="form-control form-control-sm" placeholder="Name">
+                                <label class="small font-weight-bold text-dark">Name*</label>
+                                <input type="text" name="name" id="name" class="form-control form-control-sm" placeholder="Name" required>
                             </div>
 
                             <div class="form-group">
-                                <strong>Email:</strong>
-                                <input type="email" name="email" id="email" class="form-control form-control-sm" placeholder="Email">
+                                <label class="small font-weight-bold text-dark">Email*</label>
+                                <input type="email" name="email" id="email" class="form-control form-control-sm" placeholder="Email" required>
                             </div>
 
                             <div class="form-group">
-                                <strong>Password:</strong>
+                                <label class="small font-weight-bold text-dark">Password</label>
                                 <input type="password" name="password" id="password" class="form-control form-control-sm" placeholder="Password">
                             </div>
 
                             <div class="form-group">
-                                <strong>Confirm Password:</strong>
+                                <label class="small font-weight-bold text-dark">Confirm Password</label>
                                 <input type="password" name="confirm-password" id="confirm-password" class="form-control form-control-sm" placeholder="Confirm Password">
                             </div>
 
                             <div class="form-group">
-                                <strong>Role:</strong>
-                                <select name="roles[]" id="role" class="form-control form-control-sm" multiple>
+                                <label class="small font-weight-bold text-dark">Role*</label>
+                                <select name="roles[]" id="role" class="form-control form-control-sm" required multiple>
                                     @foreach($roles as $role)
                                         <option value="{{ $role }}">{{ $role }}</option>
                                     @endforeach
                                 </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="small font-weight-bold text-dark">Accessible Companies</label>
+                                <select name="company[]" id="company" class="form-control form-control-sm" multiple></select>
                             </div>
 
                             <div class="form-group mt-3">
@@ -155,6 +135,25 @@
         $('#administrator_menu_link').addClass('active');
         $('#administrator_menu_link_icon').addClass('active');
         $('#user_link').addClass('navbtnactive');
+
+        let company = $('#company');
+
+        company.select2({
+            placeholder: 'Select Companies',
+            width: '100%',
+            allowClear: true,
+            ajax: {
+                url: '{{url("company_list_sel2")}}',
+                dataType: 'json',
+                data: function(params) {
+                    return {
+                        term: params.term || '',
+                        page: params.page || 1
+                    }
+                },
+                cache: true
+            }
+        });
 
         $('#userstable').DataTable({
         "destroy": true,
@@ -277,13 +276,13 @@
     });
 
     
+    // In create_record click
     $('#create_record').click(function(){
         $('.modal-title').text('Create New User');
         $('#action_button').html('Add');
         $('#action').val('Add');
-        $('#form_result').html('');
+        $('#form_result').html(''); 
         $('#formTitle')[0].reset();
-
         $('#formModal').modal('show');
     });
 
@@ -298,23 +297,25 @@
             action_url = "{{ route('users.update') }}";
         }
 
+        $('#form_result').html('');
+
         $.ajax({
             url: action_url,
             method: "POST",
             data: $(this).serialize(),
             dataType: "json",
-            success: function (data) {//alert(data);        
+            success: function(data) {
                 if (data.errors) {
-                    const actionObj = {
-                        icon: 'fas fa-warning',
-                        title: '',
-                        message: 'Record Error',
-                        url: '',
-                        target: '_blank',
-                        type: 'danger'
-                    };
-                    const actionJSON = JSON.stringify(actionObj, null, 2);
-                    action(actionJSON);
+                    var errorHtml = '<div class="alert alert-danger alert-sm p-2 mb-2">' +
+                                        '<ul class="mb-0 pl-3">';
+                    $.each(data.errors, function(i, error) {
+                        errorHtml += '<li class="small">' + error + '</li>';
+                    });
+                    errorHtml += '</ul></div>';
+                    $('#form_result').html(errorHtml);
+
+                    // Scroll modal body to top to show errors
+                    $('.modal-body').animate({ scrollTop: 0 }, 'fast');
                 }
                 if (data.success) {
                     const actionObj = {
@@ -327,34 +328,69 @@
                     };
                     const actionJSON = JSON.stringify(actionObj, null, 2);
                     $('#formTitle')[0].reset();
+                    $('#form_result').html('');
                     actionreload(actionJSON);
+                }
+            },
+            error: function(xhr) {
+                // Handle Laravel 422 validation errors
+                if (xhr.status === 422) {
+                    var errors = xhr.responseJSON.errors;
+                    var errorHtml = '<div class="alert alert-danger alert-sm p-2 mb-2">' +
+                                        '<ul class="mb-0 pl-3">';
+                    $.each(errors, function(field, messages) {
+                        $.each(messages, function(i, message) {
+                            errorHtml += '<li class="small">' + message + '</li>';
+                        });
+                    });
+                    errorHtml += '</ul></div>';
+                    $('#form_result').html(errorHtml);
+                    $('.modal-body').animate({ scrollTop: 0 }, 'fast');
+                } else {
+                    $('#form_result').html(
+                        '<div class="alert alert-danger alert-sm p-2 mb-2">' +
+                            '<span class="small">Something went wrong. Please try again.</span>' +
+                        '</div>'
+                    );
+                    $('.modal-body').animate({ scrollTop: 0 }, 'fast');
                 }
             }
         });
-        
     });
 
     $(document).on('click', '.edit', async function() {
-        var r = await Otherconfirmation("You want to Edit this ? ");
-        if (r == true) {
-            var id = $(this).attr('id');
-            $('#form_result').html('');
-            $.ajax({
-                url: "{{ route('users.edit', ':id') }}".replace(':id', id),
-                dataType: "json",
-                success: function (data) {
-                    $('#name').val(data.result.name);
-                    $('#email').val(data.result.email);
-                    $('#role').val(data.result.role).trigger('change'); // if using Select2
-                    $('#hidden_id').val(data.result.id);
-                    $('.modal-title').text('Edit User');
-                    $('#action_button').html('Edit');
-                    $('#action').val('Edit');
-                    $('#formModal').modal('show');
-                }
-            })
-        }
-    });
+            var r = await Otherconfirmation("You want to Edit this ? ");
+            if (r == true) {
+                var id = $(this).attr('id');
+                $('#form_result').html('');
+                $.ajax({
+                    url: "{{ route('users.edit', ':id') }}".replace(':id', id),
+                    dataType: "json",
+                    success: function(data) {
+                        $('#name').val(data.result.name);
+                        $('#email').val(data.result.email);
+                        $('#role').val(data.result.role).trigger('change');
+                        $('#hidden_id').val(data.result.id);
+                        $('.modal-title').text('Edit User');
+                        $('#action_button').html('Edit');
+                        $('#action').val('Edit');
+
+                        // Populate Select2 companies
+                        $('#company').empty();
+                        if (data.result.companies && data.result.companies.length > 0) {
+                            $.each(data.result.companies, function(i, item) {
+                                var option = new Option(item.text, item.id, true, true);
+                                $('#company').append(option);
+                            });
+                            $('#company').trigger('change');
+                        }
+
+                        $('#form_result').html(''); 
+                        $('#formModal').modal('show');
+                    }
+                });
+            }
+        });
 
     });
 </script>
