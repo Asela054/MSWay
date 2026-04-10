@@ -172,6 +172,7 @@
             );
 
             function load_table() {
+                 let company = $('#company').val();
                 let department = $('#department').val();
                 let employee = $('#employee').val();
                 let location = $('#location').val();
@@ -187,6 +188,7 @@
                     url: "{{ route('get_ot_details') }}",
                     method: "POST",
                     data: {
+                        company: company,
                         department: department,
                         employee: employee,
                         location: location,

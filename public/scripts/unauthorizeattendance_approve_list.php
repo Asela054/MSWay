@@ -60,6 +60,7 @@ $sql = "SELECT
        `e`.`emp_name_with_initial`,
         `e`.`emp_id`,
         `e`.`calling_name`,
+        `e`.`emp_company`,
         `ja`.`shift_id`,
         `ja`.`on_time`,
         `ja`.`off_time`,
@@ -101,6 +102,24 @@ if ($userId) {
         echo json_encode(['error' => 'Database connection failed']);
         exit;
     }
+    
+    $companyIds = [];
+    $companyQuery = "SELECT company_id FROM user_has_companies WHERE user_id = ?";
+    $stmt = $mysqli->prepare($companyQuery);
+    $stmt->bind_param('i', $userId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    while ($row = $result->fetch_assoc()) {
+        $companyIds[] = $row['company_id'];
+    }
+    $stmt->close();
+    
+    if (!empty($companyIds)) {
+        $companyIdsList = implode(',', array_map('intval', $companyIds));
+        $sql .= " AND `e`.`emp_company` IN ($companyIdsList)";
+    }
+
     
     $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId, $mysqli);
     if (!empty($accessibleEmployeeIds)) {

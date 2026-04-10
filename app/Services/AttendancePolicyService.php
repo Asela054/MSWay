@@ -196,4 +196,134 @@ class AttendancePolicyService
 
     }
     
+
+
+// public function checkAndInsertLateAttendance($empId, $date, $firstCheckin, $attendanceId = null, $lastCheckout = null, $workingHours = null)
+// {
+//         // Validate required parameters
+//         if (empty($empId) || empty($date) || empty($firstCheckin)) {
+//             return [
+//                 'status' => false,
+//                 'message' => 'Missing required parameters: empId, date, and firstCheckin are required'
+//             ];
+//         }
+
+//         // Get employee shift information
+//         $employee = DB::table('employees')
+//             ->select('emp_id', 'emp_shift')
+//             ->where('emp_id', $empId)
+//             ->first();
+
+//         if (is_null($employee)) {
+//             return [
+//                 'status' => false,
+//                 'message' => 'Employee not found'
+//             ];
+//         }
+
+//         // Check if employee has roster for this date
+//         $rosterInfo = DB::table('employee_roster_details')
+//             ->select('emp_id', 'shift_id')
+//             ->where('emp_id', $empId)
+//             ->where('work_date', $date)
+//             ->first();
+
+//         // Determine shift ID (roster shift if exists, otherwise employee default shift)
+//         $shiftId = $rosterInfo ? $rosterInfo->shift_id : $employee->emp_shift;
+
+//         // Get shift on-duty time
+//         $shiftType = DB::table('shift_types')
+//             ->select('shift_types.onduty_time')
+//             ->where('id', $shiftId)
+//             ->first();
+
+//         // If no shift found or no on-duty time, cannot determine late status
+//         if (!$shiftType || !$shiftType->onduty_time) {
+//             return [
+//                 'status' => false,
+//                 'message' => 'Shift not found or on-duty time not configured for employee'
+//             ];
+//         }
+
+//         // Parse times
+//         $ondutyTime = new DateTime($shiftType->onduty_time);
+//         $checkInTime = new DateTime($firstCheckin);
+        
+//         $lateMinutes = 0;
+//         $isLate = false;
+
+//         // Check if check-in time is after on-duty time
+//         if ($checkInTime > $ondutyTime) {
+//             $isLate = true;
+//             $interval = $checkInTime->diff($ondutyTime);
+//             $lateMinutes = ($interval->h * 60) + $interval->i;
+//         }
+
+//         // Prepare late attendance data
+//         $lateAttendanceData = [
+//             'attendance_id' => $attendanceId,
+//             'emp_id' => $empId,
+//             'date' => $date,
+//             'check_in_time' => $firstCheckin,
+//             'check_out_time' => $lastCheckout,
+//             'working_hours' => $workingHours,
+//             'created_by' => Auth::id(),
+//             'created_at' => now(),
+//             'updated_at' => now()
+//         ];
+
+//         // Delete existing late attendance record for the same attendance
+//         $deleteQuery = DB::table('employee_late_attendances')
+//             ->where('emp_id', $empId)
+//             ->where('date', $date);
+        
+//         if ($attendanceId) {
+//             $deleteQuery->where('attendance_id', $attendanceId);
+//         }
+        
+//         $deleteQuery->delete();
+
+//         // Insert new late attendance record
+//         DB::table('employee_late_attendances')->insert($lateAttendanceData);
+
+//         // Handle late minutes record if employee is late
+//         if ($isLate) {
+//             // Delete existing late minutes record
+//             $minutesDeleteQuery = DB::table('employee_late_attendance_minites')
+//                 ->where('emp_id', $empId)
+//                 ->where('attendance_date', $date);
+            
+//             if ($attendanceId) {
+//                 $minutesDeleteQuery->where('attendance_id', $attendanceId);
+//             }
+            
+//             $minutesDeleteQuery->delete();
+
+//             // Insert new late minutes record
+//             $lateMinutesData = [
+//                 'attendance_id' => $attendanceId,
+//                 'emp_id' => $empId,
+//                 'attendance_date' => $date,
+//                 'minites_count' => $lateMinutes,
+//                 'created_at' => now(),
+//                 'updated_at' => now()
+//             ];
+            
+//             DB::table('employee_late_attendance_minites')->insert($lateMinutesData);
+//         }
+
+//         return [
+//             'status' => true,
+//             'message' => $isLate ? "Employee is late by {$lateMinutes} minutes" : "Employee is on time",
+//             'is_late' => $isLate,
+//             'late_minutes' => $lateMinutes,
+//             'onduty_time' => $shiftType->onduty_time,
+//             'check_in_time' => $firstCheckin,
+//             'shift_id' => $shiftId
+//         ];
+
+    
+// }
+
+
 }

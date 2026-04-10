@@ -124,7 +124,14 @@ class DepartmentviseNopayController extends Controller
                     'reson' => 'No Covering',
                     'leave_approv_person' => Auth::id(),
                     'status' => 'Approved',
-                    'updated_at' =>$current_date_time
+                    'updated_at' =>$current_date_time,
+                    'approve_01' => 1,
+                    'approve_01_time' =>$current_date_time,
+                    'approve_01_by' => Auth::id(),
+                    'approve_02' => 1,
+                    'approve_02_time' =>$current_date_time,
+                    'approve_02_by' => Auth::id(),
+                    
                 ]);
             } else {  
 
@@ -140,6 +147,12 @@ class DepartmentviseNopayController extends Controller
             $leave->emp_covering = '';
             $leave->leave_approv_person = Auth::id();
             $leave->status = 'Approved';
+            $leave->approve_01 =  1;
+            $leave->approve_01_time = $current_date_time;
+            $leave->approve_01_by = Auth::id();
+            $leave->approve_02 =  1;
+            $leave->approve_02_time = $current_date_time;
+            $leave->approve_02_by = Auth::id();
             $leave->save();
             }
         }

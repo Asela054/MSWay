@@ -261,7 +261,6 @@ class LateminitesApprovelController extends Controller
             $autoid = $row['autoid'];
 
 
-
             $profiles = DB::table('payroll_profiles')
             ->join('payroll_process_types', 'payroll_profiles.payroll_process_type_id', '=', 'payroll_process_types.id')
             // ->where('payroll_profiles.emp_etfno', $empid)

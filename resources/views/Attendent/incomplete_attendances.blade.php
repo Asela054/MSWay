@@ -244,7 +244,7 @@
 
             load_dt('', '', '', from_date, to_date);
 
-            function load_dt(department, employee, location, from_date, to_date) {
+            function load_dt(department, employee, location, from_date, to_date ,company) {
 
                 $('.response').html('');
                 $.ajax({
@@ -253,6 +253,7 @@
                     data: {
                         department: department,
                         employee: employee,
+                        company: company,
                         location: location,
                         from_date: from_date,
                         to_date: to_date,
@@ -272,8 +273,9 @@
                 let location = $('#location').val();
                 let from_date = $('#from_date').val();
                 let to_date = $('#to_date').val();
+                 let company = $('#company').val();
 
-                load_dt(department, employee, location, from_date, to_date);
+                load_dt(department, employee, location, from_date, to_date,company);
                 closeOffcanvasSmoothly();
             });
 

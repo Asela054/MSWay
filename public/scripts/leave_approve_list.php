@@ -76,6 +76,7 @@ $joinQuery = "FROM (
         `leaves`.`emp_id`,
         `e`.`emp_name_with_initial`,
         `e`.`calling_name`,
+        `e`.`emp_company`,
         `e`.`emp_department` AS `dep_id`,
         `e`.`emp_location` AS `location_id`,
         `leave_types`.`leave_type`,
@@ -98,7 +99,6 @@ $joinQuery = "FROM (
 
 // new filter based on user access rights
 $userId = UserHelper::getLoggedInUserId();
-
 if ($userId) {
     $mysqli = new mysqli($db_host, $db_username, $db_password, $db_name);
     
@@ -107,6 +107,23 @@ if ($userId) {
         exit;
     }
     
+      $companyIds = [];
+        $companyQuery = "SELECT company_id FROM user_has_companies WHERE user_id = ?";
+        $stmt = $mysqli->prepare($companyQuery);
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        while ($row = $result->fetch_assoc()) {
+            $companyIds[] = $row['company_id'];
+        }
+        $stmt->close();
+        
+        if (!empty($companyIds)) {
+            $companyIdsList = implode(',', array_map('intval', $companyIds));
+            $extraWhere .= " AND `sub`.`emp_company` IN ($companyIdsList)";
+        }
+
     $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId, $mysqli);
 
     if (!empty($accessibleEmployeeIds)) {

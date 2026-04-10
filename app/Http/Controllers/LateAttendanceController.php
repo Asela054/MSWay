@@ -108,6 +108,12 @@ class LateAttendanceController extends Controller
         $userId = Auth::id();
         $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
  
+           $userCompanyIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('company_id')
+            ->toArray();
+
+
         // Base query without late time filter (for counting)
         $baseQuery = DB::table('attendances as at1')
             ->select(
@@ -119,6 +125,7 @@ class LateAttendanceController extends Controller
                 'employees.emp_id',
                 'employees.emp_name_with_initial',
                 'employees.calling_name',
+                'employees.emp_company',
                 'branches.location as branch_location',
                 'branches.id as branch_id',
                 'departments.name as department_name',
@@ -162,6 +169,8 @@ class LateAttendanceController extends Controller
         }
         if ($company) {
             $baseQuery->where('employees.emp_company', $company);
+        }else{
+             $baseQuery->whereIn('employees.emp_company', $userCompanyIds);
         }
         if ($employee) {
             $baseQuery->where('at1.uid', $employee);

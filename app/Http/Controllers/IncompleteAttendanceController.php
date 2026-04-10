@@ -34,6 +34,7 @@ class IncompleteAttendanceController extends Controller
             return response()->json(['error' => 'UnAuthorized'], 401);
         }
 
+        $company = Request('company');
         $department = Request('department');
         $employee = Request('employee');
         $location = Request('location');
@@ -49,17 +50,30 @@ class IncompleteAttendanceController extends Controller
             return response()->json(['html' => '']);
         }
 
-        $dept_sql = "SELECT * FROM departments WHERE 1 = 1 ";
+        $userCompanyIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('company_id')
+            ->toArray();
+
+       $query = DB::table('departments');
 
         if ($department != '') {
-            $dept_sql .= ' AND id = "' . $department . '" ';
+            $query->where('id', $department);
         }
 
         if ($location != '') {
-            $dept_sql .= 'AND company_id = "' . $location . '" ';
+            $query->where('emp_location', $location);
         }
 
-        $departments = DB::select($dept_sql);
+        if ($company != '') {
+            $query->where('company_id', $company);
+        } else {
+                $query->whereIn('company_id', $userCompanyIds);
+
+        }
+
+        $departments = $query->get();
+
 
         $data_arr = array();
         $not_att_count = 0;

@@ -231,7 +231,7 @@
                 }
             });
 
-            function load_dt(department, employee, location){
+            function load_dt(department, employee, location,company){
                 $('#divicestable').DataTable({
                    "destroy": true,
                         "processing": true,
@@ -269,7 +269,7 @@
                         ],
                     ajax: {
                         "url": "{!! route('coverup_list_dt') !!}",
-                        "data": {'department':department, 'employee':employee, 'location': location},
+                        "data": {'department':department, 'employee':employee, 'location': location, 'company': company},
                     },
                     columns: [
                         { data: 'emp_id', name: 'emp_id' },
@@ -296,11 +296,12 @@
 
             $('#formFilter').on('submit',function(e) {
                 e.preventDefault();
+                 let company = $('#company').val();
                 let department = $('#department').val();
                 let employee = $('#employee').val();
                 let location = $('#location').val();
 
-                load_dt(department, employee, location);
+                load_dt(department, employee, location,company);
                  closeOffcanvasSmoothly();
             });
 
