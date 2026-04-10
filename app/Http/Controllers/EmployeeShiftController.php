@@ -26,7 +26,10 @@ class EmployeeShiftController extends Controller
             abort(403);
         }
 
-        $shifts = DB::table('shift_types')->select('shift_types.*')->get();
+        $shifts = DB::table('shift_types')
+        ->select('shift_types.*')
+        ->where('shift_types.deleted', '0')
+        ->get();
 
         return view('EmployeeShift.employeeshift',compact('shifts'));
     }
