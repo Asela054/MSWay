@@ -413,11 +413,11 @@ class Attendance extends Model
 
     }
 
-    public function get_ot_hours_by_date($emp_id, $off_time, $on_time, $record_date, $shift_start_, $shift_end_, $emp_department, $allocateshiftID){
+    public function get_ot_hours_by_date($emp_id, $off_time, $on_time, $record_date, $shift_start_, $shift_end_, $emp_department, $allocateshiftID, $shift_until_time){
         $off_time = Carbon::parse($off_time);
         $on_time = Carbon::parse($on_time);
         $record_date = Carbon::parse($record_date);
-
+        
         $date_period = $off_time->diffInDays($on_time);
 
         $total_ot_hours = 0;
@@ -553,7 +553,29 @@ class Attendance extends Model
         $sunafterdoublehours= $emp->sun_after_double ;//Sunday after double OT hours
         $weekafterdouble= $emp->week_after_double ;//Week day after double OT hours
         $roundotmin= $emp->ot_round_time ;//Rounded Min 
+        
+        if(!empty($shift_until_time)):
+            if($shift_until_time<$off_time):
+                $off_time = Carbon::parse($shift_until_time);
+            endif;
+        else:
+            if($record_date->dayOfWeek == 6):
+                $max_ot_time = Carbon::parse($saturdayoffdutyTime)->copy()->addMinutes($shift->weekend_max_normal_ot_hrs * 60);
+                if($ot_to > $max_ot_time):
+                    $off_time = $max_ot_time;
+                endif;
+            else:
+                $max_ot_time = Carbon::parse($record_date->year.'-'.$record_date->month.'-'.$record_date->day.' '.$shift_end_)->copy()->addMinutes($shift->max_normal_ot_hrs * 60);
+                if($shift->off_next_day == 1):
+                    $max_ot_time->addDay();
+                endif;
 
+                if($ot_to > $max_ot_time):
+                    $off_time = $max_ot_time;
+                endif;
+            endif;
+        endif;
+        
         if($roundotmin>0){
             $roundInterval = 30;
             $minutes = (int)$off_time->format('i');
@@ -578,7 +600,7 @@ class Attendance extends Model
         $double_ot_hours_morning = 0;
         $one_point_five_ot_hours_morning=0;
         $triple_ot_hours_morning=0;
-
+        
         if($date_period == 0){
             $is_sunday = false;
             $is_holiday = false;
@@ -641,7 +663,7 @@ class Attendance extends Model
                     if($emp->is_sun_ot_type_as_act == 1){//As act
                         $is_sunday = true;
                         $is_double = true;
-
+                        
                         $ot_from = $on_time;
                         $ot_to = $off_time;
 
@@ -946,7 +968,7 @@ class Attendance extends Model
                             $next_date = $next_date->format('Y-m-d');
                             $next_date_morning_shift_start = Carbon::parse($next_date.' '.$shift_start->format('H:i:s'));
 
-                            if($next_date_morning_shift_start < $off_time ){
+                            if($next_date_morning_shift_start < $off_time && empty($shift_until_time)){
                                 $ot_to = $next_date_morning_shift_start;
                             }else{
                                 $ot_to = $off_time;
@@ -1344,7 +1366,7 @@ class Attendance extends Model
                         $total_ot_hours_double += $double_ot_hours_morning;
                         $total_ot_hours_one_point_five += $one_point_five_ot_hours_morning;
                         $total_ot_hours += $ot_hours_morning;
-
+                        
                         if($off_time > $shift_end && $totalworkinghours>=$afterothours){ //Evening ot
                             $ot_from = $shift_end;
     
@@ -1467,7 +1489,6 @@ class Attendance extends Model
             }            
         }
         else{
-
             //this condition not continued developing since multioffset has no longer shifts than 1 day.
             for($i = 0; $i < $date_period; $i++){
                 $date = $record_date->copy()->addDays($i);
@@ -1822,13 +1843,13 @@ class Attendance extends Model
                                 $next_date = $date->copy()->addDays(1);
                                 $next_date = $next_date->format('Y-m-d');
                                 $next_date_morning_shift_start = Carbon::parse($next_date.' '.$shift_start->format('H:i:s'));
-        
-                                if($next_date_morning_shift_start < $off_time ){
+                                
+                                if($next_date_morning_shift_start < $off_time && empty($shift_until_time)){
                                     $ot_to = $next_date_morning_shift_start;
                                 }else{
                                     $ot_to = $off_time;
                                 }
-        
+                                
                                 $ot_from = Carbon::parse($ot_from);
                                 $ot_to = Carbon::parse($ot_to);
     

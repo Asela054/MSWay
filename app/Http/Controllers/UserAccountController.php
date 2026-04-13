@@ -27,6 +27,7 @@ use Validator;
 
 
 use Excel;
+use Mpdf\Tag\Summary;
 use PDF; 
 
 
@@ -38,8 +39,9 @@ class UserAccountController extends Controller
             session(['url.intended' => url()->full()]);
             return redirect()->route('login');
 		}
-		$users_id = Session::get('users_id');
 		$user = Auth::user();
+		$users_id = $user->id;
+        
 		$user->hasRole('Employee');
 		// $user->can('user-account-summery-list');
 		
@@ -47,7 +49,7 @@ class UserAccountController extends Controller
         if (!$permission) {
             abort(403);
         }	
-
+        
         $employee = DB::table('users')
             ->select('employees.*','employee_pictures.emp_pic_filename','departments.name AS departmentname','companies.name AS companyname','branches.location','employment_statuses.emp_status AS emp_statusname','job_categories.category','job_titles.title','users.emp_id','employees.id AS emprecordid','employees.emp_location')
             ->leftjoin('employees','employees.emp_id','users.emp_id')
@@ -60,7 +62,7 @@ class UserAccountController extends Controller
             ->leftjoin('employee_pictures','employee_pictures.emp_id','employees.id')
             ->where('users.id', $users_id)
             ->first();
-					
+			
         $emprecordid=$employee->emprecordid;
         $emp_id=$employee->emp_id;
 		$emp_name_with_initial=$employee->emp_name_with_initial;
@@ -127,6 +129,40 @@ class UserAccountController extends Controller
         $payslip_id=$payment_period->id;
         $payroll_profile_id=$payment_period->payroll_profile_id;
 
+        // $sqlslip="SELECT 
+        //     drv_emp.emp_payslip_id, 
+        //     drv_emp.emp_payroll_profile_id, 
+        //     drv_emp.emp_epfno, 
+        //     drv_emp.emp_first_name, 
+        //     drv_emp.location, 
+        //     drv_emp.payslip_held, 
+        //     drv_emp.payslip_approved, 
+        //     drv_info.fig_group_title, 
+        //     drv_info.employee_payslip_id,
+        //     drv_info.fig_group, 
+        //     drv_info.fig_value AS fig_value, 
+        //     drv_info.epf_payable AS epf_payable, 
+        //     drv_info.remuneration_pssc, 
+        //     drv_info.remuneration_tcsc 
+        // FROM 
+        //     (SELECT employee_payslips.id AS emp_payslip_id, 
+        //     employee_payslips.payroll_profile_id AS emp_payroll_profile_id,
+        //     employees.emp_id AS emp_epfno, 
+        //     employees.emp_name_with_initial AS emp_first_name, 
+        //     companies.name AS location, 
+        //     employee_payslips.payslip_held, 
+        //     employee_payslips.payslip_approved 
+        // FROM `employee_payslips` 
+        // INNER JOIN payroll_profiles ON employee_payslips.payroll_profile_id=payroll_profiles.id 
+        // INNER JOIN employees ON payroll_profiles.emp_id=employees.id 
+        // INNER JOIN companies ON employees.emp_company=companies.id 
+        //     WHERE employee_payslips.payment_period_id=? AND employees.emp_company=? AND employees.id=?  AND employee_payslips.payslip_cancel=0) AS drv_emp 
+        // INNER JOIN 
+        // (SELECT `id` AS fig_id, `employee_payslip_id`, `fig_group_title`, `fig_group`, `epf_payable`, remuneration_payslip_spec_code AS remuneration_pssc, remuneration_taxcalc_spec_code AS remuneration_tcsc, `fig_value` AS fig_value 
+        // FROM employee_salary_payments 
+        // WHERE `payment_period_id`=?) AS drv_info ON drv_emp.emp_payslip_id=drv_info.employee_payslip_id ORDER BY drv_info.fig_id";
+        // $employee = DB::select($sqlslip, [$salaryperiodid, $empcompany, $emprecordid, $salaryperiodid]);
+
         $sqlslip="SELECT 
             drv_emp.emp_payslip_id, 
             drv_emp.emp_payroll_profile_id, 
@@ -135,6 +171,12 @@ class UserAccountController extends Controller
             drv_emp.location, 
             drv_emp.payslip_held, 
             drv_emp.payslip_approved, 
+            drv_rates.ot1dura, 
+            drv_rates.ot2dura, 
+            drv_rates.wk_days, 
+            drv_rates.abhrs, 
+            drv_rates.nopay_days, 
+            IFNULL(job_categories.emp_payroll_workdays, 26) AS emp_payroll_workdays,
             drv_info.fig_group_title, 
             drv_info.employee_payslip_id,
             drv_info.fig_group, 
@@ -143,23 +185,61 @@ class UserAccountController extends Controller
             drv_info.remuneration_pssc, 
             drv_info.remuneration_tcsc 
         FROM 
-            (SELECT employee_payslips.id AS emp_payslip_id, 
-            employee_payslips.payroll_profile_id AS emp_payroll_profile_id,
-            employees.emp_id AS emp_epfno, 
-            employees.emp_name_with_initial AS emp_first_name, 
-            companies.name AS location, 
-            employee_payslips.payslip_held, 
-            employee_payslips.payslip_approved 
-        FROM `employee_payslips` 
-        INNER JOIN payroll_profiles ON employee_payslips.payroll_profile_id=payroll_profiles.id 
-        INNER JOIN employees ON payroll_profiles.emp_id=employees.id 
-        INNER JOIN companies ON employees.emp_company=companies.id 
-            WHERE employee_payslips.payment_period_id=? AND employees.emp_company=? AND employees.id=?  AND employee_payslips.payslip_cancel=0) AS drv_emp 
-        INNER JOIN 
-        (SELECT `id` AS fig_id, `employee_payslip_id`, `fig_group_title`, `fig_group`, `epf_payable`, remuneration_payslip_spec_code AS remuneration_pssc, remuneration_taxcalc_spec_code AS remuneration_tcsc, `fig_value` AS fig_value 
-        FROM employee_salary_payments 
-        WHERE `payment_period_id`=?) AS drv_info ON drv_emp.emp_payslip_id=drv_info.employee_payslip_id ORDER BY drv_info.fig_id";
-        $employee = DB::select($sqlslip, [$salaryperiodid, $empcompany, $emprecordid, $salaryperiodid]);
+            (SELECT 
+                employee_payslips.id AS emp_payslip_id, 
+                employee_payslips.payroll_profile_id AS emp_payroll_profile_id,
+                employees.emp_id AS emp_epfno, 
+                employees.emp_etfno,
+                employees.emp_name_with_initial AS emp_first_name, 
+                companies.name AS location, 
+                employee_payslips.payslip_held, 
+                employee_payslips.payslip_approved,
+                payroll_profiles.payroll_act_id
+            FROM `employee_payslips` 
+            INNER JOIN payroll_profiles ON employee_payslips.payroll_profile_id=payroll_profiles.id 
+            INNER JOIN employees ON payroll_profiles.emp_id=employees.id 
+            INNER JOIN companies ON employees.emp_company=companies.id 
+            WHERE employee_payslips.payment_period_id=? 
+                AND employees.emp_company=? 
+                AND employees.id=? 
+                AND employee_payslips.payslip_cancel=0) AS drv_emp 
+        INNER JOIN job_categories ON drv_emp.payroll_act_id=job_categories.id
+        INNER JOIN (
+            SELECT 
+                employee_payslip_id, 
+                sum(normal_rate_otwork_hrs) as ot1dura, 
+                sum(double_rate_otwork_hrs) as ot2dura, 
+                SUM(work_days) as wk_days, 
+                0 as abhrs, 
+                SUM(nopay_days) AS nopay_days 
+            FROM employee_paid_rates 
+            WHERE date_format(concat(salary_process_year, '-', salary_process_month, '-01'), '%Y-%m') 
+                IN (date_format(?, '%Y-%m'), date_format(?, '%Y-%m')) 
+            GROUP BY employee_payslip_id
+        ) AS drv_rates ON drv_emp.emp_payslip_id=drv_rates.employee_payslip_id
+        INNER JOIN (
+            SELECT 
+                `id` AS fig_id, 
+                `employee_payslip_id`, 
+                `fig_group_title`, 
+                `fig_group`, 
+                `epf_payable`, 
+                remuneration_payslip_spec_code AS remuneration_pssc, 
+                remuneration_taxcalc_spec_code AS remuneration_tcsc, 
+                `fig_value` AS fig_value 
+            FROM employee_salary_payments 
+            WHERE `payment_period_id`=?
+        ) AS drv_info ON drv_emp.emp_payslip_id=drv_info.employee_payslip_id 
+        ORDER BY drv_info.fig_id";
+
+        $employee = DB::select($sqlslip, [
+            $salaryperiodid,    // payment_period_id in drv_emp
+            $empcompany,        // emp_company
+            $emprecordid,       // employees.id
+            $payment_period_fr, // date_format first IN()
+            $payment_period_to, // date_format second IN()
+            $salaryperiodid     // payment_period_id in drv_info
+        ]);
 
 
         $sect_name = $request->rpt_dept_name;
@@ -171,7 +251,7 @@ class UserAccountController extends Controller
 		/*
 		$sum_array = array('emp_epfno'=>'', 'emp_first_name'=>'', 'BASIC'=>0, 'BRA_I'=>'0', 'add_bra2'=>'0', 'NOPAY'=>0, 'tot_bnp'=>0, 'sal_arrears1'=>0, 'tot_fortax'=>0, 'ATTBONUS'=>0, 'add_transport'=>0, 'add_other'=>0, 'sal_arrears2'=>0, 'OTHRS1'=>0, 'OTHRS2'=>0, 'tot_earn'=>0, 'EPF8'=>0, 'sal_adv'=>0, 'ded_tp'=>0, 'ded_IOU'=>0, 'ded_fund_1'=>0, 'ded_other'=>0, 'PAYE'=>0, 'LOAN'=>0, 'tot_ded'=>0, 'NETSAL'=>0, 'OTHER_REM'=>0);
 		*/
-		$sum_array = array('emp_epfno'=>'', 'emp_first_name'=>'', 'BASIC'=>0, 'BRA_I'=>'0', 'add_bra2'=>'0', 'NOPAY'=>0, 'tot_bnp'=>0, 'sal_arrears1'=>0, 'ATTBONUS_W'=>0, 'INCNTV_EMP'=>0, 'INCNTV_DIR'=>0, 'add_other'=>0, 'sal_arrears2'=>0, 'OTHRS1'=>0, 'OTHRS2'=>0, 'tot_earn'=>0, 'tot_fortax'=>0, 'EPF8'=>0, 'sal_adv'=>0, 'LOAN'=>0, 'ded_IOU'=>0, 'ded_fund_1'=>0, 'PAYE'=>0, 'ded_other'=>0, 'tot_ded'=>0, 'NETSAL'=>0, 'EPF12'=>0, 'ETF3'=>0, 'OTHER_REM'=>0);
+		$sum_array = array('emp_epfno'=>'', 'emp_first_name'=>'', 'BASIC'=>0, 'BRA_I'=>'0', 'add_bra2'=>'0', 'NOPAY'=>0, 'nopay_days'=>0, 'tot_bnp'=>0, 'sal_arrears1'=>0, 'ATTBONUS'=>0, 'ATTBONUS_W'=>0, 'INCNTV_EMP'=>0, 'INCNTV_DIR'=>0, 'Opma_Night_Alw'=>0, 'add_transport'=>0, 'add_other'=>0, 'sal_arrears2'=>0, 'OTHRS1'=>0, 'OT1DURA'=>0, 'OTHRS2'=>0, 'OT2DURA'=>0, 'WK_ACT_DAYS'=>0, 'WK_MAX_DAYS'=>0, 'WK_DIFF_HRS'=>0, 'tot_earn'=>0, 'tot_fortax'=>0, 'EPF8'=>0, 'sal_adv'=>0, 'LOAN'=>0, 'ded_IOU'=>0, 'ded_fund_1'=>0, 'PAYE'=>0, 'ded_other'=>0, 'tot_ded'=>0, 'NETSAL'=>0, 'EPF12'=>0, 'ETF3'=>0, 'OTHER_REM'=>0);
 		
 		$cnt = 1;
 		$act_payslip_id = '';
@@ -192,10 +272,8 @@ class UserAccountController extends Controller
 		//2023-11-07
 		//keys-selected-to-calc-paye-updated-from-remuneration-taxation
 		
-        $conf_tl = DB::table('remuneration_taxations')
-        ->where(['fig_calc_opt' => 'FIGPAYE', 'optspec_cancel' => 0])
-        ->pluck('taxcalc_spec_code')
-        ->toArray();
+        $conf_tl = RemunerationTaxation::where(['fig_calc_opt'=>'FIGPAYE', 'optspec_cancel'=>0])
+						->pluck('taxcalc_spec_code')->toArray();
         //var_dump($conf_tl);
 		//return response()->json($conf_tl);
 		//-2023-11-07
@@ -210,7 +288,7 @@ class UserAccountController extends Controller
 				$emp_fig_tottax = 0;
 			}
 			if(!isset($emp_array[$cnt-1])){
-				$emp_array[] = array('emp_epfno'=>$r->emp_epfno, 'emp_first_name'=>$r->emp_first_name, 'BASIC'=>0, 'BRA_I'=>'0', 'add_bra2'=>'0', 'NOPAY'=>0, 'tot_bnp'=>0, 'sal_arrears1'=>0, 'ATTBONUS_W'=>0, 'INCNTV_EMP'=>0, 'INCNTV_DIR'=>0, 'add_other'=>0, 'sal_arrears2'=>0, 'OTHRS1'=>0, 'OTHRS2'=>0, 'tot_earn'=>0, 'tot_fortax'=>0, 'EPF8'=>0, 'sal_adv'=>0, 'LOAN'=>0, 'ded_IOU'=>0, 'ded_fund_1'=>0, 'PAYE'=>0, 'ded_other'=>0, 'tot_ded'=>0, 'NETSAL'=>0, 'EPF12'=>0, 'ETF3'=>0, 'OTHER_REM'=>0);
+				$emp_array[] = array('emp_epfno'=>$r->emp_epfno, 'emp_first_name'=>$r->emp_first_name, 'BASIC'=>0, 'BRA_I'=>'0', 'add_bra2'=>'0', 'NOPAY'=>0, 'nopay_days'=>$r->nopay_days, 'tot_bnp'=>0, 'sal_arrears1'=>0, 'ATTBONUS'=>0, 'ATTBONUS_W'=>0, 'INCNTV_EMP'=>0, 'INCNTV_DIR'=>0, 'Opma_Night_Alw'=>0, 'add_transport'=>0, 'add_other'=>0, 'sal_arrears2'=>0, 'OTHRS1'=>0, 'OT1DURA'=>$r->ot1dura, 'OTHRS2'=>0, 'OT2DURA'=>$r->ot2dura, 'WK_ACT_DAYS'=>$r->wk_days, 'WK_MAX_DAYS'=>$r->emp_payroll_workdays, 'WK_DIFF_HRS'=>0, 'tot_earn'=>0, 'tot_fortax'=>0, 'EPF8'=>0, 'sal_adv'=>0, 'LOAN'=>0, 'ded_IOU'=>0, 'ded_fund_1'=>0, 'PAYE'=>0, 'ded_other'=>0, 'tot_ded'=>0, 'NETSAL'=>0, 'EPF12'=>0, 'ETF3'=>0, 'OTHER_REM'=>0);
 				
 				$rem_tot_bnp = 0;
 				$rem_tot_fortax = 0;
@@ -314,7 +392,7 @@ class UserAccountController extends Controller
 				}
 			}
 		}
-
+        
         $html = '';
         $html .= '<table class="table table-striped table-sm small">
             <thead>
@@ -385,15 +463,15 @@ class UserAccountController extends Controller
                     <td class="text-center">&nbsp;</td>
                     <td class="text-center">&nbsp;</td>
                     <td class="text-center">&nbsp;</td>
-                    <td class="text-left">WEEKLY ATTENDANCE</td>
-                    <td class="text-right">'.number_format($sum_array['ATTBONUS_W'], 2).'</td>
+                    <td class="text-left">ATTENDANCE ALLOWANCE</td>
+                    <td class="text-right">'.number_format($sum_array['ATTBONUS'], 2).'</td>
                 </tr>
                 <tr>
                     <td class="text-center">&nbsp;</td>
                     <td class="text-center">&nbsp;</td>
                     <td class="text-center">&nbsp;</td>
                     <td class="text-center">&nbsp;</td>
-                    <td class="text-left">INCENTIVE</td>
+                    <td class="text-left">PERF. BASED INCENTIVE</td>
                     <td class="text-right">'.number_format($sum_array['INCNTV_EMP'], 2).'</td>
                 </tr>
                 <tr>
@@ -401,16 +479,24 @@ class UserAccountController extends Controller
                     <td class="text-center">&nbsp;</td>
                     <td class="text-center">&nbsp;</td>
                     <td class="text-center">&nbsp;</td>
-                    <td class="text-left">DIRECTOR INCENTIVE</td>
-                    <td class="text-right">'.number_format($sum_array['INCNTV_DIR'], 2).'</td>
+                    <td class="text-left">NIGHT ALLOWANCE</td>
+                    <td class="text-right">'.number_format($sum_array['Opma_Night_Alw'], 2).'</td>
                 </tr>
                 <tr>
                     <td class="text-center">&nbsp;</td>
                     <td class="text-center">&nbsp;</td>
                     <td class="text-center">&nbsp;</td>
                     <td class="text-center">&nbsp;</td>
-                    <td class="text-left">SALARY ARREARS</td>
-                    <td class="text-right">'.number_format($sum_array['sal_arrears2'], 2).'</td>
+                    <td class="text-left">TRANSPORT</td>
+                    <td class="text-right">'.number_format($sum_array['add_transport'], 2).'</td>
+                </tr>
+                <tr>
+                    <td class="text-center">&nbsp;</td>
+                    <td class="text-center">&nbsp;</td>
+                    <td class="text-center">&nbsp;</td>
+                    <td class="text-center">&nbsp;</td>
+                    <td class="text-left">OTHER ALLOWANCE</td>
+                    <td class="text-right">'.number_format($sum_array['add_other'], 2).'</td>
                 </tr>
                 <tr>
                     <td class="text-center">&nbsp;</td>
@@ -489,7 +575,7 @@ class UserAccountController extends Controller
                     <td class="text-center">&nbsp;</td>
                     <td class="text-center">&nbsp;</td>
                     <td class="text-center">&nbsp;</td>
-                    <td class="text-left">IOU DEDUCTION</td>
+                    <td class="text-left">LATE DEDUCTION</td>
                     <td class="text-right">('.number_format($sum_array['ded_IOU'], 2).')</td>
                 </tr>
                 <tr>
@@ -497,7 +583,7 @@ class UserAccountController extends Controller
                     <td class="text-center">&nbsp;</td>
                     <td class="text-center">&nbsp;</td>
                     <td class="text-center">&nbsp;</td>
-                    <td class="text-left">FUNERAL FUND</td>
+                    <td class="text-left">BANK CHARGES</td>
                     <td class="text-right">('.number_format($sum_array['ded_fund_1'], 2).')</td>
                 </tr>
                 <tr>
@@ -649,7 +735,7 @@ class UserAccountController extends Controller
 				$emp_fig_tottax = 0;
 			}
 			if(!isset($emp_array[$cnt-1])){
-				$emp_array[] = array('emp_epfno'=>$r->emp_epfno,'emp_national_id'=>$r->emp_national_id, 'bank_name'=>$r->bank_name, 'bank_branch'=>$r->bank_branch_name,'bank_accno'=>$r->bank_ac_no, 'emp_first_name'=>$r->emp_first_name, 'emp_designation'=>$r->emp_designation,'emp_department' => $r->department_name, 'Office'=>$r->location, 'BASIC'=>0, 'BRA_I'=>'0', 'add_bra2'=>'0', 'NOPAY'=>0, 'tot_bnp'=>0, 'sal_arrears1'=>0, 'tot_fortax'=>0, 'ATTBONUS'=>0, 'ATTBONUS_W'=>0, 'INCNTV_EMP'=>0, 'INCNTV_DIR'=>0, 'add_transport'=>0, 'add_other'=>0, 'sal_arrears2'=>0, 'OTAMT1'=>$r->emp_otamt1, 'OTAMT2'=>$r->emp_otamt2,'work_tot_days'=>$r->work_days, 'work_week_days'=>$r->working_week_days, 'NOPAYCNT'=>$r->emp_nopaydays, 'OTHRS1'=>0, 'OTHRS2'=>0, 'tot_earn'=>0, 'EPF8'=>0, 'EPF12'=>0, 'ETF3'=>0, 'sal_adv'=>0, 'ded_tp'=>0, 'ded_IOU'=>0, 'ded_fund_1'=>0, 'ded_other'=>0, 'PAYE'=>0, 'LOAN'=>0, 'tot_ded'=>0, 'NETSAL'=>0, 'OTHER_REM'=>0);
+				$emp_array[] = array('emp_epfno'=>$r->emp_epfno,'emp_national_id'=>$r->emp_national_id, 'bank_name'=>$r->bank_name, 'bank_branch'=>$r->bank_branch_name,'bank_accno'=>$r->bank_ac_no, 'emp_first_name'=>$r->emp_first_name, 'emp_designation'=>$r->emp_designation,'emp_department' => $r->department_name, 'Office'=>$r->location, 'BASIC'=>0, 'BRA_I'=>'0', 'add_bra2'=>'0', 'NOPAY'=>0, 'tot_bnp'=>0, 'sal_arrears1'=>0, 'tot_fortax'=>0, 'ATTBONUS'=>0, 'ATTBONUS_W'=>0, 'INCNTV_EMP'=>0, 'INCNTV_DIR'=>0, 'Opma_Night_Alw'=>0, 'add_transport'=>0, 'add_other'=>0, 'sal_arrears2'=>0, 'OTAMT1'=>$r->emp_otamt1, 'OTAMT2'=>$r->emp_otamt2,'work_tot_days'=>$r->work_days, 'work_week_days'=>$r->working_week_days, 'NOPAYCNT'=>$r->emp_nopaydays, 'OTHRS1'=>0, 'OTHRS2'=>0, 'tot_earn'=>0, 'EPF8'=>0, 'EPF12'=>0, 'ETF3'=>0, 'sal_adv'=>0, 'ded_tp'=>0, 'ded_IOU'=>0, 'ded_fund_1'=>0, 'ded_other'=>0, 'PAYE'=>0, 'LOAN'=>0, 'tot_ded'=>0, 'NETSAL'=>0, 'OTHER_REM'=>0);
 				
 			}
 			
