@@ -33,12 +33,12 @@
 
                 if (!empty($employee->emp_pic_filename) && file_exists(public_path('images/' .
                     $employee->emp_pic_filename))) {
-                    $imagePath = asset('images/' . $employee->emp_pic_filename);
+                    $imagePath = asset('public/images/' . $employee->emp_pic_filename);
                 } else {
                     $employeeGender = $employee->emp_gender ?? 'Male'; // Default to Male if null
                     $imagePath = $employeeGender === "Male"
-                    ? asset('images/man.png')
-                    : asset('images/girl.png');
+                    ? asset('public/images/man.png')
+                    : asset('public/images/girl.png');
                 }
                 @endphp
                 <div class="row">
@@ -306,13 +306,13 @@
                                                         </div>
                                                     </div>  
                                                 </div>         
-                                                <div role="tabpanel" class="tab-pane" id="salaryslip"> 
+                                                <div role="tabpanel" class="tab-pane" id="salaryslip">
                                                     <div class="card shadow-none bg-transparent">
                                                         <div class="card-body">
                                                             <div class="row">
                                                                 <div class="col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                                                                     <label for="selectedmonth" class="col-form-label col-form-label-sm font-weight-bold text-dark">Salary Period</label>
-                                                                     <select name="selectedmonth" id="selectedmonth" class="form-control form-control-sm">
+                                                                    <label for="selectedmonth" class="col-form-label col-form-label-sm font-weight-bold text-dark">Salary  Period</label>
+                                                                    <select name="selectedmonth" id="selectedmonth" class="form-control form-control-sm">
                                                                         <option value="" disabled="disabled" selected="selected">Please Select</option>
                                                                         @foreach($payment_period as $schedule)
                                                                         <option value="{{$schedule->id}}"
@@ -320,13 +320,14 @@
                                                                             data-payroll="{{$schedule->payroll_process_type_id}}"
                                                                             data-lastday="{{$schedule->payment_period_to}}"
                                                                             data-payroll="{{$schedule->payroll_process_type_id}}">
-                                                                            {{$schedule->payment_period_fr}} to {{$schedule->payment_period_to}}
+                                                                            {{$schedule->payment_period_fr}} to
+                                                                            {{$schedule->payment_period_to}}
                                                                         </option>
                                                                         @endforeach
                                                                     </select>
                                                                 </div>
                                                                 <div class="col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                                                                    <label for="selectedmonth" class="col-form-label col-form-label-sm font-weight-bold text-dark">&nbsp;</label><br>
+                                                                    <label for="selectedmonth"  class="col-form-label col-form-label-sm font-weight-bold text-dark">&nbsp;</label><br>
                                                                     <form id="frmExport" method="post" target="_blank" action="{{ url('get_employee_salarysheet') }}">
                                                                         {{ csrf_field() }}
 
@@ -339,7 +340,7 @@
                                                                         <input type="hidden" name="rpt_period_id" id="rpt_period_id" value="" />
                                                                         <input type="hidden" name="rpt_emp_id" id="rpt_emp_id" value="" />
 
-                                                                        <button type="submit" id="print_record" class="btn btn-sm btn-success">Download PaySlip</button>
+                                                                        <button type="submit" id="print_record" class="btn btn-sm btn-success" disabled>Download PaySlip</button>
                                                                     </form>
                                                                 </div>
                                                             </div>
@@ -352,9 +353,9 @@
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                    </div>   
-                                                </div>  
-                                                 <div role="tabpanel" class="tab-pane" id="production"> 
+                                                    </div>
+                                                </div>
+                                                <div role="tabpanel" class="tab-pane" id="production"> 
                                                     <div class="card shadow-none bg-transparent">
                                                         <div class="card-body">
                                                             <div class="row">
@@ -684,6 +685,7 @@
             let selectedmonthid = $('#selectedmonth').val(); // Get value of <select>
             let selectedmonth = selectedOption.data('selectedmonth');
             let lastday = selectedOption.data('lastday');
+            $("#print_record").prop('disabled', true);
 
             $('#rpt_location_id').val(empcompany);
             $('#rpt_period_id').val(selectedmonthid);
@@ -715,7 +717,7 @@
                 },
                 success: function (data) {
                     console.log(data);
-                    
+                    $("#print_record").prop('disabled', false);
                     $("#salaryinfo").html(data.htmlcontent);
                 }
             });
