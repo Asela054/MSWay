@@ -206,5 +206,33 @@ class Leave extends Model
 
 
 
+public function calculateMonthlyLeaveBalance($emp_id, $monthly_allocation)
+{
+    $currentYear = Carbon::now()->year;
+    $currentMonth = Carbon::now()->month;
+    
+    $remaining_balance = 0;
+    
+    // Start from current month and go backwards
+    for ($month = $currentMonth; $month >= 1; $month--) {
+        // Get month start and end dates
+        $monthStart = Carbon::createFromDate($currentYear, $month, 1)->startOfMonth();
+        $monthEnd   = Carbon::createFromDate($currentYear, $month, 1)->endOfMonth();
+        
+        // Get leaves taken in this month
+        $leaves_taken_in_month = $this->taken_annual_leaves( $emp_id, $monthStart, $monthEnd);
+        
+        // Calculate this month's unused leaves and add to balance
+        $remaining_balance += ($monthly_allocation - $leaves_taken_in_month);
+        
+        // If employee used the full allocation this month, stop here
+        if ($leaves_taken_in_month >= $monthly_allocation) {
+            break;
+        }
+    }
+    
+    return $remaining_balance;
+}
+
 
 }

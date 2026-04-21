@@ -112,7 +112,7 @@ class HomeController extends Controller
     //     return view('home', compact(
     //         'empcount',
     //         'todaycount',
-    //         'todaylatecount',
+    //         'todaylatecount',e
     //         'yesterdaycount',
     //         'yesterdaylatecount',
     //         'todayBirthdayCount',
@@ -168,13 +168,12 @@ class HomeController extends Controller
 
         // today late attendance count
         $late_times = DB::table('late_types')->orderBy('id', 'desc')->first();
-        $todaylatecount = DB::table('attendances')
-            ->select('date', 'emp_id')
-            ->where('date', $today)
-            ->where('timestamp','>', $today. ' ' . $late_times->time_from)
-            ->groupBy('date', 'emp_id')
-            ->get()
-            ->count();
+
+       $todaylatecount = DB::table('employee_late_attendances')
+                            ->where('date', $today)
+                            ->get()
+                            ->count();
+
 
         // get today daybefore day on attendance
         $yesterdayDate = Carbon::now()->subDay()->format('Y-m-d');
@@ -188,13 +187,11 @@ class HomeController extends Controller
             ->count();
 
         // yesterday late attendance count
-        $yesterdaylatecount = DB::table('attendances')
-            ->select('date', 'emp_id')
-            ->where('date', $yesterdayDate)
-            ->havingRaw('MIN(attendances.timestamp) > ?', [$yesterdayDate . ' ' . $late_times->time_from])
-            ->groupBy('date', 'emp_id')
-            ->get()
-            ->count();
+
+         $yesterdaylatecount = DB::table('employee_late_attendances')
+                            ->where('date', $yesterdayDate)
+                            ->get()
+                            ->count();
 
         // Birthday Count
         $currentMonth = Carbon::now()->month;
@@ -527,8 +524,8 @@ class HomeController extends Controller
         ->get()
         ->toArray();
         $late_times = DB::table('late_types')->where('id', 1)->first();
-        $attendance= DB::table('attendances')
-        ->leftjoin('employees', 'attendances.emp_id', '=', 'employees.emp_id')
+        $attendance= DB::table('employee_late_attendances')
+        ->leftjoin('employees', 'employee_late_attendances.emp_id', '=', 'employees.emp_id')
         ->leftJoin('employee_pictures', 'employee_pictures.emp_id', '=', 'employees.id')
         ->select(
             'employees.emp_id', 
@@ -536,12 +533,11 @@ class HomeController extends Controller
             'employees.emp_department', 
             'employee_pictures.emp_pic_filename',
             'employees.emp_shift',
-            DB::raw('MIN(attendances.timestamp) as first_checkin'), 
-            DB::raw('MAX(attendances.timestamp) as lasttimestamp')
+            'employee_late_attendances.check_in_time', 
+            'employee_late_attendances.check_out_time'
         )
-        ->where('attendances.date', '=', $today)
-        ->where('attendances.timestamp','>', $today. ' ' . $late_times->time_from)
-        ->groupBy('attendances.date','attendances.emp_id')
+        ->where('employee_late_attendances.date', '=', $today)
+        ->groupBy('employee_late_attendances.date','employee_late_attendances.emp_id')
         ->get();
 
         $departmentMap = [];
@@ -552,7 +548,7 @@ class HomeController extends Controller
         $employeesByDepartment = [];
         foreach ($attendance as $employee) {
             $departmentId = $employee->emp_department;
-            $first_time = date('H:i', strtotime($employee->first_checkin));
+            $first_time = date('H:i', strtotime($employee->check_in_time));
 
             $emprosterinfo = DB::table('employee_roster_details')
                 ->select('emp_id', 'shift_id')
@@ -568,7 +564,7 @@ class HomeController extends Controller
             }
 
             $shiftinfo = DB::table('shift_types')
-                ->select('off_next_day')
+                ->select('off_next_day','onduty_time')
                 ->where('id', $empshiftid)
                 ->first();
 
@@ -582,7 +578,8 @@ class HomeController extends Controller
                     'emp_name_with_initial' => $employee->emp_name_with_initial,
                     'first_checkin' => $first_time,
                     'emp_pic_filename' => $employee->emp_pic_filename,
-                    'off_next_day' => $shiftinfo ? $shiftinfo->off_next_day : 0
+                    'off_next_day' => $shiftinfo ? $shiftinfo->off_next_day : 0,
+                    'shift_ontime' => $shiftinfo->onduty_time
                 ];
             }
         }
@@ -597,7 +594,7 @@ class HomeController extends Controller
                     $htmlTables .= '<table class="table table-striped table-bordered table-sm small">';
 
                     $htmlTables .= '<h5>' . $departmentName . '</h5>';
-                    $htmlTables .= '<tr><th>#</th><th>Photo</th><th>Employee ID</th><th>Employee Name with Initial</th><th>In Time</th></tr>';
+                    $htmlTables .= '<tr><th>#</th><th>Photo</th><th>Employee ID</th><th>Employee Name with Initial</th><th>Shift On Time</th><th>In Time</th></tr>';
                 
                     foreach ($employees as $employee) {
                         $employeePicture = $employee['emp_pic_filename'];
@@ -619,7 +616,9 @@ class HomeController extends Controller
                         $htmlTables .= '<td class="align-middle text-center"><img style="height: 2.5rem;width: 2.5rem;border-radius: 100%;" src="' . $imagePath . '" alt="Employee Photo"/></td>';
                         $htmlTables .= '<td class="align-middle text-center">' . $employee['emp_id'] . '</td>';
                         $htmlTables .= '<td class="align-middle text-center">' . $employee['emp_name_with_initial'] . '</td>';
+                        $htmlTables .= '<td class="align-middle">' . $employee['shift_ontime'] . '</td>';
                         $htmlTables .= '<td class="align-middle">' . $employee['first_checkin'] . '</td>';
+                     
                         $htmlTables .= '</tr>';
 
                         $count=$count+1;
@@ -879,9 +878,10 @@ class HomeController extends Controller
         ->select('id', 'name') 
         ->get()
         ->toArray();
-        $late_times = DB::table('late_types')->where('id', 1)->first();
-        $attendance= DB::table('attendances')
-        ->leftjoin('employees', 'attendances.emp_id', '=', 'employees.emp_id')
+       // $late_times = DB::table('late_types')->where('id', 1)->first();
+
+        $attendance= DB::table('employee_late_attendances')
+        ->leftjoin('employees', 'employee_late_attendances.emp_id', '=', 'employees.emp_id')
         ->leftJoin('employee_pictures', 'employee_pictures.emp_id', '=', 'employees.id')
         ->select(
             'employees.emp_id', 
@@ -889,12 +889,11 @@ class HomeController extends Controller
             'employees.emp_department', 
             'employee_pictures.emp_pic_filename',
             'employees.emp_shift',
-            DB::raw('MIN(attendances.timestamp) as first_checkin'), 
-            DB::raw('MAX(attendances.timestamp) as lasttimestamp')
+            'employee_late_attendances.check_in_time', 
+            'employee_late_attendances.check_out_time'
         )
-        ->where('attendances.date', '=', $yesterdayDate)
-        ->havingRaw('MIN(attendances.timestamp) > ?', [$yesterdayDate . ' ' . $late_times->time_from])
-        ->groupBy('attendances.date','attendances.emp_id')
+        ->where('employee_late_attendances.date', '=', $yesterdayDate)
+        ->groupBy('employee_late_attendances.date','employee_late_attendances.emp_id')
         ->get();
 
         $departmentMap = [];
@@ -905,8 +904,8 @@ class HomeController extends Controller
         $employeesByDepartment = [];
         foreach ($attendance as $employee) {
             $departmentId = $employee->emp_department;
-            $first_time = date('H:i', strtotime($employee->first_checkin));
-            $last_time = date('H:i', strtotime($employee->lasttimestamp));
+            $first_time = date('H:i', strtotime($employee->check_in_time));
+            $last_time = date('H:i', strtotime($employee->check_out_time));
 
             $emprosterinfo = DB::table('employee_roster_details')
                 ->select('emp_id', 'shift_id')
@@ -922,7 +921,7 @@ class HomeController extends Controller
             }
 
             $shiftinfo = DB::table('shift_types')
-                ->select('off_next_day')
+                ->select('off_next_day','onduty_time')
                 ->where('id', $empshiftid)
                 ->first();
 
@@ -941,7 +940,8 @@ class HomeController extends Controller
                     'first_checkin' => $first_time,
                     'lasttimestamp' => $last_time,
                     'emp_pic_filename' => $employee->emp_pic_filename,
-                    'off_next_day' => $shiftinfo ? $shiftinfo->off_next_day : 0
+                    'off_next_day' => $shiftinfo ? $shiftinfo->off_next_day : 0,
+                    'shift_ontime' => $shiftinfo->onduty_time
                 ];
             }
         }
@@ -956,7 +956,7 @@ class HomeController extends Controller
                     $htmlTables .= '<table class="table table-striped table-bordered table-sm small">';
 
                     $htmlTables .= '<h5>' . $departmentName . '</h5>';
-                    $htmlTables .= '<tr><th>#</th><th>Photo</th><th>Employee ID</th><th>Employee Name with Initial</th><th>In Time</th><th>Out Time</th></tr>';
+                    $htmlTables .= '<tr><th>#</th><th>Photo</th><th>Employee ID</th><th>Employee Name with Initial</th><th>Shift On Time</th><th>In Time</th><th>Out Time</th></tr>';
                 
                     foreach ($employees as $employee) {
                         $employeePicture = $employee['emp_pic_filename'];
@@ -978,6 +978,7 @@ class HomeController extends Controller
                         $htmlTables .= '<td class="align-middle text-center"><img style="height: 2.5rem;width: 2.5rem;border-radius: 100%;" src="' . $imagePath . '" alt="Employee Photo"/></td>';
                         $htmlTables .= '<td class="align-middle text-center">' . $employee['emp_id'] . '</td>';
                         $htmlTables .= '<td class="align-middle text-center">' . $employee['emp_name_with_initial'] . '</td>';
+                        $htmlTables .= '<td class="align-middle">' . $employee['shift_ontime'] . '</td>';
                         $htmlTables .= '<td class="align-middle text-center">' . $employee['first_checkin'] . '</td>';
                         $htmlTables .= '<td class="align-middle">' . $employee['lasttimestamp'] . '</td>';
                         $htmlTables .= '</tr>';
