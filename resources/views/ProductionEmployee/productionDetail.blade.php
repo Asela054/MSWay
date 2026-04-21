@@ -34,6 +34,7 @@
                                         <tr>
                                             <th>Id</th>
                                             <th>DEPARTMENT</th>
+                                            <th>SECTION</th>
                                             <th>MEN'S INCENTIVE</th>
                                             <th>WOMEN'S INCENTIVE</th>
                                             <th class="text-right">ACTION</th>  
@@ -76,6 +77,11 @@
                                     <div class="col-md-6">
                                         <label class="small font-weight-bold text-dark">Department*</label>
                                         <select name="department" id="department_f" class="form-control form-control-sm" required>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="small font-weight-bold text-dark">Section*</label>
+                                        <select name="section" id="section_f" class="form-control form-control-sm" required>
                                         </select>
                                     </div>
                                 </div>
@@ -122,6 +128,7 @@ $(document).ready(function(){
 
     let company_f = $('#company_f');
     let department_f = $('#department_f');
+    let section_f = $('#section_f');
 
     company_f.select2({
         placeholder: 'Select a Company',
@@ -156,6 +163,33 @@ $(document).ready(function(){
             },
             cache: true
         }
+    });
+
+    section_f.select2({
+        placeholder: 'Select a Section',
+        width: '100%',
+        allowClear: true,
+        ajax: {
+            url: '{{url("section_list_sel2")}}',
+            dataType: 'json',
+            data: function(params) {
+                return {
+                    term: params.term || '',
+                    page: params.page || 1,
+                    department: department_f.val()
+                }
+            },
+            cache: true
+        }
+    });
+
+    company_f.on('change', function() {
+        department_f.val(null).trigger('change');
+        section_f.val(null).trigger('change');
+    });
+
+    department_f.on('change', function() {
+        section_f.val(null).trigger('change');
     });
 
     $('#dataTable').DataTable({
@@ -202,6 +236,7 @@ $(document).ready(function(){
         columns: [
             { data: 'id', name: 'id' },
             { data: 'department_name', name: 'department_name' },
+            { data: 'section_name', name: 'section_name' },
             { data: 'men_incentive', name: 'men_incentive' },
             { data: 'women_incentive', name: 'women_incentive' },
             {
@@ -280,6 +315,7 @@ $(document).ready(function(){
         
         $('#company_f').empty().trigger('change');
         $('#department_f').empty().trigger('change');
+        $('#section_f').empty().trigger('change');
         
         $.ajax({
             url: "ProductionDetail/" + id + "/edit",
@@ -288,6 +324,8 @@ $(document).ready(function(){
                 $('#company_f').append('<option value="' + data.result.company_id + '" selected>' + data.result.company_name + '</option>').trigger('change');
                 
                 $('#department_f').append('<option value="' + data.result.department_id + '" selected>' + data.result.department_name + '</option>').trigger('change');
+                $('#section_f').append('<option value="' + data.result.section_id + '" selected>' + data.result.section_name + '</option>').trigger('change');
+                
                 
                 $('#men_incentive').val(data.result.men_incentive);
                 $('#women_incentive').val(data.result.women_incentive);

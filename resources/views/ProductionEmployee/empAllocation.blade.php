@@ -23,7 +23,7 @@
             <div class="card-body p-0 p-2">
                 <div class="row">
                     <div class="col-12">
-                                    <button class="btn btn-warning btn-sm filter-btn float-right px-3" type="button"
+                                    <button class="btn btn-warning btn-sm filter-btn float-right mr-2" type="button"
                                         data-toggle="offcanvas" data-target="#offcanvasRight"
                                         aria-controls="offcanvasRight"><i class="fas fa-filter mr-1"></i> Filter
                                         Records</button>
@@ -47,6 +47,7 @@
                                         <th>EMP ID</th>
                                         <th>EMP NAME</th>
                                         <th>DEPARTMENT</th>
+                                        <th>SECTION</th>
                                         <th>DATE</th>
                                         <th class="text-right">Action</th>
                                     </tr>
@@ -86,6 +87,12 @@
                               <div class="col-md-12">
                                   <label class="small font-weight-bold text-dark">Department</label>
                                 <select name="department" id="department_f" class="form-control form-control-sm"></select>
+                            </div>
+                          </li>
+                            <li class="mb-2">
+                              <div class="col-md-12">
+                                  <label class="small font-weight-bold text-dark">Section</label>
+                                <select name="section" id="section_f" class="form-control form-control-sm"></select>
                             </div>
                           </li>
                            <li class="mb-2">
@@ -158,7 +165,18 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                    <div class="col-12 col-sm-6">
+                                <div class="col-12 col-sm-6">
+                                        <label class="small font-weight-bold text-dark">Section*</label>
+                                        <select name="section" id="section" class="form-control form-control-sm" required>
+                                            <option value="">Select Section</option>
+                                            @foreach($sections as $section)
+                                                <option value="{{ $section->id }}" data-department="{{ $section->department_id }}">{{ $section->section }}</option>
+                                            @endforeach
+                                        </select>
+                                </div>
+                                </div>
+                                <div class="form-row mb-1">
+                                     <div class="col-12 col-sm-6 mb-2 mb-sm-0">
                                         <label class="small font-weight-bold text-dark">Employee*</label>
                                         <select name="employee" id="employee" class="form-control form-control-sm" required></select>
                                     </div>
@@ -185,6 +203,7 @@
                                             <th>Employee Name</th>
                                             <th>Date</th>
                                             <th>Department</th>
+                                            <th>Section</th>
                                             <th class="text-right">Action</th>
                                         </tr>
                                     </thead>
@@ -233,9 +252,20 @@
                             <div class="col-12">
                                 <label class="small font-weight-bold text-dark">Department*</label>
                                 <select name="edit_department" id="edit_department" class="form-control form-control-sm" required>
-                                    <option value="">Select Department</option>
-                                    @foreach($departments as $dept)
-                                        <option value="{{ $dept->id }}">{{ $dept->name }}</option>
+                                     <option value="">Select Department</option>
+                                            @foreach($departments as $dept)
+                                                <option value="{{ $dept->id }}">{{ $dept->name }}</option>
+                                            @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row mb-2">
+                            <div class="col-12">
+                                <label class="small font-weight-bold text-dark">Section*</label>
+                                <select name="edit_section" id="edit_section" class="form-control form-control-sm" required>
+                                    <option value="">Select Section</option>
+                                    @foreach($sections as $section)
+                                        <option value="{{ $section->id }}" data-department="{{ $section->department_id }}">{{ $section->section }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -268,6 +298,7 @@ $(document).ready(function () {
     // Initialize filter dropdowns
     let company_f = $('#company_f');
     let department_f = $('#department_f');
+    let section_f = $('#section_f');
     let employee_f = $('#employee_f');
     let location_f = $('#location_f');
 
@@ -344,6 +375,23 @@ $(document).ready(function () {
             cache: true
         }
     });
+    section_f.select2({
+        placeholder: 'Select a Section',
+        width: '100%',
+        allowClear: true,
+        ajax: {
+            url: '{{url("section_list_sel2")}}',
+            dataType: 'json',
+            data: function(params) {
+                return {
+                    term: params.term || '',
+                    page: params.page || 1,
+                    department: department_f.val()
+                }
+            },
+            cache: true
+        }
+    });
 
     // Initialize employee dropdowns in modal
     let employee = $("#employee").select2({
@@ -374,8 +422,38 @@ $(document).ready(function () {
         }
     });
 
+    // Department change handler to filter sections
+    $('#department').on('change', function() {
+        var deptId = $(this).val();
+        $('#section').val('');
+        $('#section option').each(function() {
+            if ($(this).val() == '') return;
+            if ($(this).data('department') == deptId) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+    });
+
+    $('#edit_department').on('change', function() {
+        var deptId = $(this).val();
+        $('#edit_section option').each(function() {
+            if ($(this).val() == '') return;
+            if ($(this).data('department') == deptId) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+        
+        if (!window.isEditLoading) {
+            $('#edit_section').val('');
+        }
+    });
+
     // Load DataTable
-    function load_dt(company, department, employee, location, from_date, to_date) {
+    function load_dt(company, department, section, employee, location, from_date, to_date) {
         $('#dataTable').DataTable({
             "destroy": true,
             "processing": true,
@@ -420,6 +498,7 @@ $(document).ready(function () {
                 data: {
                     company: company,
                     department: department,
+                    section: section,
                     employee: employee,
                     location: location,
                     from_date: from_date,
@@ -430,6 +509,7 @@ $(document).ready(function () {
                 { data: 'emp_id', name: 'emp_id' },
                 { data: 'emp_name_with_initial', name: 'emp_name_with_initial' },
                 { data: 'department_name', name: 'department_name' },
+                { data: 'section_name', name: 'section_name' },
                 { data: 'date', name: 'date' },
                 {
                     data: 'id',
@@ -454,17 +534,19 @@ $(document).ready(function () {
         e.preventDefault();
         let company = company_f.val() || '';
         let department = department_f.val() || '';
+        let section = section_f.val() || '';
         let employee = employee_f.val() || '';
         let location = location_f.val() || '';
         let from_date = $('#from_date').val();
         let to_date = $('#to_date').val();
-        load_dt(company, department, employee, location, from_date, to_date);
+        load_dt(company, department, section, employee, location, from_date, to_date);  // <-- fixed
         closeOffcanvasSmoothly();
     });
 
     $('#btn-reset').click(function() {
         $('#formFilter')[0].reset();
         company_f.val(null).trigger('change');
+        section_f.val(null).trigger('change');
         department_f.val(null).trigger('change');
         employee_f.val(null).trigger('change');
         location_f.val(null).trigger('change');
@@ -488,6 +570,7 @@ $(document).ready(function () {
         let employeeVal  = $('#employee').val();
         let date         = $('#date').val();
         let departmentVal = $('#department').val();
+        let sectionVal = $('#section').val();
 
         if (!date) {
             Swal.fire({ position:"top-end", icon:'warning', title:'Please select a date', showConfirmButton:false, timer:2500 });
@@ -495,6 +578,10 @@ $(document).ready(function () {
         }
         if (!departmentVal) {
             Swal.fire({ position:"top-end", icon:'warning', title:'Please select a department', showConfirmButton:false, timer:2500 });
+            return;
+        }
+        if (!sectionVal) {
+            Swal.fire({ position:"top-end", icon:'warning', title:'Please select a section', showConfirmButton:false, timer:2500 });
             return;
         }
         if (!employeeVal) {
@@ -506,6 +593,9 @@ $(document).ready(function () {
                     || $('#employee').select2('data')[0]?.text || employeeVal;
         let deptText = $('#department option[value="' + departmentVal + '"]').text()
                     || $('#department').select2('data')[0]?.text || departmentVal;
+
+        let sectionText = $('#section option[value="' + sectionVal + '"]').text()
+                    || $('#section').select2('data')[0]?.text || sectionVal;
 
         let duplicate = false;
         $('#tableorder tbody tr').each(function () {
@@ -521,11 +611,12 @@ $(document).ready(function () {
         }
 
         $('#tableorder > tbody:last').append(
-            '<tr class="pointer" data-emp-id="' + employeeVal + '" data-dept-id="' + departmentVal + '">' +
+            '<tr class="pointer" data-emp-id="' + employeeVal + '" data-dept-id="' + departmentVal + '" data-section-id="' + sectionVal + '">' +
                 '<td>' + employeeVal  + '</td>' +
                 '<td>' + empText      + '</td>' +
                 '<td>' + date         + '</td>' +
                 '<td>' + deptText     + '</td>' +
+                '<td>' + sectionText     + '</td>' +
                 '<td class="text-right">' +
                     '<button type="button" onclick="productDelete(this);" class="btn btn-danger btn-sm">' +
                         '<i class="fas fa-trash-alt"></i>' +
@@ -561,6 +652,7 @@ $(document).ready(function () {
                 item["col_2"] = $(this).find('td:eq(1)').text(); // emp_name
                 item["col_3"] = $(this).find('td:eq(2)').text(); // date
                 item["col_4"] = $(this).data('dept-id') || $(this).find('td:eq(3)').text(); // department
+                item["col_5"] = $(this).data('section-id') || $(this).find('td:eq(3)').text(); // section
                 jsonObj.push(item);
             });
 
@@ -637,8 +729,12 @@ $(document).ready(function () {
                 _token: '{{ csrf_token() }}'
             },
             success: function (data) {
+                window.isEditLoading = true;
                 $('#edit_date').val(data.result.mainData.date);
-                $('#edit_department').val(data.result.mainData.department_id); 
+                $('#edit_department').val(data.result.mainData.department_id);
+                $('#edit_department').trigger('change'); // Filter sections for this department
+                $('#edit_section').val(data.result.mainData.section_id);
+                window.isEditLoading = false;
                 $('#edit_employee_id').val(data.result.mainData.emp_id);
                 $('#edit_employee_name').val(data.result.mainData.employee ? data.result.mainData.employee.emp_name_with_initial : data.result.mainData.emp_id);
                 $('#edit_record_id').val(id);
@@ -659,7 +755,8 @@ $(document).ready(function () {
             col_1: $('#edit_employee_id').val(),
             col_2: $('#edit_employee_name').val(),
             col_3: $('#edit_date').val(),
-            col_4: $('#edit_department').val()  
+            col_4: $('#edit_department').val(),  
+            col_5: $('#edit_section').val()  
         }];
         
         $.ajax({
