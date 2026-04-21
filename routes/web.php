@@ -424,6 +424,15 @@ Route::get('Department/destroy/{id}', 'DepartmentController@destroy');
 
 /*-- End Department Info----*/
 
+/*-- Section Info----*/
+Route::resource('Section', 'DepartmentSectionController');
+Route::get('SectionShow/{id}',['uses' => 'DepartmentSectionController@index', 'as' => 'SectionShow']);
+Route::post('addSection',['uses' => 'DepartmentSectionController@store', 'as' => 'addSection']);
+Route::post('Section/update', 'DepartmentSectionController@update')->name('Section.update');
+Route::get('Section/destroy/{id}', 'DepartmentSectionController@destroy');
+Route::get('section_list_sel2', 'DepartmentSectionController@section_list_sel2');
+/*-- End Section Info----*/
+
 /*-- Bank Info----*/
 Route::resource('Bank', 'BankController');
 Route::get('Bank',['uses' => 'BankController@index', 'as' => 'Bank']);
