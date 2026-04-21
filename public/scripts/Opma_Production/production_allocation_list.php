@@ -15,7 +15,8 @@ $primaryKey = 'id';
         array('db' => '`u`.`title`', 'dt' => 'title', 'field' => 'title'),
         array('db' => '`u`.`shift_name`', 'dt' => 'shift_name', 'field' => 'shift_name'),
         array('db' => '`u`.`size`', 'dt' => 'size', 'field' => 'size'),
-        array('db' => '`u`.`status`', 'dt' => 'leave_status', 'field' => 'status')
+        array('db' => '`u`.`status`', 'dt' => 'leave_status', 'field' => 'status'),
+        array('db' => '`u`.`production_status`', 'dt' => 'production_status', 'field' => 'production_status')
     );
 
 // SQL server connection information
@@ -40,7 +41,8 @@ $sql_details = array(
         `p`.`title`,
         `st`.`shift_name`,
         `sz`.`size`,
-        `epa`.`status`
+        `epa`.`status`,
+        `epa`.`production_status`
     FROM `opma_emp_product_allocation` AS `epa`
     LEFT JOIN `opma_machines` AS `m` ON `epa`.`machine_id` = `m`.`id`
     LEFT JOIN `opma_styles` AS `p` ON `epa`.`product_id` = `p`.`id`

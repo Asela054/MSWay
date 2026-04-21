@@ -360,7 +360,7 @@ $(document).ready(function(){
                 name: 'scale'
             },
             {
-                data: 'action',
+                data: 'production_status',
                 name: 'action',
                 className: 'text-right',
                 orderable: false,
@@ -370,10 +370,14 @@ $(document).ready(function(){
 
                     buttons += ' <button name="view" id="'+row.id+'" class="view btn btn-secondary btn-sm mr-1" type="button" data-toggle="tooltip" title="View"><i class="fas fa-eye"></i></button>';
 
-                    buttons += ' <button name="edit" id="'+row.id+'" class="edit btn btn-primary btn-sm mr-1" type="button" data-toggle="tooltip" title="Edit"><i class="fas fa-pencil-alt"></i></button>';
+                    if(data != 4){
 
-                    buttons += '<button name="delete" id="'+row.id+'" class="delete btn btn-danger btn-sm" data-toggle="tooltip" title="Delete"><i class="far fa-trash-alt"></i></button>';
+                        buttons += ' <button name="edit" id="'+row.id+'" class="edit btn btn-primary btn-sm mr-1" type="button" data-toggle="tooltip" title="Edit"><i class="fas fa-pencil-alt"></i></button>';
 
+                        buttons += '<button name="delete" id="'+row.id+'" class="delete btn btn-danger btn-sm" data-toggle="tooltip" title="Delete"><i class="far fa-trash-alt"></i></button>';
+
+                    }
+                    
                       return buttons;
                 }
             },
