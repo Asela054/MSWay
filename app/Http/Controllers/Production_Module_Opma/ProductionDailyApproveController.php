@@ -92,7 +92,7 @@ class ProductionDailyApproveController extends Controller
                     'total_difference' => round($totalDifference, 2),
                     'total_amount' => round($totalAmount, 2),
                     'total_damage' => round($totaldamage, 2),
-                    'daily_aveg' => round($dailyAverage),
+                    'daily_aveg' => round($dailyAverage, 2),
                      'status' => $status,
                 ];
             }

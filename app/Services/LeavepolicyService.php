@@ -71,9 +71,12 @@ class LeavepolicyService
                 }
                 // Third year onwards (24+ months) - Full 14 days
                 else {
-                    $annual_leaves = 14;
+                    $annual_leaves = $leaves->annual_leaves;
                     $leave_msg = "Employee is eligible for full 14 annual leaves per year.";
                 }
+
+
+
                 
         }else{
             $annual_leaves = 0;

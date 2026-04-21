@@ -300,6 +300,9 @@ class LeaveController extends Controller
 
             $employee = Employee::where('emp_id', $request->emp_id)->first();
 
+            $monthly_leaves = 3;
+            $renew_next_month = 1;
+
             $emp_join_date = $employee->emp_join_date;
             $join_year = Carbon::parse($emp_join_date)->year;
             $join_month = Carbon::parse($emp_join_date)->month;
@@ -355,11 +358,19 @@ class LeaveController extends Controller
             $total_no_of_med_leaves = $medical_leaves;
             $total_no_of_weekly_leaves = $weekly_leaves;
 
-            $available_no_of_annual_leaves = $total_no_of_annual_leaves - $current_year_taken_a_l;
             $available_no_of_casual_leaves = $total_no_of_casual_leaves - $current_year_taken_c_l;
             $available_no_of_med_leaves = $total_no_of_med_leaves - $current_year_taken_med;
-
             $available_no_of_weekly_leaves = $total_no_of_weekly_leaves - $current_weekly_taken;
+
+            if($job_categoryid == 2 && $monthly_leaves >0 &&  $renew_next_month){
+                
+                 $available_no_of_annual_leaves = (new \App\Leave)->calculateMonthlyLeaveBalance($empid, $monthly_leaves);
+            }else{
+                  $available_no_of_annual_leaves = $total_no_of_annual_leaves - $current_year_taken_a_l;
+            }
+          
+
+
 
 
             if($employee->emp_status != 1){
