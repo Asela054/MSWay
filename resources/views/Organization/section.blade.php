@@ -11,7 +11,7 @@
                 <div class="page-header-content py-3 px-2">
                     <h1 class="page-header-title ">
                         <div class="page-header-icon"><i class="fa-light fa-building"></i></div>
-                        <span>Department</span>
+                        <span>Section</span>
                     </h1>
                 </div>
             </div>
@@ -21,7 +21,7 @@
                 <div class="card-body p-0 p-2">
                     <div class="row">
                         <div class="col-12">
-                                <button type="button" class="btn btn-primary btn-sm fa-pull-right" name="create_record" id="create_record"><i class="fas fa-plus mr-2"></i>Add Department</button>
+                                <button type="button" class="btn btn-primary btn-sm fa-pull-right" name="create_record" id="create_record"><i class="fas fa-plus mr-2"></i>Add Section</button>
                         </div>
                         <div class="col-12">
                             <hr class="border-dark">
@@ -50,7 +50,7 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header p-2">
-                        <h5 class="modal-title" id="staticBackdropLabel">Add Department</h5>
+                        <h5 class="modal-title" id="staticBackdropLabel">Add Section</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -64,23 +64,19 @@
                                     <div class="form-row mb-1">
                                         <div class="col-12">
                                             <label class="small font-weight-bold text-dark">Name*</label>
-                                            <input type="text" name="name" id="name" class="form-control form-control-sm" />
+                                            <input type="text" name="name" id="name" class="form-control form-control-sm" required />
                                         </div>
                                         <div class="col-12" id="employee_f_wrapper">
-                                            <label class="small font-weight-bold text-dark">Department Head</label>
+                                            <label class="small font-weight-bold text-dark">Section Head</label>
                                             <select name="employee" id="employee_f" class="form-control form-control-sm">
                                             </select>
-                                        </div>
-{{--                                        <div class="col">--}}
-{{--                                            <label class="small font-weight-bold text-dark">Code*</label>--}}
-{{--                                            <input type="text" name="code" id="code" class="form-control form-control-sm" />--}}
-{{--                                        </div>--}}
+                                        </div>                                        
                                     </div>
                                     <div class="form-group mt-3">
                                         <button type="submit" name="action_button" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
                                     </div>
                                     <input type="hidden" name="action" id="action" value="Add" />
-                                    <input type="hidden" name="company_id" id="company_id" value="{{$company->id}}" />
+                                    <input type="hidden" name="section_id" id="department_id" value="{{$department->id}}" />
                                     <input type="hidden" name="hidden_id" id="hidden_id" />
                                 </form>
                             </div>
@@ -89,29 +85,7 @@
                 </div>
             </div>
         </div>
-        <div class="modal fade" id="confirmModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-             aria-labelledby="staticBackdropLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-sm">
-                <div class="modal-content">
-                    <div class="modal-header p-2">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col text-center">
-                                <h4 class="font-weight-normal">Are you sure you want to remove this data?</h4>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer p-2">
-                        <button type="button" name="ok_button" id="ok_button" class="btn btn-danger px-3 btn-sm">OK</button>
-                        <button type="button" class="btn btn-dark px-3 btn-sm" data-dismiss="modal">Cancel</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        
         <!-- Modal Area End -->
     </main>
 
@@ -155,13 +129,13 @@
                 "buttons": [{
                         extend: 'csv',
                         className: 'btn btn-success btn-sm',
-                        title: 'Customer  Information',
+                        title: 'Section  Information',
                         text: '<i class="fas fa-file-csv mr-2"></i> CSV',
                     },
                     { 
                         extend: 'pdf', 
                         className: 'btn btn-danger btn-sm', 
-                        title: 'Location Information', 
+                        title: 'Section Information', 
                         text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
                         orientation: 'landscape', 
                         pageSize: 'legal', 
@@ -171,7 +145,7 @@
                     },
                     {
                         extend: 'print',
-                        title: 'Customer  Information',
+                        title: 'Section  Information',
                         className: 'btn btn-primary btn-sm',
                         text: '<i class="fas fa-print mr-2"></i> Print',
                         customize: function(win) {
@@ -186,10 +160,10 @@
                     [0, "desc"]
                 ],
                 ajax: {
-                    url: scripturl + "/departmentlist.php",
+                    url: scripturl + "/sectionlist.php",
                     type: "POST",
                    data: {
-                        company_id: $('#company_id').val()
+                        department_id: $('#department_id').val()
                     },
                 },
                 columns: [
@@ -216,7 +190,6 @@
                             var is_resigned = row.is_resigned;
                             var buttons = '';
 
-                            buttons += '<a href="{{ url("SectionShow") }}/' + row.id + '" title="Sections" class="branches btn btn-info btn-sm mr-1" data-toggle="tooltip" title="Section" ><i class="fas fa-sitemap"></i></a>';
                             buttons += '<button name="edit" id="'+row.id+'" class="edit btn btn-primary btn-sm mr-1" type="button" data-toggle="tooltip" title="Edit"><i class="fas fa-pencil-alt"></i></button>';
                             buttons += '<button type="submit" name="delete" id="'+row.id+'" class="delete btn btn-danger btn-sm" data-toggle="tooltip" title="Remove"><i class="far fa-trash-alt"></i></button>';
 
@@ -230,7 +203,7 @@
             });
 
             $('#create_record').click(function(){
-                $('.modal-title').text('Add New Department');
+                $('.modal-title').text('Add New Section');
                 $('#action_button').html('Add');
                 $('#action').val('Add');
                 $('#form_result').html('');
@@ -245,10 +218,10 @@
                 var action_url = '';
 
                 if ($('#action').val() == 'Add') {
-                    action_url = "{{ route('addDepartment') }}";
+                    action_url = "{{ route('addSection') }}";
                 }
                 if ($('#action').val() == 'Edit') {
-                    action_url = "{{ route('Department.update') }}";
+                    action_url = "{{ route('Section.update') }}";
                 }
 
                 $.ajax({
@@ -292,14 +265,11 @@
                     var id = $(this).attr('id');
                     $('#form_result').html('');
                     $.ajax({
-                        url: "../Department/" + id + "/edit",
+                        url: "../Section/" + id + "/edit",
                         dataType: "json",
                         success: function (data) {
-                            $('#name').val(data.result.name);
-                            $('#hidden_id').val(id);
-                            $('.modal-title').text('Edit Department');
-                            $('#action_button').html('Edit');
-                            $('#action').val('Edit');
+                            $('#name').val(data.result.section);
+                            
                             $('#employee_f_wrapper').show();
 
                             if (data.result.emp_id) {
@@ -313,6 +283,11 @@
                             } else {
                                 $('#employee_f').empty().trigger('change');
                             }
+
+                            $('#hidden_id').val(id);
+                            $('.modal-title').text('Edit Section');
+                            $('#action_button').html('Edit');
+                            $('#action').val('Edit');
 
                             $('#formModal').modal('show');
                         }
@@ -329,7 +304,7 @@
         if (r == true) {
             user_id = $(this).attr('id');
             $.ajax({
-                url: "../Department/destroy/" + user_id,
+                url: "../Section/destroy/" + user_id,
                 beforeSend: function () {
                     $('#ok_button').text('Deleting...');
                 },

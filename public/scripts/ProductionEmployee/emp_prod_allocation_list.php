@@ -13,6 +13,8 @@ $columns = array(
     array('db' => 'employees.emp_name_with_initial', 'dt' => 'emp_name_with_initial', 'field' => 'emp_name_with_initial'),
     array('db' => 'COALESCE(departments.name, "")', 'dt' => 'department_name', 'field' => 'department_name', 'as' => 'department_name'),
     array('db' => 'emp_production_allocation.department_id', 'dt' => 'department_id', 'field' => 'department_id'),
+    array('db' => 'COALESCE(department_sections.section, "")', 'dt' => 'section_name', 'field' => 'section_name', 'as' => 'section_name'),
+    array('db' => 'emp_production_allocation.section_id', 'dt' => 'section_id', 'field' => 'section_id'),
 );
 
 $sql_details = array(
@@ -33,7 +35,12 @@ if (!empty($_POST['company'])) {
 
 if (!empty($_POST['department'])) {
     $department = $_POST['department'];
-    $extraWhere .= " AND employees.emp_department = '$department'";
+    $extraWhere .= " AND emp_production_allocation.department_id = '$department'";
+}
+
+if (!empty($_POST['section'])) {
+    $section = $_POST['section'];
+    $extraWhere .= " AND emp_production_allocation.section_id = '$section'";
 }
 
 if (!empty($_POST['employee'])) {
@@ -55,6 +62,7 @@ if (!empty($_POST['from_date']) && !empty($_POST['to_date'])) {
 $joinQuery = "FROM emp_production_allocation
 LEFT JOIN employees ON emp_production_allocation.emp_id = employees.emp_id AND employees.deleted = 0
 LEFT JOIN departments ON emp_production_allocation.department_id = departments.id
+LEFT JOIN department_sections ON emp_production_allocation.section_id = department_sections.id
 LEFT JOIN branches ON employees.emp_location = branches.id
 LEFT JOIN companies ON employees.emp_company = companies.id
 ";
