@@ -41,6 +41,7 @@ class ProductionDetailController extends Controller
 
         $production = new ProductionDetail;
         $production->department_id = $request->input('department');
+        $production->section_id = $request->input('section');
         $production->men_incentive = $request->input('men_incentive');
         $production->women_incentive = $request->input('women_incentive');
         $production->remark = $request->input('remark');
@@ -56,11 +57,15 @@ class ProductionDetailController extends Controller
         $letters = DB::table('emp_production_details')
             ->leftjoin('departments', 'emp_production_details.department_id', '=', 'departments.id')
             ->leftjoin('companies', 'departments.company_id', '=', 'companies.id')
-            ->select('emp_production_details.*', 'departments.name As department_name')
+            ->leftjoin('department_sections', 'emp_production_details.section_id', '=', 'department_sections.id')
+            ->select('emp_production_details.*', 'departments.name As department_name', 'department_sections.section As section_name')
             ->get();
         
         return Datatables::of($letters)
             ->addIndexColumn()
+            ->editColumn('section_name', function ($row) {
+                return $row->section_name ?? '';
+            })
             ->addColumn('action', function ($row) {
                 $btn = '';
                 if(Auth::user()->can('production-detail-edit')){
@@ -88,10 +93,12 @@ class ProductionDetailController extends Controller
         if (request()->ajax()) {
             $data = DB::table('emp_production_details')
                 ->leftjoin('departments', 'emp_production_details.department_id', '=', 'departments.id')
+                ->leftjoin('department_sections', 'emp_production_details.section_id', '=', 'department_sections.id')
                 ->leftjoin('companies', 'departments.company_id', '=', 'companies.id')
                 ->select(
                     'emp_production_details.*', 
                     'departments.name as department_name',
+                    'department_sections.section as section_name',
                     'departments.company_id',
                     'companies.name as company_name'
                 )
@@ -113,6 +120,7 @@ class ProductionDetailController extends Controller
 
         $form_data = array(
             'department_id' => $request->input('department'),
+            'section_id' => $request->input('section'),
             'men_incentive' => $request->input('men_incentive'),
             'women_incentive' => $request->input('women_incentive'),
             'remark' => $request->input('remark'),

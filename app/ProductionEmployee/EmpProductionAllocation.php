@@ -11,6 +11,7 @@ class EmpProductionAllocation extends Model
     protected $fillable = [
         'date',
         'department_id',
+        'section_id',
         'emp_id',
         'status',
         'created_by',

@@ -33,6 +33,7 @@ class ProductionApproveController extends Controller
 
         $company    = $request->get('company');
         $department = $request->get('department');
+        $section    = $request->get('section');
         $employee   = $request->get('employee');
         $from_date  = $request->get('from_date');
         $to_date    = $request->get('to_date');
@@ -47,6 +48,10 @@ class ProductionApproveController extends Controller
                 'departments.name as department_name'
             )
             ->leftJoin('departments', 'employees.emp_department', '=', 'departments.id')
+            ->leftJoin('emp_production_allocation', function($join) use ($from_date, $to_date) {
+                $join->on('emp_production_allocation.emp_id', '=', 'employees.emp_id')
+                    ->whereBetween('emp_production_allocation.date', [$from_date, $to_date]);
+            })
             ->where('employees.deleted', 0)
             ->where('employees.is_resigned', 0);
 
@@ -57,15 +62,13 @@ class ProductionApproveController extends Controller
             $query->where('employees.emp_company', $company);
         }
         if ($department != '') {
-            $query->where('employees.emp_department', $department);
+            $query->where('emp_production_allocation.department_id', $department);
+        }
+        if ($section != '') {
+            $query->where('emp_production_allocation.section_id', $section);
         }
 
-        $query->whereExists(function ($sub) use ($from_date, $to_date) {
-            $sub->select(DB::raw(1))
-                ->from('emp_production_allocation')
-                ->whereColumn('emp_production_allocation.emp_id', 'employees.emp_id')
-                ->whereBetween('emp_production_allocation.date', [$from_date, $to_date]);
-        });
+        $query->whereNotNull('emp_production_allocation.id');
 
         $query->groupBy(
             'employees.id',
@@ -85,6 +88,8 @@ class ProductionApproveController extends Controller
             $allocations = DB::table('emp_production_allocation')
                 ->whereBetween('date', [$from_date, $to_date])
                 ->where('emp_id', $record->emp_id)
+                ->when($department != '', function($q) use ($department) { return $q->where('department_id', $department); })
+                ->when($section != '', function($q) use ($section) { return $q->where('section_id', $section); })
                 ->get();
 
             $overallTotal  = 0;
@@ -99,7 +104,7 @@ class ProductionApproveController extends Controller
             foreach ($allocations as $allocation) {
 
                 $detail = DB::table('emp_production_details')
-                    ->where('department_id', $allocation->department_id)
+                    ->where('section_id', $allocation->section_id)
                     ->first();
 
                 if ($detail) {
@@ -147,13 +152,13 @@ class ProductionApproveController extends Controller
 
         foreach ($dataarry as $row) {
 
-            $empid         = $row['empid'];
+            $empid         = $row['empid'];       
             $empname       = $row['emp_name'];
             $overall_total = $row['overall_total'];
-            $autoid        = $row['emp_auto_id'];
+            $autoid        = $row['emp_auto_id']; 
 
             DB::table('emp_production_allocation')
-                ->where('emp_id', $autoid)
+                ->where('emp_id', $empid)
                 ->whereBetween('date', [$from_date, $to_date])
                 ->update(['status' => 1]);
 
@@ -229,6 +234,8 @@ class ProductionApproveController extends Controller
         $emp_id    = $request->input('emp_id');
         $from_date = $request->input('from_date');
         $to_date   = $request->input('to_date');
+        $department = $request->input('department');  
+        $section    = $request->input('section');     
 
         $employee = DB::table('employees')
             ->where('emp_id', $emp_id)
@@ -243,13 +250,25 @@ class ProductionApproveController extends Controller
 
         $allocations = DB::table('emp_production_allocation')
             ->join('departments', 'emp_production_allocation.department_id', '=', 'departments.id')
-            ->leftJoin('emp_production_details', 'emp_production_allocation.department_id', '=', 'emp_production_details.department_id')
+            ->leftJoin('department_sections', 'emp_production_allocation.section_id', '=', 'department_sections.id')
             ->where('emp_production_allocation.emp_id', $emp_id)
             ->whereBetween('emp_production_allocation.date', [$from_date, $to_date])
+            ->when($department != '', function($q) use ($department) { 
+                return $q->where('emp_production_allocation.department_id', $department); 
+            })
+            ->when($section != '', function($q) use ($section) { 
+                return $q->where('emp_production_allocation.section_id', $section); 
+            })
             ->select(
                 'emp_production_allocation.date',
                 'departments.name as department_name',
-                DB::raw("COALESCE(emp_production_details.{$incentiveField}, 0) as incentive")
+                'department_sections.section as section_name',
+                DB::raw("COALESCE((
+                    SELECT {$incentiveField} 
+                    FROM emp_production_details 
+                    WHERE emp_production_details.section_id = emp_production_allocation.section_id 
+                    LIMIT 1
+                ), 0) as incentive")
             )
             ->orderBy('emp_production_allocation.date', 'asc')
             ->get();

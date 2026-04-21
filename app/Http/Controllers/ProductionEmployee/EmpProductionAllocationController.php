@@ -29,7 +29,11 @@ class EmpProductionAllocationController extends Controller
             ->orderBy('name')
             ->get();
 
-        return view('ProductionEmployee.empAllocation', compact('departments'));
+        $sections = DB::table('department_sections')
+            ->orderBy('section')
+            ->get();
+
+        return view('ProductionEmployee.empAllocation', compact('departments', 'sections'));
     }
 
     public function insert(Request $request)
@@ -45,6 +49,7 @@ class EmpProductionAllocationController extends Controller
             'tableData.*.col_1'  => 'required|string',
             'tableData.*.col_3'  => 'required|date',
             'tableData.*.col_4'  => 'required|integer|min:1',  
+            'tableData.*.col_5'  => 'required|integer|min:1',  
         ]);
 
         try {
@@ -54,6 +59,7 @@ class EmpProductionAllocationController extends Controller
                 $emp_id = $row['col_1'];
                 $date = $row['col_3'];
                 $department_id = $row['col_4'];
+                $section_id = $row['col_5'];
 
                 $employee = DB::table('employees')
                     ->where('emp_id', $emp_id)
@@ -67,16 +73,18 @@ class EmpProductionAllocationController extends Controller
                 $existing = EmpProductionAllocation::where('emp_id', $emp_id)
                     ->where('date', $date)
                     ->where('department_id', $department_id)
+                    ->where('section_id', $section_id)
                     ->where('status', '!=', '3')
                     ->first();
 
                 if ($existing) {
-                    throw new \Exception("Reading already exists for Employee {$emp_id} on {$date} for Department ID {$department_id}");
+                    throw new \Exception("Reading already exists for Employee {$emp_id} on {$date} for Department ID {$department_id} and {$section_id}");
                 }
 
                 EmpProductionAllocation::create([
                     'date' => $date,
                     'department_id' => $department_id,
+                    'section_id' => $section_id,
                     'emp_id' => $emp_id,
                     'status' => '0',
                     'created_by' => Auth::id(),
@@ -112,6 +120,7 @@ class EmpProductionAllocationController extends Controller
                 <td>' . ($data->employee ? $data->employee->emp_name_with_initial : 'N/A') . '</td>
                 <td>' . $data->date . '</td>
                 <td>' . $data->department_id . '</td>
+                <td>' . $data->section_id . '</td>
                 <td class="text-right">
                     <button type="button" onclick="productDelete(this);" class="btn btn-danger btn-sm">
                         <i class="fas fa-trash-alt"></i>
@@ -145,6 +154,7 @@ class EmpProductionAllocationController extends Controller
             'tableData.*.col_1'  => 'required|string',
             'tableData.*.col_3'  => 'required|date',
             'tableData.*.col_4'  => 'required|integer|min:1',
+            'tableData.*.col_5'  => 'required|integer|min:1',
         ]);
 
         try {
@@ -154,6 +164,8 @@ class EmpProductionAllocationController extends Controller
             $emp_id = $row['col_1'];
             $date = $row['col_3'];
             $department_id = $row['col_4'];
+            $section_id = $row['col_5'];
+
 
             $employee = DB::table('employees')
                 ->where('emp_id', $emp_id)
@@ -167,18 +179,20 @@ class EmpProductionAllocationController extends Controller
             $existing = EmpProductionAllocation::where('emp_id', $emp_id)
                 ->where('date', $date)
                 ->where('department_id', $department_id)
+                ->where('section_id', $section_id)
                 ->where('status', '!=', '3')
                 ->where('id', '!=', $id)
                 ->first();
 
             if ($existing) {
-                throw new \Exception("Reading already exists for Employee {$emp_id} on {$date} for Department ID {$department_id}");
+                throw new \Exception("Reading already exists for Employee {$emp_id} on {$date} for Department ID {$department_id} and {$section_id}");
             }
 
             EmpProductionAllocation::findOrFail($id)->update([
                 'date' => $date,
                 'emp_id' => $emp_id,
                 'department_id' => $department_id,
+                'section_id'=> $section_id,
                 'updated_by' => Auth::id(),
                 'updated_at' => Carbon::now(),
             ]);
