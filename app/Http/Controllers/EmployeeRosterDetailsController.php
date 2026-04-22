@@ -7,7 +7,8 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\ShiftChangeLog;
 use Auth;
-
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 class EmployeeRosterDetailsController extends Controller
 {
     /**
@@ -137,4 +138,95 @@ class EmployeeRosterDetailsController extends Controller
 
         return response()->json($rosters);
     }
+
+
+    public function colnerosterstore(Request $request)
+    {
+        $user = Auth::user();
+        $permission = $user->can('employee-roster-view');
+        if (!$permission) {
+            return response()->json(['error' => 'UnAuthorized']);
+        }
+
+        $departmentId = $request->get('department_id');
+        $month = $request->get('Month');
+
+        if (!$departmentId || !$month) {
+            return response()->json(['error' => 'Missing department_id or month'], 400);
+        }
+
+        // Current month date range
+        $startDate = $month . '-01';
+        $endDate = date('Y-m-t', strtotime($startDate));
+
+        // Next month date range
+        $nextMonthStart = date('Y-m-01', strtotime('+1 month', strtotime($startDate)));
+        $nextMonthEnd   = date('Y-m-t', strtotime($nextMonthStart));
+
+        // Fetch all roster records for the given month + department
+        $rosters = DB::table('employee_roster_details')
+            ->select(
+                'employee_roster_details.id',
+                'employee_roster_details.shift_id',
+                'employee_roster_details.emp_id',
+                'employee_roster_details.work_date',
+                'employee_roster_details.scheduling_status',
+                'employee_roster_details.remark'
+            )
+            ->leftJoin('employees', 'employee_roster_details.emp_id', '=', 'employees.emp_id')
+            ->whereBetween('employee_roster_details.work_date', [$startDate, $endDate])
+            ->where('employees.emp_department', $departmentId)
+            ->get();
+
+        if ($rosters->isEmpty()) {
+            return response()->json(['message' => 'No roster records found for the given month and department'], 404);
+        }
+
+        $newRecords   = [];
+        $skippedDates = [];
+        $current_date_time    = Carbon::now()->toDateTimeString();;
+
+        foreach ($rosters as $roster) {
+            // Calculate the day offset within the month
+            $originalDay = date('d', strtotime($roster->work_date));
+            $newWorkDate = date('Y-m-', strtotime($nextMonthStart)) . $originalDay;
+
+            // Skip if this day doesn't exist in the next month (e.g., Jan 31 → Feb has no 31)
+            if ($newWorkDate > $nextMonthEnd) {
+                $skippedDates[] = $roster->work_date;
+                continue;
+            }
+
+
+            $exists = DB::table('employee_roster_details')
+                ->where('emp_id', $roster->emp_id)
+                ->where('work_date', $newWorkDate)
+                ->exists();
+
+            if ($exists) {
+                $skippedDates[] = $newWorkDate;
+                continue;
+            }
+
+            $newRecords[] = [
+                'shift_id'           => $roster->shift_id,
+                'emp_id'             => $roster->emp_id,
+                'work_date'          => $newWorkDate,
+                'scheduling_status'  => $roster->scheduling_status,
+                'remark'             => $roster->remark,
+                'created_at'         => $current_date_time,
+                'updated_at'         => $current_date_time,
+            ];
+        }
+
+        if (!empty($newRecords)) {
+            foreach (array_chunk($newRecords, 500) as $chunk) {
+                DB::table('employee_roster_details')->insert($chunk);
+            }
+        }
+
+        return response()->json(['success' => 'Roster cloned successfully to next month']);
+    }
+
+
 }

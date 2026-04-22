@@ -32,6 +32,7 @@ class LatePolicyService
                 return false; // Simply return false if any field is null
             }
 
+    
 
         $latetype = $jobcategory->late_type;
         $shortleave = $jobcategory->short_leaves;
@@ -74,10 +75,7 @@ class LatePolicyService
      */
     private function processLateType1($empData, $leaveType, $minitescount, $half_short, $date)
     {
-        if (empty($minitescount)) {
-            return;
-        }
-
+         
         // Calculate total minutes for the month
         $totalMinutes = DB::table('employee_late_attendance_minites')
             ->where('emp_id', $empData->emp_id)
@@ -91,12 +89,16 @@ class LatePolicyService
             ->where('attendance_date', '!=', $date)
             ->first();
 
+          
+
        if ($attendanceminitesrecord) {
             $totalminitescount = $totalMinutes + $attendanceminitesrecord->minites_count;
         } else {
             $totalminitescount = $totalMinutes;
         }
+         
 
+         
 
         // Create leave record based on minutes threshold
         if ($minitescount < $totalminitescount) {
@@ -104,6 +106,8 @@ class LatePolicyService
         } else {
             $this->createLeaveRecord($empData, $leaveType, $half_short, $half_short);
         }
+
+
     }
 
     /**
@@ -158,8 +162,12 @@ class LatePolicyService
         $leave->reson = 'Late';
         $leave->comment = '';
         $leave->emp_covering = '';
-        $leave->leave_approv_person = Auth::id();
-        $leave->status = 'Pending';
+        $leave->leave_approv_person = Auth::id() ?? 1;
+        $leave->status = 'Approved';
+        $leave->approve_01 =  1;
+        $leave->approve_01_by = Auth::id()?? 1;
+        $leave->approve_02 =  1;
+        $leave->approve_02_by = Auth::id()?? 1;
         $leave->save();
     }
 }

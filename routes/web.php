@@ -1456,6 +1456,7 @@ Route::get('/getrostershifts', 'EmployeeRosterController@getshifts');
 Route::post('fullrosterstore', 'EmployeeRosterDetailsController@fullrosterstore')->name('fullrosterstore');
 
 Route::get('get-view-roster-data', 'EmployeeRosterDetailsController@getViewRosterData');
+Route::post('colnerosterstore', 'EmployeeRosterDetailsController@colnerosterstore')->name('colnerosterstore');
 
 
 // Commen Get Records
