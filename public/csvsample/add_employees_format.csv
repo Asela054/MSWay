@@ -1,1 +1,2 @@
-ETF No,Employee ID,First Name,Middle Name,Last Name,Full Name,Name with Initial,Calling Name,Identity Card No,Mobile No,Birthday,Address,Join Date,Department,"status (Permenent, Tempary, Intern)",Basic Salary,Acount Number,Bank code,Branch code
+ETF No,Employee ID,First Name,Middle Name,Last Name,Full Name,Name with Initial,Calling Name,Identity Card No,Mobile No,Birthday,Address,Join Date,Department ( similar to the system),Employment status ( similar to the system),Basic Salary,Acount Number,Bank code,Branch code
+0,255,kamal,kamal,perera,kamal perera,K. perera,kamal,1234546789,776589744,2000.08.31,colombo,2026.02.05,MANAGEMENT,Permenent,20000,123456,22,22

@@ -101,13 +101,25 @@ class EmployeeUploadController extends Controller
                 if (!$departmentId) {
                     $errors[] = "Line {$currentLine}: Department '{$employeeData['department']}' not found in system";
                     continue;
-                }  
+                } 
                 
-                try {
-                    $emp_birthday = Carbon::parse($employeeData['emp_birthday'])->format('Y-m-d');
-                    $emp_join_date = Carbon::parse($employeeData['emp_join_date'])->format('Y-m-d');
-                } catch (\Exception $e) {
-                    $errors[] = "Line {$currentLine}: Invalid date format. Please use YYYY-MM-DD format";
+                $statuses = \App\EmploymentStatus::pluck('id', 'emp_status')->toArray();
+                $statusId = $statuses[$employeeData['status']] ?? null;
+
+                if (!$statusId) {
+                    $errors[] = "Line {$currentLine}: Employment Status '{$employeeData['status']}' not found in system";
+                    continue;
+                }
+                
+                $emp_birthday = $this->parseDate($employeeData['emp_birthday']);
+                if (!$emp_birthday) {
+                    $errors[] = "Line {$currentLine}: Invalid birthday date format: " . $employeeData['emp_birthday'];
+                    continue;
+                }
+
+                $emp_join_date = $this->parseDate($employeeData['emp_join_date']);
+                if (!$emp_join_date) {
+                    $errors[] = "Line {$currentLine}: Invalid join date format: " . $employeeData['emp_join_date'];
                     continue;
                 }
                 
@@ -128,7 +140,7 @@ class EmployeeUploadController extends Controller
                             'emp_address' => $employeeData['emp_address'],
                             'emp_join_date' => $emp_join_date,
                             'emp_department' => $departmentId,
-                            'emp_status' => $employeeData['status'],
+                            'emp_status' => $statusId,
                         ]
                     );
 
@@ -167,5 +179,40 @@ class EmployeeUploadController extends Controller
         }
 
         return response()->json(['success' => 'Employee records uploaded successfully.']);
+    }
+
+    private function parseDate($dateString)
+    {
+        try {
+            $dateString = trim($dateString);
+            
+            $formats = [
+                'm/d/Y',
+                'n/j/Y',
+                'd/m/Y',
+                'Y-m-d',
+                'Y/m/d',
+                'd-m-Y',
+                'm-d-Y',
+                'Y.m.d',
+                'd.m.Y',
+                'm.d.Y',
+            ];
+
+            foreach ($formats as $format) {
+                $date = \DateTime::createFromFormat($format, $dateString);
+                if ($date !== false) {
+                    $errors = \DateTime::getLastErrors();
+                    if ($errors && $errors['warning_count'] === 0 && $errors['error_count'] === 0) {
+                        return $date->format('Y-m-d');
+                    }
+                }
+            }
+
+            return Carbon::parse($dateString)->format('Y-m-d');
+            
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 }
