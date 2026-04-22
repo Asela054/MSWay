@@ -208,6 +208,8 @@ class AttendancePolicyService
     private  function checkAndInsertLateAttendance($empId, $date, $firstCheckin, $attendanceId)
     {
 
+       $latePolicyService = new LatePolicyService();
+
         $lateMinutes = 0;
         $isLate = false;
 
@@ -263,24 +265,51 @@ class AttendancePolicyService
 
                 // Get shift on-duty time
                 $shiftType = DB::table('shift_types')
-                    ->select('late_time','leave_early_time')
+                    ->select('late_time','leave_early_time','onduty_time', 'offduty_time','saturday_onduty_time', 'saturday_offduty_time')
                     ->where('id', $shiftId)
                     ->first();
 
+                if (!$shiftType) {
+                    return true;
+                }
+
+            $isSaturday = Carbon::parse($date)->isSaturday();
+
+            if ($isSaturday && $shiftType->saturday_onduty_time && $shiftType->saturday_offduty_time) {
+
+                $onDutyTime  = Carbon::parse($shiftType->saturday_onduty_time);
+                $offDutyTime = Carbon::parse($shiftType->saturday_offduty_time);
+            } else {
+                $onDutyTime  = Carbon::parse($shiftType->onduty_time);
+                $offDutyTime = Carbon::parse($shiftType->offduty_time);
+            }
+
+            $checkInTime = Carbon::parse($firstCheckin);
+
+            // Determine whether this punch is a check-in or a check-out by measuring how close the punch time is to each boundary.
+            // If the punch is closer to off-duty time than on-duty time,
+            // it is most likely a check-out punch — so we skip late marking to avoid incorrectly flagging a clock-out as a late arrival.
+            $diffFromOnDuty  = abs($checkInTime->diffInMinutes($onDutyTime));
+            $diffFromOffDuty = abs($checkInTime->diffInMinutes($offDutyTime));
+
+            if ($diffFromOffDuty < $diffFromOnDuty) {
+                // This punch is closer to off-duty time → treat as check-out, not check-in Skip late attendance evaluation to prevent false late records
+                return true;
+            }
 
 
-                if ($shiftType && $shiftType->late_time) {
+                if ($shiftType->late_time) {
 
-                $ondutylateTime = new DateTime($shiftType->late_time);
-                $checkInTime = new DateTime($firstCheckin);
+                    $ondutylateTime = new DateTime($shiftType->late_time);
+                    $checkInTime = new DateTime($firstCheckin);
 
-                $interval = $checkInTime->diff($ondutylateTime);
-                $lateMinutes = ($interval->h * 60) + $interval->i;
+                    $interval = $checkInTime->diff($ondutylateTime);
+                    $lateMinutes = ($interval->h * 60) + $interval->i;
 
-                    // Check if check-in time is after on-duty time
-                    if ($checkInTime > $ondutylateTime) {
-                        $isLate = true;
-                    }
+                        // Check if check-in time is after on-duty time
+                        if ($checkInTime > $ondutylateTime) {
+                            $isLate = true;
+                        }
                 }   
             
                 if ($isLate){
@@ -292,10 +321,12 @@ class AttendancePolicyService
                             'check_in_time' => $firstCheckin,
                             'check_out_time' => 0,
                             'working_hours' => 0,
-                            'created_by' => Auth::id()
+                            'created_by' => Auth::id() ?? 1,
+                            'is_approved' => 1,
+                            'approved_by' => Auth::id() ?? 1,
                         ];
 
-                    DB::table('employee_late_attendances')->insert($lateAttendanceData);
+                    $insertedId = DB::table('employee_late_attendances')->insertGetId($lateAttendanceData);
 
                     // Insert new late minutes record
                     $lateMinutesData = [
@@ -306,6 +337,15 @@ class AttendancePolicyService
                     ];
                     
                     DB::table('employee_late_attendance_minites')->insert($lateMinutesData);
+
+
+                    $emp_data = DB::table('employee_late_attendances')->find($insertedId);
+
+                    if ($emp_data) {
+                        $leave_type = 7;
+                        
+                        $latePolicyService->processLateAttendance($emp_data, $leave_type, $date);     
+                    }
 
                 }
             return true;

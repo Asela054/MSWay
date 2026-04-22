@@ -22,27 +22,26 @@
         <div class="card">
             <div class="card-body p-0 p-2">
                 <div class="row">
-                <div class="col-md-12">
-                    <button class="btn btn-warning btn-sm filter-btn float-right px-3" type="button"
-                        data-toggle="offcanvas" data-target="#offcanvasRight"
-                        aria-controls="offcanvasRight"><i class="fas fa-filter mr-1"></i> Filter
-                        Options</button>
+                    <div class="col-md-12">
+                        <button class="btn btn-warning btn-sm filter-btn float-right px-3" type="button"
+                            data-toggle="offcanvas" data-target="#offcanvasRight" aria-controls="offcanvasRight"><i
+                                class="fas fa-filter mr-1"></i> Filter
+                            Options</button>
+                    </div>
+                    <div class="col-12">
+                        <hr class="border-dark">
+                    </div>
                 </div>
-                <div class="col-12">
-                    <hr class="border-dark">
+                <form id="shiftForm">
+                    <button type="submit" id="saveroster" class="btn btn-sm btn-primary float-right d-none">Save Roster To Next Month</button>
+                </form><br><br>
+                <div class="center-block fix-width scroll-inner my-2">
+                    <table class="table table-striped table-bordered table-sm small nowrap" style="width: 100%"
+                        id="shiftTable">
+                        <thead></thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
-                </div>
-
-
-
-
-<div class="center-block fix-width scroll-inner my-2">
-    <table class="table table-striped table-bordered table-sm small nowrap" style="width: 100%" id="shiftTable">
-        <thead></thead>
-        <tbody></tbody>
-    </table>
-</div>
-
 
             </div>
         </div>
@@ -183,7 +182,7 @@ $(document).ready(function() {
                 loadRosterData(departmentId, selectedMonth).then(rosterData => {
                 generateViewTable(selectedMonth, rosterData);
                 });
-
+                $('#saveroster').removeClass('d-none');
               
             }
         });
@@ -246,6 +245,70 @@ $(document).ready(function() {
                 tbody.innerHTML += row;
             });
     }
+
+
+     // Handle form submit for colne
+    $('#shiftForm').on('submit', function(e) {
+        e.preventDefault();
+        let department = $('#department').val();
+        let selectedMonth = $('#month').val();
+
+         $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        })
+
+        $.ajax({
+            url: '{!! route("colnerosterstore") !!}',
+            type: 'POST',
+            data: { 
+                department_id: department, 
+                Month: selectedMonth
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response.errors) {
+                    const actionObj = {
+                        icon: 'fas fa-warning',
+                        title: '',
+                        message: 'Record Error',
+                        url: '',
+                        target: '_blank',
+                        type: 'danger'
+                    };
+                    const actionJSON = JSON.stringify(actionObj, null, 2);
+                    action(actionJSON);
+                }
+                if (response.success) {
+                    const actionObj = {
+                        icon: 'fas fa-save',
+                        title: '',
+                        message: response.success,
+                        url: '',
+                        target: '_blank',
+                        type: 'success'
+                    };
+                    const actionJSON = JSON.stringify(actionObj, null, 2);
+                    $('#shiftForm')[0].reset();
+                    actionreload(actionJSON);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+                const actionObj = {
+                    icon: 'fas fa-times',
+                    title: '',
+                    message: 'Something went wrong!',
+                    url: '',
+                    target: '_blank',
+                    type: 'danger'
+                };
+                const actionJSON = JSON.stringify(actionObj, null, 2);
+                action(actionJSON);
+            }
+        });
+    });
 
 });
 </script>
