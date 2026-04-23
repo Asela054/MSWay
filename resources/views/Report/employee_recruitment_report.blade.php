@@ -31,7 +31,7 @@
                             <table class="table table-striped table-bordered table-sm small nowrap" style="width: 100%" id="emptable">
                                 <thead>
                                 <tr>
-                                    <th>ID</th>
+                                    <th>EMPLOYEE ID</th>
                                     <th>EMPLOYEE</th>
                                     <th>FIRST INTERVIWER</th>
                                     <th>FIRST INTERVIWE DATE</th>
@@ -50,7 +50,7 @@
                             <table class="table table-striped table-bordered table-sm small nowrap" style="width: 100%" id="tableinterviwer">
                                 <thead>
                                 <tr>
-                                    <th>ID</th>
+                                    <th>EMPLOYEE ID</th>
                                     <th>EMPLOYEE</th>
                                     <th>DEPARTMENT</th>
                                     <th>INTERVIWER</th>
@@ -295,8 +295,8 @@ $('#formFilter').on('submit',function(e) {
                     }
                 },
                 columns: [{
-                        data: 'id',
-                        name: 'id'
+                        data: 'emp_id',
+                        name: 'emp_id'
                     },
                     {
                         data: 'emp_name_with_initial',
