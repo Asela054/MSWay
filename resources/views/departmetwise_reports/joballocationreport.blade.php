@@ -32,6 +32,7 @@
                             <table class="table table-striped table-bordered table-sm small nowrap" style="width: 100%" id="emptable">
                                 <thead>
                                 <tr>
+                                    <th>EMPLOYEE ID</th>
                                     <th>EMPLOYEE</th>
                                     <th>DATE</th>
                                     <th>LOCATION</th>
@@ -176,6 +177,10 @@ load_dt('','', '','');
                 'employee_f': employee_f},
         },
         columns: [
+                        {
+                            "data": "emp_id",
+                            "name": "emp_id",
+                        },
                         {
                             "data": "employee_display",
                             "name": "employee_display",
