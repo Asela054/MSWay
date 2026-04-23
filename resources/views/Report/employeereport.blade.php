@@ -30,7 +30,7 @@
                             <table class="table table-striped table-bordered table-sm small nowrap" style="width: 100%" id="emptable">
                                 <thead>
                                 <tr>
-                                    <th>ID</th>
+                                    <th>EMPLOYEE ID</th>
                                     <th>EMPLOYEE</th>
                                     <th>LOCATION</th>
                                     <th>DEPARTMENT</th>
@@ -189,7 +189,7 @@ $(document).ready(function() {
                   data: {'department':department},
             },
             columns: [
-                { data: 'id' },
+                { data: 'emp_id' },
                 { data: 'employee_display' },
                 { data: 'location' },
                 { data: 'dept_name' },
@@ -270,7 +270,7 @@ $(document).ready(function() {
         
         // Prepare table headers
         const headers = [[
-            'ID', 'EMPLOYEE', 'LOCATION', 'DEPARTMENT', 'DOB',
+            'EMPLOYEE ID', 'EMPLOYEE', 'LOCATION', 'DEPARTMENT', 'DOB',
             'MOBILE NO', 'TELEPHONE', 'NIC', 'GENDER', 'EMAIL',
             'ADDRESS', 'TEMP ADDRESS', 'CATEGORY',
             'STATUS', 'PERMANENT'
@@ -313,7 +313,7 @@ $(document).ready(function() {
             }
             
             const row = [
-                value.id || '',
+                value.emp_id || '',
                 value.employee_display || '',
                 value.location || '',
                 value.dept_name || '',
