@@ -973,12 +973,23 @@ class UserAccountController extends Controller
                         END) AS lasttimestamp'),
                     'employees.emp_name_with_initial',
                     'branches.location',
-                    'departments.name as dep_name'
+                    'departments.name as dep_name',
+                     'late_minites.minites_count',
+                    'ot_approved.hours',
+                    'ot_approved.double_hours'
                 )
                 ->from('attendances as at1')
                 ->Join('employees', 'at1.uid', '=', 'employees.emp_id')
                 ->leftJoin('branches', 'at1.location', '=', 'branches.id')
-                ->leftJoin('departments', 'departments.id', '=', 'employees.emp_department');
+                ->leftJoin('departments', 'departments.id', '=', 'employees.emp_department')
+                ->leftJoin('employee_late_attendance_minites as late_minites', function($join) {
+                        $join->on('at1.emp_id', '=', 'late_minites.emp_id')
+                            ->on('at1.date', '=', 'late_minites.attendance_date');
+                    })
+                ->leftJoin('ot_approved', function($join) {
+                    $join->on('at1.emp_id', '=', 'ot_approved.emp_id')
+                        ->on('at1.date', '=', 'ot_approved.date');
+                });
 
             
             if ($employee != '') {
@@ -1010,13 +1021,27 @@ class UserAccountController extends Controller
                     $lasttimestamp = date('H:i', strtotime($row->lasttimestamp));
                     return $lasttimestamp;
                 })
+                ->addColumn('late_minites', function ($row) {
+                    return $row->minites_count ?? '0';
+                })
+                //ot hours column
+                ->addColumn('ot_hours', function ($row) {
+                    return $row->hours ?? '0';
+                })
+                //double hours column
+                ->addColumn('double_hours', function ($row) {
+                    return $row->double_hours ?? '0';
+                })
                
                 ->rawColumns(['action',
                     'emp_name_with_initial',
                     'location',
                     'formatted_date',
                     'first_time_stamp',
-                    'last_time_stamp'
+                    'last_time_stamp',
+                    'late_minites',
+                    'ot_hours',
+                    'double_hours'
                 ])
                 ->make(true);
         } catch (\Exception $e) {

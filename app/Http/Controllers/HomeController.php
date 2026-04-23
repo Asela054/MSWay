@@ -242,6 +242,7 @@ class HomeController extends Controller
             ->whereMonth('leaves.leave_from', $currentMonth)
             ->whereYear('leaves.leave_from', $currentYear)
             ->where('leaves.status', 'Approved')
+            ->where('leaves.leave_type','!=',7)
             ->select(
                 'employees.emp_id',
                 'leave_types.leave_type',

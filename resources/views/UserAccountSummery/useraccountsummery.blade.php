@@ -259,6 +259,9 @@
                                                                                 <th>DATE</th>
                                                                                 <th>CHECK IN</th>
                                                                                 <th>CHECK OUT</th>
+                                                                                <th>LATE TIMES</th>
+                                                                                <th>OT HOUR</th>
+                                                                                <th>DOUBLE OT</th>
                                                                             </tr>
                                                                         </thead>
                                                                         <tbody></tbody>
@@ -1658,6 +1661,18 @@
                 {
                     data: 'last_time_stamp',
                     name: 'last_time_stamp'
+                },
+                {
+                    data: 'late_minites',
+                    name: 'late_minites'
+                },
+                {
+                    data: 'ot_hours',
+                    name: 'ot_hours'
+                },
+                {
+                    data: 'double_hours',
+                    name: 'double_hours'
                 },
 
             ],
