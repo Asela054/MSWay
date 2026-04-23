@@ -31,7 +31,7 @@
                             <table class="table table-striped table-bordered table-sm small nowrap" style="width: 100%" id="dt1">
                                 <thead>
                                 <tr>
-                                    <th>ID</th>
+                                    <th>EMPLOYEE ID</th>
                                     <th>EMPLOYEE</th>
                                     <th>OFFICE</th>
                                     <th>DEPARTMENT</th>
@@ -200,7 +200,7 @@
                      data : {'department':department,'banks':banks},
                 },
                 columns: [
-                    { data: 'id' },
+                    { data: 'emp_id' },
                     { data: 'employee_display' },
                     { data: 'location' },
                     { data: 'dept_name' },

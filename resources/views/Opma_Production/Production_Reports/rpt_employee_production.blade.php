@@ -33,7 +33,7 @@
                             <table class="table table-striped table-bordered table-sm small nowrap" style="width: 100%" id="dataTable">
                                 <thead>
                                     <tr>
-                                        <th>ID</th>
+                                        <th>EMPLOYEE ID</th>
                                         <th>EMPLOYEE</th>
                                         <th>DATE</th>
                                         <th>MACHINE</th>
@@ -346,7 +346,7 @@ $(document).ready(function(){
                     to_date: to_date},
             },
             columns: [
-                { data: 'id', name: 'id' },
+                { data: 'emp_id', name: 'emp_id' },
                 { data: 'emp_name', name: 'emp_name' },
                 { data: 'date', name: 'date' },
                 { data: 'machine', name: 'machine' },
