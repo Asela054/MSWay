@@ -87,6 +87,12 @@
                                 <select name="department" id="department_f" class="form-control form-control-sm"></select>
                             </div>
                           </li>
+                          <li class="mb-2">
+                              <div class="col-md-12">
+                                  <label class="small font-weight-bold text-dark">Section</label>
+                                <select name="section" id="section_f" class="form-control form-control-sm"></select>
+                            </div>
+                          </li>
                            <li class="mb-2">
                               <div class="col-md-12">
                                   <label class="small font-weight-bolder text-dark">Employee</label>
@@ -215,6 +221,7 @@
 											<tr>
 												<th>DATE</th>
                                                 <th>DEPARTMENT</th>
+                                                <th>SECTION</th>
 												<th>INCENTIVE</th>
 											</tr>
 										</thead>
@@ -264,6 +271,7 @@ $(document).ready(function(){
      let company_f = $('#company_f');
      let employee_f = $('#employee_f');
      let department_f = $('#department_f');
+     let section_f = $('#section_f');
 
     company_f.select2({
         placeholder: 'Select a Company',
@@ -300,6 +308,24 @@ $(document).ready(function(){
         }
     });
 
+    section_f.select2({
+        placeholder: 'Select a Section',
+        width: '100%',
+        allowClear: true,
+        ajax: {
+            url: '{{url("section_list_sel2")}}',
+            dataType: 'json',
+            data: function(params) {
+                return {
+                    term: params.term || '',
+                    page: params.page || 1,
+                    department: department_f.val()
+                }
+            },
+            cache: true
+        }
+    });
+
     employee_f.select2({
         placeholder: 'Select...',
         width: '100%',
@@ -319,7 +345,37 @@ $(document).ready(function(){
         }
     });
 
-    function load_dt(company, department, employee, from_date, to_date) {
+    // Department change handler to filter sections
+    $('#department').on('change', function() {
+        var deptId = $(this).val();
+        $('#section').val('');
+        $('#section option').each(function() {
+            if ($(this).val() == '') return;
+            if ($(this).data('department') == deptId) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+    });
+
+    $('#edit_department').on('change', function() {
+        var deptId = $(this).val();
+        $('#edit_section option').each(function() {
+            if ($(this).val() == '') return;
+            if ($(this).data('department') == deptId) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+        
+        if (!window.isEditLoading) {
+            $('#edit_section').val('');
+        }
+    });
+
+    function load_dt(company, department, section, employee, from_date, to_date) {
         $('#dataTable').DataTable({
         "destroy": true,
             "processing": true,
@@ -365,6 +421,7 @@ $(document).ready(function(){
                         _token: '{{ csrf_token() }}',
                     company: company,
                     department: department,
+                    section: section,
                     employee: employee, 
                     from_date: from_date,
                     to_date: to_date
@@ -412,6 +469,7 @@ $(document).ready(function(){
         e.preventDefault();
         let company = $('#company_f').val();
         let department = $('#department_f').val();
+        let section = $('#section_f').val();
         let employee = $('#employee_f').val();
         let from_date = $('#from_date').val();
         let to_date = $('#to_date').val();
@@ -426,7 +484,7 @@ $(document).ready(function(){
             return;
         }
 
-        load_dt(company, department, employee, from_date, to_date);
+        load_dt(company, department, section, employee, from_date, to_date);
         closeOffcanvasSmoothly();
     });
 
@@ -434,6 +492,7 @@ $(document).ready(function(){
         $('#formFilter')[0].reset();
         company_f.val(null).trigger('change');
         department_f.val(null).trigger('change');
+        section_f.val(null).trigger('change');
         employee_f.val(null).trigger('change');
         
         if ($.fn.DataTable.isDataTable('#dataTable')) {
@@ -581,7 +640,9 @@ $(document).ready(function(){
                 _token: '{{ csrf_token() }}',
                 emp_id: emp_id,
                 from_date: from_date,
-                to_date: to_date
+                to_date: to_date,
+                department: $('#department_f').val(),   
+                section: $('#section_f').val(),        
             },
             success: function (data) {
                 $('#loan_modal_employee_name').val(data.emp_name);
@@ -593,6 +654,7 @@ $(document).ready(function(){
                     columns: [
                         { data: 'date',            title: 'DATE' },
                         { data: 'department_name', title: 'DEPARTMENT' },
+                        { data: 'section_name',    title: 'SECTION' },
                         { data: 'incentive',       title: 'INCENTIVE' }
                     ],
                     paging: false,
