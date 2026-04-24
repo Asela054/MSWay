@@ -457,13 +457,17 @@
                         { data: 'employee_display', name: 'employee_display' },
                         { data: 'dep_name', name: 'emp_name' },
                         { data: 'leave_type', name: 'leave_type' },
-                        { 
-                            data: 'half_short', name: 'half_short', render: function(data, type, row) {
-                                if (data == 1) {
+                        {
+                             data: 'no_of_days',
+                            name: 'no_of_days',
+                            render: function(data, type, row) {
+                                var value = parseFloat(data);
+                                
+                                if (value === 1.00) {
                                     return "Full Day";
-                                } else if (data == 0.50) {
+                                } else if (value === 0.50) {
                                     return "Half Day";
-                                } else if (data == 0.25) {
+                                } else if (value === 0.25) {
                                     return "Short Leave";
                                 } else {
                                     return "Unknown";
