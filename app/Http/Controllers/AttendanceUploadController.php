@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\AttendancePolicyService;
 use Illuminate\Http\Request;
 use App\Attendance;
 use Validator;
@@ -11,6 +12,14 @@ use Illuminate\Support\Facades\DB;
 
 class AttendanceUploadController extends Controller
 {
+
+    protected $attendancePolicyService;
+
+    public function __construct(AttendancePolicyService $attendancePolicyService)
+    {
+
+        $this->attendancePolicyService = $attendancePolicyService;
+    }
 
     public function importCSV(Request $request)
     {
@@ -113,30 +122,36 @@ class AttendanceUploadController extends Controller
                 $location = $employee->location ?? '1';
 
                 // Insert IN time - FIXED: Use the actual date for the timestamp
-                Attendance::create([
-                    'emp_id' => $employeeId,
-                    'uid' => $employeeId,
-                    'state' => '1',
-                    'timestamp' => $inTime, // This now has the correct date
-                    'date' => $date, // This is now Y-m-d format
-                    'approved' => '0',
-                    'type' => '255',
-                    'devicesno' => $deviceSno,
-                    'location' => $location,
-                ]);
+                // Attendance::create([
+                //     'emp_id' => $employeeId,
+                //     'uid' => $employeeId,
+                //     'state' => '1',
+                //     'timestamp' => $inTime, // This now has the correct date
+                //     'date' => $date, // This is now Y-m-d format
+                //     'approved' => '0',
+                //     'type' => '255',
+                //     'devicesno' => $deviceSno,
+                //     'location' => $location,
+                // ]);
+
+      
+                $this->attendancePolicyService->attendanceInsertcsv_txt( $employeeId,  $date, $inTime, $date );
+
 
                 // Insert OUT time
-                Attendance::create([
-                    'emp_id' => $employeeId,
-                    'uid' => $employeeId,
-                    'state' => '1', 
-                    'timestamp' => $outTime, // This now has the correct date
-                    'date' => $date, // This is now Y-m-d format
-                    'approved' => '0',
-                    'type' => '255',
-                    'devicesno' => $deviceSno,
-                    'location' => $location,
-                ]);
+                // Attendance::create([
+                //     'emp_id' => $employeeId,
+                //     'uid' => $employeeId,
+                //     'state' => '1', 
+                //     'timestamp' => $outTime, // This now has the correct date
+                //     'date' => $date, // This is now Y-m-d format
+                //     'approved' => '0',
+                //     'type' => '255',
+                //     'devicesno' => $deviceSno,
+                //     'location' => $location,
+                // ]);
+
+                $this->attendancePolicyService->attendanceInsertcsv_txt( $employeeId,  $date, $outTime, $date );
 
                 $successCount++;
 
@@ -240,10 +255,10 @@ class AttendanceUploadController extends Controller
             }
             
             // Combine with the provided date - FIXED: Use the date parameter correctly
-            $combined = $date . ' ' . $parsedTime->format('H:i:s');
+            $combined = $parsedTime->format('H:i:s');
             $result = Carbon::parse($combined);
             
-            return $result->format('Y-m-d H:i:s');
+            return $result->format('H:i:s');
             
         } catch (\Exception $e) {
             return null;
