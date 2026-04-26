@@ -25,6 +25,7 @@ $columns = array(
     array('db' => '`u`.`leave_from`', 'dt' => 'leave_from', 'field' => 'leave_from'),
     array('db' => '`u`.`leave_to`', 'dt' => 'leave_to', 'field' => 'leave_to'),
     array('db' => '`u`.`half_short`', 'dt' => 'half_short', 'field' => 'half_short'),
+    array('db' => '`u`.`no_of_days`', 'dt' => 'no_of_days', 'field' => 'no_of_days'),
     array('db' => '`u`.`status`', 'dt' => 'status', 'field' => 'status'),
     array('db' => '`u`.`reson`', 'dt' => 'reson', 'field' => 'reson'),
     array('db' => '`u`.`emp_id`', 'dt' => 'employee_display', 'field' => 'emp_id', 
@@ -65,6 +66,7 @@ require('ssp.customized.class.php' );
         `leaves`.`leave_from`,
         `leaves`.`leave_to`,
         `leaves`.`half_short`,
+        `leaves`.`no_of_days`,
         `leaves`.`status`,
         `leaves`.`reson`
     FROM `leaves`
