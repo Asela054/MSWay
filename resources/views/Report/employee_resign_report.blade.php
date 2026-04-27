@@ -30,8 +30,8 @@
                             <table class="table table-striped table-bordered table-sm small nowrap" style="width: 100%" id="emptable">
                                 <thead>
                                 <tr>
-                                    <th>ID</th>
-                                   <th>EMPLOYEE</th>
+                                    <th>EMPLOYEE ID</th>
+                                    <th>EMPLOYEE</th>
                                     <th>LOCATION</th>
                                     <th>DEPARTMENT</th>
                                     <th>DATE OF BIRTH</th>
@@ -170,7 +170,7 @@ $(document).ready(function () {
                 },
             },
             columns: [{
-                    data: 'id'
+                    data: 'emp_id'
                 },
                 {
                     data: 'employee_display'
@@ -242,6 +242,9 @@ $(document).ready(function () {
     $('#btn-reset').on('click', function () {
         $('#formFilter')[0].reset();
         $('#department').val(null).trigger('change');
+
+        load_dt('', '', '');
+         closeOffcanvasSmoothly();
     });
 });
 
@@ -351,7 +354,7 @@ function generatePDF() {
         let departmentName = (value.department_name || '').substring(0, 20);
         
         body.push([
-            value.id || '',
+            value.emp_id || '',
             employeeName,
             locationName,
             departmentName,
@@ -370,7 +373,7 @@ function generatePDF() {
     
     // Define headers with clean names
     const headers = [[
-        'ID', 'EMPLOYEE', 'LOCATION', 'DEPT', 'DOB',
+        'EMPLOYEE ID', 'EMPLOYEE', 'LOCATION', 'DEPT', 'DOB',
         'MOBILE', 'NIC', 'GENDER', 'ADDRESS',
         'JOB CATEGORY', 'PERM DATE', 'RESIGN DATE', 'DAYS'
     ]];
@@ -398,7 +401,7 @@ function generatePDF() {
             cellPadding: { top: 3, bottom: 3, left: 2, right: 2 }
         },
         columnStyles: {
-            0: { cellWidth: 12, halign: 'center' },   // ID
+            0: { cellWidth: 12, halign: 'center' },   // EMPLOYEE ID
             1: { cellWidth: 'auto', halign: 'left' },  // EMPLOYEE - auto size
             2: { cellWidth: 20, halign: 'left' },      // LOCATION
             3: { cellWidth: 20, halign: 'left' },      // DEPT
