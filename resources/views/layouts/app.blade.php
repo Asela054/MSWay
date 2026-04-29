@@ -10,12 +10,12 @@
     <title><?= (isset($page_stitle)) ? $page_stitle : ' ShapeUP HRM- By Erav Technology' ?></title>
     <link rel="icon" type="image/x-icon" href="{{url('/images/hrm.png')}}" /> 
     <!-- Styles -->
-    <link href="{{ url('/css/styles.css') }}" rel="stylesheet"/>
-    <link href="{{ url('/css/custom_styles.css') }}" rel="stylesheet"/>
-    <link href="{{ url('/css/bootstrap-datetimepicker.min.css') }}" rel="stylesheet"/>
-    <link href="{{ url('/css/full_calendar.min.css') }}" rel="stylesheet"/>
-    <link href="{{ url('/css/font/flaticon.css') }}" rel="stylesheet"/>
-    <link rel="stylesheet" href="{{ url('/css/fontawesome/css/all.min.css') }}">
+    <link href="{{ url('/public/css/styles.css') }}" rel="stylesheet"/>
+    <link href="{{ url('/public/css/custom_styles.css') }}" rel="stylesheet"/>
+    <link href="{{ url('/public/css/bootstrap-datetimepicker.min.css') }}" rel="stylesheet"/>
+    <link href="{{ url('/public/css/full_calendar.min.css') }}" rel="stylesheet"/>
+    <link href="{{ url('/public/css/font/flaticon.css') }}" rel="stylesheet"/>
+    <link rel="stylesheet" href="{{ url('/public/css/fontawesome/css/all.min.css') }}">
 
     <link href="https://cdn.datatables.net/1.10.22/css/dataTables.bootstrap4.min.css" rel="stylesheet"/>
     <!--link href="{{ asset('css/app.css') }}" rel="stylesheet"-->
@@ -777,125 +777,125 @@
             font-weight: 600;
         }
   
-    .offcanvas {
-        position: fixed;
-        bottom: 0;
-        z-index: 1050;
-        display: flex;
-        flex-direction: column;
-        max-width: 100%;
-        visibility: hidden;
-        background-color: #fff;
-        background-clip: padding-box;
-        outline: 0;
-        transition: transform 0.3s ease-in-out;
-    }
+        .offcanvas {
+            position: fixed;
+            bottom: 0;
+            z-index: 1050;
+            display: flex;
+            flex-direction: column;
+            max-width: 100%;
+            visibility: hidden;
+            background-color: #fff;
+            background-clip: padding-box;
+            outline: 0;
+            transition: transform 0.3s ease-in-out;
+        }
 
-    .offcanvas-end {
-        top: 0;
-        right: 0;
-        width: 400px;
-        border-left: 1px solid rgba(0, 0, 0, 0.2);
-        transform: translateX(100%);
-    }
-
-    .offcanvas.show {
-        transform: none;
-        visibility: visible;
-    }
-    .offcanvas.hiding {
-    transform: translateX(100%);
-    visibility: hidden;
-}
-
-    .offcanvas-backdrop {
-        position: fixed;
-        top: 0;
-        left: 0;
-        z-index: 1040;
-        width: 100vw;
-        height: 100vh;
-        background-color: #000;
-    }
-
-    .offcanvas-backdrop.fade {
-        opacity: 0;
-    }
-
-    .offcanvas-backdrop.show {
-        opacity: 0.5;
-    }
-
-    .offcanvas-backdrop.fading {
-        opacity: 0;
-    }
-
-    .offcanvas-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 1rem 1.5rem;
-        border-bottom: 1px solid #dee2e6;
-        background-color: #f8f9fa;
-    }
-
-    .offcanvas-title {
-        margin-bottom: 0;
-        line-height: 1.5;
-        font-size: 1.25rem;
-        color: #343a40;
-    }
-
-    .btn-close {
-        background: transparent;
-        border: none;
-        cursor: pointer;
-        padding: 0.5rem;
-        opacity: 0.7;
-        transition: opacity 0.15s ease-in-out;
-    }
-
-    .btn-close:hover {
-        opacity: 1;
-    }
-
-    .offcanvas-body {
-        flex-grow: 1;
-        padding: 1.5rem;
-        overflow-y: auto;
-    }
-
-    .list-unstyled {
-        padding-left: 0;
-        list-style: none;
-    }
-
-    @media (max-width: 575.98px) {
         .offcanvas-end {
-            width: 100%;
+            top: 0;
+            right: 0;
+            width: 400px;
+            border-left: 1px solid rgba(0, 0, 0, 0.2);
+            transform: translateX(100%);
+        }
+
+        .offcanvas.show {
+            transform: none;
+            visibility: visible;
+        }
+            .offcanvas.hiding {
+            transform: translateX(100%);
+            visibility: hidden;
+        }
+
+        .offcanvas-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1040;
+            width: 100vw;
+            height: 100vh;
+            background-color: #000;
+        }
+
+        .offcanvas-backdrop.fade {
+            opacity: 0;
+        }
+
+        .offcanvas-backdrop.show {
+            opacity: 0.5;
+        }
+
+        .offcanvas-backdrop.fading {
+            opacity: 0;
         }
 
         .offcanvas-header {
-            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #dee2e6;
+            background-color: #f8f9fa;
+        }
+
+        .offcanvas-title {
+            margin-bottom: 0;
+            line-height: 1.5;
+            font-size: 1.25rem;
+            color: #343a40;
+        }
+
+        .btn-close {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            opacity: 0.7;
+            transition: opacity 0.15s ease-in-out;
+        }
+
+        .btn-close:hover {
+            opacity: 1;
         }
 
         .offcanvas-body {
-            padding: 1rem;
+            flex-grow: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
         }
-    }
 
-    .select2-container * {
-        font-family: inherit !important;
-        font-size: 14px !important;
-        font-weight: normal !important;
+        .list-unstyled {
+            padding-left: 0;
+            list-style: none;
+        }
+
+        @media (max-width: 575.98px) {
+            .offcanvas-end {
+                width: 100%;
+            }
+
+            .offcanvas-header {
+                padding: 1rem;
+            }
+
+            .offcanvas-body {
+                padding: 1rem;
+            }
+        }
+
+        .select2-container * {
+            font-family: inherit !important;
+            font-size: 14px !important;
+            font-weight: normal !important;
+            text-transform: none !important;
+            text-decoration: none !important;
+        }
+
+        .select2-container--default .select2-results__option {
         text-transform: none !important;
         text-decoration: none !important;
-    }
-
-    .select2-container--default .select2-results__option {
-    text-transform: none !important;
-    text-decoration: none !important;
-    }
+        }
     
     </style>
     
@@ -943,7 +943,7 @@
     <div id="app">
         <nav class="topnav navbar navbar-expand shadow navbar-light topnavbarcolor" id="sidenavAccordion">
             <a class="navbar-brand" href="{{ url('/home') }}" style="color: white">
-                <img class="img-fluid" src="{{ url('/images/toplogo.png') }}" alt="Employee Photo"/>
+                <img class="img-fluid" src="{{ url('/public/images/toplogo.png') }}" alt="Employee Photo"/>
             </a>
             @unless(Auth::user()->hasRole('Employee'))
                 <button class="btn btn-icon btn-transparent-dark order-1 order-lg-0 mr-lg-2" id="sidebarToggle" href="#"><i class="fas fa-bars text-light"></i></button>
@@ -971,15 +971,15 @@
                                 $imagePath = '';
                                 
                                 if ($employeePicture && file_exists(public_path("images/{$employeePicture->emp_pic_filename}"))) {
-                                    $imagePath = asset("images/{$employeePicture->emp_pic_filename}");
+                                    $imagePath = asset("public/images/{$employeePicture->emp_pic_filename}");
                                 } else {
                                     $employeeGender = \App\Employee::where('emp_id', $id)->pluck('emp_gender')->first();
                                     if(empty($employeeGender)){
                                         $employeeGender = "Male";
                                     }
                                     $imagePath = $employeeGender == "Male" 
-                                        ? asset("images/man.png") 
-                                        : asset("images/girl.png");
+                                        ? asset("public/images/man.png") 
+                                        : asset("public/images/girl.png");
                                 }
                             @endphp
 
@@ -1046,14 +1046,14 @@
         </div>
     </div>
 <!-- Scripts -->
-<script src="{{ url('/js/app.js') }}"></script>
-<script src="{{ url('/js/jquery-3.4.1.min.js') }}"></script>
-<script src="{{ url('/js/jquery.dataTables.min.js') }}"></script>
-<script src="{{ url('/js/dataTables.bootstrap4.min.js') }}"></script>
-<script src="{{ url('/js/bootstrap.bundle.min.js') }}"></script>
-<script src="{{ url('/js/scripts.js') }}"></script>
-<script src="{{ url('/js/moment.js') }}"></script>
-<script src="{{ url('/js/bootstrap-datetimepicker.js') }}"></script>
+<script src="{{ url('/public/js/app.js') }}"></script>
+<script src="{{ url('/public/js/jquery-3.4.1.min.js') }}"></script>
+<script src="{{ url('/public/js/jquery.dataTables.min.js') }}"></script>
+<script src="{{ url('/public/js/dataTables.bootstrap4.min.js') }}"></script>
+<script src="{{ url('/public/js/bootstrap.bundle.min.js') }}"></script>
+<script src="{{ url('/public/js/scripts.js') }}"></script>
+<script src="{{ url('/public/js/moment.js') }}"></script>
+<script src="{{ url('/public/js/bootstrap-datetimepicker.js') }}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.js"></script>
 
 <!--script src="https://code.jquery.com/jquery-3.4.1.min.js" crossorigin="anonymous"></script>
@@ -1078,8 +1078,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="{{ url('/js/jspdf.umd.js') }}"></script>
-<script src="{{ url('/js/jspdf.plugin.autotable.min.js') }}"></script>
+<script src="{{ url('/public/js/jspdf.umd.js') }}"></script>
+<script src="{{ url('/public/js/jspdf.plugin.autotable.min.js') }}"></script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <!-- autoTable plugin for jsPDF -->
@@ -1116,7 +1116,7 @@
         }
     });
     $(document).ready(function(){
-        window.scripturl = '{{ url('/scripts') }}';
+        window.scripturl = '{{ url('/public/scripts') }}';
     });
     $.extend(true, $.fn.dataTable.defaults, {
         lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
