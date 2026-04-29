@@ -1798,6 +1798,10 @@ Route::post('/opma_productallocationdeletelist' ,'Production_Module_Opma\Product
 
                   // End of Opma Production Section Routes
 
+Route::get('/Privacy-policy', function () {
+    return view('privacypolicy');
+});
+
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');
     Artisan::call('config:clear');

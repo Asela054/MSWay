@@ -131,7 +131,7 @@
                     <p style="font-size:11px;font-weight:700;color:#9ca3af;letter-spacing:0.05em;text-transform:uppercase;margin:0;">
                         POWERED BY <span id="poweredBySep" style="display:none;margin:0 8px;color:#e5e7eb;font-weight:400;">|</span> <span style="color:#1f2937;">eRav Technologies</span>
                     </p>
-                    <a href="#" target="_blank" rel="noopener noreferrer"
+                    <a href="Privacy-policy" target="_blank" rel="noopener noreferrer"
                         style="display:inline-block;margin-top:100px;font-size:12px;font-weight:600;color:#1bc1cb;text-decoration:none;letter-spacing:0.02em;"
                         onmouseover="this.style.color='#18a8b1'" onmouseout="this.style.color='#1bc1cb'">
                         Privacy &amp; Policy
