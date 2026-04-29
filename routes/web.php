@@ -36,14 +36,14 @@ Route::resource('userpermission','UserPermissionController');
 
 Route::get('/home', 'HomeController@index')->name('home');
 
-Route::get('/getdashboard_department_attendance', 'HomeController@department_attendance')->name('getdashboard_department_attendance');
-Route::get('/getdashboard_department_absent', 'HomeController@department_absent')->name('getdashboard_department_absent');
+Route::post('/getdashboard_department_attendance', 'HomeController@department_attendance')->name('getdashboard_department_attendance');
+Route::post('/getdashboard_department_absent', 'HomeController@department_absent')->name('getdashboard_department_absent');
 Route::get('/getdashboard_AttendentChart', 'HomeController@getAttendentChart')->name('getdashboard_AttendentChart');
 
-Route::get('/getdashboard_department_lateattendance', 'HomeController@department_lateattendance')->name('getdashboard_department_lateattendance');
-Route::get('/getdashboard_department_yesterdayattendance', 'HomeController@department_yesterdayattendance')->name('getdashboard_department_yesterdayattendance');
-Route::get('/getdashboard_department_yesterdayabsent', 'HomeController@department_yesterdayabsent')->name('getdashboard_department_yesterdayabsent');
-Route::get('/getdashboard_department_yesterdaylateattendance', 'HomeController@department_yesterdaylateattendance')->name('getdashboard_department_yesterdaylateattendance');
+Route::post('/getdashboard_department_lateattendance', 'HomeController@department_lateattendance')->name('getdashboard_department_lateattendance');
+Route::post('/getdashboard_department_yesterdayattendance', 'HomeController@department_yesterdayattendance')->name('getdashboard_department_yesterdayattendance');
+Route::post('/getdashboard_department_yesterdayabsent', 'HomeController@department_yesterdayabsent')->name('getdashboard_department_yesterdayabsent');
+Route::post('/getdashboard_department_yesterdaylateattendance', 'HomeController@department_yesterdaylateattendance')->name('getdashboard_department_yesterdaylateattendance');
 
 Route::get('/corporatedashboard' ,'CorporatedashboardController@index')->name('corporatedashboard');
 Route::get('/employeemanagementdashboard' ,'EmployeemanagementdashboardController@index')->name('employeemanagementdashboard');

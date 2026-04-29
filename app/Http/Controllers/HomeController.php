@@ -158,6 +158,82 @@ class HomeController extends Controller
         $today = Carbon::now()->format('Y-m-d');
         $empcount = DB::table('employees')->where('deleted', 0)->where('is_resigned', 0)->count();
 
+        $yesterdayDate = Carbon::now()->subDay()->format('Y-m-d');
+
+
+            // Get all companies
+            $companies = DB::table('companies')->get();
+            
+            // Initialize array to store per-company attendance data
+            $companiesAttendanceData = [];
+
+            foreach ($companies as $company) {
+                // Get all employees for this company
+                $employeeIds = DB::table('employees')
+                    ->where('emp_company', $company->id)
+                    ->where('deleted', 0)
+                    ->where('is_resigned', 0)
+                    ->pluck('emp_id')
+                    ->toArray();
+
+                if (empty($employeeIds)) {
+                    continue;
+                }
+
+                $totalEmployees = count($employeeIds);
+
+                // Today's attendance (distinct employees)
+                $todayAttendance = DB::table('attendances')
+                    ->whereIn('emp_id', $employeeIds)
+                    ->where('date', $today)
+                    ->select('emp_id')
+                    ->distinct()
+                    ->get()
+                    ->count();
+
+                // Today's late attendance
+                $todayLate = DB::table('employee_late_attendances')
+                    ->whereIn('emp_id', $employeeIds)
+                    ->where('date', $today)
+                    ->count();
+
+                // Today's absent employees
+                $todayAbsent = $totalEmployees - $todayAttendance;
+
+                // Yesterday's attendance
+                $yesterdayAttendance = DB::table('attendances')
+                    ->whereIn('emp_id', $employeeIds)
+                    ->where('date', $yesterdayDate)
+                    ->select('emp_id')
+                    ->distinct()
+                    ->get()
+                    ->count();
+
+                // Yesterday's late attendance
+                $yesterdayLate = DB::table('employee_late_attendances')
+                    ->whereIn('emp_id', $employeeIds)
+                    ->where('date', $yesterdayDate)
+                    ->count();
+
+                // Yesterday's absent employees
+                $yesterdayAbsent = $totalEmployees - $yesterdayAttendance;
+
+                // Store company data
+                $companiesAttendanceData[] = [
+                    'company_id' => $company->id,
+                    'company_name' => $company->name,
+                    'company_code' => $company->code,
+                    'total_employees' => $totalEmployees,
+                    'today_attendance' => $todayAttendance,
+                    'today_late' => $todayLate,
+                    'today_absent' => $todayAbsent,
+                    'yesterday_attendance' => $yesterdayAttendance,
+                    'yesterday_late' => $yesterdayLate,
+                    'yesterday_absent' => $yesterdayAbsent,
+                ];
+            }
+
+
         // today attendance count
         $todaycount = DB::table('attendances')
             ->select('date', 'emp_id')
@@ -176,7 +252,7 @@ class HomeController extends Controller
 
 
         // get today daybefore day on attendance
-        $yesterdayDate = Carbon::now()->subDay()->format('Y-m-d');
+        
 
         // yesterday attendance count
         $yesterdaycount = DB::table('attendances')
@@ -307,7 +383,8 @@ class HomeController extends Controller
             'thismonthBirthdayCount',
             'nextmonthBirthdayCount',
             'leavedatalist',
-            'events'
+            'events',
+            'companiesAttendanceData'
         ));
     }
 
@@ -402,11 +479,14 @@ class HomeController extends Controller
         ]);
     }
 
-    public function department_attendance(){
+    public function department_attendance(Request $request){
+
+      $companyId = $request->company_id;
         $today = Carbon::now()->format('Y-m-d');
 
         $departmentdata = DB::table('departments')
         ->select('id', 'name') 
+        ->where('company_id', $companyId)
         ->get()
         ->toArray();
 
@@ -517,11 +597,13 @@ class HomeController extends Controller
 
     }
 
-    public function department_lateattendance(){
+    public function department_lateattendance(Request $request){
         $today = Carbon::now()->format('Y-m-d');
+        $companyId = $request->company_id;
 
         $departmentdata = DB::table('departments')
         ->select('id', 'name') 
+        ->where('company_id', $companyId)
         ->get()
         ->toArray();
         $late_times = DB::table('late_types')->where('id', 1)->first();
@@ -636,11 +718,13 @@ class HomeController extends Controller
 
     }
 
-    public function department_absent(){
+    public function department_absent(Request $request){
         $today = Carbon::now()->format('Y-m-d');
+        $companyId = $request->company_id;
 
         $departmentdata = DB::table('departments')
         ->select('id', 'name') 
+        ->where('company_id', $companyId)
         ->get()
         ->toArray();
 
@@ -749,11 +833,13 @@ class HomeController extends Controller
 //--------------------------------------------------------------------------------
     // yesterday attendance part
 
-    public function department_yesterdayattendance(){
+    public function department_yesterdayattendance(Request $request){
         $yesterdayDate = Carbon::now()->subDay()->format('Y-m-d');
+        $companyId = $request->company_id;
 
         $departmentdata = DB::table('departments')
         ->select('id', 'name') 
+        ->where('company_id', $companyId)
         ->get()
         ->toArray();
 
@@ -872,11 +958,13 @@ class HomeController extends Controller
 
     }
 
-    public function department_yesterdaylateattendance(){
+    public function department_yesterdaylateattendance(Request $request){
         $yesterdayDate = Carbon::now()->subDay()->format('Y-m-d');
+        $companyId = $request->company_id;
 
         $departmentdata = DB::table('departments')
         ->select('id', 'name') 
+        ->where('company_id', $companyId)
         ->get()
         ->toArray();
        // $late_times = DB::table('late_types')->where('id', 1)->first();
@@ -998,11 +1086,13 @@ class HomeController extends Controller
 
     }
 
-    public function department_yesterdayabsent(){
+    public function department_yesterdayabsent(Request $request){
         $yesterdayDate = Carbon::now()->subDay()->format('Y-m-d');
+        $companyId = $request->company_id;
 
         $departmentdata = DB::table('departments')
         ->select('id', 'name') 
+        ->where('company_id', $companyId)
         ->get()
         ->toArray();
 
