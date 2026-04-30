@@ -158,37 +158,49 @@ class UserHelper
 
     public static function getLoggedInUserId($mysqli = null)
     {
+        // 1. Try native PHP session first (fastest, works when scripts
         if (session_status() === PHP_SESSION_ACTIVE && isset($_SESSION['users_id'])) {
-            return $_SESSION['users_id'];
+            return (int) $_SESSION['users_id'];
         }
-        
-        if ($mysqli !== null && isset($_COOKIE['laravel_session'])) {
-            $sessionId = $_COOKIE['laravel_session'];
-            
-            try {
-                $stmt = $mysqli->prepare("
-                    SELECT payload 
-                    FROM sessions 
-                    WHERE id = ? 
-                    LIMIT 1
-                ");
-                $stmt->bind_param("s", $sessionId);
-                $stmt->execute();
-                $result = $stmt->get_result();
-                $session = $result->fetch_assoc();
-                $stmt->close();
-                
-                if ($session && !empty($session['payload'])) {
-                    $payload = base64_decode($session['payload']);
-                    $data = unserialize($payload);
-                    return $data['users_id'] ?? null;
-                }
-            } catch (\Exception $e) {
-                return null;
+
+        // 2. Try Laravel Session facade (works inside Laravel's own request cycle)
+        try {
+            $laravelUserId = \Session::get('users_id');
+            if ($laravelUserId) {
+                return (int) $laravelUserId;
             }
+        } catch (\Exception $e) {
+            // Session facade unavailable — we're in a standalone script
         }
-        
-        return null;
+
+        // 3. Read the bridge token cookie and look it up in the database.
+        $token = $_COOKIE['usr_bridge'] ?? null;
+
+        if (!$token || !preg_match('/^[0-9a-f]{64}$/', $token)) {
+            return null; // No valid token present
+        }
+
+        // Use the passed-in mysqli connection, or create one from config.php globals
+        $conn = $mysqli ?? static::getConnection();
+
+        try {
+            $stmt = $conn->prepare(
+                "SELECT user_id FROM user_session_tokens
+                WHERE token = ? AND expires_at > NOW()
+                LIMIT 1"
+            );
+            $stmt->bind_param('s', $token);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $row    = $result->fetch_assoc();
+            $stmt->close();
+
+            return $row ? (int) $row['user_id'] : null;
+
+        } catch (\Exception $e) {
+            error_log('UserHelper::getLoggedInUserId bridge error: ' . $e->getMessage());
+            return null;
+        }
     }
 
     protected static function getAccessibleEmployeeIdsMySQLi($userId, $mysqli)
