@@ -1795,8 +1795,10 @@ Route::post('/opma_productallocationdeletelist' ,'Production_Module_Opma\Product
  Route::post('opma_production_amount/update', 'Production_Module_Opma\ProductionAmountController@update')->name('opma_production_amount.update');
  Route::get('opma_production_amount/destroy/{id}', 'Production_Module_Opma\ProductionAmountController@destroy');
 
-
                   // End of Opma Production Section Routes
+
+// call user account summery with user id
+Route::get('useraccountsummery/user/{user_id}', 'UserAccountController@useraccountsummery_list')->name('useraccountsummerywithuser');
 
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');
