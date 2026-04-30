@@ -42,9 +42,10 @@ class LoginController extends Controller
                 'company_address'       => $employeeData->company_address,
             ]);
 
-            // Create a bridge token for standalone PHP scripts
-            $this->createBridgeToken($request, $employeeData->id);
+            
         }
+        // Create a bridge token for standalone PHP scripts
+        $this->createBridgeToken($request, $employeeData->id);
 
         return $user->hasRole('Employee')
             ? redirect('/useraccountsummery')
