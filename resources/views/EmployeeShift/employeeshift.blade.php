@@ -20,12 +20,10 @@
             <div class="card-body p-0 p-2">
                 <div class="row">
                     <div class="col-12">
-                        @can('employee-shift-allocation-create')
                         <button type="button" class="btn btn-primary btn-sm fa-pull-right mr-2" name="create_record"
                             id="create_record"><i class="fas fa-plus mr-2"></i>Add</button>
-                            <button type="button" class="btn btn-secondary btn-sm fa-pull-right mr-2" name="csv_upload"
+                        <button type="button" class="btn btn-secondary btn-sm fa-pull-right mr-2" name="csv_upload"
                             id="csv_upload"><i class="fas fa-plus mr-2"></i>CSV Upload</button>
-                            @endif
                     </div>
                     <div class="col-12">
                         <hr class="border-dark">
@@ -103,6 +101,12 @@
                                                 <input type="radio" class="form-check-input off_next_day" name="off_next_day" id="off_next_day_1" value="1">Yes
                                             </label>
                                         </div>
+                                    </div>
+                                </div>
+                                <div class="form-row mb-1">
+                                    <div class="col-12 col-sm-6">
+                                        <label class="small font-weight-bold text-dark">Remark</label>
+                                        <textarea name="remark" id="remark" class="form-control form-control-sm" rows="2"></textarea>
                                     </div>
                                 </div>
                                 <hr>
@@ -246,6 +250,10 @@
                                         <label class="small font-weight-bold text-dark">Date To*</label>
                                         <input type="date" name="view_todate" id="view_todate" class="form-control form-control-sm" required readonly style="pointer-events: none"/>
                                     </div>
+                                    <div class="col-4">
+                                        <label class="small font-weight-bold text-dark">Remark</label>
+                                        <textarea name="view_remark" id="view_remark" class="form-control form-control-sm" rows="2" readonly style="pointer-events: none"></textarea>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -264,6 +272,12 @@
                                         <tbody id="view_tableorderlist"></tbody>
                                     </table>
                                 </div>
+                                <div class="form-group mt-2">
+                                <button type="button" name="btnprint" id="btnprint"
+                                    class="btn btn-danger btn-sm fa-pull-right px-4"><i
+                                        class="fas fa-print"></i>&nbsp;Print</button>
+                                </div>
+                                <input type="hidden" id="session_company_name" value="{{ session('company_name') ?? $_SESSION['company_name'] ?? '' }}">
                             </div>
                         </div>
                     </form>
@@ -454,6 +468,7 @@
                 var datefrom = $('#fromdate').val();
                 var until_time = $('#until_time').val();          
                 var off_next_day = $('input[name="off_next_day"]:checked').val();  
+                var remark = $('#remark').val();
                 var hidden_id = $('#hidden_id').val();
 
                 $.ajax({
@@ -466,6 +481,7 @@
                         datefrom: datefrom,
                         until_time: until_time,
                         off_next_day: off_next_day,
+                        remark: remark,
                         hidden_id: hidden_id,
                     },
                     url: action_url,
@@ -514,6 +530,7 @@
                 success: function (data) {
                     $('#shift').val(data.result.mainData.shift_id);
                     $('#fromdate').val(data.result.mainData.date_from);
+                    $('#remark').val(data.result.mainData.remark);
 
                     if (data.result.until_time) {
                         var ut = data.result.until_time.replace(' ', 'T').substring(0, 16);
@@ -742,6 +759,7 @@
                 success: function (data) {
                     $('#view_shift').val(data.result.mainData.shift_id); 
                     $('#view_fromdate').val(data.result.mainData.date_from); 
+                    $('#view_remark').val(data.result.mainData.remark);
                     $('#view_todate').val(data.result.mainData.date_to); 
                     $('#view_tableorderlist').html(data.result.requestdata);
 
@@ -760,6 +778,95 @@
     function productDelete(row) {
         $(row).closest('tr').remove();
     }
+
+    $('#btnprint').on('click', function () {
+        const doc = new jsPDF('p', 'mm', 'a4');
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const margin = 15;
+        const currentDate = new Date().toLocaleDateString();
+
+        // Header
+        const companyName = $('#session_company_name').val();
+
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.text(companyName, pageWidth / 2, 15, { align: 'center' });
+
+        doc.setFontSize(12);
+        doc.text('Additional Work Hours', pageWidth / 2, 23, { align: 'center' });
+
+        // Shift Type & Date
+        const shiftText = $('#view_shift option:selected').text();
+        const dateText = $('#view_fromdate').val();
+
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        let yPos = 35;
+        doc.text(`Shift Type : ${shiftText}`, margin, yPos);
+        yPos += 8;
+        doc.text(`Date       : ${dateText}`, margin, yPos);
+        yPos += 10;
+
+        // Separator
+        doc.setLineWidth(0.3);
+        doc.line(margin, yPos, pageWidth - margin, yPos);
+        yPos += 8;
+
+        // Table
+        const headers = [['Emp ID', 'Employee Name', 'Until Time', 'Signature']];
+        const body = [];
+
+        $('#view_tableorderlist tr').each(function () {
+            const cols = $(this).find('td');
+            if (cols.length >= 3) {
+                body.push([
+                    $(cols[0]).text().trim(),
+                    $(cols[1]).text().trim(),
+                    $(cols[2]).text().trim(),
+                    ''
+                ]);
+            }
+        });
+
+        doc.autoTable({
+            startY: yPos,
+            head: headers,
+            body: body,
+            theme: 'grid',
+            styles: { fontSize: 9, cellPadding: 3 },
+            headStyles: {
+                fillColor: [41, 128, 185],
+                textColor: 255,
+                fontStyle: 'bold',
+                halign: 'center'
+            },
+            columnStyles: {
+                0: { cellWidth: 25, halign: 'center' },
+                1: { cellWidth: 70, halign: 'left' },
+                2: { cellWidth: 45, halign: 'center' },
+                3: { cellWidth: 35, halign: 'center' }
+            },
+            margin: { left: margin, right: margin }
+        });
+
+        // Remark
+        const remarkText = $('#view_remark').val().trim();
+        let finalY = doc.lastAutoTable.finalY + 12;
+
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Remark : ${remarkText || '-'}`, margin, finalY);
+
+        // Approval Signature
+        finalY += 25;
+        doc.setLineWidth(0.3);
+        doc.line(margin, finalY, margin + 55, finalY);
+        finalY += 6;
+        doc.setFontSize(9);
+        doc.text('Approval Signature', margin, finalY);
+
+        doc.save(`Additional_Work_Hours_${dateText}.pdf`);
+    });
 </script>
 <script>
     $('#fromdate').on('change', function() {
