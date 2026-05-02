@@ -308,38 +308,7 @@
                                 
                                 <div class="form-row mb-1">
                                     <div class="col">
-                                        <label class="small font-weight-bolder">Employee Position</label>
-                                        <select name="hierarchy_id" id="hierarchy_id" class="form-control form-control-sm shipClass {{ $errors->has('hierarchy_id') ? ' has-error' : '' }}" >
-                                            <option value="">Select</option>
-                                            @foreach($empposition as $emppositions)
-                                                <option value="{{$emppositions->id}}">{{$emppositions->position}}</option>
-                                            @endforeach
-                                        </select>
-                                        @if ($errors->has('hierarchy_id'))
-                                            <span class="help-block">
-                                                <strong>{{ $errors->first('hierarchy_id') }}</strong>
-                                            </span>
-                                        @endif
-                                    </div>
-                                    <div class="col">
-                                        <label class="small font-weight-bolder">Work Location*</label>
-                                        <select name="location" class="form-control form-control-sm shipClass {{ $errors->has('location') ? ' has-error' : '' }}" required>
-                                            <option value="">Please Select</option>
-                                            @foreach($branch as $branches)
-                                                <option value="{{$branches->id}}">{{$branches->location}}</option>
-                                            @endforeach
-                                        </select>
-                                        @if ($errors->has('location'))
-                                            <span class="help-block">
-                                                <strong>{{ $errors->first('location') }}</strong>
-                                            </span>
-                                        @endif
-                                    </div>
-                                </div>
-                                
-                                <div class="form-row mb-1">
-                                    <div class="col">
-                                        <label class="small font-weight-bolder">Employee Job*</label>
+                                        <label class="small font-weight-bolder">Job Title*</label>
                                         <select name="employeejob" class="form-control form-control-sm shipClass {{ $errors->has('employeejob') ? ' has-error' : '' }}" required>
                                             <option value="">Select</option>
                                             @foreach($title as $titles)
@@ -371,29 +340,48 @@
                                 <div class="form-row mb-1">
                                     <div class="col">
                                         <label class="small font-weight-bolder">Company*</label>
-                                        <select name="employeecompany" id="company" class="form-control form-control-sm shipClass {{ $errors->has('employeecompany') ? ' has-error' : '' }}" required>
-                                            <option value="">Select</option>
-                                            @foreach($company as $companies)
-                                                <option value="{{$companies->id}}">{{$companies->name}}</option>
-                                            @endforeach
+                                        <select name="employeecompany" id="company_a" class="form-control form-control-sm" required>
                                         </select>
                                         @if ($errors->has('employeecompany'))
                                             <span class="help-block">
-                                                <strong>{{ $errors->first('employeejob') }}</strong>
+                                                <strong>{{ $errors->first('employeecompany') }}</strong>
                                             </span>
                                         @endif
                                     </div>
                                     <div class="col">
                                         <label class="small font-weight-bolder">Department*</label>
-                                        <select name="department" id="department" class="form-control form-control-sm shipClass {{ $errors->has('department') ? ' has-error' : '' }}" required>
-                                            <option value="">Select</option>
-                                            @foreach($departments as $dept)
-                                                <option value="{{$dept->id}}">{{$dept->name}}</option>
-                                            @endforeach
+                                        <select name="department" id="department_a" class="form-control form-control-sm" required>
                                         </select>
                                         @if ($errors->has('department'))
                                             <span class="help-block">
                                                 <strong>{{ $errors->first('department') }}</strong>
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <div class="form-row mb-1">
+                                    <div class="col">
+                                        <label class="small font-weight-bolder">Work Location*</label>
+                                        <select name="location" id="location_a" class="form-control form-control-sm" required>
+                                        </select>
+                                        @if ($errors->has('location'))
+                                            <span class="help-block">
+                                                <strong>{{ $errors->first('location') }}</strong>
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <div class="col">
+                                        <label class="small font-weight-bolder">Employee Position</label>
+                                        <select name="hierarchy_id" id="hierarchy_id" class="form-control form-control-sm shipClass {{ $errors->has('hierarchy_id') ? ' has-error' : '' }}" >
+                                            <option value="">Select</option>
+                                            @foreach($empposition as $emppositions)
+                                                <option value="{{$emppositions->id}}">{{$emppositions->position}}</option>
+                                            @endforeach
+                                        </select>
+                                        @if ($errors->has('hierarchy_id'))
+                                            <span class="help-block">
+                                                <strong>{{ $errors->first('hierarchy_id') }}</strong>
                                             </span>
                                         @endif
                                     </div>
@@ -780,6 +768,66 @@ $(document).ready(function () {
                     term: params.term || '',
                     page: params.page || 1,
                     company: company_f.val(),
+                }
+            },
+            cache: true
+        }
+    });
+
+    // add emplyee
+    let company_a = $('#company_a');
+    let department_a = $('#department_a');
+    let employee_a = $('#employee_a');
+    let location_a = $('#location_a');
+
+    company_a.select2({
+        placeholder: 'Select a Company',
+        width: '100%',
+        allowClear: true,
+        ajax: {
+            url: '{{url("company_list_sel2")}}',
+            dataType: 'json',
+            data: function(params) {
+                return {
+                    term: params.term || '',
+                    page: params.page || 1
+                }
+            },
+            cache: true
+        }
+    });
+
+    department_a.select2({
+        placeholder: 'Select a Department',
+        width: '100%',
+        allowClear: true,
+        ajax: {
+            url: '{{url("department_list_sel2")}}',
+            dataType: 'json',
+            data: function(params) {
+                return {
+                    term: params.term || '',
+                    page: params.page || 1,
+                    company: company_a.val(),
+                    location: location_a.val()
+                }
+            },
+            cache: true
+        }
+    });
+
+    location_a.select2({
+        placeholder: 'Select Location',
+        width: '100%',
+        allowClear: true,
+        ajax: {
+            url: '{{url("location_list_sel2")}}',
+            dataType: 'json',
+            data: function(params) {
+                return {
+                    term: params.term || '',
+                    page: params.page || 1,
+                    company: company_a.val(),
                 }
             },
             cache: true

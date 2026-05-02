@@ -11,18 +11,29 @@ class UserHelper
     protected static function getConnection()
     {
         if (self::$connection === null) {
-            $config = config('database.connections.mysql');
-            self::$connection = new \mysqli(
-                $config['host'],
-                $config['username'],
-                $config['password'],
-                $config['database']
-            );
-            
+            // Try Laravel config() first (works inside Laravel)
+            if (function_exists('config')) {
+                $dbConfig = config('database.connections.mysql');
+                $host     = $dbConfig['host'];
+                $username = $dbConfig['username'];
+                $password = $dbConfig['password'];
+                $database = $dbConfig['database'];
+            } else {
+                // Fallback for standalone scripts — read globals from config.php
+                global $db_host, $db_username, $db_password, $db_name;
+                $host     = $db_host;
+                $username = $db_username;
+                $password = $db_password;
+                $database = $db_name;
+            }
+
+            self::$connection = new \mysqli($host, $username, $password, $database);
+
             if (self::$connection->connect_error) {
                 throw new \Exception('Database connection failed: ' . self::$connection->connect_error);
             }
         }
+
         return self::$connection;
     }
     
@@ -158,30 +169,20 @@ class UserHelper
 
     public static function getLoggedInUserId($mysqli = null)
     {
-        // 1. Try native PHP session first (fastest, works when scripts
-        if (session_status() === PHP_SESSION_ACTIVE && isset($_SESSION['users_id'])) {
-            return (int) $_SESSION['users_id'];
-        }
-
-        // 2. Try Laravel Session facade (works inside Laravel's own request cycle)
-        try {
-            $laravelUserId = \Session::get('users_id');
-            if ($laravelUserId) {
-                return (int) $laravelUserId;
-            }
-        } catch (\Exception $e) {
-            // Session facade unavailable — we're in a standalone script
-        }
-
-        // 3. Read the bridge token cookie and look it up in the database.
         $token = $_COOKIE['usr_bridge'] ?? null;
 
         if (!$token || !preg_match('/^[0-9a-f]{64}$/', $token)) {
-            return null; // No valid token present
+            error_log('UserHelper: no valid usr_bridge cookie found');
+            return null;
         }
 
-        // Use the passed-in mysqli connection, or create one from config.php globals
-        $conn = $mysqli ?? static::getConnection();
+        // Use passed-in connection, or create one via getConnection()
+        try {
+            $conn = $mysqli ?? static::getConnection();
+        } catch (\Exception $e) {
+            error_log('UserHelper: connection failed - ' . $e->getMessage());
+            return null;
+        }
 
         try {
             $stmt = $conn->prepare(
@@ -189,16 +190,28 @@ class UserHelper
                 WHERE token = ? AND expires_at > NOW()
                 LIMIT 1"
             );
+
+            if (!$stmt) {
+                error_log('UserHelper: prepare failed - ' . $conn->error);
+                return null;
+            }
+
             $stmt->bind_param('s', $token);
             $stmt->execute();
             $result = $stmt->get_result();
             $row    = $result->fetch_assoc();
             $stmt->close();
 
-            return $row ? (int) $row['user_id'] : null;
+            if ($row) {
+                error_log('UserHelper: userId resolved = ' . $row['user_id']);
+                return (int) $row['user_id'];
+            }
+
+            error_log('UserHelper: token not found or expired');
+            return null;
 
         } catch (\Exception $e) {
-            error_log('UserHelper::getLoggedInUserId bridge error: ' . $e->getMessage());
+            error_log('UserHelper::getLoggedInUserId error: ' . $e->getMessage());
             return null;
         }
     }
