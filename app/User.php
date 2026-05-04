@@ -42,4 +42,14 @@ class User extends Authenticatable
         return $this->belongsToMany('App\Company', 'user_has_companies', 'user_id', 'company_id');
     }
 
+    public function userCompanies()
+    {
+        return $this->hasMany('App\UserCompany', 'user_id', 'id');
+    }
+
+    public function locations()
+    {
+        return $this->hasMany('App\UserCompany', 'user_id', 'id')->whereNotNull('branch_id');
+    }
+
 }
