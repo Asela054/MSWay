@@ -163,18 +163,24 @@ class CommenGetrreordController extends Controller
     {
         if ($request->ajax())
         {
-             $id = Auth::user()->id;
+            $id = Auth::user()->id;
 
             $page = Input::get('page');
             $resultCount = 25;
             $offset = ($page - 1) * $resultCount;
             $term = Input::get("term");
 
-             $userCompanyIds = DB::table('user_has_companies')
-            ->where('user_id', $id)
-            ->pluck('company_id')
-            ->toArray();
+            $userCompanyIds = DB::table('user_has_companies')
+                ->where('user_id', $id)
+                ->pluck('company_id')
+                ->toArray();
 
+            // Get the branch IDs that the user has permission for
+            $userBranchIds = DB::table('user_has_companies')
+                ->where('user_id', $id)
+                ->whereNotNull('branch_id')
+                ->pluck('branch_id')
+                ->toArray();
 
             $query = DB::table('employees')
                 ->where(function($q) use ($term) {
@@ -187,9 +193,15 @@ class CommenGetrreordController extends Controller
             if (!empty($userCompanyIds)) {
                 $query->whereIn('employees.emp_company', $userCompanyIds);
             }
+
+            // If user has specific branch permissions, filter by those branches
+            if (!empty($userBranchIds)) {
+                $query->whereIn('employees.emp_location', $userBranchIds);
+            }
+            // If no branch records in user_has_companies, show all employees (no additional filter)
+
             $query = UserHelper::applyEmployeeFilter($query);
 
-            // Add department filter if department parameter is provided and not empty
             if ($request->has('department') && !empty($request->department)) {
                 $query->where('employees.emp_department', $request->department);
             }
@@ -204,7 +216,7 @@ class CommenGetrreordController extends Controller
                 ->take($resultCount)
                 ->get();
 
-            $count = Count($breeds); 
+            $count = Count($breeds);
 
             $endCount = $offset + $resultCount;
             $morePages = $endCount < $count;
@@ -224,11 +236,19 @@ class CommenGetrreordController extends Controller
     {
         if ($request->ajax())
         {
+            $id = Auth::user()->id;
             $page = Input::get('page');
             $company = Input::get('company');
             $resultCount = 25;
 
             $offset = ($page - 1) * $resultCount;
+
+            // Get the branch IDs that the user has permission for
+            $userBranchIds = DB::table('user_has_companies')
+                ->where('user_id', $id)
+                ->whereNotNull('branch_id')
+                ->pluck('branch_id')
+                ->toArray();
 
             $query = DB::table('branches')
                 ->where('branches.location', 'LIKE', '%' . Input::get("term") . '%');
@@ -239,6 +259,12 @@ class CommenGetrreordController extends Controller
                     ->orWhere('branches.company_id', 0);
                 });
             }
+
+            // If user has specific branch permissions, filter by those branches
+            if (!empty($userBranchIds)) {
+                $query->whereIn('branches.id', $userBranchIds);
+            }
+            // If no branch records in user_has_companies, show all branches (no additional filter)
 
             $breeds = $query->orderBy('branches.location')
                 ->skip($offset)
