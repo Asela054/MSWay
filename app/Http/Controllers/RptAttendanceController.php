@@ -354,10 +354,6 @@ class RptAttendanceController extends Controller
             $dept_sql .= ' AND id = "' . $department . '" ';
         }
 
-        // if ($location != '') {
-        //     $dept_sql .= 'AND company_id = "' . $location . '" ';
-        // }
-
         $departments = DB::select($dept_sql);
 
         //  dd($departments);
@@ -384,6 +380,7 @@ class RptAttendanceController extends Controller
                         'employees.emp_name_with_initial',
                         'employees.calling_name',
                         'employees.emp_etfno',
+                        'employees.emp_location', 
                         'branches.location as b_location',
                         'departments.name as dept_name',
                         'departments.id as dept_id'
@@ -403,7 +400,9 @@ class RptAttendanceController extends Controller
                 if ($employee != '') {
                     $query->where('employees.emp_id', $employee);
                 }
-
+                if ($location != '') {
+                    $query->where('employees.emp_location', $location);
+                }
                 $employees = $query->get();
 
            

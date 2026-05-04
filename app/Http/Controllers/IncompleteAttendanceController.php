@@ -66,23 +66,14 @@ class IncompleteAttendanceController extends Controller
             $query->where('id', $department);
         }
 
-        if ($location != '') {
-            $query->where('emp_location', $location);
-        } 
-        
-        if ($userBranchIds) {
-            $query->whereIn('emp_location', $userBranchIds);
-        }
-
         if ($company != '') {
             $query->where('company_id', $company);
-        } else {
-                $query->whereIn('company_id', $userCompanyIds);
+        } elseif($userCompanyIds) {
+            $query->whereIn('company_id', $userCompanyIds);
 
         }
 
         $departments = $query->get();
-
 
         $data_arr = array();
         $not_att_count = 0;
@@ -108,7 +99,13 @@ class IncompleteAttendanceController extends Controller
             if ($employee != '') {
                 $query->where('employees.emp_id', $employee);
             }
-            
+
+            if ($location != '') {
+                $query->where('employees.emp_location', $location);
+            } elseif ($userBranchIds) {
+                $query->whereIn('employees.emp_location', $userBranchIds);
+            }
+                
             $employees = $query->orderBy('employees.emp_id', 'asc')->get();
 
             foreach ($employees as $record) {
@@ -178,6 +175,7 @@ class IncompleteAttendanceController extends Controller
         $department_id = 0;
         $html = '';
 
+       
         foreach ($data_arr as $dept_key => $department_data) {
             //if department_id is not equal to the previous department_id
             if ($department_id != $dept_key) {
