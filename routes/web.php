@@ -36,14 +36,14 @@ Route::resource('userpermission','UserPermissionController');
 
 Route::get('/home', 'HomeController@index')->name('home');
 
-Route::get('/getdashboard_department_attendance', 'HomeController@department_attendance')->name('getdashboard_department_attendance');
-Route::get('/getdashboard_department_absent', 'HomeController@department_absent')->name('getdashboard_department_absent');
+Route::post('/getdashboard_department_attendance', 'HomeController@department_attendance')->name('getdashboard_department_attendance');
+Route::post('/getdashboard_department_absent', 'HomeController@department_absent')->name('getdashboard_department_absent');
 Route::get('/getdashboard_AttendentChart', 'HomeController@getAttendentChart')->name('getdashboard_AttendentChart');
 
-Route::get('/getdashboard_department_lateattendance', 'HomeController@department_lateattendance')->name('getdashboard_department_lateattendance');
-Route::get('/getdashboard_department_yesterdayattendance', 'HomeController@department_yesterdayattendance')->name('getdashboard_department_yesterdayattendance');
-Route::get('/getdashboard_department_yesterdayabsent', 'HomeController@department_yesterdayabsent')->name('getdashboard_department_yesterdayabsent');
-Route::get('/getdashboard_department_yesterdaylateattendance', 'HomeController@department_yesterdaylateattendance')->name('getdashboard_department_yesterdaylateattendance');
+Route::post('/getdashboard_department_lateattendance', 'HomeController@department_lateattendance')->name('getdashboard_department_lateattendance');
+Route::post('/getdashboard_department_yesterdayattendance', 'HomeController@department_yesterdayattendance')->name('getdashboard_department_yesterdayattendance');
+Route::post('/getdashboard_department_yesterdayabsent', 'HomeController@department_yesterdayabsent')->name('getdashboard_department_yesterdayabsent');
+Route::post('/getdashboard_department_yesterdaylateattendance', 'HomeController@department_yesterdaylateattendance')->name('getdashboard_department_yesterdaylateattendance');
 
 Route::get('/corporatedashboard' ,'CorporatedashboardController@index')->name('corporatedashboard');
 Route::get('/employeemanagementdashboard' ,'EmployeemanagementdashboardController@index')->name('employeemanagementdashboard');
@@ -1795,9 +1795,10 @@ Route::post('/opma_productallocationdeletelist' ,'Production_Module_Opma\Product
  Route::post('opma_production_amount/update', 'Production_Module_Opma\ProductionAmountController@update')->name('opma_production_amount.update');
  Route::get('opma_production_amount/destroy/{id}', 'Production_Module_Opma\ProductionAmountController@destroy');
 
-
                   // End of Opma Production Section Routes
 
+// call user account summery with user id
+Route::get('useraccountsummery/user/{user_id}', 'UserAccountController@useraccountsummery_list')->name('useraccountsummerywithuser');
 Route::get('/Privacy-policy', function () {
     return view('privacypolicy');
 });

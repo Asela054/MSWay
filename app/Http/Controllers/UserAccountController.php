@@ -33,15 +33,30 @@ use PDF;
 
 class UserAccountController extends Controller
 {
-    public function useraccountsummery_list()
+    public function useraccountsummery_list($empautoid = null)
     {
 		if (!auth()->check() && request()->isMethod('get')) {
             session(['url.intended' => url()->full()]);
             return redirect()->route('login');
 		}
-		$user = Auth::user();
-		$users_id = $user->id;
-        
+
+         $user = Auth::user();
+
+        if($empautoid){
+
+        $employee = DB::table('employees')
+            ->select('users.*')
+            ->leftjoin('users','users.emp_id','employees.emp_id')
+            ->where('employees.id', $empautoid)
+            ->first();
+
+            $users_id=$employee->id;
+        }else{
+              $users_id = $user->id;
+        }
+		
+       
+      
 		$user->hasRole('Employee');
 		// $user->can('user-account-summery-list');
 		

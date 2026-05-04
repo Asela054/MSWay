@@ -7,38 +7,71 @@
         <div class="card">
 			<div class="card-body pb-5">
                 <div class="row">
-                    <div class="col-sm-12 col-md-12 col-lg-3 col-xl-3">
-                        <div class="card border h-100 p-3">
-                            <h5 class="title-style"><span>TODAY ATTENDANCE</span></h5>
-                            <div class="card mt-3">
-                                <ul class="list-group list-group-flush">
-                                    <li class="list-group-item d-flex bd-highlight list-group-item-primary"><i class="fa-light fa-users mr-2"></i>TOTAL EMPLOYEE <span class="ml-auto">{{$empcount}}</span></li>
-                                    <li class="list-group-item d-flex bd-highlight list-group-item-success pointer" id="attendancebtn"><i class="fa-light fa-calendar-week mr-2"></i>ATTENDANCE <span class="ml-auto">{{$todaycount}}</span></li>
-                                    <li class="list-group-item d-flex bd-highlight list-group-item-warning pointer" id="lateattendancebtn"><i class="fa-light fa-business-time mr-2"></i>LATE <span class="ml-auto">{{$todaylatecount}}</span></li>
-                                    <li class="list-group-item d-flex bd-highlight list-group-item-danger pointer" id="absentbtn"><i class="fa-light fa-calendar-xmark mr-2"></i>ABSENT <span class="ml-auto">{{$empcount-$todaycount}}</span></li>
-                                </ul>
+                    @foreach($companiesAttendanceData as $index => $company)
+                        <div class="col-md-3 mb-3">
+                            <div class="card border h-100 p-3">
+                              
+                                    <span >{{ strtoupper($company['company_name']) }}</span>
+                                
+                                
+                                <!-- TODAY ATTENDANCE -->
+                                <h6 class="mt-2 mb-2 text-muted" style="font-size: 0.85rem;">TODAY ATTENDANCE</h6>
+                                <div class="card mt-1">
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item d-flex bd-highlight list-group-item-primary">
+                                            <i class="fa-light fa-users mr-2"></i>TOTAL EMPLOYEE 
+                                            <span class="ml-auto fw-bold">{{ $company['total_employees'] }}</span>
+                                        </li>
+                                        <li class="list-group-item d-flex bd-highlight list-group-item-success pointer attendance-btn" 
+                                            data-company-id="{{ $company['company_id'] }}">
+                                            <i class="fa-light fa-calendar-week mr-2"></i>ATTENDANCE 
+                                            <span class="ml-auto fw-bold">{{ $company['today_attendance'] }}</span>
+                                        </li>
+                                        <li class="list-group-item d-flex bd-highlight list-group-item-warning pointer lateattendancebtn" 
+                                            data-company-id="{{ $company['company_id'] }}">
+                                            <i class="fa-light fa-business-time mr-2"></i>LATE 
+                                            <span class="ml-auto fw-bold">{{ $company['today_late'] }}</span>
+                                        </li>
+                                        <li class="list-group-item d-flex bd-highlight list-group-item-danger pointer absentbtn" 
+                                            data-company-id="{{ $company['company_id'] }}">
+                                            <i class="fa-light fa-calendar-xmark mr-2"></i>ABSENT 
+                                            <span class="ml-auto fw-bold">{{ $company['today_absent'] }}</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                
+                                <!-- YESTERDAY ATTENDANCE -->
+                                <h6 class="mt-3 mb-2 text-muted" style="font-size: 0.85rem;">YESTERDAY ATTENDANCE</h6>
+                                <div class="card mt-1">
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item d-flex bd-highlight list-group-item-primary">
+                                            <i class="fa-light fa-users mr-2"></i>TOTAL EMPLOYEE 
+                                            <span class="ml-auto fw-bold">{{ $company['total_employees'] }}</span>
+                                        </li>
+                                        <li class="list-group-item d-flex bd-highlight list-group-item-success pointer yesterdayattendancebtn" 
+                                            data-company-id="{{ $company['company_id'] }}">
+                                            <i class="fa-light fa-calendar-week mr-2"></i>ATTENDANCE 
+                                            <span class="ml-auto fw-bold">{{ $company['yesterday_attendance'] }}</span>
+                                        </li>
+                                        <li class="list-group-item d-flex bd-highlight list-group-item-warning pointer yesterdaylateattendancebtn" 
+                                            data-company-id="{{ $company['company_id'] }}">
+                                            <i class="fa-light fa-business-time mr-2"></i>LATE 
+                                            <span class="ml-auto fw-bold">{{ $company['yesterday_late'] }}</span>
+                                        </li>
+                                        <li class="list-group-item d-flex bd-highlight list-group-item-danger pointer yesterdayabsentbtn" 
+                                            data-company-id="{{ $company['company_id'] }}">
+                                            <i class="fa-light fa-calendar-xmark mr-2"></i>ABSENT 
+                                            <span class="ml-auto fw-bold">{{ $company['yesterday_absent'] }}</span>
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
-                            <h5 class="title-style my-3"><span>YESTERDAY ATTENDANCE</span></h5>
-                            <div class="card mt-3">
-                                <ul class="list-group list-group-flush">
-                                    <li class="list-group-item d-flex bd-highlight list-group-item-primary"><i class="fa-light fa-users mr-2"></i>TOTAL EMPLOYEE <span class="ml-auto">{{$empcount}}</span></li>
-                                    <li class="list-group-item d-flex bd-highlight list-group-item-success pointer" id="yesterdayattendancebtn"><i class="fa-light fa-calendar-week mr-2"></i>ATTENDANCE <span class="ml-auto">{{$yesterdaycount}}</span></li>
-                                    <li class="list-group-item d-flex bd-highlight list-group-item-warning pointer" id="yesterdaylateattendancebtn"><i class="fa-light fa-business-time mr-2"></i>LATE <span class="ml-auto">{{$yesterdaylatecount}}</span></li>
-                                    <li class="list-group-item d-flex bd-highlight list-group-item-danger pointer" id="yesterdayabsentbtn"><i class="fa-light fa-calendar-xmark mr-2"></i>ABSENT <span class="ml-auto">{{$empcount-$yesterdaycount}}</span></li>
-                                </ul>
-                            </div>
-                            <!-- <h5 class="title-style my-3"><span>EMPLOYEE BIRTHDAYS</span></h5>
-                            <div class="card mt-3">
-                                <ul class="list-group list-group-flush">
-                                    <li class="list-group-item d-flex bd-highlight list-group-item-primary" id="todaybdbtn"><i class="fa-light fa-cake-candles mr-2"></i>TODAY <span class="ml-auto">{{$todayBirthdayCount}}</span></li>
-                                    <li class="list-group-item d-flex bd-highlight list-group-item-success pointer" id="thisweekbdbtn"><i class="fa-light fa-calendar-week mr-2"></i>THIS WEEK <span class="ml-auto">{{$thisweekBirthdayCount}}</span></li>
-                                    <li class="list-group-item d-flex bd-highlight list-group-item-warning pointer" id="thismonthbdbtn"><i class="fa-light fa-calendar-days mr-2"></i>THIS MONTH <span class="ml-auto">{{$thismonthBirthdayCount}}</span></li>
-                                </ul>
-                            </div> -->
                         </div>
-                    </div>
-                    <div class="col-sm-12 col-md-auto">
-                        <div class="h-100 mt-sm-0 mt-3">
+                    @endforeach
+
+
+                    <div class="col pt-sm-0 pt-3">
+                        <div class="card border h-100 p-3">
                             <div class="calendar border h-100">
                                 <div class="calendar-header text-left">
                                     <div class="year" id="calendarYear"></div>
@@ -73,7 +106,7 @@
                         </div>
                     </div>
                     <div class="col pt-sm-0 pt-3">
-                        <div class="card h-100 mt-sm-0 mt-3">
+                        <div class="card border h-100 p-3">
                             <div class="card-body p-3">
                                 <h5 class="title-style"><span>{{strtoupper(date('F / Y'))}} LEAVE INFORMATION</span></h5>
                                 <div class="center-block fix-width scroll-inner" style="max-height: 600px;overflow-y: auto;padding-right: 5px;">
@@ -764,94 +797,145 @@ $(document).ready( function () {
     // getattend_linechart();
    
     // today part
-    $('#attendancebtn').click(function(){
+      $('.attendance-btn').click(function() {
+        var companyId = $(this).data('company-id');
+        
         $.ajax({
             url: "{{ route('getdashboard_department_attendance') }}",
-            method: "GET",
-            // data: $(this).serialize(),
+            method: "POST",
+            data: {
+                company_id: companyId,
+                _token: "{{ csrf_token() }}"
+            },
             dataType: "json",
-            success: function (data) {//alert(data);
+            success: function(data) {
+                $('#attandancetable').html(data.result);
 
-               $('#attandancetable').html(data.result)
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+                alert('Failed to load attendance data');
             }
         });
-
         $('#attendanceformModal').modal('show');
     });
 
-    $('#lateattendancebtn').click(function(){
+    $('.lateattendancebtn').click(function() {
+        var companyId = $(this).data('company-id');
+        
         $.ajax({
             url: "{{ route('getdashboard_department_lateattendance') }}",
-            method: "GET",
-            // data: $(this).serialize(),
+            method: "POST",
+            data: {
+                company_id: companyId,
+                _token: "{{ csrf_token() }}"
+            },
             dataType: "json",
-            success: function (data) {//alert(data);
+            success: function(data) {
+                $('#lateattandancetable').html(data.result);
 
-               $('#lateattandancetable').html(data.result)
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+                alert('Failed to load attendance data');
             }
         });
-
         $('#lateattendanceformModal').modal('show');
     });
 
-    $('#absentbtn').click(function(){
+    $('.absentbtn').click(function() {
+        var companyId = $(this).data('company-id');
+        
         $.ajax({
             url: "{{ route('getdashboard_department_absent') }}",
-            method: "GET",
-            // data: $(this).serialize(),
+            method: "POST",
+            data: {
+                company_id: companyId,
+                _token: "{{ csrf_token() }}"
+            },
             dataType: "json",
-            success: function (data) {//alert(data);
+            success: function(data) {
+                $('#absenttable').html(data.result);
 
-               $('#absenttable').html(data.result)
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+                alert('Failed to load attendance data');
             }
         });
-
         $('#absentformModal').modal('show');
     });
 
+
+
     // yesterday part
-    $('#yesterdayattendancebtn').click(function(){
+
+    $('.yesterdayattendancebtn').click(function() {
+        var companyId = $(this).data('company-id');
+        
         $.ajax({
             url: "{{ route('getdashboard_department_yesterdayattendance') }}",
-            method: "GET",
-            // data: $(this).serialize(),
+            method: "POST",
+            data: {
+                company_id: companyId,
+                _token: "{{ csrf_token() }}"
+            },
             dataType: "json",
-            success: function (data) {//alert(data);
+            success: function(data) {
+                $('#yesterdayattandancetable').html(data.result);
 
-               $('#yesterdayattandancetable').html(data.result)
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+                alert('Failed to load attendance data');
             }
         });
-
         $('#yesterdayattendanceformModal').modal('show');
     });
 
-    $('#yesterdaylateattendancebtn').click(function(){
+    $('.yesterdaylateattendancebtn').click(function() {
+        var companyId = $(this).data('company-id');
+        
         $.ajax({
             url: "{{ route('getdashboard_department_yesterdaylateattendance') }}",
-            method: "GET",
-            // data: $(this).serialize(),
+            method: "POST",
+            data: {
+                company_id: companyId,
+                _token: "{{ csrf_token() }}"
+            },
             dataType: "json",
-            success: function (data) {//alert(data);
+            success: function(data) {
+                $('#yesterdaylateattandancetable').html(data.result);
 
-               $('#yesterdaylateattandancetable').html(data.result)
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+                alert('Failed to load attendance data');
             }
         });
-
         $('#yesterdaylateattendanceformModal').modal('show');
     });
 
-    $('#yesterdayabsentbtn').click(function(){
+     $('.yesterdayabsentbtn').click(function() {
+        var companyId = $(this).data('company-id');
+        
         $.ajax({
             url: "{{ route('getdashboard_department_yesterdayabsent') }}",
-            method: "GET",
-            // data: $(this).serialize(),
+            method: "POST",
+            data: {
+                company_id: companyId,
+                _token: "{{ csrf_token() }}"
+            },
             dataType: "json",
-            success: function (data) {//alert(data);
+            success: function(data) {
+                $('#yesterdayabsenttable').html(data.result);
 
-               $('#yesterdayabsenttable').html(data.result)
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+                alert('Failed to load attendance data');
             }
         });
-
         $('#yesterdayabsentformModal').modal('show');
     });
 

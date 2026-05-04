@@ -220,7 +220,7 @@ class APIDashboardController extends Controller
             'casual' => $available_no_of_casual_leaves,
             'medical' => $available_no_of_med_leaves,
             'total_leave_balance' => $total_blance,
-            'attendance_precentage' => $attendancePercentage,
+            'attendance_precentage' => $workdays,
             'today_workhours' => $workingHoursToday,
             'lasttimestamp' => $lastenterd_timestamp,
             'last_leave_request_approved' => $lastApproved,
