@@ -74,14 +74,31 @@ class UserController extends Controller
 
     public function edit($id)
     {
-        $user = User::find($id);
+        $user     = User::find($id);
         $roles    = Role::pluck('name', 'name')->all();
         $userRole = $user->roles->pluck('name')->first();
 
-        // Get assigned company IDs and format for Select2
-        $userCompanies = $user->companies->map(function ($company) {
-            return ['id' => $company->id, 'text' => $company->name];
-        });
+        // Use distinct to avoid duplicates when multiple branches exist per company
+        $userCompanies = DB::table('user_has_companies')
+            ->join('companies', 'user_has_companies.company_id', '=', 'companies.id')
+            ->where('user_has_companies.user_id', $id)
+            ->select('companies.id', 'companies.name as text')
+            ->distinct()
+            ->get()
+            ->map(function ($company) {
+                return ['id' => $company->id, 'text' => $company->text];
+            });
+
+        $userLocations = DB::table('user_has_companies')
+            ->join('branches', 'user_has_companies.branch_id', '=', 'branches.id')
+            ->where('user_has_companies.user_id', $id)
+            ->whereNotNull('user_has_companies.branch_id')
+            ->select('branches.id', 'branches.location as text')
+            ->distinct()
+            ->get()
+            ->map(function ($branch) {
+                return ['id' => $branch->id, 'text' => $branch->text];
+            });
 
         return response()->json([
             'result' => [
@@ -90,13 +107,11 @@ class UserController extends Controller
                 'email'     => $user->email,
                 'role'      => $userRole,
                 'companies' => $userCompanies,
+                'locations' => $userLocations,
             ],
             'roles' => $roles
         ]);
     }
-
-
-
 
     public function destroy($id)
     {
@@ -130,13 +145,28 @@ class UserController extends Controller
         $user = User::create($input);
         $user->assignRole($request->input('roles'));
 
-        $companies = $request->input('company');
+        $companies = $request->input('company', []);
+        $locations = $request->input('location', []);
+
         if (!empty($companies)) {
             foreach ($companies as $companyId) {
-                UserCompany::create([
-                    'user_id'    => $user->id,
-                    'company_id' => $companyId,
-                ]);
+                if (!empty($locations)) {
+                    // Create one row per branch under this company
+                    foreach ($locations as $locationId) {
+                        UserCompany::create([
+                            'user_id'    => $user->id,
+                            'company_id' => $companyId,
+                            'branch_id'  => $locationId,
+                        ]);
+                    }
+                } else {
+                    // No branches selected — store company with null branch
+                    UserCompany::create([
+                        'user_id'    => $user->id,
+                        'company_id' => $companyId,
+                        'branch_id'  => null,
+                    ]);
+                }
             }
         }
 
@@ -173,13 +203,27 @@ class UserController extends Controller
         $user->assignRole($request->input('roles'));
 
         UserCompany::where('user_id', $id)->delete();
-        $companies = $request->input('company');
+
+        $companies = $request->input('company', []);
+        $locations = $request->input('location', []);
+
         if (!empty($companies)) {
             foreach ($companies as $companyId) {
-                UserCompany::create([
-                    'user_id'    => $id,
-                    'company_id' => $companyId,
-                ]);
+                if (!empty($locations)) {
+                    foreach ($locations as $locationId) {
+                        UserCompany::create([
+                            'user_id'    => $id,
+                            'company_id' => $companyId,
+                            'branch_id'  => $locationId,
+                        ]);
+                    }
+                } else {
+                    UserCompany::create([
+                        'user_id'    => $id,
+                        'company_id' => $companyId,
+                        'branch_id'  => null,
+                    ]);
+                }
             }
         }
 
