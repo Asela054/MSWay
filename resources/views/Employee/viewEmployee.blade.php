@@ -325,8 +325,8 @@
 									<div class="form-row mb-1">
 										<div class="col-md-3 col-sm-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">Company</label>
-											<select name="employeecompany" id="company" class="form-control form-control-sm {{ $errors->has('employeecompany') ? ' has-error' : '' }} shipClass" onchange="resetDepartment()">
-												<option value="">Please Select</option>
+													<select name="employeecompany" id="company" class="form-control form-control-sm {{ $errors->has('employeecompany') ? ' has-error' : '' }} shipClass">
+													<option value="">Please Select</option>
 												@foreach($company as $companies)
 													<option value="{{$companies->id}}"
 														{{$companies->id == $employee->emp_company  ? 'selected' : ''}}>
@@ -342,7 +342,7 @@
 										</div>
 										<div class="col-md-3 col-sm-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">Location</label>
-											<select name="location" class="form-control form-control-sm {{ $errors->has('location') ? ' has-error' : '' }} shipClass">
+											<select name="location" id="location" class="form-control form-control-sm shipClass {{ $errors->has('location') ? ' has-error' : '' }} required">
 												<option value="">Select</option>
 												@foreach($branch as $branches)
 													<option value="{{$branches->id}}"
@@ -497,56 +497,79 @@
 
 @section('script')
 <script>
-	$('#employee_menu_link').addClass('active');
-	$('#employee_menu_link_icon').addClass('active');
-	$('#employeeinformation').addClass('navbtnactive');
-	$('#view_employee_link').addClass('active');
+    $(document).ready(function() {
+        $('#employee_menu_link').addClass('active');
+        $('#employee_menu_link_icon').addClass('active');
+        $('#employeeinformation').addClass('navbtnactive');
+        $('#view_employee_link').addClass('active');
 
-	let company = $('#company');
-	let department = $('#department');
+        let company = $('#company');
+        let department = $('#department');
+        let location = $('#location');
 
-	department.select2({
-		placeholder: 'Select...',
-		width: '100%',
-		allowClear: true,
-		ajax: {
-			url: '{{url("department_list_sel2")}}',
-			dataType: 'json',
-			data: function(params) {
-				return {
-					term: params.term || '',
-					page: params.page || 1,
-					company: company.val()
-				}
-			},
-			cache: true
-		}
-	});
+        department.select2({
+            placeholder: 'Select...',
+            width: '100%',
+            allowClear: true,
+            ajax: {
+                url: '{{url("department_list_sel2")}}',
+                dataType: 'json',
+                data: function(params) {
+                    return {
+                        term: params.term || '',
+                        page: params.page || 1,
+                        company: company.val()
+                    }
+                },
+                cache: true
+            }
+        });
 
-	function resetDepartment() {
-		$('#department').val(null).trigger('change');
-	}
+        location.select2({
+            placeholder: 'Select Location',
+            width: '100%',
+            allowClear: true,
+            ajax: {
+                url: '{{url("location_list_sel2")}}',
+                dataType: 'json',
+                data: function(params) {
+                    return {
+                        term: params.term || '',
+                        page: params.page || 1,
+                        company: company.val()
+                    }
+                },
+                cache: true
+            }
+        });
 
-	$('.num').keypress(function (event) {
-		return isNumber(event, this)
-	});
+        // Bind company change event
+        company.on('change', function() {
+            $('#department').val(null).trigger('change');
+            $('#location').val(null).trigger('change');
+        });
 
-	function isNumber(evt, element) {
-		var charCode = (evt.which) ? evt.which : event.keyCode
-		if (
-			(charCode != 46 || $(element).val().indexOf('.') != -1) &&
-			(charCode < 48 || charCode > 57))
-			return false;
-		return true;
-	}
+        $('.num').keypress(function(event) {
+            return isNumber(event, this);
+        });
 
-	// Image preview functionality
-	$('#photograph').change(function() {
-		var reader = new FileReader();
-		reader.onload = function(e) {
-			$('#preview').attr('src', e.target.result).show();
-		}
-		reader.readAsDataURL(this.files[0]);
-	});
+        function isNumber(evt, element) {
+            var charCode = (evt.which) ? evt.which : event.keyCode;
+            if (
+                (charCode != 46 || $(element).val().indexOf('.') != -1) &&
+                (charCode < 48 || charCode > 57))
+                return false;
+            return true;
+        }
+
+        // Image preview functionality
+        $('#photograph').change(function() {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                $('#preview').attr('src', e.target.result).show();
+            }
+            reader.readAsDataURL(this.files[0]);
+        });
+    });
 </script>
 @endsection

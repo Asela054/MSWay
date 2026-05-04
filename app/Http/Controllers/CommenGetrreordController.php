@@ -225,26 +225,28 @@ class CommenGetrreordController extends Controller
         if ($request->ajax())
         {
             $page = Input::get('page');
+            $company = Input::get('company');
             $resultCount = 25;
 
             $offset = ($page - 1) * $resultCount;
 
-            $breeds = \Illuminate\Support\Facades\DB::query()
-                ->where('branches.location', 'LIKE',  '%' . Input::get("term"). '%')
-                ->from('branches')
-                ->orderBy('branches.location')
-                ->skip($offset)
-                ->take($resultCount)
-                ->get([DB::raw('DISTINCT branches.id as id'),DB::raw('branches.location as text')]);
+            $query = DB::table('branches')
+                ->where('branches.location', 'LIKE', '%' . Input::get("term") . '%');
 
-            $count = DB::query()
-                ->where('branches.location', 'LIKE',  '%' . Input::get("term"). '%')
-                ->from('branches')
-                ->orderBy('branches.location')
+            if (!empty($company)) {
+                $query->where(function($q) use ($company) {
+                    $q->where('branches.company_id', $company)
+                    ->orWhere('branches.company_id', 0);
+                });
+            }
+
+            $breeds = $query->orderBy('branches.location')
                 ->skip($offset)
                 ->take($resultCount)
-                ->get([DB::raw('DISTINCT branches.id as id'),DB::raw('branches.location as text')])
-                ->count();
+                ->get([DB::raw('DISTINCT branches.id as id'), DB::raw('branches.location as text')]);
+
+            $count = (clone $query)->count();
+
             $endCount = $offset + $resultCount;
             $morePages = $endCount < $count;
 

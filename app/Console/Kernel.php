@@ -26,6 +26,12 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')
         //          ->hourly();
+
+        $schedule->call(function () {
+            \DB::table('user_session_tokens')
+                ->where('expires_at', '<', \Carbon\Carbon::now())
+                ->delete();
+        })->daily();
     }
 
     /**

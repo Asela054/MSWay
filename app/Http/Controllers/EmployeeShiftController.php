@@ -33,7 +33,8 @@ class EmployeeShiftController extends Controller
 
         return view('EmployeeShift.employeeshift',compact('shifts'));
     }
-    public function insert(Request $request){
+    public function insert(Request $request)
+    {
 
         $user = Auth::user();
         $permission = $user->can('employee-shift-allocation-create');
@@ -42,47 +43,50 @@ class EmployeeShiftController extends Controller
         }
 
         $Employeeshift = new Employeeshift();
-        $Employeeshift->shift_id = $request->input('shift');
-        $Employeeshift->date_from = $request->input('datefrom');
-        $Employeeshift->date_to = $request->input('datefrom');
-        $Employeeshift->status = '1';
+        $Employeeshift->shift_id   = $request->input('shift');
+        $Employeeshift->date_from  = $request->input('datefrom');
+        $Employeeshift->date_to    = $request->input('datefrom');
+        $Employeeshift->remark     = $request->input('remark'); 
+        $Employeeshift->status     = '1';
         $Employeeshift->created_by = Auth::id();
         $Employeeshift->updated_by = '0';
         $Employeeshift->save();
 
-        $requestID=$Employeeshift->id;
-        $shift_id=$request->input('shift');
-        $date_from=$request->input('datefrom');
-        $until_time=$request->input('until_time');
-        $off_next_day=$request->input('off_next_day');
+        $requestID = $Employeeshift->id;
+        $shift_id  = $request->input('shift');
+        $date_from = $request->input('datefrom');
 
         $tableData = $request->input('tableData');
 
         foreach ($tableData as $rowtabledata) {
-            $emp_id = $rowtabledata['col_1'];
-            $empname = $rowtabledata['col_2'];
+            $emp_id           = $rowtabledata['col_1'];
+            $empname          = $rowtabledata['col_2'];
+            $until_time       = $rowtabledata['col_3'];       
+            $off_next_day_lbl = $rowtabledata['col_4'];       
+            $off_next_day     = ($off_next_day_lbl === 'Yes') ? 1 : 0;
 
-        $Employeeshiftdetail = new Employeeshiftdetail();
-        $Employeeshiftdetail->shift_id = $shift_id;
-        $Employeeshiftdetail->date_from = $date_from;
-        $Employeeshiftdetail->until_time = $until_time;
-        $Employeeshiftdetail->off_next_day = $off_next_day;
-        $Employeeshiftdetail->emp_id = $emp_id;
-        $Employeeshiftdetail->employee_name = $empname;
-        $Employeeshiftdetail->employeeshift_id = $requestID;
-        $Employeeshiftdetail->status = '1';
-        $Employeeshiftdetail->created_by = Auth::id();
-        $Employeeshiftdetail->updated_by = '0';
-        $Employeeshiftdetail->save();
+            $Employeeshiftdetail = new Employeeshiftdetail();
+            $Employeeshiftdetail->shift_id         = $shift_id;
+            $Employeeshiftdetail->date_from        = $date_from;
+            $Employeeshiftdetail->until_time       = $until_time;
+            $Employeeshiftdetail->off_next_day     = $off_next_day;
+            $Employeeshiftdetail->emp_id           = $emp_id;
+            $Employeeshiftdetail->employee_name    = $empname;
+            $Employeeshiftdetail->employeeshift_id = $requestID;
+            $Employeeshiftdetail->status           = '1';
+            $Employeeshiftdetail->created_by       = Auth::id();
+            $Employeeshiftdetail->updated_by       = '0';
+            $Employeeshiftdetail->save();
         }
+
         return response()->json(['success' => 'Employee Shift is Successfully Inserted']);
     }
 
     public function requestlist()
     {
         $types = DB::table('employeeshifts')
-            // ->leftJoin('shift_types','shift_types.id','employeeshifts.shift_id')
-            ->select('employeeshifts.*')
+            ->leftJoin('shift_types', 'shift_types.id', '=', 'employeeshifts.shift_id') 
+            ->select('employeeshifts.*', 'shift_types.shift_name')                      
             ->whereIn('employeeshifts.status', [1, 2])
             ->get();
 
@@ -197,7 +201,7 @@ class EmployeeShiftController extends Controller
         $current_date_time = Carbon::now()->toDateTimeString();
         $form_data = array(
             'status' =>  '3',
-            'update_by' => Auth::id(),
+            'updated_by' => Auth::id(),
             'updated_at' => $current_date_time,
         );
         Employeeshiftdetail::findOrFail($id)
@@ -222,6 +226,7 @@ class EmployeeShiftController extends Controller
             'shift_id'   => $request->shift,
             'date_from'  => $request->datefrom,
             'date_to'    => $request->datefrom,
+            'remark'     => $request->remark,
             'updated_by' => Auth::id(),
             'updated_at' => $current_date_time,
         );
@@ -324,7 +329,7 @@ class EmployeeShiftController extends Controller
         $current_date_time = Carbon::now()->toDateTimeString();
         $form_data = array(
             'status' =>  '3',
-            'update_by' => Auth::id(),
+            'updated_by' => Auth::id(),
             'updated_at' => $current_date_time,
         );
         Employeeshift::findOrFail($id)
@@ -345,7 +350,7 @@ class EmployeeShiftController extends Controller
         if($statusid == 1){
             $form_data = array(
                 'status' =>  '1',
-                'update_by' => Auth::id(),
+                'updated_by' => Auth::id(),
             );
             Employeeshift::findOrFail($id)
             ->update($form_data);
@@ -354,7 +359,7 @@ class EmployeeShiftController extends Controller
         } else{
             $form_data = array(
                 'status' =>  '2',
-                'update_by' => Auth::id(),
+                'updated_by' => Auth::id(),
             );
             Employeeshift::findOrFail($id)
             ->update($form_data);
@@ -372,62 +377,137 @@ class EmployeeShiftController extends Controller
             return response()->json(['error' => 'UnAuthorized'], 401);
         }
 
-        $shiftType = $request->input('csv_shift');
-        $file = $request->file('csv_file_u');
+        $shiftType    = $request->input('csv_shift');
+        $file         = $request->file('csv_file_u');
         $fileContents = file($file->getPathname());
 
         foreach ($fileContents as $line) {
-            $data = str_getcsv($line);
-            
-            $emp_id = trim(preg_replace('/^\xEF\xBB\xBF/', '', $data[0]));
-            $date = trim($data[1]);
-            $until_time = trim($data[2]);
-            $emp_id = trim($emp_id);
+            $data       = str_getcsv($line);
+            $emp_id     = trim(preg_replace('/^\xEF\xBB\xBF/', '', $data[0]));
+            $date       = $this->parseDate(trim($data[1]));
+            $until_time = $this->parseDateTime(trim($data[2]));
+
+            if (!$date || !$until_time) {
+                continue; // skip rows with unparseable dates
+            }
+
             $emp = DB::table('employees')
                 ->select('emp_id', 'emp_name_with_initial')
                 ->where('emp_id', $emp_id)
                 ->first();
 
-                if (is_null($emp)) {
-                    continue;
-                }
-    
-            $empname=$emp->emp_name_with_initial;
-            $empid=$emp->emp_id;
+            if (is_null($emp)) {
+                continue;
+            }
+
+            $empname = $emp->emp_name_with_initial;
+            $empid   = $emp->emp_id;
 
             $Employeeshift = Employeeshift::firstOrCreate(
                 [
-                    'shift_id' => $shiftType,
+                    'shift_id'  => $shiftType,
                     'date_from' => $date,
-                    'date_to' => $date,
+                    'date_to'   => $date,
                 ],
                 [
-                    'status' => '1',
+                    'status'     => '1',
                     'created_by' => Auth::id(),
                     'updated_by' => '0',
                 ]
             );
-        
+
             $requestID = $Employeeshift->id;
 
-            $Employeeshiftdetail = Employeeshiftdetail::firstOrCreate(
+            Employeeshiftdetail::firstOrCreate(
                 [
-                    'shift_id' => $shiftType,
-                    'date_from' => $date,
-                    'until_time' => $until_time,
+                    'shift_id'     => $shiftType,
+                    'date_from'    => $date,
+                    'until_time'   => $until_time,
                     'off_next_day' => 0,
-                    'emp_id' => $emp_id,
+                    'emp_id'       => $emp_id,
                 ],
                 [
-                    'employee_name' => $empname,
+                    'employee_name'    => $empname,
                     'employeeshift_id' => $requestID,
-                    'status' => '1',
-                    'created_by' => Auth::id(),
-                    'updated_by' => '0',
+                    'status'           => '1',
+                    'created_by'       => Auth::id(),
+                    'updated_by'       => '0',
                 ]
             );
+        }
+
+        return response()->json(['status' => 1, 'msg' => 'CSV Upload successfully.']); // Fix 4: true -> 1
+    }
+
+    private function parseDate($dateString)
+    {
+        try {
+            $dateString = trim($dateString);
+            
+            $formats = [
+                'm/d/Y',
+                'n/j/Y',
+                'd/m/Y',
+                'Y-m-d',
+                'Y/m/d',
+                'd-m-Y',
+                'm-d-Y',
+                'd.m.Y',
+                'Y.m.d',
+            ];
+
+            foreach ($formats as $format) {
+                $date = \DateTime::createFromFormat($format, $dateString);
+                if ($date !== false) {
+                    $errors = \DateTime::getLastErrors();
+                    if ($errors && $errors['warning_count'] === 0 && $errors['error_count'] === 0) {
+                        return $date->format('Y-m-d');
+                    }
+                }
             }
-        return response()->json(['status' => true, 'msg' => 'CSV Upload successfully.']);
+
+            return Carbon::parse($dateString)->format('Y-m-d');
+            
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    private function parseDateTime($dateTimeString)
+    {
+        try {
+            $dateTimeString = trim($dateTimeString);
+
+            $formats = [
+                'Y-m-d H:i:s',
+                'Y-m-d H:i',
+                'm/d/Y H:i:s',
+                'm/d/Y H:i',
+                'd/m/Y H:i:s',
+                'd/m/Y H:i',
+                'n/j/Y H:i:s',
+                'n/j/Y H:i',
+                'Y/m/d H:i:s',
+                'Y/m/d H:i',
+                'd-m-Y H:i:s',
+                'd-m-Y H:i',
+            ];
+
+            foreach ($formats as $format) {
+                $dt = \DateTime::createFromFormat($format, $dateTimeString);
+                if ($dt !== false) {
+                    $errors = \DateTime::getLastErrors();
+                    if ($errors && $errors['warning_count'] === 0 && $errors['error_count'] === 0) {
+                        return $dt->format('Y-m-d H:i:s');
+                    }
+                }
+            }
+
+            return Carbon::parse($dateTimeString)->format('Y-m-d H:i:s');
+
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 
 }

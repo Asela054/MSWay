@@ -564,15 +564,15 @@ class HomeController extends Controller
                         $employeePicture = $employee['emp_pic_filename'];
                         $imagePath = '';
                         if (file_exists(public_path("images/{$employeePicture}")) && !empty($employeePicture)) {
-                            $imagePath = asset("images/{$employeePicture}");
+                            $imagePath = asset("public/images/{$employeePicture}");
                         } else {
                             $employeeGender = \App\Employee::where('emp_id', $employee['emp_id'])->pluck('emp_gender')->first();
                             if(empty($employeeGender)){
                                 $employeeGender = "Male";
                             }
                             $imagePath = $employeeGender == "Male" 
-                                ? asset("images/man.png") 
-                                : asset("images/girl.png");
+                                ? asset("public/images/man.png") 
+                                : asset("public/images/girl.png");
                         }
 
                         $htmlTables .= '<tr class="' . ($employee['off_next_day'] == 1 ? 'table-warning' : '') . '">';
@@ -683,15 +683,15 @@ class HomeController extends Controller
                         $employeePicture = $employee['emp_pic_filename'];
                         $imagePath = '';
                         if (file_exists(public_path("images/{$employeePicture}")) && !empty($employeePicture)) {
-                            $imagePath = asset("images/{$employeePicture}");
+                            $imagePath = asset("public/images/{$employeePicture}");
                         } else {
                             $employeeGender = \App\Employee::where('emp_id', $employee['emp_id'])->pluck('emp_gender')->first();
                             if(empty($employeeGender)){
                                 $employeeGender = "Male";
                             }
                             $imagePath = $employeeGender == "Male" 
-                                ? asset("images/man.png") 
-                                : asset("images/girl.png");
+                                ? asset("public/images/man.png") 
+                                : asset("public/images/girl.png");
                         }
 
                         $htmlTables .= '<tr class="' . ($employee['off_next_day'] == 1 ? 'table-warning' : '') . '">';
@@ -800,15 +800,15 @@ class HomeController extends Controller
                         $employeePicture = $employee['emp_pic_filename'];
                         $imagePath = '';
                         if (file_exists(public_path("images/{$employeePicture}")) && !empty($employeePicture)) {
-                            $imagePath = asset("images/{$employeePicture}");
+                            $imagePath = asset("public/images/{$employeePicture}");
                         } else {
                             $employeeGender = \App\Employee::where('emp_id', $employee['emp_id'])->pluck('emp_gender')->first();
                             if(empty($employeeGender)){
                                 $employeeGender = "Male";
                             }
                             $imagePath = $employeeGender == "Male" 
-                                ? asset("images/man.png") 
-                                : asset("images/girl.png");
+                                ? asset("public/images/man.png") 
+                                : asset("public/images/girl.png");
                         }
                         
                         $htmlTables .= '<tr>';
@@ -924,15 +924,15 @@ class HomeController extends Controller
                         $employeePicture = $employee['emp_pic_filename'];
                         $imagePath = '';
                         if (file_exists(public_path("images/{$employeePicture}")) && !empty($employeePicture)) {
-                            $imagePath = asset("images/{$employeePicture}");
+                            $imagePath = asset("public/images/{$employeePicture}");
                         } else {
                             $employeeGender = \App\Employee::where('emp_id', $employee['emp_id'])->pluck('emp_gender')->first();
                             if(empty($employeeGender)){
                                 $employeeGender = "Male";
                             }
                             $imagePath = $employeeGender == "Male" 
-                                ? asset("images/man.png") 
-                                : asset("images/girl.png");
+                                ? asset("public/images/man.png") 
+                                : asset("public/images/girl.png");
                         }
 
                         $htmlTables .= '<tr class="' . ($employee['off_next_day'] == 1 ? 'table-warning' : '') . '">';
@@ -1051,15 +1051,15 @@ class HomeController extends Controller
                         $employeePicture = $employee['emp_pic_filename'];
                         $imagePath = '';
                         if (file_exists(public_path("images/{$employeePicture}")) && !empty($employeePicture)) {
-                            $imagePath = asset("images/{$employeePicture}");
+                            $imagePath = asset("public/images/{$employeePicture}");
                         } else {
                             $employeeGender = \App\Employee::where('emp_id', $employee['emp_id'])->pluck('emp_gender')->first();
                             if(empty($employeeGender)){
                                 $employeeGender = "Male";
                             }
                             $imagePath = $employeeGender == "Male" 
-                                ? asset("images/man.png") 
-                                : asset("images/girl.png");
+                                ? asset("public/images/man.png") 
+                                : asset("public/images/girl.png");
                         }
 
                         $htmlTables .= '<tr class="' . ($employee['off_next_day'] == 1 ? 'table-warning' : '') . '">';
@@ -1168,15 +1168,15 @@ class HomeController extends Controller
                         $employeePicture = $employee['emp_pic_filename'];
                         $imagePath = '';
                         if (file_exists(public_path("images/{$employeePicture}")) && !empty($employeePicture)) {
-                            $imagePath = asset("images/{$employeePicture}");
+                            $imagePath = asset("public/images/{$employeePicture}");
                         } else {
                             $employeeGender = \App\Employee::where('emp_id', $employee['emp_id'])->pluck('emp_gender')->first();
                             if(empty($employeeGender)){
                                 $employeeGender = "Male";
                             }
                             $imagePath = $employeeGender == "Male" 
-                                ? asset("images/man.png") 
-                                : asset("images/girl.png");
+                                ? asset("public/images/man.png") 
+                                : asset("public/images/girl.png");
                         }
 
                         $htmlTables .= '<tr>';

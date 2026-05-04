@@ -1799,6 +1799,9 @@ Route::post('/opma_productallocationdeletelist' ,'Production_Module_Opma\Product
 
 // call user account summery with user id
 Route::get('useraccountsummery/user/{user_id}', 'UserAccountController@useraccountsummery_list')->name('useraccountsummerywithuser');
+Route::get('/Privacy-policy', function () {
+    return view('privacypolicy');
+});
 
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');

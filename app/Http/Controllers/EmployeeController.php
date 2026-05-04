@@ -57,7 +57,18 @@ class EmployeeController extends Controller
         $branch = Branch::orderBy('id', 'asc')->get();
         $title = JobTitle::orderBy('id', 'asc')->get();
         $shift_type = ShiftType::where('deleted', 0)->orderBy('id', 'asc')->get();
-        $company = Company::orderBy('id', 'asc')->get();
+
+        $id = Auth::user()->id;
+        $userCompanyIds = DB::table('user_has_companies')->where('user_id', $id)
+            ->pluck('company_id')
+            ->toArray();
+
+        $company = Company::orderBy('id', 'asc')
+            ->when(!empty($userCompanyIds), function ($query) use ($userCompanyIds) {
+                $query->whereIn('id', $userCompanyIds);
+            })
+            ->get();
+
         $departments = Department::orderBy('id', 'asc')->get();
         $empposition = CompanyHierarchy::orderBy('order_number', 'asc')->get();
 
@@ -244,7 +255,18 @@ class EmployeeController extends Controller
             $shift_type = ShiftType::where('deleted', 0)->orderBy('id', 'asc')->get();
             $employmentstatus = EmploymentStatus::orderBy('id', 'asc')->get();
             $jobtitles = JobTitle::orderBy('id', 'asc')->get();
-            $company = Company::orderBy('id', 'asc')->get();
+
+            $userId = Auth::user()->id;
+            $userCompanyIds = DB::table('user_has_companies')->where('user_id', $userId)
+                ->pluck('company_id')
+                ->toArray();
+
+            $company = Company::orderBy('id', 'asc')
+                ->when(!empty($userCompanyIds), function ($query) use ($userCompanyIds) {
+                    $query->whereIn('id', $userCompanyIds);
+                })
+                ->get();
+
             $departments = Department::orderBy('id', 'asc')->get();
             $job_categories = JobCategory::orderBy('id', 'asc')->get();
             $work_categories = WorkCategory::orderBy('id', 'asc')->get();
