@@ -148,8 +148,9 @@ class BranchController extends Controller
         }
 
         $form_data = array(
+            'company_id' => $request->company_id,
             'location'    =>  $request->location,
-             'code'    =>  $request->code,
+            'code'    =>  $request->code,
             'contactno'        =>  $request->contactno,
             'latitude'        =>  $request->altitude,
             'longitude'        =>  $request->longitude,
