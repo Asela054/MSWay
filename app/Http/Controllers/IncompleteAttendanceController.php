@@ -55,6 +55,11 @@ class IncompleteAttendanceController extends Controller
             ->pluck('company_id')
             ->toArray();
 
+        $userBranchIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('branch_id')
+            ->toArray();
+
        $query = DB::table('departments');
 
         if ($department != '') {
@@ -63,6 +68,10 @@ class IncompleteAttendanceController extends Controller
 
         if ($location != '') {
             $query->where('emp_location', $location);
+        } 
+        
+        if ($userBranchIds) {
+            $query->whereIn('emp_location', $userBranchIds);
         }
 
         if ($company != '') {

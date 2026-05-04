@@ -61,6 +61,7 @@ $sql = "SELECT
         `e`.`emp_id`,
         `e`.`calling_name`,
         `e`.`emp_company`,
+        `e`.`emp_location`,
         `ja`.`shift_id`,
         `ja`.`on_time`,
         `ja`.`off_time`,
@@ -104,7 +105,8 @@ if ($userId) {
     }
     
     $companyIds = [];
-    $companyQuery = "SELECT company_id FROM user_has_companies WHERE user_id = ?";
+    $branchIds = [];
+    $companyQuery = "SELECT company_id, branch_id FROM user_has_companies WHERE user_id = ?";
     $stmt = $mysqli->prepare($companyQuery);
     $stmt->bind_param('i', $userId);
     $stmt->execute();
@@ -112,6 +114,7 @@ if ($userId) {
     
     while ($row = $result->fetch_assoc()) {
         $companyIds[] = $row['company_id'];
+        $branchIds[] = $row['branch_id'];
     }
     $stmt->close();
     
@@ -120,6 +123,10 @@ if ($userId) {
         $sql .= " AND `e`.`emp_company` IN ($companyIdsList)";
     }
 
+    if (!empty($branchIds)) {
+        $branchIdsList = implode(',', array_map('intval', $branchIds));
+        $sql .= " AND `e`.`emp_location` IN ($branchIdsList)";
+    }
     
     $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId, $mysqli);
     if (!empty($accessibleEmployeeIds)) {

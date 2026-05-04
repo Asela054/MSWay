@@ -43,6 +43,11 @@ class AttendanceApprovalController extends Controller
         $userId = Auth::id();
         $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
 
+        $userBranchIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('branch_id')
+            ->toArray();
+
         $query = DB::query()
             ->select('at1.id as attendance_id',
                 'at1.emp_id',
@@ -59,6 +64,7 @@ class AttendanceApprovalController extends Controller
                         ELSE Max(at1.timestamp)
                         END) AS lasttimestamp'),
                 'employees.emp_name_with_initial',
+                'employees.emp_location',
                 'branches.location',
                 'departments.name as dept_name'
             )
@@ -81,6 +87,10 @@ class AttendanceApprovalController extends Controller
         // Apply user access rights filter
         if (!empty($accessibleEmployeeIds)) {
             $query->whereIn('employees.emp_id', $accessibleEmployeeIds);
+        }
+
+         if (!empty($userBranchIds)) {
+            $query->whereIn('employees.emp_location', $userBranchIds);
         }
 
         if ($department != '' && $department != 'All') {

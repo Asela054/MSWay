@@ -58,6 +58,7 @@ $sql = "SELECT
     `ela`.`working_hours`,
     `employees`.`emp_name_with_initial`,
     `employees`.`calling_name`,
+    `employees`.`emp_location`,
     `branches`.`location`,
     `departments`.`name` as `dep_name`
 FROM `employee_late_attendances` as `ela`
@@ -103,14 +104,20 @@ if ($userId) {
     $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId, $mysqli);
 
     $companyIds = [];
-    $companyQuery = "SELECT company_id FROM user_has_companies WHERE user_id = ?";
+    $branchIds = [];
+    $companyQuery = "SELECT company_id, branch_id FROM user_has_companies WHERE user_id = ?";
     $stmt = $mysqli->prepare($companyQuery);
     $stmt->bind_param('i', $userId);
     $stmt->execute();
     $result = $stmt->get_result();
     
-    while ($row = $result->fetch_assoc()) {
+     while ($row = $result->fetch_assoc()) {
+        if (!empty($row['company_id'])) {
         $companyIds[] = $row['company_id'];
+        }
+        if (!empty($row['branch_id'])) {
+            $branchIds[] = $row['branch_id'];
+        }
     }
     $stmt->close();
     
@@ -119,6 +126,10 @@ if ($userId) {
         $sql .= " AND `employees`.`emp_company` IN ($companyIdsList)";
     }
 
+    if (!empty($branchIds)) {
+        $branchIdsList = implode(',', array_map('intval', $branchIds));
+        $sql .= " AND `employees`.`emp_location` IN ($branchIdsList)";
+    }
 
     if (!empty($accessibleEmployeeIds)) {
         $empIds = implode(',', array_map('intval', $accessibleEmployeeIds));

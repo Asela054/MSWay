@@ -60,6 +60,7 @@ require('ssp.customized.class.php' );
         `e`.`emp_name_with_initial`,
         `e`.`calling_name`,
         `e`.`emp_company`,
+        `e`.`emp_location`,
         `leave_types`.`leave_type`,
         `ec`.`emp_name_with_initial` AS `covering_emp_name`,
         `departments`.`name` AS `dep_name`,
@@ -109,7 +110,8 @@ require('ssp.customized.class.php' );
         }
         
           $companyIds = [];
-        $companyQuery = "SELECT company_id FROM user_has_companies WHERE user_id = ?";
+          $branchIds = [];
+        $companyQuery = "SELECT company_id, branch_id FROM user_has_companies WHERE user_id = ?";
         $stmt = $mysqli->prepare($companyQuery);
         $stmt->bind_param('i', $userId);
         $stmt->execute();
@@ -117,6 +119,7 @@ require('ssp.customized.class.php' );
         
         while ($row = $result->fetch_assoc()) {
             $companyIds[] = $row['company_id'];
+            $branchIds[] = $row['branch_id'];
         }
         $stmt->close();
         
@@ -125,6 +128,10 @@ require('ssp.customized.class.php' );
             $sql .= " AND `e`.`emp_company` IN ($companyIdsList)";
         }
 
+        if (!empty($branchIds)) {
+            $branchIdsList = implode(',', array_map('intval', $branchIds));
+            $sql .= " AND `e`.`emp_location` IN ($branchIdsList)";
+        }
 
         $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId, $mysqli);
     if (!empty($accessibleEmployeeIds)) {
