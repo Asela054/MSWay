@@ -126,15 +126,21 @@ if ($userId) {
     $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId, $mysqli);
 
 	$companyIds = [];
-    $companyQuery = "SELECT company_id FROM user_has_companies WHERE user_id = ?";
+	$branchIds = [];
+    $companyQuery = "SELECT company_id, branch_id FROM user_has_companies WHERE user_id = ?";
     $stmt = $mysqli->prepare($companyQuery);
     $stmt->bind_param('i', $userId);
     $stmt->execute();
     $result = $stmt->get_result();
     
-    while ($row = $result->fetch_assoc()) {
-        $companyIds[] = $row['company_id'];
-    }
+     while ($row = $result->fetch_assoc()) {
+			if (!empty($row['company_id'])) {
+			$companyIds[] = $row['company_id'];
+			}
+			if (!empty($row['branch_id'])) {
+				$branchIds[] = $row['branch_id'];
+			}
+		}
     $stmt->close();
     
     if (!empty($companyIds)) {
@@ -142,6 +148,11 @@ if ($userId) {
         $extraWhere .= " AND `employees`.`emp_company` IN ($companyIdsList)";
     }
 
+	 if (!empty($branchIds)) {
+        $branchIdsList = implode(',', array_map('intval', $branchIds));
+        $extraWhere .= " AND `employees`.`emp_location` IN ($branchIdsList)";
+    }
+	
 
 	if (!empty($accessibleEmployeeIds)) {
 		$empIds = implode(',', array_map('intval', $accessibleEmployeeIds));

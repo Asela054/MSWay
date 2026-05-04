@@ -55,6 +55,11 @@ class OTApproveController extends Controller
             ->pluck('company_id')
             ->toArray();
 
+        $userBranchIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('branch_id')
+            ->toArray();
+        
          $query = DB::table('attendances as at1')
         ->select(
             'at1.*',
@@ -99,6 +104,10 @@ class OTApproveController extends Controller
 
     if (!empty($location)) {
         $query->where('at1.location', $location);
+
+    }
+    if (!empty($userBranchIds)){
+        $query->whereIn('at1.location', $userBranchIds);
     }
 
     if (!empty($from_date)) {

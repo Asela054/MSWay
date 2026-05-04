@@ -64,6 +64,8 @@ require('ssp.customized.class.php');
         `departments`.`name` AS `dep_name`, 
         `shift_types`.`shift_name`,
         `at1`.`date`, 
+        `employees`.`emp_company`,
+        `employees`.`emp_location`,
         DATE_FORMAT(`at1`.`date`, '%Y-%m-%d') AS `formatted_date`, 
         MIN(`at1`.`timestamp`) AS `firsttimestamp`, 
         CASE WHEN MIN(`at1`.`timestamp`) = MAX(`at1`.`timestamp`) THEN NULL ELSE MAX(`at1`.`timestamp`) END AS `lasttimestamp`, 
@@ -101,8 +103,7 @@ require('ssp.customized.class.php');
     
     $sql .= " HAVING COUNT(at1.timestamp) < 2";
 
-    $joinQuery = "FROM (" . $sql . ") as `u`";
-    $extraWhere = "";
+   
     
 
     // new filter based on user access rights
@@ -118,7 +119,9 @@ require('ssp.customized.class.php');
 
            // Get company IDs - considering they might be VARCHAR values
         $companyIds = [];
-        $companyQuery = "SELECT company_id FROM user_has_companies WHERE user_id = ?";
+        $branchIds = [];
+
+        $companyQuery = "SELECT company_id, branch_id FROM user_has_companies WHERE user_id = ?";
         $stmt = $mysqli->prepare($companyQuery);
         
         if ($stmt) {
@@ -127,7 +130,12 @@ require('ssp.customized.class.php');
             $result = $stmt->get_result();
             
             while ($row = $result->fetch_assoc()) {
+               if (!empty($row['company_id'])) {
                 $companyIds[] = $row['company_id'];
+                }
+                if (!empty($row['branch_id'])) {
+                    $branchIds[] = $row['branch_id'];
+                }
             }
             $stmt->close();
         }
@@ -140,21 +148,34 @@ require('ssp.customized.class.php');
             }, $companyIds);
             
             $companyIdsList = implode(',', $escapedCompanyIds);
-            $extraWhere .= " AND `employees`.`emp_company` IN ($companyIdsList)";
+            $sql .= " AND `employees`.`emp_company` IN ($companyIdsList)";
+        }
+
+         // Apply branch filter based on user_has_companies
+        if (!empty($branchIds)) {
+            $escapedBranchIds = array_map(function($id) use ($mysqli) {
+                  return "'" . $mysqli->real_escape_string($id) . "'";
+            }, $branchIds);
+            
+            $branchIdsList = implode(',', $escapedBranchIds);
+            $sql .= " AND `employees`.`emp_location` IN ($branchIdsList)";
         }
         
         $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId, $mysqli);
 
         if (!empty($accessibleEmployeeIds)) {
             $empIds = implode(',', array_map('intval', $accessibleEmployeeIds));
-            $extraWhere .= " AND employees.emp_id IN ($empIds)";
+            $sql .= " AND employees.emp_id IN ($empIds)";
         } else {
-            $extraWhere .= " AND 1 = 0";
+            $sql .= " AND 1 = 0";
         }
         $mysqli->close();
     }
     // end of new filter
 
+     $joinQuery = "FROM (" . $sql . ") as `u`";
 
- echo json_encode(SSP::simple($_POST, $sql_details, $table, $primaryKey, $columns, $joinQuery));
+    $extraWhere = "";
+
+ echo json_encode(SSP::simple($_POST, $sql_details, $table, $primaryKey, $columns, $joinQuery,$extraWhere));
  ?>

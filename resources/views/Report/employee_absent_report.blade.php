@@ -60,17 +60,18 @@
                   <div class="offcanvas-body">
                       <ul class="list-unstyled">
                           <form class="form-horizontal" id="formFilter">
+                            <li class="mb-2">
+                                  <div class="col-md-12">
+                                      <label class="small font-weight-bolder text-dark">Company</label>
+                                      <select name="company" id="company" class="form-control form-control-sm">
+                                      </select>
+                                  </div>
+                              </li>  
                               <li class="mb-2">
                                   <div class="col-md-12">
                                       <label class="small font-weight-bolder text-dark">Department</label>
-                                     <select name="department" id="department" class="form-control form-control-sm" required>
-                                            <option value="">Please Select</option>
-                                            <option value="All">All Departments</option>
-                                            @foreach ($departments as $department){
-                                                <option value="{{$department->id}}">{{$department->name}}</option>
-                                            }  
-                                            @endforeach
-                                        </select>
+                                      <select name="department" id="department" class="form-control form-control-sm">
+                                      </select>
                                   </div>
                               </li>
                               <li>
@@ -116,7 +117,43 @@ $(document).ready(function() {
     $('#report_menu_link_icon').addClass('active');
     $('#employeereportmaster').addClass('navbtnactive');
 
-    $('#department').select2({ width: '100%' });
+    let company = $('#company');
+    let department = $('#department');
+
+         company.select2({
+            placeholder: 'Select...',
+            width: '100%',
+            allowClear: true,
+            ajax: {
+                url: '{{url("company_list_sel2")}}',
+                dataType: 'json',
+                data: function(params) {
+                    return {
+                        term: params.term || '',
+                        page: params.page || 1
+                    }
+                },
+                cache: true
+            }
+        });
+
+        department.select2({
+            placeholder: 'Select...',
+            width: '100%',
+            allowClear: true,
+            ajax: {
+                url: '{{url("department_list_sel2")}}',
+                dataType: 'json',
+                data: function(params) {
+                    return {
+                        term: params.term || '',
+                        page: params.page || 1,
+                        company: company.val()
+                    }
+                },
+                cache: true
+            }
+        });
 
     showInitialMessage()
 

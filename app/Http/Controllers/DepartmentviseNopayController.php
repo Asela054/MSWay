@@ -42,14 +42,24 @@ class DepartmentviseNopayController extends Controller
                 return response()->json(['data' => []]);
             }
 
+            $userBranchIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('branch_id')
+            ->toArray();
+
+
+
         $datareturn = [];
 
         $query =  DB::table('employees')
-            ->select('emp_name_with_initial as emp_name','id as emp_autoid','emp_department','emp_id as empid')
+            ->select('emp_name_with_initial as emp_name','id as emp_autoid','emp_department','emp_id as empid','emp_location')
             ->where('emp_department', '=', $department)
             ->where('deleted', 0)
             ->where('is_resigned', 0)
             ->whereIn('emp_id', $accessibleEmployeeIds)
+            ->when(!empty($userBranchIds), function($q) use ($userBranchIds) {
+                return $q->whereIn('emp_location', $userBranchIds);
+            })
             ->get();
 
             foreach ($query as $row) {

@@ -43,6 +43,11 @@ class AttendanceApprovalController extends Controller
         $userId = Auth::id();
         $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
 
+        $userBranchIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('branch_id')
+            ->toArray();
+
         $query = DB::query()
             ->select('at1.id as attendance_id',
                 'at1.emp_id',
@@ -59,6 +64,7 @@ class AttendanceApprovalController extends Controller
                         ELSE Max(at1.timestamp)
                         END) AS lasttimestamp'),
                 'employees.emp_name_with_initial',
+                'employees.emp_location',
                 'branches.location',
                 'departments.name as dept_name'
             )
@@ -81,6 +87,10 @@ class AttendanceApprovalController extends Controller
         // Apply user access rights filter
         if (!empty($accessibleEmployeeIds)) {
             $query->whereIn('employees.emp_id', $accessibleEmployeeIds);
+        }
+
+         if (!empty($userBranchIds)) {
+            $query->whereIn('employees.emp_location', $userBranchIds);
         }
 
         if ($department != '' && $department != 'All') {
@@ -413,13 +423,7 @@ class AttendanceApprovalController extends Controller
             if(!empty($record->date)){
 				$year_rec = Carbon::createFromFormat('Y-m-d H:i:s', $record->date)->year;
 				$month_rec = Carbon::createFromFormat('Y-m-d H:i:s', $record->date)->month;
-	
-				DB::table('employee_work_rates')
-					->where('emp_id', $record->emp_auto_id)
-					->where('work_year', $year_rec)
-					->where('work_month', $month_rec)
-					->delete();
-	
+
 	
 				// Fetch employee job category and work hour data
 				$employee = DB::table('employees as e')
@@ -438,6 +442,46 @@ class AttendanceApprovalController extends Controller
 					$salarystatus = $employee->salary_without_attendace;
 				}
 	
+
+                $existingRecord = DB::table('employee_work_rates')
+                    ->where('emp_id', $record->emp_auto_id)
+                    ->where('work_year', $year_rec)
+                    ->where('work_month', $month_rec)
+                    ->first();
+
+                // If existing record found, backup to backup table
+                if ($existingRecord) {
+                    DB::table('employee_work_rates_backup_records')->insert([
+                        'record_id' => $existingRecord->id,
+                        'emp_id' => $existingRecord->emp_id,
+                        'emp_etfno' => $existingRecord->emp_etfno,
+                        'work_year' => $existingRecord->work_year,
+                        'work_month' => $existingRecord->work_month,
+                        'work_days' => $existingRecord->work_days,
+                        'working_week_days' => $existingRecord->working_week_days,
+                        'work_hours' => $existingRecord->work_hours,
+                        'leave_days' => $existingRecord->leave_days,
+                        'nopay_days' => $existingRecord->nopay_days,
+                        'emp_late_hours' => $existingRecord->emp_late_hours ?? 0,
+                        'normal_rate_otwork_hrs' => $existingRecord->normal_rate_otwork_hrs,
+                        'double_rate_otwork_hrs' => $existingRecord->double_rate_otwork_hrs,
+                        'triple_rate_otwork_hrs' => $existingRecord->triple_rate_otwork_hrs ?? 0,
+                        'holiday_nopay_days' => $existingRecord->holiday_nopay_days ?? 0,
+                        'holiday_normal_ot_hrs' => $existingRecord->holiday_normal_ot_hrs ?? 0,
+                        'holiday_double_ot_hrs' => $existingRecord->holiday_double_ot_hrs ?? 0,
+                        'created_by' => Auth::user()->name,
+                        'updated_by' => Auth::user()->name,
+                    ]);
+                }
+
+
+            	DB::table('employee_work_rates')
+					->where('emp_id', $record->emp_auto_id)
+					->where('work_year', $year_rec)
+					->where('work_month', $month_rec)
+					->delete();
+
+
 				//Insert Work Rate Table
 				if($workHourDate === "Hour"){//Daily Or Weekly Salary
 					foreach ($dateRange as $todayDate) {

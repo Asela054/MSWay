@@ -66,6 +66,11 @@ class LateminitesApprovelController extends Controller
         $userId = Auth::id();
         $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
 
+        $userBranchIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('branch_id')
+            ->toArray();
+
 
         $query = DB::query()
             ->select('at1.id as attendance_id',
@@ -74,6 +79,7 @@ class LateminitesApprovelController extends Controller
                 'employees.emp_name_with_initial',
                 'employees.calling_name',
                 'employees.emp_join_date',
+                'employees.emp_location',
                 'branches.location',
                 'departments.name as dept_name',
                 'job_categories.late_attend_min',
@@ -104,6 +110,10 @@ class LateminitesApprovelController extends Controller
         if ($department != '') {
             $query->where(['departments.id' => $department]);
         }
+       if($userBranchIds){
+             $query->whereIn('employees.emp_location', $userBranchIds);
+        }
+
         $query->where('employees.deleted', 0);
         $query->groupBy('employees.emp_id');
         $results = $query->get();

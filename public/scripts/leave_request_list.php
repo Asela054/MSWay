@@ -59,6 +59,7 @@ require('ssp.customized.class.php');
         `emp`.`calling_name`,
         `departments`.`name`,
         `emp`.`emp_company`,
+        `emp`.`emp_location`,
         `leave_types`.`leave_type`,
         `leave_request`.`from_date` AS `leave_from`,
         `leave_request`.`to_date` AS `leave_to`,
@@ -103,20 +104,31 @@ require('ssp.customized.class.php');
         }
         
          $companyIds = [];
-        $companyQuery = "SELECT company_id FROM user_has_companies WHERE user_id = ?";
+          $branchIds = [];
+        $companyQuery = "SELECT company_id, branch_id FROM user_has_companies WHERE user_id = ?";
         $stmt = $mysqli->prepare($companyQuery);
         $stmt->bind_param('i', $userId);
         $stmt->execute();
         $result = $stmt->get_result();
         
-        while ($row = $result->fetch_assoc()) {
-            $companyIds[] = $row['company_id'];
-        }
+         while ($row = $result->fetch_assoc()) {
+               if (!empty($row['company_id'])) {
+                $companyIds[] = $row['company_id'];
+                }
+                if (!empty($row['branch_id'])) {
+                    $branchIds[] = $row['branch_id'];
+                }
+            }
         $stmt->close();
         
         if (!empty($companyIds)) {
             $companyIdsList = implode(',', array_map('intval', $companyIds));
             $sql .= " AND `emp`.`emp_company` IN ($companyIdsList)";
+        }
+
+        if (!empty($branchIds)) {
+            $branchIdsList = implode(',', array_map('intval', $branchIds));
+            $sql .= " AND `emp`.`emp_location` IN ($branchIdsList)";
         }
 
         $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId, $mysqli);

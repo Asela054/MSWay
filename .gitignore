@@ -3,3 +3,5 @@ public/scripts/config.php
 .env
 bootstrap/cache/config-24072024.php
 public/scripts/config.php
+resources/views/layouts/app.blade.php
+resources/views/layouts/app.blade.php

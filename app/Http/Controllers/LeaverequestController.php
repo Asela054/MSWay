@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\UserHelper;
 use Illuminate\Support\Facades\Auth;
 use App\LeaveType;
 use App\Employee;
@@ -136,12 +137,27 @@ class LeaverequestController extends Controller
 
     public function getemployeeleaverequest(Request $request){
 
+            $userId = Auth::id();
+            $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
+            
+            // Return empty data if no accessible employees
+            if (empty($accessibleEmployeeIds)) {
+                return response()->json(['data' => []]);
+            }
+
+            $userBranchIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('branch_id')
+            ->toArray();
+
+
         $data = DB::table('leave_request')
                 ->select(
                     'leave_request.id',
                     'emp.emp_id',
                     'emp.emp_name_with_initial',
                     'emp.calling_name',
+                    'emp.emp_location',
                     'departments.name as department_name',
                     'leave_types.leave_type',
                     'leave_request.from_date as leave_from',
@@ -159,6 +175,9 @@ class LeaverequestController extends Controller
                 ->where('leave_request.status', 1)
                 ->where('leave_request.approve_status', 0)
                 ->where('leave_request.request_approve_status', 1)
+                ->when(!empty($userBranchIds), function($q) use ($userBranchIds) {
+                    return $q->whereIn('emp.emp_location', $userBranchIds);
+                })
                 ->get();
 
         $html = '';

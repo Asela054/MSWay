@@ -59,6 +59,10 @@ class CoverupController extends Controller
             ->pluck('company_id')
             ->toArray();
 
+         $userBranchIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('branch_id')
+            ->toArray();
 
         $query =  DB::table('coverup_details')
             // ->join('employees as ec', 'coverup_details.emp_id', '=', 'ec.emp_id')
@@ -88,6 +92,9 @@ class CoverupController extends Controller
 
         if($location != ''){
             $query->where(['e.emp_location' => $location]);
+        }
+        if($userBranchIds){
+            $query->whereIn('e.emp_location', $userBranchIds);
         }
 
         $data = $query->get();

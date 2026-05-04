@@ -51,6 +51,11 @@ class MealallowanceapproveController extends Controller
         $userId = Auth::id();
         $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
 
+         $userBranchIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('branch_id')
+            ->toArray();
+
 
         $datareturn = [];
 
@@ -61,6 +66,7 @@ class MealallowanceapproveController extends Controller
             'employees.emp_id as empid',
             'employees.emp_name_with_initial as emp_name',
             'employees.calling_name',
+            'employees.emp_location',
             'payroll_profiles.basic_salary as basicsalary',
             'payroll_profiles.id as payroll_profiles_id')
         ->where('employees.emp_department', '=', $department)
@@ -68,6 +74,9 @@ class MealallowanceapproveController extends Controller
         ->where('employees.deleted', '=',0)
         ->where('employees.is_resigned', '=',0)
         ->whereIn('employees.emp_id', $accessibleEmployeeIds)
+        ->when(!empty($userBranchIds), function($q) use ($userBranchIds) {
+                return $q->whereIn('employees.emp_location', $userBranchIds);
+            })
         ->orderBy('employees.id')
         ->get();
         // dd(DB::getQueryLog());

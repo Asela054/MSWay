@@ -113,6 +113,11 @@ class LateAttendanceController extends Controller
             ->pluck('company_id')
             ->toArray();
 
+            $userBranchIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('branch_id')
+            ->toArray();
+
 
         // Base query without late time filter (for counting)
         $baseQuery = DB::table('attendances as at1')
@@ -182,6 +187,10 @@ class LateAttendanceController extends Controller
         } elseif ($to_date) {
             $baseQuery->where('at1.date', '<=', $to_date);
         }
+        if($userBranchIds){
+             $baseQuery->whereIn('at1.location', $userBranchIds);
+        }
+       
 
         $totalRecords = DB::table(DB::raw("({$baseQuery->toSql()}) as sub"))
             ->mergeBindings($baseQuery)
