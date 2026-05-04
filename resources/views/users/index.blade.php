@@ -107,6 +107,12 @@
                                 <select name="company[]" id="company" class="form-control form-control-sm" multiple></select>
                             </div>
 
+                            <div class="form-group">
+                                <label class="small font-weight-bold text-dark">Accessible Branches</label>
+                                <select name="location[]" id="location" class="form-control form-control-sm" multiple>
+                                </select>
+                            </div>
+
                             <div class="form-group mt-3">
                                 <button type="submit" name="action_button" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-4">
                                     <i class="fas fa-plus"></i>&nbsp;Add
@@ -137,6 +143,7 @@
         $('#user_link').addClass('navbtnactive');
 
         let company = $('#company');
+        let location = $('#location');
 
         company.select2({
             placeholder: 'Select Companies',
@@ -153,6 +160,46 @@
                 },
                 cache: true
             }
+        });
+
+        location.select2({
+            placeholder: 'Select Location',
+            width: '100%',
+            allowClear: true,
+            ajax: {
+                url: '{{url("location_list_sel2")}}',
+                dataType: 'json',
+                data: function(params) {
+                    return {
+                        term: params.term || '',
+                        page: params.page || 1,
+                        company: company.val(),  
+                    }
+                },
+                cache: false  
+            }
+        });
+
+        company.on('change', function() {
+            location.val(null).trigger('change');
+            location.select2('destroy');
+            location.select2({
+                placeholder: 'Select Location',
+                width: '100%',
+                allowClear: true,
+                ajax: {
+                    url: '{{url("location_list_sel2")}}',
+                    dataType: 'json',
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1,
+                            company: company.val(),
+                        }
+                    },
+                    cache: false
+                }
+            });
         });
 
         $('#userstable').DataTable({
@@ -383,6 +430,16 @@
                                 $('#company').append(option);
                             });
                             $('#company').trigger('change');
+                        }
+
+                        // Populate Select2 locations
+                        $('#location').empty();
+                        if (data.result.locations && data.result.locations.length > 0) {
+                            $.each(data.result.locations, function(i, item) {
+                                var option = new Option(item.text, item.id, true, true);
+                                $('#location').append(option);
+                            });
+                            $('#location').trigger('change');
                         }
 
                         $('#form_result').html(''); 
