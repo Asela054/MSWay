@@ -15,6 +15,7 @@
     $hasmeterreadingPermissions = in_array('Access-Meter_Reading', $userPermissions);
     $hasempproductionPermissions = in_array('Access-Employee_Production', $userPermissions);
     $hasproductionPermissions_Opma = in_array('Access-Production_Task_Opma', $userPermissions);
+    $hasERPPermissions_KT = in_array('Access-ERP_KT', $userPermissions);
 
 @endphp
 <div class="sidebar" id="sidebar">
@@ -134,6 +135,16 @@
                 <span class="links_name">Employee Production</span>
             </a>
             <span class="tooltip">Employee Production</span>
+            </li>
+        @endif
+
+        @if($hasERPPermissions_KT)
+            <li>
+            <a href="{{ url('/erp_ktdashboard') }}" id="erp_menu_link_KT">
+                <i class="fa-light fa-industry"></i>
+                <span class="links_name">ERP</span>
+            </a>
+            <span class="tooltip">ERP</span>
             </li>
         @endif
 
