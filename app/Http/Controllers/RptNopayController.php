@@ -159,43 +159,55 @@ class RptNopayController extends Controller
             return response()->json(['html' => '']);
         }
 
+        $userCompanyIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('company_id')
+            ->toArray();
 
-        $emp_query = 'SELECT  
-                employees.*,  
-                employees.id as emp_auto_id, 
-                shift_types.onduty_time, 
-                shift_types.offduty_time,
-                shift_types.shift_name,
-                branches.location as b_location,
-                departments.name as dept_name 
-                FROM `employees`   
-                left join shift_types ON employees.emp_shift = shift_types.id 
-                left join branches ON employees.emp_location = branches.id 
-                left join departments ON employees.emp_department = departments.id 
-                WHERE employees.deleted = 0  
-                ';
+        $userBranchIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('branch_id')
+            ->toArray();
 
-        if (!empty($accessibleEmployeeIds)) {
-            $ids = implode('","', $accessibleEmployeeIds);
-            $emp_query .= 'AND employees.emp_id IN ("' . $ids . '") ';
-        }
-        
-        if($department != ''){
-            $emp_query .= ' AND employees.emp_department = '.$department;
-        }
 
-        if($employee != ''){
-            $emp_query .= ' AND employees.emp_id = '.$employee;
-        }
+       $query = DB::table('employees')
+                    ->select(
+                        'employees.*',
+                        'employees.id as emp_auto_id',
+                        'shift_types.onduty_time',
+                        'shift_types.offduty_time',
+                        'shift_types.shift_name',
+                        'branches.location as b_location',
+                        'departments.name as dept_name'
+                    )
+                    ->leftJoin('shift_types', 'employees.emp_shift', '=', 'shift_types.id')
+                    ->leftJoin('branches', 'employees.emp_location', '=', 'branches.id')
+                    ->leftJoin('departments', 'employees.emp_department', '=', 'departments.id')
+                    ->where('employees.deleted', 0);
 
-        if($location != ''){
-            $emp_query .= ' AND employees.emp_location = '.$location;
-        }
+                if (!empty($accessibleEmployeeIds)) {
+                    $query->whereIn('employees.emp_id', $accessibleEmployeeIds);
+                }
 
-        $emp_query .= ' order by employees.emp_id ';
+                if ($department != '') {
+                    $query->where('employees.emp_department', $department);
+                }
 
-        $data = DB::select($emp_query);
+                if ($employee != '') {
+                    $query->where('employees.emp_id', $employee);
+                }
 
+                if (!empty($userCompanyIds)) {
+                    $query->whereIn('employees.emp_company', $userCompanyIds);
+                }
+
+                if ($location != '') {
+                    $query->where('employees.emp_location', $location);
+                } elseif (!empty($userBranchIds)) {
+                    $query->whereIn('employees.emp_location', $userBranchIds);
+                }
+
+                $data = $query->orderBy('employees.emp_id')->get();
         //remove emp_id's which doesn't have no pay
         $index = 0;
         foreach ($data as $d){

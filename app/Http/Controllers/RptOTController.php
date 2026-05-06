@@ -232,39 +232,93 @@ class RptOTController extends Controller
             return response()->json(['html' => '']);
         }
 
-        $emp_query = 'SELECT  
-                employees.*,  
-                employees.id as emp_auto_id, 
-                shift_types.onduty_time, 
-                shift_types.offduty_time,
-                shift_types.shift_name,
-                branches.location as b_location,
-                departments.name as dept_name 
-                FROM `employees`   
-                left join shift_types ON employees.emp_shift = shift_types.id 
-                left join branches ON employees.emp_location = branches.id 
-                left join departments ON employees.emp_department = departments.id 
-                WHERE employees.deleted = 0  
-                ';
+        $userCompanyIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('company_id')
+            ->toArray();
 
-        if (!empty($accessibleEmployeeIds)) {
-            $ids = implode('","', $accessibleEmployeeIds);
-            $emp_query .= 'AND employees.emp_id IN ("' . $ids . '") ';
-        }
+        $userBranchIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('branch_id')
+            ->toArray();
 
-        if($department != ''){
-            $emp_query .= ' AND employees.emp_department = '.$department;
-        }
+        // $emp_query = 'SELECT  
+        //         employees.*,  
+        //         employees.id as emp_auto_id, 
+        //         shift_types.onduty_time, 
+        //         shift_types.offduty_time,
+        //         shift_types.shift_name,
+        //         branches.location as b_location,
+        //         departments.name as dept_name 
+        //         FROM `employees`   
+        //         left join shift_types ON employees.emp_shift = shift_types.id 
+        //         left join branches ON employees.emp_location = branches.id 
+        //         left join departments ON employees.emp_department = departments.id 
+        //         WHERE employees.deleted = 0  
+        //         ';
 
-        if($employee != ''){
-            $emp_query .= ' AND employees.emp_id = '.$employee;
-        }
+        // if (!empty($accessibleEmployeeIds)) {
+        //     $ids = implode('","', $accessibleEmployeeIds);
+        //     $emp_query .= 'AND employees.emp_id IN ("' . $ids . '") ';
+        // }
 
-        if($location != ''){
-            $emp_query .= ' AND employees.emp_location = '.$location;
-        }
+        // if($department != ''){
+        //     $emp_query .= ' AND employees.emp_department = '.$department;
+        // }
 
-        $data = DB::select($emp_query);
+        // if($employee != ''){
+        //     $emp_query .= ' AND employees.emp_id = '.$employee;
+        // }
+
+        // if($userCompanyIds) {
+        //     $emp_query .= ' AND employees.emp_company = '.$userCompanyIds;
+        // }
+
+        // if($location != ''){
+        //     $emp_query .= ' AND employees.emp_location = '.$location;
+        // }elseif($userBranchIds) {
+        //     $emp_query .= ' AND employees.emp_location = '.$userBranchIds;
+        // }
+        // $data = DB::select($emp_query);
+
+        $query = DB::table('employees')
+                    ->select(
+                        'employees.*',
+                        'employees.id as emp_auto_id',
+                        'shift_types.onduty_time',
+                        'shift_types.offduty_time',
+                        'shift_types.shift_name',
+                        'branches.location as b_location',
+                        'departments.name as dept_name'
+                    )
+                    ->leftJoin('shift_types', 'employees.emp_shift', '=', 'shift_types.id')
+                    ->leftJoin('branches', 'employees.emp_location', '=', 'branches.id')
+                    ->leftJoin('departments', 'employees.emp_department', '=', 'departments.id')
+                    ->where('employees.deleted', 0);
+
+                if (!empty($accessibleEmployeeIds)) {
+                    $query->whereIn('employees.emp_id', $accessibleEmployeeIds);
+                }
+
+                if ($department != '') {
+                    $query->where('employees.emp_department', $department);
+                }
+
+                if ($employee != '') {
+                    $query->where('employees.emp_id', $employee);
+                }
+
+                if (!empty($userCompanyIds)) {
+                    $query->whereIn('employees.emp_company', $userCompanyIds);
+                }
+
+                if ($location != '') {
+                    $query->where('employees.emp_location', $location);
+                } elseif (!empty($userBranchIds)) {
+                    $query->whereIn('employees.emp_location', $userBranchIds);
+                }
+
+                $data = $query->orderBy('employees.emp_id')->get();
 
         return Datatables::of($data)
             ->addIndexColumn()

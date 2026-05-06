@@ -8,6 +8,7 @@ use App\Attendance;
 use DB;
 use Carbon\Carbon;
 use DateTime;
+use App\Helpers\UserHelper;
 use Illuminate\Support\Facades\Auth;
 use Session;
 
@@ -155,6 +156,24 @@ class HomeController extends Controller
         }
 
 
+         $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
+        
+        // Return empty HTML if no accessible employees
+        if (empty($accessibleEmployeeIds)) {
+            return response()->json(['html' => '']);
+        }
+
+        $userCompanyIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('company_id')
+            ->toArray();
+
+        $userBranchIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('branch_id')
+            ->toArray();
+
+
         $today = Carbon::now()->format('Y-m-d');
         $empcount = DB::table('employees')->where('deleted', 0)->where('is_resigned', 0)->count();
 
@@ -162,19 +181,27 @@ class HomeController extends Controller
 
 
             // Get all companies
-            $companies = DB::table('companies')->get();
+            $companies = DB::table('companies');
+            if (!empty($userCompanyIds)) {
+                $companies->whereIn('id', $userCompanyIds);
+            }
+            $companies = $companies->get();
             
             // Initialize array to store per-company attendance data
             $companiesAttendanceData = [];
 
             foreach ($companies as $company) {
                 // Get all employees for this company
-                $employeeIds = DB::table('employees')
+               $employeeIds = DB::table('employees')
                     ->where('emp_company', $company->id)
                     ->where('deleted', 0)
-                    ->where('is_resigned', 0)
-                    ->pluck('emp_id')
-                    ->toArray();
+                    ->where('is_resigned', 0);
+
+                if (!empty($userBranchIds)) {
+                    $employeeIds->whereIn('emp_location', $userBranchIds);
+                }
+
+                $employeeIds = $employeeIds->pluck('emp_id')->toArray();
 
                 if (empty($employeeIds)) {
                     continue;
@@ -327,11 +354,21 @@ class HomeController extends Controller
                 'leaves.no_of_days',
                 'leaves.reson',
                 'employees.emp_name_with_initial',
+                'employees.emp_company',
+                'employees.emp_location',
                 'employee_pictures.emp_pic_filename',
                 'departments.name as department'
             )
-            ->orderBy('leaves.leave_from', 'DESC')
-            ->get();
+            ->orderBy('leaves.leave_from', 'DESC');
+
+            if (!empty($userCompanyIds)) {
+                $leavedatalist->whereIn('employees.emp_company', $userCompanyIds);
+            }
+            if (!empty($userBranchIds)) {
+                $leavedatalist->whereIn('employees.emp_location', $userBranchIds);
+            }
+
+            $leavedatalist = $leavedatalist->get();
 
         $employeesbday = DB::table('employees')
             ->select('emp_name_with_initial', 'emp_birthday')
@@ -386,6 +423,7 @@ class HomeController extends Controller
             'events',
             'companiesAttendanceData'
         ));
+
     }
 
     public function nextmonth_birthday() {
@@ -481,12 +519,30 @@ class HomeController extends Controller
 
     public function department_attendance(Request $request){
 
-      $companyId = $request->company_id;
+        $userId = Auth::id();
+        $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
+        
+        // Return empty HTML if no accessible employees
+        if (empty($accessibleEmployeeIds)) {
+            return response()->json(['html' => '']);
+        }
+
+        $userCompanyIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('company_id')
+            ->toArray();
+
+        $userBranchIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('branch_id')
+            ->toArray();
+
+
         $today = Carbon::now()->format('Y-m-d');
 
         $departmentdata = DB::table('departments')
         ->select('id', 'name') 
-        ->where('company_id', $companyId)
+        ->whereIn('company_id', $userCompanyIds)
         ->get()
         ->toArray();
 
@@ -499,12 +555,17 @@ class HomeController extends Controller
             'employees.emp_department', 
             'employee_pictures.emp_pic_filename',
             'employees.emp_shift',
+            'employees.emp_location',
             DB::raw('MIN(attendances.timestamp) as first_checkin'), 
             DB::raw('MAX(attendances.timestamp) as lasttimestamp')
         )
-        ->where('attendances.date', '=', $today)
-        ->groupBy('attendances.date','attendances.emp_id')
-        ->get();
+        ->where('attendances.date', '=', $today);
+         if (!empty($userBranchIds)) {
+            $attendance->whereIn('employees.emp_location', $userBranchIds);
+        }
+        $attendance->groupBy('attendances.date','attendances.emp_id');
+        $attendance = $attendance->get();
+
 
         $departmentMap = [];
         foreach ($departmentdata as $department) {
@@ -599,13 +660,31 @@ class HomeController extends Controller
 
     public function department_lateattendance(Request $request){
         $today = Carbon::now()->format('Y-m-d');
-        $companyId = $request->company_id;
+         $userId = Auth::id();
+        $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
+        
+        // Return empty HTML if no accessible employees
+        if (empty($accessibleEmployeeIds)) {
+            return response()->json(['html' => '']);
+        }
+
+        $userCompanyIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('company_id')
+            ->toArray();
+
+        $userBranchIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('branch_id')
+            ->toArray();
+
 
         $departmentdata = DB::table('departments')
         ->select('id', 'name') 
-        ->where('company_id', $companyId)
+         ->whereIn('company_id', $userCompanyIds)
         ->get()
         ->toArray();
+
         $late_times = DB::table('late_types')->where('id', 1)->first();
         $attendance= DB::table('employee_late_attendances')
         ->leftjoin('employees', 'employee_late_attendances.emp_id', '=', 'employees.emp_id')
@@ -616,12 +695,17 @@ class HomeController extends Controller
             'employees.emp_department', 
             'employee_pictures.emp_pic_filename',
             'employees.emp_shift',
+            'employees.emp_location',
             'employee_late_attendances.check_in_time', 
             'employee_late_attendances.check_out_time'
         )
-        ->where('employee_late_attendances.date', '=', $today)
-        ->groupBy('employee_late_attendances.date','employee_late_attendances.emp_id')
-        ->get();
+        ->where('employee_late_attendances.date', '=', $today);
+         if (!empty($userBranchIds)) {
+            $attendance->whereIn('employees.emp_location', $userBranchIds);
+        }
+        $attendance->groupBy('employee_late_attendances.date','employee_late_attendances.emp_id');
+        $attendance = $attendance->get();
+
 
         $departmentMap = [];
         foreach ($departmentdata as $department) {
@@ -720,11 +804,30 @@ class HomeController extends Controller
 
     public function department_absent(Request $request){
         $today = Carbon::now()->format('Y-m-d');
-        $companyId = $request->company_id;
+       $userId = Auth::id();
+        $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
+        
+        // Return empty HTML if no accessible employees
+        if (empty($accessibleEmployeeIds)) {
+            return response()->json(['html' => '']);
+        }
+
+        $userCompanyIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('company_id')
+            ->toArray();
+
+        $userBranchIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('branch_id')
+            ->toArray();
+
+
+        $today = Carbon::now()->format('Y-m-d');
 
         $departmentdata = DB::table('departments')
         ->select('id', 'name') 
-        ->where('company_id', $companyId)
+        ->whereIn('company_id', $userCompanyIds)
         ->get()
         ->toArray();
 
@@ -739,8 +842,11 @@ class HomeController extends Controller
         ->select('employees.emp_id', 'employees.emp_name_with_initial','employees.emp_department', 'employee_pictures.emp_pic_filename') 
         ->leftJoin('employee_pictures', 'employee_pictures.emp_id', '=', 'employees.id')
         ->where('deleted', 0)
-        ->where('is_resigned', 0)
-        ->get();
+        ->where('is_resigned', 0);
+         if (!empty($userBranchIds)) {
+            $employeedata->whereIn('emp_location', $userBranchIds);
+        }
+         $employeedata = $employeedata->get();
 
         $employeeMap = [];
         foreach ($employeedata as $employee) {
@@ -835,13 +941,24 @@ class HomeController extends Controller
 
     public function department_yesterdayattendance(Request $request){
         $yesterdayDate = Carbon::now()->subDay()->format('Y-m-d');
-        $companyId = $request->company_id;
+        $userId = Auth::id();
+        $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
+        
+        // Return empty HTML if no accessible employees
+        if (empty($accessibleEmployeeIds)) {
+            return response()->json(['html' => '']);
+        }
 
-        $departmentdata = DB::table('departments')
-        ->select('id', 'name') 
-        ->where('company_id', $companyId)
-        ->get()
-        ->toArray();
+        $userCompanyIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('company_id')
+            ->toArray();
+
+        $userBranchIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('branch_id')
+            ->toArray();
+
 
         $attendance= DB::table('attendances')
         ->leftjoin('employees', 'attendances.emp_id', '=', 'employees.emp_id')
@@ -855,9 +972,12 @@ class HomeController extends Controller
             DB::raw('MIN(attendances.timestamp) as first_checkin'), 
             DB::raw('MAX(attendances.timestamp) as lasttimestamp')
         )
-        ->where('attendances.date', '=', $yesterdayDate)
-        ->groupBy('attendances.date','attendances.emp_id')
-        ->get();
+        ->where('attendances.date', '=', $yesterdayDate);
+         if (!empty($userBranchIds)) {
+            $attendance->whereIn('employees.emp_location', $userBranchIds);
+        }
+        $attendance->groupBy('attendances.date','attendances.emp_id');
+        $attendance = $attendance->get();
 
         $departmentMap = [];
         foreach ($departmentdata as $department) {
@@ -960,13 +1080,31 @@ class HomeController extends Controller
 
     public function department_yesterdaylateattendance(Request $request){
         $yesterdayDate = Carbon::now()->subDay()->format('Y-m-d');
-        $companyId = $request->company_id;
+         $userId = Auth::id();
+        $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
+        
+        // Return empty HTML if no accessible employees
+        if (empty($accessibleEmployeeIds)) {
+            return response()->json(['html' => '']);
+        }
+
+        $userCompanyIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('company_id')
+            ->toArray();
+
+        $userBranchIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('branch_id')
+            ->toArray();
+
 
         $departmentdata = DB::table('departments')
         ->select('id', 'name') 
-        ->where('company_id', $companyId)
+         ->whereIn('company_id', $userCompanyIds)
         ->get()
         ->toArray();
+
        // $late_times = DB::table('late_types')->where('id', 1)->first();
 
         $attendance= DB::table('employee_late_attendances')
@@ -981,9 +1119,12 @@ class HomeController extends Controller
             'employee_late_attendances.check_in_time', 
             'employee_late_attendances.check_out_time'
         )
-        ->where('employee_late_attendances.date', '=', $yesterdayDate)
-        ->groupBy('employee_late_attendances.date','employee_late_attendances.emp_id')
-        ->get();
+        ->where('employee_late_attendances.date', '=', $yesterdayDate);
+        if (!empty($userBranchIds)) {
+            $attendance->whereIn('employees.emp_location', $userBranchIds);
+        }
+        $attendance->groupBy('employee_late_attendances.date','employee_late_attendances.emp_id');
+        $attendance = $attendance->get();
 
         $departmentMap = [];
         foreach ($departmentdata as $department) {
@@ -1088,11 +1229,28 @@ class HomeController extends Controller
 
     public function department_yesterdayabsent(Request $request){
         $yesterdayDate = Carbon::now()->subDay()->format('Y-m-d');
-        $companyId = $request->company_id;
+        
+        $userId = Auth::id();
+        $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
+        
+        // Return empty HTML if no accessible employees
+        if (empty($accessibleEmployeeIds)) {
+            return response()->json(['html' => '']);
+        }
+
+        $userCompanyIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('company_id')
+            ->toArray();
+
+        $userBranchIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('branch_id')
+            ->toArray();
 
         $departmentdata = DB::table('departments')
         ->select('id', 'name') 
-        ->where('company_id', $companyId)
+        ->whereIn('company_id', $userCompanyIds)
         ->get()
         ->toArray();
 
@@ -1107,8 +1265,11 @@ class HomeController extends Controller
         ->select('employees.emp_id', 'employees.emp_name_with_initial','employees.emp_department', 'employee_pictures.emp_pic_filename') 
         ->leftJoin('employee_pictures', 'employee_pictures.emp_id', '=', 'employees.id')
         ->where('deleted', 0)
-        ->where('is_resigned', 0)
-        ->get();
+        ->where('is_resigned', 0);
+        if (!empty($userBranchIds)) {
+            $employeedata->whereIn('emp_location', $userBranchIds);
+        }
+         $employeedata = $employeedata->get();
 
         $employeeMap = [];
         foreach ($employeedata as $employee) {

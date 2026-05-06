@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Commen;
 use Illuminate\Http\Request;
+use App\Helpers\UserHelper;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use DB;
 
@@ -15,6 +17,25 @@ class AttendenceleavedashboardController extends Controller
 
         // get most department wise attendance
 
+         $userId = Auth::id();
+        $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
+        
+        // Return empty HTML if no accessible employees
+        if (empty($accessibleEmployeeIds)) {
+            return response()->json(['html' => '']);
+        }
+
+        $userCompanyIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('company_id')
+            ->toArray();
+
+        $userBranchIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('branch_id')
+            ->toArray();
+
+
         $mostattendance = DB::table('attendances')
             ->leftjoin('employees', 'attendances.emp_id', '=', 'employees.emp_id')
             ->leftJoin('departments', 'employees.emp_department', '=', 'departments.id')
@@ -23,6 +44,8 @@ class AttendenceleavedashboardController extends Controller
                 'employees.emp_name_with_initial',
                 'employees.emp_department',
                 'departments.name as dept_name',
+                'employees.emp_company',
+                'employees.emp_location',
                 DB::raw('YEAR(attendances.date) as year'),
                 DB::raw('MONTH(attendances.date) as month'),
                 DB::raw('MIN(attendances.timestamp) as first_checkin'),
@@ -32,6 +55,13 @@ class AttendenceleavedashboardController extends Controller
         $mostattendance->whereYear('attendances.date', '=', date('Y', strtotime($selectedmonth)))
             ->whereMonth('attendances.date', '=', date('m', strtotime($selectedmonth)));
 
+
+        if (!empty($userCompanyIds)) {
+            $mostattendance->whereIn('employees.emp_company', $userCompanyIds);
+        }
+        if (!empty($userBranchIds)) {
+            $mostattendance->whereIn('employees.emp_location', $userBranchIds);
+        }
 
         $mostattendance->groupBy('attendances.date', 'attendances.emp_id');
 
@@ -65,22 +95,38 @@ class AttendenceleavedashboardController extends Controller
             ->leftJoin('employees', 'employees.emp_id', '=', 'leaves.emp_id')
             ->where('leaves.status', 'Approved')
             ->where('leaves.leave_from', 'like', $selectedmonth . '%')
-            ->where('leaves.leave_type', '!=','7')
+            ->where('leaves.leave_type', '!=', '7')
             ->groupBy('leaves.emp_id')
-            ->orderBy('total', 'desc') 
-            ->limit(5) 
-            ->get();
+            ->orderBy('total', 'desc')
+            ->limit(5);
+
+        if (!empty($userCompanyIds)) {
+            $getmostleaves->whereIn('employees.emp_company', $userCompanyIds);
+        }
+        if (!empty($userBranchIds)) {
+            $getmostleaves->whereIn('employees.emp_location', $userBranchIds);
+        }
+
+        $getmostleaves = $getmostleaves->get();
 
 
         // get most ot
         $getmostot = DB::table('ot_approved')
-            ->select(DB::raw('SUM(hours) as normaltotal'),DB::raw('SUM(double_hours) as doubletotal'), 'employees.emp_etfno', 'employees.emp_name_with_initial')
+            ->select(DB::raw('SUM(hours) as normaltotal'), DB::raw('SUM(double_hours) as doubletotal'), 'employees.emp_etfno', 'employees.emp_name_with_initial')
             ->leftJoin('employees', 'employees.emp_id', '=', 'ot_approved.emp_id')
-            ->where('ot_approved.date', 'like', $selectedmonth.'%')
+            ->where('ot_approved.date', 'like', $selectedmonth . '%')
             ->groupBy('ot_approved.emp_id')
-            ->orderBy('normaltotal', 'desc') 
-            ->limit(5) 
-            ->get();
+            ->orderBy('normaltotal', 'desc')
+            ->limit(5);
+
+        if (!empty($userCompanyIds)) {
+            $getmostot->whereIn('employees.emp_company', $userCompanyIds);
+        }
+        if (!empty($userBranchIds)) {
+            $getmostot->whereIn('employees.emp_location', $userBranchIds);
+        }
+
+        $getmostot = $getmostot->get();
 
         return view('Dashboard.attendance', compact('departmentWithMostAttendance', 'getmostleaves','getmostot'));
     }

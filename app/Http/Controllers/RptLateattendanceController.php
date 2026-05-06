@@ -38,6 +38,15 @@ class RptLateattendanceController extends Controller
             return response()->json(['html' => '']);
         }
 
+         $userCompanyIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('company_id')
+            ->toArray();
+
+        $userBranchIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('branch_id')
+            ->toArray();
 
         // Base query
         $query = DB::table('employee_late_attendances as ela')
@@ -46,6 +55,8 @@ class RptLateattendanceController extends Controller
                 'employees.emp_id',
                 'employees.emp_name_with_initial',
                 'employees.calling_name',
+                'employees.emp_company',
+                'employees.emp_location',
                 'departments.name as dept_name',
                 'shift_types.onduty_time',
                 'shift_types.offduty_time'
@@ -57,6 +68,13 @@ class RptLateattendanceController extends Controller
             ->where('ela.is_approved', 1)
             ->where('employees.deleted', 0);
 
+        if($userCompanyIds) {
+            $query->whereIn('employees.emp_company', $userCompanyIds);
+
+        }
+        if($userBranchIds) {
+            $query->whereIn('employees.emp_location', $userBranchIds);
+        }
         // Apply filters
         if ($request->has('department') && $request->department != '') {
             $query->where('departments.id', $request->department);
