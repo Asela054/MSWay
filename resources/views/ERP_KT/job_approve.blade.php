@@ -10,7 +10,7 @@
         <div class="container-fluid">
             <div class="page-header-content py-3 px-2">
                 <h1 class="page-header-title ">
-                    <div class="page-header-icon"><i class="fa-light fa-industryt"></i></div>
+                    <div class="page-header-icon"><i class="fa-light fa-industry"></i></div>
                     <span>Job Approve</span>
                 </h1>
             </div>
