@@ -1803,6 +1803,78 @@ Route::get('/Privacy-policy', function () {
     return view('privacypolicy');
 });
 
+//KT Clean Routes
+
+Route::get('/erp_ktdashboard' ,'ERP_KT\ERPDashboardController@index')->name('erp_ktdashboard');
+
+// ERP Customer
+Route::resource('KTCustomer', 'ERP_KT\ERPCustomerController');
+Route::get('kt_customer', 'ERP_KT\ERPCustomerController@index')->name('kt_customer');
+Route::post('kt_addCustomer',['uses' => 'ERP_KT\ERPCustomerController@store', 'as' => 'kt_addCustomer']); 
+Route::post('KTCustomer/update', 'ERP_KT\ERPCustomerController@update')->name('KTCustomer.update');
+Route::get('KTCustomer/destroy/{id}', 'ERP_KT\ERPCustomerController@destroy');
+
+// ERP Inquiry
+Route::resource('KTInquiry', 'ERP_KT\ERPInquiryController');
+Route::get('kt_inquiry', 'ERP_KT\ERPInquiryController@index')->name('kt_inquiry');
+Route::post('kt_addInquiry',['uses' => 'ERP_KT\ERPInquiryController@store', 'as' => 'kt_addInquiry']); 
+Route::post('KTInquiry/update', 'ERP_KT\ERPInquiryController@update')->name('KTInquiry.update');
+Route::get('KTInquiry/destroy/{id}', 'ERP_KT\ERPInquiryController@destroy');
+Route::get('kt_customer_list_sel2', 'ERP_KT\ERPInquiryController@customerList');
+
+// ERP Machine
+Route::resource('KTMachine', 'ERP_KT\ERPMachineController');
+Route::get('kt_machines', 'ERP_KT\ERPMachineController@index')->name('kt_machines');
+Route::post('kt_addMachine',['uses' => 'ERP_KT\ERPMachineController@store', 'as' => 'kt_addMachine']); 
+Route::post('KTMachine/update', 'ERP_KT\ERPMachineController@update')->name('KTMachine.update');
+Route::get('KTMachine/destroy/{id}', 'ERP_KT\ERPMachineController@destroy');
+
+// ERP Machine Operator
+Route::get('KTMachine/{id}/operators', 'ERP_KT\ERPMachineController@getOperators')->name('KTMachine.getOperators');
+Route::post('KTMachine/storeOperators', 'ERP_KT\ERPMachineController@storeOperators')->name('KTMachine.storeOperators');
+Route::get('KTMachine/destroyOperator/{id}', 'ERP_KT\ERPMachineController@destroyOperator')->name('KTMachine.destroyOperator');
+
+// ERP Machine Helper
+Route::get('KTMachine/{id}/helpers', 'ERP_KT\ERPMachineController@getHelpers')->name('KTMachine.getHelpers');
+Route::post('KTMachine/storeHelpers', 'ERP_KT\ERPMachineController@storeHelpers')->name('KTMachine.storeHelpers');
+Route::get('KTMachine/destroyHelper/{id}', 'ERP_KT\ERPMachineController@destroyHelper')->name('KTMachine.destroyHelper');
+
+// ERP Quotation
+Route::resource('KTQuotation', 'ERP_KT\ERPQuotationController');
+Route::get('kt_quotations', 'ERP_KT\ERPQuotationController@index')->name('kt_quotations');
+Route::post('kt_addQuotation',['uses' => 'ERP_KT\ERPQuotationController@store', 'as' => 'kt_addQuotation']); 
+Route::post('KTQuotation/update', 'ERP_KT\ERPQuotationController@update')->name('KTQuotation.update');
+Route::get('KTQuotation/destroy/{id}', 'ERP_KT\ERPQuotationController@destroy');
+
+// Inquiry Approve Controller Routes
+Route::resource('KTInquiry_Approve', 'ERP_KT\ERPInquiryApproveController');
+Route::get('/kt_inquiry_approve' ,'ERP_KT\ERPInquiryApproveController@index')->name('kt_inquiry_approve');
+Route::post('/kt_inquiry_approvegenerate' ,'ERP_KT\ERPInquiryApproveController@inquiryapprovegenerate')->name('kt_inquiry_approvegenerate');
+Route::post('/approveinquiry' ,'ERP_KT\ERPInquiryApproveController@approveinquiry')->name('approveinquiry');
+
+// Job Create Controller Routes
+Route::resource('KTJob_Create', 'ERP_KT\ERPJobCreateController');
+
+Route::get('kt_job_create', 'ERP_KT\ERPJobCreateController@index')->name('kt_job_create');
+Route::post('kt_addJob_Create',['uses' => 'ERP_KT\ERPJobCreateController@store', 'as' => 'kt_addJob_Create']); 
+Route::post('KTJob_Create_edit/{id}', 'ERP_KT\ERPJobCreateController@edit')->name('KTJob_Create_edit');
+Route::post('KTJob_Create/store', 'ERP_KT\ERPJobCreateController@store')->name('KTJob_Create.store');
+Route::post('KTJob_Create/update', 'ERP_KT\ERPJobCreateController@update')->name('KTJob_Create.update');
+Route::get('KTJob_Create/destroy/{id}', 'ERP_KT\ERPJobCreateController@destroy');
+
+Route::get('kt_inquiry_list_sel2', 'ERP_KT\ERPJobCreateController@inquiryList');
+Route::get('kt_machine_list_sel2', 'ERP_KT\ERPJobCreateController@machineList');
+Route::get('kt_job_title_list_sel2', 'ERP_KT\ERPJobCreateController@jobTitleList');
+Route::get('kt_employee_list_by_title_sel2', 'ERP_KT\ERPJobCreateController@employeeListByTitle');
+
+// Job Approve Controller Routes
+Route::resource('KTJob_Approve', 'ERP_KT\ERPJobApproveController');
+Route::get('/kt_job_approve' ,'ERP_KT\ERPJobApproveController@index')->name('kt_job_approve');
+Route::post('/kt_job_approvegenerate' ,'ERP_KT\ERPJobApproveController@jobapprovegenerate')->name('kt_approve_approvegenerate');
+Route::post('/jobapproveinquiry' ,'ERP_KT\ERPJobApproveController@jobapproveinquiry')->name('jobapproveinquiry');
+
+// End of KT Clean Routes
+
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');
     Artisan::call('config:clear');
