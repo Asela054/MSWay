@@ -347,21 +347,7 @@ class RptAttendanceController extends Controller
 
         $holidays = DB::table('holidays')->whereBetween('date', [$from_date, $to_date])->get()->keyBy('date'); 
 
-        
-
-        $dept_sql = "SELECT * FROM departments WHERE 1 = 1 ";
-        if ($department != '') {
-            $dept_sql .= ' AND id = "' . $department . '" ';
-        }
-
-        $departments = DB::select($dept_sql);
-
-        //  dd($departments);
-        $data_arr = [];
-        $not_att_count = 0;
-
-
-          // Get accessible employee IDs based on user access rights
+        // Get accessible employee IDs based on user access rights
         $userId = Auth::id();
         $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
         
@@ -369,6 +355,34 @@ class RptAttendanceController extends Controller
         if (empty($accessibleEmployeeIds)) {
             return response()->json(['html' => '']);
         }
+
+         $userCompanyIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('company_id')
+            ->toArray();
+
+        $userBranchIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('branch_id')
+            ->toArray();
+
+
+        $query = DB::table('departments');
+
+        if ($department != '') {
+            $query->where('id', $department);
+        }
+
+        if($userCompanyIds) {
+            $query->whereIn('company_id', $userCompanyIds);
+
+        }
+
+        $departments = $query->get();
+
+        //  dd($departments);
+        $data_arr = [];
+        $not_att_count = 0;
 
 
         foreach ($departments as $department_) {
@@ -402,7 +416,10 @@ class RptAttendanceController extends Controller
                 }
                 if ($location != '') {
                     $query->where('employees.emp_location', $location);
+                }elseif ($userBranchIds) {
+                    $query->whereIn('employees.emp_location', $userBranchIds);
                 }
+
                 $employees = $query->get();
 
            

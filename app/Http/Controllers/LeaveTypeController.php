@@ -201,6 +201,16 @@ class LeaveTypeController extends Controller
             return response()->json(['html' => '']);
         }
 
+         $userCompanyIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('company_id')
+            ->toArray();
+
+        $userBranchIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('branch_id')
+            ->toArray();
+
         $query = \Illuminate\Support\Facades\DB::query()
             ->select('employees.*',
                 'branches.location',
@@ -212,6 +222,13 @@ class LeaveTypeController extends Controller
             ->whereIn('employees.emp_id', $accessibleEmployeeIds)
             ->where('employees.is_resigned', '=', '0');
 
+        if($userCompanyIds) {
+           $query->whereIn('employees.emp_company', $userCompanyIds);
+
+        }
+        if($userBranchIds) {
+            $query->whereIn('employees.emp_location', $userBranchIds);
+        }
 
         if($department != ''){
             $query->where(['departments.id' => $department]);

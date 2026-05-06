@@ -50,16 +50,35 @@ class EmployeeAbsentController extends Controller
             return response()->json(['html' => '']);
         }
 
+        $userCompanyIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('company_id')
+            ->toArray();
+
+        $userBranchIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('branch_id')
+            ->toArray();
+
+
     if($department=='All'){
 
-        $employeedata= DB::table('employees')
+        $query= DB::table('employees')
         ->leftjoin('departments', 'employees.emp_department', '=', 'departments.id')
         ->leftjoin('branches', 'employees.emp_location', '=', 'branches.id')
-        ->select('employees.emp_id', 'employees.emp_name_with_initial', 'employees.calling_name', 'employees.emp_department','departments.name AS departmentname','branches.location AS location') 
+        ->select('employees.emp_id', 'employees.emp_company', 'employees.emp_location', 'employees.emp_name_with_initial', 'employees.calling_name', 'employees.emp_department','departments.name AS departmentname','branches.location AS location') 
         ->where('deleted', 0)
         ->where('is_resigned', 0)
-        ->whereIn('employees.emp_id', $accessibleEmployeeIds)
-        ->get();
+        ->whereIn('employees.emp_id', $accessibleEmployeeIds);
+
+        if (!empty($userCompanyIds)) {
+            $query->whereIn('employees.emp_company', $userCompanyIds);
+        }
+        if (!empty($userBranchIds)) {
+            $query->whereIn('employees.emp_location', $userBranchIds);
+        }
+
+        $employeedata = $query->get();
         
         $employeeMap = [];
         foreach ($employeedata as $employee) {
@@ -96,15 +115,22 @@ class EmployeeAbsentController extends Controller
 
     }else if($department!='All'){
 
-        $employeedata= DB::table('employees')
+        $query= DB::table('employees')
         ->leftjoin('departments', 'employees.emp_department', '=', 'departments.id')
         ->leftjoin('branches', 'employees.emp_location', '=', 'branches.id')
-        ->select('employees.emp_id', 'employees.emp_name_with_initial', 'employees.calling_name', 'employees.emp_department','departments.name AS departmentname','branches.location AS location') 
+        ->select('employees.emp_id', 'employees.emp_company', 'employees.emp_location', 'employees.emp_name_with_initial', 'employees.calling_name', 'employees.emp_department','departments.name AS departmentname','branches.location AS location') 
         ->where('deleted', 0)
         ->where('is_resigned', 0)
         ->where('employees.emp_department', '=', $department)
-        ->whereIn('employees.emp_id', $accessibleEmployeeIds)
-        ->get();
+        ->whereIn('employees.emp_id', $accessibleEmployeeIds);
+         if (!empty($userCompanyIds)) {
+            $query->whereIn('employees.emp_company', $userCompanyIds);
+        }
+        if (!empty($userBranchIds)) {
+            $query->whereIn('employees.emp_location', $userBranchIds);
+        }
+
+        $employeedata = $query->get();
 
         $employeeMap = [];
         foreach ($employeedata as $employee) {

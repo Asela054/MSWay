@@ -9,6 +9,9 @@ use App\Company;
 use App\LateAttendance;
 use App\OtApproved;
 use Carbon\Carbon;
+use DB;
+use App\Helpers\UserHelper;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -16,8 +19,15 @@ class DashboarddetailedController extends Controller
 {
         public function attendacechart(Request $request)
     {
+         $userId = Auth::id();
+        $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
+
         // Get all companies
-        $companies = Company::all();
+          $companies = DB::table('companies');
+            if (!empty($userCompanyIds)) {
+                $companies->whereIn('id', $userCompanyIds);
+            }
+            $companies = $companies->get();
         
         // Initialize response array
         $responseData = [];
@@ -42,9 +52,12 @@ class DashboarddetailedController extends Controller
                 // Get all employees in this department
                 $employeeIds = Employee::where('emp_department', $department->id)
                     ->where('deleted', 0)
-                    ->where('is_resigned', 0)
-                    ->pluck('emp_id')
-                    ->toArray();
+                    ->where('is_resigned', 0);
+
+                if (!empty($userBranchIds)) {
+                    $employeeIds->whereIn('emp_location', $userBranchIds);
+                }
+                $employeeIds = $employeeIds->pluck('emp_id')->toArray();
                 
                 if (empty($employeeIds)) {
                     continue;
