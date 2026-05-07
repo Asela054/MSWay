@@ -87,10 +87,10 @@ class OTApproveController extends Controller
         ->leftJoin('departments', 'employees.emp_department', '=', 'departments.id')
         ->whereNull('at1.deleted_at')
         ->whereIn('employees.emp_id', $accessibleEmployeeIds); 
-    // Apply filters
-    if (!empty($department)) {
-        $query->where('employees.emp_department', $department);
-    }
+            // Apply filters
+            if (!empty($department)) {
+                $query->where('employees.emp_department', $department);
+            }
 
     if ($company) {
         $query->where('employees.emp_company', $company);
@@ -98,31 +98,31 @@ class OTApproveController extends Controller
         $query->whereIn('employees.emp_company', $userCompanyIds);
     }
 
-    if (!empty($employee)) {
-        $query->where('employees.emp_id', $employee);
-    }
+            if (!empty($employee)) {
+                $query->where('employees.emp_id', $employee);
+            }
 
-    if (!empty($location)) {
-        $query->where('at1.location', $location);
+            if (!empty($location)) {
+                $query->where('at1.location', $location);
 
-    }
-    if (!empty($userBranchIds)){
-        $query->whereIn('at1.location', $userBranchIds);
-    }
+            }
+            if (!empty($userBranchIds)){
+                $query->whereIn('at1.location', $userBranchIds);
+            }
 
-    if (!empty($from_date)) {
-        $query->whereDate('at1.date', '>=', $from_date);
-    }
+            if (!empty($from_date)) {
+                $query->whereDate('at1.date', '>=', $from_date);
+            }
 
-    if (!empty($to_date)) {
-        $query->whereDate('at1.date', '<=', $to_date);
-    }
+            if (!empty($to_date)) {
+                $query->whereDate('at1.date', '<=', $to_date);
+            }
 
-    $query->groupBy('at1.uid', 'at1.date')
-          ->orderBy('at1.date');
+            $query->groupBy('at1.uid', 'at1.date')
+                ->orderBy('at1.date');
 
-    $attendance_data = $query->get();
-    
+            $attendance_data = $query->get();
+            
 
         //dd($sql);
 
@@ -276,6 +276,7 @@ class OTApproveController extends Controller
                 'double_hours' => $ch['double_hours'],
                 'triple_hours' => $ch['triple_hours'],
                 'is_holiday' => $ch['is_holiday'],
+                'status' => 1,
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s')
             );
@@ -332,7 +333,7 @@ class OTApproveController extends Controller
                 left join shift_types ON employees.emp_shift = shift_types.id  
                 left join departments ON employees.emp_department = departments.id 
                 left join branches ON employees.emp_location = branches.id 
-                WHERE employees.deleted = 0 AND employees.is_resigned = 0
+                WHERE employees.deleted = 0 AND employees.is_resigned = 0 AND ot_approved.status != 3
                 ';
 
         if (!empty($accessibleEmployeeIds)) {
@@ -483,7 +484,7 @@ class OTApproveController extends Controller
         }
 
         $id = $request->get('id');
-        OtApproved::query()->where('id', $id)->delete();
+        OtApproved::query()->where('id', $id)->update(['status' => 3]);
         return response()->json([
             'success' => true,
             'msg' => 'Deleted']);

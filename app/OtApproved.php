@@ -17,6 +17,7 @@ class OtApproved extends Model
         //'one_point_five_hours',
         'double_hours',
         'is_holiday',
+        'status',
         'created_at',
         'created_by'];
 
@@ -25,6 +26,7 @@ class OtApproved extends Model
         $ot_hours = OtApproved::where('emp_id', $emp_id)
                             ->where('date', 'like', $month.'%')
                             ->where('date', '<=', $closedate)
+                            ->where('status', '!=', 3)
                             ->sum('hours');
         return $ot_hours;
     }
@@ -34,6 +36,7 @@ class OtApproved extends Model
         $double_ot_hours = OtApproved::where('emp_id', $emp_id)
                             ->where('date', 'like', $month.'%')
                             ->where('date', '<=', $closedate)
+                            ->where('status', '!=', 3)
                             ->sum('double_hours');
         return $double_ot_hours;
     }
@@ -43,6 +46,7 @@ class OtApproved extends Model
         $triple_ot_hours = OtApproved::where('emp_id', $emp_id)
                             ->where('date', 'like', $month.'%')
                             ->where('date', '<=', $closedate)
+                            ->where('status', '!=', 3)
                             ->sum('triple_hours');
         return $triple_ot_hours;
     }
@@ -53,6 +57,10 @@ class OtApproved extends Model
         $ot = OtApproved::where('emp_id', $emp_id)
             ->where('date', '=', $date)
             ->where('from', '=', $OTfrom)
+          ->where(function($query) {
+                $query->where('status', '!=', 3)
+                    ->orWhereNull('status');
+            })
             ->get();
 
         $status = true;

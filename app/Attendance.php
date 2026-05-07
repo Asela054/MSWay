@@ -2405,7 +2405,7 @@ class Attendance extends Model
                 left join shift_types ON employees.emp_shift = shift_types.id  
                 left join departments ON employees.emp_department = departments.id 
                 left join branches ON employees.emp_location = branches.id 
-                WHERE ot_approved.emp_id = '.$emp_id.' AND ot_approved.date LIKE  "'.$month.'"
+                WHERE ot_approved.emp_id = '.$emp_id.' AND ot_approved.date LIKE  "'.$month.' AND ot_approved.status = 1"
                 ';
 
         $att_records = DB::select($att_query);

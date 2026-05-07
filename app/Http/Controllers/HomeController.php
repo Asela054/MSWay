@@ -29,99 +29,7 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    // public function index()
-    // {
-    //     $today = Carbon::now()->format('Y-m-d');
-    //     $empcount = DB::table('employees')->where('deleted', 0)->where('is_resigned', 0)->count();
 
-    //     // today attendance count
-    //     $todaycount = DB::table('attendances')
-    //         ->select('date', 'emp_id')
-    //         ->where('date', $today)
-    //         ->groupBy('date', 'emp_id')
-    //         ->get()
-    //         ->count();
-
-    //     // today late attendance count
-    //     $late_times = DB::table('late_types')->where('id', 1)->first();
-    //     $todaylatecount = DB::table('attendances')
-    //         ->select('date', 'emp_id')
-    //         ->where('date', $today)
-    //         ->where('timestamp','>', $today. ' ' . $late_times->time_from)
-    //         ->groupBy('date', 'emp_id')
-    //         ->get()
-    //         ->count();
-
-    //     // get today daybefore day on attendance
-    //     $yesterdayDate = Carbon::now()->subDay()->format('Y-m-d');
-
-    //     // yesterday attendance count
-    //     $yesterdaycount = DB::table('attendances')
-    //         ->select('date', 'emp_id')
-    //         ->where('date', $yesterdayDate)
-    //         ->groupBy('date', 'emp_id')
-    //         ->get()
-    //         ->count();
-
-    //     // yesterday late attendance count
-    //     $yesterdaylatecount = DB::table('attendances')
-    //         ->select('date', 'emp_id')
-    //         ->where('date', $yesterdayDate)
-    //         ->havingRaw('MIN(attendances.timestamp) > ?', [$yesterdayDate . ' ' . $late_times->time_from])
-    //         ->groupBy('date', 'emp_id')
-    //         ->get()
-    //         ->count();
-
-    //     // Birthday Count
-    //     $currentMonth = Carbon::now()->month;
-    //     $currentDay = Carbon::now()->day;
-    //     $nextMonth = Carbon::now()->addMonth()->month;
-    //     $nextMonthYear = Carbon::now()->addMonth()->year;
-
-    //     // Today's Birthday Count
-    //     $todayBirthdayCount = DB::table('employees')
-    //         ->where('deleted', 0)
-    //         ->where('is_resigned', 0)
-    //         ->whereMonth('emp_birthday', $currentMonth)
-    //         ->whereDay('emp_birthday', $currentDay)
-    //         ->count();
-
-    //     // This Week's Birthday Count
-    //     $thisweekBirthdayCount = DB::table('employees')
-    //         ->where('deleted', 0)
-    //         ->where('is_resigned', 0)
-    //         ->whereBetween(DB::raw('DATE_FORMAT(emp_birthday, "%m-%d")'), [
-    //             Carbon::now()->startOfWeek()->format('m-d'),
-    //             Carbon::now()->endOfWeek()->format('m-d'),
-    //         ])
-    //         ->count();
-
-    //     // This Month's Birthday Count
-    //     $thismonthBirthdayCount = DB::table('employees')
-    //         ->where('deleted', 0)
-    //         ->where('is_resigned', 0)
-    //         ->whereMonth('emp_birthday', $currentMonth)
-    //         ->count();
-
-    //     // Next Month's Birthday Count
-    //     $nextmonthBirthdayCount = DB::table('employees')
-    //         ->where('deleted', 0)
-    //         ->where('is_resigned', 0)
-    //         ->whereMonth('emp_birthday', $nextMonth)
-    //         ->count();
-
-    //     return view('home', compact(
-    //         'empcount',
-    //         'todaycount',
-    //         'todaylatecount',e
-    //         'yesterdaycount',
-    //         'yesterdaylatecount',
-    //         'todayBirthdayCount',
-    //         'thisweekBirthdayCount',
-    //         'thismonthBirthdayCount',
-    //         'nextmonthBirthdayCount'
-    //     ));
-    // }
     public function index()
     {
 
@@ -168,6 +76,7 @@ class HomeController extends Controller
             ->pluck('company_id')
             ->toArray();
 
+
         $userBranchIds = DB::table('user_has_companies')
             ->where('user_id', $userId)
             ->pluck('branch_id')
@@ -187,6 +96,7 @@ class HomeController extends Controller
             }
             $companies = $companies->get();
             
+
             // Initialize array to store per-company attendance data
             $companiesAttendanceData = [];
 
@@ -203,9 +113,9 @@ class HomeController extends Controller
 
                 $employeeIds = $employeeIds->pluck('emp_id')->toArray();
 
-                if (empty($employeeIds)) {
-                    continue;
-                }
+                // if (empty($employeeIds)) {
+                //     continue;
+                // }
 
                 $totalEmployees = count($employeeIds);
 
@@ -262,20 +172,40 @@ class HomeController extends Controller
 
 
         // today attendance count
-        $todaycount = DB::table('attendances')
-            ->select('date', 'emp_id')
-            ->where('date', $today)
-            ->groupBy('date', 'emp_id')
-            ->get()
-            ->count();
+        $allAccessibleEmployeeIds = [];
+            foreach ($companies as $company) {
+                $empIds = DB::table('employees')
+                    ->where('emp_company', $company->id)
+                    ->where('deleted', 0)
+                    ->where('is_resigned', 0);
+                
+                if (!empty($userBranchIds)) {
+                    $empIds->whereIn('emp_location', $userBranchIds);
+                }
+                
+                $empIds = $empIds->pluck('emp_id')->toArray();
+                $allAccessibleEmployeeIds = array_merge($allAccessibleEmployeeIds, $empIds);
+            }
+            $allAccessibleEmployeeIds = array_unique($allAccessibleEmployeeIds);
 
-        // today late attendance count
-        $late_times = DB::table('late_types')->orderBy('id', 'desc')->first();
+            // today attendance count (overall)
+            $todaycount = DB::table('attendances')
+                ->whereIn('emp_id', $allAccessibleEmployeeIds)
+                ->where('date', $today)
+                ->select('date', 'emp_id')
+                ->groupBy('date', 'emp_id')
+                ->get()
+                ->count();
 
-       $todaylatecount = DB::table('employee_late_attendances')
-                            ->where('date', $today)
-                            ->get()
-                            ->count();
+            // Get late types (keep your existing logic)
+            $late_times = DB::table('late_types')->orderBy('id', 'desc')->first();
+
+            // today late attendance count (overall)
+            $todaylatecount = DB::table('employee_late_attendances')
+                ->whereIn('emp_id', $allAccessibleEmployeeIds)
+                ->where('date', $today)
+                ->get()
+                ->count();
 
 
         // get today daybefore day on attendance
@@ -409,6 +339,7 @@ class HomeController extends Controller
 
         $events = array_merge($birthdayEvents, $holidayEvents);
 
+        
         return view('home', compact(
             'empcount',
             'todaycount',
@@ -541,10 +472,11 @@ class HomeController extends Controller
         $today = Carbon::now()->format('Y-m-d');
 
         $departmentdata = DB::table('departments')
-        ->select('id', 'name') 
-        ->whereIn('company_id', $userCompanyIds)
-        ->get()
-        ->toArray();
+                ->select('id', 'name'); 
+            if (!empty($userCompanyIds)) {
+                    $departmentdata->whereIn('company_id', $userCompanyIds);
+                }
+                $departmentdata = $departmentdata->get()->toArray();
 
         $attendance= DB::table('attendances')
         ->leftjoin('employees', 'attendances.emp_id', '=', 'employees.emp_id')
@@ -959,6 +891,12 @@ class HomeController extends Controller
             ->pluck('branch_id')
             ->toArray();
 
+            $departmentdata = DB::table('departments')
+                ->select('id', 'name'); 
+            if (!empty($userCompanyIds)) {
+                    $departmentdata->whereIn('company_id', $userCompanyIds);
+                }
+                $departmentdata = $departmentdata->get()->toArray();
 
         $attendance= DB::table('attendances')
         ->leftjoin('employees', 'attendances.emp_id', '=', 'employees.emp_id')
@@ -1699,12 +1637,30 @@ public function thismonth_birthday() {
 
     public function getAttendentChart(Request $request)
     {
+        $userId = Auth::id();
+         $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
+
+        if (empty($accessibleEmployeeIds)) {
+            return response()->json([]);
+        }
+
+        $userCompanyIds = DB::table('user_has_companies')
+        ->where('user_id', $userId)
+        ->pluck('company_id')
+        ->toArray();
+    
+       $userBranchIds = DB::table('user_has_companies')
+        ->where('user_id', $userId)
+        ->pluck('branch_id')
+        ->toArray();
+
+
         // 1. Define the Date Range (Last 30 Days)
         $endDate = Carbon::now()->startOfDay();
         $startDate = Carbon::now()->subDays(29)->startOfDay();
 
         // 2. Query Attendance Data for the Range
-        $attendanceData = DB::table('attendances as a')
+        $attendanceQuery = DB::table('attendances as a')
             ->selectRaw('DATE(a.date) as date, COUNT(DISTINCT a.uid) as count')
             ->leftJoin('employees as e', function ($join) {
                 $join->on('e.emp_id', '=', 'a.emp_id')
@@ -1712,7 +1668,19 @@ public function thismonth_birthday() {
             })
             ->whereBetween('a.date', [$startDate, $endDate])
             ->whereNull('a.deleted_at')
-            ->groupBy(DB::raw('DATE(a.date)'))
+            ->whereIn('a.emp_id', $accessibleEmployeeIds);
+
+             if (!empty($userCompanyIds)) {
+                $attendanceQuery->whereIn('e.emp_company', $userCompanyIds);
+            }
+            
+            // Apply branch filter if not empty
+            if (!empty($userBranchIds)) {
+                $attendanceQuery->whereIn('e.emp_location', $userBranchIds);
+            }
+
+
+             $attendanceData = $attendanceQuery ->groupBy(DB::raw('DATE(a.date)'))
             ->get()
             ->keyBy('date'); // Index the collection by the date string
 

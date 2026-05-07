@@ -22,13 +22,24 @@ class DashboarddetailedController extends Controller
          $userId = Auth::id();
         $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
 
+         $userCompanyIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('company_id')
+            ->toArray();
+
+
+        $userBranchIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('branch_id')
+            ->toArray();
+
+
         // Get all companies
           $companies = DB::table('companies');
             if (!empty($userCompanyIds)) {
                 $companies->whereIn('id', $userCompanyIds);
             }
             $companies = $companies->get();
-        
         // Initialize response array
         $responseData = [];
         
