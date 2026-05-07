@@ -8,7 +8,7 @@
 			<div class="card-body pb-5">
                 <div class="row">
                     @foreach($companiesAttendanceData as $index => $company)
-                    <div class="col-sm-12 col-md-12 col-lg-3 col-xl-3">
+                    <div class="col-sm-12 col-md-12 col-lg-3 col-xl-3 pb-3">
                         <div class="card border h-100 p-3">
                             <span >{{ strtoupper($company['company_name']) }}</span>
                             <!-- TODAY ATTENDANCE -->
@@ -66,7 +66,7 @@
                     </div>
                     @endforeach
 
-                    <div class="col-sm-12 col-md-auto">
+                    <div class="col-sm-12 col-md-auto pb-3">
                         <div class="card border h-100 p-3">
                             <div class="calendar border h-100">
                                 <div class="calendar-header text-left">
@@ -101,7 +101,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col pt-sm-0 pt-3">
+                    <div class="col pt-sm-0 pt-3 pb-3">
                         <div class="card border h-100 p-3">
                             <div class="card-body p-3">
                                 <h5 class="title-style"><span>{{strtoupper(date('F / Y'))}} LEAVE INFORMATION</span></h5>
