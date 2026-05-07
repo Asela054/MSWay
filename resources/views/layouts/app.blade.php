@@ -1116,7 +1116,7 @@
         }
     });
     $(document).ready(function(){
-        window.scripturl = '{{ url('/scripts') }}';
+        window.scripturl = '{{ url('/public/scripts') }}';
     });
     $.extend(true, $.fn.dataTable.defaults, {
         lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
