@@ -1439,7 +1439,7 @@ Route::get('/locationallwanceapprove' ,'JoblocationallwanceController@index')->n
 Route::post('/locationallwanceapprovegenerate' ,'JoblocationallwanceController@generatelocationallowance')->name('locationallwanceapprovegenerate');
 Route::post('/approvelocationallowance' ,'JoblocationallwanceController@approvelocationallowance')->name('approvelocationallowance');
 
-Route::get('/getattendancesummarychart' ,'DashboarddetailedController@attendacechart')->name('getattendancesummarychart');
+//Route::get('/getattendancesummarychart' ,'DashboarddetailedController@attendacechart')->name('getattendancesummarychart');
 
 // absent nopay controller 
 Route::get('/absentnopay' ,'DepartmentviseNopayController@index')->name('absentnopay');
