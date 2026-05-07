@@ -16,7 +16,7 @@ class LoginController extends Controller
     protected function authenticated(Request $request, $user)
     {
         $employeeData = DB::table('users')
-            ->join('employees', 'users.emp_id', '=', 'employees.emp_id')
+            ->leftjoin('employees', 'users.emp_id', '=', 'employees.emp_id')
             ->leftjoin('companies', 'employees.emp_company', '=', 'companies.id')
             ->where('users.id', $user->id)
             ->select(

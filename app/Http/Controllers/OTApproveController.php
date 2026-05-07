@@ -92,11 +92,11 @@ class OTApproveController extends Controller
         $query->where('employees.emp_department', $department);
     }
 
-     if ($company) {
-            $query->where('employees.emp_company', $company);
-        }else{
-             $query->whereIn('employees.emp_company', $userCompanyIds);
-        }
+    if ($company) {
+        $query->where('employees.emp_company', $company);
+    } else if ($userCompanyIds) {
+        $query->whereIn('employees.emp_company', $userCompanyIds);
+    }
 
     if (!empty($employee)) {
         $query->where('employees.emp_id', $employee);
