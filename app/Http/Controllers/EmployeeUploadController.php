@@ -56,11 +56,12 @@ class EmployeeUploadController extends Controller
                     'emp_address' => $column[11] ?? '',
                     'emp_join_date' => $column[12] ?? '',
                     'department' => $column[13] ?? '',
-                    'status' => $column[14] ?? '',
-                    'basic_salary' => $column[15] ?? '',
-                    'bank_ac_no' => $column[16] ?? '',
-                    'bank_code' => $column[17] ?? '',
-                    'branch_code' => $column[18] ?? '',
+                    'branch' => $column[14] ?? '',
+                    'status' => $column[15] ?? '',
+                    'basic_salary' => $column[16] ?? '',
+                    'bank_ac_no' => $column[17] ?? '',
+                    'bank_code' => $column[18] ?? '',
+                    'branch_code' => $column[19] ?? '',
                 ];
             }
             fclose($handle);
@@ -81,6 +82,7 @@ class EmployeeUploadController extends Controller
                     'emp_mobile' => 'required|string|max:10',
                     'emp_address' => 'nullable|string|max:255',
                     'department' => 'required|string',
+                    'branch' => 'required|string',
                     'status' => 'required|string',
                     'basic_salary' => 'required|numeric',
                     'bank_ac_no' => 'required|string|max:20',
@@ -102,6 +104,22 @@ class EmployeeUploadController extends Controller
                     $errors[] = "Line {$currentLine}: Department '{$employeeData['department']}' not found in system";
                     continue;
                 } 
+
+                $branches = \App\Branch::pluck('id', 'location')->toArray();
+                $branchId = $branches[$employeeData['branch']] ?? null;
+
+                if (!$branchId) {
+                    $errors[] = "Line {$currentLine}: Branch '{$employeeData['branch']}' not found in system";
+                    continue;
+                }
+
+                $branch = \App\Branch::find($branchId);
+                $companyId = $branch ? $branch->company_id : null;
+
+                if (!$companyId) {
+                    $errors[] = "Line {$currentLine}: Company not found for branch '{$employeeData['branch']}'";
+                    continue;
+                }
                 
                 $statuses = \App\EmploymentStatus::pluck('id', 'emp_status')->toArray();
                 $statusId = $statuses[$employeeData['status']] ?? null;
@@ -140,6 +158,8 @@ class EmployeeUploadController extends Controller
                             'emp_address' => $employeeData['emp_address'],
                             'emp_join_date' => $emp_join_date,
                             'emp_department' => $departmentId,
+                            'emp_location' => $branchId,
+                            'emp_company' => $companyId,
                             'emp_status' => $statusId,
                         ]
                     );
