@@ -8,69 +8,65 @@
 			<div class="card-body pb-5">
                 <div class="row">
                     @foreach($companiesAttendanceData as $index => $company)
-                        <div class="col-md-3 mb-3">
-                            <div class="card border h-100 p-3">
-                              
-                                    <span >{{ strtoupper($company['company_name']) }}</span>
-                                
-                                
-                                <!-- TODAY ATTENDANCE -->
-                                <h6 class="mt-2 mb-2 text-muted" style="font-size: 0.85rem;">TODAY ATTENDANCE</h6>
-                                <div class="card mt-1">
-                                    <ul class="list-group list-group-flush">
-                                        <li class="list-group-item d-flex bd-highlight list-group-item-primary">
-                                            <i class="fa-light fa-users mr-2"></i>TOTAL EMPLOYEE 
-                                            <span class="ml-auto fw-bold">{{ $company['total_employees'] }}</span>
-                                        </li>
-                                        <li class="list-group-item d-flex bd-highlight list-group-item-success pointer attendance-btn" 
-                                            data-company-id="{{ $company['company_id'] }}">
-                                            <i class="fa-light fa-calendar-week mr-2"></i>ATTENDANCE 
-                                            <span class="ml-auto fw-bold">{{ $company['today_attendance'] }}</span>
-                                        </li>
-                                        <li class="list-group-item d-flex bd-highlight list-group-item-warning pointer lateattendancebtn" 
-                                            data-company-id="{{ $company['company_id'] }}">
-                                            <i class="fa-light fa-business-time mr-2"></i>LATE 
-                                            <span class="ml-auto fw-bold">{{ $company['today_late'] }}</span>
-                                        </li>
-                                        <li class="list-group-item d-flex bd-highlight list-group-item-danger pointer absentbtn" 
-                                            data-company-id="{{ $company['company_id'] }}">
-                                            <i class="fa-light fa-calendar-xmark mr-2"></i>ABSENT 
-                                            <span class="ml-auto fw-bold">{{ $company['today_absent'] }}</span>
-                                        </li>
-                                    </ul>
-                                </div>
-                                
-                                <!-- YESTERDAY ATTENDANCE -->
-                                <h6 class="mt-3 mb-2 text-muted" style="font-size: 0.85rem;">YESTERDAY ATTENDANCE</h6>
-                                <div class="card mt-1">
-                                    <ul class="list-group list-group-flush">
-                                        <li class="list-group-item d-flex bd-highlight list-group-item-primary">
-                                            <i class="fa-light fa-users mr-2"></i>TOTAL EMPLOYEE 
-                                            <span class="ml-auto fw-bold">{{ $company['total_employees'] }}</span>
-                                        </li>
-                                        <li class="list-group-item d-flex bd-highlight list-group-item-success pointer yesterdayattendancebtn" 
-                                            data-company-id="{{ $company['company_id'] }}">
-                                            <i class="fa-light fa-calendar-week mr-2"></i>ATTENDANCE 
-                                            <span class="ml-auto fw-bold">{{ $company['yesterday_attendance'] }}</span>
-                                        </li>
-                                        <li class="list-group-item d-flex bd-highlight list-group-item-warning pointer yesterdaylateattendancebtn" 
-                                            data-company-id="{{ $company['company_id'] }}">
-                                            <i class="fa-light fa-business-time mr-2"></i>LATE 
-                                            <span class="ml-auto fw-bold">{{ $company['yesterday_late'] }}</span>
-                                        </li>
-                                        <li class="list-group-item d-flex bd-highlight list-group-item-danger pointer yesterdayabsentbtn" 
-                                            data-company-id="{{ $company['company_id'] }}">
-                                            <i class="fa-light fa-calendar-xmark mr-2"></i>ABSENT 
-                                            <span class="ml-auto fw-bold">{{ $company['yesterday_absent'] }}</span>
-                                        </li>
-                                    </ul>
-                                </div>
+                    <div class="col-sm-12 col-md-12 col-lg-3 col-xl-3">
+                        <div class="card border h-100 p-3">
+                            <span >{{ strtoupper($company['company_name']) }}</span>
+                            <!-- TODAY ATTENDANCE -->
+                            <h6 class="mt-2 mb-2 text-muted" style="font-size: 0.85rem;">TODAY ATTENDANCE</h6>
+                            <div class="card mt-1">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex bd-highlight list-group-item-primary">
+                                        <i class="fa-light fa-users mr-2"></i>TOTAL EMPLOYEE 
+                                        <span class="ml-auto fw-bold">{{ $company['total_employees'] }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex bd-highlight list-group-item-success pointer attendance-btn" 
+                                        data-company-id="{{ $company['company_id'] }}">
+                                        <i class="fa-light fa-calendar-week mr-2"></i>ATTENDANCE 
+                                        <span class="ml-auto fw-bold">{{ $company['today_attendance'] }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex bd-highlight list-group-item-warning pointer lateattendancebtn" 
+                                        data-company-id="{{ $company['company_id'] }}">
+                                        <i class="fa-light fa-business-time mr-2"></i>LATE 
+                                        <span class="ml-auto fw-bold">{{ $company['today_late'] }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex bd-highlight list-group-item-danger pointer absentbtn" 
+                                        data-company-id="{{ $company['company_id'] }}">
+                                        <i class="fa-light fa-calendar-xmark mr-2"></i>ABSENT 
+                                        <span class="ml-auto fw-bold">{{ $company['today_absent'] }}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            
+                            <!-- YESTERDAY ATTENDANCE -->
+                            <h6 class="mt-3 mb-2 text-muted" style="font-size: 0.85rem;">YESTERDAY ATTENDANCE</h6>
+                            <div class="card mt-1">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex bd-highlight list-group-item-primary">
+                                        <i class="fa-light fa-users mr-2"></i>TOTAL EMPLOYEE 
+                                        <span class="ml-auto fw-bold">{{ $company['total_employees'] }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex bd-highlight list-group-item-success pointer yesterdayattendancebtn" 
+                                        data-company-id="{{ $company['company_id'] }}">
+                                        <i class="fa-light fa-calendar-week mr-2"></i>ATTENDANCE 
+                                        <span class="ml-auto fw-bold">{{ $company['yesterday_attendance'] }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex bd-highlight list-group-item-warning pointer yesterdaylateattendancebtn" 
+                                        data-company-id="{{ $company['company_id'] }}">
+                                        <i class="fa-light fa-business-time mr-2"></i>LATE 
+                                        <span class="ml-auto fw-bold">{{ $company['yesterday_late'] }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex bd-highlight list-group-item-danger pointer yesterdayabsentbtn" 
+                                        data-company-id="{{ $company['company_id'] }}">
+                                        <i class="fa-light fa-calendar-xmark mr-2"></i>ABSENT 
+                                        <span class="ml-auto fw-bold">{{ $company['yesterday_absent'] }}</span>
+                                    </li>
+                                </ul>
                             </div>
                         </div>
+                    </div>
                     @endforeach
 
-
-                    <div class="col pt-sm-0 pt-3">
+                    <div class="col-sm-12 col-md-auto">
                         <div class="card border h-100 p-3">
                             <div class="calendar border h-100">
                                 <div class="calendar-header text-left">
