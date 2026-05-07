@@ -95,7 +95,7 @@ $joinQuery = "FROM `ot_approved` AS `u`
             left join (SELECT `id`,`name` AS `dept_name` FROM `departments`) AS `dep` ON emp.emp_department = dep.id 
             left join (SELECT `id`,`location` AS `b_location` FROM `branches`) AS `bran` ON emp.emp_location = bran.id";
 	
-	$extraWhere = "1=1";
+	$extraWhere = "1=1 AND u.status != 3";
 
 	if ($department != '') {
 		$extraWhere .= " AND `emp`.`emp_department` = '$department'";

@@ -242,45 +242,6 @@ class RptOTController extends Controller
             ->pluck('branch_id')
             ->toArray();
 
-        // $emp_query = 'SELECT  
-        //         employees.*,  
-        //         employees.id as emp_auto_id, 
-        //         shift_types.onduty_time, 
-        //         shift_types.offduty_time,
-        //         shift_types.shift_name,
-        //         branches.location as b_location,
-        //         departments.name as dept_name 
-        //         FROM `employees`   
-        //         left join shift_types ON employees.emp_shift = shift_types.id 
-        //         left join branches ON employees.emp_location = branches.id 
-        //         left join departments ON employees.emp_department = departments.id 
-        //         WHERE employees.deleted = 0  
-        //         ';
-
-        // if (!empty($accessibleEmployeeIds)) {
-        //     $ids = implode('","', $accessibleEmployeeIds);
-        //     $emp_query .= 'AND employees.emp_id IN ("' . $ids . '") ';
-        // }
-
-        // if($department != ''){
-        //     $emp_query .= ' AND employees.emp_department = '.$department;
-        // }
-
-        // if($employee != ''){
-        //     $emp_query .= ' AND employees.emp_id = '.$employee;
-        // }
-
-        // if($userCompanyIds) {
-        //     $emp_query .= ' AND employees.emp_company = '.$userCompanyIds;
-        // }
-
-        // if($location != ''){
-        //     $emp_query .= ' AND employees.emp_location = '.$location;
-        // }elseif($userBranchIds) {
-        //     $emp_query .= ' AND employees.emp_location = '.$userBranchIds;
-        // }
-        // $data = DB::select($emp_query);
-
         $query = DB::table('employees')
                     ->select(
                         'employees.*',
@@ -339,6 +300,7 @@ class RptOTController extends Controller
             })
             ->addColumn('normal_rate_otwork_hrs', function ($row) use ($month) {
                 $ot_hours = (new \App\Attendance)->get_ot_hours_approved($row->emp_id, $month);
+                
                 $normal_ot_hours = $ot_hours['normal_rate_otwork_hrs'];
 
                 return number_format($normal_ot_hours, 2);
