@@ -31,7 +31,7 @@
                             <table class="table table-striped table-bordered table-sm small nowrap display text-uppercase" style="width: 100%" id="dataTable">
                                         <thead>
                                             <tr>
-                                                <th>ID </th>
+                                                <th class="d-none">ID </th>
                                                 <th>Adjustment Type</th> 
                                                 <th>Employee</th>
                                                 <th>Job Category</th>
@@ -257,7 +257,8 @@ $(document).ready(function(){
         },
         columns: [{
                 data: 'id',
-                name: 'id'
+                name: 'id',
+                visible: false
             },
             {
                 data: 'adjustment_type', 

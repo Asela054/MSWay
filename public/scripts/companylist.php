@@ -1,22 +1,9 @@
 <?php
+session_start();
 
-/*
- * DataTables example server-side processing script.
- *
- * Please note that this script is intentionally extremely simply to show how
- * server-side processing can be implemented, and probably shouldn't be used as
- * the basis for a large complex system. It is suitable for simple use cases as
- * for learning.
- *
- * See http://datatables.net/usage/server-side for full details on the server-
- * side processing requirements of DataTables.
- *
- * @license MIT - http://datatables.net/license_mit
- */
+use App\Helpers\UserHelper;
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Easy set variables
- */
+require_once __DIR__ . '/../../app/Helpers/UserHelper.php';
 
 // DB table to use
 $table = 'companies';
@@ -59,18 +46,50 @@ $sql_details = array(
 	'host' => $db_host
 );
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * If you just want to use the basic configuration for DataTables with PHP
- * server-side, there is no need to edit below this line.
- */
-
 // require( 'ssp.class.php' );
 require('ssp.customized.class.php' );
 
-$joinQuery = "FROM `companies` AS `u`";
-	
-$extraWhere = "1=1";
+// Build base SQL
+$sql = "SELECT `c`.* FROM `companies` AS `c` WHERE 1=1";
+
+// Apply user company access filter
+$userId = UserHelper::getLoggedInUserId();
+
+if ($userId) {
+    $mysqli = new mysqli($db_host, $db_username, $db_password, $db_name);
+
+    if ($mysqli->connect_error) {
+        echo json_encode(['error' => 'Database connection failed']);
+        exit;
+    }
+
+    $companyIds = [];
+    $stmt = $mysqli->prepare("SELECT company_id FROM user_has_companies WHERE user_id = ?");
+
+    if ($stmt) {
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        while ($row = $result->fetch_assoc()) {
+            $companyIds[] = $row['company_id'];
+        }
+        $stmt->close();
+    }
+
+    // If user has assigned companies, restrict to those; otherwise show all
+    if (!empty($companyIds)) {
+        $escapedIds = array_map(function($id) use ($mysqli) {
+            return "'" . $mysqli->real_escape_string($id) . "'";
+        }, $companyIds);
+        $sql .= " AND `c`.`id` IN (" . implode(',', $escapedIds) . ")";
+    }
+
+    $mysqli->close();
+}
+
+$joinQuery = "FROM (" . $sql . ") AS `u`";
+$extraWhere = "";
 
 echo json_encode(
-	SSP::simple( $_POST, $sql_details, $table, $primaryKey, $columns, $joinQuery, $extraWhere)
+    SSP::simple($_POST, $sql_details, $table, $primaryKey, $columns, $joinQuery, $extraWhere)
 );
