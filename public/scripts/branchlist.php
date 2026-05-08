@@ -1,4 +1,10 @@
 <?php
+session_start();
+
+use App\Helpers\UserHelper;
+
+require_once __DIR__ . '/../../app/Helpers/UserHelper.php';
+
 
 // DB table to use
 $table = 'branches';
@@ -35,10 +41,48 @@ require('ssp.customized.class.php' );
 
 $company_id = $_POST['company_id'];
 
-$joinQuery = "FROM `branches` AS `u`";
-	
-$extraWhere = "1=1 AND (`u`.`company_id` = '$company_id' OR `u`.`company_id` = '0')";
+// Apply user branch access filter
+$userId = UserHelper::getLoggedInUserId();
+
+if ($userId) {
+    $mysqli = new mysqli($db_host, $db_username, $db_password, $db_name);
+
+    if ($mysqli->connect_error) {
+        echo json_encode(['error' => 'Database connection failed']);
+        exit;
+    }
+
+    $sql = "SELECT `b`.* FROM `branches` AS `b` 
+            WHERE (`b`.`company_id` = '" . $mysqli->real_escape_string($company_id) . "' OR `b`.`company_id` = '0')";
+
+    $branchIds = [];
+    $stmt = $mysqli->prepare("SELECT branch_id FROM user_has_companies WHERE user_id = ?");
+
+    if ($stmt) {
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        while ($row = $result->fetch_assoc()) {
+            $branchIds[] = intval($row['branch_id']);
+        }
+        $stmt->close();
+    }
+
+    if (!empty($branchIds)) {
+        $branchIdsList = implode(',', $branchIds);
+        $sql .= " AND `b`.`id` IN ($branchIdsList)";
+    }
+
+    $mysqli->close();
+} else {
+    // No logged-in user — show all branches for the company unfiltered
+    $sql = "SELECT `b`.* FROM `branches` AS `b` 
+            WHERE (`b`.`company_id` = '" . intval($company_id) . "' OR `b`.`company_id` = '0')";
+}
+
+$joinQuery = "FROM (" . $sql . ") AS `u`";
+$extraWhere = "";
 
 echo json_encode(
-	SSP::simple( $_POST, $sql_details, $table, $primaryKey, $columns, $joinQuery, $extraWhere)
+    SSP::simple($_POST, $sql_details, $table, $primaryKey, $columns, $joinQuery, $extraWhere)
 );
