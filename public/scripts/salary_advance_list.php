@@ -58,16 +58,46 @@ if ($userId) {
         echo json_encode(['error' => 'Database connection failed']);
         exit;
     }
-    
+
+    $companyIds = [];
+    $branchIds = [];
+    $companyQuery = "SELECT company_id, branch_id FROM user_has_companies WHERE user_id = ?";
+    $stmt = $mysqli->prepare($companyQuery);
+
+    if ($stmt) {
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        while ($row = $result->fetch_assoc()) {
+            $companyIds[] = $row['company_id'];
+            $branchIds[] = $row['branch_id'];
+        }
+        $stmt->close();
+    }
+
+    if (!empty($companyIds)) {
+        $escapedCompanyIds = array_map(function($id) use ($mysqli) {
+            return "'" . $mysqli->real_escape_string($id) . "'";
+        }, $companyIds);
+        $companyIdsList = implode(',', $escapedCompanyIds);
+        $extraWhere .= " AND employees.emp_company IN ($companyIdsList)";
+    }
+
+    if (!empty($branchIds)) {
+        $branchIdsList = implode(',', array_map('intval', $branchIds));
+        $extraWhere .= " AND employees.emp_location IN ($branchIdsList)";
+    }
+
     $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId, $mysqli);
-    
+
     if (!empty($accessibleEmployeeIds)) {
         $empIds = implode(',', array_map('intval', $accessibleEmployeeIds));
         $extraWhere .= " AND employees.emp_id IN ($empIds)";
     } else {
         $extraWhere .= " AND 1 = 0";
     }
-    
+
     $mysqli->close();
 }
 // end of new filter
