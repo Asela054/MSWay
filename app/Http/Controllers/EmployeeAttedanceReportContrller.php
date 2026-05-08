@@ -30,24 +30,28 @@ class EmployeeAttedanceReportContrller extends Controller
         $department = $request->get('department');
         $from_date = $request->get('from_date');
         $to_date = $request->get('to_date');
-        // $from_range = $request->get('from_range', 0);
-        // $to_range = $request->get('to_range', 20);
-    
+
         $period = new DatePeriod(
             new DateTime($from_date),
             new DateInterval('P1D'), 
             new DateTime(date('Y-m-d', strtotime($to_date . ' +1 day')))
         );
-    
-        // $from_range = max(0, (int) $from_range);
-        // $to_range = max($from_range, (int) $to_range);
-        // $limit = $to_range - $from_range; 
 
-          // Get accessible employee IDs based on user access rights
         $userId = Auth::id();
+
+        // Get company IDs and branch IDs from user_has_companies
+        $companyIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('company_id')
+            ->toArray();
+
+        $branchIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('branch_id')
+            ->toArray();
+
         $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
-        
-        // Return empty HTML if no accessible employees
+
         if (empty($accessibleEmployeeIds)) {
             return response()->json(['html' => '']);
         }
@@ -65,40 +69,46 @@ class EmployeeAttedanceReportContrller extends Controller
             ->where('employees.emp_department', $department)
             ->whereBetween('attendances.date', [$from_date, $to_date])
             ->whereIn('employees.emp_id', $accessibleEmployeeIds)
+            ->when(!empty($companyIds), function ($query) use ($companyIds) {
+                $query->whereIn('employees.emp_company', $companyIds);
+            })
+            ->when(!empty($branchIds), function ($query) use ($branchIds) {
+                $query->whereIn('employees.emp_location', $branchIds);
+            })
             ->groupBy('employees.id')
             ->orderBy('employees.id')
             ->get();
-    
+
         $pdfData = [];
-    
+
         foreach ($employees as $employee) {
             $attendanceData = [];
-    
+
             foreach ($period as $date) {
                 $currentDate = $date->format('Y-m-d');
-    
+
                 $attendance = DB::table('attendances')
                     ->where('emp_id', $employee->emp_id)
                     ->whereDate('date', $currentDate)
                     ->selectRaw('MIN(timestamp) as in_time, MAX(timestamp) as out_time, MAX(date) as max_date')
                     ->first();
-    
-                    if ($attendance->in_time || $attendance->out_time) {
-                            $inTime = $attendance->in_time ? date('H:i:s', strtotime($attendance->in_time)) : ' ';
-                            $outTime = $attendance->out_time ? date('H:i:s', strtotime($attendance->out_time)) : ' ';
 
-                            $duration = Carbon::parse($inTime)->diff(Carbon::parse($outTime))->format('%H:%I');
-                        
-                            $attendanceData[] = [
-                                'date' => $currentDate,
-                                'empno' => $employee->emp_id,
-                                'Department' => $employee->departmentname,
-                                'in_time' => $inTime,
-                                'out_time' => $outTime,
-                                'duration' => $duration
-                            ];
-                    }
+                if ($attendance->in_time || $attendance->out_time) {
+                    $inTime = $attendance->in_time ? date('H:i:s', strtotime($attendance->in_time)) : ' ';
+                    $outTime = $attendance->out_time ? date('H:i:s', strtotime($attendance->out_time)) : ' ';
+                    $duration = Carbon::parse($inTime)->diff(Carbon::parse($outTime))->format('%H:%I');
+
+                    $attendanceData[] = [
+                        'date' => $currentDate,
+                        'empno' => $employee->emp_id,
+                        'Department' => $employee->departmentname,
+                        'in_time' => $inTime,
+                        'out_time' => $outTime,
+                        'duration' => $duration
+                    ];
+                }
             }
+
             $pdfData[] = [
                 'employee' => $employee,
                 'attendance' => $attendanceData,
@@ -106,7 +116,7 @@ class EmployeeAttedanceReportContrller extends Controller
         }
 
         ini_set("memory_limit", "999M");
-		ini_set("max_execution_time", "999");
+        ini_set("max_execution_time", "999");
 
         $pdf = Pdf::loadView('AuditReports.timeinoutreportPDF', compact('pdfData'))->setPaper('A4', 'portrait');
         return $pdf->download('Employee Time In-Out Report.pdf');
@@ -128,17 +138,26 @@ class EmployeeAttedanceReportContrller extends Controller
     $department = $request->get('department');
     $from_date = $request->get('from_date');
     $to_date = $request->get('to_date');
-    
-    // Get accessible employee IDs based on user access rights
+
     $userId = Auth::id();
+
+    // Get company IDs and branch IDs from user_has_companies
+    $companyIds = DB::table('user_has_companies')
+        ->where('user_id', $userId)
+        ->pluck('company_id')
+        ->toArray();
+
+    $branchIds = DB::table('user_has_companies')
+        ->where('user_id', $userId)
+        ->pluck('branch_id')
+        ->toArray();
+
     $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
-    
-    // Return empty HTML if no accessible employees
+
     if (empty($accessibleEmployeeIds)) {
         return response()->json(['html' => '']);
     }
 
-    // Get all OT approved records with employee info in a single query
     $otRecords = DB::table('ot_approved')
         ->join('employees', 'ot_approved.emp_id', '=', 'employees.emp_id')
         ->leftJoin('departments', 'employees.emp_department', '=', 'departments.id')
@@ -146,6 +165,12 @@ class EmployeeAttedanceReportContrller extends Controller
         ->where('employees.emp_department', $department)
         ->whereBetween('ot_approved.date', [$from_date, $to_date])
         ->whereIn('employees.emp_id', $accessibleEmployeeIds)
+        ->when(!empty($companyIds), function ($query) use ($companyIds) {
+            $query->whereIn('employees.emp_company', $companyIds);
+        })
+        ->when(!empty($branchIds), function ($query) use ($branchIds) {
+            $query->whereIn('employees.emp_location', $branchIds);
+        })
         ->select(
             'employees.id', 
             'employees.emp_id', 
@@ -159,12 +184,11 @@ class EmployeeAttedanceReportContrller extends Controller
         ->orderBy('employees.id')
         ->orderBy('ot_approved.date')
         ->get();
-    
-    // Group records by employee
+
     $employeesWithOT = [];
     foreach ($otRecords as $record) {
         $empKey = $record->emp_id;
-        
+
         if (!isset($employeesWithOT[$empKey])) {
             $employeesWithOT[$empKey] = [
                 'employee' => (object)[
@@ -176,8 +200,7 @@ class EmployeeAttedanceReportContrller extends Controller
                 'attendance' => []
             ];
         }
-        
-        // Add attendance record
+
         $employeesWithOT[$empKey]['attendance'][] = [
             'date' => $record->date,
             'empno' => $record->emp_id,
@@ -187,8 +210,7 @@ class EmployeeAttedanceReportContrller extends Controller
             'duration' => $record->hours
         ];
     }
-    
-    // Convert to indexed array for view
+
     $pdfData = array_values($employeesWithOT);
 
     ini_set("memory_limit", "999M");

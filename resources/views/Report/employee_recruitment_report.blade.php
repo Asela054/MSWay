@@ -80,11 +80,6 @@
                             <div class="col-md-12">
                                 <label class="small font-weight-bolder text-dark">Company*</label>
                                 <select name="company" id="company" class="form-control form-control-sm">
-                                    <option value="">Please Select</option>
-                                    @foreach ($companies as $company){
-                                    <option value="{{$company->id}}">{{$company->name}}</option>
-                                    }
-                                    @endforeach
                                 </select>
                             </div>
                         </li>
@@ -92,8 +87,6 @@
                             <div class="col-md-12">
                                 <label class="small font-weight-bolder text-dark">Department</label>
                                 <select name="department" id="department" class="form-control form-control-sm">
-                                    <option value="">Please Select</option>
-                                    <option value="All">All Departments</option>
                                 </select>
                             </div>
                         </li>
@@ -101,11 +94,6 @@
                             <div class="col-md-12">
                                 <label class="small font-weight-bolder text-dark">Employee</label>
                                 <select name="employee" id="employee_f" class="form-control form-control-sm">
-                                    <option value="">Please Select</option>
-                                    @foreach ($employees as $employee){
-                                    <option value="{{$employee->id}}">{{$employee->emp_name_with_initial}}</option>
-                                    }
-                                    @endforeach
                                 </select>
                             </div>
                         </li>
@@ -147,8 +135,6 @@ $(document).ready(function() {
     $('#report_menu_link').addClass('active');
     $('#report_menu_link_icon').addClass('active');
     $('#employeedetailsreport').addClass('navbtnactive');
-    $('#employee_f').select2({ width: '100%' });
-    $('#department').select2({ width: '100%' });
      showInitialMessage()
 
     $('#interviwersection').addClass('d-none');
@@ -162,6 +148,64 @@ $(document).ready(function() {
         $('#emptablesection').removeClass('d-none');
     }
 });
+
+    let company = $('#company');
+    let department = $('#department');
+    let employee_f = $('#employee_f');
+
+    company.select2({
+        placeholder: 'Select a Company',
+        width: '100%',
+        allowClear: true,
+        ajax: {
+            url: '{{url("company_list_sel2")}}',
+            dataType: 'json',
+            data: function(params) {
+                return {
+                    term: params.term || '',
+                    page: params.page || 1
+                }
+            },
+            cache: true
+        }
+    });
+
+    department.select2({
+        placeholder: 'Select a Department',
+        width: '100%',
+        allowClear: true,
+        ajax: {
+            url: '{{url("department_list_sel2")}}',
+            dataType: 'json',
+            data: function(params) {
+                return {
+                    term: params.term || '',
+                    page: params.page || 1,
+                    company: company.val()
+                }
+            },
+            cache: true
+        }
+    });
+
+    employee_f.select2({
+        placeholder: 'Select a Employee',
+        width: '100%',
+        allowClear: true,
+        ajax: {
+            url: '{{url("employee_list_sel2")}}',
+            dataType: 'json',
+            data: function(params) {
+                return {
+                    term: params.term || '',
+                    page: params.page || 1,
+                    company: company.val(),
+                    department: department.val()
+                }
+            },
+            cache: true
+        }
+    });
 
 
 

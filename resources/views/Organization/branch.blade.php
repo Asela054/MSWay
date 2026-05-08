@@ -30,17 +30,17 @@
                     </div>
                     <div class="col-12">
                         <div class="center-block fix-width scroll-inner">
-                        <table class="table table-striped table-bordered table-sm small nowrap text-uppercase" style="width: 100%" id="dataTable">
+                        <table class="table table-striped table-bordered table-sm small nowrap" style="width: 100%" id="dataTable">
                             <thead>
                                 <tr>
                                     <th>ID </th>
-                                    <th>Location</th>
-                                    <th>Code</th>
-                                    <th>Contact No</th>
-                                    <th>EPF No</th>
-                                    <th>ETF No</th>
-                                    <th>Latitude</th>
-                                    <th>Longitude</th>
+                                    <th>LOCATION</th>
+                                    <th>CODE</th>
+                                    <th>CONTACT NO</th>
+                                    <th>EPF NO</th>
+                                    <th>ETF NO</th>
+                                    <th>LATITUDE</th>
+                                    <th>LONGITUDE</th>
                                     <th class="text-right">Action</th>
                                 </tr>
                             </thead>

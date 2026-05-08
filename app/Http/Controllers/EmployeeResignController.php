@@ -30,14 +30,19 @@ class EmployeeResignController extends Controller
     $from_date = $request->input('from_date');
     $to_date = $request->input('to_date');
 
-    // Get accessible employee IDs based on user access rights
-        $userId = Auth::id();
-        $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
-        
-        // Return empty HTML if no accessible employees
-        if (empty($accessibleEmployeeIds)) {
-            return response()->json(['html' => '']);
-        }
+    $userId = Auth::id();
+
+    // Get company and branch IDs the user has access to (same pattern as CommenGetrreordController)
+    $userCompanyIds = DB::table('user_has_companies')
+        ->where('user_id', $userId)
+        ->pluck('company_id')
+        ->toArray();
+
+    $userBranchIds = DB::table('user_has_companies')
+        ->where('user_id', $userId)
+        ->whereNotNull('branch_id')
+        ->pluck('branch_id')
+        ->toArray();
 
     $types = DB::table('employees')
         ->leftJoin('departments', 'departments.id', '=', 'employees.emp_department')
@@ -50,8 +55,17 @@ class EmployeeResignController extends Controller
             'branches.location AS location'
         )
         ->where('employees.deleted', '0')
-        ->whereIn('employees.emp_id', $accessibleEmployeeIds)
         ->where('employees.is_resigned', 1);
+
+    // Apply company filter if user has specific company permissions
+    if (!empty($userCompanyIds)) {
+        $types->whereIn('employees.emp_company', $userCompanyIds);
+    }
+
+    // Apply branch filter if user has specific branch permissions
+    if (!empty($userBranchIds)) {
+        $types->whereIn('employees.emp_location', $userBranchIds);
+    }
 
     if (!empty($department) && $department != 'All') {
         $types->where('employees.emp_department', $department);
@@ -65,17 +79,16 @@ class EmployeeResignController extends Controller
 
     return Datatables::of($types)
         ->addIndexColumn()
-              ->addColumn('employee_display', function ($row) {
-                   return EmployeeHelper::getDisplayName($row);
-                   
-            })
-                ->filterColumn('employee_display', function($query, $keyword) {
-                $query->where(function($q) use ($keyword) {
-                    $q->where('e.emp_name_with_initial', 'like', "%{$keyword}%")
+        ->addColumn('employee_display', function ($row) {
+            return EmployeeHelper::getDisplayName($row);
+        })
+        ->filterColumn('employee_display', function($query, $keyword) {
+            $query->where(function($q) use ($keyword) {
+                $q->where('e.emp_name_with_initial', 'like', "%{$keyword}%")
                     ->orWhere('e.calling_name', 'like', "%{$keyword}%")
                     ->orWhere('e.emp_id', 'like', "%{$keyword}%");
-                });
-            })
+            });
+        })
         ->addColumn('action', function ($row) {
         })
         ->rawColumns(['action'])

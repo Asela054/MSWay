@@ -62,12 +62,7 @@
                          <li class="mb-2">
                              <div class="col-md-12">
                                  <label class="small font-weight-bolder text-dark">Location</label>
-                                 <select name="company" id="company" class="form-control form-control-sm">
-                                     <option value="">Please Select</option>
-                                     @foreach ($locations as $location){
-                                     <option value="{{$location->id}}">{{$location->location}}</option>
-                                     }
-                                     @endforeach
+                                 <select name="location" id="location" class="form-control form-control-sm">
                                  </select>
                              </div>
                          </li>
@@ -75,11 +70,6 @@
                               <div class="col-md-12">
                                   <label class="small font-weight-bolder text-dark">Employee</label>
                                   <select name="employee" id="employee_f" class="form-control form-control-sm">
-                                      <option value="">Please Select</option>
-                                      @foreach ($employees as $employee){
-                                      <option value="{{$employee->id}}">{{$employee->emp_name_with_initial}}</option>
-                                      }
-                                      @endforeach
                                   </select>
                               </div>
                           </li>
@@ -127,8 +117,44 @@ $(document).ready(function() {
     $('#report_menu_link').addClass('active');
     $('#report_menu_link_icon').addClass('active');
     $('#departmentvisereport').addClass('navbtnactive');
-    $('#employee_f').select2({ width: '100%' });
-    $('#company').select2({ width: '100%' });
+
+    let employee_f = $('#employee_f');
+    let location = $('#location');
+
+    employee_f.select2({
+        placeholder: 'Select a Employee',
+        width: '100%',
+        allowClear: true,
+        ajax: {
+            url: '{{url("employee_list_sel2")}}',
+            dataType: 'json',
+            data: function(params) {
+                return {
+                    term: params.term || '',
+                    page: params.page || 1,
+                    location: location.val()
+                }
+            },
+            cache: true
+        }
+    });
+
+    location.select2({
+        placeholder: 'Select Location',
+        width: '100%',
+        allowClear: true,
+        ajax: {
+            url: '{{url("location_list_sel2")}}',
+            dataType: 'json',
+            data: function(params) {
+                return {
+                    term: params.term || '',
+                    page: params.page || 1
+                }
+            },
+            cache: true
+        }
+    });
 
 load_dt('','', '','');
 
@@ -210,7 +236,7 @@ load_dt('','', '','');
 
     $('#formFilter').on('submit',function(e) {
         e.preventDefault();
-        let location = $('#company').val();
+        let location = $('#location').val();
         let from_date = $('#from_date').val();
         let to_date = $('#to_date').val();
         let employee_f = $('#employee_f').val();

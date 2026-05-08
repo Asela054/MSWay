@@ -85,25 +85,61 @@ if (!empty($_REQUEST['banks'])) {
 }
 
 // Add user access rights filter directly to the main query
-    $userId = UserHelper::getLoggedInUserId();
+$userId = UserHelper::getLoggedInUserId();
 
-    if ($userId) {
-        $mysqli = new mysqli($db_host, $db_username, $db_password, $db_name);
-        
-        if ($mysqli->connect_error) {
-            echo json_encode(['error' => 'Database connection failed']);
-            exit;
+if ($userId) {
+    $mysqli = new mysqli($db_host, $db_username, $db_password, $db_name);
+    
+    if ($mysqli->connect_error) {
+        echo json_encode(['error' => 'Database connection failed']);
+        exit;
+    }
+
+    // Get company IDs and branch IDs from user_has_companies
+    $companyIds = [];
+    $branchIds = [];
+    $companyQuery = "SELECT company_id, branch_id FROM user_has_companies WHERE user_id = ?";
+    $stmt = $mysqli->prepare($companyQuery);
+
+    if ($stmt) {
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        while ($row = $result->fetch_assoc()) {
+            $companyIds[] = $row['company_id'];
+            $branchIds[] = $row['branch_id'];
         }
-        
-        $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId, $mysqli);
+        $stmt->close();
+    }
+
+    // Apply company filter with proper escaping for VARCHAR values
+    if (!empty($companyIds)) {
+        $escapedCompanyIds = array_map(function($id) use ($mysqli) {
+            return "'" . $mysqli->real_escape_string($id) . "'";
+        }, $companyIds);
+
+        $companyIdsList = implode(',', $escapedCompanyIds);
+        $sql .= " AND `employees`.`emp_company` IN ($companyIdsList)";
+    }
+
+    // Apply branch filter
+    if (!empty($branchIds)) {
+        $branchIdsList = implode(',', array_map('intval', $branchIds));
+        $sql .= " AND `employees`.`emp_location` IN ($branchIdsList)";
+    }
+
+    $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId, $mysqli);
+
     if (!empty($accessibleEmployeeIds)) {
         $empIds = implode(',', array_map('intval', $accessibleEmployeeIds));
         $sql .= " AND `employees`.`emp_id` IN ($empIds)";
     } else {
         $sql .= " AND 1 = 0";
     }
+
     $mysqli->close();
-    }
+}
 
 $joinQuery = "FROM (" . $sql . ") as `u`";
 $extraWhere = "";

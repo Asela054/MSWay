@@ -7,9 +7,9 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>ShapeUP HRM - By eRav Technology</title>
     <link rel="icon" type="image/x-icon" href="{{url('/public/images/hrm.png')}}" />
-    <link href="{{ url('/css/styles.css') }}" rel="stylesheet" />
-    <link href="{{ url('/css/custom_styles.css') }}" rel="stylesheet"/>
-    <link rel="stylesheet" href="{{ url('/css/fontawesome/css/all.min.css') }}">
+    <link href="{{ url('/public/css/styles.css') }}" rel="stylesheet" />
+    <link href="{{ url('/public/css/custom_styles.css') }}" rel="stylesheet"/>
+    <link rel="stylesheet" href="{{ url('/public/css/fontawesome/css/all.min.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
