@@ -51,21 +51,14 @@
                           <li class="mb-2">
                               <div class="col-md-12">
                                   <label class="small font-weight-bolder text-dark">Company*</label>
-                                <select name="company" id="company" class="form-control form-control-sm">
-                                    <option value="">Please Select</option>
-                                    @foreach ($companies as $company){
-                                        <option value="{{$company->id}}">{{$company->name}}</option>
-                                    }  
-                                    @endforeach
+                                <select name="company" id="company" class="form-control form-control-sm" required>
                                 </select>
                               </div>
                           </li>
                           <li class="mb-2">
                               <div class="col-md-12">
                                  <label class="small font-weight-bolder text-dark">Department*</label>
-                                <select name="department" id="department" class="form-control form-control-sm">
-                                    <option value="">Please Select</option>
-                                    <option value="All">All Departments</option>
+                                <select name="department" id="department" class="form-control form-control-sm" required>
                                 </select>
                               </div>
                           </li>
@@ -166,7 +159,6 @@
             $('#report_menu_link').addClass('active');
             $('#report_menu_link_icon').addClass('active');
             $('#departmentvisereport').addClass('navbtnactive');
-            $('#department').select2({ width: '100%' });
 
             showInitialMessage()
 
@@ -182,6 +174,44 @@
                 } else {
                     $('#div_month').addClass('d-none');
                     $('.div_date_range').removeClass('d-none');
+                }
+            });
+
+            let company = $('#company');
+            let department = $('#department');
+
+            company.select2({
+                placeholder: 'Select a Company',
+                width: '100%',
+                allowClear: true,
+                ajax: {
+                    url: '{{url("company_list_sel2")}}',
+                    dataType: 'json',
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1
+                        }
+                    },
+                    cache: true
+                }
+            });
+
+            department.select2({
+                placeholder: 'Select a Department',
+                width: '100%',
+                allowClear: true,
+                ajax: {
+                    url: '{{url("department_list_sel2")}}',
+                    dataType: 'json',
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1,
+                            company: company.val()
+                        }
+                    },
+                    cache: true
                 }
             });
 
