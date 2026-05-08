@@ -411,6 +411,7 @@ class AttendanceApprovalController extends Controller
 
             $leave_days = (new \App\Leave)->get_leave_days($record->emp_id, $month , $closedate);
             $no_pay_days = (new \App\Leave)->get_no_pay_days($record->emp_id, $month, $closedate);
+            $duty_leaves = (new \App\Leave)->get_duty_leaves($record->emp_id, $month, $closedate);
 
             $normal_ot_hours = (new \App\OtApproved)->get_ot_hours_monthly($record->emp_id, $month, $closedate);
 
@@ -428,7 +429,7 @@ class AttendanceApprovalController extends Controller
 				// Fetch employee job category and work hour data
 				$employee = DB::table('employees as e')
 					->join('job_categories as jc', 'e.job_category_id', '=', 'jc.id')
-					->select('e.id as empid', 'e.emp_id', 'e.emp_status', 'jc.work_hour_date','jc.salary_without_attendace')
+					->select('e.id as empid', 'e.emp_id', 'e.emp_status', 'jc.work_hour_date','jc.salary_without_attendace','jc.shift_hours')
 					->where('e.deleted', 0)
 					->where('e.id', $record->emp_auto_id)
 					->first();
@@ -440,6 +441,7 @@ class AttendanceApprovalController extends Controller
 					$empstatus = $employee->emp_status;
 					$workHourDate = $employee->work_hour_date;
 					$salarystatus = $employee->salary_without_attendace;
+                    $shift_hours = $employee->shift_hours;
 				}
 	
 
@@ -524,9 +526,14 @@ class AttendanceApprovalController extends Controller
 	
 						}
 					}
+
 	
-					$totalweekworkshours = $totalworkHours -($normal_ot_hours + $double_ot_hours);
-	
+					$totalregularweekworkshours = $totalworkHours -($normal_ot_hours + $double_ot_hours);
+
+                    // this use to add duty leaves hours count to day salaries 
+                    $totalweekworkshours = $totalregularweekworkshours + ($shift_hours * $duty_leaves);
+
+
 					if($salarystatus == 1 &&  $totalweekworkshours==0 && $empstatus == 1){
 						$data3 = array(
 							'emp_id' => $record->emp_auto_id,
