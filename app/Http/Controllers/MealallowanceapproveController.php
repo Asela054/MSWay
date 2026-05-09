@@ -259,6 +259,22 @@ class MealallowanceapproveController extends Controller
                         }
                     }
                 }
+                else if($allowancetype==4){
+                    $dayallowanceamount = $allowanceamount / $workingDays;
+                    $workallawanceamount = ($workingDays - $totalLeaveDays) * $dayallowanceamount;
+                    
+                    // Using Query Builder
+                    $avgCompletionPercentage = DB::table('opma_daily_production_summary')
+                        ->select(
+                            DB::raw('AVG((produce / NULLIF(target, 0)) * 100) as avg_completion_percentage')
+                        )
+                        ->where('emp_id', $empId)
+                        ->whereBetween('date', [$firstDate, $lastDate])
+                        ->value('avg_completion_percentage');
+
+                    $monthlyremain = ($avgCompletionPercentage / 100) * $workallawanceamount;
+                    $totalamount = $workallawanceamount - $monthlyremain;
+                }
                 else{//Daily or monthly salary adjustment deductions
                     if($remunerationtype == 21){
                         $totalWeekDays = DB::table('leaves')
