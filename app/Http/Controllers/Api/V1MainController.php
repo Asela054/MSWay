@@ -747,32 +747,50 @@ class V1MainController extends Controller
         $employee = $request->get('employee');
         $from_date = $request->get('from_date');
         $to_date = $request->get('to_date');
-
-        $query = DB::table('attendances as at1')
-                    ->Join('employees', 'at1.emp_id', '=', 'employees.emp_id')
-                    ->leftJoin('branches', 'at1.location', '=', 'branches.id')
-                    ->select('at1.id',
-                        'at1.emp_id',
-                        'at1.uid',
-                        'at1.state',
-                        'at1.timestamp',
-                        'at1.date',
-                        'at1.approved',
-                        'at1.type',
-                        DB::raw('Min(at1.timestamp) as firsttimestamp'),
-                        DB::raw('(CASE 
-                            WHEN Min(at1.timestamp) = Max(at1.timestamp) THEN ""  
-                            ELSE Max(at1.timestamp)
-                            END) AS lasttimestamp'),
-                        'employees.emp_name_with_initial',
-                        'branches.location')
-                       ->where(['employees.emp_id' => $employee])
-                        ->whereBetween('at1.date', [$from_date, $to_date])
-                       ->where(['at1.deleted_at' => null])
-                       ->where(['approved' => '0'])
-                       ->groupBy('at1.uid', 'at1.date')
-                       ->get();
            
+
+        $query = DB::query()
+                ->select('at1.id',
+                    'at1.emp_id',
+                    'at1.uid',
+                    'at1.state',
+                    'at1.timestamp',
+                    'at1.date',
+                    'at1.approved',
+                    'at1.type',
+                    'at1.devicesno',
+                    DB::raw('Min(at1.timestamp) as firsttimestamp'),
+                    DB::raw('(CASE 
+                        WHEN Min(at1.timestamp) = Max(at1.timestamp) THEN ""  
+                        ELSE Max(at1.timestamp)
+                        END) AS lasttimestamp'),
+                    'employees.emp_name_with_initial',
+                    'branches.location',
+                    'departments.name as dep_name',
+                     'late_minites.minites_count',
+                    'ot_approved.hours',
+                    'ot_approved.double_hours'
+                )
+                ->from('attendances as at1')
+                ->Join('employees', 'at1.uid', '=', 'employees.emp_id')
+                ->leftJoin('branches', 'at1.location', '=', 'branches.id')
+                ->leftJoin('departments', 'departments.id', '=', 'employees.emp_department')
+                ->leftJoin('employee_late_attendance_minites as late_minites', function($join) {
+                        $join->on('at1.emp_id', '=', 'late_minites.emp_id')
+                            ->on('at1.date', '=', 'late_minites.attendance_date');
+                    })
+                ->leftJoin('ot_approved', function($join) {
+                    $join->on('at1.emp_id', '=', 'ot_approved.emp_id')
+                        ->on('at1.date', '=', 'ot_approved.date');
+                })
+                ->where(['employees.emp_id' => $employee])
+                    ->whereBetween('at1.date', [$from_date, $to_date])
+                    ->where(['at1.deleted_at' => null])
+                    ->where(['approved' => '0'])
+                    ->groupBy('at1.uid', 'at1.date')
+                    ->get();
+
+            
         $data = array(
             'attendance' => $query,
         );
