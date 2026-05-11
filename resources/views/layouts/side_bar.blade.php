@@ -584,6 +584,42 @@
             </li>
             @endif
 
+            @if($hasERPPermissions_KT)
+            <li>
+                <a href="javascript:void(0);" data-toggle="collapse" data-target="#collapseerp" aria-expanded="false" aria-controls="collapseerp">
+                    <i class="fa-light fa-hard-hat"></i>
+                    <span class="links_name">ERP<i class="fas fa-angle-down"></i></span>
+                </a>
+                <span class="tooltip">ERP</span>
+                <div class="collapse" id="collapseerp" data-parent="#accordionSidenav">
+                    <nav class="sidenav-menu-nested nav" id="accordionSubkt_erp">
+                            <a href="javascript:void(0);" data-toggle="collapse" data-target="#collapsdailypro" aria-expanded="false" aria-controls="collapsdailypro" class="py-1">
+                                <span class="links_name">Master Data<i class="fas fa-angle-down"></i></span>
+                            </a>
+                        <div class="collapse" id="collapsdailypro" data-parent="#accordionSubkt_erp">
+                            <nav class="sidenav-menu-nested nav">
+                                <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('kt_customer')}}">Customer</a>
+                                <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('kt_inquiry')}}">Inquiry</a>
+                                <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('kt_machines')}}">Machines</a>
+                                <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('kt_job_approve')}}">Job Approve</a>
+                            </nav>
+                        </div>
+                        <a href="javascript:void(0);" data-toggle="collapse" data-target="#collapstask" aria-expanded="false" aria-controls="collapstask" class="py-1">
+                                <span class="links_name">Calculations<i class="fas fa-angle-down"></i></span>
+                            </a>
+                            <div class="collapse" id="collapstask" data-parent="#accordionSubkt_erp">
+                                <nav class="sidenav-menu-nested nav">
+                                    <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('kt_quotations')}}">Quotation</a>
+                                    <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('kt_inquiry_approve')}}">Inquiry Approve</a>
+                                    <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('kt_job_create')}}">Job Create</a>
+                                    <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('kt_special_rate')}}">Special Rate</a>
+                                </nav>
+                            </div>
+                    </nav>
+                </div>
+            </li>
+            @endif
+
 
 
             @if($hasUserAccountSummaryPermission)
