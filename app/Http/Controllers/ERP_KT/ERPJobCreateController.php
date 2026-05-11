@@ -116,31 +116,30 @@ class ERPJobCreateController extends Controller
             return response()->json(['errors' => ['No data provided.']]);
         }
 
-        $row   = $tableData[0];
+        $firstRow = $tableData[0];
         $jobId = $request->input('hidden_id');
 
         DB::beginTransaction();
         try {
             DB::table('kt_job_inquiry')->where('id', $jobId)->update([
-                'customer_id' => $row['col_1'],
-                'inquiry_id' => $row['col_4'],
-                'start_from'  => $row['col_2'],
-                'end_at'     => $row['col_3'],
-                'reading_hours' => round(Carbon::parse($row['col_2'])->diffInMinutes(Carbon::parse($row['col_3'])) / 60, 2),
-                'job_description' => !empty($row['col_8']) ? trim($row['col_8']) : null,
-                'remarks'         => !empty($row['col_9']) ? trim($row['col_9']) : null,
-                'updated_at'  => Carbon::now()->toDateTimeString(),
+                'customer_id'     => $firstRow['col_1'],
+                'inquiry_id'      => $firstRow['col_4'],
+                'start_from'      => $firstRow['col_2'],
+                'end_at'          => $firstRow['col_3'],
+                'reading_hours'   => round(Carbon::parse($firstRow['col_2'])->diffInMinutes(Carbon::parse($firstRow['col_3'])) / 60, 2),
+                'job_description' => !empty($firstRow['col_8']) ? trim($firstRow['col_8']) : null,
+                'remarks'         => !empty($firstRow['col_9']) ? trim($firstRow['col_9']) : null,
+                'updated_at'      => Carbon::now()->toDateTimeString(),
             ]);
 
             DB::table('kt_job_details')->where('job_id', $jobId)->delete();
 
-            foreach ($tableData as $row) {
+            foreach ($tableData as $detailRow) {   
                 DB::table('kt_job_details')->insert([
                     'job_id'     => $jobId,
-                    'emp_id'     => !empty($row['col_6']) ? trim($row['col_6']) : null,
-                    'job_title'  => !empty($row['col_7']) ? trim($row['col_7']) : null,
-                    'machine_id' => !empty($row['col_5']) ? trim($row['col_5']) : null,
-
+                    'emp_id'     => !empty($detailRow['col_6']) ? trim($detailRow['col_6']) : null,
+                    'job_title'  => !empty($detailRow['col_7']) ? trim($detailRow['col_7']) : null,
+                    'machine_id' => !empty($detailRow['col_5']) ? trim($detailRow['col_5']) : null,
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now(),
                 ]);
@@ -231,7 +230,9 @@ class ERPJobCreateController extends Controller
         $search       = $request->term;
         $jobTitleId   = $request->job_title_id;
         $query = DB::table('employees AS e')
-            ->join('job_titles AS jt', 'jt.id', '=', 'e.emp_job_code');
+            ->join('job_titles AS jt', 'jt.id', '=', 'e.emp_job_code')
+            ->where('e.deleted', 0)
+            ->where('e.is_resigned', 0);
         if ($jobTitleId) {
             $query->where('e.emp_job_code', $jobTitleId);
         }
