@@ -354,6 +354,7 @@
 		$('#payrollmenu').addClass('active');
 		$('#payrollmenu_icon').addClass('active');
 		$('#payrollreport').addClass('navbtnactive');
+		var currentBankFormat = '';
 
 		var empTable = $("#emptable").DataTable({
 			"columns": [{
@@ -484,94 +485,266 @@
 			findEmployee();
 		});
 
+		// $('#slip').click(function () {
+		// 	if ($("#tbl_all").is(':visible')) {
+		// 		var fromdate = $('#rpt_info').val();
+		// 		var retContent = [];
+		// 		var retString = '';
+
+		// 		//add company name
+		// 		var txtaccname = $("#txt_acc_name").val();
+		// 		let company_name = txtaccname.substring(0,
+		// 		20); //'Multi Offset (Pvt) Ltd'.substring(0, 20);//(0, 19);
+		// 		let amount = $('#rpt_total_amount').val(); //console.log('amount='+amount);
+		// 		let acc_no = $("#txt_acc_number").val(); //'000000000000';
+		// 		let date = $('#rpt_date_e').val(); //console.log('date='+date);
+		// 		let hash_total = $('#rpt_hash_total').val(); //console.log('hash_total='+hash_total);
+		// 		let no_of_transactions = $('#rpt_no_of_transactions').val(); //console.log('no_of_transactions='+no_of_transactions);
+		// 		let br_code = $("#txt_acc_br").val(); //'0000000';//'xxxxxxx';
+		// 		let trans_code = '223'; //$('#rpt_trx_code').val();console.log('trans_code='+trans_code);
+
+		// 		retContent.push(company_name + amount + acc_no + date + hash_total + no_of_transactions + br_code + trans_code);
+
+		// 		$('#emptable tbody tr').each(function (e, elem) {
+		// 			var elemText = [];
+		// 			$(elem).children('td').each(function (childIdx, childElem) {
+		// 				elemText.push($(childElem).text());
+		// 			});
+		// 			retContent.push(`${elemText.join('')}` + 'SALARY');
+		// 		});
+
+		// 		let counter = '';
+		// 		for (let a = 0; a < 80; a++) {
+		// 			counter += '0';
+		// 		}
+		// 		retContent.push(counter);
+
+		// 		retString = retContent.join('\r\n');
+
+		// 		var file = new Blob([retString], {
+		// 			type: 'text/plain'
+		// 		});
+		// 		var btn = $('#slip');
+		// 		btn.attr("href", URL.createObjectURL(file));
+		// 		btn.prop("download", fromdate + ' - Report.txt');
+		// 	} else if ($("#tbl_epf").is(':visible')) {
+		// 		var fromdate = $('#rpt_info').val();
+		// 		var retContent = [];
+		// 		var retString = '';
+
+		// 		$('#emp_epftable tbody tr').each(function (e, elem) {
+		// 			var elemText = [];
+		// 			$(elem).children('td').each(function (childIdx, childElem) {
+		// 				elemText.push($(childElem).text());
+		// 			});
+		// 			retContent.push(`${elemText.join('')}`);
+		// 		});
+
+		// 		retString = retContent.join('\r\n');
+
+		// 		var file = new Blob([retString], {
+		// 			type: 'text/plain'
+		// 		});
+		// 		var btn = $('#slip');
+		// 		btn.attr("href", URL.createObjectURL(file));
+		// 		btn.prop("download", fromdate + ' - Epf.txt');
+
+		// 	} else if ($("#tbl_etf").is(':visible')) {
+		// 		var fromdate = $('#rpt_info').val();
+		// 		var retContent = [];
+		// 		var retString = '';
+
+		// 		$('#emp_etftable tbody tr').each(function (e, elem) {
+		// 			var elemText = [];
+		// 			$(elem).children('td').each(function (childIdx, childElem) {
+		// 				elemText.push($(childElem).text());
+		// 			});
+		// 			retContent.push(`${elemText.join('')}`);
+		// 		});
+
+		// 		retContent.push($('#etf_summary_str').val());
+
+		// 		retString = retContent.join('\r\n');
+
+		// 		var file = new Blob([retString], {
+		// 			type: 'text/plain'
+		// 		});
+		// 		var btn = $('#slip');
+		// 		btn.attr("href", URL.createObjectURL(file));
+		// 		btn.prop("download", fromdate + ' - Etf.txt');
+		// 	}
+		// });
 		$('#slip').click(function () {
+			var fromdate   = $('#rpt_info').val();
+			var retContent = [];
+			var retString  = '';
+			var btn        = $('#slip');
+
 			if ($("#tbl_all").is(':visible')) {
-				var fromdate = $('#rpt_info').val();
-				var retContent = [];
-				var retString = '';
+				// ── Salary / Advance file ─────────────────────────────
 
-				//add company name
-				var txtaccname = $("#txt_acc_name").val();
-				let company_name = txtaccname.substring(0,
-				20); //'Multi Offset (Pvt) Ltd'.substring(0, 20);//(0, 19);
-				let amount = $('#rpt_total_amount').val(); //console.log('amount='+amount);
-				let acc_no = $("#txt_acc_number").val(); //'000000000000';
-				let date = $('#rpt_date_e').val(); //console.log('date='+date);
-				let hash_total = $('#rpt_hash_total').val(); //console.log('hash_total='+hash_total);
-				let no_of_transactions = $('#rpt_no_of_transactions')
-			.val(); //console.log('no_of_transactions='+no_of_transactions);
-				let br_code = $("#txt_acc_br").val(); //'0000000';//'xxxxxxx';
-				let trans_code = '223'; //$('#rpt_trx_code').val();console.log('trans_code='+trans_code);
+				switch (currentBankFormat) {
 
-				retContent.push(company_name + amount + acc_no + date + hash_total + no_of_transactions +
-					br_code + trans_code);
+					// ══════════════════════════════════════════════════
+					case 'BOC':
+					// ══════════════════════════════════════════════════
+					// BOC format: one plain-text row per employee.
+					// Fields: RecType BankCode AccNo Name TrxCode Flag Amount
+					//         Currency PayBank PayBranch EmpBranch Company Ref Desc Date EndFlag
+					// (No header record, no footer record — BOC processes the list directly)
+					empTable.rows().every(function () {
+						var d = this.data();
+						if (!d || d.bank_format !== 'BOC') return;
 
-				$('#emptable tbody tr').each(function (e, elem) {
-					var elemText = [];
-					$(elem).children('td').each(function (childIdx, childElem) {
-						elemText.push($(childElem).text());
+						var line =
+							d.boc_rec_type   +   // 0
+							d.boc_bank_code  +   // employee bank code (4 digits)
+							d.boc_acc_no     +   // account no (variable, no leading zeros)
+							'\t'             +   // TAB separator (as seen in BOC sample)
+							d.boc_emp_name   +   // 20-char padded name
+							d.boc_trx_code   +   // 23
+							d.boc_flag       +   // 0
+							d.boc_amount     +   // integer rupees
+							d.boc_currency   +   // SLR
+							d.boc_pay_bank   +   // 7010 (company debit bank)
+							d.boc_pay_branch +   // company branch code (3)
+							d.boc_other_br   +   // employee branch code (3)
+							d.boc_company    +   // company name (13 chars)
+							d.boc_ref        +   // reference (blank or custom)
+							d.boc_desc       +   // SAL MMM YY
+							d.boc_date       +   // YYMMDD
+							d.boc_end_flag;      // 0
+
+						retContent.push(line);
 					});
-					retContent.push(`${elemText.join('')}` + 'SALARY');
-				});
 
-				let counter = '';
-				for (let a = 0; a < 80; a++) {
-					counter += '0';
+					retString = retContent.join('\r\n');
+					btn.attr("href", URL.createObjectURL(new Blob([retString], { type: 'text/plain' })));
+					btn.prop("download", fromdate + ' - BOC_Salary.txt');
+					break;
+
+					// ══════════════════════════════════════════════════
+					case 'HNB':
+					// ══════════════════════════════════════════════════
+					// HNB SLIPS format (80-byte fixed records):
+					// 1 control record + N detail records + 1 all-zero trailer
+
+					// Control record (80 bytes):
+					// AccountName(20) Amount(11) AccNo(12) Date(6) HashTotal(14)
+					// NoOfTrans(5) BankBrCode(7) TrxCode(3=223) CtrlInfo(2 spaces)
+					var company_name = $("#txt_acc_name").val().substring(0, 20);
+					// pad to exactly 20 if shorter
+					while (company_name.length < 20) company_name += ' ';
+
+					retContent.push(
+						company_name +
+						$('#rpt_total_amount').val()       +  // 11 digits
+						$("#txt_acc_number").val()         +  // 12 digits
+						$('#rpt_date_e').val()             +  // 6 digits YYMMDD
+						$('#rpt_hash_total').val()         +  // 14 digits
+						$('#rpt_no_of_transactions').val() +  // 5 digits
+						$("#txt_acc_br").val()             +  // 7 digits bank+branch
+						'223'                             +  // control trx code
+						'  '                                 // 2 blank control info chars
+					);
+
+					// Detail records (80 bytes each):
+					// RefNo(8) AccName(20) BankBrCode(7) AccNo(12) TrxCode(3=023) Amount(11) Date(6) Comments(13)
+					empTable.rows().every(function () {
+						var d = this.data();
+						if (!d || d.bank_format !== 'HNB') return;
+
+						var comments = 'SALARY       '; // 13 chars (pad to 13)
+						comments = (comments + '             ').substring(0, 13);
+
+						var line =
+							d.ref_no       +  // 8
+							d.emp_name     +  // 20
+							d.bank_br_code +  // 7
+							d.account_no   +  // 12
+							d.trx_code     +  // 3  (023)
+							d.amount       +  // 11
+							d.date         +  // 6
+							comments;         // 13
+
+						retContent.push(line);
+					});
+
+					// Trailer record – 80 zeros
+					retContent.push('0'.repeat(80));
+
+					retString = retContent.join('\r\n');
+					btn.attr("href", URL.createObjectURL(new Blob([retString], { type: 'text/plain' })));
+					btn.prop("download", fromdate + ' - HNB_SLIPS_Salary.txt');
+					break;
+
+					// ══════════════════════════════════════════════════
+					case 'SAMPATH':
+					// ══════════════════════════════════════════════════
+					// TODO: build Sampath file format once spec is received.
+					// empTable.rows().every(function () { var d = this.data(); ... });
+					alert('Sampath bank file format not yet implemented. Please contact IT.');
+					return; // prevent download
+
+					// ══════════════════════════════════════════════════
+					case 'NTB':
+					// ══════════════════════════════════════════════════
+					// TODO: build NTB file format once spec is received.
+					alert('NTB bank file format not yet implemented. Please contact IT.');
+					return;
+
+					// ══════════════════════════════════════════════════
+					default:
+					// ══════════════════════════════════════════════════
+					alert('Unknown bank format (' + currentBankFormat + '). Cannot generate bank file.');
+					return;
 				}
-				retContent.push(counter);
 
-				retString = retContent.join('\r\n');
-
-				var file = new Blob([retString], {
-					type: 'text/plain'
-				});
-				var btn = $('#slip');
-				btn.attr("href", URL.createObjectURL(file));
-				btn.prop("download", fromdate + ' - Report.txt');
 			} else if ($("#tbl_epf").is(':visible')) {
-				var fromdate = $('#rpt_info').val();
-				var retContent = [];
-				var retString = '';
-
-				$('#emp_epftable tbody tr').each(function (e, elem) {
-					var elemText = [];
-					$(elem).children('td').each(function (childIdx, childElem) {
-						elemText.push($(childElem).text());
-					});
-					retContent.push(`${elemText.join('')}`);
+				// ── EPF file (bank-agnostic, format is the same for all banks) ──
+				emp_epfTable.rows().every(function () {
+					var d = this.data();
+					retContent.push(
+						d.emp_nicnum    +
+						d.emp_last_name +
+						d.emp_first_name+
+						d.emp_epfno     +
+						d.tot_epf       +
+						d.EPF12         +
+						d.EPF8          +
+						d.tot_fortax    +
+						d.member_status +
+						d.zone_code     +
+						d.employer_num  +
+						d.cont_period   +
+						d.submit_num    +
+						d.emp_workdays  +
+						d.occu_grade
+					);
 				});
-
 				retString = retContent.join('\r\n');
-
-				var file = new Blob([retString], {
-					type: 'text/plain'
-				});
-				var btn = $('#slip');
-				btn.attr("href", URL.createObjectURL(file));
+				btn.attr("href", URL.createObjectURL(new Blob([retString], { type: 'text/plain' })));
 				btn.prop("download", fromdate + ' - Epf.txt');
 
 			} else if ($("#tbl_etf").is(':visible')) {
-				var fromdate = $('#rpt_info').val();
-				var retContent = [];
-				var retString = '';
-
-				$('#emp_etftable tbody tr').each(function (e, elem) {
-					var elemText = [];
-					$(elem).children('td').each(function (childIdx, childElem) {
-						elemText.push($(childElem).text());
-					});
-					retContent.push(`${elemText.join('')}`);
+				// ── ETF file (bank-agnostic) ─────────────────────────
+				emp_etfTable.rows().every(function () {
+					var d = this.data();
+					retContent.push(
+						d.etf_rec_code   +
+						d.employer_num   +
+						d.emp_etfno      +
+						d.emp_first_name +
+						d.emp_last_name  +
+						d.emp_nicnum     +
+						d.ETF3           +
+						d.cont_period_fr +
+						d.cont_period_to
+					);
 				});
-
 				retContent.push($('#etf_summary_str').val());
-
 				retString = retContent.join('\r\n');
-
-				var file = new Blob([retString], {
-					type: 'text/plain'
-				});
-				var btn = $('#slip');
-				btn.attr("href", URL.createObjectURL(file));
+				btn.attr("href", URL.createObjectURL(new Blob([retString], { type: 'text/plain' })));
 				btn.prop("download", fromdate + ' - Etf.txt');
 			}
 		});
@@ -645,7 +818,7 @@
 					//$('#find_employee').prop('disabled', true);
 				},
 				success: function (data) {
-					//alert(JSON.stringify(data));
+					console.log(data);
 					var html = '';
 					empTable.clear();
 
@@ -660,14 +833,55 @@
 						var optrpt = $('input[name="opt_rpt"]:checked').val();
 
 						if ((optrpt == 1)||(optrpt == 4)) {
+							const columnMap = {
+								'7010': [ // BOC
+									{ title: "REC TYPE", data: 'boc_rec_type' },
+									{ title: "BANK CODE", data: 'boc_bank_code' },
+									{ title: "BRANCH CODE", data: 'boc_branch_code' },
+									{ title: "ACCOUNT NO", data: 'boc_acc_no' },
+									{ title: "NAME", data: 'boc_emp_name' },
+									{ title: "TRX CODE", data: 'boc_trx_code' },
+									{ title: "FLAG", data: 'boc_flag' },
+									{ title: "AMOUNT", data: 'boc_amount' },
+									{ title: "CURRENCY", data: 'boc_currency' },
+									{ title: "PAY BANK", data: 'boc_pay_bank' },
+									{ title: "PAY BRANCH", data: 'boc_pay_branch' },
+									// { title: "OTHER BRANCH", data: 'boc_other_br' },
+									{ title: "COMPANY", data: 'boc_company' },
+									{ title: "REFERENCE", data: 'boc_ref' },
+									{ title: "DESCRIPTION", data: 'boc_desc' },
+									{ title: "DATE", data: 'boc_date' },
+									{ title: "END FLAG", data: 'boc_end_flag' }
+								],
+								'7083': [ // HNB (Standard)
+									{ title: "REF NO", data: 'ref_no' },
+									{ title: "NAME (EMPLOYEE)", data: 'emp_name' },
+									{ title: "BANK-BR-CODE", data: 'bank_br_code' },
+									{ title: "ACCOUNT NO", data: 'account_no' },
+									{ title: "TRX CODE", data: 'trx_code' },
+									{ title: "AMOUNT", data: 'amount' },
+									{ title: "DATE", data: 'date' }
+								]
+							};
+
 							$("#tbl_all").show();
 							$("#tbl_etf").hide();
 							$("#tbl_epf").hide();
 							empTable.clear();
 							emp_epfTable.clear();
 							emp_etfTable.clear();
+							// empTable.rows.add(data.employee_detail);
+							var bankID = data.bank_id; // Ensure your PHP returns this
+							var configs = columnMap[bankID] || columnMap['7083']; // Default to HNB/Standard
+							currentBankFormat = data.bank_format;
+
+							// Initialize/Re-initialize
+							empTable = initializeEmpTable(configs);
+
+							// Add data
 							empTable.rows.add(data.employee_detail);
 							empTable.draw();
+							// empTable.draw();
 							emp_epfTable.draw();
 							emp_etfTable.draw();
 
@@ -769,15 +983,33 @@
 		});
 		*/
 		$('input[name="opt_rpt"]').change(function(){
-		var opt_payslip_disp=($('input[name="opt_rpt"]:checked').val()==4)?false:true;
-		if(opt_payslip_disp){
-			$("#opt_payslip").show();
-		}else{
-			$("#opt_payslip").hide();
-		}
+			var opt_payslip_disp=($('input[name="opt_rpt"]:checked').val()==4)?false:true;
+			if(opt_payslip_disp){
+				$("#opt_payslip").show();
+			}else{
+				$("#opt_payslip").hide();
+			}
+		});
 	});
 
-	});
+	function initializeEmpTable(columnConfigs) {
+		// 1. Destroy existing table if it exists
+		if ($.fn.DataTable.isDataTable('#emptable')) {
+			$('#emptable').DataTable().destroy();
+			$('#emptable').empty(); // Clear the header/footer
+		}
+
+		// 2. Re-initialize
+		return $("#emptable").DataTable({
+			"columns": columnConfigs,
+			"iDisplayLength": -1,
+			"aLengthMenu": [[-1], ["All"]],
+			"order": [],
+			"createdRow": function (row, data, dataIndex) {
+				$(row).attr('id', 'row-' + (data.id || dataIndex));
+			}
+		});
+	}
 </script>
 
 @endsection
