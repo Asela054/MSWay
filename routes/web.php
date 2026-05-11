@@ -1873,6 +1873,13 @@ Route::get('/kt_job_approve' ,'ERP_KT\ERPJobApproveController@index')->name('kt_
 Route::post('/kt_job_approvegenerate' ,'ERP_KT\ERPJobApproveController@jobapprovegenerate')->name('kt_approve_approvegenerate');
 Route::post('/jobapproveinquiry' ,'ERP_KT\ERPJobApproveController@jobapproveinquiry')->name('jobapproveinquiry');
 
+// Speical Rate Controller Routes
+Route::resource('KTSpecial_Rate', 'ERP_KT\ERPSpecialRateController');
+Route::get('kt_special_rate', 'ERP_KT\ERPSpecialRateController@index')->name('kt_special_rate');
+Route::post('kt_addSpecial_Rate',['uses' => 'ERP_KT\ERPSpecialRateController@store', 'as' => 'kt_addSpecial_Rate']); 
+Route::post('KTSpecial_Rate/update', 'ERP_KT\ERPSpecialRateController@update')->name('KTSpecial_Rate.update');
+Route::get('KTSpecial_Rate/destroy/{id}', 'ERP_KT\ERPSpecialRateController@destroy');
+
 // End of KT Clean Routes
 
 Route::get('/clear-cache', function() {

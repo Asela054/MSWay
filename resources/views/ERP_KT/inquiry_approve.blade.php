@@ -148,8 +148,8 @@
 <script>
 $(document).ready(function(){
 
-    $('#inquiry_approve_menu_link').addClass('active');
-    $('#inquiry_approve_menu_link_icon').addClass('active');
+    $('#erp_menu_link_KT').addClass('active');
+    $('#erp_menu_link_KT_icon').addClass('active');
     $('#erp_kt_calculations').addClass('navbtnactive');
 
 

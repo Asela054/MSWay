@@ -7,6 +7,7 @@
       <li><a class="dropdown-item" href="{{ route('kt_customer')}}">Customer</a></li>
       <li><a class="dropdown-item" href="{{ route('kt_inquiry')}}">Inquiry</a></li>
       <li><a class="dropdown-item" href="{{ route('kt_machines')}}">Machine</a></li>
+      <li><a class="dropdown-item" href="{{ route('kt_special_rate')}}">Special Rate</a></li>
     </ul>
   </div>
   <div class="dropdown">

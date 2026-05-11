@@ -92,11 +92,11 @@
                                 <hr>
                                 <div class="form-row mb-1">
                                     <div class="col-12 col-sm-6 mb-2 mb-sm-0">
-                                        <label class="small font-weight-bold text-dark">Job Description</span></label>
+                                        <label class="small font-weight-bold text-dark">Job Description</label>
                                         <input type="text" name="job_description" id="job_description" class="form-control form-control-sm" />
                                     </div>
                                     <div class="col-12 col-sm-6 mb-2 mb-sm-0">
-                                        <label class="small font-weight-bold text-dark">Remarks</span></label>
+                                        <label class="small font-weight-bold text-dark">Remarks</label>
                                         <input type="text" name="remarks" id="remarks" class="form-control form-control-sm" />
                                     </div>
                                 </div>
@@ -110,11 +110,11 @@
                                 <hr>
                                 <div class="form-row mb-1">
                                     <div class="col-12 col-sm-6 mb-2 mb-sm-0">
-                                        <label class="small font-weight-bold text-dark">Job Title</span></label>
+                                        <label class="small font-weight-bold text-dark">Job Title</label>
                                         <select name="job_title" id="job_title_f" class="form-control form-control-sm"></select>
                                     </div>
                                     <div class="col-12 col-sm-6 mb-2 mb-sm-0">
-                                        <label class="small font-weight-bold text-dark">Employee</span></label>
+                                        <label class="small font-weight-bold text-dark">Employee</label>
                                         <select name="employee" id="employee_f" class="form-control form-control-sm"></select>
                                     </div>
                                 </div>
@@ -199,11 +199,11 @@
                                 <hr>
                                 <div class="form-row mb-1">
                                     <div class="col-12 col-sm-6 mb-2 mb-sm-0">
-                                        <label class="small font-weight-bold text-dark">Job Description</span></label>
+                                        <label class="small font-weight-bold text-dark">Job Description</label>
                                         <input type="text" name="view_job_description" id="view_job_description" class="form-control form-control-sm" readonly />
                                     </div>
                                     <div class="col-12 col-sm-6 mb-2 mb-sm-0">
-                                        <label class="small font-weight-bold text-dark">Remarks</span></label>
+                                        <label class="small font-weight-bold text-dark">Remarks</label>
                                         <input type="text" name="view_remarks" id="view_remarks" class="form-control form-control-sm" readonly />
                                     </div>
                                 </div>
@@ -216,11 +216,11 @@
                                 <hr>
                                 <div class="form-row mb-1">
                                     <div class="col-12 col-sm-6 mb-2 mb-sm-0">
-                                        <label class="small font-weight-bold text-dark">Job Title</span></label>
+                                        <label class="small font-weight-bold text-dark">Job Title</label>
                                         <select name="view_job_title" id="view_job_title" class="form-control form-control-sm" disabled></select>
                                     </div>
                                     <div class="col-12 col-sm-6 mb-2 mb-sm-0">
-                                        <label class="small font-weight-bold text-dark">Employee</span></label>
+                                        <label class="small font-weight-bold text-dark">Employee</label>
                                         <select name="view_employee_body" id="view_employee_body" class="form-control form-control-sm" disabled></select>
                                     </div>
                                 </div>
@@ -646,7 +646,7 @@
                 'data-inquiry-id="' + currentInquiryId + '" ' +
                 'data-machine-id="' + machineVal + '" ' +
                 'data-employee-id="' + employeeVal + '" ' +
-                'data-job_title-id="' + job_titleVal + '" ' +
+                'data-jobtitle-id="' + job_titleVal + '" ' +
                 'data-start-from="' + currentStartFrom + '" ' +
                 'data-end-at="' + currentEndAt + '" ' +
                 'data-job-description="' + $('#job_description').val() + '" ' +
@@ -684,21 +684,28 @@
             var tbody = $("#tableorder tbody");
 
             if (tbody.children().length > 0) {
+
+                var currentCustomerId = $('#customer_name').val();
+                var currentInquiryId  = $('#inquiry_f').val();
+                var currentStartFrom  = $('#start_from').val();
+                var currentEndAt      = $('#end_at').val();
+                var currentJobDesc    = $('#job_description').val();
+                var currentRemarks    = $('#remarks').val();
+
                 var jsonObj = [];
                 $("#tableorder tbody tr").each(function() {
                     var item = {};
-                    item["col_1"] = $(this).data('customer-id') || $(this).find('td:eq(0)').text();
-                    item["col_2"] = $(this).data('start-from') || $(this).find('td:eq(1)').text();
-                    item["col_3"] = $(this).data('end-at') || $(this).find('td:eq(2)').text();
-                    item["col_4"] = $(this).data('inquiry-id') || $(this).find('td:eq(3)').text();
-                    item["col_5"] = $(this).data('machine-id') || $(this).find('td:eq(4)').text();
-                    item["col_6"] = $(this).data('employee-id') || $(this).find('td:eq(5)').text();
-                    item["col_7"] = $(this).data('job_title-id') || $(this).find('td:eq(6)').text();
-                    item["col_8"] = $('#job_description').val();
-                    item["col_9"] = $('#remarks').val();
+                    item["col_1"] = currentCustomerId;
+                    item["col_2"] = currentStartFrom;
+                    item["col_3"] = currentEndAt;
+                    item["col_4"] = currentInquiryId;
+                    item["col_5"] = $(this).data('machine-id');
+                    item["col_6"] = $(this).data('employee-id');
+                    item["col_7"] = $(this).data('jobtitle-id');
+                    item["col_8"] = currentJobDesc;
+                    item["col_9"] = currentRemarks;
                     jsonObj.push(item);
                 });
-
 
                 var hidden_id = $('#hidden_id').val();
 
@@ -829,7 +836,7 @@
                                     'data-end-at="' + editEndAt + '" ' +
                                     'data-machine-id="' + (d.machine_id || '') + '" ' +
                                     'data-employee-id="' + (d.emp_id || '') + '" ' +
-                                    'data-job_title-id="' + (d.job_title || '') + '" ' +
+                                    'data-jobtitle-id="' + (d.job_title || '') + '" ' +
                                     'data-job-description="' + (data.result.job_description || '') + '" ' +
                                     'data-remarks="' + (data.result.remarks || '') + '">' +
                                     '<td>' + (d.machine_name || '') + '</td>' +
@@ -849,10 +856,6 @@
                         initEmployeeSelect(null);
                         $('#formModal').modal('show');
 
-                        window.isEditLoading = false;
-                        $('#edit_record_id').val(id);
-                        $('#edit_form_result').html('');
-                        $('#editModal').modal('show');
                     },
                     error: function(xhr) {
                         Swal.fire({
