@@ -7,6 +7,7 @@ use App\Helpers\EmployeeHelper;
 use App\Helpers\UserHelper;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Holiday;
 use App\Mealallowanceapproved;
 use Auth;
 use Illuminate\Support\Facades\DB;
@@ -261,8 +262,7 @@ class MealallowanceapproveController extends Controller
                 }
                 else if($allowancetype==4){
                     $dayallowanceamount = $allowanceamount / $workingDays;
-                    $workallawanceamount = ($workingDays - $totalLeaveDays) * $dayallowanceamount;
-                    
+                    $workallawanceamount = $totalWorkingDays * $dayallowanceamount;
                     // Using Query Builder
                     $avgCompletionPercentage = DB::table('opma_daily_production_summary')
                         ->select(
@@ -274,6 +274,7 @@ class MealallowanceapproveController extends Controller
 
                     $monthlyremain = ($avgCompletionPercentage / 100) * $workallawanceamount;
                     $totalamount = $workallawanceamount - $monthlyremain;
+                    $allowanceamount = round($workallawanceamount, 2);
                 }
                 else{//Daily or monthly salary adjustment deductions
                     if($remunerationtype == 21){
