@@ -10,6 +10,7 @@ $columns = array(
     array( 'db' => '`st`.`shift_name`', 'dt' => 'shift_name', 'field' => 'shift_name' ),
     array( 'db' => '`s`.`date_from`', 'dt' => 'date_from', 'field' => 'date_from' ),
     array( 'db' => '`s`.`date_to`', 'dt' => 'date_to', 'field' => 'date_to' ),
+    array( 'db' => '`s`.`approval_status`', 'dt' => 'approval_status', 'field' => 'approval_status' ),
     array( 'db' => '`s`.`status`', 'dt' => 'status', 'field' => 'status' )
 );
 
