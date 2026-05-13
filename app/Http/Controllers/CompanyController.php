@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Company;
+use App\CompanyBankDetail;
 use App\Department;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -93,7 +94,29 @@ class CompanyController extends Controller
         }
     
         $company->save();
+        $company_id = $company->id;
 
+        $bank_codes       = $request->input('bank_code', []);
+        $branch_codes     = $request->input('branch_code', []);
+        $account_numbers  = $request->input('bank_account_number', []);
+        $account_names    = $request->input('bank_account_name', []);
+
+        foreach ($bank_codes as $i => $bank_code) {
+            $branch_code    = $branch_codes[$i]    ?? null;
+            $account_number = $account_numbers[$i] ?? null;
+            $account_name   = $account_names[$i]   ?? null;
+
+            if ($bank_code && $branch_code && $account_number && $account_name) {
+                $companyBankDetail = new CompanyBankDetail;
+                $companyBankDetail->company_id          = $company_id;
+                $companyBankDetail->bank_code           = str_pad((string)$bank_code, 4, '0', STR_PAD_LEFT);
+                $companyBankDetail->branch_code         = str_pad((string)$branch_code, 3, '0', STR_PAD_LEFT);
+                $companyBankDetail->bank_account_number = $account_number;
+                $companyBankDetail->bank_account_name   = $account_name;
+                $companyBankDetail->save();
+            }
+        }
+        
         return response()->json(['success' => 'Company Added successfully.']);
     }
 
@@ -114,7 +137,26 @@ class CompanyController extends Controller
 
         if (request()->ajax()) {
             $data = Company::findOrFail($id);
-            return response()->json(['result' => $data]);
+
+            $bankDetails = DB::table('company_bank_details')
+                ->leftJoin('banks', 'company_bank_details.bank_code', '=', 'banks.code')
+                ->leftJoin('bank_branches', function($join) {
+                    $join->on('company_bank_details.branch_code', '=', 'bank_branches.code')  
+                        ->on('bank_branches.bankcode', '=', 'banks.code');
+                })
+                ->where('company_bank_details.company_id', $id)
+                ->select(
+                    'company_bank_details.id',
+                    'company_bank_details.bank_code',
+                    'company_bank_details.branch_code',  
+                    'company_bank_details.bank_account_number',
+                    'company_bank_details.bank_account_name',
+                    'banks.bank as bank_name',
+                    'bank_branches.branch as branch_name'
+                )
+                ->get();
+
+            return response()->json(['result' => $data, 'bank_details' => $bankDetails]);
         }
     }
 
@@ -134,8 +176,8 @@ class CompanyController extends Controller
         }
 
         $rules = array(
-            'name' => 'required',
-            'code' => 'required',
+            'name'   => 'required',
+            'code'   => 'required',
             'mobile' => 'required|Numeric'
         );
 
@@ -146,29 +188,29 @@ class CompanyController extends Controller
         }
 
         $form_data = array(
-            'name' => $request->name,
-            'code' => $request->code,
-            'address' => $request->address,
-            'mobile' => $request->mobile,
-            'email' => $request->email,
-            'domain_name' => $request->domain_name,
-            'land' => $request->land,
-            'etf' => $request->etf,
-            'epf' => $request->epf,
-            'bank_account_name' => $request->account_name,
-            'bank_account_number' => $request->account_no,
-            'bank_account_branch_code' => $request->account_branchcode,
-            'employer_number' => $request->employeeno,
-            'zone_code' => $request->zone_code,
-            'ref_no' => $request->ref_no,
-            'vat_reg_no' => $request->vat_reg_no,
-            'svat_no' => $request->svat_no
+            'name'                    => $request->name,
+            'code'                    => $request->code,
+            'address'                 => $request->address,
+            'mobile'                  => $request->mobile,
+            'email'                   => $request->email,
+            'domain_name'             => $request->domain_name,
+            'land'                    => $request->land,
+            'etf'                     => $request->etf,
+            'epf'                     => $request->epf,
+            'bank_account_name'       => $request->account_name,
+            'bank_account_number'     => $request->account_no,
+            'bank_account_branch_code'=> $request->account_branchcode,
+            'employer_number'         => $request->employeeno,
+            'zone_code'               => $request->zone_code,
+            'ref_no'                  => $request->ref_no,
+            'vat_reg_no'              => $request->vat_reg_no,
+            'svat_no'                 => $request->svat_no
         );
 
         if ($request->hasFile('logo')) {
             $companyName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $request->name);
-            $extension = $request->file('logo')->getClientOriginalExtension();
-            $fileName = $companyName . '.' . $extension;
+            $extension   = $request->file('logo')->getClientOriginalExtension();
+            $fileName    = $companyName . '.' . $extension;
             $request->file('logo')->move(public_path('images'), $fileName);
             $form_data['logo'] = 'images/' . $fileName;
 
@@ -177,7 +219,7 @@ class CompanyController extends Controller
             if ($existing && $existing->logo) {
                 $oldPath = public_path($existing->logo);
                 if (file_exists($oldPath)) {
-                    unlink($oldPath); 
+                    unlink($oldPath);
                 }
             }
             $form_data['logo'] = null;
@@ -190,6 +232,52 @@ class CompanyController extends Controller
         }
 
         Company::whereId($request->hidden_id)->update($form_data);
+
+        $company_id      = $request->hidden_id;
+        $detail_ids      = $request->input('detail_id',          []);
+        $bank_codes      = $request->input('bank_code',          []);
+        $branch_codes    = $request->input('branch_code',        []);
+        $account_numbers = $request->input('bank_account_number',[]);
+        $account_names   = $request->input('bank_account_name',  []);
+
+        // Delete rows that were removed in the UI
+        $submittedIds = array_values(array_filter($detail_ids, function($v) { return !empty($v); }));
+        CompanyBankDetail::where('company_id', $company_id)
+            ->whereNotIn('id', count($submittedIds) ? $submittedIds : [0])
+            ->delete();
+
+        foreach ($bank_codes as $i => $bank_code) {
+            $branch_code    = $branch_codes[$i]    ?? null;
+            $account_number = $account_numbers[$i] ?? null;
+            $account_name   = $account_names[$i]   ?? null;
+            $detail_id      = $detail_ids[$i]      ?? null;
+
+            if (!$bank_code || !$branch_code || !$account_number || !$account_name) {
+                continue;
+            }
+
+            $bank_code   = str_pad((string)$bank_code,   4, '0', STR_PAD_LEFT);
+            $branch_code = str_pad((string)$branch_code, 3, '0', STR_PAD_LEFT);
+
+            if (!empty($detail_id)) {
+                CompanyBankDetail::where('id', $detail_id)
+                    ->where('company_id', $company_id)
+                    ->update([
+                        'bank_code'           => $bank_code,
+                        'branch_code'         => $branch_code,
+                        'bank_account_number' => $account_number,
+                        'bank_account_name'   => $account_name,
+                    ]);
+            } else {
+                CompanyBankDetail::create([
+                    'company_id'          => $company_id,
+                    'bank_code'           => $bank_code,
+                    'branch_code'         => $branch_code,
+                    'bank_account_number' => $account_number,
+                    'bank_account_name'   => $account_name,
+                ]);
+            }
+        }
 
         return response()->json(['success' => 'Company is successfully updated']);
     }

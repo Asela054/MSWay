@@ -451,6 +451,7 @@ Route::post('BankBranch/update', 'BankBranchController@update')->name('BankBranc
 Route::get('BankBranch/destroy/{id}', 'BankBranchController@destroy');
 Route::get('BankBranchEdit/{id}', 'BankBranchController@edit');
 Route::get('branch_list', 'BankBranchController@branch_list');
+Route::get('branch_list2', 'BankBranchController@branch_list2');
 Route::get('bank_branches_list_dt',['uses' => 'BankBranchController@bank_branches_list_dt', 'as' => 'bank_branches_list_dt']);
 
 /*-- End bank_branch Info----*/
@@ -968,6 +969,7 @@ Route::post('/employeeshiftdelete' ,'EmployeeShiftController@delete')->name('emp
 Route::post('/employeeshiftdeletelist' ,'EmployeeShiftController@deletelist')->name('employeeshiftdeletelist');
 Route::get('/employeeshiftstatus/{id}/{stasus}','EmployeeShiftController@status')->name('employeeshiftstatus');
 Route::post('/night_shiftallocate_csv' ,'EmployeeShiftController@night_shiftallocate_csv')->name('night_shiftallocate_csv');
+Route::post('/employeeshiftapproval' ,'EmployeeShiftController@approval')->name('employeeshiftapproval');
 
 Route::get('/functionalmanagementdashboard' ,'FunctionalmanagementdashboardController@index')->name('functionalmanagementdashboard');
 

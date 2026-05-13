@@ -182,14 +182,20 @@ class ERPJobCreateController extends Controller
         return response()->json(['results' => $results]);
     }
 
-    //searches induiry list and filter approved inquires only
+    //searches induiry list and filter approved inquires only, optionally filtered by customer
     public function inquiryList(Request $request)
     {
-        $search = $request->term;
-        $inquiries = DB::table('kt_inquiry_details')
-            ->where('approve_status', 1)
-            ->where('inquiry', 'like', '%' . $search . '%')
-            ->get(['id', 'inquiry']);
+        $search     = $request->term;
+        $customerId = $request->customer_id;
+
+        $inquiries = DB::table('kt_inquiry_details as d')
+            ->join('kt_inquiries as i', 'i.id', '=', 'd.inquiry_id')
+            ->where('d.approve_status', 1)
+            ->where('d.inquiry', 'like', '%' . $search . '%')
+            ->when($customerId, function ($q) use ($customerId) {
+                return $q->where('i.customer_id', $customerId);
+            })
+            ->get(['d.id', 'd.inquiry']);
 
         $results = $inquiries->map(function ($i) {
             return ['id' => $i->id, 'text' => $i->inquiry];

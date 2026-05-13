@@ -163,6 +163,30 @@
                                         <input type="hidden" name="remove_logo" id="remove_logo_flag" value="0" />
                                     </div>
                                 </div>
+                                <div class="form-row mb-1">
+                                    <div class="col-12">
+                                        <div class="center-block fix-width scroll-inner">
+                                            <table class="table table-striped table-bordered table-sm small nowrap display" id="allocationtbl" style="width:100%;">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Bank Name</th>
+                                                        <th>Branch Name</th>
+                                                        <th>Account No</th>
+                                                        <th>Account Name</th>
+                                                        <th style="white-space: nowrap;">ACTION</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="emplistbody">
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <button type="button" class="btn btn-primary btn-sm px-4" id="add_detail_row">
+                                            <i class="fas fa-plus"></i> Bank Details
+                                        </button>
+                                    </div>
+                                </div>
 
                                 <div class="form-group mt-3">
                                     <button type="submit" name="action_button" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
@@ -231,6 +255,99 @@ $(document).ready(function(){
         $('#logo').val('');
         $('#remove_logo').hide();
         $('#remove_logo_flag').val('1'); 
+    });
+
+    var rowIndex = 0;
+
+    function initBankRow(rowIndex) {
+        var bankSel = $('#bank_sel_' + rowIndex);
+        var branchSel = $('#branch_sel_' + rowIndex);
+
+        bankSel.select2({
+            placeholder: 'Select Bank...',
+            width: '100%',
+            allowClear: true,
+            dropdownParent: $('#formModal'),
+            ajax: {
+                url: '{{ url("bank_list") }}',
+                dataType: 'json',
+                data: function(params) {
+                    return { term: params.term || '', page: params.page || 1 };
+                },
+                cache: true
+            }
+        });
+
+        branchSel.select2({
+            placeholder: 'Select Branch...',
+            width: '100%',
+            allowClear: true,
+            dropdownParent: $('#formModal'),
+            ajax: {
+                url: '{{ url("branch_list2") }}',
+                dataType: 'json',
+                data: function(params) {
+                    return {
+                        term: params.term || '',
+                        page: params.page || 1,
+                        bank: bankSel.val()
+                    };
+                },
+                cache: true
+            }
+        });
+
+        // Reset branch when bank changes
+        bankSel.on('change', function() {
+            branchSel.val(null).trigger('change');
+        });
+    }
+
+    function addBankRow(detailId, bankCode, bankText, branchCode, branchText, accountNo, accountName) {
+        rowIndex++;
+        var row = `
+        <tr id="row_${rowIndex}">
+            <td>
+                <input type="hidden" name="detail_id[]" value="${detailId || ''}" />
+                <select class="form-control form-control-sm" id="bank_sel_${rowIndex}" name="bank_code[]" required></select>
+            </td>
+            <td>
+                <select class="form-control form-control-sm" id="branch_sel_${rowIndex}" name="branch_code[]" required></select>
+            </td>
+            <td>
+                <input type="text" name="bank_account_number[]" class="form-control form-control-sm" placeholder="Account No" value="${accountNo || ''}" required />
+            </td>
+            <td>
+                <input type="text" name="bank_account_name[]" class="form-control form-control-sm" placeholder="Account Name" value="${accountName || ''}" required />
+            </td>
+            <td>
+                <button type="button" class="btn btn-danger btn-sm remove_row" data-id="${rowIndex}">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </td>
+        </tr>`;
+
+        $('#emplistbody').append(row);
+        initBankRow(rowIndex);
+
+        // If pre-loading existing data (edit mode), set selected options
+        if (bankCode && bankText) {
+            var bankOption = new Option(bankText, bankCode, true, true);
+            $('#bank_sel_' + rowIndex).append(bankOption).trigger('change');
+        }
+        if (branchCode && branchText) {
+            var branchOption = new Option(branchText, branchCode, true, true);
+            $('#branch_sel_' + rowIndex).append(branchOption).trigger('change');
+        }
+    }
+
+    $('#add_detail_row').click(function() {
+        addBankRow('', '', '', '', '', '', '');
+    });
+
+    $(document).on('click', '.remove_row', function() {
+        var id = $(this).data('id');
+        $('#row_' + id).remove();
     });
 
     $('#dataTable').DataTable({
@@ -355,10 +472,12 @@ $(document).ready(function(){
 
     $('#create_record').click(function(){
         $('.modal-title').text('Add New Company');
-        $('#action_button').html('Add');
+        $('#action_button').html('<i class="fas fa-plus"></i>&nbsp;Add');
         $('#action').val('Add');
         $('#form_result').html('');
         $('#formTitle')[0].reset();
+        $('#emplistbody').empty();    
+        rowIndex = 0;
 
         $('#formModal').modal('show');
     });
@@ -439,6 +558,22 @@ $(document).ready(function(){
                     $('#account_branchcode').val(data.result.bank_account_branch_code);
                     $('#employeeno').val(data.result.employer_number);
                     $('#zone_code').val(data.result.zone_code);
+
+                    $('#emplistbody').empty();
+                    rowIndex = 0;
+                    if (data.bank_details && data.bank_details.length > 0) {
+                        $.each(data.bank_details, function(i, detail) {
+                            addBankRow(
+                                detail.id,
+                                detail.bank_code,
+                                detail.bank_name,
+                                detail.branch_code,
+                                detail.branch_name,
+                                detail.bank_account_number,
+                                detail.bank_account_name
+                            );
+                        });
+                    }
 
                     if (data.result.logo) {
                         $('#preview').attr('src', assetUrl + '/' + data.result.logo);
