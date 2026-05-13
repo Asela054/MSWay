@@ -17,72 +17,96 @@ class LeavepolicyService
 
         $jobleaves = DB::table('job_category_leaves')->where('job_id', $jobCategoryId)->where('leave_id',1)->first();
 
-        if($jobleaves && $leaves->annual_leaves > 0){
+        $settings = DB::table('hrm_general_settings as settings')
+                    ->join('hrm_general_settings_key_list as key_list', 'settings.key_id', '=', 'key_list.id')
+                    ->where('key_list.config_key', 'LEAVE')
+                    ->where('settings.status', 1)
+                    ->select('settings.config_value' )
+                    ->first(); 
 
-                $employee_join_date = Carbon::parse($empJoinDate);
-                $current_date = Carbon::now();
+       if($settings &&  $settings->config_value == 1){
+        // calculate annual leaves based on joining date
+            if($jobleaves && $leaves->annual_leaves > 0){
 
-                // Calculate months of service
-                $months_of_service = $employee_join_date->diffInMonths($current_date);
+                    $employee_join_date = Carbon::parse($empJoinDate);
+                    $current_date = Carbon::now();
 
-                // Extract join month and date for quarter calculation
-                $join_year = Carbon::parse($empJoinDate)->year;
-                $join_month = Carbon::parse($empJoinDate)->month;
-                $join_date = Carbon::parse($empJoinDate)->day;
+                    // Calculate months of service
+                    $months_of_service = $employee_join_date->diffInMonths($current_date);
 
-
-
-                // Get dates in YYYY-MM-DD format
-                $currentdate = $current_date->toDateString(); // YYYY-MM-DD
-
-                // Next year from JOIN DATE (join date + 1 year)
-                $next_year_from_join = $employee_join_date->copy()->addYear();
-                $next_year_first_date = $next_year_from_join->copy()->startOfYear()->toDateString(); // YYYY-01-01
-                $next_year_end_date = $next_year_from_join->copy()->endOfYear()->toDateString(); // YYYY-12-31
-                $join_year_end_date = $employee_join_date->copy()->endOfYear()->toDateString(); // Join year's YYYY-12-31
-
-           
+                    // Extract join month and date for quarter calculation
+                    $join_year = Carbon::parse($empJoinDate)->year;
+                    $join_month = Carbon::parse($empJoinDate)->month;
+                    $join_date = Carbon::parse($empJoinDate)->day;
 
 
-                // First Year (0-12 months) - No annual leaves
-                if ($currentdate <=  $join_year_end_date) {
-                    $annual_leaves = 0;
-                    $leave_msg = "Employee is in the first year of service - no annual leaves yet.";
-                }
-                // Second Year (12-24 months) - Pro-rated leaves based on first year's quarter
-                elseif ($next_year_first_date <= $currentdate && $currentdate <= $next_year_end_date) {
-                    // Get the 1-year anniversary date
-                    $anniversary_date = $employee_join_date->copy()->addYear();
 
-                    // Check if current date is between anniversary and December 31
-                    $year_end = Carbon::create($anniversary_date->year, 12, 31);
+                    // Get dates in YYYY-MM-DD format
+                    $currentdate = $current_date->toDateString(); // YYYY-MM-DD
 
-                    // Only calculate if current date is after anniversary but before next year
-                        // Get the quarter period from the joining year (original employment quarter)
-                        $full_date = '2022-'.$join_month.'-'.$join_date;
+                    // Next year from JOIN DATE (join date + 1 year)
+                    $next_year_from_join = $employee_join_date->copy()->addYear();
+                    $next_year_first_date = $next_year_from_join->copy()->startOfYear()->toDateString(); // YYYY-01-01
+                    $next_year_end_date = $next_year_from_join->copy()->endOfYear()->toDateString(); // YYYY-12-31
+                    $join_year_end_date = $employee_join_date->copy()->endOfYear()->toDateString(); // Join year's YYYY-12-31
 
-                        $q_data = DB::table('quater_leaves')
-                            ->where('from_date', '<=', $full_date)
-                            ->where('to_date', '>', $full_date)
-                            ->first();
+            
 
-                        $annual_leaves = $q_data ? $q_data->leaves : 0;
-                        $leave_msg = $q_data ? "Using quarter leaves value from anniversary to year-end." : "No matching quarter found for pro-rated leaves.";
-                }
-                // Third year onwards (24+ months) - Full 14 days
-                else {
+
+                    // First Year (0-12 months) - No annual leaves
+                    if ($currentdate <=  $join_year_end_date) {
+                        $annual_leaves = 0;
+                        $leave_msg = "Employee is in the first year of service - no annual leaves yet.";
+                    }
+                    // Second Year (12-24 months) - Pro-rated leaves based on first year's quarter
+                    elseif ($next_year_first_date <= $currentdate && $currentdate <= $next_year_end_date) {
+                        // Get the 1-year anniversary date
+                        $anniversary_date = $employee_join_date->copy()->addYear();
+
+                        // Check if current date is between anniversary and December 31
+                        $year_end = Carbon::create($anniversary_date->year, 12, 31);
+
+                        // Only calculate if current date is after anniversary but before next year
+                            // Get the quarter period from the joining year (original employment quarter)
+                            $full_date = '2022-'.$join_month.'-'.$join_date;
+
+                            $q_data = DB::table('quater_leaves')
+                                ->where('from_date', '<=', $full_date)
+                                ->where('to_date', '>', $full_date)
+                                ->first();
+
+                            $annual_leaves = $q_data ? $q_data->leaves : 0;
+                            $leave_msg = $q_data ? "Using quarter leaves value from anniversary to year-end." : "No matching quarter found for pro-rated leaves.";
+                    }
+                    // Third year onwards (24+ months) - Full 14 days
+                    else {
+                        $annual_leaves = $leaves->annual_leaves;
+                        $leave_msg = "Employee is eligible for full 14 annual leaves per year.";
+                    }
+
+
+
+                    
+            }else{
+                $annual_leaves = 0;
+                $leave_msg = "Employee is Not eligible for annual leaves.";
+            }
+       } 
+       elseif ($settings && $settings->config_value == 2) {
+        // calculate annual leaves based on job category (ignoring joining date)    
+             if($jobleaves && $leaves->annual_leaves > 0){
                     $annual_leaves = $leaves->annual_leaves;
                     $leave_msg = "Employee is eligible for full 14 annual leaves per year.";
-                }
-
-
-
                 
-        }else{
-            $annual_leaves = 0;
-            $leave_msg = "Employee is Not eligible for annual leaves.";
-        }
-       
+            }else{
+                $annual_leaves = 0;
+                $leave_msg = "Employee is Not eligible for annual leaves.";
+            }
+       }
+       else{
+        $annual_leaves = 0;
+        $leave_msg = "Leave settings not configured.";
+       }
 
         return [
             'annual_leaves' => $annual_leaves,
@@ -93,36 +117,64 @@ class LeavepolicyService
     // calculate casual leaves 
       public function calculateCasualLeaves($empJoinDate, $jobCategoryId)
     {
+
          $leaves = DB::table('job_categories')->where('id', $jobCategoryId)->first();
 
          $jobleaves = DB::table('job_category_leaves')->where('job_id', $jobCategoryId)->where('leave_id',2)->first();
 
-        if($jobleaves && $leaves->casual_leaves > 0){
-                $join_date = new DateTime($empJoinDate);
-                $current_date = new DateTime();
-                $interval = $join_date->diff($current_date);
-                
-                $years_of_service = $interval->y;
-                $months_of_service = $interval->m;
-                
-                $today_date = Carbon::now();
-                $employeejoin_date = Carbon::parse($empJoinDate);
+          $settings = DB::table('hrm_general_settings as settings')
+                    ->join('hrm_general_settings_key_list as key_list', 'settings.key_id', '=', 'key_list.id')
+                    ->where('key_list.config_key', 'LEAVE')
+                    ->where('settings.status', 1)
+                    ->select('settings.config_value' )
+                    ->first(); 
+        
+         if($settings &&  $settings->config_value == 1){
 
-                $currentdate = $today_date->toDateString(); // YYYY-MM-DD
-                $join_year_end_date = $employeejoin_date->copy()->endOfYear()->toDateString(); 
+          // calculte casual leaves based on joining date
+
+             if($jobleaves && $leaves->casual_leaves > 0){
+                    $join_date = new DateTime($empJoinDate);
+                    $current_date = new DateTime();
+                    $interval = $join_date->diff($current_date);
+                    
+                    $years_of_service = $interval->y;
+                    $months_of_service = $interval->m;
+                    
+                    $today_date = Carbon::now();
+                    $employeejoin_date = Carbon::parse($empJoinDate);
+
+                    $currentdate = $today_date->toDateString(); // YYYY-MM-DD
+                    $join_year_end_date = $employeejoin_date->copy()->endOfYear()->toDateString(); 
 
 
 
-                // Casual leave calculation
-                if ($currentdate <=  $join_year_end_date) {
-                    $casual_leaves = number_format((6 / 12) * $months_of_service, 2);
-                }
-                else {
-                    $casual_leaves = 7;
-                }
-        }else{
-             $casual_leaves = 0;
-        }
+                    // Casual leave calculation
+                    if ($currentdate <=  $join_year_end_date) {
+                        $casual_leaves = number_format((6 / 12) * $months_of_service, 2);
+                    }
+                    else {
+                        $casual_leaves = 7;
+                    }
+            }else{
+                $casual_leaves = 0;
+            }
+         } 
+        elseif ($settings && $settings->config_value == 2){
+            // rturn full casual leaves without considering joining date
+             if($jobleaves && $leaves->casual_leaves > 0){
+        
+                $casual_leaves = 7;
+            
+            }else{
+                $casual_leaves = 0;
+            }
+         } 
+        else{
+            $casual_leaves = 0;
+        }         
+
+       
         
         return $casual_leaves;
     }
