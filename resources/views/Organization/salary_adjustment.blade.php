@@ -136,6 +136,11 @@
                                                 <input type="radio" class="form-check-input allowance_type" name="allowance_type" id="allowance_type_3" value="4">Presentage
                                             </label>
                                         </div>
+                                         <div class="form-check-inline">
+                                            <label class="form-check-label">
+                                                <input type="radio" class="form-check-input allowance_type" name="allowance_type" id="allowance_type_4" value="5">Night Allowance
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -287,9 +292,16 @@ $(document).ready(function(){
             {
                 data: 'allowance_type',
                 name: 'allowance_type',
-                render: function (data, type, row) {
-                    return data == 1 ? 'Daily' : (data == 2 ? 'Monthly' : (data == 4 ? 'Percentage' : 'Custom'));
-                }
+                 render: function (data, type, row) {
+                                const types = {
+                                    1: 'Daily',
+                                    2: 'Monthly',
+                                    3: 'Custom',
+                                    4: 'Percentage',
+                                    5: 'Night'
+                                };
+                                return types[data] || 'Unknown';
+                            }
             },
             {
                 data: 'amount',
@@ -363,7 +375,7 @@ $(document).ready(function(){
         $('#employee').prop('disabled', false);
         $('#job_category').prop('disabled', false);
         $('#remuneration_name').prop('disabled', false);
-        $('#allowance_type_0, #allowance_type_1, #allowance_type_2, #allowance_type_3').prop('disabled', false);
+        $('#allowance_type_0, #allowance_type_1, #allowance_type_2, #allowance_type_3 , #allowance_type_4').prop('disabled', false);
         $('#amount').prop('readonly', false);
         $('#allowleave').prop('readonly', false);
 
@@ -466,6 +478,8 @@ $(document).ready(function(){
                         $('#allowance_type_2').prop("checked", true);
                     } else if (data.result.allowance_type == '4') {
                         $('#allowance_type_3').prop("checked", true);
+                    } else if (data.result.allowance_type == '5') {
+                        $('#allowance_type_4').prop("checked", true);
                     }
 
                     $('#amount').val(data.result.amount);
@@ -528,6 +542,12 @@ $(document).ready(function(){
                 } else if (data.result.allowance_type == '4') {
                     $('#allowance_type_3').prop("checked", true).prop('disabled', true);
                     $('#allowance_type_0').prop('disabled', true);
+                    $('#allowance_type_1').prop('disabled', true);
+                    $('#allowance_type_2').prop('disabled', true);
+                }else if (data.result.allowance_type == '5') {
+                    $('#allowance_type_4').prop("checked", true).prop('disabled', true);
+                    $('#allowance_type_3').prop('disabled', true);
+                     $('#allowance_type_0').prop('disabled', true);
                     $('#allowance_type_1').prop('disabled', true);
                     $('#allowance_type_2').prop('disabled', true);
                 }

@@ -276,6 +276,24 @@ class MealallowanceapproveController extends Controller
                     $totalamount = $workallawanceamount - $monthlyremain;
                     $allowanceamount = round($workallawanceamount, 2);
                 }
+                else if($allowancetype==5){
+                    // Using Query Builder
+                        $count = DB::table('employee_roster_details as erd')
+                            ->where('erd.emp_id', $empId)
+                            ->whereBetween('erd.work_date', [$firstDate, $lastDate])
+                            ->where('erd.shift_id', 4)
+                            ->whereExists(function ($query) use ($empId) {
+                                $query->select(DB::raw(1))
+                                    ->from('attendances as a')
+                                    ->whereRaw('a.emp_id = erd.emp_id')
+                                    ->whereRaw('DATE(a.date) = erd.work_date')
+                                    ->whereNull('a.deleted_at'); 
+                            })
+                            ->count();
+                            
+                    $totalamount = $count * $allowanceamount;
+                    $monthlyremain = $totalamount;
+                }
                 else{//Daily or monthly salary adjustment deductions
                     if($remunerationtype == 21){
                         $totalWeekDays = DB::table('leaves')
