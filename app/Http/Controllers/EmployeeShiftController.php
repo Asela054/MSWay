@@ -291,6 +291,7 @@ class EmployeeShiftController extends Controller
         $responseData = array(
             'mainData' => $data[0],
             'requestdata' => $requestlist,
+            'approval_status' => $data[0]->approval_status,
         );
 
         return response() ->json(['result'=>  $responseData]);
@@ -508,6 +509,25 @@ class EmployeeShiftController extends Controller
         } catch (\Exception $e) {
             return null;
         }
+    }
+
+    public function approval(Request $request){
+        $user = Auth::user();
+        $permission = $user->can('employee-shift-allocation-edit');
+        if (!$permission) {
+            return response()->json(['error' => 'UnAuthorized'], 401);
+        }
+
+        $id = $request->input('id');
+        $current_date_time = Carbon::now()->toDateTimeString();
+
+        Employeeshift::findOrFail($id)->update([
+            'approval_status' => '1',
+            'updated_by'      => Auth::id(),
+            'updated_at'      => $current_date_time,
+        ]);
+
+        return response()->json(['success' => 'Approved Successfully']);
     }
 
 }

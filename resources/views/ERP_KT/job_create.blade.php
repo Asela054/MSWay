@@ -320,11 +320,17 @@
                 data: function(params) {
                     return {
                         term: params.term || '',
-                        page: params.page || 1
+                        page: params.page || 1,
+                        customer_id: $('#customer_name').val() || ''
                     }
                 },
                 cache: true
             }
+        });
+
+        // Reset inquiry when customer changes
+        customer.on('change', function() {
+            inquiry.val(null).trigger('change');
         });
 
         //Machine Select2 Initialization
