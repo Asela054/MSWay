@@ -206,6 +206,10 @@ class CommenGetrreordController extends Controller
                 $query->where('employees.emp_department', $request->department);
             }
 
+            if ($request->has('location') && !empty($request->location)) {
+                $query->where('employees.emp_location', $request->location);
+            }
+
             $breeds = $query
                 ->select(
                     DB::raw('DISTINCT employees.emp_id as id'),
