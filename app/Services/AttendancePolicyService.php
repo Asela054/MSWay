@@ -50,11 +50,15 @@ class AttendancePolicyService
                         $empshiftid = $empshift->emp_shift;
                     }
                 }
+
+                
             
             $shift = DB::table('shift_types')
                 ->where('id', $empshiftid)
                 ->first();
+
             
+
             $previousDate = Carbon::parse($date)->subDay()->format('Y-m-d');
             $employeeshiftdetails = DB::table('employeeshiftdetails')
                 ->where('date_from', $previousDate)
@@ -65,19 +69,20 @@ class AttendancePolicyService
                 $period = (new DateTime($timestamp))->format('A');
                 $timestamp = $date_input . ' ' . $timestamp;
                 $attendance_date = null;
-
+                
                 if ($shift && $shift->off_next_day == '1' && $date == $date_input) {
                     $previous_day = (new DateTime($date_input))->modify('-1 day')->format('Y-m-d');
-
-                    $shif_ontime = Carbon::parse($shift->onduty_time);
+                      $shif_ontime = Carbon::parse($shift->onduty_time);
+                      $attendance_time = Carbon::parse($timestamp);
                     
-                    if($shif_ontime > $timestamp){
-                       
+                    if($shif_ontime->format('H:i:s') > $attendance_time->format('H:i:s')){
                         $attendance_date = ($period === 'AM') ? $previous_day : substr($timestamp, 0, 10);
                     }
                     else{
                         $attendance_date = substr($timestamp, 0, 10);
                     }
+
+                    
                     
                 } else if ($date == $date_input) {
                     if($employeeshiftdetails){
