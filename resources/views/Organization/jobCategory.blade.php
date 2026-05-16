@@ -153,6 +153,11 @@
 
                                 <div class="form-row mb-2">
                                     <div class="col-md-3">
+                                        <label class="small font-weight-bold text-dark">Full Day Work Hours</label>
+                                        <input type="number" step="0.01" name="full_day_work_hours" id="full_day_work_hours"
+                                            class="form-control form-control-sm" />
+                                    </div>
+                                    <div class="col-md-3">
                                         <label class="small font-weight-bold text-dark">Applicable leave types</label>
                                         <select class="form-control form-control-sm" id="leave_types" name="leave_types[]" multiple="multiple">
                                             @foreach($leave_types as $leave_type)
@@ -160,6 +165,9 @@
                                             @endforeach
                                         </select>
                                     </div>
+                                </div>
+
+                                <div class="form-row mb-2">
                                     <div class="col-md-3">
                                         <label class="small font-weight-bold text-dark">Working Calculation</label>
                                         <br>
@@ -929,6 +937,7 @@ $(document).ready(function(){
                     // $('#nopaydeduct').val(data.result.nopaydeduct);
                     $('#holiday_work_hours').val(data.result.holiday_work_hours);
                     $('#week_after_double').val(data.result.week_after_double);
+                    $('#full_day_work_hours').val(data.result.full_day_work_hours);
 
                     if (data.result.work_hour_date == 'Date') {
                         $('#work_hour_date_0').prop("checked", true);
