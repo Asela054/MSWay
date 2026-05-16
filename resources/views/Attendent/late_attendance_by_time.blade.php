@@ -98,6 +98,13 @@
                             </li>
                             <li class="mb-2">
                                 <div class="col-md-12">
+                                    <label class="small font-weight-bolder text-dark">Location</label>
+                                    <select name="location" id="location" class="form-control form-control-sm">
+                                    </select>
+                                </div>
+                            </li>
+                            <li class="mb-2">
+                                <div class="col-md-12">
                                     <label class="small font-weight-bolder text-dark">Employee</label>
                                     <select name="employee" id="employee" class="form-control form-control-sm">
                                     </select>
@@ -211,7 +218,25 @@
                             term: params.term || '',
                             page: params.page || 1,
                             company: company.val(),
-                            department: department.val()
+                            department: department.val(),
+                             location: location.val()
+                        }
+                    },
+                    cache: true
+                }
+            });
+            location.select2({
+                placeholder: 'Select...',
+                width: '100%',
+                allowClear: true,
+                ajax: {
+                    url: '{{url("location_list_sel2")}}',
+                    dataType: 'json',
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1,
+                            company: company.val()
                         }
                     },
                     cache: true

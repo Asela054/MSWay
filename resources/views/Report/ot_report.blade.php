@@ -249,7 +249,8 @@
                             term: params.term || '',
                             page: params.page || 1,
                             company: company.val(),
-                            department: department.val()
+                            department: department.val(),
+                            location: location.val()
                         }
                     },
                     cache: true

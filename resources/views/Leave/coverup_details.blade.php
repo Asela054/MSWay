@@ -187,8 +187,8 @@
                         return {
                             term: params.term || '',
                             page: params.page || 1,
-                            company: company_f.val(),
-                            department: department_f.val()
+                            department: department_f.val(),
+                            location: location_f.val()
                         }
                     },
                     cache: true
@@ -205,7 +205,8 @@
                     data: function(params) {
                         return {
                             term: params.term || '',
-                            page: params.page || 1
+                            page: params.page || 1,
+                            company: company_f.val(),
                         }
                     },
                     cache: true
