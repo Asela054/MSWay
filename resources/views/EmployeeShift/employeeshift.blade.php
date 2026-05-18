@@ -273,6 +273,9 @@
                                     </table>
                                 </div>
                                 <div class="form-group mt-2">
+                                <button type="button" name="btnapproval" id="btnapproval" 
+                                    class="btn btn-success btn-sm fa-pull-right px-4"><i 
+                                        class="fas fa-check"></i>&nbsp;Approval</button>
                                 <button type="button" name="btnprint" id="btnprint"
                                     class="btn btn-danger btn-sm fa-pull-right px-4"><i
                                         class="fas fa-print"></i>&nbsp;Print</button>
@@ -388,12 +391,13 @@
                     orderable: false,
                     searchable: false,
                     render: function(data, type, row) {
+                        var approval_status = row.approval_status;
                         var buttons = '';
-                        // View button
+                        
                         buttons += '<button name="view" id="'+row.id+'" class="view btn btn-secondary btn-sm mr-1" type="button"><i class="fas fa-eye"></i></button>';
-                        // Edit button
+                        if (approval_status == 0) {
                         buttons += '<button name="edit" id="'+row.id+'" class="edit btn btn-primary btn-sm mr-1" type="button" data-toggle="tooltip" title="Edit"><i class="fas fa-pencil-alt"></i></button>';
-                        // Delete button
+                        }
                         buttons += '<button type="button" name="delete" id="'+row.id+'" class="delete btn btn-danger btn-sm mr-1" data-toggle="tooltip" title="Remove"><i class="far fa-trash-alt"></i></button>';
                         return buttons;
                     }
@@ -765,10 +769,41 @@
 
                     $('#viewconfirmModal').modal('show');
 
+                    // Approval button state
+                    if (data.result.approval_status == 1) {
+                        $('#btnapproval').prop('disabled', true).html('<i class="fas fa-check"></i>&nbsp;Approved');
+                    } else {
+                        $('#btnapproval').prop('disabled', false).html('<i class="fas fa-check"></i>&nbsp;Approval');
+                    }
+                    $('#btnapproval').data('id', id);
+
                 }
             })
 
 
+        });
+
+        $('#btnapproval').on('click', async function () {
+            var r = await Otherconfirmation("Are you sure you want to approve this?");
+            if (r == true) {
+                var shiftId = $(this).data('id');
+                var btn = $(this);
+                $.ajaxSetup({
+                    headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
+                });
+                $.ajax({
+                    url: '{!! route("employeeshiftapproval") !!}',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: { id: shiftId },
+                    success: function (data) {
+                        if (data.success) {
+                            btn.prop('disabled', true).html('<i class="fas fa-check"></i>&nbsp;Approved');
+                            location.reload();
+                        }
+                    }
+                });
+            }
         });
 
         $('#csv_sample').click(function () {
