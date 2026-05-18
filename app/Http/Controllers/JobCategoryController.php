@@ -54,6 +54,7 @@ class JobCategoryController extends Controller
         $jobcategory->shift_hours = $request->input('shift_hours');
         $jobcategory->holiday_work_hours = $request->input('holiday_work_hours');
         $jobcategory->week_after_double = $request->input('week_after_double');
+        $jobcategory->full_day_work_hours = $request->input('full_day_work_hours');
         $jobcategory->work_hour_date = $request->input('work_hour_date');
         $jobcategory->morning_ot = $request->input('morning_ot');
         $jobcategory->holiday_ot_start = $request->input('holiday_ot_start');
@@ -151,6 +152,7 @@ class JobCategoryController extends Controller
             'shift_hours' => $request->shift_hours,
             'holiday_work_hours' => $request->holiday_work_hours,
             'week_after_double' => $request->week_after_double,
+            'full_day_work_hours' => $request->full_day_work_hours,
             'work_hour_date' => $request->work_hour_date,
             'morning_ot' => $request->morning_ot,
             'holiday_ot_start' => $request->holiday_ot_start,
