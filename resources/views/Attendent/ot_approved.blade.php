@@ -129,7 +129,8 @@
                             term: params.term || '',
                             page: params.page || 1,
                             company: company.val(),
-                            department: department.val()
+                            department: department.val(),
+                            location: location.val()
                         }
                     },
                     cache: true
@@ -146,7 +147,8 @@
                     data: function(params) {
                         return {
                             term: params.term || '',
-                            page: params.page || 1
+                            page: params.page || 1,
+                            company: company.val()
                         }
                     },
                     cache: true

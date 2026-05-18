@@ -169,12 +169,15 @@
                 width: '100%',
                 allowClear: true,
                 ajax: {
-                    url: '{{url("employee_list_from_attendance_sel2")}}',
+                    url: '{{url("employee_list_sel2")}}',
                     dataType: 'json',
                     data: function (params) {
                         return {
                             term: params.term || '',
-                            page: params.page || 1
+                            page: params.page || 1,
+                            company: company.val(),
+                            department: department.val(),
+                            location: location.val()
                         }
                     },
                     cache: true
@@ -186,12 +189,13 @@
                 width: '100%',
                 allowClear: true,
                 ajax: {
-                    url: '{{url("location_list_from_attendance_sel2")}}',
+                    url: '{{url("location_list_sel2")}}',
                     dataType: 'json',
                     data: function (params) {
                         return {
                             term: params.term || '',
-                            page: params.page || 1
+                            page: params.page || 1,
+                            company: company.val()
                         }
                     },
                     cache: true
