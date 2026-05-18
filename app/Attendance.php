@@ -557,27 +557,27 @@ class Attendance extends Model
         $weekafterdouble= $emp->week_after_double ;//Week day after double OT hours
         $roundotmin= $emp->ot_round_time ;//Rounded Min 
         
-        if(!empty($shift_until_time)):
-            if($shift_until_time<$off_time):
-                $off_time = Carbon::parse($shift_until_time);
-            endif;
-        else:
-            if($record_date->dayOfWeek == 6):
-                $max_ot_time = Carbon::parse($saturdayoffdutyTime)->copy()->addMinutes($shift->weekend_max_normal_ot_hrs * 60);
-                if($ot_to > $max_ot_time):
-                    $off_time = $max_ot_time;
-                endif;
-            else:
-                $max_ot_time = Carbon::parse($record_date->year.'-'.$record_date->month.'-'.$record_date->day.' '.$shift_end_)->copy()->addMinutes($shift->max_normal_ot_hrs * 60);
-                if($shift->off_next_day == 1):
-                    $max_ot_time->addDay();
-                endif;
+        // if(!empty($shift_until_time)):
+        //     if($shift_until_time<$off_time):
+        //         $off_time = Carbon::parse($shift_until_time);
+        //     endif;
+        // else:
+        //     if($record_date->dayOfWeek == 6):
+        //         $max_ot_time = Carbon::parse($saturdayoffdutyTime)->copy()->addMinutes($shift->weekend_max_normal_ot_hrs * 60);
+        //         if($ot_to > $max_ot_time):
+        //             $off_time = $max_ot_time;
+        //         endif;
+        //     else:
+        //         $max_ot_time = Carbon::parse($record_date->year.'-'.$record_date->month.'-'.$record_date->day.' '.$shift_end_)->copy()->addMinutes($shift->max_normal_ot_hrs * 60);
+        //         if($shift->off_next_day == 1):
+        //             $max_ot_time->addDay();
+        //         endif;
 
-                if($ot_to > $max_ot_time):
-                    $off_time = $max_ot_time;
-                endif;
-            endif;
-        endif;
+        //         if($ot_to > $max_ot_time):
+        //             $off_time = $max_ot_time;
+        //         endif;
+        //     endif;
+        // endif;
         
         if($roundotmin>0){
             $roundInterval = 30;
