@@ -145,13 +145,14 @@ class MealallowanceapproveController extends Controller
                 }
                 
                 //check meal allowance approved on given date range
-                $approvedallowance = DB::table('meal_allowances_approved')
-                    ->where('emp_id', $empId)
-                    ->where('remuneration_id', $remunerationtype)
-                    ->whereBetween('from_date', [$firstDate, $lastDate]) 
-                    ->whereBetween('to_date', [$firstDate, $lastDate])  
-                    ->first();
-                $approvedallowancestatus = $approvedallowance ? 1 : 0;
+                // $approvedallowance = DB::table('meal_allowances_approved')
+                //     ->where('emp_id', $empId)
+                //     ->where('remuneration_id', $remunerationtype)
+                //     ->whereBetween('from_date', [$firstDate, $lastDate]) 
+                //     ->whereBetween('to_date', [$firstDate, $lastDate])  
+                //     ->first();
+                // $approvedallowancestatus = $approvedallowance ? 1 : 0;
+                $approvedallowancestatus = 0;
                 
                 $totalWorkingDays = DB::table('attendances')
                     ->where('emp_id', $empId)
