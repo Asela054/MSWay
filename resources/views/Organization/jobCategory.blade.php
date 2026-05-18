@@ -66,7 +66,7 @@
         </div>
     </div>
 
-        <!-- Modal Area Start -->
+    <!-- Modal Area Start -->
     <div class="modal fade" id="formModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
     aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-xl">
@@ -82,460 +82,479 @@
                         <div class="col">
                             <span id="form_result"></span>
                             <form method="post" id="formTitle" class="form-horizontal">
-                                {{ csrf_field() }}	
-                                
-                                <div class="form-row mb-2">
-                                    <div class="col-md-3">
-                                        <label class="small font-weight-bold text-dark">Category</label>
-                                        <input type="text" name="category" id="category"
-                                            class="form-control form-control-sm" required />
+                                {{ csrf_field() }}
+                                {{-- SECTION 1: Basic Info --}}
+                                <div class="card mb-2 border">
+                                    <div class="card-header p-2 d-flex justify-content-between align-items-center" data-toggle="collapse" data-target="#section_basic" aria-expanded="true" style="cursor:pointer; background:#f8f9fa;">
+                                        <span class="font-weight-bold small text-dark"><i class="fas fa-tag mr-1"></i> Basic Information</span>
+                                        <i class="fas fa-chevron-up small text-muted section-icon"></i>
                                     </div>
-                                    <div class="col-md-3">
-                                        <label class="small font-weight-bold text-dark">Annual Leaves</label>
-                                        <input type="number" name="annual_leaves" id="annual_leaves"
-                                            class="form-control form-control-sm" required />
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="small font-weight-bold text-dark">Casual Leaves</label>
-                                        <input type="number" name="casual_leaves" id="casual_leaves"
-                                            class="form-control form-control-sm" required />
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="small font-weight-bold text-dark">Medical Leaves</label>
-                                        <input type="number" name="medical_leaves" id="medical_leaves"
-                                            class="form-control form-control-sm" required />
-                                    </div>
-                                </div>
-
-                                <div class="form-row mb-2">
-                                <div class="col-md-3">
-                                    <label class="small font-weight-bold text-dark">Payroll Workdays</label>
-                                    <input type="number" name="emp_payroll_workdays" step="0.01" id="emp_payroll_workdays" class="form-control form-control-sm" required />
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="small font-weight-bold text-dark">Payroll Work Hours</label>
-                                    <input type="number" name="emp_payroll_workhrs" step="0.01" id="emp_payroll_workhrs" class="form-control form-control-sm" required />
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="small font-weight-bold text-dark">OT Calculate Hours (After Shift)</label>
-                                    <input type="number" name="ot_app_hours" step="0.01" id="ot_app_hours" class="form-control form-control-sm" required />
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="small font-weight-bold text-dark">Holiday OT Minimum minits</label>
-                                    <input type="number" name="holiday_ot_minimum_min" id="holiday_ot_minimum_min" class="form-control form-control-sm" required />
-                                </div>
-                                </div>
-
-                                <div class="form-row mb-2">
-                                    <div class="col-md-3">
-                                        <label class="small font-weight-bold text-dark">Special OT Deduct
-                                            Precentage(%)</label>
-                                        <input type="number" name="spe_deduct_pre" step="0.01" id="spe_deduct_pre"
-                                            class="form-control form-control-sm" required />
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="small font-weight-bold text-dark">Shift Hours</label>
-                                        <input type="number" name="shift_hours" step="0.01" id="shift_hours"
-                                            class="form-control form-control-sm" required />
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="small font-weight-bold text-dark">Holiday Work Hours</label>
-                                        <input type="number" step="0.01" name="holiday_work_hours" id="holiday_work_hours"
-                                            class="form-control form-control-sm" required />
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="small font-weight-bold text-dark">After how hours W.Days
-                                            Double?</label>
-                                        <input type="number" name="week_after_double" id="week_after_double"
-                                            class="form-control form-control-sm" required />
-                                    </div>
-                                </div>
-
-                                <div class="form-row mb-2">
-                                    <div class="col-md-3">
-                                        <label class="small font-weight-bold text-dark">Full Day Work Hours</label>
-                                        <input type="number" step="0.01" name="full_day_work_hours" id="full_day_work_hours"
-                                            class="form-control form-control-sm" />
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="small font-weight-bold text-dark">Applicable leave types</label>
-                                        <select class="form-control form-control-sm" id="leave_types" name="leave_types[]" multiple="multiple">
-                                            @foreach($leave_types as $leave_type)
-                                                <option value="{{ $leave_type->id }}">{{ $leave_type->leave_type }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="form-row mb-2">
-                                    <div class="col-md-3">
-                                        <label class="small font-weight-bold text-dark">Working Calculation</label>
-                                        <br>
-                                        <div class="form-check-inline">
-                                            <label class="form-check-label">
-                                                <input type="radio" class="form-check-input work_hour_date" name="work_hour_date" id="work_hour_date_0" value="Date" checked>Dates
-                                            </label>
-                                        </div>
-                                        <div class="form-check-inline">
-                                            <label class="form-check-label">
-                                                <input type="radio" class="form-check-input work_hour_date" name="work_hour_date" id="work_hour_date_1" value="Hour">Hours
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="small font-weight-bold text-dark">Lunch Hours Deduct</label>
-                                        <br>
-                                        <div class="form-check-inline">
-                                            <label class="form-check-label">
-                                                <input type="radio" class="form-check-input lunch_deduct_type" name="lunch_deduct_type" id="lunch_deduct_type_0" value="0" checked>No
-                                            </label>
-                                        </div>
-                                        <div class="form-check-inline">
-                                            <label class="form-check-label">
-                                                <input type="radio" class="form-check-input lunch_deduct_type" name="lunch_deduct_type" id="lunch_deduct_type_1" value="1">Yes
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3 custom_lunch" style="display: none">
-                                    <label class="small font-weight-bold text-dark">Lunch Deduction Minutes</label>
-                                        <br>
-                                        <div class="form-check-inline">
-                                            <label class="form-check-label">
-                                                <input type="number" class="form-control form-control-sm" name="lunch_deduct_min" id="lunch_deduct_min"/>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                                 
-                                <div class="form-row mb-2">
-                                    <div class="col-md-3">
-                                        <label class="small font-weight-bold text-dark">Salary Without Attendance</label>
-                                        <br>
-                                        <div class="form-check-inline">
-                                            <label class="form-check-label">
-                                                <input type="radio" class="form-check-input salary_without_attendace" name="salary_without_attendace" id="salary_without_attendace_0" value="0" checked>No
-                                            </label>
-                                        </div>
-                                        <div class="form-check-inline">
-                                            <label class="form-check-label">
-                                                <input type="radio" class="form-check-input salary_without_attendace" name="salary_without_attendace" id="salary_without_attendace_1" value="1">Yes
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="small font-weight-bold text-dark">Morning OT Applicable</label>
-                                        <br>
-                                        <div class="form-check-inline">
-                                            <label class="form-check-label">
-                                                <input type="radio" class="form-check-input morning_ot" name="morning_ot" id="morning_ot_0" value="0" checked>No
-                                            </label>
-                                        </div>
-                                        <div class="form-check-inline">
-                                            <label class="form-check-label">
-                                                <input type="radio" class="form-check-input morning_ot" name="morning_ot" id="morning_ot_1" value="1">Yes
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="small font-weight-bold text-dark">Holiday OT Start</label>
-                                        <br>
-                                        <div class="form-check-inline">
-                                            <label class="form-check-label">
-                                                <input type="radio" class="form-check-input holiday_ot_start" name="holiday_ot_start" id="holiday_ot_start_1" value="1" checked>As Act
-                                            </label>
-                                        </div>
-                                        <div class="form-check-inline">
-                                            <label class="form-check-label">
-                                                <input type="radio" class="form-check-input holiday_ot_start" name="holiday_ot_start" id="holiday_ot_start_0" value="0">Shift Time
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="small font-weight-bold text-dark">Holiday Lunch Deduct</label>
-                                        <br>
-                                        <div class="form-check-inline">
-                                            <label class="form-check-label">
-                                                <input type="radio" class="form-check-input holiday_lunch_deduct" name="holiday_lunch_deduct" id="holiday_lunch_deduct_0" value="0" checked>No
-                                            </label>
-                                        </div>
-                                        <div class="form-check-inline">
-                                            <label class="form-check-label">
-                                                <input type="radio" class="form-check-input holiday_lunch_deduct" name="holiday_lunch_deduct" id="holiday_lunch_deduct_1" value="1">Yes
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="form-group mb-2">
-                                    <label class="small font-weight-bold text-dark">Saturday OT Type</label>
-                                    <br>
-                                    <div class="form-check-inline">
-                                        <label class="form-check-label">
-                                            <input type="radio" class="form-check-input is_sat_ot_type_as_act" name="is_sat_ot_type_as_act" id="is_sat_ot_type_as_act_1" value="1" checked>As Act
-                                        </label>
-                                    </div>
-                                    <div class="form-check-inline">
-                                        <label class="form-check-label">
-                                            <input type="radio" class="form-check-input is_sat_ot_type_as_act" name="is_sat_ot_type_as_act" id="is_sat_ot_type_as_act_0" value="0">Custom
-                                        </label>
-                                    </div>
-                                    <div class="form-check-inline">
-                                        <label class="form-check-label">
-                                            <input type="radio" class="form-check-input is_sat_ot_type_as_act" name="is_sat_ot_type_as_act" id="is_sat_ot_type_as_act_2" value="2">Saturday is a working date
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div class="form-group mb-2 custom_sat" style="display: none">
-                                    <label class="small font-weight-bold text-dark">Custom Saturday OT Type</label>
-                                    <br>
-                                    <div class="form-check-inline">
-                                        <label class="form-check-label">
-                                            <input type="radio" class="form-check-input" name="custom_saturday_ot_type" id="custom_saturday_ot_type_1" value="1" checked>1
-                                        </label>
-                                    </div>
-                                    <!-- <div class="form-check-inline">
-                                        <label class="form-check-label">
-                                            <input type="radio" class="form-check-input" name="custom_saturday_ot_type" id="custom_saturday_ot_type_1_5" value="1.5">1.5
-                                        </label>
-                                    </div> -->
-                                    <div class="form-check-inline">
-                                        <label class="form-check-label">
-                                            <input type="radio" class="form-check-input" name="custom_saturday_ot_type" id="custom_saturday_ot_type_2" value="2">2
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div class="form-group mb-2">
-                                    <label class="small font-weight-bold text-dark">Sunday OT Type</label>
-                                    <br>
-                                    <div class="form-check-inline">
-                                        <label class="form-check-label">
-                                            <input type="radio" class="form-check-input is_sun_ot_type_as_act" name="is_sun_ot_type_as_act" id="is_sun_ot_type_as_act_1" value="1" checked>As Act
-                                        </label>
-                                    </div>
-                                    <div class="form-check-inline">
-                                        <label class="form-check-label">
-                                            <input type="radio" class="form-check-input is_sun_ot_type_as_act" name="is_sun_ot_type_as_act" id="is_sun_ot_type_as_act_0" value="0">Custom
-                                        </label>
-                                    </div>
-                                    <div class="form-check-inline">
-                                        <label class="form-check-label">
-                                            <input type="radio" class="form-check-input is_sun_ot_type_as_act" name="is_sun_ot_type_as_act" id="is_sun_ot_type_as_act_2" value="2">Sunday is a working date
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div class="form-row mb-2">
-                                    <div class="col-md-4 custom_sun" style="display: none">
-                                        <label class="small font-weight-bold text-dark">Custom Sunday OT Type</label>
-                                        <br>
-                                        <div class="form-check-inline">
-                                            <label class="form-check-label">
-                                                <input type="radio" class="form-check-input custom_sunday_ot_type" name="custom_sunday_ot_type" id="custom_sunday_ot_type_1" value="1">1
-                                            </label>
-                                        </div>
-                                        <!-- <div class="form-check-inline">
-                                            <label class="form-check-label">
-                                                <input type="radio" class="form-check-input" name="custom_sunday_ot_type" id="custom_sunday_ot_type_1_5" value="1.5">1.5
-                                            </label>
-                                        </div> -->
-                                        <div class="form-check-inline">
-                                            <label class="form-check-label">
-                                                <input type="radio" class="form-check-input custom_sunday_ot_type" name="custom_sunday_ot_type" id="custom_sunday_ot_type_2" value="2">2
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4 custom_sun_after" style="display: none">
-                                    <label class="small font-weight-bold text-dark">After how many hours will it double?</label>
-                                        <br>
-                                        <div class="form-check-inline">
-                                            <label class="form-check-label">
-                                                <input type="number" class="form-control form-control-sm" name="sun_after_double" id="sun_after_double"/>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="form-row mb-2">
-                                    <!-- Special Day 01 Day -->
-                                    <div class="col-md-4">
-                                        <label class="small font-weight-bold text-dark">Special Day 01 Day</label>
-                                        <select class="form-control form-control-sm" id="spe_day_1_day" name="spe_day_1_day">
-                                            <option value="">Select Day</option>
-                                            <option value="0">Sunday</option>
-                                            <option value="1">Monday</option>
-                                            <option value="2">Tuesday</option>
-                                            <option value="3">Wednesday</option>
-                                            <option value="4">Thursday</option>
-                                            <option value="5">Friday</option>
-                                            <option value="6">Saturday</option>
-                                        </select>
-                                    </div>
-
-                                    <!-- OT Type -->
-                                    <div class="col-md-4">
-                                        <label class="small font-weight-bold text-dark">Special Day 01 OT Type</label>
-                                        <div class="form-check">
-                                            <input type="radio" class="form-check-input spe_day_1_type" name="spe_day_1_type" id="spe_day_1_type_0" value="0">
-                                            <label class="form-check-label" for="spe_day_1_type_0">Custom</label>
-                                        </div>
-                                    </div>
-
-                                    <!-- Custom OT Rate -->
-                                    <div class="col-md-4 custom_spe">
-                                        <label class="small font-weight-bold text-dark">Custom Special Day OT Type</label>
-                                        <br>
-                                        <div class="form-check form-check-inline">
-                                            <input type="radio" class="form-check-input" name="spe_day_1_rate" id="spe_day_1_rate_1" value="1">
-                                            <label class="form-check-label" for="spe_day_1_rate_1">1</label>
-                                        </div>
-                                        <div class="form-check form-check-inline">
-                                            <input type="radio" class="form-check-input" name="spe_day_1_rate" id="spe_day_1_rate_2" value="2">
-                                            <label class="form-check-label" for="spe_day_1_rate_2">2</label>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="form-group mb-2">
-                                    <label class="small font-weight-bold text-dark">Late Type</label>
-                                    <br>
-                                    <div class="form-check-inline">
-                                        <label class="form-check-label">
-                                            <input type="radio" class="form-check-input late_type" name="late_type" id="late_type_1" value="1">Late Per Minutes
-                                        </label>
-                                    </div>
-                                    <div class="form-check-inline">
-                                        <label class="form-check-label">
-                                            <input type="radio" class="form-check-input late_type" name="late_type" id="late_type_2" value="2">Late Leave
-                                        </label>
-                                    </div>
-                                    <div class="form-check-inline">
-                                        <label class="form-check-label">
-                                            <input type="radio" class="form-check-input late_type" name="late_type" id="late_type_3" value="3">Custom
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div class="form-row mb-2">
-                                    <div class="col-md-4 per_min" style="display: none">
-                                        <label class="small font-weight-bold text-dark">Late Attendance Minutes</label>
-                                            <br>
-                                            <div class="form-check-inline">
-                                                <label class="form-check-label">
-                                                    <input type="number" class="form-control form-control-sm" name="late_attend_min" id="late_attend_min"/>
-                                                </label>
+                                    <div class="collapse show" id="section_basic">
+                                        <div class="card-body p-2">
+                                            <div class="form-row mb-2">
+                                                <div class="col-md-3 col-6">
+                                                    <label class="small font-weight-bold text-dark">Category <span class="text-danger">*</span></label>
+                                                    <input type="text" name="category" id="category" class="form-control form-control-sm" required />
+                                                </div>
+                                                <div class="col-md-3 col-6">
+                                                    <label class="small font-weight-bold text-dark">Annual Leaves <span class="text-danger">*</span></label>
+                                                    <input type="number" name="annual_leaves" id="annual_leaves" class="form-control form-control-sm" required />
+                                                </div>
+                                                <div class="col-md-3 col-6">
+                                                    <label class="small font-weight-bold text-dark">Casual Leaves <span class="text-danger">*</span></label>
+                                                    <input type="number" name="casual_leaves" id="casual_leaves" class="form-control form-control-sm" required />
+                                                </div>
+                                                <div class="col-md-3 col-6">
+                                                    <label class="small font-weight-bold text-dark">Medical Leaves <span class="text-danger">*</span></label>
+                                                    <input type="number" name="medical_leaves" id="medical_leaves" class="form-control form-control-sm" required />
+                                                </div>
                                             </div>
-                                    </div>
-                                    <div class="col-md-4 short_lev" style="display: none">
-                                        <label class="small font-weight-bold text-dark">Short Leaves</label>
-                                            <br>
-                                            <div class="form-check-inline">
-                                                <label class="form-check-label">
-                                                    <input type="number" class="form-control form-control-sm" name="short_leaves" id="short_leaves"/>
-                                                </label>
+                                            <div class="form-row mb-2">
+                                                <div class="col-md-3 col-6">
+                                                    <label class="small font-weight-bold text-dark">Full Day Work Hours</label>
+                                                    <input type="number" step="0.01" name="full_day_work_hours" id="full_day_work_hours" class="form-control form-control-sm" />
+                                                </div>
+                                                <div class="col-md-3 col-6">
+                                                    <label class="small font-weight-bold text-dark">Applicable Leave Types</label>
+                                                    <select class="form-control form-control-sm" id="leave_types" name="leave_types[]" multiple="multiple">
+                                                        @foreach($leave_types as $leave_type)
+                                                            <option value="{{ $leave_type->id }}">{{ $leave_type->leave_type }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-3 col-6">
+                                                    <label class="small font-weight-bold text-dark">Salary Without Attendance</label>
+                                                    <br>
+                                                    <div class="form-check-inline">
+                                                        <label class="form-check-label">
+                                                            <input type="radio" class="form-check-input salary_without_attendace" name="salary_without_attendace" id="salary_without_attendace_0" value="0" checked>No
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-check-inline">
+                                                        <label class="form-check-label">
+                                                            <input type="radio" class="form-check-input salary_without_attendace" name="salary_without_attendace" id="salary_without_attendace_1" value="1">Yes
+                                                        </label>
+                                                    </div>
+                                                </div>
                                             </div>
+                                        </div>
                                     </div>
-                                    <div class="col-md-4 half_day" style="display: none">
-                                        <label class="small font-weight-bold text-dark">Half Days</label>
-                                            <br>
-                                            <div class="form-check-inline">
-                                                <label class="form-check-label">
-                                                    <input type="number" class="form-control form-control-sm" name="half_days" id="half_days"/>
-                                                </label>
+                                </div>
+
+                                {{-- SECTION 2: Payroll & Shift --}}
+                                <div class="card mb-2 border">
+                                    <div class="card-header p-2 d-flex justify-content-between align-items-center" data-toggle="collapse" data-target="#section_payroll" aria-expanded="true" style="cursor:pointer; background:#f8f9fa;">
+                                        <span class="font-weight-bold small text-dark"><i class="fas fa-calendar-alt mr-1"></i> Payroll & Shift</span>
+                                        <i class="fas fa-chevron-up small text-muted section-icon"></i>
+                                    </div>
+                                    <div class="collapse show" id="section_payroll">
+                                        <div class="card-body p-2">
+                                            <div class="form-row mb-2">
+                                                <div class="col-md-3 col-6">
+                                                    <label class="small font-weight-bold text-dark">Payroll Workdays <span class="text-danger">*</span></label>
+                                                    <input type="number" name="emp_payroll_workdays" step="0.01" id="emp_payroll_workdays" class="form-control form-control-sm" required />
+                                                </div>
+                                                <div class="col-md-3 col-6">
+                                                    <label class="small font-weight-bold text-dark">Payroll Work Hours <span class="text-danger">*</span></label>
+                                                    <input type="number" name="emp_payroll_workhrs" step="0.01" id="emp_payroll_workhrs" class="form-control form-control-sm" required />
+                                                </div>
+                                                <div class="col-md-3 col-6">
+                                                    <label class="small font-weight-bold text-dark">Shift Hours <span class="text-danger">*</span></label>
+                                                    <input type="number" name="shift_hours" step="0.01" id="shift_hours" class="form-control form-control-sm" required />
+                                                </div>
+                                                <div class="col-md-3 col-6">
+                                                    <label class="small font-weight-bold text-dark">Working Calculation</label>
+                                                    <br>
+                                                    <div class="form-check-inline">
+                                                        <label class="form-check-label">
+                                                            <input type="radio" class="form-check-input work_hour_date" name="work_hour_date" id="work_hour_date_0" value="Date" checked>Dates
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-check-inline">
+                                                        <label class="form-check-label">
+                                                            <input type="radio" class="form-check-input work_hour_date" name="work_hour_date" id="work_hour_date_1" value="Hour">Hours
+                                                        </label>
+                                                    </div>
+                                                </div>
                                             </div>
+                                            <div class="form-row mb-2">
+                                                <div class="col-md-3 col-6">
+                                                    <label class="small font-weight-bold text-dark">Lunch Hours Deduct</label>
+                                                    <br>
+                                                    <div class="form-check-inline">
+                                                        <label class="form-check-label">
+                                                            <input type="radio" class="form-check-input lunch_deduct_type" name="lunch_deduct_type" id="lunch_deduct_type_0" value="0" checked>No
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-check-inline">
+                                                        <label class="form-check-label">
+                                                            <input type="radio" class="form-check-input lunch_deduct_type" name="lunch_deduct_type" id="lunch_deduct_type_1" value="1">Yes
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3 col-6 custom_lunch" style="display: none">
+                                                    <label class="small font-weight-bold text-dark">Lunch Deduction Minutes</label>
+                                                    <input type="number" class="form-control form-control-sm" name="lunch_deduct_min" id="lunch_deduct_min"/>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div class="form-group mb-2">
-                                    <label class="small font-weight-bold text-dark">Late Deduction Calculation</label>
-                                    <br>
-                                    <div class="form-check-inline">
-                                        <label class="form-check-label">
-                                            <input type="radio" class="form-check-input late_deduct_calculation" name="late_deduct_calculation" id="late_deduct_calculation_1" value="1" checked>Nopay
-                                        </label>
+                                {{-- SECTION 3: OT Settings --}}
+                                <div class="card mb-2 border">
+                                    <div class="card-header p-2 d-flex justify-content-between align-items-center" data-toggle="collapse" data-target="#section_ot" aria-expanded="false" style="cursor:pointer; background:#f8f9fa;">
+                                        <span class="font-weight-bold small text-dark"><i class="fas fa-clock mr-1"></i> OT Settings</span>
+                                        <i class="fas fa-chevron-down small text-muted section-icon"></i>
                                     </div>
-                                    <div class="form-check-inline">
-                                        <label class="form-check-label">
-                                            <input type="radio" class="form-check-input late_deduct_calculation" name="late_deduct_calculation" id="late_deduct_calculation_2" value="2">Normal OT
-                                        </label>
-                                    </div>
-                                    <div class="form-check-inline">
-                                        <label class="form-check-label">
-                                            <input type="radio" class="form-check-input late_deduct_calculation" name="late_deduct_calculation" id="late_deduct_calculation_3" value="3">Double OT
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div class="form-group mb-2">
-                                    <label class="small font-weight-bold text-dark">Basic OT Type</label>
-                                    <br>
-                                    <div class="form-check-inline">
-                                        <label class="form-check-label">
-                                            <input type="radio" class="form-check-input basic_ot_type" name="basic_ot_type" id="basic_ot_type_1" value="1" checked>Basic salary
-                                        </label>
-                                    </div>
-                                    <div class="form-check-inline">
-                                        <label class="form-check-label">
-                                            <input type="radio" class="form-check-input basic_ot_type" name="basic_ot_type" id="basic_ot_type_2" value="2">Custom
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div class="form-row mb-2">
-                                    <div class="col-md-4 normal_ot" style="display: none">
-                                        <label class="small font-weight-bold text-dark">Normal OT Rate</label>
-                                            <br>
-                                            <div class="form-check-inline">
-                                                <label class="form-check-label">
+                                    <div class="collapse" id="section_ot">
+                                        <div class="card-body p-2">
+                                            <div class="form-row mb-2">
+                                                <div class="col-md-3 col-6">
+                                                    <label class="small font-weight-bold text-dark">OT Calculate Hours (After Shift) <span class="text-danger">*</span></label>
+                                                    <input type="number" name="ot_app_hours" step="0.01" id="ot_app_hours" class="form-control form-control-sm" required />
+                                                </div>
+                                                <div class="col-md-3 col-6">
+                                                    <label class="small font-weight-bold text-dark">Special OT Deduct % <span class="text-danger">*</span></label>
+                                                    <input type="number" name="spe_deduct_pre" step="0.01" id="spe_deduct_pre" class="form-control form-control-sm" required />
+                                                </div>
+                                                <div class="col-md-3 col-6">
+                                                    <label class="small font-weight-bold text-dark">After how hours W.Days Double? <span class="text-danger">*</span></label>
+                                                    <input type="number" name="week_after_double" id="week_after_double" class="form-control form-control-sm" required />
+                                                </div>
+                                                <div class="col-md-3 col-6">
+                                                    <label class="small font-weight-bold text-dark">Morning OT Applicable</label>
+                                                    <br>
+                                                    <div class="form-check-inline">
+                                                        <label class="form-check-label">
+                                                            <input type="radio" class="form-check-input morning_ot" name="morning_ot" id="morning_ot_0" value="0" checked>No
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-check-inline">
+                                                        <label class="form-check-label">
+                                                            <input type="radio" class="form-check-input morning_ot" name="morning_ot" id="morning_ot_1" value="1">Yes
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-row mb-2">
+                                                <div class="col-md-3 col-6">
+                                                    <label class="small font-weight-bold text-dark">Basic OT Type</label>
+                                                    <br>
+                                                    <div class="form-check-inline">
+                                                        <label class="form-check-label">
+                                                            <input type="radio" class="form-check-input basic_ot_type" name="basic_ot_type" id="basic_ot_type_1" value="1" checked>Basic Salary
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-check-inline">
+                                                        <label class="form-check-label">
+                                                            <input type="radio" class="form-check-input basic_ot_type" name="basic_ot_type" id="basic_ot_type_2" value="2">Custom
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3 col-6 normal_ot" style="display: none">
+                                                    <label class="small font-weight-bold text-dark">Normal OT Rate</label>
                                                     <input type="number" step="0.01" class="form-control form-control-sm" name="custom_normal_ot_rate" id="custom_normal_ot_rate"/>
-                                                </label>
-                                            </div>
-                                    </div>
-                                    <div class="col-md-4 double_ot" style="display: none">
-                                        <label class="small font-weight-bold text-dark">Double OT Rate</label>
-                                            <br>
-                                            <div class="form-check-inline">
-                                                <label class="form-check-label">
+                                                </div>
+                                                <div class="col-md-3 col-6 double_ot" style="display: none">
+                                                    <label class="small font-weight-bold text-dark">Double OT Rate</label>
                                                     <input type="number" step="0.01" class="form-control form-control-sm" name="custom_double_ot_rate" id="custom_double_ot_rate"/>
-                                                </label>
+                                                </div>
                                             </div>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div class="form-group mb-2">
-                                    <label class="small font-weight-bold text-dark">Salary Advance Type</label>
-                                    <br>
-                                    <div class="form-check-inline">
-                                        <label class="form-check-label">
-                                            <input type="radio" class="form-check-input salary_advance_type" name="salary_advance_type" id="salary_advance_type_1" value="1" >Precentage
-                                        </label>
+                                {{-- SECTION 4: Holiday Settings --}}
+                                <div class="card mb-2 border">
+                                    <div class="card-header p-2 d-flex justify-content-between align-items-center" data-toggle="collapse" data-target="#section_holiday" aria-expanded="false" style="cursor:pointer; background:#f8f9fa;">
+                                        <span class="font-weight-bold small text-dark"><i class="fas fa-umbrella-beach mr-1"></i> Holiday Settings</span>
+                                        <i class="fas fa-chevron-down small text-muted section-icon"></i>
                                     </div>
-                                    <div class="form-check-inline">
-                                        <label class="form-check-label">
-                                            <input type="radio" class="form-check-input salary_advance_type" name="salary_advance_type" id="salary_advance_type_2" value="2">Fixed Amount
-                                        </label>
+                                    <div class="collapse" id="section_holiday">
+                                        <div class="card-body p-2">
+                                            <div class="form-row mb-2">
+                                                <div class="col-md-3 col-6">
+                                                    <label class="small font-weight-bold text-dark">Holiday OT Minimum Minutes <span class="text-danger">*</span></label>
+                                                    <input type="number" name="holiday_ot_minimum_min" id="holiday_ot_minimum_min" class="form-control form-control-sm" required />
+                                                </div>
+                                                <div class="col-md-3 col-6">
+                                                    <label class="small font-weight-bold text-dark">Holiday Work Hours <span class="text-danger">*</span></label>
+                                                    <input type="number" step="0.01" name="holiday_work_hours" id="holiday_work_hours" class="form-control form-control-sm" required />
+                                                </div>
+                                                <div class="col-md-3 col-6">
+                                                    <label class="small font-weight-bold text-dark">Holiday OT Start</label>
+                                                    <br>
+                                                    <div class="form-check-inline">
+                                                        <label class="form-check-label">
+                                                            <input type="radio" class="form-check-input holiday_ot_start" name="holiday_ot_start" id="holiday_ot_start_1" value="1" checked>As Act
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-check-inline">
+                                                        <label class="form-check-label">
+                                                            <input type="radio" class="form-check-input holiday_ot_start" name="holiday_ot_start" id="holiday_ot_start_0" value="0">Shift Time
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3 col-6">
+                                                    <label class="small font-weight-bold text-dark">Holiday Lunch Deduct</label>
+                                                    <br>
+                                                    <div class="form-check-inline">
+                                                        <label class="form-check-label">
+                                                            <input type="radio" class="form-check-input holiday_lunch_deduct" name="holiday_lunch_deduct" id="holiday_lunch_deduct_0" value="0" checked>No
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-check-inline">
+                                                        <label class="form-check-label">
+                                                            <input type="radio" class="form-check-input holiday_lunch_deduct" name="holiday_lunch_deduct" id="holiday_lunch_deduct_1" value="1">Yes
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div class="form-row mb-2">
-                                    <div class="col-md-4 advance_value" style="display: none">
-                                        <label class="small font-weight-bold text-dark">Advance Value</label>
-                                            <br>
-                                            <div class="form-check-inline">
-                                                <label class="form-check-label">
+                                {{-- SECTION 5: Weekend OT --}}
+                                <div class="card mb-2 border">
+                                    <div class="card-header p-2 d-flex justify-content-between align-items-center" data-toggle="collapse" data-target="#section_weekend" aria-expanded="false" style="cursor:pointer; background:#f8f9fa;">
+                                        <span class="font-weight-bold small text-dark"><i class="fas fa-calendar-week mr-1"></i> Weekend OT</span>
+                                        <i class="fas fa-chevron-down small text-muted section-icon"></i>
+                                    </div>
+                                    <div class="collapse" id="section_weekend">
+                                        <div class="card-body p-2">
+                                            {{-- Saturday --}}
+                                            <p class="small font-weight-bold text-dark mb-1">Saturday OT Type</p>
+                                            <div class="form-row mb-2">
+                                                <div class="col-12">
+                                                    <div class="form-check-inline">
+                                                        <label class="form-check-label">
+                                                            <input type="radio" class="form-check-input is_sat_ot_type_as_act" name="is_sat_ot_type_as_act" id="is_sat_ot_type_as_act_1" value="1" checked>As Act
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-check-inline">
+                                                        <label class="form-check-label">
+                                                            <input type="radio" class="form-check-input is_sat_ot_type_as_act" name="is_sat_ot_type_as_act" id="is_sat_ot_type_as_act_0" value="0">Custom
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-check-inline">
+                                                        <label class="form-check-label">
+                                                            <input type="radio" class="form-check-input is_sat_ot_type_as_act" name="is_sat_ot_type_as_act" id="is_sat_ot_type_as_act_2" value="2">Saturday is a working date
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-row mb-2 custom_sat" style="display: none">
+                                                <div class="col-12">
+                                                    <label class="small font-weight-bold text-dark">Custom Saturday OT Type</label>
+                                                    <br>
+                                                    <div class="form-check-inline">
+                                                        <label class="form-check-label">
+                                                            <input type="radio" class="form-check-input" name="custom_saturday_ot_type" id="custom_saturday_ot_type_1" value="1" checked>1
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-check-inline">
+                                                        <label class="form-check-label">
+                                                            <input type="radio" class="form-check-input" name="custom_saturday_ot_type" id="custom_saturday_ot_type_2" value="2">2
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <hr class="my-2">
+                                            {{-- Sunday --}}
+                                            <p class="small font-weight-bold text-dark mb-1">Sunday OT Type</p>
+                                            <div class="form-row mb-2">
+                                                <div class="col-12">
+                                                    <div class="form-check-inline">
+                                                        <label class="form-check-label">
+                                                            <input type="radio" class="form-check-input is_sun_ot_type_as_act" name="is_sun_ot_type_as_act" id="is_sun_ot_type_as_act_1" value="1" checked>As Act
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-check-inline">
+                                                        <label class="form-check-label">
+                                                            <input type="radio" class="form-check-input is_sun_ot_type_as_act" name="is_sun_ot_type_as_act" id="is_sun_ot_type_as_act_0" value="0">Custom
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-check-inline">
+                                                        <label class="form-check-label">
+                                                            <input type="radio" class="form-check-input is_sun_ot_type_as_act" name="is_sun_ot_type_as_act" id="is_sun_ot_type_as_act_2" value="2">Sunday is a working date
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-row mb-2">
+                                                <div class="col-md-4 col-6 custom_sun" style="display: none">
+                                                    <label class="small font-weight-bold text-dark">Custom Sunday OT Type</label>
+                                                    <br>
+                                                    <div class="form-check-inline">
+                                                        <label class="form-check-label">
+                                                            <input type="radio" class="form-check-input custom_sunday_ot_type" name="custom_sunday_ot_type" id="custom_sunday_ot_type_1" value="1">1
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-check-inline">
+                                                        <label class="form-check-label">
+                                                            <input type="radio" class="form-check-input custom_sunday_ot_type" name="custom_sunday_ot_type" id="custom_sunday_ot_type_2" value="2">2
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4 col-6 custom_sun_after" style="display: none">
+                                                    <label class="small font-weight-bold text-dark">After how many hours will it double?</label>
+                                                    <input type="number" class="form-control form-control-sm" name="sun_after_double" id="sun_after_double"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- SECTION 6: Special Day --}}
+                                <div class="card mb-2 border">
+                                    <div class="card-header p-2 d-flex justify-content-between align-items-center" data-toggle="collapse" data-target="#section_special" aria-expanded="false" style="cursor:pointer; background:#f8f9fa;">
+                                        <span class="font-weight-bold small text-dark"><i class="fas fa-star mr-1"></i> Special Day OT</span>
+                                        <i class="fas fa-chevron-down small text-muted section-icon"></i>
+                                    </div>
+                                    <div class="collapse" id="section_special">
+                                        <div class="card-body p-2">
+                                            <div class="form-row mb-2">
+                                                <div class="col-md-4 col-12">
+                                                    <label class="small font-weight-bold text-dark">Special Day 01 Day</label>
+                                                    <select class="form-control form-control-sm" id="spe_day_1_day" name="spe_day_1_day">
+                                                        <option value="">Select Day</option>
+                                                        <option value="0">Sunday</option>
+                                                        <option value="1">Monday</option>
+                                                        <option value="2">Tuesday</option>
+                                                        <option value="3">Wednesday</option>
+                                                        <option value="4">Thursday</option>
+                                                        <option value="5">Friday</option>
+                                                        <option value="6">Saturday</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-4 col-12">
+                                                    <label class="small font-weight-bold text-dark">Special Day 01 OT Type</label>
+                                                    <div class="form-check">
+                                                        <input type="radio" class="form-check-input spe_day_1_type" name="spe_day_1_type" id="spe_day_1_type_0" value="0">
+                                                        <label class="form-check-label" for="spe_day_1_type_0">Custom</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4 col-12 custom_spe">
+                                                    <label class="small font-weight-bold text-dark">Custom Special Day OT Type</label>
+                                                    <br>
+                                                    <div class="form-check form-check-inline">
+                                                        <input type="radio" class="form-check-input" name="spe_day_1_rate" id="spe_day_1_rate_1" value="1">
+                                                        <label class="form-check-label" for="spe_day_1_rate_1">1</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input type="radio" class="form-check-input" name="spe_day_1_rate" id="spe_day_1_rate_2" value="2">
+                                                        <label class="form-check-label" for="spe_day_1_rate_2">2</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- SECTION 7: Late & Deductions --}}
+                                <div class="card mb-2 border">
+                                    <div class="card-header p-2 d-flex justify-content-between align-items-center" data-toggle="collapse" data-target="#section_late" aria-expanded="false" style="cursor:pointer; background:#f8f9fa;">
+                                        <span class="font-weight-bold small text-dark"><i class="fas fa-user-clock mr-1"></i> Late & Deductions</span>
+                                        <i class="fas fa-chevron-down small text-muted section-icon"></i>
+                                    </div>
+                                    <div class="collapse" id="section_late">
+                                        <div class="card-body p-2">
+                                            <div class="form-row mb-2">
+                                                <div class="col-12">
+                                                    <label class="small font-weight-bold text-dark">Late Type</label>
+                                                    <br>
+                                                    <div class="form-check-inline">
+                                                        <label class="form-check-label">
+                                                            <input type="radio" class="form-check-input late_type" name="late_type" id="late_type_1" value="1">Late Per Minutes
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-check-inline">
+                                                        <label class="form-check-label">
+                                                            <input type="radio" class="form-check-input late_type" name="late_type" id="late_type_2" value="2">Late Leave
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-check-inline">
+                                                        <label class="form-check-label">
+                                                            <input type="radio" class="form-check-input late_type" name="late_type" id="late_type_3" value="3">Custom
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-row mb-2">
+                                                <div class="col-md-4 col-6 per_min" style="display: none">
+                                                    <label class="small font-weight-bold text-dark">Late Attendance Minutes</label>
+                                                    <input type="number" class="form-control form-control-sm" name="late_attend_min" id="late_attend_min"/>
+                                                </div>
+                                                <div class="col-md-4 col-6 short_lev" style="display: none">
+                                                    <label class="small font-weight-bold text-dark">Short Leaves</label>
+                                                    <input type="number" class="form-control form-control-sm" name="short_leaves" id="short_leaves"/>
+                                                </div>
+                                                <div class="col-md-4 col-6 half_day" style="display: none">
+                                                    <label class="small font-weight-bold text-dark">Half Days</label>
+                                                    <input type="number" class="form-control form-control-sm" name="half_days" id="half_days"/>
+                                                </div>
+                                            </div>
+                                            <div class="form-row mb-2">
+                                                <div class="col-12">
+                                                    <label class="small font-weight-bold text-dark">Late Deduction Calculation</label>
+                                                    <br>
+                                                    <div class="form-check-inline">
+                                                        <label class="form-check-label">
+                                                            <input type="radio" class="form-check-input late_deduct_calculation" name="late_deduct_calculation" id="late_deduct_calculation_1" value="1" checked>Nopay
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-check-inline">
+                                                        <label class="form-check-label">
+                                                            <input type="radio" class="form-check-input late_deduct_calculation" name="late_deduct_calculation" id="late_deduct_calculation_2" value="2">Normal OT
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-check-inline">
+                                                        <label class="form-check-label">
+                                                            <input type="radio" class="form-check-input late_deduct_calculation" name="late_deduct_calculation" id="late_deduct_calculation_3" value="3">Double OT
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- SECTION 8: Salary Advance --}}
+                                <div class="card mb-2 border">
+                                    <div class="card-header p-2 d-flex justify-content-between align-items-center" data-toggle="collapse" data-target="#section_advance" aria-expanded="false" style="cursor:pointer; background:#f8f9fa;">
+                                        <span class="font-weight-bold small text-dark"><i class="fas fa-money-bill-wave mr-1"></i> Salary Advance</span>
+                                        <i class="fas fa-chevron-down small text-muted section-icon"></i>
+                                    </div>
+                                    <div class="collapse" id="section_advance">
+                                        <div class="card-body p-2">
+                                            <div class="form-row mb-2">
+                                                <div class="col-12">
+                                                    <label class="small font-weight-bold text-dark">Salary Advance Type</label>
+                                                    <br>
+                                                    <div class="form-check-inline">
+                                                        <label class="form-check-label">
+                                                            <input type="radio" class="form-check-input salary_advance_type" name="salary_advance_type" id="salary_advance_type_1" value="1">Percentage
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-check-inline">
+                                                        <label class="form-check-label">
+                                                            <input type="radio" class="form-check-input salary_advance_type" name="salary_advance_type" id="salary_advance_type_2" value="2">Fixed Amount
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-row mb-2">
+                                                <div class="col-md-4 col-6 advance_value" style="display: none">
+                                                    <label class="small font-weight-bold text-dark">Advance Value</label>
                                                     <input type="number" step="0.01" class="form-control form-control-sm" name="salary_advance_value" id="salary_advance_value"/>
-                                                </label>
-                                            </div>
-                                    </div>
-                                    <div class="col-md-4 advance_min_date" style="display: none">
-                                        <label class="small font-weight-bold text-dark">Minimum Working Dates</label>
-                                            <br>
-                                            <div class="form-check-inline">
-                                                <label class="form-check-label">
+                                                </div>
+                                                <div class="col-md-4 col-6 advance_min_date" style="display: none">
+                                                    <label class="small font-weight-bold text-dark">Minimum Working Dates</label>
                                                     <input type="number" step="0.01" class="form-control form-control-sm" name="salary_advance_min_date" id="salary_advance_min_date"/>
-                                                </label>
+                                                </div>
                                             </div>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -576,12 +595,24 @@
         </div>
     </div>
     <!-- Modal Area End -->
+
+
 </main>
 @endsection
 
 @section('script')
 <script>
 $(document).ready(function(){
+
+    $(document).on('click', '[data-toggle="collapse"]', function () {
+        var target = $(this).data('target');
+        var icon = $(this).find('.section-icon');
+        if ($(target).hasClass('show')) {
+            icon.removeClass('fa-chevron-up').addClass('fa-chevron-down');
+        } else {
+            icon.removeClass('fa-chevron-down').addClass('fa-chevron-up');
+        }
+    });
 
     $('#organization_menu_link').addClass('active');
     $('#organization_menu_link_icon').addClass('active');
@@ -854,6 +885,26 @@ $(document).ready(function(){
         $('.double_ot').hide();
         $('.advance_value').hide();
         $('.advance_min_date').hide();
+
+        // Reset all collapse sections to default state (Basic Info & Payroll open, rest closed)
+        $('#section_basic').addClass('show');
+        $('#section_payroll').addClass('show');
+        $('#section_ot').removeClass('show');
+        $('#section_holiday').removeClass('show');
+        $('#section_weekend').removeClass('show');
+        $('#section_special').removeClass('show');
+        $('#section_late').removeClass('show');
+        $('#section_advance').removeClass('show');
+
+        // Reset chevron icons
+        $('[data-target="#section_basic"]').find('.section-icon').removeClass('fa-chevron-down').addClass('fa-chevron-up');
+        $('[data-target="#section_payroll"]').find('.section-icon').removeClass('fa-chevron-down').addClass('fa-chevron-up');
+        $('[data-target="#section_ot"]').find('.section-icon').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+        $('[data-target="#section_holiday"]').find('.section-icon').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+        $('[data-target="#section_weekend"]').find('.section-icon').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+        $('[data-target="#section_special"]').find('.section-icon').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+        $('[data-target="#section_late"]').find('.section-icon').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+        $('[data-target="#section_advance"]').find('.section-icon').removeClass('fa-chevron-up').addClass('fa-chevron-down');
 
 
         $('#formModal').modal('show');
