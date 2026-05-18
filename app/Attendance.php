@@ -42,6 +42,13 @@ class Attendance extends Model
                  $halfDayHours = $expectedHours / 2;
             }
 
+         $empjob_cat = DB::table('employees')
+            ->leftJoin('job_categories', 'job_categories.id' , '=', 'employees.job_category_id')
+            ->select('job_categories.full_day_work_hours')
+            ->where('emp_id', $emp_id)
+            ->first();
+
+        $full_day_work_hours = $empjob_cat ? $empjob_cat->full_day_work_hours : 8;
 
         $query = "SELECT Max(at1.timestamp) as lasttimestamp,
         Min(at1.timestamp) as firsttimestamp
@@ -70,20 +77,14 @@ class Attendance extends Model
                 continue;
             }
 
-            $work_days++;
             //get difference in hours
-           // $diff = round((strtotime($last_time) - strtotime($first_time)) / 3600, 1);
+           $diff = round((strtotime($last_time) - strtotime($first_time)) / 3600, 1);
 
-            //if diff is greater than 8 hours then it is a work day
-            //if diff is greater than 4 hours then it is a half day
-            //if diff is greater than 2 hours then it is a half day
-            // if ($diff >= $expectedHours) {
-            //     $work_days++;
-            // } elseif ($diff >= $halfDayHours) {
-            //     $work_days += 0.5;
-            // } elseif ($diff >= ($halfDayHours / 2)){
-            //     //$work_days += 0.25;
-            // }
+            if ($diff >= $full_day_work_hours) {
+                $work_days++;
+            } else{
+                $work_days += 0.5;
+            }
         }
         return $work_days;
     }

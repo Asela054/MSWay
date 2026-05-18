@@ -14,6 +14,7 @@ $columns = array(
     array('db' => '`u`.`target`', 'dt' => 'target', 'field' => 'target'),
     array('db' => '`u`.`produce`', 'dt' => 'produce', 'field' => 'produce'),
     array('db' => '`u`.`difference`', 'dt' => 'difference', 'field' => 'difference'),
+    array('db' => '`u`.`average_percentage`', 'dt' => 'average_percentage', 'field' => 'average_percentage'),
     array('db' => '`u`.`bonus`', 'dt' => 'bonus', 'field' => 'bonus'),
     array('db' => '`u`.`damage`', 'dt' => 'damage', 'field' => 'damage')
 );
@@ -38,6 +39,10 @@ $sql = "SELECT
         `ep`.`target`,
         `ep`.`produce`,
         `ep`.`difference`,
+         CASE 
+            WHEN `ep`.`target` > 0 THEN (`ep`.`produce` / `ep`.`target`) * 100
+            ELSE 0
+        END AS `average_percentage`,
         `ep`.`bonus`,
         `ep`.`damage`
     FROM `opma_daily_production_summary` AS `ep`

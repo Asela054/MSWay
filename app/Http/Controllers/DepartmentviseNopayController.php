@@ -6,6 +6,7 @@ use App\Helpers\UserHelper;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Leave;
+use App\LeaveType;
 use Illuminate\Support\Facades\Auth;
 use Validator;
 use DB;
@@ -20,7 +21,8 @@ class DepartmentviseNopayController extends Controller
         if (!$permission) {
             abort(403);
         }
-        return view('Attendent.absentnopay');
+        $leavetype = LeaveType::orderBy('id', 'asc')->get();
+        return view('Attendent.absentnopay', compact('leavetype'));
     }
 
 
@@ -109,6 +111,7 @@ class DepartmentviseNopayController extends Controller
 
         $dataarry = $request->input('dataarry');
         $leavedate =  $request->input('from_date');
+        $leavetype =  $request->input('leavetype');
 
         $current_date_time = Carbon::now()->toDateTimeString();
 
@@ -124,7 +127,7 @@ class DepartmentviseNopayController extends Controller
 
 
             $leave = Leave::where('emp_id', $empid)
-              ->where('leave_type', '3')
+              ->where('leave_type', $leavetype)
               ->whereDate('leave_from', '<=', $leavedate)
               ->whereDate('leave_to', '>=', $leavedate)
               ->first();
@@ -147,7 +150,7 @@ class DepartmentviseNopayController extends Controller
 
             $leave = new Leave;
             $leave->emp_id = $empid;
-            $leave->leave_type = '3';
+            $leave->leave_type = $leavetype;
             $leave->leave_from = $leavedate;
             $leave->leave_to = $leavedate;
             $leave->no_of_days = $no_of_days;

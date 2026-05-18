@@ -367,12 +367,12 @@
                                                                         <table class="table table-striped table-sm small nowrap" style="width: 100%" id="productiondataTable">
                                                                             <thead>
                                                                                 <tr>
-                                                                                    <th>ID</th>
                                                                                     <th>EMPLOYEE</th>
                                                                                     <th>DATE</th>
                                                                                     <th>TARGET</th>
                                                                                     <th>DAY PRODUCE</th>
                                                                                     <th>PLUS/MINUS</th>
+                                                                                    <th>AVERAGE</th>
                                                                                     <th>BONUS AMOUNT</th>
                                                                                     <th>DAMAGE QTY</th>
                                                                                 </tr>
@@ -385,7 +385,7 @@
                                                             </div>
                                                         </div>
                                                     </div>  
-                                                </div>  
+                                                </div> 
                                             </div>
                                         </div>
                                     </div>      
@@ -1324,12 +1324,21 @@
                             { employee :empid},
                     },
                     columns: [
-                        { data: 'id', name: 'id' },
                         { data: 'emp_name', name: 'emp_name' },
                         { data: 'date', name: 'date' },
                         { data: 'target', name: 'target' },
                         { data: 'produce', name: 'produce' },
                         { data: 'difference', name: 'difference' },
+                        { 
+                            data: 'average_percentage',  // Now this exists in the server response
+                            name: 'average_percentage',
+                            render: function(data, type, row) {
+                                if (type === 'display' || type === 'filter') {
+                                    return parseFloat(data).toFixed(2) + '%';
+                                }
+                                return data;
+                            }
+                        },
                        { 
                             data: 'bonus', 
                             name: 'bonus',
@@ -1345,57 +1354,9 @@
         });
 
 
+
     });
 
-    // function load_dt(emp_id) {            
-    //     $('#divicestable').DataTable({
-    //         processing: true,
-    //         serverSide: true,
-    //         ajax: {
-    //             "url": "{!! route('user_leave_list') !!}",
-    //             "data": {
-    //                 'emp_id': emp_id
-    //             },
-    //         },
-    //         columns: [{
-    //                 data: 'emp_id',
-    //                 name: 'emp_id'
-    //             },
-    //             {
-    //                 data: 'leave_type',
-    //                 name: 'leave_type'
-    //             },
-    //             {
-    //                 data: 'half_or_short',
-    //                 name: 'half_or_short'
-    //             },
-    //             {
-    //                 data: 'leave_from',
-    //                 name: 'leave_from'
-    //             },
-    //             {
-    //                 data: 'leave_to',
-    //                 name: 'leave_to'
-    //             },
-    //             {
-    //                 data: 'reson',
-    //                 name: 'reson'
-    //             },
-    //             {
-    //                 data: 'covering_emp',
-    //                 name: 'covering_emp'
-    //             },
-    //             {
-    //                 data: 'status',
-    //                 name: 'status'
-    //             },
-    //         ],
-    //         "bDestroy": true,
-    //         "order": [
-    //             [5, "desc"]
-    //         ]
-    //     });
-    // }
     function load_dt(empid){
         $('#divicestable').DataTable({
             destroy: true,
@@ -1633,8 +1594,40 @@
     function attendent_load_dt(emp_id) {
         var attendancemonth = $('#attendancemonth').val();
         $('#attendtable').DataTable({
+            destroy: true,
             processing: true,
             serverSide: true,
+            dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+            buttons: [{
+                    extend: 'csv',
+                    className: 'btn btn-success btn-sm',
+                    title: 'Attendance Details',
+                    text: '<i class="fas fa-file-csv mr-2"></i> CSV',
+                },
+                { 
+                    extend: 'pdf', 
+                    className: 'btn btn-danger btn-sm', 
+                    title: 'Attendance Details', 
+                    text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
+                    orientation: 'landscape', 
+                    pageSize: 'legal', 
+                    customize: function(doc) {
+                        doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+                    }
+                },
+                {
+                    extend: 'print',
+                    title: 'Attendance Details',
+                    className: 'btn btn-primary btn-sm',
+                    text: '<i class="fas fa-print mr-2"></i> Print',
+                    customize: function(win) {
+                        $(win.document.body).find('table')
+                            .addClass('compact')
+                            .css('font-size', 'inherit');
+                    },
+                },
+            ],
             ajax: {
                 "url": "{!! route('get_employee_attendance') !!}",
                 "data": {

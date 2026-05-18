@@ -112,10 +112,41 @@
                     </ul>
                 </div>
             </div>
-
-
         </div>
         
+         <div class="modal fade" id="approveModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Apply Absent Nopay </h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="message_modal"></div>
+                            <form class="form-horizontal" id="formApprove">
+                                <div class="form-group mb-1">
+                                    <div class="col-12">
+                                         <label class="small font-weight-bolder text-dark">Leave Type</label>
+                                            <select name="leavetype" id="leavetype" class="form-control form-control-sm">
+                                                <option value="">Select Leave Type</option>
+                                                    @foreach ($leavetype as $type){
+                                                        <option value="{{$type->id}}" >{{$type->leave_type}}</option>
+                                                    }  
+                                                    @endforeach
+                                            </select>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary btn-sm px-3" id="btn-approve"><i class="fa-light fa-light fa-clipboard-check"></i>&nbsp;Apply</button>
+                        </div>
+                    </div>
+                </div>
+        </div>
+
     </main>
 
 @endsection
@@ -249,83 +280,177 @@
 
         var selectedRowIdsapprove = [];
 
-        $('#approve').click(async function () {
-            var r = await Otherconfirmation("You want to Approve this ? ");
-            if (r == true) {
-                 selectedRowIdsapprove = [];
-                    $('#dataTable tbody .selectCheck:checked').each(function () {
-                        var rowData = $('#dataTable').DataTable().row($(this).closest('tr')).data();
-                        if (rowData) {
-                            selectedRowIdsapprove.push({
-                                empid: rowData[1],
-                                emp_name: rowData[2], 
-                                emp_autoid: rowData[3],
-                            });
-                        }
-                    });
+        // $('#approve').click(async function () {
+        //     var r = await Otherconfirmation("You want to Approve this ? ");
+        //     if (r == true) {
+        //          selectedRowIdsapprove = [];
+        //             $('#dataTable tbody .selectCheck:checked').each(function () {
+        //                 var rowData = $('#dataTable').DataTable().row($(this).closest('tr')).data();
+        //                 if (rowData) {
+        //                     selectedRowIdsapprove.push({
+        //                         empid: rowData[1],
+        //                         emp_name: rowData[2], 
+        //                         emp_autoid: rowData[3],
+        //                     });
+        //                 }
+        //             });
 
-                    if (selectedRowIdsapprove.length > 0) {
-                     console.log(selectedRowIdsapprove);
-                        $.ajaxSetup({
-                            headers: {
-                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                            }
-                        })
+        //             if (selectedRowIdsapprove.length > 0) {
+        //              console.log(selectedRowIdsapprove);
+        //                 $.ajaxSetup({
+        //                     headers: {
+        //                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        //                     }
+        //                 })
 
-                        var from_date = $('#from_date').val();
-                        $.ajax({
-                            url: '{!! route("applyabsentnopay") !!}',
-                            type: 'POST',
-                            dataType: "json",
-                            data: {
-                                dataarry: selectedRowIdsapprove,
-                                from_date:from_date
-                            },
-                            success: function (data) {
+        //                 var from_date = $('#from_date').val();
+        //                 $.ajax({
+        //                     url: '{!! route("applyabsentnopay") !!}',
+        //                     type: 'POST',
+        //                     dataType: "json",
+        //                     data: {
+        //                         dataarry: selectedRowIdsapprove,
+        //                         from_date:from_date
+        //                     },
+        //                     success: function (data) {
 
-                              if (data.errors) {
-                                const actionObj = {
-                                    icon: 'fas fa-warning',
-                                    title: '',
-                                    message: 'Record Error',
-                                    url: '',
-                                    target: '_blank',
-                                    type: 'danger'
-                                };
-                                const actionJSON = JSON.stringify(actionObj, null, 2);
-                                action(actionJSON);
-                            }
-                            if (data.success) {
-                                const actionObj = {
-                                    icon: 'fas fa-save',
-                                    title: '',
-                                    message: data.success,
-                                    url: '',
-                                    target: '_blank',
-                                    type: 'success'
-                                };
-                                const actionJSON = JSON.stringify(actionObj, null, 2);
-                                actionreload(actionJSON);
-                            }
+        //                       if (data.errors) {
+        //                         const actionObj = {
+        //                             icon: 'fas fa-warning',
+        //                             title: '',
+        //                             message: 'Record Error',
+        //                             url: '',
+        //                             target: '_blank',
+        //                             type: 'danger'
+        //                         };
+        //                         const actionJSON = JSON.stringify(actionObj, null, 2);
+        //                         action(actionJSON);
+        //                     }
+        //                     if (data.success) {
+        //                         const actionObj = {
+        //                             icon: 'fas fa-save',
+        //                             title: '',
+        //                             message: data.success,
+        //                             url: '',
+        //                             target: '_blank',
+        //                             type: 'success'
+        //                         };
+        //                         const actionJSON = JSON.stringify(actionObj, null, 2);
+        //                         actionreload(actionJSON);
+        //                     }
 
                             
-                            }
-                        })
+        //                     }
+        //                 })
 
-                    } else {
+        //             } else {
                         
-                        Swal.fire({
-                        position: "top-end",
-                        icon: 'warning',
-                        title: 'Select Rows to Final Approve!',
-                        showConfirmButton: false,
-                        timer: 2500
-                        });
-                    }
+        //                 Swal.fire({
+        //                 position: "top-end",
+        //                 icon: 'warning',
+        //                 title: 'Select Rows to Final Approve!',
+        //                 showConfirmButton: false,
+        //                 timer: 2500
+        //                 });
+        //             }
 
 
-            }
-        });
+        //     }
+        // });
+
+
+        $('#approve').click(async function () {
+              var r = await Otherconfirmation("You want to Approve this ? ");
+              if (r == true) {
+                  $('.message_modal').html('');
+                  $('#approveModal').modal('show');
+
+                  //#btn-approve
+                  $('#btn-approve').on('click', function (e) {
+                      e.preventDefault();
+                      var leavetype = $('#leavetype').val();
+                      var from_date = $('#from_date').val();
+
+                      if (leavetype == '') {
+                          Swal.fire({
+                              position: "top-end",
+                              icon: 'warning',
+                              title: 'Please select Leave Type!',
+                              showConfirmButton: false,
+                              timer: 2500
+                          });
+                          return false;
+                      } else {
+                          selectedRowIdsapprove = [];
+                          $('#dataTable tbody .selectCheck:checked').each(function () {
+                              var rowData = $('#dataTable').DataTable().row($(this).closest('tr')).data();
+
+                              if (rowData) {
+                                selectedRowIdsapprove.push({
+                                    empid: rowData[1],
+                                    emp_name: rowData[2], 
+                                    emp_autoid: rowData[3],
+                                });
+                            }
+                          });
+                          if (selectedRowIdsapprove.length > 0) {
+                              console.log(selectedRowIdsapprove);
+                              $.ajaxSetup({
+                                  headers: {
+                                      'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                                  }
+                              });
+
+                              $.ajax({
+                                  url: '{!! route("applyabsentnopay") !!}',
+                                  type: 'POST',
+                                  dataType: "json",
+                                   data: {
+                                        dataarry: selectedRowIdsapprove,
+                                        from_date:from_date,
+                                        leavetype:leavetype
+                                    },
+                                  success: function (data) {
+                                      if (data.errors) {
+                                          const actionObj = {
+                                              icon: 'fas fa-warning',
+                                              title: '',
+                                              message: 'Record Error',
+                                              url: '',
+                                              target: '_blank',
+                                              type: 'danger'
+                                          };
+                                          const actionJSON = JSON.stringify(actionObj, null, 2);
+                                          action(actionJSON);
+                                      }
+                                      if (data.success) {
+                                          const actionObj = {
+                                              icon: 'fas fa-save',
+                                              title: '',
+                                              message: data.success,
+                                              url: '',
+                                              target: '_blank',
+                                              type: 'success'
+                                          };
+                                          const actionJSON = JSON.stringify(actionObj, null, 2);
+                                          actionreload(actionJSON);
+                                      }
+                                  }
+                              });
+                          } else {
+                              Swal.fire({
+                                  position: "top-end",
+                                  icon: 'warning',
+                                  title: 'Select Rows to Apply Nopay!',
+                                  showConfirmButton: false,
+                                  timer: 2500
+                              });
+                          }
+                      }
+
+                  });
+              }
+          });
 
         $('#selectAll').click(function (e) {
             $('#dataTable').closest('table').find('td input:checkbox').prop('checked', this.checked);
