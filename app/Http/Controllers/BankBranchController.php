@@ -186,5 +186,40 @@ class BankBranchController extends Controller
             return response()->json($results);
         }
     }
+    
+    //Branch List get with code for select2
+    public function branch_list2(Request $request){
+        if ($request->ajax())
+        {
+            $page = Input::get('page');
+            $bankcode = Input::get('bank');
+            $resultCount = 25;
+
+            $offset = ($page - 1) * $resultCount;
+
+            $breeds = Bank_branch::where('branch', 'LIKE',  '%' . Input::get("term"). '%')
+                ->where('status','1')
+                ->where('bankcode',"$bankcode")
+                ->orderBy('code')
+                ->skip($offset)
+                ->take($resultCount)
+                ->get([DB::raw('code as id'),DB::raw('branch as text')]);
+
+            $count = Bank_branch::where('status', '1')
+                ->where('bankcode',"$bankcode")
+                ->count();
+            $endCount = $offset + $resultCount;
+            $morePages = $endCount < $count;
+
+            $results = array(
+                "results" => $breeds,
+                "pagination" => array(
+                    "more" => $morePages
+                )
+            );
+
+            return response()->json($results);
+        }
+    }
 
 }
