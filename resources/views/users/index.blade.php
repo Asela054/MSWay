@@ -102,15 +102,33 @@
                                 </select>
                             </div>
 
-                            <div class="form-group">
-                                <label class="small font-weight-bold text-dark">Accessible Companies</label>
-                                <select name="company[]" id="company" class="form-control form-control-sm" multiple></select>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="small font-weight-bold text-dark">Accessible Branches</label>
-                                <select name="location[]" id="location" class="form-control form-control-sm" multiple>
-                                </select>
+                            <div class="card mb-2 border mt-2">
+                                <div class="card-header p-2 d-flex justify-content-between align-items-center" 
+                                    data-toggle="collapse" data-target="#section_access" aria-expanded="false" 
+                                    style="cursor:pointer; background:#f8f9fa;">
+                                    <span class="font-weight-bold small text-dark">
+                                        <i class="fas fa-building mr-1"></i> Access Restrictions
+                                    </span>
+                                    <i class="fas fa-chevron-down small text-muted section-icon-access"></i>
+                                </div>
+                                <div class="collapse" id="section_access">
+                                    <div class="card-body p-2">
+                                        <div class="alert alert-info p-2 mb-2" style="font-size:0.78rem;">
+                                            <i class="fas fa-info-circle mr-1"></i>
+                                            When you assign companies and branches to this user, they will <strong>only</strong> be able to access those specific companies and branches. Leave empty to allow access to all.
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="col-md-6 col-12 mb-2">
+                                                <label class="small font-weight-bold text-dark">Accessible Companies</label>
+                                                <select name="company[]" id="company" class="form-control form-control-sm" multiple></select>
+                                            </div>
+                                            <div class="col-md-6 col-12 mb-2">
+                                                <label class="small font-weight-bold text-dark">Accessible Branches</label>
+                                                <select name="location[]" id="location" class="form-control form-control-sm" multiple></select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="form-group mt-3">
@@ -137,6 +155,15 @@
 @section('script')
 <script>
     $(document).ready(function(){
+
+    $(document).on('click', '[data-target="#section_access"]', function () {
+        var icon = $(this).find('.section-icon-access');
+        if ($('#section_access').hasClass('show')) {
+            icon.removeClass('fa-chevron-up').addClass('fa-chevron-down');
+        } else {
+            icon.removeClass('fa-chevron-down').addClass('fa-chevron-up');
+        }
+    });
 
         $('#administrator_menu_link').addClass('active');
         $('#administrator_menu_link_icon').addClass('active');
@@ -330,6 +357,14 @@
         $('#action').val('Add');
         $('#form_result').html(''); 
         $('#formTitle')[0].reset();
+
+        $('#company').val(null).trigger('change');
+        $('#location').val(null).trigger('change');
+
+        $('#section_access').removeClass('show');
+        $('[data-target="#section_access"]').find('.section-icon-access')
+            .removeClass('fa-chevron-up').addClass('fa-chevron-down');
+
         $('#formModal').modal('show');
     });
 
