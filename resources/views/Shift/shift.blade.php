@@ -204,7 +204,7 @@ $(document).ready(function () {
     let location_f = $('#location_f');
 
     company_f.select2({
-        placeholder: 'Select...',
+        placeholder: 'Select a Company',
         width: '100%',
         allowClear: true,
         ajax: {
@@ -221,7 +221,7 @@ $(document).ready(function () {
     });
 
     department_f.select2({
-        placeholder: 'Select...',
+        placeholder: 'Select a Department',
         width: '100%',
         allowClear: true,
         ajax: {
@@ -231,7 +231,8 @@ $(document).ready(function () {
                 return {
                     term: params.term || '',
                     page: params.page || 1,
-                    company: company_f.val()
+                    company: company_f.val(),
+                    location: location_f.val()
                 }
             },
             cache: true
@@ -239,7 +240,7 @@ $(document).ready(function () {
     });
 
     employee_f.select2({
-        placeholder: 'Select...',
+        placeholder: 'Select a Employee',
         width: '100%',
         allowClear: true,
         ajax: {
@@ -248,7 +249,10 @@ $(document).ready(function () {
             data: function(params) {
                 return {
                     term: params.term || '',
-                    page: params.page || 1
+                    page: params.page || 1,
+                    company: company_f.val(),
+                    location: location_f.val(),
+                    department: department_f.val()
                 }
             },
             cache: true
@@ -256,7 +260,7 @@ $(document).ready(function () {
     });
 
     location_f.select2({
-        placeholder: 'Select...',
+        placeholder: 'Select Location',
         width: '100%',
         allowClear: true,
         ajax: {
@@ -265,7 +269,8 @@ $(document).ready(function () {
             data: function(params) {
                 return {
                     term: params.term || '',
-                    page: params.page || 1
+                    page: params.page || 1,
+                    company: company_f.val(),
                 }
             },
             cache: true

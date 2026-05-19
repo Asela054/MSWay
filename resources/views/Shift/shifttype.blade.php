@@ -204,6 +204,37 @@
                                     </div>     --}}
                                 </div>
 
+                                <div class="form-row mb-1">
+                                    <div class="col">
+                                        <label class="small font-weight-bold text-dark">Off Next Day</label>
+                                        <br>
+                                        <div class="form-check-inline">
+                                            <label class="form-check-label">
+                                                <input type="radio" class="form-check-input off_next_day" name="off_next_day" id="off_next_day_1" value="1" >Yes
+                                            </label>
+                                        </div>
+                                        <div class="form-check-inline">
+                                            <label class="form-check-label">
+                                                <input type="radio" class="form-check-input off_next_day" name="off_next_day" id="off_next_day_0" value="0">No
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <label class="small font-weight-bold text-dark">On Next Day</label>
+                                        <br>
+                                        <div class="form-check-inline">
+                                            <label class="form-check-label">
+                                                <input type="radio" class="form-check-input on_next_day" name="on_next_day" id="on_next_day_1" value="1" >Yes
+                                            </label>
+                                        </div>
+                                        <div class="form-check-inline">
+                                            <label class="form-check-label">
+                                                <input type="radio" class="form-check-input on_next_day" name="on_next_day" id="on_next_day_0" value="0">No
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 {{-- <div class="form-row mb-1">
                                     <div class="col">
                                         <div class="custom-control custom-checkbox">
@@ -475,6 +506,22 @@ $(document).ready(function(){
                 }else if(data.result.offduty_day === 0) {
                     $('#offduty_day_0').prop( "checked", true );
                     $('.custom_offduty').css('display', 'block');
+                }
+
+                if(data.result.off_next_day == 1){
+                    $('#off_next_day_1').prop( "checked", true );
+                    $('.custom_off_next_day').css('display', 'none');
+                }else if(data.result.off_next_day === 0) {
+                    $('#off_next_day_0').prop( "checked", true );
+                    $('.custom_off_next_day').css('display', 'block');
+                }
+
+                if(data.result.on_next_day == 1){
+                    $('#on_next_day_1').prop( "checked", true );
+                    $('.custom_on_next_day').css('display', 'none');
+                }else if(data.result.on_next_day === 0) {
+                    $('#on_next_day_0').prop( "checked", true );
+                    $('.custom_on_next_day').css('display', 'block');
                 }
 
                 if(data.result.ot_calculate_type == 1){
