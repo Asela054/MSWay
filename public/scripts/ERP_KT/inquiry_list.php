@@ -25,6 +25,17 @@ $joinQuery = "FROM `kt_inquiries` AS `u`
     LEFT JOIN `kt_inquiry_details` AS `d` ON `d`.`inquiry_id` = `u`.`id`";
 
 $extraWhere = "`u`.`status` != 3";
+
+if (!empty($_POST['customer_id'])) {
+    $customer_id = $_POST['customer_id'];
+    $extraWhere .= " AND `u`.`customer_id` = '$customer_id'";
+}
+
+if (!empty($_POST['from_date']) && !empty($_POST['to_date'])) {
+    $from_date = $_POST['from_date'];
+    $to_date = $_POST['to_date'];
+    $extraWhere .= " AND `u`.`date` BETWEEN '$from_date' AND '$to_date'";
+}
 $groupBy    = "`u`.`id`";
 
 echo json_encode(
