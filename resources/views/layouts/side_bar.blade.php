@@ -16,6 +16,7 @@
     $hasempproductionPermissions = in_array('Access-Employee_Production', $userPermissions);
     $hasproductionPermissions_Opma = in_array('Access-Production_Task_Opma', $userPermissions);
     $hasERPPermissions_KT = in_array('Access-ERP_KT', $userPermissions);
+    $hasWorkRatePermissions = in_array('Access-Work_Rates', $userPermissions);
 
 @endphp
 <div class="sidebar" id="sidebar">
@@ -54,6 +55,16 @@
                 <span class="links_name">Attendance & Leave</span>
             </a>
             <span class="tooltip">Attendance & Leave</span>
+        </li>
+        @endif
+
+        @if($hasWorkRatePermissions)
+        <li>
+            <a href="{{ url('/empworkrate') }}" id="workrate_menu_link">
+                <i class="fa-light fa-user-clock"></i>
+                <span class="links_name">Work Rate Management</span>
+            </a>
+            <span class="tooltip">Work Rate Management</span>
         </li>
         @endif
 
