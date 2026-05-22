@@ -1897,6 +1897,16 @@ Route::get('empworkrate',['uses' => 'EmployeeWorkRates\EmployeeWorkRateControlle
 Route::get('emp_work_rate_list',['uses' => 'EmployeeWorkRates\EmployeeWorkRateController@emp_work_rate_list', 'as' => 'emp_work_rate_list']);
 Route::post('emp_work_rate_add', 'EmployeeWorkRates\EmployeeWorkRateController@emp_work_rate_add')->name('emp_work_rate_add');
 
+//department wise reports
+Route::get('departmentemployee_wise_leavereport', 'DepartmentemployeewisereportController@index')->name('departmentemployee_wise_leavereport');
+Route::post('/departmentemployeewise_generateleavereport', 'DepartmentemployeewisereportController@generateleavereport')->name('departmentemployeewise_generateleavereport');
+Route::get('departmentemployee_wise_otreport', 'DepartmentemployeewisereportController@otreport')->name('departmentemployee_wise_otreport');
+Route::post('/departmentemployeewise_generateotreport', 'DepartmentemployeewisereportController@generateotreport')->name('departmentemployeewise_generateotreport');
+Route::get('departmentemployee_wise_latereport', 'DepartmentemployeewisereportController@latereport')->name('departmentemployee_wise_latereport');
+Route::post('/departmentemployeewise_generatelatereport', 'DepartmentemployeewisereportController@generatelatereport')->name('departmentemployeewise_generatelatereport');
+
+
+
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');
     Artisan::call('config:clear');

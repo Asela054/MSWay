@@ -1,0 +1,265 @@
+
+@extends('layouts.app')
+
+@section('content')
+
+    <main>
+         <div class="page-header">
+             <div class="container-fluid d-none d-sm-block shadow">
+                 @include('layouts.reports_nav_bar')
+             </div>
+             <div class="container-fluid">
+                 <div class="page-header-content py-3 px-2">
+                     <h1 class="page-header-title ">
+                         <div class="page-header-icon"><i class="fa-light fa-file-contract"></i></div>
+                         <span>Department-Wise Employee Leave Report</span>
+                     </h1>
+                 </div>
+             </div>
+         </div>
+
+        <div class="container-fluid mt-2 p-0 p-2">
+            <div class="card">
+                    <div class="card-body p-0 p-2 main_card">
+                        <div class="col-md-12">
+                            <button class="btn btn-warning btn-sm filter-btn float-right px-3" type="button"
+                                data-toggle="offcanvas" data-target="#offcanvasRight" aria-controls="offcanvasRight"><i
+                                    class="fas fa-filter mr-1"></i> Filter
+                                Records</button>
+                        </div><br>
+                        <div class="col-12">
+                            <hr class="border-dark">
+                        </div>
+                        <div class="table_outer">
+                            <div class="daily_table table-responsive center-block fix-width scroll-inner" id="tableContainer">
+                            </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+              <div class="offcanvas-header">
+                  <h2 class="offcanvas-title font-weight-bolder" id="offcanvasRightLabel">Records Filter Options</h2>
+                  <button type="button" class="btn-close" data-dismiss="offcanvas" aria-label="Close">
+                      <span aria-hidden="true" class="h1 font-weight-bolder">&times;</span>
+                  </button>
+              </div>
+              <div class="offcanvas-body">
+                  <ul class="list-unstyled">
+                      <form class="form-horizontal" id="formFilter">
+                          <li class="mb-2">
+                              <div class="col-md-12">
+                                  <label class="small font-weight-bolder text-dark">Company*</label>
+                                <select name="company" id="company" class="form-control form-control-sm">
+                                </select>
+                              </div>
+                          </li>
+                          <li class="mb-2">
+                              <div class="col-md-12">
+                                 <label class="small font-weight-bolder text-dark">Department*</label>
+                                <select name="department" id="department" class="form-control form-control-sm">
+                                </select>
+                              </div>
+                          </li>
+                            <li class="mb-2">
+                                <div class="col-md-12">
+                                    <label class="small font-weight-bolder text-dark">Location</label>
+                                    <select name="location" id="location" class="form-control form-control-sm">
+                                    </select>
+                                </div>
+                            </li>
+                          <li class="mb-2">
+                              <div class="col-md-12">
+                                  <label class="small font-weight-bolder text-dark">Type*</label>
+                                  <select name="reporttype" id="reporttype" class="form-control form-control-sm">
+                                    <option value="">Please Select Type</option>
+                                    <option value="1">Month Wise</option>
+                                    <option value="2">Date Range Wise</option>
+                                </select>
+                              </div>
+                          </li>
+
+                          <li class="div_date_range">
+                              <div class="col-md-12">
+                                  <label class="small font-weight-bolder text-dark">From Date</label>
+                                  <div class="input-group input-group-sm mb-2">
+                                      <input type="date" id="from_date" name="from_date"
+                                          class="form-control form-control-sm" placeholder="yyyy-mm-dd">
+                                  </div>
+                              </div>
+                          </li>
+                          <li class="div_date_range">
+                              <div class="col-md-12">
+                                  <label class="small font-weight-bolder text-dark">To Date  </label>
+                                  <div class="input-group input-group-sm mb-2">
+                                      <input type="date" id="to_date" name="to_date"  class="form-control form-control-sm" placeholder="yyyy-mm-dd">
+                                  </div>
+                              </div>
+                          </li>
+                          <li id="div_month">
+                              <div class="col-md-12">
+                                 <label class="small font-weight-bolder text-dark">Month</label>
+                                 <div class="input-group input-group-sm mb-2">
+                                    <input type="month" id="selectedmonth" name="selectedmonth" class="form-control form-control-sm" placeholder="yyyy-mm-dd">
+                                </div>
+                              </div>
+                          </li>
+                          <li>
+                              <div class="col-md-12 d-flex justify-content-between">
+                                 
+                                  <button type="button" class="btn btn-danger btn-sm filter-btn px-3" id="btn-reset">
+                                      <i class="fas fa-redo mr-1"></i> Reset
+                                  </button>
+                                   <button type="submit" class="btn btn-primary btn-sm filter-btn px-3" id="btn-filter">
+                                      <i class="fas fa-search mr-2"></i>Search
+                                  </button>
+                              </div>
+                          </li>
+                      </form>
+                  </ul>
+              </div>
+            </div>
+
+      </div>
+    </main>
+
+
+@endsection
+
+@section('script')
+
+    <script>
+        $(document).ready(function () {
+
+            $('#report_menu_link').addClass('active');
+            $('#report_menu_link_icon').addClass('active');
+            $('#departmentvisereport').addClass('navbtnactive');
+ 
+            showInitialMessage()
+
+            $('.div_date_range').addClass('d-none');
+            $('#div_month').addClass('d-none');
+            $('#reporttype').on('change', function () {
+                let $type = $(this).val();
+                if ($type == 1) {
+
+                    $('.div_date_range').addClass('d-none');
+                    $('#div_month').removeClass('d-none');
+
+                } else {
+                    $('#div_month').addClass('d-none');
+                    $('.div_date_range').removeClass('d-none');
+                }
+            });
+
+            let company = $('#company');
+            let department = $('#department');
+            let location = $('#location');
+
+            company.select2({
+                placeholder: 'Select a Company',
+                width: '100%',
+                allowClear: true,
+                ajax: {
+                    url: '{{url("company_list_sel2")}}',
+                    dataType: 'json',
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1
+                        }
+                    },
+                    cache: true
+                }
+            });
+
+            department.select2({
+                placeholder: 'Select a Department',
+                width: '100%',
+                allowClear: true,
+                ajax: {
+                    url: '{{url("department_list_sel2")}}',
+                    dataType: 'json',
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1,
+                            company: company.val()
+                        }
+                    },
+                    cache: true
+                }
+            });
+
+            location.select2({
+                placeholder: 'Select a Location',
+                width: '100%',
+                allowClear: true,
+                ajax: {
+                    url: '{{url("location_list_sel2")}}',
+                    dataType: 'json',
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1
+                        }
+                    },
+                    cache: true
+                }
+            });
+
+            $('#formFilter').on('submit', function (e) {
+                let department = $('#department').val();
+                let location = $('#location').val();
+                let from_date = $('#from_date').val();
+                let to_date = $('#to_date').val();
+                let reporttype = $('#reporttype').val();
+                let selectedmonth = $('#selectedmonth').val();
+                e.preventDefault();
+
+                closeOffcanvasSmoothly();
+
+                 $.ajaxSetup({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    }
+                });
+                $.ajax({
+                    url: '{{ route("departmentemployeewise_generateleavereport") }}',
+                    type: 'POST',
+                    data: {
+                        department: department,
+                        location: location,
+                        from_date: from_date,
+                        to_date: to_date,
+                        reporttype: reporttype,
+                        selectedmonth: selectedmonth
+                    },
+                    success: function (response) {
+                        $('#tableContainer').html(response.html);
+                        $('#leave_report').DataTable({});
+                    }
+                });
+            });
+
+            $('#btn-reset').on('click', function () {
+            $('#formFilter')[0].reset();
+            $('#company').val(null).trigger('change');
+            $('#department').val(null).trigger('change');
+        });
+    
+        });
+
+         function showInitialMessage() {
+        $('#tableContainer').html(
+            '<div class="d-flex flex-column align-items-center">' +
+            '<i class="fas fa-filter fa-3x text-muted mb-2"></i>' +
+            '<h4 class="text-muted mb-2">No Records Found</h4>' +
+            '<p class="text-muted">Use the filter options to get records</p>' +
+            '</div>'
+        );
+        }
+    </script>
+
+@endsection
+

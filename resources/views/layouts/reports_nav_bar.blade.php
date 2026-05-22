@@ -35,6 +35,9 @@
           <li><a class="dropdown-item" id="resignation_report_link" href="{{ route('departmentwise_attendancereport') }}">Department-Wise Attendance Report</a></li>
           <li><a class="dropdown-item" href="{{ route('departmentwise_otreport')}}"> Department-Wise O.T. Report</a></li>
           <li><a class="dropdown-item" href="{{ route('departmentwise_leavereport')}}">Department-Wise Leave Report</a></li>
+          <li><a class="dropdown-item" href="{{ route('departmentemployee_wise_leavereport')}}">Department-Wise Employee Leave Report</a></li>
+          <li><a class="dropdown-item" href="{{ route('departmentemployee_wise_otreport')}}">Department-Wise Employee O.T. Report</a></li>
+          <li><a class="dropdown-item" href="{{ route('departmentemployee_wise_latereport')}}">Department-Wise Employee Late Report</a></li>
           <li><a class="dropdown-item" href="{{ route('joballocationreport')}}">Job Allocation Report</a></li>
         </ul>
   </div>
