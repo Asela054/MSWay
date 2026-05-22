@@ -1892,6 +1892,11 @@ Route::get('KTSpecial_Rate/destroy/{id}', 'ERP_KT\ERPSpecialRateController@destr
 
 // End of KT Clean Routes
 
+// Attendance Approval Controller Routes
+Route::get('empworkrate',['uses' => 'EmployeeWorkRates\EmployeeWorkRateController@empworkrate', 'as' => 'empworkrate']);
+Route::get('emp_work_rate_list',['uses' => 'EmployeeWorkRates\EmployeeWorkRateController@emp_work_rate_list', 'as' => 'emp_work_rate_list']);
+Route::post('emp_work_rate_add', 'EmployeeWorkRates\EmployeeWorkRateController@emp_work_rate_add')->name('emp_work_rate_add');
+
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');
     Artisan::call('config:clear');
