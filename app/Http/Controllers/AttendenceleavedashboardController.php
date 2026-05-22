@@ -19,11 +19,6 @@ class AttendenceleavedashboardController extends Controller
 
          $userId = Auth::id();
         $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
-        
-        // Return empty HTML if no accessible employees
-        if (empty($accessibleEmployeeIds)) {
-            return response()->json(['html' => '']);
-        }
 
         $userCompanyIds = DB::table('user_has_companies')
             ->where('user_id', $userId)

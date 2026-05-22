@@ -108,6 +108,31 @@ class ProductionEndingController extends Controller
                                             ->where('emp_id', $allocation->emp_id)
                                             ->first();
 
+                 if ($existingRecord) {
+                    // Backup existing record to backup table
+                    DB::table('opma_employee_production_backup')->insert([
+                        'allocation_id' => $existingRecord->allocation_id,
+                        'emp_id' => $existingRecord->emp_id,
+                        'date' => $existingRecord->date,
+                        'machine_id' => $existingRecord->machine_id,
+                        'product_id' => $existingRecord->product_id,
+                        'target' => $existingRecord->target,
+                        'Produce_qty' => $existingRecord->Produce_qty,
+                        'difference' => $existingRecord->difference,
+                        'precentage' => $existingRecord->precentage,
+                        'amount' => $existingRecord->amount,
+                        'description' => $existingRecord->description,
+                        'damage_precentage' => $existingRecord->damage_precentage,
+                        'damage_qty' => $existingRecord->damage_qty,
+                        'perfomance' => $existingRecord->perfomance,
+                        'status' => $existingRecord->status,
+                        'created_by' => Auth::id(),
+                        'updated_by' => Auth::id(),
+                        'created_at' => $current_date_time,
+                        'updated_at' => $current_date_time 
+                    ]);
+                }
+
                 $data = [
                 'allocation_id' => $hidden_id,
                 'emp_id' => $allocation->emp_id,
