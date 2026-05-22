@@ -16,13 +16,12 @@
             </div>
         </div>
 
-        <div class="container-fluid mt-4">
-
+        <div class="container-fluid mt-2 p-0 p-2">
             <div class="card">
                 <div class="card-body p-0 p-2">
                     <div class="row">
                         <div class="col-12 text-right">
-                                <button type="button" class="btn btn-primary btn-sm px-4" name="create_record" id="create_record"><i class="fas fa-plus mr-2"></i>Create New Permission</button>
+                                <button type="button" class="btn btn-primary btn-sm px-4" name="create_record" id="create_record"><i class="fas fa-plus mr-2"></i>Create Permissions</button>
                         </div>
                         <div class="col-12">
                             <hr class="border-dark">
@@ -41,7 +40,7 @@
                                     <th>NO</th>
                                     <th>PERMISSION</th>
                                     <th>MODULE</th>
-                                    <th width="280px">ACTION</th>
+                                    <th class="text-right">ACTION</th>
                                 </tr>
                                 </thead>
                                 
@@ -54,7 +53,7 @@
                 </div>
             </div>
         </div>
-        <!-- Modal Area Start -->
+    <!-- Modal Area Start -->
     <div class="modal fade" id="formModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-md">
             <div class="modal-content">
@@ -69,21 +68,129 @@
                         <div class="col">
                             <span id="form_result"></span>
                             <form method="post" id="formTitle">
-                             {{ csrf_field() }}
+                                {{ csrf_field() }}
+                                <div class="row">
+                                    <!-- Permission Name -->
+                                    <div class="col-xs-12 col-sm-12 col-md-12">
+                                        <div class="form-group">
+                                            <strong>Permission <span class="text-danger">*</span></strong>
+                                            <input 
+                                                type="text" 
+                                                name="name" 
+                                                id="name" 
+                                                class="form-control form-control-sm" 
+                                                placeholder="Permission Name e.g. location-list" 
+                                                value="{{ old('name') }}" required>
+                                        </div>
+                                    </div>
 
+                                    <!-- Module List -->
+                                    <div class="col-xs-12 col-sm-12 col-md-12">
+                                        <div class="form-group">
+                                            <strong>Module <span class="text-danger">*</span></strong><br>
+                                            <input 
+                                                list="modules" 
+                                                name="module" 
+                                                id="module" 
+                                                class="form-control form-control-sm" 
+                                                value="{{ old('module') }}" required>
+                                            <datalist id="modules">
+                                                @foreach($modules as $module)
+                                                    <option value="{{ $module->module }}"></option>
+                                                @endforeach
+                                            </datalist>
+                                        </div>
+                                    </div>
+
+                                    <!-- Permission Checkboxes -->
+                                    <div class="col-xs-12 col-sm-12 col-md-12">
+                                        <div class="form-group">
+                                            <strong>Permission Types:</strong>
+                                            <small class="text-muted d-block mb-2">If none selected, only the permission name will be saved.</small>
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input permission-type" type="checkbox" name="permission_types[]" id="perm_list" value="list">
+                                                        <label class="form-check-label" for="perm_list">List Permission</label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input permission-type" type="checkbox" name="permission_types[]" id="perm_create" value="create">
+                                                        <label class="form-check-label" for="perm_create">Create Permission</label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input permission-type" type="checkbox" name="permission_types[]" id="perm_edit" value="edit">
+                                                        <label class="form-check-label" for="perm_edit">Edit Permission</label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input permission-type" type="checkbox" name="permission_types[]" id="perm_delete" value="delete">
+                                                        <label class="form-check-label" for="perm_delete">Delete Permission</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input permission-type" type="checkbox" name="permission_types[]" id="perm_status" value="status">
+                                                        <label class="form-check-label" for="perm_status">Status Permission</label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input permission-type" type="checkbox" name="permission_types[]" id="perm_approve" value="approve">
+                                                        <label class="form-check-label" for="perm_approve">Approve Permission</label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input permission-type" type="checkbox" name="permission_types[]" id="perm_check" value="check">
+                                                        <label class="form-check-label" for="perm_check">Check Permission</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="form-group mt-3">
+                                    <button type="submit" name="action_button" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-4">
+                                        <i class="fas fa-plus"></i>&nbsp;Add
+                                    </button>
+                                </div>
+
+                                <input type="hidden" name="action" id="action" value="Add">
+                                <input type="hidden" name="hidden_id" id="hidden_id">
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="formModal_edit" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-md">
+            <div class="modal-content">
+                <div class="modal-header p-2">
+                    <h6 class="modal-title" id="staticBackdropLabel"></h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col">
+                            <span id="form_result_edit"></span>
+                            <form method="post" id="formTitle_edit">
+                             {{ csrf_field() }}
                             
                                  <div class="row">
                                 <!-- Permission Name -->
                                 <div class="col-xs-12 col-sm-12 col-md-12">
                                     <div class="form-group">
-                                        <strong>Permission:</strong>
+                                        <strong>Permission <span class="text-danger">*</span></strong>
                                         <input 
                                             type="text" 
                                             name="name" 
-                                            id="name" 
+                                            id="name_edit" 
                                             class="form-control form-control-sm" 
                                             placeholder="Permission Name" 
-                                            value="{{ old('name') }}">
+                                            value="{{ old('name') }}" 
+                                            required>
                                         
                                     </div>
                                 </div>
@@ -91,13 +198,14 @@
                                 <!-- Module List -->
                                 <div class="col-xs-12 col-sm-12 col-md-12">
                                     <div class="form-group">
-                                        <strong>Module:</strong><br>
+                                        <strong>Module <span class="text-danger">*</span></strong><br>
                                         <input 
                                             list="modules" 
                                             name="module" 
-                                            id="module" 
+                                            id="module_edit" 
                                             class="form-control form-control-sm" 
-                                            value="{{ old('module') }}">
+                                            value="{{ old('module') }}" 
+                                            required>
                                         <datalist id="modules">
                                             @foreach($modules as $module)
                                                 <option value="{{ $module->module }}"></option>
@@ -106,17 +214,15 @@
                                        
                                     </div>
                                 </div>
-                            
-
 
                             <div class="form-group mt-3">
-                                <button type="submit" name="action_button" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-4">
-                                    <i class="fas fa-plus"></i>&nbsp;Add
+                                <button type="submit" name="action_button_edit" id="action_button_edit" class="btn btn-primary btn-sm fa-pull-right px-4">
+                                    <i class="fas fa-pencil-alt"></i>&nbsp;Edit
                                 </button>
                             </div>
 
-                            <input type="hidden" name="action" id="action" value="Add">
-                            <input type="hidden" name="hidden_id" id="hidden_id">
+                            <input type="hidden" name="action_edit" id="action_edit" value="Add">
+                            <input type="hidden" name="hidden_id" id="hidden_id_edit">
                         </form>
 
                         </div>
@@ -125,71 +231,12 @@
             </div>
         </div>
     </div>
-    </main>
-
+</main>
 @endsection
 
 @section('script')
     <script>
         $(document).ready(function(){
-        // $('#permissiontable').DataTable({
-        //     "destroy": true,
-        //     "processing": true,
-        //     "serverSide": true,
-        //     dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
-        //         "<'row'<'col-sm-5'i><'col-sm-7'p>>",
-        //     "buttons": [{
-        //             extend: 'csv',
-        //             className: 'btn btn-success btn-sm',
-        //             title: 'User Role Information',
-        //             text: '<i class="fas fa-file-csv mr-2"></i> CSV',
-        //         },
-        //         { 
-        //             extend: 'pdf', 
-        //             className: 'btn btn-danger btn-sm', 
-        //             title: 'User Role Information', 
-        //             text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
-        //             orientation: 'landscape', 
-        //             pageSize: 'legal', 
-        //             customize: function(doc) {
-        //                 doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
-        //             }
-        //         },
-        //         {
-        //             extend: 'print',
-        //             title: 'User Role Information',
-        //             className: 'btn btn-primary btn-sm',
-        //             text: '<i class="fas fa-print mr-2"></i> Print',
-        //             customize: function(win) {
-        //                 $(win.document.body).find('table')
-        //                     .addClass('compact')
-        //                     .css('font-size', 'inherit');
-        //             },
-        //         },
-        //         // 'copy', 'csv', 'excel', 'pdf', 'print'
-        //     ],
-        //     "order": [
-        //         [0, "desc"]
-        //     ],
-        //     ajax: {
-        //         url: scripturl + "/permission_list.php",
-        //         type: "POST",
-        //     },
-        //     columns: [
-        //         { data: 'id', name: 'id' },
-        //         { data: 'name', name: 'name' },
-        //         { data: 'module', name: 'module' },
-        //         { 
-        //             data: 'emp_id',
-        //             name: 'emp_id',
-        //             render: function(data, type, full) {
-        //                 return '<a class="btn btn-outline-primary btn-sm edit" ><i class="fa fa-pencil-alt"></i></a>';
-        //             }
-        //         }
-        //     ],
-        //     order: [[2, "desc"]], // last column
-        //     destroy: true
-        // });
 
         $('#permissiontable').DataTable({
                 "destroy": true,
@@ -278,8 +325,8 @@
 
 
             $('#create_record').click(function(){
-                $('.modal-title').text('Create New Permission');
-                $('#action_button').html('Add');
+                $('.modal-title').text('Create Permissions');
+                $('#action_button').html('<i class="fas fa-plus"></i>&nbsp;Add');
                 $('#action').val('Add');
                 $('#form_result').html('');
                 $('#formTitle')[0].reset();
@@ -334,19 +381,55 @@
                 
             });
 
+            $('#formTitle_edit').on('submit', function(event){
+                event.preventDefault();
+
+                $.ajax({
+                    url: "{{ route('permissions.update') }}",
+                    method: "POST",
+                    data: $(this).serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.errors) {
+                            const actionObj = {
+                                icon: 'fas fa-warning',
+                                title: '',
+                                message: data.errors,
+                                url: '',
+                                target: '_blank',
+                                type: 'danger'
+                            };
+                            action(JSON.stringify(actionObj));
+                        }
+                        if (data.success) {
+                            const actionObj = {
+                                icon: 'fas fa-save',
+                                title: '',
+                                message: data.success,
+                                url: '',
+                                target: '_blank',
+                                type: 'success'
+                            };
+                            $('#formTitle_edit')[0].reset();
+                            $('#formModal_edit').modal('hide');
+                            actionreload(JSON.stringify(actionObj));
+                        }
+                    }
+                });
+            });
+
             $(document).on('click', '.edit', async function() {
                 var r = await Otherconfirmation("You want to Edit this ? ");
                 if (r == true) {
                     var id = $(this).attr('id');
-                    $('#form_result').html('');
+                    $('#form_result_edit').html('');
                     $.ajax({
                     url: "{{ route('permissions.edit', ':id') }}".replace(':id', id),
                     dataType: "json",
                     success: function (data) {
-                        // Set form values
-                        $('#name').val(data.permission.name);
-                        $('#hidden_id').val(data.permission.id);
-                        $('#module').val(data.permission.module);
+                        $('#name_edit').val(data.permission.name);
+                        $('#hidden_id_edit').val(data.permission.id);
+                        $('#module_edit').val(data.permission.module);
 
                         // Update datalist dynamically
                         let datalist = $('#modules');
@@ -355,11 +438,10 @@
                             datalist.append(`<option value="${item.module}"></option>`);
                         });
 
-                        // Show modal
                         $('.modal-title').text('Edit Permission');
-                        $('#action_button').show().html('Update');
-                        $('#action').val('Edit');
-                        $('#formModal').modal('show');
+                        $('#action_button_edit').show().html('<i class="fas fa-pencil-alt"></i>&nbsp;Edit');
+                        $('#action_edit').val('Edit');
+                        $('#formModal_edit').modal('show');
                     }
                 });
 

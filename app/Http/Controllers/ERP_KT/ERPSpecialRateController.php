@@ -45,6 +45,7 @@ class ERPSpecialRateController extends Controller
 
         $form_data = array(
             'job_title'=>$request->job_title,
+            'machine_id'=>$request->machine_id ?: 0,
             'emp_id'=>$request->employee,
             'rate'=>$request->rate,
             'remarks'=>$request->remarks,
@@ -52,6 +53,7 @@ class ERPSpecialRateController extends Controller
 
         $special_rate=new SpecialRate;
         $special_rate->job_title=$request->input('job_title');
+        $special_rate->machine_id=$request->input('machine_id') ?: 0;
         $special_rate->emp_id=$request->input('employee');
         $special_rate->rate=$request->input('rate');
         $special_rate->remarks=$request->input('remarks');       
@@ -94,6 +96,7 @@ class ERPSpecialRateController extends Controller
 
        $form_data = array(
             'job_title'=>$request->job_title,
+            'machine_id'=>$request->machine_id ?: 0,
             'emp_id'=>$request->employee,
             'rate'=>$request->rate,
             'remarks'=>$request->remarks,

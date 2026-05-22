@@ -16,6 +16,7 @@
     $hasempproductionPermissions = in_array('Access-Employee_Production', $userPermissions);
     $hasproductionPermissions_Opma = in_array('Access-Production_Task_Opma', $userPermissions);
     $hasERPPermissions_KT = in_array('Access-ERP_KT', $userPermissions);
+    $hasWorkRatePermissions = in_array('Access-Work_Rates', $userPermissions);
 
 @endphp
 <div class="sidebar" id="sidebar">
@@ -54,6 +55,16 @@
                 <span class="links_name">Attendance & Leave</span>
             </a>
             <span class="tooltip">Attendance & Leave</span>
+        </li>
+        @endif
+
+        @if($hasWorkRatePermissions)
+        <li>
+            <a href="{{ url('/empworkrate') }}" id="workrate_menu_link">
+                <i class="fa-light fa-user-clock"></i>
+                <span class="links_name">Work Rate Management</span>
+            </a>
+            <span class="tooltip">Work Rate Management</span>
         </li>
         @endif
 
@@ -234,6 +245,17 @@
                                 <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('serviceletter')}}">Employee Service Letter</a>
                                 <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('resignletter')}}">Employee Resignation Letter</a>
                                 <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('end_user_letter')}}">Employee End User Letter</a>
+                            </nav>
+                        </div>
+                        <a href="javascript:void(0);" data-toggle="collapse" data-target="#collapsTrainManagement" aria-expanded="false" aria-controls="collapsTrainManagement" class="py-1">
+                            <span class="links_name">Training Management<i class="fas fa-angle-down"></i></span>
+                        </a>
+                        <div class="collapse" id="collapsTrainManagement" data-parent="#accordionSubSidenavPages">
+                            <nav class="sidenav-menu-nested nav">
+                                <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('Trainingtype')}}" id="">Training Type</a>
+                                <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('TrainingAllocation')}}">Training Allocation</a>
+                                <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('train_defect_point')}}">Training Points</a>
+                                <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('train_summary')}}">Training Summary</a>
                             </nav>
                         </div>
                         <a href="javascript:void(0);" data-toggle="collapse" data-target="#collapsEmpPerformance" aria-expanded="false" aria-controls="collapsEmpPerformance" class="py-1">

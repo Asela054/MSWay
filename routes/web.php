@@ -1480,42 +1480,50 @@ Route::get('/qr-modal', 'QRController@generateQRModal')->name('qr.modal');
 
 /*-- Training Management----*/
 /*-- Types----*/
-Route::resource('Trainingtype', 'TrainingTypeController');
-Route::get('Trainingtype',['uses' => 'TrainingTypeController@index', 'as' => 'Trainingtype']); 
-Route::post('addTrainingtype',['uses' => 'TrainingTypeController@store', 'as' => 'addTrainingtype']); 
-Route::post('Trainingtype/update', 'TrainingTypeController@update')->name('Trainingtype.update');
-Route::get('Trainingtype/destroy/{id}', 'TrainingTypeController@destroy');
+Route::resource('Trainingtype', 'Training_Management\TrainingTypeController');
+Route::get('Trainingtype',['uses' => 'Training_Management\TrainingTypeController@index', 'as' => 'Trainingtype']); 
+Route::post('addTrainingtype',['uses' => 'Training_Management\TrainingTypeController@store', 'as' => 'addTrainingtype']); 
+Route::post('Trainingtype/update', 'Training_Management\TrainingTypeController@update')->name('Trainingtype.update');
+Route::get('Trainingtype/destroy/{id}', 'Training_Management\TrainingTypeController@destroy');
 /*-- Types----*/
 /*-- allocation----*/
-Route::get('/TrainingAllocation/getData','TrainingAllocationController@getData')->name('TrainingAllocation.getData');
-Route::get('TrainingAllocation', 'TrainingAllocationController@index')->name('TrainingAllocation');
-Route::post('addTrainingAllocation',['uses' => 'TrainingAllocationController@store', 'as' => 'addTrainingAllocation']); 
-Route::post('TrainingAllocation/update', 'TrainingAllocationController@update')->name('TrainingAllocation.update');
-Route::get('TrainingAllocation/destroy/{id}', 'TrainingAllocationController@destroy')->name('TrainingAllocation.destroy');
-Route::get('TrainingAllocation/{id}/edit', 'TrainingAllocationController@edit')->name('TrainingAllocation.edit');
+Route::get('/TrainingAllocation/getData','Training_Management\TrainingAllocationController@getData')->name('TrainingAllocation.getData');
+Route::get('TrainingAllocation', 'Training_Management\TrainingAllocationController@index')->name('TrainingAllocation');
+Route::post('addTrainingAllocation',['uses' => 'Training_Management\TrainingAllocationController@store', 'as' => 'addTrainingAllocation']); 
+Route::post('TrainingAllocation/update', 'Training_Management\TrainingAllocationController@update')->name('TrainingAllocation.update');
+Route::get('TrainingAllocation/destroy/{id}', 'Training_Management\TrainingAllocationController@destroy')->name('TrainingAllocation.destroy');
+Route::get('TrainingAllocation/{id}/edit', 'Training_Management\TrainingAllocationController@edit')->name('TrainingAllocation.edit');
 /*-- allocation----*/
 /*-- Employee allocation----*/
-Route::get('trainingEmpAllocation', 'TrainingEmployeeAllocationController@index')->name('trainingEmpAllocation');
-Route::get('TrainEmpShow/{id}', 'TrainingEmployeeAllocationController@show')->name('TrainEmpShow');
-Route::post('/trainingEmpAllocationinsert' ,'TrainingEmployeeAllocationController@insert')->name('trainingEmpAllocationinsert');
-Route::get('trainingEmpAllocation/destroy/{id}', 'TrainingEmployeeAllocationController@destroy')->name('trainingEmpAllocation.destroy');
+Route::post('/trainingEmpAllocationinsert' ,'Training_Management\TrainingEmployeeAllocationController@insert')->name('trainingEmpAllocationinsert');
+Route::get('trainingEmpAllocation/destroy/{id}', 'Training_Management\TrainingEmployeeAllocationController@destroy')->name('trainingEmpAllocation.destroy');
+Route::get('TrainingAllocation/{id}/employees', 'Training_Management\TrainingAllocationController@getEmployees');
 /*-- Employee allocation----*/
-/*-- Employee attendance----*/
-Route::get('train_attendance',['uses' => 'TrainingAttendanceController@train_attendance', 'as' => 'train_attendance']);
-Route::get('train_Attendance_list',['uses' => 'TrainingAttendanceController@train_Attendance_list', 'as' => 'train_Attendance_list']);
-Route::post('train_Attendance_mark',['uses' => 'TrainingAttendanceController@train_Attendance_mark', 'as' => 'train_Attendance_mark']);
-Route::get('train_attendances_all',['uses' => 'TrainingAttendanceController@train_attendances_all', 'as' => 'train_attendances_all']);
-Route::get('train_attendance/{id}/edit', ['uses' => 'TrainingAttendanceController@edit', 'as' => 'train_attendance.edit']);
-Route::post('Trainingmark/update', 'TrainingAttendanceController@update')->name('Trainingmark.update');
-/*-- Employee attendance----*/
+/*-- Training Defect Point----*/
+Route::get('train_defect_point',['uses' => 'Training_Management\TrainingDefectPointController@train_defect_point', 'as' => 'train_defect_point']);
+Route::get('train_defect_point_list',['uses' => 'Training_Management\TrainingDefectPointController@train_defect_point_list', 'as' => 'train_defect_point_list']);
+Route::post('train_defect_point_mark',['uses' => 'Training_Management\TrainingDefectPointController@train_defect_point_mark', 'as' => 'train_defect_point_mark']);
+Route::get('train_defect_point/{id}/edit', ['uses' => 'Training_Management\TrainingDefectPointController@edit', 'as' => 'train_defect_point.edit']);
+Route::post('train_defect_point_mark/update', 'Training_Management\TrainingDefectPointController@update')->name('train_defect_point.update');
+
+Route::get('get_allocations_list', ['uses' => 'Training_Management\TrainingDefectPointController@get_allocations', 'as' => 'get_allocations_list']);
+Route::get('get_employees_by_allocation', ['uses' => 'Training_Management\TrainingDefectPointController@get_employees_by_allocation', 'as' => 'get_employees_by_allocation']);
+Route::get('get_session_types', ['uses' => 'Training_Management\TrainingDefectPointController@get_session_types', 'as' => 'get_session_types']);
+/*--  Training Defect Points----*/
 /*-- Summary----*/
-Route::get('train_summary',['uses' => 'TrainingSummaryController@train_summary', 'as' => 'train_summary']);
+Route::get('train_summary',['uses' => 'Training_Management\TrainingSummaryController@train_summary', 'as' => 'train_summary']);
+Route::get('get_summary_types', ['uses' => 'Training_Management\TrainingSummaryController@get_summary_types', 'as' => 'get_summary_types']);
+Route::post('training_summary_list', ['uses' => 'Training_Management\TrainingSummaryController@training_summary_list', 'as' => 'training_summary_list']);
 /*-- Summary----*/
 /*-- select----*/
-Route::get('trainType_list_sel2', 'TrainingTypeController@trainType_list_sel2');
-Route::get('trainVenue_list_sel2', 'TrainingTypeController@trainVenue_list_sel2');
-Route::get('trainEmp_list_sel2', 'TrainingTypeController@trainEmp_list_sel2');
+Route::get('trainType_list_sel2', 'Training_Management\TrainingTypeController@trainType_list_sel2');
+Route::get('trainVenue_list_sel2', 'Training_Management\TrainingTypeController@trainVenue_list_sel2');
+Route::get('trainEmp_list_sel2', 'Training_Management\TrainingTypeController@trainEmp_list_sel2');
 /*-- select----*/
+/*-- Traning allocation types routes ----*/
+Route::get('TrainingAllocation/{id}/types',  'Training_Management\TrainingAllocationController@getTypes');
+Route::post('TrainingAllocation/saveTypes',  'Training_Management\TrainingAllocationController@saveTypes');
+/*-- Traning allocation types routes ----*/
 /*-- Training Management----*/
 
 
@@ -1884,6 +1892,10 @@ Route::get('KTSpecial_Rate/destroy/{id}', 'ERP_KT\ERPSpecialRateController@destr
 
 // End of KT Clean Routes
 
+// Attendance Approval Controller Routes
+Route::get('empworkrate',['uses' => 'EmployeeWorkRates\EmployeeWorkRateController@empworkrate', 'as' => 'empworkrate']);
+Route::get('emp_work_rate_list',['uses' => 'EmployeeWorkRates\EmployeeWorkRateController@emp_work_rate_list', 'as' => 'emp_work_rate_list']);
+Route::post('emp_work_rate_add', 'EmployeeWorkRates\EmployeeWorkRateController@emp_work_rate_add')->name('emp_work_rate_add');
 
 //department wise reports
 Route::get('departmentemployee_wise_leavereport', 'DepartmentemployeewisereportController@index')->name('departmentemployee_wise_leavereport');

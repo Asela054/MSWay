@@ -24,21 +24,29 @@ class PermissionController extends Controller
     }
      public function store(Request $request)
     {
-        // $user = Auth::user();
-        // $permission = $user->can('permissions-create');
-        // if(!$permission) {
-        //     return response()->json(['errors' => array('You do not have permission to insert Permission.')]);
-        // }
-        
-         
-        Permission::create([
-            'name' => $request->name,
-            'guard_name' => 'web',
-            'module' => $request->module, 
-        ]);
-        $modules = DB::table('permissions')->groupBy('module')->get();
-         return response()->json(['success' => 'Permission created  successfully.']);
-       
+        $baseName    = $request->name;
+        $module      = $request->module;
+        $types       = $request->input('permission_types', []); 
+
+        if (!empty($types)) {
+            // Save one permission per selected type: e.g. meter-reading-list
+            foreach ($types as $type) {
+                Permission::create([
+                    'name'       => $baseName . '-' . $type,
+                    'guard_name' => 'web',
+                    'module'     => $module,
+                ]);
+            }
+        } else {
+            // No checkboxes selected — save the base name as-is
+            Permission::create([
+                'name'       => $baseName,
+                'guard_name' => 'web',
+                'module'     => $module,
+            ]);
+        }
+
+        return response()->json(['success' => 'Permission created successfully.']);
     }
     public function edit($id)
     {

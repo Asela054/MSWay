@@ -335,13 +335,32 @@
             }
         });
 
+        let dataTable = null;
+
         function load_dt(customer_name, inquiry, from_date, to_date, machine_name, employee, job_title) {
 
-            if ($.fn.DataTable.isDataTable('#dataTable')) {
-                $('#dataTable').DataTable().destroy();
-                $('#dataTable tbody').empty();
+            if (dataTable !== null) {
+                dataTable.ajax.url('{{ route("kt_approve_approvegenerate") }}').load();
+                // Update the ajax data params
+                dataTable.settings()[0].ajax = {
+                    url: '{{ route("kt_approve_approvegenerate") }}',
+                    type: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        customer_name: customer_name,
+                        inquiry: inquiry,
+                        from_date: from_date,
+                        to_date: to_date,
+                        machine_name: machine_name,
+                        employee: employee,
+                        job_title: job_title,
+                    }
+                };
+                dataTable.ajax.reload();
+                return;
             }
-            $('#dataTable').DataTable({
+
+            dataTable = $('#dataTable').DataTable({
                 "processing": true,
                 "serverSide": true,
                 dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
@@ -482,10 +501,7 @@
             employee.val(null).trigger('change');
             job_title.val(null).trigger('change');
 
-            if ($.fn.DataTable.isDataTable('#dataTable')) {
-                $('#dataTable').DataTable().destroy();
-            }
-            $('#dataTable tbody').empty();
+            load_dt('', '', '', '', '', '', '');
         });
 
 
