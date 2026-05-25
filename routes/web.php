@@ -1797,6 +1797,9 @@ Route::post('/opma_productallocationdeletelist' ,'Production_Module_Opma\Product
  Route::post('opma_production_amount/update', 'Production_Module_Opma\ProductionAmountController@update')->name('opma_production_amount.update');
  Route::get('opma_production_amount/destroy/{id}', 'Production_Module_Opma\ProductionAmountController@destroy');
 
+
+ Route::post('opma_getEmployeeProductionDetails', 'Production_Module_Opma\ProductionDailyApproveController@getEmployeeProductionDetails')->name('opma_getEmployeeProductionDetails');
+
                   // End of Opma Production Section Routes
 
 // call user account summery with user id

@@ -112,6 +112,40 @@
                   </ul>
               </div>
         </div>
+
+
+        <div class="modal fade" id="employeeModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+          aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header p-2">
+                        <h5 class="modal-title" id="staticBackdropLabel">Employee Production Details</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" id="employeeModalBody">
+                        <div class="card">
+                            <div class="card-body p-0">
+                                <table id="productionDetailsTable" class="table table-bordered table-sm mb-0">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th>ID</th>
+                                            <th style="width: 40%;">Style</th>
+                                            <th>Size</th>
+                                            <th>Complete Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <!-- Modal Area End -->
@@ -216,7 +250,16 @@ $(document).ready(function(){
                         }
                     },
                     { data: 'emp_id', name: 'emp_id' },
-                    { data: 'emp_name_with_initial', name: 'emp_name_with_initial' },
+                    {
+                        data: 'emp_name_with_initial', 
+                        name: 'emp_name_with_initial',
+                        render: function(data, type, row) {
+                            return '<div style="display: flex; justify-content: space-between; align-items: center;">' +
+                                '<span>' + data + '</span>' +
+                                '<i class="fa fa-eye text-primary employee-info-icon" style="cursor: pointer; margin-left: 10px;" data-emp-id="' + row.emp_id + '" data-emp-date="' + row.recorddate + '"></i>' +
+                                '</div>';
+                        }
+                    },
                     { data: 'recorddate', name: 'recorddate' },
                     { data: 'total_target', name: 'total_target' },
                     { data: 'total_produce_qty', name: 'total_produce_qty' },
@@ -334,7 +377,74 @@ $(document).ready(function(){
         $('#dataTable').closest('table').find('td input:checkbox').prop('checked', this.checked);
     });
 
+        $(document).on('click', '.employee-info-icon', function() {
+            var empId = $(this).data('emp-id');
+            var empDate = $(this).data('emp-date');
+
+            $('#employeeModal').modal('show');
+            
+              $.ajax({
+                url: '{!! route("opma_getEmployeeProductionDetails") !!}',
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    emp_id: empId,
+                    date: empDate
+                },
+                success: function(response) {
+                    if (response.success) {
+                        displayProductionDetails(response.productions);
+                    }
+                },
+                error: function(xhr) {
+                    $('#employeeModalBody').html('<div class="alert alert-danger">Error: ' + xhr.statusText + '</div>');
+                }
+            });
+        });
 });
+
+    function displayProductionDetails(productions) {
+            // Show the employee info card
+            $('#employeeInfoCard').show();
+            
+            var table = $('#productionDetailsTable').DataTable();
+            if (table) {
+                table.destroy();
+            }
+            
+            $('#productionDetailsTable tbody').empty();
+            
+            if (productions && productions.length > 0) {
+                $.each(productions, function(i, production) {
+                    var row = `
+                        <tr>
+                            <td>${production.id }</td>
+                            <td>${production.style_title || ' '}</td>
+                            <td>${production.size_name || ' '}</td>
+                            <td>
+                                <span>
+                                    ${production.complete_status == 1 ? 'Completed' : 'Not Completed'}
+                                </span>
+                            </td>
+                        </tr>
+                    `;
+                    $('#productionDetailsTable tbody').append(row);
+                });
+            }
+            
+            // Initialize DataTable
+            $('#productionDetailsTable').DataTable({
+                "pageLength": 10,
+                "lengthChange": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "autoWidth": false,
+                "responsive": true,
+                "dom": '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>><"row"<"col-sm-12"t>><"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>'
+            });
+    }
+
 </script>
 
 
