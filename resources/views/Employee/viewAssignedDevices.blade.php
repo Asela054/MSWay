@@ -28,8 +28,8 @@
                                 {{ csrf_field() }}
                                 <div class="form-row mt-2">
                                     <div class="col-md-4 col-sm-6 col-12 mb-2">
-                                        <label class="small font-weight-bold text-dark">Device Type</label>
-                                        <select required class="form-control form-control-sm @if ($errors->has('device_type')) border-danger-soft @endif"
+                                        <label class="small font-weight-bold text-dark">Device Type*</label>
+                                        <!-- <select required class="form-control form-control-sm @if ($errors->has('device_type')) border-danger-soft @endif"
                                                 id="device_type" name="device_type">
                                             <option @if(old('device_type') == '') selected @endif value="">Select</option>
                                             <option @if(old('device_type') == 'Laptop') selected @endif value="Laptop">Laptop</option>
@@ -38,17 +38,23 @@
                                             <option @if(old('device_type') == 'Tab') selected @endif value="Tab">Tab</option>
                                             <option @if(old('device_type') == 'Router') selected @endif value="Router">Router</option>
                                             <option @if(old('device_type') == 'Sim') selected @endif value="Sim">Sim</option>
+                                        </select> -->
+                                        <select name="device_type" id="device_type" class="form-control form-control-sm">
+                                            <option value="">Please Select</option>
+                                            @foreach ($devices as $device)
+                                                <option value="{{$device->id}}">{{$device->device_name}}</option>
+                                            @endforeach
                                         </select>
                                         @if ($errors->has('device_type')) <p class="text-danger small mb-0">{{ $errors->first('device_type') }}</p> @endif
                                     </div>
                                     <div class="col-md-4 col-sm-6 col-12 mb-2">
-                                        <label class="small font-weight-bold text-dark">Model Number</label>
+                                        <label class="small font-weight-bold text-dark">Model Number*</label>
                                         <input required class="form-control form-control-sm @if ($errors->has('model_number')) border-danger-soft @endif"
                                             id="model_number" name="model_number" type="text" value="{{old('model_number')}}">
                                         @if ($errors->has('model_number')) <p class="text-danger small mb-0">{{ $errors->first('model_number') }}</p> @endif
                                     </div>
                                     <div class="col-md-4 col-sm-6 col-12 mb-2">
-                                        <label class="small font-weight-bold text-dark">Serial Number</label>
+                                        <label class="small font-weight-bold text-dark">Serial Number*</label>
                                         <input required class="form-control form-control-sm @if ($errors->has('serial_number')) border-danger-soft @endif"
                                             id="serial_number" name="serial_number" type="text" value="{{old('serial_number')}}">
                                         @if ($errors->has('serial_number')) <p class="text-danger small mb-0">{{ $errors->first('serial_number') }}</p> @endif
@@ -62,7 +68,7 @@
                                         @if ($errors->has('other_ref_number')) <p class="text-danger small mb-0">{{ $errors->first('other_ref_number') }}</p> @endif
                                     </div>
                                     <div class="col-md-4 col-sm-6 col-12 mb-2">
-                                        <label class="small font-weight-bold text-dark">Assigned Date</label>
+                                        <label class="small font-weight-bold text-dark">Assigned Date*</label>
                                         <input required class="form-control form-control-sm @if ($errors->has('assigned_date')) border-danger-soft @endif"
                                             id="assigned_date" name="assigned_date" type="date" value="{{old('assigned_date')}}">
                                         @if ($errors->has('assigned_date')) <p class="text-danger small mb-0">{{ $errors->first('assigned_date') }}</p> @endif
@@ -98,7 +104,7 @@
                                     <tbody>
                                     @foreach($assigned_devices as $ad)
                                         <tr>
-                                            <td class="text-nowrap">{{$ad->device_type}}</td>
+                                            <td class="text-nowrap">{{ $ad->device_name }}</td>
                                             <td>{{$ad->model_number}}</td>
                                             <td>{{$ad->serial_number}}</td>
                                             <td class="d-none d-md-table-cell">{{$ad->other_ref_number}}</td>
@@ -159,13 +165,10 @@
                                     <label class="small font-weight-bold text-dark">Device Type</label>
                                     <select class="form-control form-control-sm"
                                             id="edit_device_type" name="device_type">
-                                        <option>Select</option>
-                                        <option value="Laptop">Laptop</option>
-                                        <option value="Desktop">Desktop</option>
-                                        <option value="Phone">Mobile Phone</option>
-                                        <option value="Tab">Tab</option>
-                                        <option value="Router">Router</option>
-                                        <option value="Sim">Sim</option>
+                                        <option value="">Please Select</option>
+                                        @foreach ($devices as $device)
+                                            <option value="{{ $device->id }}">{{ $device->device_name }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                                 <div class="col-md-6 col-12 mb-2">
@@ -312,10 +315,22 @@
             var id = $(this).data('id');
             $('#form_result').html('');
             $.ajax({
-                url: "../getAssignedDeviceDetail/"+id,
+                url: "../getAssignedDeviceDetail/" + id,
                 dataType: "json",
                 success: function (data) {
-                    $('#edit_device_type').val(data.result.device_type);
+                    var deviceType = data.result.device_type;
+
+                    // Try selecting by numeric ID first; fall back to word value for legacy data
+                    var $select = $('#edit_device_type');
+                    if ($select.find('option[value="' + deviceType + '"]').length) {
+                        $select.val(deviceType);
+                    } else {
+                        // Legacy word value — find matching option text
+                        $select.find('option').filter(function () {
+                            return $(this).text().toLowerCase() === String(deviceType).toLowerCase();
+                        }).prop('selected', true);
+                    }
+
                     $('#edit_model_number').val(data.result.model_number);
                     $('#edit_serial_number').val(data.result.serial_number);
                     $('#edit_other_ref_number').val(data.result.other_ref_number);
@@ -324,7 +339,7 @@
                     $('#ad_id').val(data.result.id);
                     $('#modelDependent').modal('show');
                 }
-            })
+            });
         });
 
         $('#formDependent').on('submit', function(event){
