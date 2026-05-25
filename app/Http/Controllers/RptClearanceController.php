@@ -110,14 +110,32 @@ class RptClearanceController extends Controller
 
         // Get assigned devices
         $devices = DB::table('employee_assigned_devices')
-            ->where('emp_id', $employee->id)
-            ->whereIn('status', [1, 2]) 
+            ->leftJoin('assigned_devices', function($join) {
+                $join->on(
+                    DB::raw('employee_assigned_devices.device_type COLLATE utf8mb4_unicode_ci'),
+                    '=',
+                    DB::raw('CAST(assigned_devices.id AS CHAR) COLLATE utf8mb4_unicode_ci')
+                );
+            })
+            ->where('employee_assigned_devices.emp_id', $employee->id)
+            ->whereIn('employee_assigned_devices.status', [1, 2])
+            ->select(
+                'employee_assigned_devices.id',
+                'employee_assigned_devices.model_number',
+                'employee_assigned_devices.device_type',
+                'employee_assigned_devices.status',
+                DB::raw('CASE 
+                    WHEN employee_assigned_devices.device_type REGEXP "^[0-9]+$" 
+                    THEN assigned_devices.device_name 
+                    ELSE employee_assigned_devices.device_type 
+                END AS resolved_device_name')
+            )
             ->get();
 
         if ($devices->count() > 0) {
             foreach ($devices as $device) {
                 $data_arr[] = [
-                    "description" => ($device->device_type ?? 'N/A') . ' - ' . ($device->model_number ?? 'N/A'),
+                    "description" => ($device->resolved_device_name ?? 'N/A') . ' - ' . ($device->model_number ?? 'N/A'),
                     "quantity_balance" => '1',
                     "amount" => '',
                     "is_title" => false,

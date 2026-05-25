@@ -10,6 +10,7 @@
           <li><a class="dropdown-item" href="{{ route('EmploymentStatus')}}">Job Employment Status</a></li>
           <li><a class="dropdown-item" href="{{ route('Financial')}}">Financial Category</a></li>
           <li><a class="dropdown-item" href="{{ route('examsubjects')}}">Exam Subjects</a></li>
+          <li><a class="dropdown-item" href="{{ route('Devices')}}">Assigned Devices</a></li>
           <li><a class="dropdown-item" href="{{ route('dsdivision')}}">DS Divisions</a></li>
           <li><a class="dropdown-item" href="{{ route('gnsdivision')}}">GNS Divisions</a></li>
           <li><a class="dropdown-item" href="{{ route('policestation')}}">Police Station</a></li>

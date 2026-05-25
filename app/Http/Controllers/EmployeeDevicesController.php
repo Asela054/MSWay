@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\EmployeeDevices;
+use App\AssignedDevice;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -18,8 +19,9 @@ class EmployeeDevicesController extends Controller
             abort(403);
         }
 
-        $assigned_devices = EmployeeDevices::where('emp_id',$id)->get();
-        return view('Employee.viewAssignedDevices',compact('assigned_devices','id'));
+        $assigned_devices = EmployeeDevices::with('assignedDevice')->where('emp_id', $id)->get();
+        $devices = AssignedDevice::orderBy('id', 'asc')->get();
+        return view('Employee.viewAssignedDevices', compact('assigned_devices', 'id', 'devices'));
     }
 
     public function create(Request $request)

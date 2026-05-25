@@ -1603,6 +1603,14 @@ Route::post('Hierarchy/update', 'CompanyHierarchyController@update')->name('Hier
 Route::get('Hierarchy/destroy/{id}', 'CompanyHierarchyController@destroy');
 /*-- End Comany Hierarchy----*/
 
+/*-- Assigned Devices----*/
+Route::resource('Devices', 'AssignedDeviceController');
+Route::get('Devices',['uses' => 'AssignedDeviceController@index', 'as' => 'Devices']); 
+Route::post('addDevices',['uses' => 'AssignedDeviceController@store', 'as' => 'addDevices']); 
+Route::post('Devices/update', 'AssignedDeviceController@update')->name('Devices.update');
+Route::get('Devices/destroy/{id}', 'AssignedDeviceController@destroy');
+/*-- End Assigned Devices----*/
+
 /*-- Financial Category----*/
 Route::resource('Financial', 'FinancialCategoryController');
 Route::get('Financial',['uses' => 'FinancialCategoryController@index', 'as' => 'Financial']); 
