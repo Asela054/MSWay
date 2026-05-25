@@ -102,6 +102,42 @@ class LeavepolicyService
                 $annual_leaves = 0;
                 $leave_msg = "Employee is Not eligible for annual leaves.";
             }
+       }elseif ($settings && $settings->config_value == 3) {
+        // calculate annual leaves based on job category (joining date type condition 2)    
+            $currentYear = date('Y');
+            $joiningYear = date('Y', strtotime($empJoinDate));
+            $joiningMonth = (int) date('m', strtotime($empJoinDate));
+
+             if($jobleaves && $leaves->annual_leaves > 0){
+                if ($joiningYear == $currentYear) {
+                    if ($joiningMonth >= 1 && $joiningMonth <= 3) {
+                        $annual_leaves = 14;
+                        $leave_msg = "Employee joined in Q1 (Jan-Mar) — Eligible for 14 annual leaves for the current year.";
+                    } elseif ($joiningMonth >= 4 && $joiningMonth <= 6) {
+                        $annual_leaves = 10;
+                        $leave_msg = "Employee joined in Q2 (Apr-Jun) — Eligible for 10 annual leaves for the current year.";
+                    } elseif ($joiningMonth >= 7 && $joiningMonth <= 9) {
+                        $annual_leaves = 5;
+                        $leave_msg = "Employee joined in Q3 (Jul-Sep) — Eligible for 5 annual leaves for the current year.";
+                    } else {
+                        $annual_leaves = 0;
+                        $leave_msg = "Employee joined in Q4 (Oct-Dec) — Not eligible for annual leaves for the current year.";
+                    }
+                } else {
+                    // Joined in previous years → follow job category rule
+                    if ($jobleaves && $leaves->annual_leaves > 0) {
+                        $annual_leaves = $leaves->annual_leaves;
+                        $leave_msg = "Employee is eligible for full {$annual_leaves} annual leaves per year.";
+                    } else {
+                        $annual_leaves = 0;
+                        $leave_msg = "Employee is not eligible for annual leaves.";
+                    }
+                }
+
+            }else{
+                $annual_leaves = 0;
+                $leave_msg = "Employee is Not eligible for annual leaves.";
+            }
        }
        else{
         $annual_leaves = 0;
@@ -160,22 +196,27 @@ class LeavepolicyService
                 $casual_leaves = 0;
             }
          } 
-        elseif ($settings && $settings->config_value == 2){
+         elseif ($settings && $settings->config_value == 2){
+                // rturn full casual leaves without considering joining date
+                if($jobleaves && $leaves->casual_leaves > 0){
+            
+                    $casual_leaves = 7;
+                }else{
+                    $casual_leaves = 0;
+                }
+            } 
+         elseif($settings && $settings->config_value == 3){
             // rturn full casual leaves without considering joining date
              if($jobleaves && $leaves->casual_leaves > 0){
-        
                 $casual_leaves = 7;
-            
-            }else{
+             }else{
                 $casual_leaves = 0;
-            }
-         } 
+            }     
+         }   
         else{
             $casual_leaves = 0;
         }         
 
-       
-        
         return $casual_leaves;
     }
 

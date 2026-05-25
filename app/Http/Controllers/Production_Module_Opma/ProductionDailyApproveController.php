@@ -165,5 +165,43 @@ class ProductionDailyApproveController extends Controller
     }
 
 
+    public function getEmployeeProductionDetails(Request $request)
+    {
+        $user = Auth::user();
+        $permission = $user->can('Production-Task-Approve-Create');
+        
+        if(!$permission){
+            return response()->json(['error' => 'UnAuthorized'], 401);
+        }
+        
+        $empId = $request->get('emp_id');
+        $date = $request->get('date');
+        
+
+        $productions = DB::table('opma_employee_production as ep')
+            ->leftJoin('opma_emp_product_allocation_details as epad', 'ep.allocation_id', '=', 'epad.id')
+            ->leftJoin('opma_emp_product_allocation as epa', 'ep.allocation_id', '=', 'epa.id')
+            ->leftJoin('opma_styles as os', 'epa.product_id', '=', 'os.id')
+            ->leftJoin('opma_sizes as osz', 'epa.size', '=', 'osz.id')
+            ->select(
+                'ep.id',
+                'ep.emp_id',
+                'os.title as style_title',
+                'os.code as style_code',
+                'osz.size as size_name',
+                'epa.scale',
+                'epa.complete_status'
+            )
+            ->where('ep.emp_id', $empId)
+            ->where('ep.date', $date)
+            ->where('ep.status',1)
+            ->where('epa.status',1)
+            ->get();
+        
+        return response()->json([
+            'success' => true,
+            'productions' => $productions
+        ]);
+    }
 
 }
