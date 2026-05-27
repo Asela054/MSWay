@@ -54,6 +54,10 @@ class EmployeeRosterDetailsController extends Controller
             $date   = $item['date'];
             $newIds = $item['shift_ids'];
 
+            $startOfMonth = Carbon::parse($date)->startOfMonth();
+            $endOfMonth = Carbon::parse($date)->endOfMonth();
+
+
             // Get all existing records for this emp + date
             $existingRecords = EmployeeRosterDetails::where('emp_id', $empId)
                 ->where('work_date', $date)
@@ -72,9 +76,8 @@ class EmployeeRosterDetailsController extends Controller
                     'new_shift_id' => null,
                     'changed_by'   => Auth::id() ?? 1,
                 ]);
-                EmployeeRosterDetails::where('emp_id', $empId)
-                    ->where('work_date', $date)
-                    ->where('shift_id', $oldShiftId)
+               EmployeeRosterDetails::where('emp_id', $empId)
+                    ->whereBetween('work_date', [$startOfMonth, $endOfMonth])
                     ->delete();
             }
 
@@ -229,4 +232,91 @@ class EmployeeRosterDetailsController extends Controller
     }
 
 
+    public function approverosterstore(Request $request)
+    {
+        $user = Auth::user();
+        $permission = $user->can('employee-roster-view');
+        if (!$permission) {
+            return response()->json(['error' => 'UnAuthorized']);
+        }
+        
+        $departmentId = $request->get('department_id');
+        $month = $request->get('Month');
+        if (!$departmentId || !$month) {
+            return response()->json(['error' => 'Missing department_id or month'], 400);
+        }
+        
+        // Current month date range
+        $monthDate = Carbon::createFromFormat('Y-m', $month);
+        $startDate = $monthDate->startOfMonth()->toDateString();
+        $endDate = $monthDate->endOfMonth()->toDateString();
+        
+        // Fetch all roster records for the given month + department
+        $rosters = DB::table('employee_roster_details')
+            ->select('employee_roster_details.emp_id')
+            ->leftJoin('employees', 'employee_roster_details.emp_id', '=', 'employees.emp_id')
+            ->whereBetween('employee_roster_details.work_date', [$startDate, $endDate])
+            ->where('employees.emp_department', $departmentId)
+            ->distinct()
+            ->get();
+        
+        if ($rosters->isEmpty()) {
+            return response()->json(['message' => 'No roster records found for the given month and department'], 404);
+        }
+        
+        $newRecords = [];
+        $current_date_time = Carbon::now()->toDateTimeString();
+        
+        // Get all shift types
+        $shifts = DB::table('shift_types')->select('id', 'shift_code', 'shift_name')->get();
+        
+        foreach ($rosters as $roster) {
+            $empId = $roster->emp_id;
+            
+            // Loop through each shift type
+            foreach ($shifts as $shift) {
+                // Count employee dates for this shift in the given date range
+                $count = DB::table('employee_roster_details')
+                    ->where('emp_id', $empId)
+                    ->where('shift_id', $shift->id)
+                    ->whereBetween('work_date', [$startDate, $endDate])
+                    ->count();
+                
+                if ($count > 0) {
+                    // Check if record already exists
+                    $existingRecord = DB::table('employee_roster_approve')
+                        ->where('emp_id', $empId)
+                        ->where('shift_id', $shift->id)
+                        ->where('month', $startDate)
+                        ->first();
+                    
+                    if ($existingRecord) {
+                        // Update existing record
+                        DB::table('employee_roster_approve')
+                            ->where('id', $existingRecord->id)
+                            ->update([
+                                'count' => $count,
+                                'updated_at' => $current_date_time
+                            ]);
+                    } else {
+                        // Create new record
+                        $newRecords[] = [
+                            'emp_id' => $empId,
+                            'month' => $startDate,
+                            'shift_id' => $shift->id,
+                            'count' => $count,
+                            'created_at' => $current_date_time,
+                            'updated_at' => $current_date_time
+                        ];
+                    }
+                }
+            }
+        }
+        
+        if (!empty($newRecords)) {
+            DB::table('employee_roster_approve')->insert($newRecords);
+        }
+        
+        return response()->json(['success' => 'Roster approved successfully']);
+    }
 }

@@ -454,9 +454,9 @@ class HomeController extends Controller
         $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
         
         // Return empty HTML if no accessible employees
-        if (empty($accessibleEmployeeIds)) {
-            return response()->json(['html' => '']);
-        }
+        // if (empty($accessibleEmployeeIds)) {
+        //     return response()->json(['html' => '']);
+        // }
 
         $userCompanyIds = DB::table('user_has_companies')
             ->where('user_id', $userId)
@@ -596,9 +596,9 @@ class HomeController extends Controller
         $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
         
         // Return empty HTML if no accessible employees
-        if (empty($accessibleEmployeeIds)) {
-            return response()->json(['html' => '']);
-        }
+        // if (empty($accessibleEmployeeIds)) {
+        //     return response()->json(['html' => '']);
+        // }
 
         $userCompanyIds = DB::table('user_has_companies')
             ->where('user_id', $userId)
@@ -612,10 +612,11 @@ class HomeController extends Controller
 
 
         $departmentdata = DB::table('departments')
-        ->select('id', 'name') 
-         ->whereIn('company_id', $userCompanyIds)
-        ->get()
-        ->toArray();
+                ->select('id', 'name'); 
+            if (!empty($userCompanyIds)) {
+                    $departmentdata->whereIn('company_id', $userCompanyIds);
+                }
+                $departmentdata = $departmentdata->get()->toArray();
 
         $late_times = DB::table('late_types')->where('id', 1)->first();
         $attendance= DB::table('employee_late_attendances')
@@ -740,9 +741,9 @@ class HomeController extends Controller
         $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
         
         // Return empty HTML if no accessible employees
-        if (empty($accessibleEmployeeIds)) {
-            return response()->json(['html' => '']);
-        }
+        // if (empty($accessibleEmployeeIds)) {
+        //     return response()->json(['html' => '']);
+        // }
 
         $userCompanyIds = DB::table('user_has_companies')
             ->where('user_id', $userId)
@@ -757,11 +758,12 @@ class HomeController extends Controller
 
         $today = Carbon::now()->format('Y-m-d');
 
-        $departmentdata = DB::table('departments')
-        ->select('id', 'name') 
-        ->whereIn('company_id', $userCompanyIds)
-        ->get()
-        ->toArray();
+         $departmentdata = DB::table('departments')
+                ->select('id', 'name'); 
+            if (!empty($userCompanyIds)) {
+                    $departmentdata->whereIn('company_id', $userCompanyIds);
+                }
+                $departmentdata = $departmentdata->get()->toArray();
 
         $attendance= DB::table('attendances')
         ->leftjoin('employees', 'attendances.emp_id', '=', 'employees.emp_id')
@@ -877,9 +879,9 @@ class HomeController extends Controller
         $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
         
         // Return empty HTML if no accessible employees
-        if (empty($accessibleEmployeeIds)) {
-            return response()->json(['html' => '']);
-        }
+        // if (empty($accessibleEmployeeIds)) {
+        //     return response()->json(['html' => '']);
+        // }
 
         $userCompanyIds = DB::table('user_has_companies')
             ->where('user_id', $userId)
@@ -1022,9 +1024,9 @@ class HomeController extends Controller
         $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
         
         // Return empty HTML if no accessible employees
-        if (empty($accessibleEmployeeIds)) {
-            return response()->json(['html' => '']);
-        }
+        // if (empty($accessibleEmployeeIds)) {
+        //     return response()->json(['html' => '']);
+        // }
 
         $userCompanyIds = DB::table('user_has_companies')
             ->where('user_id', $userId)
@@ -1037,11 +1039,12 @@ class HomeController extends Controller
             ->toArray();
 
 
-        $departmentdata = DB::table('departments')
-        ->select('id', 'name') 
-         ->whereIn('company_id', $userCompanyIds)
-        ->get()
-        ->toArray();
+       $departmentdata = DB::table('departments')
+                ->select('id', 'name'); 
+            if (!empty($userCompanyIds)) {
+                    $departmentdata->whereIn('company_id', $userCompanyIds);
+                }
+                $departmentdata = $departmentdata->get()->toArray();
 
        // $late_times = DB::table('late_types')->where('id', 1)->first();
 
@@ -1172,9 +1175,9 @@ class HomeController extends Controller
         $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
         
         // Return empty HTML if no accessible employees
-        if (empty($accessibleEmployeeIds)) {
-            return response()->json(['html' => '']);
-        }
+        // if (empty($accessibleEmployeeIds)) {
+        //     return response()->json(['html' => '']);
+        // }
 
         $userCompanyIds = DB::table('user_has_companies')
             ->where('user_id', $userId)
@@ -1187,10 +1190,11 @@ class HomeController extends Controller
             ->toArray();
 
         $departmentdata = DB::table('departments')
-        ->select('id', 'name') 
-        ->whereIn('company_id', $userCompanyIds)
-        ->get()
-        ->toArray();
+                ->select('id', 'name'); 
+            if (!empty($userCompanyIds)) {
+                    $departmentdata->whereIn('company_id', $userCompanyIds);
+                }
+                $departmentdata = $departmentdata->get()->toArray();
 
         $attendance= DB::table('attendances')
         ->leftjoin('employees', 'attendances.emp_id', '=', 'employees.emp_id')
