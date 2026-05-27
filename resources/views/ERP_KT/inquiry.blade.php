@@ -28,6 +28,12 @@
                     <div class="col-12">
                         <hr class="border-dark">
                     </div>
+                    <div class="col-md-12 mb-2">
+                        <button class="btn btn-warning btn-sm filter-btn float-right px-3" type="button"
+                            data-toggle="offcanvas" data-target="#offcanvasRight"
+                            aria-controls="offcanvasRight"><i class="fas fa-filter mr-1"></i> Filter
+                            Records</button>
+                    </div>
                     <div class="col-12">
                         <div class="center-block fix-width scroll-inner">
                             <table class="table table-striped table-bordered table-sm small nowrap" style="width: 100%" id="dataTable">
@@ -47,6 +53,55 @@
             </div>
         </div>
     </div>
+
+    <!-- filter function -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+        <div class="offcanvas-header">
+            <h2 class="offcanvas-title font-weight-bolderer" id="offcanvasRightLabel">Records Filter Options</h2>
+            <button type="button" class="btn-close" data-dismiss="offcanvas" aria-label="Close">
+                <span aria-hidden="true" class="h1 font-weight-bolderer">&times;</span>
+            </button>
+        </div>
+        <div class="offcanvas-body">
+            <ul class="list-unstyled">
+                <form class="form-horizontal" id="formFilter">
+                    <li class="mb-2">
+                        <div class="col-md-12">
+                            <label class="small font-weight-bolder text-dark">Customer Name</label>
+                            <select name="customer_f" id="customer_f" class="form-control form-control-sm"></select>
+                        </div>
+                    </li>
+                    <li class="mb-2">
+                        <div class="col-md-12">
+                            <label class="small font-weight-bolder text-dark"> From Date* </label>
+                            <input type="date" id="from_date" name="from_date"
+                                class="form-control form-control-sm" placeholder="yyyy-mm-dd"
+                                value="{{date('Y-m-d') }}" required>
+                        </div>
+                    </li>
+                    <li class="mb-2">
+                        <div class="col-md-12">
+                            <label class="small font-weight-bolder text-dark"> To Date*</label>
+                            <input type="date" id="to_date" name="to_date" class="form-control form-control-sm"
+                                placeholder="yyyy-mm-dd" value="{{date('Y-m-d') }}" required>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="col-md-12 d-flex justify-content-between">
+
+                            <button type="button" class="btn btn-danger btn-sm filter-btn px-3" id="btn-reset">
+                                <i class="fas fa-redo mr-1"></i> Reset
+                            </button>
+                            <button type="submit" class="btn btn-primary btn-sm filter-btn px-3" id="btn-filter">
+                                <i class="fas fa-search mr-2"></i>Search
+                            </button>
+                        </div>
+                    </li>
+                </form>
+            </ul>
+        </div>
+    </div>
+    <!-- filter function end-->
 
     <!-- Modal Area Start -->
     <div class="modal fade" id="formModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -201,7 +256,26 @@
             placeholder: 'Select Customer...',
             width: '100%',
             allowClear: true,
-            dropdownParent: $('#formModal'),
+            dropdownParent: $('body'),
+            ajax: {
+                url: '{{ url("kt_customer_list_sel2") }}',
+                dataType: 'json',
+                data: function(params) {
+                    return {
+                        term: params.term || '',
+                        page: params.page || 1
+                    }
+                },
+                cache: true
+            }
+        });
+
+        let customer_f = $('#customer_f');
+        customer_f.select2({
+            placeholder: 'Select Customer...',
+            width: '100%',
+            allowClear: true,
+            dropdownParent: $('body'),
             ajax: {
                 url: '{{ url("kt_customer_list_sel2") }}',
                 dataType: 'json',
@@ -234,6 +308,11 @@
             $('#row_' + id).remove();
         });
 
+        function load_dt(customer_id, from_date, to_date) {
+            if ($.fn.DataTable.isDataTable('#dataTable')) {
+                $('#dataTable').DataTable().destroy();
+                $('#dataTable tbody').empty();
+        }
         $('#dataTable').DataTable({
             "destroy": true,
             "processing": true,
@@ -275,7 +354,11 @@
             ajax: {
                 url: scripturl + "/ERP_KT/inquiry_list.php",
                 type: "POST",
-                data: {},
+                data: {
+                    customer_id: customer_id,
+                    from_date: from_date,
+                    to_date: to_date
+                },
             },
             columns: [{
                     data: 'id',
@@ -316,7 +399,10 @@
                 $('[data-toggle="tooltip"]').tooltip();
             }
         });
-    });
+    }
+
+    load_dt('', '', '');
+
 
     $('#create_record').click(function() {
         $('.modal-title').text('Add Inquiry');
@@ -529,6 +615,34 @@
             }
         });
     });
+
+        //filter handler
+        $('#formFilter').on('submit',function(e) {
+            e.preventDefault();
+            let customer = $('#customer_f').val();
+            let from_date = $('#from_date').val();
+            let to_date = $('#to_date').val();
+
+            if (!from_date || !to_date) {
+                alert('Please select both From and To dates');
+                return;
+            }
+            
+            if (from_date > to_date) {
+                alert('From date cannot be greater than To date');
+                return;
+            }
+
+            load_dt(customer, from_date, to_date);
+            closeOffcanvasSmoothly();
+        });
+
+        $('#btn-reset').click(function() {
+            $('#formFilter')[0].reset();
+            $('#customer_f').val(null).trigger('change');
+            load_dt('', '', '');
+        });
+});
 </script>
 
 @endsection

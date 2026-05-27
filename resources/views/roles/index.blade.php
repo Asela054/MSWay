@@ -78,10 +78,9 @@
 
     <!-- Modal Area Start -->
     <div class="modal fade" id="formModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
             <div class="modal-content">
                 <div class="modal-header p-2">
-                    <h6 class="modal-title" id="staticBackdropLabel">Add Company</h6>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -102,20 +101,39 @@
                                 <div class="form-group">
                                     <strong>Permission:</strong>
                                     <br>
-                                   <div class="row">
-                                        @foreach($permission as $value)
-                                            <div class="col-4 mb-2">
-                                                <label>
-                                                    <input type="checkbox" name="permission[]" value="{{ $value->id }}" class="name">
-                                                    {{ $value->name }}
-                                                </label>
+                                    <div class="input-group input-group-sm mb-3">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                        </div>
+                                        <input type="text" id="permission_search" class="form-control form-control-sm" placeholder="Search by module name...">
+                                    </div>
+                                    <div class="row mt-2" id="permission_container">
+                                        @php
+                                            $grouped = $permission->sortBy('module')->groupBy('module');
+                                        @endphp
+                                        @foreach($grouped as $module => $perms)
+                                            <div class="col-md-4 mb-3" data-module="{{ strtolower($module ?? 'general') }}">
+                                                <div class="card h-100" style="border: 1px solid #1AC6D9;">
+                                                    <div class="card-header py-1 px-2 text-white" style="background-color: #1AC6D9;">
+                                                        <small class="font-weight-bold text-uppercase">
+                                                            <i class="fa fa-shield-alt mr-1"></i>{{ $module ?? 'General' }}
+                                                        </small>
+                                                    </div>
+                                                    <div class="card-body py-2 px-3">
+                                                        @foreach($perms as $value)
+                                                            <div class="mb-1">
+                                                                <label class="mb-0 d-flex align-items-center" style="cursor:pointer;">
+                                                                    <input type="checkbox" name="permission[]" value="{{ $value->id }}" class="name mr-2">
+                                                                    <small>{{ $value->name }}</small>
+                                                                </label>
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
                                             </div>
                                         @endforeach
                                     </div>
-
                                 </div>
-                            
-
 
                             <div class="form-group mt-3">
                                 <button type="submit" name="action_button" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-4">
@@ -140,6 +158,19 @@
 @section('script')
     <script>
         $(document).ready(function(){
+
+        var searchTimer;
+        $(document).on('input', '#permission_search', function() {
+            clearTimeout(searchTimer);
+            var $input = $(this);
+            searchTimer = setTimeout(function() {
+                var search = $input.val().toLowerCase().trim();
+                $('#permission_container .col-md-4').each(function() {
+                    // Uses cached data-module attribute — no DOM traversal
+                    $(this).toggle(search === '' || $(this).data('module').includes(search));
+                });
+            }, 250); 
+        });
 
             $('#administrator_menu_link').addClass('active');
             $('#administrator_menu_link_icon').addClass('active');
@@ -223,15 +254,69 @@
                 }
             });
 
+            function renderPermissionCards(allPermissions, checkedIds, readOnly = false) {
+                var grouped = {};
+                $.each(allPermissions, function(i, perm) {
+                    var mod = perm.module || 'General';
+                    if (!grouped[mod]) grouped[mod] = [];
+                    grouped[mod].push(perm);
+                });
+
+                var checkedArr = Object.values(checkedIds);
+
+                // Sort module names alphabetically
+                var sortedModules = Object.keys(grouped).sort();
+
+                var html = '';
+                $.each(sortedModules, function(i, moduleName) {
+                    var perms = grouped[moduleName];
+                    html += `
+                    <div class="col-md-4 mb-3" data-module="${moduleName.toLowerCase()}">
+                        <div class="card h-100" style="border: 1px solid #1AC6D9;">
+                            <div class="card-header py-1 px-2 text-white" style="background-color: #1AC6D9;">
+                                <small class="font-weight-bold text-uppercase">
+                                    <i class="fa fa-shield-alt mr-1"></i>${moduleName}
+                                </small>
+                            </div>
+                            <div class="card-body py-2 px-3">`;
+
+                    $.each(perms, function(j, perm) {
+                        var isChecked = checkedArr.includes(perm.id) ? 'checked' : '';
+                        var isDisabled = readOnly ? 'disabled' : '';
+                        html += `
+                                <div class="mb-1">
+                                    <label class="mb-0 d-flex align-items-center" style="cursor:${readOnly ? 'default' : 'pointer'};">
+                                        <input type="checkbox" name="permission[]" value="${perm.id}" 
+                                            class="name mr-2" ${isChecked} ${isDisabled}>
+                                        <small>${perm.name}</small>
+                                    </label>
+                                </div>`;
+                    });
+
+                    html += `
+                            </div>
+                        </div>
+                    </div>`;
+                });
+
+                $('#permission_container').html(html);
+            }
+
             
 
             $('#create_record').click(function(){
                 $('.modal-title').text('Create New Role');
-                $('#action_button').html('Add');
+                $('#action_button').show();
+                $('#action_button').html('<i class="fas fa-plus"></i>&nbsp;Add');
                 $('#action').val('Add');
                 $('#form_result').html('');
                 $('#formTitle')[0].reset();
 
+                $('#name').removeAttr('readonly');
+                $('#permission_container input[type="checkbox"]').prop('checked', false).prop('disabled', false);
+
+                $('#permission_search').val('');
+                $('#permission_container .col-md-4').show();
                 $('#formModal').modal('show');
             });
 
@@ -292,46 +377,42 @@
                         dataType: "json",
                         success: function (data) {
                             $('#name').val(data.role.name);
+                            $('#name').attr('readonly', true);
                             $('#hidden_id').val(data.role.id);
-                            $('input[name="permission[]"]').prop('checked', false);
 
-                            // Loop through returned permissions and check relevant ones
-                            $.each(data.rolePermissions, function (index, permission_id) {
-                                $(`input[name="permission[]"][value="${permission_id}"]`).prop('checked', true);
-                            });
+                            // Re-render permission cards grouped by module
+                            renderPermissionCards(data.permission, data.rolePermissions);
+
                             $('.modal-title').text('Edit Role');
                             $('#action_button').show();
-                            $('#action_button').html('Edit');
+                            $('#action_button').html('<i class="fas fa-save"></i>&nbsp;Update');
                             $('#action').val('Edit');
                             $('#formModal').modal('show');
                         }
-                    })
+                    });
                 }
             });
 
-            $(document).on('click', '.view', async function() {
-               
-                    var id = $(this).attr('id');
-                    $('#form_result').html('');
-                    $.ajax({
-                        url: "{{ route('roles.show', ':id') }}".replace(':id', id),
-                        dataType: "json",
-                        success: function (data) {
-                            $('#name').val(data.role.name);
-                            $('#hidden_id').val(data.role.id);
-                            $('input[name="permission[]"]').prop('checked', false);
+            $(document).on('click', '.view', function() {
+                var id = $(this).attr('id');
+                $('#form_result').html('');
+                $.ajax({
+                    url: "{{ route('roles.show', ':id') }}".replace(':id', id),
+                    dataType: "json",
+                    success: function (data) {
+                        $('#name').val(data.role.name);
+                        $('#name').attr('readonly', true);
+                        $('#hidden_id').val(data.role.id);
 
-                            // Loop through returned permissions and check relevant ones
-                            $.each(data.rolePermissions, function (index, permission_id) {
-                                $(`input[name="permission[]"][value="${permission_id}"]`).prop('checked', true);
-                            });
-                            $('.modal-title').text('Edit Role');
-                            $('#action_button').hide();
-                            $('#action').val('Edit');
-                            $('#formModal').modal('show');
-                        }
-                    })
-                
+                        // Re-render permission cards grouped by module (read-only)
+                        renderPermissionCards(data.permission, data.rolePermissions, true);
+
+                        $('.modal-title').text('<i class="fa fa-eye mr-1"></i> View Role');
+                        $('#action_button').hide();
+                        $('#action').val('View');
+                        $('#formModal').modal('show');
+                    }
+                });
             });
 
             $(document).on('click', '.delete', async function() {

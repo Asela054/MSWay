@@ -40,7 +40,7 @@
         <ul class="dropdown-menu multi-level dropdownmenucolor" role="menu" aria-labelledby="dropdownMenu">
           <li><a class="dropdown-item" href="{{ route('Trainingtype')}}" id="">Training Type</a></li>
           <li><a class="dropdown-item" href="{{ route('TrainingAllocation')}}">Training Allocation</a></li>
-          <li><a class="dropdown-item" href="{{ route('train_attendance')}}">Training Attendance</a></li>
+          <li><a class="dropdown-item" href="{{ route('train_defect_point')}}">Training Points</a></li>
           <li><a class="dropdown-item" href="{{ route('train_summary')}}">Training Summary</a></li>
         </ul>
   </div>

@@ -83,9 +83,11 @@ class RoleController extends Controller
             ->pluck('role_has_permissions.permission_id', 'role_has_permissions.permission_id')
             ->all();
 
-        //return view('roles.show',compact('role','rolePermissions'));
-         return response()->json([
-            'role' => $role,
+        $permission = Permission::get(); 
+
+        return response()->json([
+            'role'            => $role,
+            'permission'      => $permission, 
             'rolePermissions' => $rolePermissions,
         ]);
     }

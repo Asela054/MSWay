@@ -35,6 +35,7 @@
                                     <tr>
                                         <th>ID </th>
                                         <th>JOB TITLE</th>
+                                        <th>MACHINE NAME</th>
                                         <th>EMPLOYEE</th>
                                         <th>RATE</th>
                                         <th>REMARKS</th>
@@ -70,6 +71,14 @@
                                     <label class="small font-weight-bold text-dark">Job Title <span class="text-red">*</span></label>
                                     <select name="job_title" id="job_title_f" class="form-control form-control-sm" required></select>
                                 </div>
+                            </div>
+                             <div class="col-md-6">
+                                <div class="form-group mb-1">
+                                        <label class="small font-weight-bold text-dark">Machine Name</label>
+                                        <select name="machine_id" id="machine_f" class="form-control form-control-sm">
+                                            <option value="0">All Machines</option>
+                                        </select>
+                                    </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group mb-1">
@@ -118,7 +127,8 @@
 
         // Employee Select2 Initialization
         let employee = $('#employee_f');
-        let job_title = $('#job_title_f')
+        let job_title = $('#job_title_f');
+        let machine = $('#machine_f');
 
         job_title.select2({
             placeholder: 'Select Job Title...',
@@ -162,6 +172,26 @@
         job_title.on('change', function() {
             employee.val(null).trigger('change');
         });
+
+        //Machine Select2 Initialization
+        machine.select2({
+            placeholder: 'All Machines',
+            width: '100%',
+            allowClear: true,
+            dropdownParent: $('#formModal'),
+            ajax: {
+                url: '{{ url("kt_machine_list_sel2") }}',
+                dataType: 'json',
+                data: function(params) {
+                    return {
+                        term: params.term || '',
+                        page: params.page || 1
+                    }
+                },
+                cache: true
+            }
+        });
+
 
 
         $('#dataTable').DataTable({
@@ -216,6 +246,10 @@
                     name: 'job_title'
                 },
                 {
+                    data: 'machine_name',
+                    name: 'machine_name'
+                },
+                {
                     data: 'employee',
                     name: 'employee'
                 },
@@ -256,6 +290,7 @@
 
             $('#employee_f').empty().val(null).trigger('change');
             $('#job_title_f').empty().val(null).trigger('change');
+            $('#machine_f').empty().val(null).trigger('change');
 
             $('#formTitle')[0].reset();
             $('#action_button').html('<i class="fas fa-plus"></i>&nbsp;Add');
@@ -319,7 +354,8 @@
                 var id = $(this).attr('id');
                 var row = $(this).closest('tr');
                 var jobTitleText = row.find('td:eq(1)').text();
-                var employeeText = row.find('td:eq(2)').text();
+                var machineText = row.find('td:eq(2)').text();
+                var employeeText = row.find('td:eq(3)').text();
 
                 $('#form_result').html('');
                 $.ajax({
@@ -328,6 +364,13 @@
                     success: function(data) {
                         var jobTitleOption = new Option(jobTitleText, data.result.job_title, true, true);
                         $('#job_title_f').append(jobTitleOption).trigger('change');
+
+                        if (data.result.machine_id && data.result.machine_id != 0) {
+                            var machineOption = new Option(machineText, data.result.machine_id, true, true);
+                            $('#machine_f').append(machineOption).trigger('change');
+                        } else {
+                            $('#machine_f').val('0').trigger('change');
+                        }
 
                         if (data.result.emp_id) {
                             var empOption = new Option(employeeText, data.result.emp_id, true, true);

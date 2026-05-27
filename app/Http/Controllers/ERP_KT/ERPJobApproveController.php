@@ -59,8 +59,28 @@ class ERPJobApproveController extends Controller
                 DB::raw('ROUND(TIMESTAMPDIFF(MINUTE, i.start_from, i.end_at) / 60, 2) as reading_hours'),
                 DB::raw('
                     CASE
-                        WHEN sr.emp_id IS NOT NULL
-                            THEN ROUND((TIMESTAMPDIFF(MINUTE, i.start_from, i.end_at) / 60) * sr.rate, 2)
+                        WHEN EXISTS (
+                            SELECT 1 FROM kt_special_rate
+                            WHERE kt_special_rate.emp_id = e.emp_id
+                            AND kt_special_rate.machine_id = d.machine_id
+                        )
+                            THEN ROUND((TIMESTAMPDIFF(MINUTE, i.start_from, i.end_at) / 60) * (
+                                SELECT rate FROM kt_special_rate
+                                WHERE kt_special_rate.emp_id = e.emp_id
+                                AND kt_special_rate.machine_id = d.machine_id
+                                LIMIT 1
+                            ), 2)
+                        WHEN EXISTS (
+                            SELECT 1 FROM kt_special_rate
+                            WHERE kt_special_rate.emp_id = e.emp_id
+                            AND kt_special_rate.machine_id = 0
+                        )
+                            THEN ROUND((TIMESTAMPDIFF(MINUTE, i.start_from, i.end_at) / 60) * (
+                                SELECT rate FROM kt_special_rate
+                                WHERE kt_special_rate.emp_id = e.emp_id
+                                AND kt_special_rate.machine_id = 0
+                                LIMIT 1
+                            ), 2)
                         WHEN jt.title = "OPERATOR"
                             THEN ROUND((TIMESTAMPDIFF(MINUTE, i.start_from, i.end_at) / 60) * m.operator_rate, 2)
                         WHEN jt.title = "HELPER"
