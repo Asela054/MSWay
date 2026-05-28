@@ -129,7 +129,24 @@ class EmployeeRosterController extends Controller
             ];
             
          return view('roster.employeesrosterview', compact('months','currentMonth'));
-     }
+    }
 
-     
+    public function rosterapproveView(Request $request){
+         $user = auth()->user();
+        $permission = $user->can('employee-roster-view');
+
+        if(!$permission) {
+            abort(403);
+        }
+
+         $currentMonth = \Carbon\Carbon::now();
+            $months = [
+                $currentMonth->copy()->subMonth(),
+                $currentMonth,
+                $currentMonth->copy()->addMonth(),
+            ];
+            
+         return view('roster.employeesrosterapprove', compact('months','currentMonth'));
+    }
+
 }

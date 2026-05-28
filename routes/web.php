@@ -1452,6 +1452,7 @@ Route::post('/applyabsentnopay' ,'DepartmentviseNopayController@applyabsentnopay
 // roster managment
 Route::get('Roster',['uses' => 'EmployeeRosterController@index', 'as' => 'Roster']);
 Route::get('rosterview',['uses' => 'EmployeeRosterController@rosterView', 'as' => 'rosterview']);
+Route::get('rosterapproveView',['uses' => 'EmployeeRosterController@rosterapproveView', 'as' => 'rosterapproveView']);
 Route::get('/get-employees-by-department', 'EmployeeRosterController@employee_list');
 Route::get('get-roster-data', 'EmployeeRosterController@getRosterData');
 Route::get('/getrostershifts', 'EmployeeRosterController@getshifts');
@@ -1459,7 +1460,7 @@ Route::post('fullrosterstore', 'EmployeeRosterDetailsController@fullrosterstore'
 
 Route::get('get-view-roster-data', 'EmployeeRosterDetailsController@getViewRosterData');
 Route::post('colnerosterstore', 'EmployeeRosterDetailsController@colnerosterstore')->name('colnerosterstore');
-
+Route::post('approverosterstore', 'EmployeeRosterDetailsController@approverosterstore')->name('approverosterstore');
 
 // Commen Get Records
 Route::get('company_list_sel2', 'CommenGetrreordController@company_list_sel2');

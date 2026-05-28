@@ -1028,8 +1028,8 @@
             body += "=========================<br><br>";
             
             // Employee details
-            const employeeName = $('#employee option:selected').text();
-            const employeeId = $('#employee').val();
+            const employeeName = $('#employee_f option:selected').text();
+            const employeeId = $('#employee_f').val();
             if (employeeName) {
                 body += "EMPLOYEE: " + employeeName + "<br>";
                 body += "EMPLOYEE ID: " + (employeeId || 'N/A') + "<br>";

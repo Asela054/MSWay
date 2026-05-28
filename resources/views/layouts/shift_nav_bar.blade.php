@@ -16,7 +16,7 @@
        
         <a role="button" class="btn navbtncolor" href="{{ route('rosterview') }}" id="monthlyshifts_view">Month Shifts View <span class="caret"></span></a>
         
-
+        <a role="button" class="btn navbtncolor" href="{{ route('rosterapproveView') }}" id="monthlyshifts_approve_view">Month Shifts Approve <span class="caret"></span></a>
 
        
       </div>
