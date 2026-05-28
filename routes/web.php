@@ -504,6 +504,7 @@ Route::post('work_hours_save', 'WorkHoursController@work_hours_save')->name('wor
 // Resignation Report
 Route::get('employee_resign_report', 'EmployeeResignController@employee_resign_report')->name('employee_resign_report');
 Route::get('get_resign_employees', 'EmployeeResignController@get_resign_employees')->name('get_resign_employees');
+Route::post('add_resign_employees', 'EmployeeResignController@addResignEmployees')->name('addResignEmployees');
 
 
 // Absent Report
