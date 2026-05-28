@@ -150,6 +150,18 @@ class EmployeeBankController extends Controller
         }
 
         $data = EmployeeBank::findOrFail($id);
+
+        //backup record before delete
+        DB::table('employee_backup_records')->insert([
+            'emp_auto_id' => $data->emp_id,
+            'bank_code'   => $data->bank_code,
+            'branch_code' => $data->branch_code,
+            'bank_ac_no'  => $data->bank_ac_no,
+            'created_by'  => \Auth::user()->name,
+            'updated_by'  => \Auth::user()->name,
+            'created_at'  => \Carbon\Carbon::now()->toDateTimeString(),
+            'updated_at'  => \Carbon\Carbon::now()->toDateTimeString(),
+        ]);
         $data->delete();
 
         Session::flash('message', 'Deleted!');
