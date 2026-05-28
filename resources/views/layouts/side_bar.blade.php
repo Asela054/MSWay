@@ -237,14 +237,9 @@
                         </a>
                         <div class="collapse" id="collapsEmpLetters" data-parent="#accordionSubSidenavPages">
                             <nav class="sidenav-menu-nested nav">
-                                <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('appoinementletter')}}" id="">Employee Appointment Letter</a>
-                                <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('NDAletter')}}">Employee NDA Letter</a>
-                                <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('warningletter')}}">Employee Warning Letter</a>
-                                <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('salary_incletter')}}">Employee Salary Increment Letter</a>
-                                <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('promotionletter')}}">Employee Promotion Letter</a>
-                                <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('serviceletter')}}">Employee Service Letter</a>
-                                <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('resignletter')}}">Employee Resignation Letter</a>
-                                <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('end_user_letter')}}">Employee End User Letter</a>
+                                <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('letterType')}}">Employee Letter Type</a>
+                                <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('letterTemplate')}}">Employee Letter Template</a>
+                                <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('issueLetter')}}">Employee Issued Letter</a>
                             </nav>
                         </div>
                         <a href="javascript:void(0);" data-toggle="collapse" data-target="#collapsTrainManagement" aria-expanded="false" aria-controls="collapsTrainManagement" class="py-1">
