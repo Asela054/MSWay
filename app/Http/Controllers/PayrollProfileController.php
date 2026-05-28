@@ -366,7 +366,7 @@ class PayrollProfileController extends Controller
 			$payrollChangedFields = [];
 			foreach ($payrollUpdateBackupFields as $field => $values) {
 				if ((string)$values['old'] !== (string)$values['new']) {
-					$payrollChangedFields[$field] = $values['new'];
+					$payrollChangedFields[$field] = $values['old'];
 				}
 			}
 
