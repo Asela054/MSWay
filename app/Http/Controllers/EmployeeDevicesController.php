@@ -120,7 +120,7 @@ class EmployeeDevicesController extends Controller
             $new = ($values['new'] === null || $values['new'] === '') ? null : (string)$values['new'];
 
             if ($old !== $new) {
-                $changedDeviceFields[$field] = $values['new'];
+                $changedDeviceFields[$field] = $values['old'];
             }
         }
 
