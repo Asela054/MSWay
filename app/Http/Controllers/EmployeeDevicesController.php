@@ -102,6 +102,38 @@ class EmployeeDevicesController extends Controller
             'returned_date' => $request->returned_date
         );
 
+        // Backup original device details before updating
+        $originalDevice = EmployeeDevices::find($request->ad_id);
+
+        $deviceBackupFields = [
+            'device_type'   => ['old' => $originalDevice->device_type,    'new' => $request->device_type],
+            'model_number'  => ['old' => $originalDevice->model_number,   'new' => $request->model_number],
+            'serial_number' => ['old' => $originalDevice->serial_number,  'new' => $request->serial_number],
+            'other_ref_number' => ['old' => $originalDevice->other_ref_number, 'new' => $request->other_ref_number],
+            'assigned_date' => ['old' => $originalDevice->assigned_date ? \Carbon\Carbon::parse($originalDevice->assigned_date)->toDateString() : null, 'new' => $request->assigned_date ?: null],
+            'returned_date' => ['old' => $originalDevice->returned_date ? \Carbon\Carbon::parse($originalDevice->returned_date)->toDateString() : null, 'new' => $request->returned_date ?: null],
+        ];
+
+        $changedDeviceFields = [];
+        foreach ($deviceBackupFields as $field => $values) {
+            $old = ($values['old'] === null || $values['old'] === '') ? null : (string)$values['old'];
+            $new = ($values['new'] === null || $values['new'] === '') ? null : (string)$values['new'];
+
+            if ($old !== $new) {
+                $changedDeviceFields[$field] = $values['new'];
+            }
+        }
+
+        if (!empty($changedDeviceFields)) {
+            $changedDeviceFields['emp_auto_id'] = $originalDevice->emp_id;
+            $changedDeviceFields['created_by']  = Auth::user()->name;
+            $changedDeviceFields['updated_by']  = Auth::user()->name;
+            $changedDeviceFields['created_at']  = \Carbon\Carbon::now()->toDateTimeString();
+            $changedDeviceFields['updated_at']  = \Carbon\Carbon::now()->toDateTimeString();
+
+            \DB::table('employee_backup_records')->insert($changedDeviceFields);
+        }
+
         EmployeeDevices::whereId($request->ad_id)->update($form_data);
 
         return response()->json(['success' => 'The Assigned Device Details updated successfully']);

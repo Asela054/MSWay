@@ -348,7 +348,40 @@ class PayrollProfileController extends Controller
             
         );
 
-        PayrollProfile::whereId($request->hidden_id)->update($form_data);
+        // Backup data update
+		$originalProfileForUpdate = PayrollProfile::find($request->hidden_id);
+
+		if ($originalProfileForUpdate) {
+			$payrollUpdateBackupFields = [
+				'payroll_process_type_id'  => ['old' => $originalProfileForUpdate->payroll_process_type_id,  'new' => $request->payroll_process_type_id],
+				'payroll_act_id'           => ['old' => $originalProfileForUpdate->payroll_act_id,            'new' => $request->payroll_act_id],
+				'employee_bank_id'         => ['old' => $originalProfileForUpdate->employee_bank_id,          'new' => $employee_bank_id],
+				'employee_executive_level' => ['old' => $originalProfileForUpdate->employee_executive_level,  'new' => $request->employee_executive_level],
+				'basic_salary'             => ['old' => $originalProfileForUpdate->basic_salary,              'new' => $request->basic_salary],
+				'day_salary'               => ['old' => $originalProfileForUpdate->day_salary,                'new' => $request->day_salary],
+				'epfetf_contribution'      => ['old' => $originalProfileForUpdate->epfetf_contribution,       'new' => $request->epfetf_contribution],
+				'employee_payday_id'       => ['old' => $originalProfileForUpdate->employee_payday_id,        'new' => $request->employee_payday_id],
+			];
+
+			$payrollChangedFields = [];
+			foreach ($payrollUpdateBackupFields as $field => $values) {
+				if ((string)$values['old'] !== (string)$values['new']) {
+					$payrollChangedFields[$field] = $values['new'];
+				}
+			}
+
+			if (!empty($payrollChangedFields)) {
+				$payrollChangedFields['emp_auto_id'] = $originalProfileForUpdate->emp_id;
+				$payrollChangedFields['created_by']  = Auth::user()->name;
+				$payrollChangedFields['updated_by']  = Auth::user()->name;
+				$payrollChangedFields['created_at']  = \Carbon\Carbon::now()->toDateTimeString();
+				$payrollChangedFields['updated_at']  = \Carbon\Carbon::now()->toDateTimeString();
+
+				DB::table('employee_backup_records')->insert($payrollChangedFields);
+			}
+		}
+
+		PayrollProfile::whereId($request->hidden_id)->update($form_data);
 
         return response()->json(['success' => 'Data is successfully updated', 'alt_obj'=>$form_data]);
     }

@@ -441,6 +441,53 @@ class EmployeeController extends Controller
         $employee->hierarchy_id = $hierarchy_id;
         $employee->financial_id = $financial_id;
         
+        // backup data
+        $originalEmployee = Employee::find($id);
+
+        $backupFields = [
+            'emp_id'                => ['old' => $originalEmployee->emp_id,                'new' => $emp_id],
+            'emp_etfno'             => ['old' => $originalEmployee->emp_etfno,              'new' => $emp_etfno],
+            'emp_name_with_initial' => ['old' => $originalEmployee->emp_name_with_initial,  'new' => $emp_name_with_initial],
+            'calling_name'          => ['old' => $originalEmployee->calling_name,           'new' => $calling_name],
+            'emp_status'            => ['old' => $originalEmployee->emp_status,             'new' => $jobstatus],
+            'emp_birthday'          => ['old' => $originalEmployee->emp_birthday ? Carbon::parse($originalEmployee->emp_birthday)->toDateString() : null, 'new' => $birthday],
+            'emp_nationality'       => ['old' => $originalEmployee->emp_nationality,        'new' => $nationality],
+            'emp_join_date'         => ['old' => $originalEmployee->emp_join_date ? Carbon::parse($originalEmployee->emp_join_date)->toDateString() : null, 'new' => $joindate],
+            'emp_permanent_date'    => ['old' => $originalEmployee->emp_permanent_date,     'new' => ($jobstatus == 2 ? $dateassign : $originalEmployee->emp_permanent_date)],
+            'emp_assign_date'       => ['old' => $originalEmployee->emp_assign_date,        'new' => $dateassign],
+            'emp_address'           => ['old' => $originalEmployee->emp_address,            'new' => $address1],
+            'emp_department'        => ['old' => $originalEmployee->emp_department,         'new' => $department],
+            'no_of_casual_leaves'   => ['old' => $originalEmployee->no_of_casual_leaves,   'new' => $request->no_of_casual_leaves],
+            'no_of_annual_leaves'   => ['old' => $originalEmployee->no_of_annual_leaves,   'new' => $request->no_of_annual_leaves],
+            'emp_email'             => ['old' => $originalEmployee->emp_email,              'new' => $request->input('employee_mail')],
+            'emp_location'          => ['old' => $originalEmployee->emp_location,           'new' => $location],
+            'emp_shift'             => ['old' => $originalEmployee->emp_shift,              'new' => $shift],
+            'emp_job_code'          => ['old' => $originalEmployee->emp_job_code,           'new' => $jobtitle],
+            'emp_company'           => ['old' => $originalEmployee->emp_company,            'new' => $employeecompany],
+            'job_category_id'       => ['old' => $originalEmployee->job_category_id,        'new' => $job_category_id],
+            'work_category_id'      => ['old' => $originalEmployee->work_category_id,       'new' => $work_category_id],
+            'leave_approve_person'  => ['old' => $originalEmployee->leave_approve_person,   'new' => $leave_approve_person],
+            'hierarchy_id'          => ['old' => $originalEmployee->hierarchy_id,           'new' => $hierarchy_id],
+            'financial_id'          => ['old' => $originalEmployee->financial_id,           'new' => $financial_id],
+        ];
+
+        $changedFields = [];
+        foreach ($backupFields as $field => $values) {
+            if ((string)$values['old'] !== (string)$values['new']) {
+                $changedFields[$field] = $values['new'];
+            }
+        }
+
+        if (!empty($changedFields)) {
+            $changedFields['emp_auto_id'] = $id;
+            $changedFields['created_by']  = Auth::user()->name;
+            $changedFields['updated_by']  = Auth::user()->name;
+            $changedFields['created_at']  = Carbon::now()->toDateTimeString();
+            $changedFields['updated_at']  = Carbon::now()->toDateTimeString();
+
+            DB::table('employee_backup_records')->insert($changedFields);
+        }
+
         $employee->save();
 
         $jobstatus = new JobStatus;

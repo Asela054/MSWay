@@ -72,7 +72,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group mt-3">
-                                        <button type="submit" name="action_button" id="action_button" class="btn btn-outline-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
+                                        <button type="submit" name="action_button" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
                                     </div>
                                     <input type="hidden" name="action" id="action" value="Add" />
                                     <input type="hidden" name="hidden_id" id="hidden_id" />
@@ -202,11 +202,10 @@
 
             $('#create_record').click(function(){
                 $('.modal-title').text('Add New Branch');
-                $('#action_button').html('Add');
+                $('#action_button').prop('disabled', false).html('<i class="fas fa-plus"></i>&nbsp;Add');
                 $('#action').val('Add');
-                $('#form_result').html('');
+                $('#form_result').html('');  
                 $('#formTitle')[0].reset();
-
                 $('#formModal').modal('show');
             });
 
@@ -220,25 +219,25 @@
                 if ($('#action').val() == 'Edit') {
                     action_url = "{{ route('BankBranch.update') }}";
                 }
+                $('#action_button').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>&nbsp;Saving...');
 
                 $.ajax({
                     url: action_url,
                     method: "POST",
                     data: $(this).serialize(),
                     dataType: "json",
-                    success: function (data) {//alert(data);        
+                    success: function (data) {
+                        $('#action_button').prop('disabled', false).html($('#action').val() == 'Add' ? '<i class="fas fa-plus"></i>&nbsp;Add' : '<i class="fas fa-pencil-alt"></i>&nbsp;Edit');
+
                         if (data.errors) {
-                            const actionObj = {
-                                icon: 'fas fa-warning',
-                                title: '',
-                                message: 'Record Error',
-                                url: '',
-                                target: '_blank',
-                                type: 'danger'
-                            };
-                            const actionJSON = JSON.stringify(actionObj, null, 2);
-                            action(actionJSON);
+                            var errorHtml = '<div class="alert alert-danger alert-sm p-2 mb-2"><ul class="mb-0 pl-3">';
+                            $.each(data.errors, function(index, value) {
+                                errorHtml += '<li class="small">' + value + '</li>';
+                            });
+                            errorHtml += '</ul></div>';
+                            $('#form_result').html(errorHtml);
                         }
+
                         if (data.success) {
                             const actionObj = {
                                 icon: 'fas fa-save',
@@ -250,8 +249,13 @@
                             };
                             const actionJSON = JSON.stringify(actionObj, null, 2);
                             $('#formTitle')[0].reset();
+                            $('#form_result').html('');
                             actionreload(actionJSON);
                         }
+                    },
+                    error: function(xhr) {
+                        $('#action_button').prop('disabled', false);
+                        $('#form_result').html('<div class="alert alert-danger alert-sm p-2 mb-2"><small>Something went wrong. Please try again.</small></div>');
                     }
                 });
             });

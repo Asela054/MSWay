@@ -74,7 +74,7 @@ class BankBranchController extends Controller
 
         $rules = array(
             'name' => 'required',
-            'code' => 'required|unique:bank_branches,code|max:3',
+            'code' => 'required|max:3|unique:bank_branches,code,NULL,id,bankcode,' . $request->input('bankcode'),
         );
 
         $error = Validator::make($request->all(), $rules);
@@ -118,7 +118,7 @@ class BankBranchController extends Controller
 
         $rules = array(
             'name' => 'required',
-            'code' => 'required | max:3',
+            'code' => 'required|max:3|unique:bank_branches,code,' . $request->hidden_id . ',id,bankcode,' . $request->input('bankcode'),
         );
 
         $error = Validator::make($request->all(), $rules);
