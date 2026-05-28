@@ -539,7 +539,8 @@ class Attendance extends Model
         // $shifthours= $offdutyTime->diffInHours($ondutyTime); //Remove this line on 27/03/2026
         $shifthours= $emp->shift_hours; //Get by job category
         $otafterhours= $emp->ot_app_hours;//Please add database column
-        $emplyeeworkhours= $on_time->diffInHours($off_time);//Differents of in time & out time
+        $totalMinutes = $on_time->diffInMinutes($off_time);
+        $emplyeeworkhours = round($totalMinutes / 60, 2);//Differents of in time & out time
         $totalworkinghours=$emplyeeworkhours+$halfshorthours;
         $afterothours=$shifthours+$otafterhours;
         $ot_from = $on_time;
