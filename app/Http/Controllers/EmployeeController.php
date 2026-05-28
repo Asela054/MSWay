@@ -474,7 +474,7 @@ class EmployeeController extends Controller
         $changedFields = [];
         foreach ($backupFields as $field => $values) {
             if ((string)$values['old'] !== (string)$values['new']) {
-                $changedFields[$field] = $values['new'];
+                $changedFields[$field] = $values['old'];
             }
         }
 
