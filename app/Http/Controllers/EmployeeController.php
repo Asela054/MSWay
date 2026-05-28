@@ -25,6 +25,7 @@ use App\PayrollProfile;
 use App\Policestation;
 use App\CompanyHierarchy;
 use App\FinancialCategory;
+use App\EmployeeResignBy;
 use DB;
 use Excel;
 use Illuminate\Support\Facades\Auth;
@@ -573,13 +574,24 @@ class EmployeeController extends Controller
             $resignationremark = $request->input('resignationremark');
 
         $current_date_time = Carbon::now()->toDateTimeString();
-        Employee::where('emp_id', $emp_id)
-            ->update([
+
+        $employee = Employee::where('emp_id', $emp_id)->first();
+
+        if (!$employee) {
+            return response()->json(['errors' => ['Employee not found.']]);
+        }
+
+        $employee->update([
                 'resignation_date' =>  $resignationdate,
                 'resignation_remark' =>  $resignationremark,
                 'is_resigned' =>  '1',
                 'updated_at' => $current_date_time,
             ]);
+
+        EmployeeResignBy::create([
+            'emp_id'     => $employee->emp_id,
+            'updated_by' => Auth::id(),
+        ]);
             
         return response()->json(['success' => 'Employee successfully Resigned']);
     
