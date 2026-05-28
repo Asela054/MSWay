@@ -483,6 +483,60 @@
             </div>
         </div>
     </div>
+
+
+    <!-- employee add modal -->
+    <div class="modal fade" id="empadd" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-header p-2">
+                    <h5 class="modal-title" id="exampleModalLabel">Re Assign Employee</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col">
+                            <span id="empaddform_result"></span>
+
+                            <form id="empaddform" method="post">
+                                {{ csrf_field() }}
+                                <div class="form-group mb-1">
+                                    <label class="small font-weight-bold text-dark">E-mail <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-control-sm {{ $errors->has('email') ? ' has-error' : '' }} shipClass" id="empadd_email" name="email" placeholder="Type Your Email" required>
+                                    @if ($errors->has('email'))
+                                    <span class="help-block">
+                                        <strong>{{ $errors->first('email') }}</strong>
+                                    </span>
+                                    @endif
+                                </div>
+                                <div class="form-group mb-1">
+                                    <label class="small font-weight-bold text-dark">Password</label>
+                                    <input type="password" class="form-control form-control-sm {{ $errors->has('password') ? ' has-error' : '' }} shipClass" id="employee_password" name="password" required>
+                                    @if ($errors->has('password'))
+                                    <span class="help-block">
+                                        <strong>{{ $errors->first('password') }}</strong>
+                                    </span>
+                                    @endif
+                                </div>
+                                <div class="form-group mt-3">
+                                    <button type="submit" name="action_button" id="empadd_action_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-exchange-alt"></i>&nbsp;Re Assign</button>
+                                </div>
+                                <input type="hidden" id="empadd_userid" name="empadd_userid">
+                                <input type="hidden" id="empadd_name" name="name">
+                                <input type="hidden" id="empadd_company" name="company_id">
+                                <input type="hidden" name="action" id="empadd_action" />
+                                <input type="hidden" name="hidden_id" id="empadd_hidden_id" />
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- employee add modal end-->
+
     <div class="modal fade" id="fpModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
     aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">
@@ -576,7 +630,7 @@
 						<textarea class="form-control form-control-sm" id="resignremark" name="resignremark"></textarea>
                     </div>
                     <div class="form-group mt-3">
-                        <button type="button" name="resign_button" id="resign_button" class="btn btn-primary btn-sm fa-pull-right px-4 resign_button"><i class="fas fa-plus"></i>&nbsp;approve</button>
+                        <button type="button" name="resign_button" id="resign_button" class="btn btn-primary btn-sm fa-pull-right px-4 resign_button"><i class="fas fa-plus"></i>&nbsp;Approve</button>
                     </div>
                     </div>
                 </div>
@@ -972,7 +1026,9 @@ $(document).ready(function () {
                         if (is_resigned == 0) {
                             buttons += '<button style="margin:1px;" data-toggle="tooltip" data-placement="bottom" title="Delete Employee Details" class="btn btn-danger btn-sm delete" id="' + row.id + '"><i class="far fa-trash-alt"></i></button>';
                         }
-
+                        if (is_resigned == 1) {
+                            buttons += '<button style="margin:1px;" data-toggle="tooltip" data-placement="bottom" title="Re Assign Employee" class="btn btn-success btn-sm addemployee" id="' + row.emp_id + '" name="' + (row.emp_name_with_initial || '') + '" emp_company="' + row.emp_company + '"><i class="fas fa-exchange-alt"></i></button>';
+                        }
                         return buttons;
                     }
                 },
@@ -1248,6 +1304,79 @@ $(document).ready(function () {
         $('#userlogModal').modal('show');
     });
 
+    //empadd
+    $(document).on('click', '.addemployee', function () {
+        var id = $(this).attr('id');
+        var name = $(this).attr('name');
+        var emp_company = $(this).attr('emp_company');
+        $('#empadd_userid').val(id);
+        $('#empadd_name').val(name);
+        $('#empadd_company').val(emp_company);
+        $('#empadd_action').val('Add');
+        $('#empaddform_result').html('');
+        $('#empaddform')[0].reset();
+        $('#empadd_email').val('');
+        $('#employee_password').val('');
+        $('#empadd').modal('show');
+    });
+
+    $('#empaddform').on('submit', function (event) {
+        event.preventDefault();
+        
+       $('#empaddform_result').html('');
+        
+        var email    = $.trim($('#empadd_email').val());
+        var password = $.trim($('#employee_password').val());
+        
+        if (email === '') {
+        $('#empaddform_result').html('<div class="alert alert-danger">Email is required</div>');
+        return false;
+        }
+        if (password === '') {
+            $('#empaddform_result').html('<div class="alert alert-danger">Password is required</div>');
+            return false;
+        }
+
+       $('#empadd_action_button').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>&nbsp;Processing...');
+
+            $.ajax({
+            url: "{{ route('addResignEmployees') }}",
+            method: "POST",
+            data: $(this).serialize(),
+            dataType: "json",
+            success: function (data) {
+                if (data.errors) {
+                    var html = '<div class="alert alert-danger">';
+                    data.errors.forEach(function(e) { html += '<p>' + e + '</p>'; });
+                    html += '</div>';
+                    $('#empaddform_result').html(html);
+                    $('#empadd_action_button').prop('disabled', false)
+                        .html('<i class="fas fa-plus"></i>&nbsp;Add');
+                }
+                if (data.success) {
+                    var html = '<div class="alert alert-success">' + data.success + '</div>';
+                    $('#empaddform_result').html(html);
+                    $('#empaddform')[0].reset();
+                    setTimeout(function() {
+                        $('#empadd').modal('hide');
+                        location.reload();
+                    }, 2000);
+                }
+            },
+            error: function (xhr) {
+                var html = '<div class="alert alert-danger">';
+                if (xhr.responseJSON && xhr.responseJSON.errors) {
+                    xhr.responseJSON.errors.forEach(function(e) { html += '<p>' + e + '</p>'; });
+                } else {
+                    html += '<p>An unexpected error occurred.</p>';
+                }
+                html += '</div>';
+                $('#empaddform_result').html(html);
+                $('#empadd_action_button').prop('disabled', false).html('<i class="fas fa-plus"></i>&nbsp;Add');
+            }
+        });
+    });
+
     $('#userlogform').on('submit', function (event) {
         event.preventDefault();
         
@@ -1453,7 +1582,7 @@ $(document).ready(function () {
                                 message: 'Employee Resignation Processed Successfully',
                                 url: '',
                                 target: '_blank',
-                                type: 'warning'
+                                type: 'success'
                             };
                             const actionJSON = JSON.stringify(actionObj, null, 2);
                             actionreload(actionJSON);
