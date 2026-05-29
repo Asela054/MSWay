@@ -242,6 +242,7 @@ class EmployeeRosterDetailsController extends Controller
         
         $departmentId = $request->get('department_id');
         $month = $request->get('Month');
+        $maxwork_days = $request->get('max_work_days');
         if (!$departmentId || !$month) {
             return response()->json(['error' => 'Missing department_id or month'], 400);
         }
@@ -295,6 +296,7 @@ class EmployeeRosterDetailsController extends Controller
                         DB::table('employee_roster_approve')
                             ->where('id', $existingRecord->id)
                             ->update([
+                                'max_work_days' => $maxwork_days,
                                 'count' => $count,
                                 'updated_at' => $current_date_time
                             ]);
@@ -304,6 +306,7 @@ class EmployeeRosterDetailsController extends Controller
                             'emp_id' => $empId,
                             'month' => $startDate,
                             'shift_id' => $shift->id,
+                            'max_work_days' => $maxwork_days,
                             'count' => $count,
                             'created_at' => $current_date_time,
                             'updated_at' => $current_date_time

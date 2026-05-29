@@ -104,6 +104,32 @@
         </div>
     </div>
 
+     <div class="modal fade" id="approveModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Max Work Days for Month</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="message_modal"></div>
+                            <form class="form-horizontal" id="formApprove">
+                                <div class="row">
+                                    <div class="col-sm-12 col-md-12">
+                                        <label class="small font-weight-bolder ">Max Work Days*</label>
+                                        <input type="number" name="max_work_days" id="max_work_days" class="form-control form-control-sm" required/>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary btn-sm px-3" id="btn-approve"><i class="fa-light fa-light fa-clipboard-check"></i>&nbsp;Approve</button>
+                        </div>
+                    </div>
+                </div>
+        </div>
 </main>
               
 @endsection
@@ -246,12 +272,95 @@ $(document).ready(function() {
             });
     }
 
+     $('#saveroster').click(async function () {
+         var r = await Otherconfirmation("You want to Approve this ? ");
+         if (r == true) {
+             $('.message_modal').html('');
+             $('#approveModal').modal('show');
+
+             $('#btn-approve').on('click', function (e) {
+                 e.preventDefault();
+                 let department = $('#department').val();
+                 let selectedMonth = $('#month').val();
+                 var max_work_days = $('#max_work_days').val();
+
+                 if (max_work_days == '') {
+                     Swal.fire({
+                         position: "top-end",
+                         icon: 'warning',
+                         title: 'Please select Max Work Days!',
+                         showConfirmButton: false,
+                         timer: 2500
+                     });
+                     return false;
+                 } else {
+                     $.ajaxSetup({
+                         headers: {
+                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                         }
+                     })
+
+                     $.ajax({
+                         url: '{!! route("approverosterstore") !!}',
+                         type: 'POST',
+                         data: {
+                             department_id: department,
+                             Month: selectedMonth,
+                             max_work_days: max_work_days
+                         },
+                         dataType: 'json',
+                         success: function (response) {
+                             if (response.errors) {
+                                 const actionObj = {
+                                     icon: 'fas fa-warning',
+                                     title: '',
+                                     message: 'Record Error',
+                                     url: '',
+                                     target: '_blank',
+                                     type: 'danger'
+                                 };
+                                 const actionJSON = JSON.stringify(actionObj, null, 2);
+                                 action(actionJSON);
+                             }
+                             if (response.success) {
+                                 const actionObj = {
+                                     icon: 'fas fa-save',
+                                     title: '',
+                                     message: response.success,
+                                     url: '',
+                                     target: '_blank',
+                                     type: 'success'
+                                 };
+                                 const actionJSON = JSON.stringify(actionObj, null, 2);
+                                 $('#shiftForm')[0].reset();
+                                 actionreload(actionJSON);
+                             }
+                         },
+                         error: function (xhr, status, error) {
+                             console.error('Error:', error);
+                             const actionObj = {
+                                 icon: 'fas fa-times',
+                                 title: '',
+                                 message: 'Something went wrong!',
+                                 url: '',
+                                 target: '_blank',
+                                 type: 'danger'
+                             };
+                             const actionJSON = JSON.stringify(actionObj, null, 2);
+                             action(actionJSON);
+                         }
+                     });
+                 }
+             });
+         }
+     });
+
+
 
      // Handle form submit for colne
     $('#shiftForm').on('submit', function(e) {
         e.preventDefault();
-        let department = $('#department').val();
-        let selectedMonth = $('#month').val();
+       
 
          $.ajaxSetup({
             headers: {
@@ -259,55 +368,7 @@ $(document).ready(function() {
             }
         })
 
-        $.ajax({
-            url: '{!! route("approverosterstore") !!}',
-            type: 'POST',
-            data: { 
-                department_id: department, 
-                Month: selectedMonth
-            },
-            dataType: 'json',
-            success: function(response) {
-                if (response.errors) {
-                    const actionObj = {
-                        icon: 'fas fa-warning',
-                        title: '',
-                        message: 'Record Error',
-                        url: '',
-                        target: '_blank',
-                        type: 'danger'
-                    };
-                    const actionJSON = JSON.stringify(actionObj, null, 2);
-                    action(actionJSON);
-                }
-                if (response.success) {
-                    const actionObj = {
-                        icon: 'fas fa-save',
-                        title: '',
-                        message: response.success,
-                        url: '',
-                        target: '_blank',
-                        type: 'success'
-                    };
-                    const actionJSON = JSON.stringify(actionObj, null, 2);
-                    $('#shiftForm')[0].reset();
-                    actionreload(actionJSON);
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error('Error:', error);
-                const actionObj = {
-                    icon: 'fas fa-times',
-                    title: '',
-                    message: 'Something went wrong!',
-                    url: '',
-                    target: '_blank',
-                    type: 'danger'
-                };
-                const actionJSON = JSON.stringify(actionObj, null, 2);
-                action(actionJSON);
-            }
-        });
+       
     });
 
 });
