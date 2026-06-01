@@ -44,6 +44,7 @@
                                     <th>EMPLOYEE ID</th>
                                     <th>EMPLOYEE NAME</th>
                                     <th>DEPARTMENT</th>
+                                    <th>MAXIMUM WORK DAYS</th>
                                     <th>WORKING DAYS</th>
                                     <th>WORKING HOURS</th>
                                     <th>LEAVE DAYS</th>
@@ -169,11 +170,31 @@ $(document).ready(function () {
 
     showInitialMessage();
 
-    function inputCell(value, name) {
-        const v = (value !== null && value !== undefined && value !== '') ? value : '';
-        return `<input type="number" min="0" step="0.01"
-                    class="form-control form-control-sm work-rate-input"
-                    name="${name}" value="${v}" style="min-width:75px;">`;
+    function inputCell(savedValue, name, rosterValue) {
+        const sv = (savedValue  !== null && savedValue  !== undefined && savedValue  !== '') ? savedValue  : '';
+        const rv = (rosterValue !== null && rosterValue !== undefined && rosterValue !== '') ? parseFloat(rosterValue) : '';
+        return `
+            <div class="d-flex align-items-end" style="gap:4px;min-width:155px;">
+                <div style="flex:1;min-width:0;">
+                    <div class="text-center text-muted" style="font-size:9px;line-height:1.4;white-space:nowrap;">
+                        <i class="fas fa-calendar-alt" style="font-size:8px;"></i> Roster
+                    </div>
+                    <input type="number" min="0" step="0.01"
+                        class="form-control form-control-sm work-rate-input text-center"
+                        name="${name}" value="${rv}"
+                        style="min-width:68px;padding-left:4px;padding-right:4px;">
+                </div>
+                <div style="flex:1;min-width:0;">
+                    <div class="text-center text-muted" style="font-size:9px;line-height:1.4;white-space:nowrap;">
+                        <i class="fas fa-save" style="font-size:8px;"></i> Saved
+                    </div>
+                    <input type="number" min="0" step="0.01"
+                        class="form-control form-control-sm text-center"
+                        value="${sv}"
+                        style="min-width:68px;padding-left:4px;padding-right:4px;background:#f8f9fa;color:#6c757d;cursor:default;"
+                        readonly tabindex="-1">
+                </div>
+            </div>`;
     }
 
     function load_dt(company, department, month) {
@@ -223,23 +244,49 @@ $(document).ready(function () {
                 data : { company, department, month }
             },
             columns: [
-                { data:'uid',                  name:'employees.emp_id' },
-                { data:'emp_name_with_initial',name:'employees.emp_name_with_initial' },
-                { data:'dept_name',            name:'departments.name' },
-                { data:'work_days',            name:'work_days',            orderable:false, render: (v)=> inputCell(v,'work_days') },
-                { data:'working_hours',        name:'working_hours',        orderable:false, render: (v)=> inputCell(v,'working_hours') },
-                { data:'leave_days',           name:'leave_days',           orderable:false, render: (v)=> inputCell(v,'leave_days') },
-                { data:'no_pay_days',          name:'no_pay_days',          orderable:false, render: (v)=> inputCell(v,'no_pay_days') },
-                { data:'late_hours',           name:'late_hours',           orderable:false, render: (v)=> inputCell(v,'late_hours') },
-                { data:'normal_ot_hours',      name:'normal_ot_hours',      orderable:false, render: (v)=> inputCell(v,'normal_ot_hours') },
-                { data:'double_ot_hours',      name:'double_ot_hours',      orderable:false, render: (v)=> inputCell(v,'double_ot_hours') },
-                { data:'triple_ot_hours',      name:'triple_ot_hours',      orderable:false, render: (v)=> inputCell(v,'triple_ot_hours') },
-                { data:'holiday_nopay_days',   name:'holiday_nopay_days',   orderable:false, render: (v)=> inputCell(v,'holiday_nopay_days') },
-                { data:'holiday_normal_ot_hours', name:'holiday_normal_ot_hours', orderable:false, render: (v)=> inputCell(v,'holiday_normal_ot_hours') },
-                { data:'holiday_double_ot_hours', name:'holiday_double_ot_hours', orderable:false, render: (v)=> inputCell(v,'holiday_double_ot_hours') },
+                { data: 'uid',                   name: 'employees.emp_id' },
+                { data: 'emp_name_with_initial', name: 'employees.emp_name_with_initial' },
+                { data: 'dept_name', name: 'departments.name' },
+
+                { data: 'roster_max_work_days', name: 'roster_max_work_days', orderable: false, searchable: false,
+                render: (v) => `<div class="text-center"><input type="number" class="form-control form-control-sm text-center" value="${v ?? ''}" readonly tabindex="-1" style="min-width:80px;background:#f8f9fa;color:#6c757d;cursor:default;"></div>` },
+
+                { data: 'work_days',            name: 'work_days',            orderable: false, searchable: false,
+                render: (v, t, row) => inputCell(v, 'work_days',            row.roster_work_days) },
+
+                { data: 'working_hours',        name: 'working_hours',        orderable: false, searchable: false,
+                render: (v, t, row) => inputCell(v, 'working_hours',        row.roster_working_hours) },
+
+                { data: 'leave_days',           name: 'leave_days',           orderable: false, searchable: false,
+                render: (v, t, row) => inputCell(v, 'leave_days',           row.roster_leave_days) },
+
+                { data: 'no_pay_days',          name: 'no_pay_days',          orderable: false, searchable: false,
+                render: (v, t, row) => inputCell(v, 'no_pay_days',          null) },
+
+                { data: 'late_hours',           name: 'late_hours',           orderable: false, searchable: false,
+                render: (v, t, row) => inputCell(v, 'late_hours',           null) },
+
+                { data: 'normal_ot_hours',      name: 'normal_ot_hours',      orderable: false, searchable: false,
+                render: (v, t, row) => inputCell(v, 'normal_ot_hours',      row.roster_normal_ot_hours) },
+
+                { data: 'double_ot_hours',      name: 'double_ot_hours',      orderable: false, searchable: false,
+                render: (v, t, row) => inputCell(v, 'double_ot_hours',      null) },
+
+                { data: 'triple_ot_hours',      name: 'triple_ot_hours',      orderable: false, searchable: false,
+                render: (v, t, row) => inputCell(v, 'triple_ot_hours',      null) },
+
+                { data: 'holiday_nopay_days',   name: 'holiday_nopay_days',   orderable: false, searchable: false,
+                render: (v, t, row) => inputCell(v, 'holiday_nopay_days',   null) },
+
+                { data: 'holiday_normal_ot_hours', name: 'holiday_normal_ot_hours', orderable: false, searchable: false,
+                render: (v, t, row) => inputCell(v, 'holiday_normal_ot_hours', null) },
+
+                { data: 'holiday_double_ot_hours', name: 'holiday_double_ot_hours', orderable: false, searchable: false,
+                render: (v, t, row) => inputCell(v, 'holiday_double_ot_hours', null) },
+
                 // Hidden
-                { data:'emp_auto_id', name:'emp_auto_id', visible:false },
-                { data:'emp_etfno',   name:'emp_etfno',   visible:false },
+                { data: 'emp_auto_id', name: 'emp_auto_id', visible: false, searchable: false },
+                { data: 'emp_etfno',   name: 'emp_etfno',   visible: false, searchable: false },
             ],
         });
     }
@@ -335,7 +382,7 @@ $(document).ready(function () {
 
     function showInitialMessage() {
         $('.response').html(
-            '<tr><td colspan="14" class="text-center py-5">' +
+            '<tr><td colspan="15" class="text-center py-5">' +
             '<div class="d-flex flex-column align-items-center">' +
             '<i class="fas fa-filter fa-3x text-muted mb-2"></i>' +
             '<h4 class="text-muted mb-2">No Records Found</h4>' +

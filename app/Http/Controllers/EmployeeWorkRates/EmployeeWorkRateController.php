@@ -29,55 +29,103 @@ class EmployeeWorkRateController extends Controller
 
         $company    = $request->get('company');
         $department = $request->get('department');
-        $month      = $request->get('month'); 
+        $month      = $request->get('month');
 
-        $userId              = Auth::id();
+        $userId                = Auth::id();
         $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
-        $userBranchIds       = DB::table('user_has_companies')
+        $userBranchIds         = DB::table('user_has_companies')
             ->where('user_id', $userId)
             ->pluck('branch_id')
             ->toArray();
 
-        // Parse year and month
         $work_year  = null;
         $work_month = null;
         if (!empty($month)) {
             [$work_year, $work_month] = explode('-', $month);
         }
 
+        $monthStr = '';
+        if ($work_year && $work_month) {
+            $monthStr = sprintf('%04d-%02d', (int)$work_year, (int)$work_month);
+        }
+
+        $rosterSql = "
+            SELECT
+                era.emp_id AS r_emp_id,
+                ROUND(SUM(era.count), 2) AS roster_work_days,
+                ROUND(SUM(era.count * (MOD(TIME_TO_SEC(st.offduty_time) - TIME_TO_SEC(st.onduty_time) + 86400, 86400) / 3600)), 2) AS roster_working_hours,
+                MAX(era.max_work_days) AS roster_max_work_days
+            FROM employee_roster_approve AS era
+            INNER JOIN shift_types AS st ON st.id = era.shift_id
+            " . ($monthStr ? "WHERE DATE_FORMAT(era.month, '%Y-%m') = ?" : "") . "
+            GROUP BY era.emp_id
+        ";
+
+        $rosterBindings = $monthStr ? [$monthStr] : [];
+
+
         $query = DB::table('employees')
             ->leftJoin('departments', 'departments.id', '=', 'employees.emp_department')
-            ->leftJoin('branches', 'branches.id', '=', 'employees.emp_location')
-            ->leftJoin('companies', 'companies.id', '=', 'employees.emp_company')
+            ->leftJoin('branches',    'branches.id',    '=', 'employees.emp_location')
+            ->leftJoin('companies',   'companies.id',   '=', 'employees.emp_company')
             ->leftJoin('employee_work_rates as ewr', function ($join) use ($work_year, $work_month) {
                 $join->on('ewr.emp_id', '=', 'employees.id');
                 if ($work_year && $work_month) {
-                    $join->where('ewr.work_year', '=', $work_year)
-                         ->where('ewr.work_month', '=', $work_month);
+                    $join->where('ewr.work_year',  '=', $work_year)
+                        ->where('ewr.work_month', '=', $work_month);
                 }
             })
+            ->leftJoin(DB::raw("({$rosterSql}) AS roster"), function ($join) use ($rosterBindings) {
+                $join->on('roster.r_emp_id', '=', 'employees.emp_id');
+            })
+            ->addBinding($rosterBindings, 'join')
             ->select([
-                'employees.emp_id         as uid',
+                // Core employee fields
+                'employees.emp_id              as uid',
                 'employees.emp_name_with_initial',
-                'employees.id             as emp_auto_id',
-                'employees.emp_id         as emp_etfno',
-                'departments.name         as dept_name',
+                'employees.id                  as emp_auto_id',
+                'employees.emp_id              as emp_etfno',
+                'departments.name              as dept_name',
                 'branches.location',
-                'companies.name           as company_name',
-                'ewr.id                   as ewr_id',
+                'companies.name                as company_name',
+                // Previously saved work-rate fields (right / read-only side)
+                'ewr.id                        as ewr_id',
                 'ewr.work_days',
-                'ewr.work_hours           as working_hours',
+                'ewr.work_hours                as working_hours',
                 'ewr.leave_days',
-                'ewr.nopay_days           as no_pay_days',
-                'ewr.emp_late_hours       as late_hours',
-                'ewr.normal_rate_otwork_hrs  as normal_ot_hours',
-                'ewr.double_rate_otwork_hrs  as double_ot_hours',
-                'ewr.triple_rate_otwork_hrs  as triple_ot_hours',
+                'ewr.nopay_days                as no_pay_days',
+                'ewr.emp_late_hours            as late_hours',
+                'ewr.normal_rate_otwork_hrs    as normal_ot_hours',
+                'ewr.double_rate_otwork_hrs    as double_ot_hours',
+                'ewr.triple_rate_otwork_hrs    as triple_ot_hours',
                 'ewr.holiday_nopay_days',
-                'ewr.holiday_normal_ot_hrs   as holiday_normal_ot_hours',
-                'ewr.holiday_double_ot_hrs   as holiday_double_ot_hours',
+                'ewr.holiday_normal_ot_hrs     as holiday_normal_ot_hours',
+                'ewr.holiday_double_ot_hrs     as holiday_double_ot_hours',
+                //Roster-calculated fields (left / editable side) 
+                'roster.roster_work_days',
+                'roster.roster_working_hours',
+                'roster.roster_max_work_days',
+                // LEAVE DAYS  : max_work_days − total_count  (only when count < max)
+                DB::raw('CASE
+                            WHEN roster.roster_work_days IS NOT NULL
+                            AND roster.roster_max_work_days IS NOT NULL
+                            AND roster.roster_work_days < roster.roster_max_work_days
+                            THEN ROUND(roster.roster_max_work_days - roster.roster_work_days, 2)
+                            ELSE NULL
+                        END AS roster_leave_days'),
+                // NORMAL OT HRS : excess_days × avg_hours_per_day  (only when count > max)
+                DB::raw('CASE
+                            WHEN roster.roster_work_days IS NOT NULL
+                            AND roster.roster_max_work_days IS NOT NULL
+                            AND roster.roster_work_days > roster.roster_max_work_days
+                            THEN ROUND(
+                                (roster.roster_work_days - roster.roster_max_work_days)
+                                * (roster.roster_working_hours / NULLIF(roster.roster_work_days, 0)),
+                                2)
+                            ELSE NULL
+                        END AS roster_normal_ot_hours'),
             ])
-            ->where('employees.deleted', 0)
+            ->where('employees.deleted',     0)
             ->where('employees.is_resigned', 0);
 
         if (!empty($accessibleEmployeeIds)) {
@@ -195,10 +243,10 @@ class EmployeeWorkRateController extends Controller
         ]);
     }
 
-    /** Return numeric value or null if blank/non-numeric */
+    /** Return numeric value or 0 if blank/non-numeric */
     private function numOrNull($value)
     {
-        if ($value === '' || $value === null) return null;
-        return is_numeric($value) ? $value + 0 : null;
+        if ($value === '' || $value === null) return 0;
+        return is_numeric($value) ? $value + 0 : 0;
     }
 }

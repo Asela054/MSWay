@@ -504,6 +504,7 @@ Route::post('work_hours_save', 'WorkHoursController@work_hours_save')->name('wor
 // Resignation Report
 Route::get('employee_resign_report', 'EmployeeResignController@employee_resign_report')->name('employee_resign_report');
 Route::get('get_resign_employees', 'EmployeeResignController@get_resign_employees')->name('get_resign_employees');
+Route::post('add_resign_employees', 'EmployeeResignController@addResignEmployees')->name('addResignEmployees');
 
 
 // Absent Report
@@ -517,6 +518,33 @@ Route::post('employeeresignation', 'EmployeeController@employeeresignation')->na
 Route::get('employee_recirument_report', 'RecruitmentreportController@index')->name('employee_recirument_report');
 Route::get('/filterrecruitment-report', 'RecruitmentReportController@filter')->name('filterRecruitmentReport');
 Route::get('/filterrecruitmentinterviwer-report', 'RecruitmentReportController@interviwerfilter')->name('filterRecruitmentinterviwerReport');
+
+/*-- Employee Letter routes ----*/
+
+// Employee Letter Types Routes
+Route::resource('letterType', 'EmployeeLetter\LetterTypeController');
+Route::get('letterType',['uses' => 'EmployeeLetter\LetterTypeController@index', 'as' => 'letterType']); 
+Route::post('addLetterType',['uses' => 'EmployeeLetter\LetterTypeController@store', 'as' => 'addLetterType']); 
+Route::post('letterType/update', 'EmployeeLetter\LetterTypeController@update')->name('letterType.update');
+Route::get('letterType/destroy/{id}', 'EmployeeLetter\LetterTypeController@destroy');
+
+//Employee Letter Templates Routes
+Route::get('letterTemplate',                'EmployeeLetter\LetterTemplateController@index')  ->name('letterTemplate');
+Route::post('letterTemplate/store',         'EmployeeLetter\LetterTemplateController@store')  ->name('letterTemplate.store');
+Route::get('letterTemplate/{id}/edit',      'EmployeeLetter\LetterTemplateController@edit')   ->name('letterTemplate.edit');
+Route::get('letterTemplate/destroy/{id}',   'EmployeeLetter\LetterTemplateController@destroy')->name('letterTemplate.destroy');
+Route::post('letterTemplate/update',        'EmployeeLetter\LetterTemplateController@update') ->name('letterTemplate.update');
+Route::get('letterTemplate/status/{id}',    'EmployeeLetter\LetterTemplateController@status') ->name('letterTemplate.status');
+
+//Employee Issued Letters Routes
+Route::get('issueLetter',                'EmployeeLetter\IssuedLetterController@index')  ->name('issueLetter');
+Route::post('issueLetter/store',         'EmployeeLetter\IssuedLetterController@store')  ->name('issueLetter.store');
+Route::get('issueLetter/{id}/edit',      'EmployeeLetter\IssuedLetterController@edit')   ->name('issueLetter.edit');
+Route::get('issueLetter/destroy/{id}',   'EmployeeLetter\IssuedLetterController@destroy')->name('issueLetter.destroy');
+Route::post('issueLetter/update',        'EmployeeLetter\IssuedLetterController@update') ->name('issueLetter.update');
+
+Route::post('issueLetter/loadTemplate',     'EmployeeLetter\IssuedLetterController@loadTemplate')->name('issueLetter.loadTemplate');
+Route::get('issueLetter/print/{id}',        'EmployeeLetter\IssuedLetterController@printLetter') ->name('issueLetter.print');
 
 
 // Appointment Letter Routes

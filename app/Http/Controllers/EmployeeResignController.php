@@ -6,9 +6,12 @@ use App\Helpers\EmployeeHelper;
 use App\Helpers\UserHelper;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\EmployeeAssignBy;
+use Hash;
 use Auth;
 use Datatables;
 use DB;
+use Carbon\Carbon;
 
 class EmployeeResignController extends Controller
 {
@@ -95,4 +98,45 @@ class EmployeeResignController extends Controller
         ->make(true);
 }
 
+    public function addResignEmployees(Request $request)
+    {
+        $empId     = $request->input('empadd_userid');
+        $email     = $request->input('email');
+        $password  = $request->input('password');
+
+        $employee = DB::table('employees')
+            ->where('emp_id', $empId)
+            ->where('deleted', '0')
+            ->where('is_resigned', 1)
+            ->first();
+
+        if (!$employee) {
+            return response()->json(['errors' => ['Employee not found or not resigned.']]);
+        }
+
+        $loggedInUser = Auth::user();
+
+        if ($loggedInUser->email !== $email) {
+            return response()->json(['errors' => ['Email does not match the logged-in user.']]);
+        }
+
+        if (!Hash::check($password, $loggedInUser->password)) {
+            return response()->json(['errors' => ['Invalid Password.']]);
+        }
+
+        DB::table('employees')
+            ->where('id', $employee->id)
+            ->update([
+                'is_resigned'        => 0,
+                'updated_at'         => Carbon::now(),
+            ]);
+
+        EmployeeAssignBy::create([
+            'emp_id'        => $employee->emp_id,
+            'emp_assign_id' => Auth::id(),
+            'updated_by'    => Auth::id(),
+        ]);
+
+        return response()->json(['success' => 'Employee re-assigned successfully.']);
+    }
 }
