@@ -168,7 +168,7 @@ class MealallowanceapproveController extends Controller
                     ->where('emp_id', $empId)
                     ->whereBetween('leave_from', [$firstDate, $lastDate])
                     ->where('status', 'Approved')
-                    ->whereNotIn('leave_type', ['7'])
+                    ->whereNotIn('leave_type', ['7', '1'])
                     ->first();
                 $totalLeaveDays = $leavecount->total_days;
                 
@@ -188,7 +188,7 @@ class MealallowanceapproveController extends Controller
                             ->whereBetween('leave_from', [$firstDate, $lastDate])
                             ->where('emp_id', $empId)
                             ->where('status', 'Approved')
-                            ->whereNotIn('leave_type', ['7'])
+                            ->whereNotIn('leave_type', ['7', '1'])
                             ->get();
                         
                         $empallowleave = $allowleave;
