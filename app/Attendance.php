@@ -557,6 +557,7 @@ class Attendance extends Model
         $sunafterdoublehours= $emp->sun_after_double ;//Sunday after double OT hours
         $weekafterdouble= $emp->week_after_double ;//Week day after double OT hours
         $roundotmin= $emp->ot_round_time ;//Rounded Min 
+        $holidayworkhours = $emp->holiday_work_hours; //Holiday work hours for OT calculation
         
         // if(!empty($shift_until_time)):
         //     if($shift_until_time<$off_time):
@@ -649,6 +650,10 @@ class Attendance extends Model
                         $double_ot_hours = 0;
                         $one_point_five_ot_hours=0;
                         $ot_hours = round($ot_minutes / 60, 2);
+                        if($holidayworkhours>0):
+                            $ot_hours = round(($ot_hours - $holidayworkhours), 2);
+                            $ot_hours = $ot_hours > 0 ? $ot_hours : 0;
+                        endif;
                         $total_ot_hours += $ot_hours;
                     }
                 }
@@ -658,6 +663,10 @@ class Attendance extends Model
                         $double_ot_hours = 0;
                         $one_point_five_ot_hours=0;
                         $double_ot_hours = round($ot_minutes / 60, 2);
+                        if($holidayworkhours>0):
+                            $double_ot_hours = round(($double_ot_hours - $holidayworkhours), 2);
+                            $double_ot_hours = $double_ot_hours > 0 ? $double_ot_hours : 0;
+                        endif;
                         $total_ot_hours_double += $double_ot_hours;
                     }
                 }
