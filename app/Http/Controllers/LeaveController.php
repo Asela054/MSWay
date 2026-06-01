@@ -300,9 +300,6 @@ class LeaveController extends Controller
 
             $employee = Employee::where('emp_id', $request->emp_id)->first();
 
-            $monthly_leaves = 3;
-            $renew_next_month = 1;
-
             $emp_join_date = $employee->emp_join_date;
             $join_year = Carbon::parse($emp_join_date)->year;
             $join_month = Carbon::parse($emp_join_date)->month;
@@ -334,12 +331,10 @@ class LeaveController extends Controller
                 $month_from_date = Carbon::parse($fromdate)->startOfMonth()->format('Y-m-d');
                 $month_to_date = $todate;
             }
-
             $current_weekly_taken = (new \App\Leave)->taken_weekly_leaves($empid, $month_from_date, $month_to_date);
 
 
             $leave_msg = '';
-
             $annualData = $this->leavePolicyService->calculateAnnualLeaves($employee->emp_join_date, $employee->emp_id, $job_categoryid);
             $annual_leaves = $annualData['annual_leaves'];
             $leave_msg = $annualData['leave_msg'];
@@ -349,7 +344,6 @@ class LeaveController extends Controller
 
              // medical leave calculation
             $medical_leaves = $this->leavePolicyService->getMedicalLeaves($employee->job_category_id);
-
             $weekly_leaves = $this->leavePolicyService->getweeklyLeaves($employee->job_category_id);
 
 
@@ -362,7 +356,19 @@ class LeaveController extends Controller
             $available_no_of_med_leaves = $total_no_of_med_leaves - $current_year_taken_med;
             $available_no_of_weekly_leaves = $total_no_of_weekly_leaves - $current_weekly_taken;
 
-            if($job_categoryid == 2 && $monthly_leaves >0 &&  $renew_next_month){
+
+            $settings = DB::table('hrm_general_settings as settings')
+                    ->join('hrm_general_settings_key_list as key_list', 'settings.key_id', '=', 'key_list.id')
+                    ->where('key_list.config_key', 'LEAVE')
+                    ->where('settings.status', 1)
+                    ->select('settings.config_value' )
+                    ->first(); 
+
+                    
+            $monthly_leaves = 3;
+            $renew_next_month = 1;
+            
+            if($settings &&  $settings->config_value == 4 && $monthly_leaves >0 &&  $renew_next_month){
                 
                  $available_no_of_annual_leaves = (new \App\Leave)->calculateMonthlyLeaveBalance($empid, $monthly_leaves);
             }else{
