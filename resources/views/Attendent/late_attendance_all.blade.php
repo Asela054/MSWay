@@ -297,13 +297,17 @@
                              const actionObj = {
                                 icon: 'fas fa-trash-alt',
                                 title: '',
-                                message: 'Record Remove Successfully',
+                                message: data.message,
                                 url: '',
                                 target: '_blank',
                                 type: 'danger'
                             };
                             const actionJSON = JSON.stringify(actionObj, null, 2);
                             actionreload(actionJSON);
+
+
+
+
                         }
                     })
                 }
