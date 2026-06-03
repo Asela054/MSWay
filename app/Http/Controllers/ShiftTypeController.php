@@ -93,6 +93,7 @@ class ShiftTypeController extends Controller
        $shifttype->max_double_ot_hrs=$request->input('max_double_ot_hrs'); 
        $shifttype->weekend_max_normal_ot_hrs=$request->input('weekend_max_normal_ot_hrs'); 
        $shifttype->weekend_max_double_ot_hrs=$request->input('weekend_max_double_ot_hrs'); 
+       $shifttype->shift_end_time=$request->input('shift_end_time');
     //    $shifttype->ending_checkin=$request->input('endingcheckin');    
     //    $shifttype->ending_checkout=$request->input('endingcheckout');   
     //    $shifttype->must_checkin=$request->input('mustcheckin');    
@@ -193,6 +194,7 @@ class ShiftTypeController extends Controller
             'max_double_ot_hrs'        =>  $request->max_double_ot_hrs,
             'weekend_max_normal_ot_hrs'        =>  $request->weekend_max_normal_ot_hrs,
             'weekend_max_double_ot_hrs'        =>  $request->weekend_max_double_ot_hrs,
+            'shift_end_time'        =>  $request->shift_end_time,
             // 'must_checkin'        =>  $request->mustcheckin, 
             // 'must_checkout'        =>  $request->mustcheckout,          
             // 'color'        =>  $request->color  
