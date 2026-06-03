@@ -193,7 +193,6 @@ $(document).ready(function() {
 
         loadRosterData(departmentId, this.value).then(rosterData => {
         generateTable(this.value, rosterData);
-        closeOffcanvasSmoothly();
         });
     });
 
@@ -356,80 +355,76 @@ $(document).ready(function() {
 
 
     // Handle form submit
-    $('#shiftForm').on('submit', function(e) {
-        e.preventDefault();
+        $('#shiftForm').on('submit', function(e) {
+            e.preventDefault();
 
-        const month   = $('#month').val();
-        const payload = [];
+            const month   = $('#month').val();
+            const payload = [];
 
-        // Read every checked checkbox in the table
-        document.querySelectorAll('#shiftTable tbody input[type=checkbox]:checked').forEach(cb => {
-            const empId = cb.dataset.emp;
-            const day   = String(cb.dataset.day).padStart(2, '0');
-            const date  = `${month}-${day}`;
+            // Track which emp+date combos have at least one checked shift
+            const checkedKeys = new Set();
 
-            payload.push({
-                emp_id : empId,
-                shift  : cb.value,   // shift id
-                date   : date        // YYYY-MM-DD  (matches backend work_date)
+            document.querySelectorAll('#shiftTable tbody input[type=checkbox]:checked').forEach(cb => {
+                const empId = cb.dataset.emp;
+                const day   = String(cb.dataset.day).padStart(2, '0');
+                const date  = `${month}-${day}`;
+                const key   = `${empId}_${date}`;
+
+                checkedKeys.add(key);
+
+                payload.push({
+                    emp_id : empId,
+                    shift  : cb.value,
+                    date   : date
+                });
+            });
+
+            // send a sentinel entry with shift = null so backend knows to delete everything
+            document.querySelectorAll('#shiftTable tbody input[type=checkbox]:not(:checked)').forEach(cb => {
+                const empId = cb.dataset.emp;
+                const day   = String(cb.dataset.day).padStart(2, '0');
+                const date  = `${month}-${day}`;
+                const key   = `${empId}_${date}`;
+
+                if (!checkedKeys.has(key)) {
+                    checkedKeys.add(key); // prevent duplicate sentinel entries
+                    payload.push({
+                        emp_id : empId,
+                        shift  : null,   // sentinel — means "delete all shifts for this emp+date"
+                        date   : date
+                    });
+                }
+            });
+
+            let action_url = "{{ url('/fullrosterstore') }}";
+            $.ajaxSetup({
+                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
+            });
+
+            $.ajax({
+                url: action_url,
+                type: 'POST',
+                data: JSON.stringify({ shifts: payload }),
+                contentType: 'application/json',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.errors) {
+                        const actionObj = { icon: 'fas fa-warning', title: '', message: 'Record Error', url: '', target: '_blank', type: 'danger' };
+                        action(JSON.stringify(actionObj));
+                    }
+                    if (response.success) {
+                        const actionObj = { icon: 'fas fa-save', title: '', message: response.success, url: '', target: '_blank', type: 'success' };
+                        $('#shiftForm')[0].reset();
+                        actionreload(JSON.stringify(actionObj));
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    const actionObj = { icon: 'fas fa-times', title: '', message: 'Something went wrong!', url: '', target: '_blank', type: 'danger' };
+                    action(JSON.stringify(actionObj));
+                }
             });
         });
-
-        let action_url = "{{ url('/fullrosterstore') }}";
-         $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        })
-
-        $.ajax({
-            url: action_url,
-            type: 'POST',
-            data: JSON.stringify({ shifts: payload }),
-            contentType: 'application/json',
-            dataType: 'json',
-            success: function(response) {
-                if (response.errors) {
-                    const actionObj = {
-                        icon: 'fas fa-warning',
-                        title: '',
-                        message: 'Record Error',
-                        url: '',
-                        target: '_blank',
-                        type: 'danger'
-                    };
-                    const actionJSON = JSON.stringify(actionObj, null, 2);
-                    action(actionJSON);
-                }
-                if (response.success) {
-                    const actionObj = {
-                        icon: 'fas fa-save',
-                        title: '',
-                        message: response.success,
-                        url: '',
-                        target: '_blank',
-                        type: 'success'
-                    };
-                    const actionJSON = JSON.stringify(actionObj, null, 2);
-                    $('#shiftForm')[0].reset();
-                    actionreload(actionJSON);
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error('Error:', error);
-                const actionObj = {
-                    icon: 'fas fa-times',
-                    title: '',
-                    message: 'Something went wrong!',
-                    url: '',
-                    target: '_blank',
-                    type: 'danger'
-                };
-                const actionJSON = JSON.stringify(actionObj, null, 2);
-                action(actionJSON);
-            }
-        });
-    });
 
 });
 

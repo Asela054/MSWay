@@ -32,31 +32,29 @@ class EmployeeRosterDetailsController extends Controller
          $shifts = $request->json('shifts');
 
         // Group incoming shifts by emp_id + date
-        // payload: [{ emp_id, shift, date }, { emp_id, shift, date }, ...]
-        $grouped = [];
-        foreach ($shifts as $roster) {
-            $key = $roster['emp_id'] . '_' . $roster['date'];
-            
-            if (!isset($grouped[$key])) {
-                $grouped[$key] = [
-                    'emp_id' => $roster['emp_id'],
-                    'date' => $roster['date'],
-                    'shift_ids' => []
-                ];
+            $grouped = [];
+            foreach ($shifts as $roster) {
+                $key = $roster['emp_id'] . '_' . $roster['date'];
+
+                if (!isset($grouped[$key])) {
+                    $grouped[$key] = [
+                        'emp_id'    => $roster['emp_id'],
+                        'date'      => $roster['date'],
+                        'shift_ids' => []
+                    ];
+                }
+
+                // Only add real shift IDs, skip null sentinels
+                if (!is_null($roster['shift'])) {
+                    $grouped[$key]['shift_ids'][] = $roster['shift'];
+                }
             }
-            
-            $grouped[$key]['shift_ids'][] = $roster['shift'];
-        }
 
 
          foreach ($grouped as $item) {
             $empId  = $item['emp_id'];
             $date   = $item['date'];
             $newIds = $item['shift_ids'];
-
-            $startOfMonth = Carbon::parse($date)->startOfMonth();
-            $endOfMonth = Carbon::parse($date)->endOfMonth();
-
 
             // Get all existing records for this emp + date
             $existingRecords = EmployeeRosterDetails::where('emp_id', $empId)
@@ -77,8 +75,8 @@ class EmployeeRosterDetailsController extends Controller
                     'changed_by'   => Auth::id() ?? 1,
                 ]);
                EmployeeRosterDetails::where('emp_id', $empId)
-                    ->whereBetween('work_date', [$startOfMonth, $endOfMonth])
-                    ->delete();
+                                    ->where('work_date', $date)
+                                    ->delete();
             }
 
             // Insert newly added shifts
@@ -97,7 +95,6 @@ class EmployeeRosterDetailsController extends Controller
                     'shift_id'  => $newShiftId,
                 ]);
             }
-            // Shifts in both old and new → unchanged, skip
         }
          return response()->json(['success' => 'Roster Inserted Successfully!']);
     }
