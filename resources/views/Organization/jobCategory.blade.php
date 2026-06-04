@@ -261,6 +261,22 @@
                                                     <input type="number" step="0.01" class="form-control form-control-sm" name="custom_double_ot_rate" id="custom_double_ot_rate"/>
                                                 </div>
                                             </div>
+                                            <div class="form-row mb-2">
+                                                <div class="col-md-3 col-6">
+                                                    <label class="small font-weight-bold text-dark">Until Time Available (Shift Extend)</label>
+                                                    <br>
+                                                    <div class="form-check-inline">
+                                                        <label class="form-check-label">
+                                                            <input type="radio" class="form-check-input until_time_available" name="until_time_available" id="until_time_available_0" value="0" checked>No
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-check-inline">
+                                                        <label class="form-check-label">
+                                                            <input type="radio" class="form-check-input until_time_available" name="until_time_available" id="until_time_available_1" value="1">Yes
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -1004,6 +1020,14 @@ $(document).ready(function(){
                     } else if (data.result.morning_ot == 1) {
                         $('#morning_ot_1').prop("checked", true);
                         $('.custom_morning').css('display', 'block');
+                    }
+
+                    if (data.result.until_time_available == 0) {
+                        $('#until_time_available_0').prop("checked", true);
+                        $('.custom_until_time').css('display', 'none');
+                    } else if (data.result.until_time_available == 1) {
+                        $('#until_time_available_1').prop("checked", true);
+                        $('.custom_until_time').css('display', 'block');
                     }
 
                     if (data.result.holiday_ot_start == 0) {
