@@ -57,6 +57,7 @@ class JobCategoryController extends Controller
         $jobcategory->full_day_work_hours = $request->input('full_day_work_hours');
         $jobcategory->work_hour_date = $request->input('work_hour_date');
         $jobcategory->morning_ot = $request->input('morning_ot');
+        $jobcategory->until_time_available = $request->input('until_time_available');
         $jobcategory->holiday_ot_start = $request->input('holiday_ot_start');
         $jobcategory->holiday_lunch_deduct = $request->input('holiday_lunch_deduct');
         
@@ -155,6 +156,7 @@ class JobCategoryController extends Controller
             'full_day_work_hours' => $request->full_day_work_hours,
             'work_hour_date' => $request->work_hour_date,
             'morning_ot' => $request->morning_ot,
+            'until_time_available' => $request->until_time_available,
             'holiday_ot_start' => $request->holiday_ot_start,
             'holiday_lunch_deduct' => $request->holiday_lunch_deduct,
             'lunch_deduct_type' => $request->lunch_deduct_type,
