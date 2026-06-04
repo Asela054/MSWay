@@ -98,4 +98,6 @@
         </ul>
   </div> 
 
+  <a role="button" class="btn navbtncolor" href="{{ route('daily_summary_approve') }}" id="dailysummry">Daily Summary Approve<span class="caret"></span></a>
+
 </div>

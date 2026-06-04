@@ -1945,6 +1945,8 @@ Route::post('/departmentemployeewise_generateotreport', 'Departmentemployeewiser
 Route::get('departmentemployee_wise_latereport', 'DepartmentemployeewisereportController@latereport')->name('departmentemployee_wise_latereport');
 Route::post('/departmentemployeewise_generatelatereport', 'DepartmentemployeewisereportController@generatelatereport')->name('departmentemployeewise_generatelatereport');
 
+//Daily Summary Approve
+Route::get('daily_summary_approve', 'DailysummaryapprovControllr@index')->name('daily_summary_approve');
 
 
 Route::get('/clear-cache', function() {
