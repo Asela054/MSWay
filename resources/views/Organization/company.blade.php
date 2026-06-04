@@ -502,18 +502,14 @@ $(document).ready(function(){
             dataType: "json",
             processData: false,          
             contentType: false,  
-            success: function (data) {//alert(data);        
+            success: function (data) {//alert(data); 
                 if (data.errors) {
-                    const actionObj = {
-                        icon: 'fas fa-warning',
-                        title: '',
-                        message: 'Record Error',
-                        url: '',
-                        target: '_blank',
-                        type: 'danger'
-                    };
-                    const actionJSON = JSON.stringify(actionObj, null, 2);
-                    action(actionJSON);
+                    var errorHtml = '<div class="alert alert-danger"><ul class="mb-0">';
+                    $.each(data.errors, function(key, value) {
+                        errorHtml += '<li>' + value + '</li>';
+                    });
+                    errorHtml += '</ul></div>';
+                    $('#form_result').html(errorHtml);  
                 }
                 if (data.success) {
                     const actionObj = {
