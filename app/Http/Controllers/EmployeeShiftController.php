@@ -492,6 +492,10 @@ class EmployeeShiftController extends Controller
                 'Y/m/d H:i',
                 'd-m-Y H:i:s',
                 'd-m-Y H:i',
+                'd.m.Y H:i:s',
+                'd.m.Y H:i',
+                'Y.m.d H:i:s',
+                'Y.m.d H:i',
             ];
 
             foreach ($formats as $format) {
