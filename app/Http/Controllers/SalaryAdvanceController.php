@@ -165,9 +165,10 @@ class SalaryAdvanceController extends Controller
                 'job_categories.salary_advance_type',
                 'job_categories.salary_advance_value',
                 'job_categories.salary_advance_min_date',
-                'employees.emp_id as emp_id'
+                'employees.emp_id as emp_id',
+                'employees.id as employee_id'
             )
-            ->where('employees.id', $emp_id)
+            ->where('employees.emp_id', $emp_id)
             ->first();
 
         if (!$employee) {
@@ -206,7 +207,7 @@ class SalaryAdvanceController extends Controller
             ->select(
                 DB::raw('(payroll_profiles.basic_salary + IFNULL(rp1.new_eligible_amount, 0) + IFNULL(rp2.new_eligible_amount, 0)) as total_basic')
             )
-            ->where('payroll_profiles.emp_id', $emp_id)
+            ->where('payroll_profiles.emp_id', $employee->employee_id)
             ->first();
 
         $basic_salary = $payroll ? $payroll->total_basic : 0;
