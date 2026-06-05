@@ -306,7 +306,6 @@ class LeaveController extends Controller
             $join_date = Carbon::parse($emp_join_date)->day;
             $full_date = '2022-'.$join_month.'-'.$join_date;
             $empid = $employee->emp_id;
-
             $job_categoryid = $employee->job_category_id;
 
             $formated_from_date = date('Y').'-01-01';
@@ -370,15 +369,18 @@ class LeaveController extends Controller
             
             if($settings &&  $settings->config_value == 4 && $monthly_leaves >0 &&  $renew_next_month){
                 
-                 $available_no_of_annual_leaves = (new \App\Leave)->calculateMonthlyLeaveBalance($empid, $monthly_leaves);
+                   $employeedetails = DB::table('employees')
+                        ->leftJoin('job_categories', 'job_categories.id',  '=', 'employees.job_category_id' )
+                        ->select('job_categories.poya_covering_leave')
+                        ->where('employees.emp_id', $empid)
+                        ->first();
+                 $poya_covering_leave = $employeedetails->poya_covering_leave ?? 0;
+
+                 $available_no_of_annual_leaves = (new \App\Leave)->calculateMonthlyLeaveBalance($empid, $monthly_leaves,$poya_covering_leave);
             }else{
                   $available_no_of_annual_leaves = $total_no_of_annual_leaves - $current_year_taken_a_l;
             }
           
-
-
-
-
             if($employee->emp_status != 1){
                 $emp_status = DB::table('employment_statuses')->where('id', $employee->emp_status)->first();
                 $leave_msg = 'Casual Leaves - '.$emp_status->emp_status.' Employee can have only a half day per month (Not a permanent employee)';
