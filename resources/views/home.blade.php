@@ -113,15 +113,15 @@
                                                     $employeePicture = $leavelist->emp_pic_filename;
                                                     $imagePath = '';
                                                     if (file_exists(public_path("images/{$employeePicture}")) && !empty($employeePicture)) {
-                                                        $imagePath = asset("images/{$employeePicture}");
+                                                        $imagePath = asset("public/images/{$employeePicture}");
                                                     } else {
                                                         $employeeGender = \App\Employee::where('emp_id', $leavelist->emp_id)->pluck('emp_gender')->first();
                                                         if(empty($employeeGender)){
                                                             $employeeGender = "Male";
                                                         }
                                                         $imagePath = $employeeGender == "Male" 
-                                                            ? asset("images/man.png") 
-                                                            : asset("images/girl.png");
+                                                            ? asset("public/images/man.png") 
+                                                            : asset("public/images/girl.png");
                                                     }
                                                 @endphp
                                             <tr>
