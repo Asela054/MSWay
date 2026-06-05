@@ -160,6 +160,12 @@
                                 </div>
                                 <div class="form-row mb-1">
                                     <div class="col">
+                                        <label class="small font-weight-bold text-dark">Shift End Time</label>
+                                        <input type="time" name="shift_end_time" id="shift_end_time" class="form-control form-control-sm"/>
+                                    </div>                                
+                                </div>
+                                <div class="form-row mb-1">
+                                    <div class="col">
                                         <label class="small font-weight-bold text-dark">Actual OT calculation</label>
                                         <br>
                                         <div class="form-check-inline">
@@ -189,7 +195,7 @@
                                         <br>
                                         <div class="form-check-inline">
                                             <label class="form-check-label">
-                                                <input type="radio" class="form-check-input offduty_day" name="offduty_day" id="offduty_day_1" value="1" >Today
+                                                <input type="radio" class="form-check-input offduty_day" name="offduty_day" id="offduty_day_1" value="1" checked>Today
                                             </label>
                                         </div>
                                         <div class="form-check-inline">
@@ -210,12 +216,12 @@
                                         <br>
                                         <div class="form-check-inline">
                                             <label class="form-check-label">
-                                                <input type="radio" class="form-check-input off_next_day" name="off_next_day" id="off_next_day_1" value="1" >Yes
+                                                <input type="radio" class="form-check-input off_next_day" name="off_next_day" id="off_next_day_0" value="0" checked>No
                                             </label>
                                         </div>
                                         <div class="form-check-inline">
                                             <label class="form-check-label">
-                                                <input type="radio" class="form-check-input off_next_day" name="off_next_day" id="off_next_day_0" value="0">No
+                                                <input type="radio" class="form-check-input off_next_day" name="off_next_day" id="off_next_day_1" value="1" >Yes
                                             </label>
                                         </div>
                                     </div>
@@ -224,12 +230,12 @@
                                         <br>
                                         <div class="form-check-inline">
                                             <label class="form-check-label">
-                                                <input type="radio" class="form-check-input on_next_day" name="on_next_day" id="on_next_day_1" value="1" >Yes
+                                                <input type="radio" class="form-check-input on_next_day" name="on_next_day" id="on_next_day_0" value="0" checked>No
                                             </label>
                                         </div>
                                         <div class="form-check-inline">
                                             <label class="form-check-label">
-                                                <input type="radio" class="form-check-input on_next_day" name="on_next_day" id="on_next_day_0" value="0">No
+                                                <input type="radio" class="form-check-input on_next_day" name="on_next_day" id="on_next_day_1" value="1" >Yes
                                             </label>
                                         </div>
                                     </div>
@@ -499,6 +505,7 @@ $(document).ready(function(){
                 $('#max_double_ot_hrs').val(data.result.max_double_ot_hrs);
                 $('#weekend_max_normal_ot_hrs').val(data.result.weekend_max_normal_ot_hrs);
                 $('#weekend_max_double_ot_hrs').val(data.result.weekend_max_double_ot_hrs);
+                $('#shift_end_time').val(data.result.shift_end_time);
 
                 if(data.result.offduty_day == 1){
                     $('#offduty_day_1').prop( "checked", true );
