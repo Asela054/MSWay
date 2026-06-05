@@ -53,6 +53,8 @@ class ProductionTaskApproveController extends Controller
         $results = $query->get();
         
 
+        $data = [];
+
           foreach ($results as $record) {
 
             $productionQuery = DB::table('opma_daily_production_summary')
@@ -101,6 +103,64 @@ class ProductionTaskApproveController extends Controller
                         'perfomance_total' =>round($emp_perf_amount, 2), 
                     ];
           }
+
+          $totalProduction = DB::table('opma_daily_production_summary')
+        ->whereBetween('date', [$from_date, $to_date])
+        ->selectRaw('SUM(target) as total_target, SUM(produce) as total_produce')
+        ->first();
+
+        $overallAvgPerformance = ($totalProduction->total_target > 0) ? round(($totalProduction->total_produce / $totalProduction->total_target) * 100): 0;
+
+        $existingEmpIds = array_column($data, 'emp_id');
+
+        $deptEmployees = DB::table('employees')
+            ->select(
+                'id as emp_auto_id',
+                'emp_id',
+                'emp_name_with_initial'
+            )
+            ->where('deleted', 0)
+            ->where('is_resigned', 0)
+            ->where('emp_department', 4)
+            ->whereNotIn('emp_id', $existingEmpIds)
+            ->get();
+
+
+            foreach ($deptEmployees as $emp) {
+
+                $salaryAdjustment = DB::table('salary_adjustments')
+                    ->where('emp_id', $emp->emp_id)
+                    ->where('remuneration_id', 34)
+                    ->select('amount')
+                    ->first();
+
+                if ($salaryAdjustment) {
+                    $baseAmount = $salaryAdjustment->amount;
+
+                    if ($overallAvgPerformance > 80) {
+                        $emp_perf_amount = $baseAmount;
+                    } elseif ($overallAvgPerformance >= 50 && $overallAvgPerformance <= 80) {
+                        $emp_perf_amount = ($overallAvgPerformance / 100) * $baseAmount;
+                    } else {
+                        $emp_perf_amount = 0;
+                    }
+                } else {
+                    $emp_perf_amount = 0;
+                }
+
+                $data[] = [
+                    'emp_auto_id'           => $emp->emp_auto_id,
+                    'emp_id'                => $emp->emp_id,
+                    'emp_name_with_initial' => $emp->emp_name_with_initial,
+                    'target_total'          => 0,
+                    'produce_total'         => 0,
+                    'bonus_total'           => 0,
+                    'perfomance'            => round($overallAvgPerformance, 2),
+                    'perfomance_total'      => round($emp_perf_amount, 2),
+                ];
+            }
+
+
 
          return response()->json(['data' => $data ?? []]);
     }
