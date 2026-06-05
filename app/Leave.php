@@ -206,7 +206,7 @@ class Leave extends Model
 
 
 
-public function calculateMonthlyLeaveBalance($emp_id, $monthly_allocation)
+public function calculateMonthlyLeaveBalance($emp_id, $monthly_allocation, $poya_covering_leave = 0)
 {
     $currentYear = Carbon::now()->year;
     $currentMonth = Carbon::now()->month;
@@ -222,11 +222,18 @@ public function calculateMonthlyLeaveBalance($emp_id, $monthly_allocation)
         // Get leaves taken in this month
         $leaves_taken_in_month = $this->taken_annual_leaves( $emp_id, $monthStart, $monthEnd);
         
+        // --- Poya covering bonus ---
+        $poya_bonus = 0;
+        if ($poya_covering_leave == 1) {
+            $poya_bonus = $this->countPoyaWorkedDays($emp_id, $monthStart, $monthEnd);
+        }
+        
         // Calculate this month's unused leaves and add to balance
-        $remaining_balance += ($monthly_allocation - $leaves_taken_in_month);
+        $remaining_balance += ($monthly_allocation + $poya_bonus - $leaves_taken_in_month);
+        
         
         // If employee used the full allocation this month, stop here
-        if ($leaves_taken_in_month >= $monthly_allocation) {
+        if ($leaves_taken_in_month >= ($monthly_allocation + $poya_bonus)) {
             break;
         }
     }
@@ -234,6 +241,32 @@ public function calculateMonthlyLeaveBalance($emp_id, $monthly_allocation)
     return $remaining_balance;
 }
 
+   private function countPoyaWorkedDays($emp_id, $monthStart, $monthEnd)
+{
+    $poyaDays = DB::table('holidays')
+        ->where('holiday_type', 1)
+        ->whereBetween('date', [$monthStart->toDateString(), $monthEnd->toDateString()])
+        ->pluck('date')
+        ->map(function($d) { return Carbon::parse($d)->toDateString(); })
+        ->toArray();
+
+    if (empty($poyaDays)) {
+        return 0;
+    }
+
+    $workedCount = DB::table('attendances')
+        ->where('emp_id', $emp_id)
+        ->whereNull('deleted_at')
+        ->where(function($query) use ($poyaDays) {
+            foreach ($poyaDays as $poyaDay) {
+                $query->orWhereDate('date', '=', $poyaDay);
+            }
+        })
+        ->distinct(DB::raw('DATE(date)'))
+        ->count(DB::raw('DATE(date)'));
+
+    return $workedCount;
+}
 
 public function get_duty_leaves($emp_id, $month ,$closedate){
 
