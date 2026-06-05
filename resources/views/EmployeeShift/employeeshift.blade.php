@@ -76,7 +76,7 @@
                                         <select name="shift" id="shift" class="form-control form-control-sm" style="width: 100%;">
                                             <option value="">Select Shift</option>
                                             @foreach ($shifts as $shift)
-                                                <option value="{{ $shift->id }}">{{ $shift->shift_name }}</option>
+                                                <option value="{{ $shift->id }}">{{ $shift->shift_name }} - {{ $shift->shift_code }}</option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -189,7 +189,7 @@
                                         <select name="csv_shift" id="csv_shift" class="form-control form-control-sm" style="width: 100%;">
                                             <option value="">Select Shift</option>
                                             @foreach ($shifts as $shift)
-                                                <option value="{{ $shift->id }}">{{ $shift->shift_name }}</option>
+                                                <option value="{{ $shift->id }}">{{ $shift->shift_name }} - {{ $shift->shift_code }}</option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -208,7 +208,7 @@
                         <div class="row">
                             <div class="col">
                                 <div class="form-group mt-3">
-                                    <button type="submit" name="action_button" id="btn-upload" class="btn btn-outline-primary btn-sm fa-pull-right px-4"><i class="fas fa-upload"></i>&nbsp;Upload</button>
+                                    <button type="submit" name="action_button" id="btn-upload" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-upload"></i>&nbsp;Upload</button>
                                 </div>
                             </div>
                         </div>
@@ -238,7 +238,7 @@
                                         <select name="view_shift" id="view_shift" class="form-control form-control-sm" style="width: 100%;" disabled>
                                             <option value="">Select Shift</option>
                                             @foreach ($shifts as $shift)
-                                                <option value="{{ $shift->id }}">{{ $shift->shift_name }}</option>
+                                                <option value="{{ $shift->id }}">{{ $shift->shift_name }} - {{ $shift->shift_code }}</option>
                                             @endforeach
                                         </select>
                                     </div>

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\ERP_KT\Customer;
 use Illuminate\Http\Request;
 use Validator;
+use DB;
 
 class ERPCustomerController extends Controller
 {
@@ -117,5 +118,97 @@ class ERPCustomerController extends Controller
         $data->delete();
 
         return response()->json(['success' => 'Customer Deleted Successfully.']);
+    }
+
+    public function upload_csv(Request $request)
+    {
+        $user = auth()->user();
+        $permission = $user->can('kt-customer-create');
+        if (!$permission) {
+            return response()->json(['error' => 'UnAuthorized'], 401);
+        }
+
+        $this->validate($request, [
+            'csv_file_u' => 'required|file|mimes:csv,txt|max:2048'
+        ]);
+
+        $file = $request->file('csv_file_u');
+
+        try {
+            $fileContents = file($file->getPathname());
+            array_shift($fileContents);
+
+            $errors = [];
+            $successCount = 0;
+            $lineNumber = 2;
+
+            DB::beginTransaction();
+
+            foreach ($fileContents as $line) {
+                $line = trim($line);
+                if (empty($line)) {
+                    $lineNumber++;
+                    continue;
+                }
+
+                $data = str_getcsv($line);
+
+                if (count($data) < 1 || empty(trim($data[0]))) {
+                    $errors[] = "Line {$lineNumber}: Missing customer name";
+                    $lineNumber++;
+                    continue;
+                }
+
+                $name           = trim($data[0]);
+                $contact_number = isset($data[1]) ? trim($data[1]) : null;
+                $email          = isset($data[2]) ? trim($data[2]) : null;
+                $remarks        = isset($data[3]) ? trim($data[3]) : null;
+
+                $existing = Customer::where('name', $name)->first();
+                if ($existing) {
+                    $errors[] = "Line {$lineNumber}: Customer already exists with name '{$name}'";
+                    $lineNumber++;
+                    continue;
+                }
+
+                try {
+                    Customer::create([
+                        'name'           => $name,
+                        'contact_number' => $contact_number,
+                        'email'          => $email,
+                        'remarks'        => $remarks,
+                    ]);
+                    $successCount++;
+                } catch (\Exception $e) {
+                    $errors[] = "Line {$lineNumber}: Processing error - " . $e->getMessage();
+                }
+
+                $lineNumber++;
+            }
+
+            DB::commit();
+
+            $response = [
+                'status' => $successCount > 0,
+                'msg'    => "Successfully processed {$successCount} customer(s)."
+            ];
+
+            if (!empty($errors)) {
+                $response['errors'] = $errors;
+                if ($successCount === 0) {
+                    $response['status'] = false;
+                    $response['msg']    = 'No records were processed due to errors.';
+                }
+            }
+
+            return response()->json($response);
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'status' => false,
+                'msg'    => 'File processing failed: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

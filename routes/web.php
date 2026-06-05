@@ -1863,6 +1863,7 @@ Route::get('kt_customer', 'ERP_KT\ERPCustomerController@index')->name('kt_custom
 Route::post('kt_addCustomer',['uses' => 'ERP_KT\ERPCustomerController@store', 'as' => 'kt_addCustomer']); 
 Route::post('KTCustomer/update', 'ERP_KT\ERPCustomerController@update')->name('KTCustomer.update');
 Route::get('KTCustomer/destroy/{id}', 'ERP_KT\ERPCustomerController@destroy');
+Route::post('/kt_customer_upload_csv', 'ERP_KT\ERPCustomerController@upload_csv')->name('kt_customer_upload_csv');
 
 // ERP Inquiry
 Route::resource('KTInquiry', 'ERP_KT\ERPInquiryController');
