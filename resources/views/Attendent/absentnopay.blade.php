@@ -40,7 +40,7 @@
                             </div>
                             <div class="col-md-6">
                                 <button id="approve" class="btn btn-primary btn-sm float-right px-3"><i
-                                        class="fas fa-plus mr-2"></i>Apply Nopay</button>
+                                        class="fas fa-plus mr-2"></i>Apply Leave</button>
                             </div>
                         </div>
 
@@ -53,6 +53,7 @@
                                             <th>EMP ID </th>
                                             <th>EMPLOYEE NAME</th>
                                             <th class="d-none">Emp Auto ID</th>
+                                            <th>Date</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -94,6 +95,12 @@
                                 <div class="col-md-12">
                                     <label class="small font-weight-bolder text-dark">Date</label>
                                     <input type="date" id="from_date" name="from_date" class="form-control form-control-sm"placeholder="yyyy-mm-dd">
+                                </div>
+                            </li>
+                            <li class="mb-2">
+                                <div class="col-md-12">
+                                    <label class="small font-weight-bolder text-dark">Date</label>
+                                    <input type="date" id="to_date" name="to_date" class="form-control form-control-sm"placeholder="yyyy-mm-dd">
                                 </div>
                             </li>
                             <li>
@@ -154,9 +161,9 @@
 @section('script')
 <script>
     $(document).ready(function () {
-            $('#attendant_menu_link').addClass('active');
-            $('#attendant_menu_link_icon').addClass('active');
-            $('#attendantmaster').addClass('navbtnactive');
+        $('#attendant_menu_link').addClass('active');
+        $('#attendant_menu_link_icon').addClass('active');
+        $('#attendantmaster').addClass('navbtnactive');
 
         let company = $('#company');
         let department = $('#department');
@@ -198,13 +205,13 @@
 
         $('#formFilter').on('submit', function (event) {
             event.preventDefault();
+            $('#btn-filter').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i> Searching...');
 
             var action_url = "{{ route('getabsetnopay') }}";
 
             var department = $('#department').val();
             var from_date = $('#from_date').val();
-
-            closeOffcanvasSmoothly();
+            var to_date = $('#to_date').val();
 
             $.ajax({
                 url: action_url,
@@ -213,6 +220,7 @@
                     _token: '{{ csrf_token() }}',
                     department: department,
                     from_date: from_date,
+                    to_date: to_date
                 },
                 dataType: "json",
                 success: function (data) {
@@ -230,6 +238,7 @@
                                         <td>${item.empid}</td>
                                         <td>${item.emp_name}</td>
                                         <td class="d-none">${item.emp_autoid}</td>
+                                        <td>${item.emp_date}</td>
                                     </tr>
                                 `;
                     });
@@ -274,6 +283,9 @@
                             targets: [0, 1]
                         }, ]
                     });
+
+                    $('#btn-filter').prop('disabled', false).html('<i class="fas fa-search mr-2"></i> Search');
+                    closeOffcanvasSmoothly();
                 }
             });
         });
@@ -390,6 +402,7 @@
                                     empid: rowData[1],
                                     emp_name: rowData[2], 
                                     emp_autoid: rowData[3],
+                                    emp_date: rowData[4],
                                 });
                             }
                           });
