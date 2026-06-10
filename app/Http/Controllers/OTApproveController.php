@@ -124,7 +124,7 @@ class OTApproveController extends Controller
             $attendance_data = $query->get();
             
 
-        //dd($sql);
+       
 
         $ot_data = array();
 
@@ -193,6 +193,7 @@ class OTApproveController extends Controller
                 }
 
             $ot_hours = (new \App\Attendance)->get_ot_hours_by_date($emp_id, $att->lasttimestamp, $att->first_checkin, $date,  $on_duty_time, $off_duty_time, $att->emp_department,$emp_shift_id ,$shift_until_time);
+           
             //$ot_hours = (new \App\Attendance)->get_ot_hours_by_date_morning_evening($emp_id, $att->lasttimestamp, $att->first_checkin, $date, $att->onduty_time, $att->offduty_time, $att->emp_department);
             // $is_approved = (new \App\OtApproved)->is_exists_in_ot_approved($emp_id, $date);
             // //if ot_breakdown is a key in the array
@@ -225,32 +226,71 @@ class OTApproveController extends Controller
             //$ot_hours = (new \App\Attendance)->get_ot_hours_by_date_morning_evening($emp_id, $att->lasttimestamp, $att->first_checkin, $date, $att->onduty_time, $att->offduty_time, $att->emp_department);
             //if ot_breakdown is a key in the array
             if (array_key_exists('ot_breakdown', $ot_hours)) {
-                if(count($ot_hours['ot_breakdown']) == 2) {
-                    $ot_breakdown_morning = array('ot_breakdown'=> $ot_hours['ot_breakdown'][0], 'is_approved' => $is_approved_morning);
-                    $ot_breakdown_evening = array('ot_breakdown'=> $ot_hours['ot_breakdown'][1], 'is_approved' => $is_approved_evening);
-                } else {
-                    $ot_breakdown_evening = array('ot_breakdown'=> $ot_hours['ot_breakdown'][0], 'is_approved' => $is_approved_evening);
-                }
+                // if(count($ot_hours['ot_breakdown']) == 2) {
+                //     $ot_breakdown_morning = array('ot_breakdown'=> $ot_hours['ot_breakdown'][0], 'is_approved' => $is_approved_morning);
+                //     $ot_breakdown_evening = array('ot_breakdown'=> $ot_hours['ot_breakdown'][1], 'is_approved' => $is_approved_evening);
+                // } else {
+                //     $ot_breakdown_evening = array('ot_breakdown'=> $ot_hours['ot_breakdown'][0], 'is_approved' => $is_approved_evening);
+                // }
                 
+                // $normal_rate_otwork_hrs = $ot_hours['normal_rate_otwork_hrs'];
+                // $double_rate_otwork_hrs = $ot_hours['double_rate_otwork_hrs'];
+
+                
+      
+                // Opma OT Approval Summary Data
+                $dailyAverage = 0;
+
+                $dailysummary = DB::table('opma_daily_production_summary')
+                ->select('opma_daily_production_summary.*')
+                ->where('emp_id', $emp_id)
+                ->where('date',  $date)
+                ->first();
+
+                if($dailysummary){
+
+                    $target = $dailysummary->target;
+                    $produce = $dailysummary->produce;
+                    $dailyAverage = 0;
+                    if ($target > 0) {
+                        $dailyAverage = round(($produce / $target) * 100, 2);
+                    }
+
+                }
+
+                 
+                if(count($ot_hours['ot_breakdown']) == 2) {
+                    $ot_breakdown_morning = [
+                        'ot_breakdown'  => $ot_hours['ot_breakdown'][0],
+                        'is_approved'   => $is_approved_morning,
+                        'daily_average' => $dailyAverage, 
+                    ];
+                    $ot_breakdown_evening = [
+                        'ot_breakdown'  => $ot_hours['ot_breakdown'][1],
+                        'is_approved'   => $is_approved_evening,
+                        'daily_average' => $dailyAverage,
+                    ];
+                } else {
+                    $ot_breakdown_evening = [
+                        'ot_breakdown'  => $ot_hours['ot_breakdown'][0],
+                        'is_approved'   => $is_approved_evening,
+                        'daily_average' => $dailyAverage,
+                    ];
+                }
+
                 $normal_rate_otwork_hrs = $ot_hours['normal_rate_otwork_hrs'];
                 $double_rate_otwork_hrs = $ot_hours['double_rate_otwork_hrs'];
 
                 if(count($ot_hours['ot_breakdown']) == 2) {
-                    //push ot_breakdown to ot_data
-                    if (!empty($ot_breakdown_morning)) {
-                        array_push($ot_data, $ot_breakdown_morning);
-                    }
-                    if (!empty($ot_breakdown_evening)) {
-                        array_push($ot_data, $ot_breakdown_evening);
-                    }
+                    if (!empty($ot_breakdown_morning)) array_push($ot_data, $ot_breakdown_morning);
+                    if (!empty($ot_breakdown_evening)) array_push($ot_data, $ot_breakdown_evening);
+                } else {
+                    if (!empty($ot_breakdown_evening)) array_push($ot_data, $ot_breakdown_evening);
                 }
-                else {
-                    //push ot_breakdown to ot_data
-                    if (!empty($ot_breakdown_evening)) {
-                        array_push($ot_data, $ot_breakdown_evening);
-                    }
-                }
-                // dd($ot_data);
+
+
+
+                     
             }
         }
         return response()->json(['ot_data' => $ot_data]);
