@@ -57,11 +57,12 @@ class EmployeeUploadController extends Controller
                     'emp_join_date' => $column[12] ?? '',
                     'department' => $column[13] ?? '',
                     'branch' => $column[14] ?? '',
-                    'status' => $column[15] ?? '',
-                    'basic_salary' => $column[16] ?? '',
-                    'bank_ac_no' => $column[17] ?? '',
-                    'bank_code' => $column[18] ?? '',
-                    'branch_code' => $column[19] ?? '',
+                    'company_code' => $column[15] ?? '',
+                    'status' => $column[16] ?? '',
+                    'basic_salary' => $column[17] ?? '',
+                    'bank_ac_no' => $column[18] ?? '',
+                    'bank_code' => $column[19] ?? '',
+                    'branch_code' => $column[20] ?? '',
                 ];
             }
             fclose($handle);
@@ -71,7 +72,7 @@ class EmployeeUploadController extends Controller
                 
                 $rowValidator = Validator::make($employeeData, [
                     'emp_id' => 'required|max:15|unique:employees,emp_id',
-                    'etfno' => 'required|unique:employees,emp_etfno,NULL,id,emp_etfno,!0',
+                    'etfno' => 'required',
                     'firstname' => 'required|string|max:255',
                     'middlename' => 'nullable|string|max:255',
                     'lastname' => 'required|string|max:255',
@@ -83,6 +84,7 @@ class EmployeeUploadController extends Controller
                     'emp_address' => 'nullable|string|max:255',
                     'department' => 'required|string',
                     'branch' => 'required|string',
+                    'company_code' => 'required|string',
                     'status' => 'required|string',
                     'basic_salary' => 'required|numeric',
                     'bank_ac_no' => 'required|string|max:20',
@@ -97,27 +99,41 @@ class EmployeeUploadController extends Controller
                     continue; 
                 }
 
-                $departments = \App\Department::pluck('id', 'name')->toArray();
-                $departmentId = $departments[$employeeData['department']] ?? null;
+                $company = \App\Company::where('code', $employeeData['company_code'])->first();
+                $companyId = $company ? $company->id : null;
 
-                if (!$departmentId) {
-                    $errors[] = "Line {$currentLine}: Department '{$employeeData['department']}' not found in system";
-                    continue;
-                } 
-
-                $branches = \App\Branch::pluck('id', 'location')->toArray();
-                $branchId = $branches[$employeeData['branch']] ?? null;
-
-                if (!$branchId) {
-                    $errors[] = "Line {$currentLine}: Branch '{$employeeData['branch']}' not found in system";
+                if (!$companyId) {
+                    $errors[] = "Line {$currentLine}: Company code '{$employeeData['company_code']}' not found in system";
                     continue;
                 }
 
-                $branch = \App\Branch::find($branchId);
-                $companyId = $branch ? $branch->company_id : null;
+                $department = \App\Department::where('name', $employeeData['department'])
+                    ->where('company_id', $companyId)
+                    ->first();
+                $departmentId = $department ? $department->id : null;
 
-                if (!$companyId) {
-                    $errors[] = "Line {$currentLine}: Company not found for branch '{$employeeData['branch']}'";
+                if (!$departmentId) {
+                    $errors[] = "Line {$currentLine}: Department '{$employeeData['department']}' not found for company '{$employeeData['company_code']}'";
+                    continue;
+                }
+
+                $branch = \App\Branch::where('location', $employeeData['branch'])
+                    ->where('company_id', $companyId)
+                    ->first();
+                $branchId = $branch ? $branch->id : null;
+
+                if (!$branchId) {
+                    $errors[] = "Line {$currentLine}: Branch '{$employeeData['branch']}' not found for company '{$employeeData['company_code']}'";
+                    continue;
+                }
+
+                $existingEtf = Employee::where('emp_etfno', $employeeData['etfno'])
+                    ->where('emp_company', $companyId)
+                    ->where('emp_id', '!=', $employeeData['emp_id'])
+                    ->exists();
+
+                if ($existingEtf) {
+                    $errors[] = "Line {$currentLine}: ETF No '{$employeeData['etfno']}' already exists in this company.";
                     continue;
                 }
                 
