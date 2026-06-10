@@ -7,6 +7,7 @@ use App\ERP_KT\Inquiry;
 use App\ERP_KT\InquiryDetail;
 use App\ERP_KT\Customer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Validator;
 
 class ERPInquiryController extends Controller
@@ -165,14 +166,30 @@ class ERPInquiryController extends Controller
     public function customerList(Request $request)
     {
         $search = $request->term;
-        $customers = Customer::where('name', 'like', '%' . $search . '%')
-            ->orWhere('id', 'like', '%' . $search . '%')
-            ->get(['id', 'name']);
+        $page = $request->get('page', 1);
+        $resultCount = 10;
+        $offset = ($page - 1) * $resultCount;
 
-        $results = $customers->map(function ($c) {
-            return ['id' => $c->id, 'text' => $c->name];
-        });
+        $query = DB::table('kt_customer')
+            ->select('id', DB::raw('name as text'));
 
-        return response()->json(['results' => $results]);
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'LIKE', '%' . $search . '%')
+                    ->orWhere('id', 'LIKE', '%' . $search . '%');
+            });
+        }
+
+        $customers = $query->orderBy('name')
+            ->skip($offset)
+            ->take($resultCount)
+            ->get();
+
+        return response()->json([
+            'results' => $customers,
+            'pagination' => [
+                'more' => $customers->count() == $resultCount
+            ]
+        ]);
     }
 }
