@@ -247,7 +247,7 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header p-2">
-                        <h5 class="modal-title" id="staticBackdropLabel">Edit Attendance</h5>
+                        <h5 class="modal-title" id="staticBackdropLabel">Delete Attendance</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -268,6 +268,40 @@
             </div>
         </div>
 
+        <div class="modal fade" id="editAttendModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+            aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header p-2">
+                        <h5 class="modal-title" id="staticBackdropLabel">Edit Attendance</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col">
+                                <input type="hidden" id="hidden_emp_id">
+                                <input type="hidden" id="hidden_date">
+
+                                <div id="message"></div>
+                                <table id='attendTable' class="table table-striped table-bordered table-sm small">
+                                    <thead></thead>
+                                    <tbody></tbody>
+                                </table>
+                                <div class="form-group mt-3">
+                                    <button type="button" name="update_button" id="update_button"
+                                        class="btn btn-primary btn-sm fa-pull-right px-4">
+                                        <i class="fas fa-save"></i>&nbsp;Update
+                                    </button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     
         <!-- Modal Area End -->
 
@@ -693,9 +727,9 @@
                                             '<i class="fas fa-eye"></i>' +
                                             '</button> ';
                               
-                                    // button += '<button type="button" class="btn btn-primary btn-sm edit_button" data-uid="'+ uid + '" data-date="' + date + '" data-name="' + emp_name + '" data-toggle="tooltip" title="Edit">' +
-                                    //         '<i class="fas fa-pencil-alt"></i>' +
-                                    //         '</button> ';
+                                    button += '<button type="button" class="btn btn-primary btn-sm edit_button" data-uid="'+ uid + '" data-date="' + date + '" data-name="' + emp_name + '" data-toggle="tooltip" title="Edit">' +
+                                            '<i class="fas fa-pencil-alt"></i>' +
+                                            '</button> ';
                                
 
                                     button += '<button type="button" class="btn btn-danger btn-sm delete_button" data-uid="' + uid + '" data-date="' + date + '" data-name="' + emp_name + '" data-toggle="tooltip" title="Delete">' +
@@ -1447,66 +1481,183 @@
                 })
             });
 
+            // $(document).on('click', '.edit_button', async function () {
+            //     var r = await Otherconfirmation("You want to Edit this ? ");
+            //     if (r == true) {
+            //         let id = $(this).data("uid");
+            //         date = $(this).attr('data-date');
+            //         emp_name_with_initial = $(this).attr('data-name');
+
+            //         var formdata = {
+            //             _token: $('input[name=_token]').val(),
+            //             id: id,
+            //             date: date
+            //         };
+            //         // alert(date);
+            //         $('#form_result').html('');
+            //         $.ajax({
+            //             url: "AttendentUpdate",
+            //             dataType: "json",
+            //             data: formdata,
+            //             success: function (data) {
+            //                 $('#editAttendModal').modal('show');
+            //                 var htmlhead = '';
+            //                 htmlhead += '<tr><td>Emp ID :' + id + '</td><td colspan="2">Name :' + emp_name_with_initial + '</td></tr>';
+            //                 htmlhead += '<tr> <th> Type </th> <th>Date & Time</th><th class="text-right">Action</th>';
+            //                 var html = '';
+
+            //                 html += '<tr>';
+            //                 html += '<td id="aduserid" colspan="3"><span style="display: none;">' + id + '</span></td>';
+            //                 html += '</tr>';
+            //                 for (var count = 0; count < data.length; count++) {
+            //                     html += '<tr>';
+            //                     const timestamp = new Date(data[count].timestamp);
+            //                     const date = data[count].date;
+            //                     const begining_checkout = data[count].begining_checkout;
+            //                     const ending_checkin = data[count].ending_checkin;
+            //                     const checkdate = date.slice(0, -8)
+
+            //                     var checkbegining_checkout = checkdate + begining_checkout + ':00';
+            //                     var checkending_checkin = checkdate + ending_checkin + ':00';
+
+            //                     var setbegining_checkout = new Date(checkbegining_checkout).getTime();
+            //                     var setcheckending_checkin = new Date(checkending_checkin).getTime();
+            //                     var settimestamp = timestamp.getTime();
+
+            //                     html += '<tr>';
+            //                     if (settimestamp < setbegining_checkout) {
+            //                         html += '<td> Checkin</td>';
+            //                     } else {
+            //                         html += '<td> Checkout</td>';
+            //                     }
+
+            //                     html += '<td contenteditable class="timestamp" data-timestamp="timestamp" data-id="' + data[count].id + '">' + data[count].timestamp + '</td>';
+            //                     html += '<td class="text-right"><button type="button" class="btn btn-danger btn-sm addelete" id="' + data[count].id + '"><i class="far fa-trash-alt"></i></button></td></tr>';
+            //                 }
+            //                 $('#attendTable thead').html(htmlhead);
+            //                 $('#attendTable tbody').html(html);
+            //             }
+            //         })
+            //     }
+
+            // });
+
             $(document).on('click', '.edit_button', async function () {
                 var r = await Otherconfirmation("You want to Edit this ? ");
                 if (r == true) {
                     let id = $(this).data("uid");
                     date = $(this).attr('data-date');
                     emp_name_with_initial = $(this).attr('data-name');
-
                     var formdata = {
                         _token: $('input[name=_token]').val(),
                         id: id,
                         date: date
                     };
-                    // alert(date);
+
                     $('#form_result').html('');
                     $.ajax({
                         url: "AttendentUpdate",
                         dataType: "json",
                         data: formdata,
                         success: function (data) {
-                            $('#AttendeditModal').modal('show');
+                            $('#hidden_emp_id').val(id);
+                            $('#hidden_date').val(date);
+                            $('#editAttendModal').modal('show');
+
                             var htmlhead = '';
                             htmlhead += '<tr><td>Emp ID :' + id + '</td><td colspan="2">Name :' + emp_name_with_initial + '</td></tr>';
-                            htmlhead += '<tr> <th> Type </th> <th>Date & Time</th><th class="text-right">Action</th>';
+                            htmlhead += '<tr><th>Type</th><th>Date & Time</th></tr>';
+
                             var html = '';
+                          html += '<tr>';
+                          html += '<td id="aduserid" colspan="3"><span style="display: none;">' + id + '</span></td>';
+                          html += '</tr>';
 
-                            html += '<tr>';
-                            html += '<td id="aduserid" colspan="3"><span style="display: none;">' + id + '</span></td>';
-                            html += '</tr>';
-                            for (var count = 0; count < data.length; count++) {
-                                html += '<tr>';
-                                const timestamp = new Date(data[count].timestamp);
-                                const date = data[count].date;
-                                const begining_checkout = data[count].begining_checkout;
-                                const ending_checkin = data[count].ending_checkin;
-                                const checkdate = date.slice(0, -8)
+                           for (var count = 0; count < data.length; count++) {
 
-                                var checkbegining_checkout = checkdate + begining_checkout + ':00';
-                                var checkending_checkin = checkdate + ending_checkin + ':00';
+                                    var typeLabel = '';
+                                    if (count === 0) {
+                                        typeLabel = 'Checkin';
+                                    } else if (count === data.length - 1) {
+                                        typeLabel = 'Checkout';
+                                    } else {
+                                        typeLabel = 'Additional';
+                                    }
 
-                                var setbegining_checkout = new Date(checkbegining_checkout).getTime();
-                                var setcheckending_checkin = new Date(checkending_checkin).getTime();
-                                var settimestamp = timestamp.getTime();
-
-                                html += '<tr>';
-                                if (settimestamp < setbegining_checkout) {
-                                    html += '<td> Checkin</td>';
-                                } else {
-                                    html += '<td> Checkout</td>';
+                                    html += '<tr>';
+                                    html += '<td>' + typeLabel + '</td>';
+                                    html += '<td>';
+                                    html += '<input type="datetime-local" '
+                                        + 'class="form-control form-control-sm" '
+                                        + 'data-id="' + data[count].id + '" '
+                                        + 'value="' + data[count].timestamp.replace(' ', 'T') + '" />';
+                                    html += '</td>';
+                                    html += '</tr>';
                                 }
 
-                                html += '<td contenteditable class="timestamp" data-timestamp="timestamp" data-id="' + data[count].id + '">' + data[count].timestamp + '</td>';
-                                html += '<td class="text-right"><button type="button" class="btn btn-danger btn-sm addelete" id="' + data[count].id + '"><i class="far fa-trash-alt"></i></button></td></tr>';
-                            }
+                                var existingAdditionals = data.length > 2 ? data.length - 2 : 0;
+                                var emptySlots = existingAdditionals % 2 === 0 ? 2 : 1;
+
+                                for (var s = 0; s < emptySlots; s++) {
+                                    html += '<tr>';
+                                    html += '<td>Additional</td>';
+                                    html += '<td>';
+                                    html += '<input type="datetime-local" '
+                                        + 'class="form-control form-control-sm" '
+                                        + 'data-id="new_' + s + '" />';
+                                    html += '</td>';
+                                    html += '</tr>';
+                                }
                             $('#attendTable thead').html(htmlhead);
                             $('#attendTable tbody').html(html);
                         }
-                    })
+                    });
                 }
-
             });
+
+
+           $(document).on('click', '#update_button', function () {
+                var timestamps = [];
+
+                $('#attendTable tbody input[type="datetime-local"]').each(function () {
+                    var recordId = $(this).data('id');
+                    var rawValue = $(this).val();
+
+                     if (String(recordId).startsWith('new') && rawValue === '') return;
+
+                    var timestamp = rawValue ? rawValue.replace('T', ' ') + ':00' : '';
+                    timestamps.push({ id: recordId, timestamp: timestamp });
+                });
+
+                $.ajax({
+                    url: "AttendentTimestampUpdate",
+                    method: "POST",
+                    dataType: "json",
+                    data: {
+                        _token:     $('input[name=_token]').val(),
+                        emp_id:     $('#hidden_emp_id').val(),
+                        date:       $('#hidden_date').val(),
+                        timestamps: timestamps
+                    },
+                    success: function (res) {
+                        if (res.status === 'success') {
+                            const actionObj = {
+                                icon: 'fas fa-check',
+                                title: '',
+                                message: res.message,
+                                url: '',
+                                target: '_blank',
+                                type: 'success'
+                            };
+                            actionreload(JSON.stringify(actionObj));
+                        }
+                    }
+                });
+            });
+
+
+
+
 
             $(document).on('click', '#add', function () {
                 var _token = $('input[name="_token"]').val();

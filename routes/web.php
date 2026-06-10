@@ -279,6 +279,8 @@ Route::get('/getAttendentChart', 'AttendanceController@getAttendentChart');
 Route::get('/getBranchAttendentChart', 'AttendanceController@getBranchAttendentChart');
 Route::get('/Attendentdetails/{id}/{date}',['uses' => 'AttendanceController@attendentdetails', 'as' => 'Attendentdetails']);
 
+Route::post('/AttendentTimestampUpdate', 'AttendanceController@updateTimestamps')->name('attendance.updateTimestamps');
+
 //get_incomplete_attendance_by_employee_data
 
 

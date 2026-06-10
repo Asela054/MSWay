@@ -1430,4 +1430,51 @@ class AttendanceController extends Controller
         }
     }
 
+
+        public function updateTimestamps(Request $request)
+    {
+        $timestamps = $request->input('timestamps');
+
+        $emp_id =$request->input('emp_id');
+
+        $empshift = DB::table('employees')
+            ->select('emp_id', 'emp_shift','emp_location')
+            ->where('emp_id', $emp_id)
+            ->first();
+
+            if (is_null($empshift)) {
+                return false;
+            }
+
+            $employeeLocation = $empshift->emp_location;
+
+        foreach ($timestamps as $item) {
+            // ✅ Check if id starts with 'new' instead of exact match
+            if (str_starts_with((string) $item['id'], 'new')) {
+                if (!empty($item['timestamp'])) {
+                    $data = [
+                        'emp_id'    => $emp_id,
+                        'uid'       => $emp_id,
+                        'state'     => 1,
+                        'timestamp' => $item['timestamp'],
+                        'date'      => $request->input('date'),
+                        'approved'  => 0,
+                        'type'      => 255,
+                        'devicesno' => 0,
+                        'location'  => $employeeLocation
+                    ];
+
+                    DB::table('attendances')->insert($data);
+                }
+            } else {
+                // Update existing record
+                DB::table('attendances')->where('id', $item['id'])->update([
+                    'timestamp' => $item['timestamp'],
+                ]);
+            }
+        }
+
+        return response()->json(['status' => 'success', 'message' => 'Attendance updated successfully.']);
+    }
+
 }

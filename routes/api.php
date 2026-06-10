@@ -119,6 +119,9 @@ Route::post('v1/getattendance_details', ['uses' => '\App\Http\Controllers\Api\AP
 Route::post('v1/getemployee_monthlysummery', ['uses' => '\App\Http\Controllers\Api\APIPayrollController@get_employee_monthlysummery', 'as' => 'getemployee_monthlysummery']);
 Route::post('v1/download_payslip', ['uses' => '\App\Http\Controllers\Api\APIPayrollController@downloadEmployeeSalarySheet', 'as' => 'download_payslip']);
 
+Route::post('v1/GetSalaryperiods', ['uses' => '\App\Http\Controllers\Api\APIPayrollController@GetSalaryperiods', 'as' => 'GetSalaryperiods']);
+Route::post('v1/get_monthlysummery', ['uses' => '\App\Http\Controllers\Api\APIPayrollController@get_monthlysummery', 'as' => 'get_monthlysummery']);
+
 Route::post('/attendancesyncAPI', ['uses' => '\App\Http\Controllers\AttendanceSyncAPIController@index', 'as' => 'attendancesyncAPI']);
 
 
