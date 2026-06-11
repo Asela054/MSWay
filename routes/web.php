@@ -1933,6 +1933,12 @@ Route::post('kt_addSpecial_Rate',['uses' => 'ERP_KT\ERPSpecialRateController@sto
 Route::post('KTSpecial_Rate/update', 'ERP_KT\ERPSpecialRateController@update')->name('KTSpecial_Rate.update');
 Route::get('KTSpecial_Rate/destroy/{id}', 'ERP_KT\ERPSpecialRateController@destroy');
 
+// Shift OT - Employee Allocation Controller Routes
+Route::resource('KTEmployee_Allocation', 'ERP_KT\ERPEmployeeAllocationController');
+Route::post('kt_employee_allocation',['uses' => 'ERP_KT\ERPEmployeeAllocationController@store', 'as' => 'kt_employee_allocation']);
+Route::post('KTEmployee_Allocation/update', 'ERP_KT\ERPEmployeeAllocationController@update')->name('KTEmployee_Allocation.update');
+Route::get('KTEmployee_Allocation/destroy/{id}', 'ERP_KT\ERPEmployeeAllocationController@destroy');
+
 // End of KT Clean Routes
 
 // Attendance Approval Controller Routes
