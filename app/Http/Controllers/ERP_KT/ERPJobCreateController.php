@@ -167,19 +167,34 @@ class ERPJobCreateController extends Controller
 
 
     //searches customers by name or ID
-    public function customerList(Request $request)
+       public function customerList(Request $request)
     {
         $search = $request->term;
-        $customers = DB::table('kt_customer')
-            ->where('name', 'like', '%' . $search . '%')
-            ->orWhere('id', 'like', '%' . $search . '%')
-            ->get(['id', 'name']);
+        $page = $request->get('page', 1);
+        $resultCount = 10;
+        $offset = ($page - 1) * $resultCount;
 
-        $results = $customers->map(function ($c) {
-            return ['id' => $c->id, 'text' => $c->name];
-        });
+        $query = DB::table('kt_customer')
+            ->select('id', DB::raw('name as text'));
 
-        return response()->json(['results' => $results]);
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'LIKE', '%' . $search . '%')
+                    ->orWhere('id', 'LIKE', '%' . $search . '%');
+            });
+        }
+
+        $customers = $query->orderBy('name')
+            ->skip($offset)
+            ->take($resultCount)
+            ->get();
+
+        return response()->json([
+            'results' => $customers,
+            'pagination' => [
+                'more' => count($customers) == $resultCount
+            ]
+        ]);
     }
 
     //searches induiry list and filter approved inquires only, optionally filtered by customer
@@ -187,47 +202,82 @@ class ERPJobCreateController extends Controller
     {
         $search     = $request->term;
         $customerId = $request->customer_id;
+        $page = $request->get('page', 1);
+        $resultCount = 10;
+        $offset = ($page - 1) * $resultCount;
 
-        $inquiries = DB::table('kt_inquiry_details as d')
+        $query = DB::table('kt_inquiry_details as d')
             ->join('kt_inquiries as i', 'i.id', '=', 'd.inquiry_id')
             ->where('d.approve_status', 1)
-            ->where('d.inquiry', 'like', '%' . $search . '%')
-            ->when($customerId, function ($q) use ($customerId) {
-                return $q->where('i.customer_id', $customerId);
-            })
-            ->get(['d.id', 'd.inquiry']);
+            ->select('d.id', DB::raw('d.inquiry as text'));
 
-        $results = $inquiries->map(function ($i) {
-            return ['id' => $i->id, 'text' => $i->inquiry];
-        });
+        if (!empty($search)) {
+            $query->where('d.inquiry', 'like', '%' . $search . '%');
+        }
 
-        return response()->json(['results' => $results]);
+        if (!empty($customerId)) {
+            $query->where('i.customer_id', $customerId);
+        }
+
+        $inquiries = $query->orderBy('d.inquiry')
+            ->skip($offset)
+            ->take($resultCount)
+            ->get();
+
+        return response()->json([
+            'results' => $inquiries,
+            'pagination' => ['more' => count($inquiries) == $resultCount]
+        ]);
     }
 
     public function machineList(Request $request)
     {
         $search = $request->term;
-        $machines = DB::table('kt_machines')
+        $page = $request->get('page', 1);
+        $resultCount = 10;
+        $offset = ($page - 1) * $resultCount;
+
+        $query = DB::table('kt_machines')
             ->where('status', 1)
-            ->where('machine_name', 'like', '%' . $search . '%')
-            ->get(['id', 'machine_name']);
+            ->select('id', DB::raw('machine_name as text'));
 
-        $results = $machines->map(function ($m) {
-            return ['id' => $m->id, 'text' => $m->machine_name];
-        });
+        if (!empty($search)) {
+            $query->where('machine_name', 'like', '%' . $search . '%');
+        }
 
-        return response()->json(['results' => $results]);
+        $machines = $query->orderBy('machine_name')
+            ->skip($offset)
+            ->take($resultCount)
+            ->get();
+
+        return response()->json([
+            'results' => $machines,
+            'pagination' => ['more' => count($machines) == $resultCount]
+        ]);
     }
 
     public function jobTitleList(Request $request)
     {
         $search = $request->term;
-        $titles = DB::table('job_titles')
-            ->where('title', 'like', '%' . $search . '%')
-            ->get(['id', 'title']);
-        return response()->json(['results' => $titles->map(function ($t) {
-            return ['id' => $t->id, 'text' => $t->title];
-        })]);
+        $page = $request->get('page', 1);
+        $resultCount = 10;
+        $offset = ($page - 1) * $resultCount;
+
+        $query = DB::table('job_titles')->select('id', DB::raw('title as text'));
+
+        if (!empty($search)) {
+            $query->where('title', 'like', '%' . $search . '%');
+        }
+
+        $titles = $query->orderBy('title')
+            ->skip($offset)
+            ->take($resultCount)
+            ->get();
+
+        return response()->json([
+            'results' => $titles,
+            'pagination' => ['more' => count($titles) == $resultCount]
+        ]);
     }
 
     //job_title_id filter by employee
@@ -235,25 +285,35 @@ class ERPJobCreateController extends Controller
     {
         $search       = $request->term;
         $jobTitleId   = $request->job_title_id;
+        $page = $request->get('page', 1);
+        $resultCount = 10;
+        $offset = ($page - 1) * $resultCount;
+
         $query = DB::table('employees AS e')
             ->join('job_titles AS jt', 'jt.id', '=', 'e.emp_job_code')
             ->where('e.deleted', 0)
-            ->where('e.is_resigned', 0);
-        if ($jobTitleId) {
+            ->where('e.is_resigned', 0)
+            ->select('e.emp_id as id', DB::raw("CONCAT(e.emp_name_with_initial,' - ',e.calling_name) as text"));
+
+        if (!empty($jobTitleId)) {
             $query->where('e.emp_job_code', $jobTitleId);
         }
 
-        if ($search) {
+        if (!empty($search)) {
             $query->where(function ($q) use ($search) {
                 $q->where('e.emp_name_with_initial', 'like', '%' . $search . '%')
                     ->orWhere('e.calling_name', 'like', '%' . $search . '%');
             });
         }
 
-        $employees = $query->get(['e.emp_id', DB::raw("CONCAT(e.emp_name_with_initial,' - ',e.calling_name) as emp_name")]);
+        $employees = $query->orderBy('e.emp_name_with_initial')
+            ->skip($offset)
+            ->take($resultCount)
+            ->get();
 
-        return response()->json(['results' => $employees->map(function ($e) {
-            return ['id' => $e->emp_id, 'text' => $e->emp_name];
-        })]);
+        return response()->json([
+            'results' => $employees,
+            'pagination' => ['more' => count($employees) == $resultCount]
+        ]);
     }
 }
