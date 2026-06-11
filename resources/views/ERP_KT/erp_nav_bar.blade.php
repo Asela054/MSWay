@@ -21,4 +21,12 @@
         <li><a class="dropdown-item" href="{{ route('kt_job_approve')}}">Job Approve</a></li>
     </ul>
   </div>
+    <div class="dropdown">
+    <a role="button" data-toggle="dropdown" class="btn navbtncolor" href="#" id="erp_kt_shiftot">
+      Shift OT<span class="caret"></span></a>
+    <ul class="dropdown-menu multi-level dropdownmenucolor" role="menu" aria-labelledby="dropdownMenu">
+
+      <li><a class="dropdown-item" href="{{ route('kt_employee_allocation')}}">Employee Allocation</a></li>
+    </ul>
+  </div>
 </div>

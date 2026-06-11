@@ -632,6 +632,15 @@
                                     <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('kt_special_rate')}}">Special Rate</a>
                                 </nav>
                             </div>
+
+                            <a href="javascript:void(0);" data-toggle="collapse" data-target="#collapshiftot" aria-expanded="false" aria-controls="collapshiftot" class="py-1">
+                                <span class="links_name">Shift OT<i class="fas fa-angle-down"></i></span>
+                            </a>
+                            <div class="collapse" id="collapshiftot" data-parent="#accordionSubkt_erp">
+                                <nav class="sidenav-menu-nested nav">
+                                    <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('kt_employee_allocation')}}">Employee Allocation</a>
+                                </nav>
+                            </div>
                     </nav>
                 </div>
             </li>
