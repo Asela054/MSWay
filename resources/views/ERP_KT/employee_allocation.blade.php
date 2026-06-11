@@ -54,8 +54,7 @@
 
 
     <!-- Add Shift Modal Area Start -->
-    <div class="modal fade" id="formModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-        aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal fade" id="formModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header p-2">
@@ -101,7 +100,7 @@
                                     <div class="col-12 mt-2">
                                         <button type="button" id="formsubmit"
                                             class="btn btn-primary btn-sm px-4 float-right"><i
-                                                class="fas fa-plus"></i>&nbsp;Add to list</button>
+                                                class="fas fa-plus mr-2"></i>&nbsp;Add to list</button>
                                         <input name="submitBtn" type="submit" value="Save" id="submitBtn" class="d-none">
                                     </div>
                                     <input type="hidden" name="action" id="action" value="Add" />
@@ -127,9 +126,9 @@
                                 </table>
                             </div>
                             <div class="form-group mt-2">
-                                <button type="button" name="btncreateorder" id="btncreateorder"
-                                    class="btn btn-primary btn-sm fa-pull-right px-4"><i
-                                        class="fas fa-plus"></i>&nbsp;Create</button>
+                                <button type="button" name="btncreateorder" id="btncreateorder" class="btn btn-primary btn-sm fa-pull-right mr-2 px-4">
+                                    <i class="fas fa-plus mr-2"></i>Create
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -140,8 +139,7 @@
     <!-- Add Shift Modal Area End -->
 
     <!--CSV Modal Area Start -->
-    <div class="modal fade" id="uploadAtModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-        aria-labelledby="staticBackdropLabel1" aria-hidden="true">
+    <div class="modal fade" id="uploadAtModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header p-2">
@@ -315,7 +313,7 @@
             $('#form_result').html('');
             $('#formTitle')[0].reset();
             $('#tableorderlist').empty();
-            $('#btncreateorder').prop('disabled', false).html('<i class="fas fa-plus"></i> Create');
+            $('#btncreateorder').prop('disabled', false).html('<i class="fas fa-plus mr-2"></i> Create');
             $('#formModal').modal('show');
         });
 

@@ -70,6 +70,7 @@ class ERPEmployeeAllocationController extends Controller
                     'date'     => $datefrom,
                     'in_time'  => !empty($in_time)  ? $in_time  : null,
                     'out_time' => !empty($out_time) ? $out_time : null,
+                    'ot_hours' => 0,
                 ]);
             }
             DB::commit();
@@ -288,6 +289,7 @@ class ERPEmployeeAllocationController extends Controller
                         'date'     => $date,
                         'in_time'  => $in_datetime,
                         'out_time' => $out_datetime,
+                        'ot_hours' => 0,
                     ]);
                     $successCount++;
                 } catch (\Exception $e) {

@@ -16,5 +16,7 @@ class EmployeeAllocation extends Model
         'date',
         'in_time',
         'out_time',
+        'ot_hours',
+        'approve_status',
     ];
 }
