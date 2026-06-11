@@ -52,7 +52,7 @@
                                             <th>EMP ID </th>
                                             <th>EMPLOYEE NAME</th>
                                             <th>TOTAL ABSENT DAYS</th>
-                                            <th>DEDUCTION AMOUNT</th>
+                                            <th>AMOUNT</th>
                                             <th>REMAINING AMOUNT</th>
                                             <th class="d-none">PAYROLL PROFILE</th>
                                             <th class="d-none">REMUNITION</th>

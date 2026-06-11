@@ -115,16 +115,8 @@ class HolidayDeductionapproveController extends Controller
 
                 if ($emp) {
                     $jobCategoryId = $emp->job_categoryid;
-                     $payroll_workingdays   = $emp->workingdays ?? 0;
-                }else {
-                    $jobCategoryId = null;
-                    $payroll_workingdays   = 0;
                 }
 
-                $month = Carbon::parse($firstDate)->format('Y-m');
-
-                $work_days = (new \App\Attendance)->get_work_days($empId, $month, $lastDate);
-                
                 //check holiday deductions approved on given date range
                 $approveholidayductions = DB::table('holiday_deductions_approved')
                     ->where('emp_id', $empId)
@@ -151,35 +143,32 @@ class HolidayDeductionapproveController extends Controller
                     $monthlytotal = $leavededutionamount->amount;
                     $daycount = $leavededutionamount->day_count;
 
-                    if ($work_days < $payroll_workingdays) {
-
-                    $shortfall_days = $payroll_workingdays - $work_days;
-
-                         $leavededuction = DB::table('holiday_deductions')
-                            ->select('*')
-                            ->where('job_id', $jobCategoryId)
-                            ->where('remuneration_id', $remunerationtype)
-                            ->orderBy('day_count', 'desc')
-                            ->get();
-                            
-                             foreach($leavededuction as $dataleavededuction){
-                                    if($maxmindayscount->min_day_count > $shortfall_days){
-                                        $totalAmount     = $monthlytotal;
-                                        $deductionamount = $monthlytotal;
-                                        break;
-                                    }
-                                    else if($maxmindayscount->max_day_count < $shortfall_days){
-                                        $totalAmount     = $monthlytotal - $dataleavededuction->amount;
-                                        $deductionamount = $dataleavededuction->amount;
-                                        break;
-                                    }
-                                    if($dataleavededuction->day_count == $shortfall_days){
-                                        $totalAmount     = $monthlytotal - $dataleavededuction->amount;
-                                        $deductionamount = $dataleavededuction->amount;
-                                        break;
-                                    }
-                                }
+                    $leavededuction = DB::table('holiday_deductions')
+                    ->select('*')
+                    ->where('job_id', $jobCategoryId)
+                    ->where('remuneration_id', $remunerationtype)
+                    ->orderBy('day_count', 'desc')
+                    ->get();
+                    
+                    foreach($leavededuction as $dataleavededuction){
+                        if($maxmindayscount->min_day_count > $totalDays->total_days){
+                            $totalAmount = $monthlytotal;
+                            $deductionamount = $monthlytotal;
+                            break;
+                        }
+                        else if($maxmindayscount->max_day_count < $totalDays->total_days){
+                            $totalAmount = $monthlytotal-$dataleavededuction->amount;
+                            $deductionamount = $dataleavededuction->amount;
+                            break;
+                        }
+                        if($dataleavededuction->day_count==$totalDays->total_days){
+                            $totalAmount = $monthlytotal-$dataleavededuction->amount;
+                            $deductionamount = $dataleavededuction->amount;
+                            break;
+                        }
                     }
+
+                    // dd($totalAmount, $deductionamount);
                 }
                 
                 if($totalAmount==0 && $totalDays->total_days==0){

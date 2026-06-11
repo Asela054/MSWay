@@ -58,6 +58,7 @@
                                         <th>D/OT TIME</th>
                                         <th>T/OT TIME</th>
                                         <th>IS HOLIDAY</th>
+                                        <th>DALIY AVG</th>
                                     </tr>
                                 </thead>
                                 <tbody class="response">
@@ -163,7 +164,7 @@
 
              $('.response').html(
                 '<tr>' +
-                '<td colspan="13" class="text-center py-5">' +
+                '<td colspan="14" class="text-center py-5">' +
                 '<div class="d-flex flex-column align-items-center">' +
                 '<i class="fas fa-filter fa-3x text-muted mb-3"></i>' +
                 '<h4 class="text-muted mb-2">No Records Found</h4>' +
@@ -214,11 +215,21 @@
                             ot_data.forEach(function(key, data) {
                                 let is_approved = key.is_approved;
                                 let obj = key.ot_breakdown;
+                                let daily_average = key.daily_average;
                                 let is_holiday = obj.is_holiday == 1 ? 'Yes' : 'No';
                                 
                                 let h_class = obj.is_morning ? 'bg-teal-light' : '';
                                 
-                                ot_data_html += '<tr class="'+h_class+'" >';
+                                 // If daily average is less than 50, override with red
+                               let row_style = '';
+
+                                if(daily_average !== undefined && daily_average < 90 && daily_average > 0 ) {
+                                    h_class = obj.is_morning ? 'bg-teal-light' : '';
+                                    row_style = 'style="background-color: #ffd6d6;"';
+                                }
+
+
+                                ot_data_html += '<tr class="'+h_class+'" '+row_style+'>';
                                 
                                 if(is_approved == false){
                                     ot_data_html += '<td><input type="checkbox" class="cb" ' +
@@ -240,6 +251,7 @@
                                 ot_data_html += '<td>'+obj.double_hours +'</td>';
                                 ot_data_html += '<td>'+obj.triple_hours+'</td>';
                                 ot_data_html += '<td>'+is_holiday+'</td>';
+                                ot_data_html += '<td>'+(daily_average !== undefined ? daily_average.toFixed(2)+'%' : 'N/A')+'</td>';
                                 ot_data_html += '</tr>';
                             });
                         }
