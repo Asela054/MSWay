@@ -1944,9 +1944,9 @@ Route::post('/kt_employee_allocation_csv', 'ERP_KT\ERPEmployeeAllocationControll
 
 // Shift OT - OT Approve Controller Routes
 Route::resource('KTOT_Approve', 'ERP_KT\ERPOTApproveController');
-Route::post('kt_ot_approve',['uses' => 'ERP_KT\ERPOTApproveController@store', 'as' => 'kt_ot_approve']);
-Route::post('KTOT_Approve/update', 'ERP_KT\ERPOTApproveController@update')->name('KTOT_Approve.update');
-Route::get('KTOT_Approve/destroy/{id}', 'ERP_KT\ERPOTApproveController@destroy');
+Route::get('kt_ot_approve', ['uses' => 'ERP_KT\ERPOTApproveController@index', 'as' => 'kt_ot_approve']);
+Route::post('kt_ot_approve_generate', ['uses' => 'ERP_KT\ERPOTApproveController@otapprovegenerate', 'as' => 'kt_ot_approve_generate']);
+Route::post('kt_ot_approve_submit', ['uses' => 'ERP_KT\ERPOTApproveController@otapprovesubmit', 'as' => 'kt_ot_approve_submit']);
 // End of KT Clean Routes
 
 // Attendance Approval Controller Routes

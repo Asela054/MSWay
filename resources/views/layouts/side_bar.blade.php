@@ -639,6 +639,7 @@
                             <div class="collapse" id="collapshiftot" data-parent="#accordionSubkt_erp">
                                 <nav class="sidenav-menu-nested nav">
                                     <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('kt_employee_allocation')}}">Employee Allocation</a>
+                                    <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('kt_ot_approve')}}">OT Approve</a>
                                 </nav>
                             </div>
                     </nav>

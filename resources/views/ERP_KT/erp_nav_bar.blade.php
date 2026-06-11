@@ -27,6 +27,7 @@
     <ul class="dropdown-menu multi-level dropdownmenucolor" role="menu" aria-labelledby="dropdownMenu">
 
       <li><a class="dropdown-item" href="{{ route('kt_employee_allocation')}}">Employee Allocation</a></li>
+       <li><a class="dropdown-item" href="{{ route('kt_ot_approve')}}">OT Approve</a></li>
     </ul>
   </div>
 </div>
