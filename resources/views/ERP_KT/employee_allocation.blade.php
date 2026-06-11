@@ -22,6 +22,8 @@
                     <div class="col-12">
                         <button type="button" class="btn btn-primary btn-sm fa-pull-right mr-2" name="create_record"
                             id="create_record"><i class="fas fa-plus mr-2"></i>Add</button>
+                        <button type="button" class="btn btn-secondary btn-sm fa-pull-right mr-2" name="csv_upload"
+                            id="csv_upload"><i class="fas fa-plus mr-2"></i>CSV Upload</button>
                     </div>
                     <div class="col-12">
                         <hr class="border-dark">
@@ -143,9 +145,65 @@
             </div>
         </div>
     </div>
-
-
     <!-- Modal Area End -->
+
+    <!--CSV Modal Area Start -->
+    <div class="modal fade" id="uploadAtModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+        aria-labelledby="staticBackdropLabel1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header p-2">
+                    <h5 class="csvmodal-title" id="staticBackdropLabel1">Upload CSV</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="upload_response"></div>
+                    <div class="row">
+                        <div class="col">
+                            <a href="{{ url('/public/csvsample/Additional Work Allocation.csv') }}" class="control-label d-flex justify-content-end">CSV Format-Download Sample File</a>
+                        </div>
+                    </div>
+                    <form method="post" id="formUpload" class="form-horizontal">
+                        {{ csrf_field() }}
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-row mb-1">
+                                    <div class="col-12 col-sm-6">
+                                        <label class="small font-weight-bold text-dark">Shift Type*</label>
+                                        <select name="csv_shift" id="csv_shift" class="form-control form-control-sm" style="width: 100%;">
+                                            <option value="">Select Shift</option>
+                                            @foreach ($shifts as $shift)
+                                            <option value="{{ $shift->id }}">{{ $shift->shift_name }} - {{ $shift->shift_code }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-12 col-sm-6">
+                                        <label class="small font-weight-bold text-dark">CSV File</label>
+                                        <input required type="file" id="csv_file_u" name="csv_file_u" class="form-control form-control-sm" accept=".csv" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="loading"></div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group mt-3">
+                                    <button type="submit" name="action_button" id="btn-upload" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-upload"></i>&nbsp;Upload</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--CSV Modal Area End -->
 </main>
 
 @endsection
@@ -285,7 +343,7 @@
                 var selectedText = $('#employee option:selected').text();
                 var in_time = $('#in_time').val();
                 var out_time = $('#out_time').val();
-                
+
                 var in_time_display = in_time.replace('T', ' ');
                 var out_time_display = out_time.replace('T', ' ');
 
@@ -374,6 +432,10 @@
             }
         });
 
+        $('#csv_upload').click(function() {
+            $('#uploadAtModal').modal('show');
+            $('#upload_response').html('');
+        });
 
         $('#formUpload').on('submit', function(e) {
             e.preventDefault();
@@ -461,7 +523,7 @@
             }
         });
 
-  
+        $('#csv_sample').click(function() {});
     });
 
     function productDelete(row) {
