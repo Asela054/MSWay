@@ -334,6 +334,19 @@
                     return;
                 }
 
+                var duplicate = false;
+                $('#tableorderlist tr').each(function() {
+                    if ($(this).find('td:first').text() == emp_id) {
+                        duplicate = true;
+                        return false;
+                    }
+                });
+                if (duplicate) {
+                    alert('This employee is already added to the list.');
+                    return;
+                }
+
+
                 var in_time_display = in_time ? in_time.replace('T', ' ') : '';
                 var out_time_display = out_time ? out_time.replace('T', ' ') : '';
 
@@ -457,14 +470,14 @@
                 contentType: false,
                 processData: false,
                 data: formData,
-                
+
                 success: function(res) {
                     if (res.status == 1) {
                         var html = '';
                         if (res.errors && res.errors.length > 0) {
-                            html = '<div class="alert alert-warning"><strong>Some rows had issues:</strong><br>' + res.errors.join('<br>') + '</div>';
+                            errhtml = '<div class="alert alert-warning"><strong>Some rows had issues:</strong><br>' + res.errors.join('<br>') + '</div>';
                         }
-                        $('#upload_response').html('');
+                        $('#upload_response').html(errhtml);
                         Swal.fire({
                             position: "top-end",
                             icon: 'success',
@@ -478,10 +491,13 @@
                         $("#formUpload")[0].reset();
                         $('#uploadAtModal').scrollTop(0);
                         $('#dataTable').DataTable().ajax.reload();
-                        
-                        setTimeout(function() {
-                            $('#uploadAtModal').modal('hide');
-                        }, 2000);
+
+                        $("#formUpload")[0].reset();
+                        if (!res.errors || res.errors.length === 0) {
+                            setTimeout(function() {
+                                $('#uploadAtModal').modal('hide');
+                            }, 2000);
+                        }
 
                     } else {
                         var html = '';
