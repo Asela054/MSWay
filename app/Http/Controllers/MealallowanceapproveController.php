@@ -262,20 +262,58 @@ class MealallowanceapproveController extends Controller
                     }
                 }
                 else if($allowancetype==4){
-                    $dayallowanceamount = $allowanceamount / $workingDays;
-                    $workallawanceamount = $totalWorkingDays * $dayallowanceamount;
-                    // Using Query Builder
-                    $avgCompletionPercentage = DB::table('opma_daily_production_summary')
-                        ->select(
-                            DB::raw('AVG((produce / NULLIF(target, 0)) * 100) as avg_completion_percentage')
-                        )
-                        ->where('emp_id', $empId)
-                        ->whereBetween('date', [$firstDate, $lastDate])
-                        ->value('avg_completion_percentage');
 
-                    $monthlyremain = ($avgCompletionPercentage / 100) * $workallawanceamount;
-                    $totalamount = $workallawanceamount - $monthlyremain;
-                    $allowanceamount = round($workallawanceamount, 2);
+                $settings = DB::table('hrm_general_settings as settings')
+                    ->join('hrm_general_settings_key_list as key_list', 'settings.key_id', '=', 'key_list.id')
+                    ->where('key_list.config_key', 'SAL_ADJ')
+                    ->where('settings.status', 1)
+                    ->select('settings.config_value' )
+                    ->first();
+
+                     if($settings &&  $settings->config_value == 1){
+                        //manula pst deduction 
+                        // Get entitle working days from job category
+                            $entitleDays = $workingDays;
+                            
+                            if ($entitleDays > 0) {
+                                $attendancePercentage = ($totalWorkingDays / $entitleDays) * 100;
+                            } else {
+                                $attendancePercentage = 0;
+                            }
+
+                            if ($attendancePercentage == 100) {
+                                $totalamount = 10000.00;
+                            } elseif ($attendancePercentage >= 95) {
+                                $totalamount = 8000.00;
+                            } elseif ($attendancePercentage >= 90) {
+                                $totalamount = 6000.00;
+                            } elseif ($attendancePercentage >= 85) {
+                                $totalamount = 4000.00;
+                            } else {
+                                $totalamount = 0;
+                            }
+                            $monthlyremain = $totalamount;
+                            $allowanceamount = $totalamount;
+
+                     }else{
+                        $dayallowanceamount = $allowanceamount / $workingDays;
+                        $workallawanceamount = $totalWorkingDays * $dayallowanceamount;
+                        // Using Query Builder
+                        $avgCompletionPercentage = DB::table('opma_daily_production_summary')
+                            ->select(
+                                DB::raw('AVG((produce / NULLIF(target, 0)) * 100) as avg_completion_percentage')
+                            )
+                            ->where('emp_id', $empId)
+                            ->whereBetween('date', [$firstDate, $lastDate])
+                            ->value('avg_completion_percentage');
+
+                        $monthlyremain = ($avgCompletionPercentage / 100) * $workallawanceamount;
+                        $totalamount = $workallawanceamount - $monthlyremain;
+                        $allowanceamount = round($workallawanceamount, 2);
+                     }
+
+            
+                    
                 }
                 else if($allowancetype==5){
                     // Using Query Builder
@@ -295,6 +333,7 @@ class MealallowanceapproveController extends Controller
                     $totalamount = $count * $allowanceamount;
                     $monthlyremain = $totalamount;
                 }
+
                 else{//Daily or monthly salary adjustment deductions
                     if($remunerationtype == 21){
                         $totalWeekDays = DB::table('leaves')
