@@ -23,7 +23,7 @@
                         <button type="button" class="btn btn-primary btn-sm fa-pull-right mr-2" name="create_record"
                             id="create_record"><i class="fas fa-plus mr-2"></i>Add</button>
                         <button type="button" class="btn btn-secondary btn-sm fa-pull-right mr-2" name="csv_upload"
-                            id="csv_upload"><i class="fas fa-plus mr-2"></i>CSV Upload</button>
+                            id="csv_upload"><i class="fas fa-upload mr-2"></i>CSV Upload</button>
                     </div>
                     <div class="col-12">
                         <hr class="border-dark">
@@ -42,9 +42,7 @@
                                         <th class="text-right">ACTION</th>
                                     </tr>
                                 </thead>
-
                                 <tbody>
-
                                 </tbody>
                             </table>
                         </div>
@@ -55,7 +53,7 @@
     </div>
 
 
-    <!-- Modal Area Start -->
+    <!-- Add Shift Modal Area Start -->
     <div class="modal fade" id="formModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
         aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -86,36 +84,29 @@
                                         <label class="small font-weight-bold text-dark">Date*</label>
                                         <input type="date" name="fromdate" id="fromdate" class="form-control form-control-sm" required />
                                     </div>
-                                    <div class="col-12 col-sm-4">
-                                        <label class="small font-weight-bold text-dark">In time*</label>
-                                        <input type="datetime-local" name="in_time" id="until_time" class="form-control form-control-sm" required />
+                                    <div class="col-12 col-sm-6 mt-2">
+                                        <label class="small font-weight-bold text-dark">In Time*</label>
+                                        <input type="datetime-local" name="in_time" id="in_time" class="form-control form-control-sm" required />
                                     </div>
-                                    <div class="col-12 col-sm-4">
-                                        <label class="small font-weight-bold text-dark">Out time*</label>
-                                        <input type="datetime-local" name="out_time" id="until_time" class="form-control form-control-sm" required />
+                                    <div class="col-12 col-sm-6 mt-2">
+                                        <label class="small font-weight-bold text-dark">Out Time*</label>
+                                        <input type="datetime-local" name="out_time" id="out_time" class="form-control form-control-sm" required />
                                     </div>
-                                    <hr>
-                                    <div class="form-row mb-1">
-                                        <div class="col-12 col-sm-6">
-                                            <label class="small font-weight-bold text-dark">Employee*</label>
-                                            <select name="employee" id="employee" class="form-control form-control-sm" required>
-                                            </select>
-                                        </div>
+                                    <hr class="w-100 mt-3">
+                                    <div class="col-12 col-sm-6 mt-2">
+                                        <label class="small font-weight-bold text-dark">Employee*</label>
+                                        <select name="employee" id="employee" class="form-control form-control-sm" style="width:100%;" required>
+                                        </select>
                                     </div>
-                                    <div class="form-group mt-3">
-                                        <div class="col-12 col-sm-6">
-                                            <button type="button" id="formsubmit"
-                                                class="btn btn-primary btn-sm px-4 float-right"><i
-                                                    class="fas fa-plus"></i>&nbsp;Add to list</button>
-                                            <input name="submitBtn" type="submit" value="Save" id="submitBtn" class="d-none">
-                                            <button type="button" name="Btnupdatelist" id="Btnupdatelist"
-                                                class="btn btn-primary btn-sm px-4 fa-pull-right" style="display:none;"><i
-                                                    class="fas fa-plus"></i>&nbsp;Update List</button>
-                                        </div>
+                                    <div class="col-12 mt-2">
+                                        <button type="button" id="formsubmit"
+                                            class="btn btn-primary btn-sm px-4 float-right"><i
+                                                class="fas fa-plus"></i>&nbsp;Add to list</button>
+                                        <input name="submitBtn" type="submit" value="Save" id="submitBtn" class="d-none">
                                     </div>
                                     <input type="hidden" name="action" id="action" value="Add" />
                                     <input type="hidden" name="hidden_id" id="hidden_id" />
-                                    <input type="hidden" name="detailsid" id="detailsid">
+                                </div>
                             </form>
                         </div>
                         <div class="col-12 mt-3">
@@ -127,6 +118,7 @@
                                             <th>Employee Name</th>
                                             <th>In Time</th>
                                             <th>Out Time</th>
+                                            <th class="d-none"></th>
                                             <th class="d-none"></th>
                                             <th class="text-right">Action</th>
                                         </tr>
@@ -145,7 +137,7 @@
             </div>
         </div>
     </div>
-    <!-- Modal Area End -->
+    <!-- Add Shift Modal Area End -->
 
     <!--CSV Modal Area Start -->
     <div class="modal fade" id="uploadAtModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
@@ -162,17 +154,17 @@
                     <div id="upload_response"></div>
                     <div class="row">
                         <div class="col">
-                            <a href="{{ url('/public/csvsample/Additional Work Allocation.csv') }}" class="control-label d-flex justify-content-end">CSV Format-Download Sample File</a>
+                            <a href="{{ url('/csvsample/KT Employee Allocation.csv') }}" class="control-label d-flex justify-content-end">CSV Format - Download Sample File</a>
                         </div>
                     </div>
-                    <form method="post" id="formUpload" class="form-horizontal">
+                    <form method="post" id="formUpload" class="form-horizontal" enctype="multipart/form-data">
                         {{ csrf_field() }}
                         <div class="row">
                             <div class="col">
                                 <div class="form-row mb-1">
                                     <div class="col-12 col-sm-6">
                                         <label class="small font-weight-bold text-dark">Shift Type*</label>
-                                        <select name="csv_shift" id="csv_shift" class="form-control form-control-sm" style="width: 100%;">
+                                        <select name="csv_shift" id="csv_shift" class="form-control form-control-sm" style="width: 100%;" required>
                                             <option value="">Select Shift</option>
                                             @foreach ($shifts as $shift)
                                             <option value="{{ $shift->id }}">{{ $shift->shift_name }} - {{ $shift->shift_code }}</option>
@@ -180,20 +172,16 @@
                                         </select>
                                     </div>
                                     <div class="col-12 col-sm-6">
-                                        <label class="small font-weight-bold text-dark">CSV File</label>
+                                        <label class="small font-weight-bold text-dark">CSV File*</label>
                                         <input required type="file" id="csv_file_u" name="csv_file_u" class="form-control form-control-sm" accept=".csv" />
                                     </div>
                                 </div>
+                                <small class="text-muted">CSV format: Date: 2026-01-01, Time: 20:00:00 (Use this format to upload data)</small>
                             </div>
                         </div>
-                        <div class="row">
+                        <div class="row mt-3">
                             <div class="col">
-                                <div class="loading"></div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col">
-                                <div class="form-group mt-3">
+                                <div class="form-group">
                                     <button type="submit" name="action_button" id="btn-upload" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-upload"></i>&nbsp;Upload</button>
                                 </div>
                             </div>
@@ -224,6 +212,7 @@
             placeholder: 'Select...',
             width: '100%',
             allowClear: true,
+            dropdownParent: $('#formModal'),
             ajax: {
                 url: '{{url("employee_list_sel2")}}',
                 dataType: 'json',
@@ -272,13 +261,12 @@
                             .css('font-size', 'inherit');
                     },
                 },
-                // 'copy', 'csv', 'excel', 'pdf', 'print'
             ],
             "order": [
                 [0, "desc"]
             ],
             ajax: {
-                url: scripturl + "/employee_allocation_list.php",
+                url: scripturl + "/ERP_KT/employee_allocation_list.php",
                 type: "POST",
                 data: {},
             },
@@ -287,12 +275,12 @@
                     name: 'id'
                 },
                 {
-                    data: 'date_from',
-                    name: 'date_from'
+                    data: 'employee_name',
+                    name: 'employee_name'
                 },
                 {
-                    data: 'shift_name',
-                    name: 'shift_name'
+                    data: 'date',
+                    name: 'date'
                 },
                 {
                     data: 'in_time',
@@ -302,7 +290,6 @@
                     data: 'out_time',
                     name: 'out_time'
                 },
-
                 {
                     data: 'id',
                     name: 'action',
@@ -310,13 +297,10 @@
                     orderable: false,
                     searchable: false,
                     render: function(data, type, row) {
-                        var approval_status = row.approval_status;
                         var buttons = '';
-
                         buttons += '<button type="button" name="delete" id="' + row.id + '" class="delete btn btn-danger btn-sm mr-1" data-toggle="tooltip" title="Remove"><i class="far fa-trash-alt"></i></button>';
                         return buttons;
                     }
-
                 }
             ],
             drawCallback: function(settings) {
@@ -330,11 +314,12 @@
             $('#action').val('Add');
             $('#form_result').html('');
             $('#formTitle')[0].reset();
+            $('#tableorderlist').empty();
             $('#btncreateorder').prop('disabled', false).html('<i class="fas fa-plus"></i> Create');
-
             $('#formModal').modal('show');
         });
 
+        // Add to list button
         $("#formsubmit").click(function() {
             if (!$("#formTitle")[0].checkValidity()) {
                 $("#submitBtn").click();
@@ -344,10 +329,15 @@
                 var in_time = $('#in_time').val();
                 var out_time = $('#out_time').val();
 
-                var in_time_display = in_time.replace('T', ' ');
-                var out_time_display = out_time.replace('T', ' ');
+                if (!emp_id) {
+                    alert('Please select an employee.');
+                    return;
+                }
 
-                $('#tableorder > tbody:last').append(
+                var in_time_display = in_time ? in_time.replace('T', ' ') : '';
+                var out_time_display = out_time ? out_time.replace('T', ' ') : '';
+
+                $('#tableorderlist').append(
                     '<tr class="pointer">' +
                     '<td>' + emp_id + '</td>' +
                     '<td>' + selectedText + '</td>' +
@@ -365,13 +355,8 @@
 
         // Save Record
         $('#btncreateorder').click(function() {
-            var action_url = '';
-            if ($('#action').val() == 'Add') {
-                action_url = "{{ route('ky_addEmployee_Allocation') }}";
-            }
-            if ($('#action').val() == 'Edit') {
-                action_url = "{{ route('KTEmployee_Allocation.update') }}";
-            }
+            var action_url = "{{ route('ky_addEmployee_Allocation') }}";
+
             $('#btncreateorder').prop('disabled', true).html('<i class="fas fa-circle-notch fa-spin mr-2"></i> Creating');
             var tbody = $("#tableorder tbody");
 
@@ -414,9 +399,15 @@
                             html += '</div>';
                         }
                         if (data.success) {
-                            html = '<div class="alert alert-success">' + data.success + '</div>';
+                            Swal.fire({
+                                position: "top-end",
+                                icon: 'success',
+                                title: data.success,
+                                showConfirmButton: false,
+                                timer: 2500
+                            });
                             $('#formTitle')[0].reset();
-                            $('#tableorder tbody').empty();
+                            $('#tableorderlist').empty();
                             $('#dataTable').DataTable().ajax.reload();
                             setTimeout(function() {
                                 $('#formModal').modal('hide');
@@ -424,6 +415,13 @@
                             $('#btncreateorder').prop('disabled', false).html('<i class="fas fa-plus mr-2"></i> Create');
                         }
                         $('#form_result').html(html);
+                        if (!data.success) {
+                            $('#btncreateorder').prop('disabled', false).html('<i class="fas fa-plus mr-2"></i> Create');
+                        }
+                    },
+                    error: function() {
+                        alert('An error occurred. Please try again.');
+                        $('#btncreateorder').prop('disabled', false).html('<i class="fas fa-plus mr-2"></i> Create');
                     }
                 });
             } else {
@@ -432,47 +430,60 @@
             }
         });
 
+        // CSV Upload button
         $('#csv_upload').click(function() {
             $('#uploadAtModal').modal('show');
             $('#upload_response').html('');
         });
 
+        // CSV Upload form submit
         $('#formUpload').on('submit', function(e) {
             e.preventDefault();
             let save_btn = $("#btn-upload");
             let btn_prev_text = save_btn.html();
 
-            //save_btn.prop("disabled", true);
             save_btn.html('<i class="fa fa-spinner fa-spin"></i> loading...');
             let formData = new FormData($('#formUpload')[0]);
 
-            let url_text = '{{ url("/night_shiftallocate_csv") }}';
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 }
-            })
+            });
+
             $.ajax({
-                url: url_text,
+                url: '{{ route("kt_employee_allocation_csv") }}',
                 type: 'POST',
                 contentType: false,
                 processData: false,
                 data: formData,
+                
                 success: function(res) {
                     if (res.status == 1) {
-                        $('#upload_response').html("<div class='alert alert-success'>" + res.msg + "</div>");
+                        var html = '';
+                        if (res.errors && res.errors.length > 0) {
+                            html = '<div class="alert alert-warning"><strong>Some rows had issues:</strong><br>' + res.errors.join('<br>') + '</div>';
+                        }
+                        $('#upload_response').html('');
+                        Swal.fire({
+                            position: "top-end",
+                            icon: 'success',
+                            title: res.msg,
+                            showConfirmButton: false,
+                            timer: 2500
+                        });
 
                         save_btn.html(btn_prev_text);
                         save_btn.prop("disabled", false);
                         $("#formUpload")[0].reset();
                         $('#uploadAtModal').scrollTop(0);
                         $('#dataTable').DataTable().ajax.reload();
+                        
                         setTimeout(function() {
                             $('#uploadAtModal').modal('hide');
                         }, 2000);
 
                     } else {
-
                         var html = '';
                         if (res.errors) {
                             html = '<div class="alert alert-danger">';
@@ -481,26 +492,27 @@
                             }
                             html += '</div>';
                         }
-
+                        if (res.msg) {
+                            html += '<div class="alert alert-warning">' + res.msg + '</div>';
+                        }
                         $('#upload_response').html(html);
-
                         save_btn.prop("disabled", false);
                         save_btn.html(btn_prev_text);
                     }
                 },
-                error: function(res) {
-                    alert(data);
+                error: function(xhr) {
+                    alert('Upload failed. Please try again.');
+                    save_btn.prop("disabled", false);
+                    save_btn.html(btn_prev_text);
                 }
             });
         });
 
-
-        var user_id;
-
+        // Delete record
         $(document).on('click', '.delete', async function() {
             var r = await Otherconfirmation("You want to remove this?");
             if (r == true) {
-                var user_id = $(this).attr('id');
+                var record_id = $(this).attr('id');
                 $.ajaxSetup({
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -511,29 +523,32 @@
                     type: 'POST',
                     dataType: "json",
                     data: {
-                        id: user_id
+                        id: record_id
                     },
                     success: function(data) {
+                        Swal.fire({
+                            position: "top-end",
+                            icon: 'error',
+                            title: data.success,
+                            showConfirmButton: false,
+                            timer: 2500
+                        });
                         setTimeout(function() {
                             $('#dataTable').DataTable().ajax.reload();
-                        }, 2000);
-                        location.reload();
+                        }, 500);
+                    },
+                    error: function() {
+                        alert('Delete failed. Please try again.');
                     }
                 });
             }
         });
 
-        $('#csv_sample').click(function() {});
     });
 
     function productDelete(row) {
         $(row).closest('tr').remove();
     }
-</script>
-<script>
-    $('#fromdate').on('change', function() {
-        $('#todate').val($(this).val());
-    });
 </script>
 
 @endsection
