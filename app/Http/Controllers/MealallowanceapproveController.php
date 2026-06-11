@@ -173,7 +173,38 @@ class MealallowanceapproveController extends Controller
                 $totalLeaveDays = $leavecount->total_days;
                 
                 if($allowancetype==3){//Custom salary adjustment deductions
-                    if($allowleave>=$totalLeaveDays){ //Leave within allowed limit
+                    $checkweekendleave = DB::table('leaves')
+                        ->select(DB::raw('*'))
+                        ->whereBetween('leave_from', [$firstDate, $lastDate])
+                        ->where('emp_id', $empId)
+                        ->where('status', 'Approved')
+                        ->whereNotIn('leave_type', ['7', '1'])
+                        ->get();
+                        
+                    $empallowleave = $allowleave;
+                    $checkweekenddates = [];
+                    
+                    foreach($checkweekendleave as $checkleave){
+                        $leavefromdate = $checkleave->leave_from;
+                        $leavetodate = $checkleave->leave_to;
+
+                        $leaveperiod = CarbonPeriod::create($leavefromdate, $leavetodate);
+                        
+                        foreach ($leaveperiod as $date) {                                     
+                            $checkholiday = DB::table('holidays')
+                                ->where('date', $date->format('Y-m-d'))
+                                ->first();
+                                
+                            if($checkholiday){
+                                $checkweekenddates[] = $date->format('Y-m-d');
+                            }
+                            else if (in_array(Carbon::parse($date)->dayOfWeek, [5, 6, 0])) {
+                                $checkweekenddates[] = $date->format('Y-m-d');
+                            }
+                        }
+                    }
+
+                    if($allowleave>=$totalLeaveDays && empty($checkweekenddates)){ //Leave within allowed limit
                         $totalamount = $allowanceamount;
                         $monthlyremain = $totalamount;
                     }
