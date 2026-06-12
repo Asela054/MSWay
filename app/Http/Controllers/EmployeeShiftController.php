@@ -336,6 +336,9 @@ class EmployeeShiftController extends Controller
         Employeeshift::findOrFail($id)
         ->update($form_data);
 
+        Employeeshiftdetail::where('employeeshift_id', $id)
+            ->update($form_data);
+
         return response()->json(['success' => 'Employee Shift is Successfully Deleted']);
 
     }
