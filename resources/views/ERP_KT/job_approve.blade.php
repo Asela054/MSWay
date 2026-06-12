@@ -52,6 +52,7 @@
                                         <th>JOB TITLE</th>
                                         <th>MACHINE</th>
                                         <th>WORK HOURS</th>
+                                        <th>INCENTIVE HOURS</th>
                                         <th>INCENTIVE</th>
                                         <th>CUSTOMER</th>
                                         <th>INQUIRY</th>
@@ -439,6 +440,10 @@
                     {
                         data: 'reading_hours',
                         name: 'reading_hours'
+                    },
+                    {
+                        data: 'incentive_hours',
+                        name: 'incentive_hours'
                     },
                     {
                         data: 'incentive',
