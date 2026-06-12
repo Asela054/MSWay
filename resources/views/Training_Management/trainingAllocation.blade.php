@@ -664,6 +664,7 @@
             $('#emplistbody').empty();
             $('#emp_employee').val(null).trigger('change');
             $('#emp_action_button').prop('disabled', false).html('<i class="fas fa-plus"></i>&nbsp;Save');
+            removedEmpIds = [];
 
             $.ajax({
                 url: "{{ url('TrainingAllocation') }}/" + id + "/employees",
@@ -715,39 +716,48 @@
                 '<td>' + emp_id + '</td>' +
                 '<td>' + selectedText + '</td>' +
                 '<td class="text-right">' +
-                '<button type="button" class="btn btn-danger btn-sm emp-delete">' +
+                '<button type="button" class="btn btn-danger btn-sm emp-delete" data-new="1">' +
                 '<i class="fas fa-trash-alt"></i>' +
                 '</button>' +
                 '</td>' +
-                '<td class="d-none">NewData</td>' +
                 '</tr>');
 
             $('#emp_employee').val(null).trigger('change');
         });
 
-        // Save new employees
+        // Track removed DB employee IDs
+        var removedEmpIds = [];
+
+        // Remove employee row from modal table
+        $(document).on('click', '.emp-delete', function() {
+            var btn = $(this);
+            var dbId = btn.data('id');
+            if (dbId) {
+                removedEmpIds.push(dbId);
+            }
+            btn.closest('tr').remove();
+        });
+
+        // Save employees
         $('#emp_action_button').click(function(e) {
             e.preventDefault();
             $('#emp_action_button').prop('disabled', true).html('<i class="fas fa-circle-notch fa-spin mr-2"></i>Processing');
 
-            var jsonObj = [];
+            var newEmps = [];
             $("#emplistbody tr").each(function() {
-                var cells = $(this).find('td');
-                var lastCell = cells.last().text().trim();
-                if (lastCell === 'NewData') {
-                    var item = {};
-                    item["col_1"] = cells.eq(0).text();
-                    item["col_4"] = 'NewData';
-                    jsonObj.push(item);
+                var btn = $(this).find('.emp-delete');
+                if (btn.data('new') == '1') {
+                    var cells = $(this).find('td');
+                    newEmps.push({ col_1: cells.eq(0).text().trim() });
                 }
             });
 
-            if (jsonObj.length === 0) {
+            if (removedEmpIds.length === 0 && newEmps.length === 0) {
                 $('#emp_action_button').prop('disabled', false).html('<i class="fas fa-plus"></i>&nbsp;Save');
                 const actionObj = {
                     icon: 'fas fa-info-circle',
                     title: '',
-                    message: 'No new employees to add.',
+                    message: 'No changes to save.',
                     url: '',
                     target: '_blank',
                     type: 'info'
@@ -762,8 +772,9 @@
                 data: {
                     _token: '{{ csrf_token() }}',
                     detailsid: $('#emp_detailsid').val(),
-                    empData: JSON.stringify(jsonObj),
-                    action: 'Add'
+                    empData: JSON.stringify(newEmps),
+                    removedIds: JSON.stringify(removedEmpIds),
+                    action: 'Save'
                 },
                 dataType: "json",
                 success: function(data) {
@@ -780,10 +791,11 @@
                         action(JSON.stringify(actionObj));
                     }
                     if (data.success) {
+                        removedEmpIds = [];
                         const actionObj = {
                             icon: 'fas fa-save',
                             title: '',
-                            message: data.success,
+                            message: 'Employees Updated successfully',
                             url: '',
                             target: '_blank',
                             type: 'success'
@@ -794,47 +806,17 @@
                 },
                 error: function() {
                     $('#emp_action_button').prop('disabled', false).html('<i class="fas fa-plus"></i>&nbsp;Save');
-                    alert('Something went wrong!');
+                    const actionObj = {
+                        icon: 'fas fa-warning',
+                        title: '',
+                        message: 'Something went wrong!',
+                        url: '',
+                        target: '_blank',
+                        type: 'danger'
+                    };
+                    action(JSON.stringify(actionObj));
                 }
             });
-        });
-
-        // Delete existing employee from allocation
-        $(document).on('click', '.emp-delete', async function() {
-            var btn = $(this);
-            var dbId = btn.data('id');
-
-            if (!dbId) {
-                btn.closest('tr').remove();
-                return;
-            }
-
-            var r = await Otherconfirmation("You want to remove this employee?");
-            if (r == true) {
-                $.ajax({
-                    url: "{{ url('trainingEmpAllocation/destroy') }}/" + dbId,
-                    method: "GET",
-                    success: function(data) {
-                        if (data.success) {
-                            btn.closest('tr').remove();
-                            const actionObj = {
-                                icon: 'fas fa-trash-alt',
-                                title: '',
-                                message: data.success,
-                                url: '',
-                                target: '_blank',
-                                type: 'danger'
-                            };
-                            action(JSON.stringify(actionObj));
-                        } else if (data.error) {
-                            alert(data.error);
-                        }
-                    },
-                    error: function() {
-                        alert('Failed to delete employee');
-                    }
-                });
-            }
         });
 
     });

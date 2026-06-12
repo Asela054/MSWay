@@ -110,7 +110,7 @@ class TrainingSummaryController extends Controller
         $query = DB::table('training_emp_allocations as tea')
             ->join('employees as e',             'e.emp_id', '=', 'tea.emp_id')
             ->join('training_allocations as ta', 'ta.id',    '=', 'tea.allocation_id')
-            ->where('tea.status', '>=', 0)
+            ->where('tea.status', 1)
             ->select(
                 'tea.id',
                 'tea.emp_id',
