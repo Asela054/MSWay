@@ -92,11 +92,11 @@ class TrainingAllocationController extends Controller
         if (request()->ajax()) {
             $data = TrainingAllocation::findOrFail($id);
             $sessions = DB::table('training_sessions')
-                ->leftJoin('employees', 'training_sessions.trainer_id', '=', 'employees.id')
+                ->leftJoin('employees', 'training_sessions.trainer_id', '=', 'employees.emp_id')
                 ->where('training_sessions.allocation_id', $id)
                 ->select(
                     'training_sessions.*',
-                    DB::raw("COALESCE(employees.calling_name, '') as trainer_name")
+                    DB::raw("COALESCE(CONCAT(employees.emp_name_with_initial, ' - ', employees.calling_name), '') as trainer_name")
                 )
                 ->get();
 
@@ -208,7 +208,7 @@ class TrainingAllocationController extends Controller
             ->select(
                 'training_emp_allocations.id',
                 'training_emp_allocations.emp_id',
-                DB::raw("CONCAT(COALESCE(training_emp_allocations.emp_id,''), ' - ', COALESCE(employees.calling_name,'')) as employee_display")
+                DB::raw("COALESCE(employees.emp_name_with_initial,'') as employee_display")
             )
             ->get();
 
