@@ -282,6 +282,16 @@ class ERPEmployeeAllocationController extends Controller
                 $in_datetime  = (!empty($in_date) && !empty($in_time))  ? $in_date . ' ' . $in_time  : null;
                 $out_datetime = (!empty($out_date) && !empty($out_time)) ? $out_date . ' ' . $out_time : null;
 
+                $existing = EmployeeAllocation::where('emp_id', $emp_id)
+                    ->where('date', $date)
+                    ->first();
+
+                if ($existing) {
+                    $errors[] = "Line {$lineNumber}: Record already exists for Employee {$emp_id} on {$date}.";
+                    $lineNumber++;
+                    continue;
+                }
+
                 try {
                     EmployeeAllocation::create([
                         'shift_id' => $shift_id,

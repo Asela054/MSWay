@@ -473,9 +473,9 @@
                     if (res.status == 1) {
                         var html = '';
                         if (res.errors && res.errors.length > 0) {
-                            errhtml = '<div class="alert alert-warning"><strong>Some rows had issues:</strong><br>' + res.errors.join('<br>') + '</div>';
+                            html = '<div class="alert alert-warning"><strong>Some rows had issues:</strong><br>' + res.errors.join('<br>') + '</div>';
                         }
-                        $('#upload_response').html(errhtml);
+                        $('#upload_response').html(html);
                         Swal.fire({
                             position: "top-end",
                             icon: 'success',
