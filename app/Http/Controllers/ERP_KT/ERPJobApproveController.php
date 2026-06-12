@@ -39,6 +39,19 @@ class ERPJobApproveController extends Controller
         $from_date     = $request->get('from_date');
         $to_date       = $request->get('to_date');
 
+        // SQL expression: hours of overlap between job time and employee's shift time
+        $shiftHoursSql = "
+            GREATEST(TIMESTAMPDIFF(MINUTE,
+                GREATEST(i.start_from, CONCAT(DATE(i.start_from), ' ', st.onduty_time)),
+                LEAST(i.end_at,
+                    CASE WHEN st.offduty_time < st.onduty_time
+                         THEN DATE_ADD(CONCAT(DATE(i.start_from), ' ', st.offduty_time), INTERVAL 1 DAY)
+                         ELSE CONCAT(DATE(i.start_from), ' ', st.offduty_time)
+                    END
+                )
+            ), 0) / 60
+        ";
+
         $query = DB::table('kt_job_details as d')
             ->join('kt_job_inquiry as i', 'i.id', '=', 'd.job_id')
             ->leftJoin('kt_customer as c', 'c.id', '=', 'i.customer_id')
@@ -47,6 +60,7 @@ class ERPJobApproveController extends Controller
             ->leftJoin('employees as e', 'e.emp_id', '=', 'd.emp_id')
             ->leftJoin('job_titles as jt', 'jt.id', '=', 'd.job_title')
             ->leftJoin('kt_special_rate as sr', 'sr.emp_id', '=', 'e.emp_id')
+            ->leftJoin('shift_types as st', 'st.id', '=', 'e.emp_shift')
             ->select(
                 'd.id',
                 'jt.title as job_title',
@@ -57,6 +71,7 @@ class ERPJobApproveController extends Controller
                 'c.name as customer_name',
                 'idet.inquiry as inquiry',
                 DB::raw('ROUND(TIMESTAMPDIFF(MINUTE, i.start_from, i.end_at) / 60, 2) as reading_hours'),
+                DB::raw('ROUND((' . $shiftHoursSql . '), 2) as incentive_hours'),
                 DB::raw('
                     CASE
                         WHEN EXISTS (
@@ -64,7 +79,7 @@ class ERPJobApproveController extends Controller
                             WHERE kt_special_rate.emp_id = e.emp_id
                             AND kt_special_rate.machine_id = d.machine_id
                         )
-                            THEN ROUND((TIMESTAMPDIFF(MINUTE, i.start_from, i.end_at) / 60) * (
+                            THEN ROUND((' . $shiftHoursSql . ') * (
                                 SELECT rate FROM kt_special_rate
                                 WHERE kt_special_rate.emp_id = e.emp_id
                                 AND kt_special_rate.machine_id = d.machine_id
@@ -75,16 +90,16 @@ class ERPJobApproveController extends Controller
                             WHERE kt_special_rate.emp_id = e.emp_id
                             AND kt_special_rate.machine_id = 0
                         )
-                            THEN ROUND((TIMESTAMPDIFF(MINUTE, i.start_from, i.end_at) / 60) * (
+                            THEN ROUND((' . $shiftHoursSql . ') * (
                                 SELECT rate FROM kt_special_rate
                                 WHERE kt_special_rate.emp_id = e.emp_id
                                 AND kt_special_rate.machine_id = 0
                                 LIMIT 1
                             ), 2)
                         WHEN jt.title = "OPERATOR"
-                            THEN ROUND((TIMESTAMPDIFF(MINUTE, i.start_from, i.end_at) / 60) * m.operator_rate, 2)
+                            THEN ROUND((' . $shiftHoursSql . ') * m.operator_rate, 2)
                         WHEN jt.title = "HELPER"
-                            THEN ROUND((TIMESTAMPDIFF(MINUTE, i.start_from, i.end_at) / 60) * m.helper_rate, 2)
+                            THEN ROUND((' . $shiftHoursSql . ') * m.helper_rate, 2)
                         ELSE 0
                     END as incentive
                 ')
@@ -204,12 +219,9 @@ class ERPJobApproveController extends Controller
                     'date'      => $startFrom->toDateString(),
                     'timestamp' => $startFrom->toDateTimeString(),
                 ];
-                $timestampsToSave[] = [
-                    'emp_id'    => $empId,
-                    'date'      => $endAt->toDateString(),
-                    'timestamp' => $endAt->toDateTimeString(),
-                ];
-            } elseif ($endOutsideShift) {
+            }
+
+            if ($endOutsideShift) {
                 $timestampsToSave[] = [
                     'emp_id'    => $empId,
                     'date'      => $endAt->toDateString(),
@@ -230,6 +242,7 @@ class ERPJobApproveController extends Controller
                         'date'      => $att['date'],
                         'timestamp' => $att['timestamp'],
                         'location'  => $jobDetail->emp_location,
+                        'created_at' => $current_date_time,
                     ]);
                 }
             }
