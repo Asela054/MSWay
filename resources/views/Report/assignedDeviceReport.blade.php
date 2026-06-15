@@ -196,7 +196,7 @@ $(document).ready(function() {
                   data: {'company':company, 'department':department},
             },
             columns: [
-                { data: 'emp_id' },
+                { data: 'employee_id' },
                 { data: 'employee_display' },
                 { data: 'dept_name' },
                 { data: 'device_type' },
