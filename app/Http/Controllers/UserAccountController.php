@@ -89,7 +89,8 @@ class UserAccountController extends Controller
 		$payment_period=PaymentPeriod::orderBy('id', 'desc')->get();
 		
         $employees = Employee::where('leave_approve_person', 1)->get();
-        return view('UserAccountSummery.useraccountsummery',compact('emprecordid','emp_id','emp_location','employee','leavetype','emp_name_with_initial','calling_name','payment_period','employees', 'emp_company'));
+        $branches = DB::table('branches')->select('id','location')->get();
+        return view('UserAccountSummery.useraccountsummery',compact('emprecordid','emp_id','emp_location','employee','leavetype','emp_name_with_initial','calling_name','payment_period','employees', 'emp_company', 'branches'));
     }
 
     public function get_employee_monthlysummery(Request $request)
@@ -1064,6 +1065,57 @@ class UserAccountController extends Controller
         }
 
 
+    }
+
+    //get branch coordinates
+    public function getBranchCoords($id)
+    {
+        $branch = DB::table('branches')->where('id', $id)->select('id', 'location', 'latitude', 'longitude')->first();
+        if (!$branch) {
+            return response()->json(['error' => 'Branch not found'], 404);
+        }
+        return response()->json($branch);
+    }
+
+    //clock in and clock out function
+    public function markAttendanceClock(Request $request)
+    {
+        $permission = Auth::user()->can('user-account-summery-list');
+        if (!$permission) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $emp_id   = $request->emp_id;
+        $location = $request->location_id;
+        $today    = \Carbon\Carbon::now()->toDateString();
+        $now      = \Carbon\Carbon::now()->toDateTimeString();
+
+        $todayRows = DB::table('attendances')
+            ->where('uid', $emp_id)
+            ->where('date', $today)
+            ->count();
+
+        if ($todayRows >= 2) {
+            return response()->json(['error' => 'Already clocked in and out today.'], 422);
+        }
+
+        DB::table('attendances')->insert([
+            'uid'       => $emp_id,
+            'emp_id'    => $emp_id,
+            'location'  => $location,
+            'timestamp' => $now,
+            'date'      => $today,
+            'state'     => ($todayRows === 0) ? 1 : 0,
+            'type'      => 255,
+            'devicesno' => 'WEB',
+            'approved'  => 0,
+            'created_at'=> $now,
+            'updated_at'=> $now,
+        ]);
+
+        $action = ($todayRows === 0) ? 'clockin' : 'clockout';
+
+        return response()->json(['success' => true, 'action' => $action]);
     }
 
 }
