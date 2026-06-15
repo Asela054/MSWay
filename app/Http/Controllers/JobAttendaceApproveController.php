@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Joballocation;
 use App\Jobattendance;
+use App\Services\AttendancePolicyService;
 use Auth;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -14,6 +15,16 @@ use Datatables;
 
 class JobAttendaceApproveController extends Controller
 {
+    protected $attendancePolicyService;
+
+    public function __construct(AttendancePolicyService $attendancePolicyService)
+    {
+        $this->middleware('auth');
+
+        $this->attendancePolicyService = $attendancePolicyService;
+    }
+
+
      public function index()
     {
           $permission = \Auth::user()->can('Job-Attendance-Approve-list');
@@ -53,7 +64,7 @@ class JobAttendaceApproveController extends Controller
             $id = $row['id'];
             $empid = $row['empid'];
             $emp_name = $row['emp_name'];
-            $date = $row['date'];
+            $attendance_date = $row['date'];
             $on_time = $row['on_time'];
             $off_time = $row['off_time'];
             $location_id = $row['location_id'];
@@ -68,37 +79,21 @@ class JobAttendaceApproveController extends Controller
             Jobattendance::where('id', $id)
             ->update($data);
 
-            // on time
-            $data = array(
-                'emp_id' =>  $empid,
-                'uid' =>  $empid,
-                'state' => 1,
-                'timestamp' => $on_time,
-                'date' => $date,
-                'approved' => 0,
-                'type' => 255,
-                'devicesno' => '-',
-                'location' => $location_id,
-                'created_at' => $current_date_time,
-                'updated_at' => $current_date_time
-            );
-            DB::table('attendances')->insert($data);
 
-            //off time
-            $data = array(
-                'emp_id' => $empid,
-                'uid' => $empid,
-                'state' => 1,
-                'timestamp' => $off_time,
-                'date' => $date,
-                'approved' => 0,
-                'type' => 255,
-                'devicesno' => '-',
-                'location' => $location_id,
-                'created_at' => $current_date_time,
-                'updated_at' => $current_date_time
-            );
-            DB::table('attendances')->insert($data);
+             $employees = DB::table('employees')
+            ->select('employees.emp_location as location')
+            ->where('employees.emp_id', $empid)
+            ->first();
+
+            if ($on_time != '') {
+               $this->attendancePolicyService->attendanceInsertsingle_dep($empid, $on_time,$employees->location , $attendance_date);
+            }
+
+            if ($off_time != '') {
+                $this->attendancePolicyService->attendanceInsertsingle_dep($empid, $off_time,$employees->location , $attendance_date);
+            
+            }
+            
         }
 
         return response()->json(['success' => 'Location Attendance is successfully Approved']);
