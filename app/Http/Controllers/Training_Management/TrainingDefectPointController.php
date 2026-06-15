@@ -50,7 +50,8 @@ class TrainingDefectPointController extends Controller
         $employees = DB::table('training_emp_allocations as tea')
             ->join('employees', 'employees.emp_id', '=', 'tea.emp_id')
             ->where('tea.allocation_id', $allocation_id)
-            ->select('employees.emp_id as id', DB::raw("CONCAT(employees.emp_name_with_initial, ' ', employees.calling_name) as text"))
+            ->where('tea.status', 1)
+            ->select('employees.emp_id as id', DB::raw("CONCAT(employees.emp_name_with_initial, ' - ', employees.calling_name) as text"))
             ->get();
         return response()->json(['results' => $employees]);
     }

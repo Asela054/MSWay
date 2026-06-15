@@ -27,11 +27,8 @@ class TrainingEmployeeAllocationController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        $empData = json_decode($request->input('empData'), true);
-
-        if (empty($empData)) {
-            return response()->json(['errors' => ['No employees selected']]);
-        }
+        $empData   = json_decode($request->input('empData', '[]'), true) ?? [];
+        $removedIds = json_decode($request->input('removedIds', '[]'), true) ?? [];
 
         $allocation_id = $request->input('detailsid');
 
@@ -42,6 +39,12 @@ class TrainingEmployeeAllocationController extends Controller
         try {
             DB::beginTransaction();
 
+            // Removed(Status = 3) employees
+            foreach ($removedIds as $rid) {
+                TrainingEmpAllocation::where('id', $rid)->update(['status' => 3]);
+            }
+
+            // Insert new employees
             foreach ($empData as $emp) {
                 $emp_id = $emp['col_1'];
 
@@ -60,10 +63,10 @@ class TrainingEmployeeAllocationController extends Controller
             }
 
             DB::commit();
-            return response()->json(['success' => 'Employees allocated successfully.']);
+            return response()->json(['success' => 'Employees updated successfully.']);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['errors' => ['Failed to allocate employees: ' . $e->getMessage()]]);
+            return response()->json(['errors' => ['Failed to update employees: ' . $e->getMessage()]]);
         }
     }
 
