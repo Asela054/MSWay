@@ -21,82 +21,198 @@ class EmployeeRosterDetailsController extends Controller
         $this->middleware('auth');
     }
    
-    public function fullrosterstore(Request $request)
-    {
+    // public function fullrosterstore(Request $request)
+    // {
+    //     $user = Auth::user();
+    //     $permission = $user->can('employee-roster');
+    //     if (!$permission) {
+    //          return response()->json(['error' => 'UnAuthorized']);
+    //     }
+
+    //      $shifts = $request->json('shifts');
+
+    //     // Group incoming shifts by emp_id + date
+    //         $grouped = [];
+    //         foreach ($shifts as $roster) {
+    //             $key = $roster['emp_id'] . '_' . $roster['date'];
+
+    //             if (!isset($grouped[$key])) {
+    //                 $grouped[$key] = [
+    //                     'emp_id'    => $roster['emp_id'],
+    //                     'date'      => $roster['date'],
+    //                     'shift_ids' => []
+    //                 ];
+    //             }
+
+    //             // Only add real shift IDs, skip null sentinels
+    //             if (!is_null($roster['shift'])) {
+    //                 $grouped[$key]['shift_ids'][] = $roster['shift'];
+    //             }
+    //         }
+
+
+    //      foreach ($grouped as $item) {
+    //         $empId  = $item['emp_id'];
+    //         $date   = $item['date'];
+    //         $newIds = $item['shift_ids'];
+
+    //         // Get all existing records for this emp + date
+    //         $existingRecords = EmployeeRosterDetails::where('emp_id', $empId)
+    //             ->where('work_date', $date)
+    //             ->get();
+
+    //         $existingIds = array_map('strval', $existingRecords->pluck('shift_id')->toArray());
+    //         $newIdsStr   = array_map('strval', $newIds);
+
+    //         // Log + delete shifts that were removed
+    //         $toDelete = array_diff($existingIds, $newIdsStr);
+    //         foreach ($toDelete as $oldShiftId) {
+    //             ShiftChangeLog::create([
+    //                 'emp_id'       => $empId,
+    //                 'work_date'    => $date,
+    //                 'old_shift_id' => $oldShiftId,
+    //                 'new_shift_id' => null,
+    //                 'changed_by'   => Auth::id() ?? 1,
+    //             ]);
+    //            EmployeeRosterDetails::where('emp_id', $empId)
+    //                                 ->where('work_date', $date)
+    //                                 ->delete();
+    //         }
+
+    //         // Insert newly added shifts
+    //         $toAdd = array_diff($newIdsStr, $existingIds);
+    //         foreach ($toAdd as $newShiftId) {
+    //             ShiftChangeLog::create([
+    //                 'emp_id'       => $empId,
+    //                 'work_date'    => $date,
+    //                 'old_shift_id' => null,
+    //                 'new_shift_id' => $newShiftId,
+    //                 'changed_by'   => Auth::id() ?? 1,
+    //             ]);
+    //             EmployeeRosterDetails::create([
+    //                 'emp_id'    => $empId,
+    //                 'work_date' => $date,
+    //                 'shift_id'  => $newShiftId,
+    //             ]);
+    //         }
+    //     }
+    //      return response()->json(['success' => 'Roster Inserted Successfully!']);
+    // }
+
+    public function fullrosterstore(Request $request) {
         $user = Auth::user();
-        $permission = $user->can('employee-roster');
-        if (!$permission) {
-             return response()->json(['error' => 'UnAuthorized']);
+        if (!$user->can('employee-roster')) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized']);
         }
 
-         $shifts = $request->json('shifts');
+        $rosterData = json_decode($request->get('roster_data'), true);
 
-        // Group incoming shifts by emp_id + date
-            $grouped = [];
-            foreach ($shifts as $roster) {
-                $key = $roster['emp_id'] . '_' . $roster['date'];
+        if (empty($rosterData)) {
+            return response()->json(['success' => false, 'message' => 'No data received']);
+        }
 
-                if (!isset($grouped[$key])) {
-                    $grouped[$key] = [
-                        'emp_id'    => $roster['emp_id'],
-                        'date'      => $roster['date'],
-                        'shift_ids' => []
-                    ];
-                }
+        try {
+            $now = Carbon::now();
+            $changedBy = Auth::id();
 
-                // Only add real shift IDs, skip null sentinels
-                if (!is_null($roster['shift'])) {
-                    $grouped[$key]['shift_ids'][] = $roster['shift'];
-                }
+            // Group new shifts by emp_id + work_date
+            // $newShiftMap[emp_id][work_date] = [shift_id, shift_id, ...]
+            $newShiftMap = [];
+            foreach ($rosterData as $row) {
+                $newShiftMap[$row['emp_id']][$row['work_date']][] = $row['shift_id'];
             }
 
+            // Get all affected emp_ids and dates
+            $empIds    = array_keys($newShiftMap);
+            $allDates  = [];
+            foreach ($newShiftMap as $empId => $dates) {
+                $allDates = array_merge($allDates, array_keys($dates));
+            }
+            $allDates = array_unique($allDates);
 
-         foreach ($grouped as $item) {
-            $empId  = $item['emp_id'];
-            $date   = $item['date'];
-            $newIds = $item['shift_ids'];
-
-            // Get all existing records for this emp + date
-            $existingRecords = EmployeeRosterDetails::where('emp_id', $empId)
-                ->where('work_date', $date)
+            // Fetch existing roster records for affected emp+date combinations
+            $existingRecords = DB::table('employee_roster_details')
+                ->whereIn('emp_id', $empIds)
+                ->whereIn('work_date', $allDates)
                 ->get();
 
-            $existingIds = array_map('strval', $existingRecords->pluck('shift_id')->toArray());
-            $newIdsStr   = array_map('strval', $newIds);
-
-            // Log + delete shifts that were removed
-            $toDelete = array_diff($existingIds, $newIdsStr);
-            foreach ($toDelete as $oldShiftId) {
-                ShiftChangeLog::create([
-                    'emp_id'       => $empId,
-                    'work_date'    => $date,
-                    'old_shift_id' => $oldShiftId,
-                    'new_shift_id' => null,
-                    'changed_by'   => Auth::id() ?? 1,
-                ]);
-               EmployeeRosterDetails::where('emp_id', $empId)
-                                    ->where('work_date', $date)
-                                    ->delete();
+            // Build old shift map
+            // $oldShiftMap[emp_id][work_date] = [shift_id, shift_id, ...]
+            $oldShiftMap = [];
+            foreach ($existingRecords as $record) {
+                $workDate = Carbon::parse($record->work_date)->toDateString();
+                $oldShiftMap[$record->emp_id][$workDate][] = $record->shift_id;
             }
 
-            // Insert newly added shifts
-            $toAdd = array_diff($newIdsStr, $existingIds);
-            foreach ($toAdd as $newShiftId) {
-                ShiftChangeLog::create([
-                    'emp_id'       => $empId,
-                    'work_date'    => $date,
-                    'old_shift_id' => null,
-                    'new_shift_id' => $newShiftId,
-                    'changed_by'   => Auth::id() ?? 1,
-                ]);
-                EmployeeRosterDetails::create([
-                    'emp_id'    => $empId,
-                    'work_date' => $date,
-                    'shift_id'  => $newShiftId,
-                ]);
+            // Build log entries — compare old vs new per emp+date
+            $logData = [];
+            foreach ($newShiftMap as $empId => $dates) {
+                foreach ($dates as $workDate => $newShiftIds) {
+                    $oldShiftIds = array_values($oldShiftMap[$empId][$workDate] ?? []);
+                    $newShiftIds = array_values($newShiftIds);
+
+                    $maxCount = max(count($oldShiftIds), count($newShiftIds));
+
+                    for ($i = 0; $i < $maxCount; $i++) {
+                        $oldShiftId = $oldShiftIds[$i] ?? null;
+                        $newShiftId = $newShiftIds[$i] ?? null;
+
+                        $logData[] = [
+                            'emp_id'       => $empId,
+                            'work_date'    => $workDate,
+                            'old_shift_id' => $oldShiftId,
+                            'new_shift_id' => $newShiftId,
+                            'changed_by'   => $changedBy,
+                            'created_at'   => $now,
+                            'updated_at'   => $now,
+                        ];
+                    }
+                }
             }
+
+            // Delete existing records for affected emp+date
+            foreach ($newShiftMap as $empId => $dates) {
+                DB::table('employee_roster_details')
+                    ->where('emp_id', $empId)
+                    ->whereIn('work_date', array_keys($dates))
+                    ->delete();
+            }
+
+            // Bulk insert new roster
+            $insertData = [];
+            foreach ($rosterData as $row) {
+                $insertData[] = [
+                    'shift_id'          => $row['shift_id'],
+                    'emp_id'            => $row['emp_id'],
+                    'work_date'         => $row['work_date'],
+                    'scheduling_status' => null,
+                    'remark'            => null,
+                    'created_at'        => $now,
+                    'updated_at'        => $now,
+                ];
+            }
+
+            DB::table('employee_roster_details')->insert($insertData);
+
+            // Bulk insert log (only if there are changes)
+            if (!empty($logData)) {
+                DB::table('roster_shift_log')->insert($logData);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Roster saved successfully.',
+                'count'   => count($insertData),
+                'logs'    => count($logData)
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ]);
         }
-         return response()->json(['success' => 'Roster Inserted Successfully!']);
     }
 
     public function getViewRosterData(Request $request)

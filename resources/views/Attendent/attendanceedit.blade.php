@@ -341,13 +341,13 @@
                                 <div class="col">
                                     <div class="loading"></div>
                                     <div class="table-responsive mt-2">
-                                        <table class="table table-sm table-bordered table-striped table-hover" id="table_month">
+                                        <table class="table table-sm table-bordered table-striped table-hover nowrap" id="table_month">
                                             <thead>
                                             <tr>
                                                 <th>#</th>
                                                 <th>DAY</th>
-                                                <th>IN TIME</th>
-                                                <th>OUT TIME</th>
+                                                <th width='35%'>IN TIME</th>
+                                                <th width='35%'>OUT TIME</th>
                                             </tr>
                                             </thead>
                                             <tbody>
@@ -809,22 +809,174 @@
                 }
             });
 
+            // function fill_month_table(month_id){
+            //     //get month attendances for the selected employee
+
+            //     // $('#bulk_response').html('<i class="fa fa-spinner fa-spin"></i> loading...');
+
+            //     let save_btn=$("#edit_record_month");
+            //     let btn_prev_text = save_btn.html();
+            //     save_btn.prop("disabled", true);
+            //     save_btn.html('<i class="fa fa-spinner fa-spin"></i> loading...' );
+            //     let url_text = '{{ url("/attendance_list_for_month_edit") }}';
+
+            //     $.ajaxSetup({
+            //         headers: {
+            //             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            //         }
+            //     })
+            //     $.ajax({
+            //         url: url_text,
+            //         type: 'POST',
+            //         data: {
+            //             'month': month_id,
+            //             'emp': emp.val(),
+            //         },
+            //         success: function(res) {
+            //             if (res.status == 1) {
+
+            //                 let month_n_y_arr = month_id.split('-');
+            //                 let num_of_days = daysInMonth(month_n_y_arr[1] ,month_n_y_arr[0]);
+
+            //                 let t = $('#table_month').DataTable({
+            //                     "pageLength": 50,
+            //                     "bDestroy": true,
+            //                 });
+            //                 t.clear();
+
+            //                 for(let i = 1; i <= num_of_days; i++)
+            //                 {
+            //                     let day = get_day(month_n_y_arr[0], month_n_y_arr[1] ,i);
+            //                     //console.log( month_n_y_arr[0]+' : '+ month_n_y_arr[1]+ ' : ' + i + ' : ' +day);
+            //                     let year = month_n_y_arr[0];
+            //                         let month = String(month_n_y_arr[1]).padStart(2, '0');
+            //                         let date = String(i).padStart(2, '0');
+            //                         let formattedDate = `${year}-${month}-${date}`;
+                                    
+            //                     t.row.add([
+            //                         i,
+            //                         day,
+            //                         '<input type="datetime-local" class="form-control form-control-sm in_date_time" placeholder="YYYY-MM-DD HH:MM" id="in_'+i+'" name="in_time[]" value="' + formattedDate + 'T00:00"/> ' +
+            //                         '<input type="hidden" value="'+i+'" name="date[]" />' +
+            //                         '<input type="hidden" value="" id="uid_'+i+'" name="uid[]" />' +
+            //                         '<input type="hidden" value="" id="emp_id_'+i+'" name="emp_id[]" />' +
+            //                         '<input type="hidden" value="'+month_id+'-'+i+'" id="date_'+i+'" name="date_e[]" />' +
+            //                         '<input type="hidden" value="" id="existing_time_stamp_in_'+i+'" name="existing_time_stamp_in[]" />' +
+            //                         '<input type="hidden" value="" id="existing_time_stamp_out_'+i+'" name="existing_time_stamp_out[]" />'+
+            //                         '<input type="hidden" value="" id="existing_time_stamp_in_rfc_'+i+'" name="existing_time_stamp_in_rfc[]" />'+
+            //                         '<input type="hidden" value="" id="existing_time_stamp_out_rfc_'+i+'" name="existing_time_stamp_out_rfc[]" />',
+            //                         '<input type="datetime-local" class="form-control form-control-sm out_date_time" placeholder="YYYY-MM-DD HH:MM" id="out_'+i+'" name="out_time[]" value="' + formattedDate + 'T00:00"/> '
+            //                     ]).node().id = i;
+            //                     t.draw( false );
+            //                 }
+
+            //                 //loop through the response and fill the table
+            //                 let attendances = res.attendances;
+            //                 $.each(attendances, function(key,value) {
+            //                     let date_no_arr = value.date.split(' ');
+            //                     let date_only_arr = date_no_arr[0].split('-');
+            //                     let date_no = parseInt(date_only_arr[2]);
+
+            //                     let in_selector = $('#in_'+date_no);
+            //                     let out_selector = $('#out_'+date_no);
+            //                     let uid_selector = $('#uid_'+date_no);
+            //                     let date_selector = $('#date_'+date_no);
+            //                     let existing_time_stamp_in_selector = $('#existing_time_stamp_in_'+date_no);
+            //                     let existing_time_stamp_out_selector = $('#existing_time_stamp_out_'+date_no);
+            //                     let existing_time_stamp_in_rfc_selector = $('#existing_time_stamp_in_rfc_'+date_no);
+            //                     let existing_time_stamp_out_rfc_selector = $('#existing_time_stamp_out_rfc_'+date_no);
+            //                     let emp_id_selector = $('#emp_id_'+date_no);
+
+            //                     uid_selector.val(value.uid);
+            //                     date_selector.val(value.date);
+            //                     emp_id_selector.val(value.emp_id);
+
+            //                     if(value.firsttimestamp != ''){
+            //                         in_selector.val(value.firsttime_24);
+            //                         existing_time_stamp_in_selector.val(value.firsttime_24);
+            //                         existing_time_stamp_in_rfc_selector.val(value.firsttime_rfc);
+            //                     }
+
+            //                     if(value.lasttimestamp != ''){
+            //                         out_selector.val(value.lasttime_24);
+            //                         existing_time_stamp_out_selector.val(value.lasttime_24);
+            //                         existing_time_stamp_out_rfc_selector.val(value.lasttime_rfc);
+            //                     }
+
+            //                      $('#in_' + date_no).on('change', function() {
+            //                             checkForChanges(date_no.toString());
+            //                         });
+                                    
+            //                         $('#out_' + date_no).on('change', function() {
+            //                             checkForChanges(date_no.toString());
+            //                         });
+
+            //                 });
+
+            //                 for (let i = 1; i <= num_of_days; i++) {
+            //                         $('#in_' + i).on('change', function() {
+            //                             checkForChanges(i.toString());
+            //                         });
+                                    
+            //                         $('#out_' + i).on('change', function() {
+            //                             checkForChanges(i.toString());
+            //                         });
+            //                     }
+
+            //                 save_btn.html(btn_prev_text);
+            //                 save_btn.prop("disabled", false);
+
+            //             }else {
+                           
+            //               if (res.errors) {
+            //                 const actionObj = {
+            //                     icon: 'fas fa-warning',
+            //                     title: '',
+            //                     message: 'Record Error',
+            //                     url: '',
+            //                     target: '_blank',
+            //                     type: 'danger'
+            //                 };
+            //                 const actionJSON = JSON.stringify(actionObj, null, 2);
+            //                 action(actionJSON);
+            //             }
+
+
+            //                 save_btn.prop("disabled", false);
+            //                 save_btn.html(btn_prev_text);
+            //             }
+            //         },
+            //         error: function(res) {
+            //                if (data.errors) {
+            //                 const actionObj = {
+            //                     icon: 'fas fa-warning',
+            //                     title: '',
+            //                     message: 'Record Error',
+            //                     url: '',
+            //                     target: '_blank',
+            //                     type: 'danger'
+            //                 };
+            //                 const actionJSON = JSON.stringify(actionObj, null, 2);
+            //                 action(actionJSON);
+            //             }
+            //         }
+            //     });
+
+            // }
+
             function fill_month_table(month_id){
-                //get month attendances for the selected employee
-
-                // $('#bulk_response').html('<i class="fa fa-spinner fa-spin"></i> loading...');
-
-                let save_btn=$("#edit_record_month");
+                let save_btn = $("#edit_record_month");
                 let btn_prev_text = save_btn.html();
                 save_btn.prop("disabled", true);
-                save_btn.html('<i class="fa fa-spinner fa-spin"></i> loading...' );
+                save_btn.html('<i class="fa fa-spinner fa-spin"></i> loading...');
                 let url_text = '{{ url("/attendance_list_for_month_edit") }}';
 
                 $.ajaxSetup({
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     }
-                })
+                });
+
                 $.ajax({
                     url: url_text,
                     type: 'POST',
@@ -836,118 +988,158 @@
                         if (res.status == 1) {
 
                             let month_n_y_arr = month_id.split('-');
-                            let num_of_days = daysInMonth(month_n_y_arr[1] ,month_n_y_arr[0]);
+                            let num_of_days   = daysInMonth(month_n_y_arr[1], month_n_y_arr[0]);
 
                             let t = $('#table_month').DataTable({
                                 "pageLength": 50,
                                 "bDestroy": true,
+                                "createdRow": function(row, data, dataIndex) {
+                                    $('td', row).attr('nowrap', 'nowrap');
+                                }
                             });
                             t.clear();
 
-                            for(let i = 1; i <= num_of_days; i++)
-                            {
-                                let day = get_day(month_n_y_arr[0], month_n_y_arr[1] ,i);
-                                //console.log( month_n_y_arr[0]+' : '+ month_n_y_arr[1]+ ' : ' + i + ' : ' +day);
-                                let year = month_n_y_arr[0];
-                                    let month = String(month_n_y_arr[1]).padStart(2, '0');
-                                    let date = String(i).padStart(2, '0');
-                                    let formattedDate = `${year}-${month}-${date}`;
-                                    
+                            // Build rows
+                            for (let i = 1; i <= num_of_days; i++) {
+                                let day          = get_day(month_n_y_arr[0], month_n_y_arr[1], i);
+                                let year         = month_n_y_arr[0];
+                                let month        = String(month_n_y_arr[1]).padStart(2, '0');
+                                let date         = String(i).padStart(2, '0');
+                                let formattedDate = `${year}-${month}-${date}`;
+
                                 t.row.add([
                                     i,
                                     day,
-                                    '<input type="datetime-local" class="form-control form-control-sm in_date_time" placeholder="YYYY-MM-DD HH:MM" id="in_'+i+'" name="in_time[]" value="' + formattedDate + 'T00:00"/> ' +
-                                    '<input type="hidden" value="'+i+'" name="date[]" />' +
-                                    '<input type="hidden" value="" id="uid_'+i+'" name="uid[]" />' +
-                                    '<input type="hidden" value="" id="emp_id_'+i+'" name="emp_id[]" />' +
-                                    '<input type="hidden" value="'+month_id+'-'+i+'" id="date_'+i+'" name="date_e[]" />' +
-                                    '<input type="hidden" value="" id="existing_time_stamp_in_'+i+'" name="existing_time_stamp_in[]" />' +
-                                    '<input type="hidden" value="" id="existing_time_stamp_out_'+i+'" name="existing_time_stamp_out[]" />'+
-                                    '<input type="hidden" value="" id="existing_time_stamp_in_rfc_'+i+'" name="existing_time_stamp_in_rfc[]" />'+
-                                    '<input type="hidden" value="" id="existing_time_stamp_out_rfc_'+i+'" name="existing_time_stamp_out_rfc[]" />',
-                                    '<input type="datetime-local" class="form-control form-control-sm out_date_time" placeholder="YYYY-MM-DD HH:MM" id="out_'+i+'" name="out_time[]" value="' + formattedDate + 'T00:00"/> '
+
+                                    // IN column - separate date + time inputs
+                                    '<div class="input-group input-group-sm">' +
+                                        '<input type="date" class="form-control form-control-sm in_date" id="in_date_' + i + '" value="' + formattedDate + '"/>' +
+                                        // '<div class="input-group-prepend input-group-append">' +
+                                        //     '<span class="input-group-text px-1"><i class="fa fa-clock-o"></i></span>' +
+                                        // '</div>' +
+                                        '<input type="time" class="form-control form-control-sm in_time_input" id="in_time_' + i + '" value=""/>' +
+                                    '</div>' +
+                                    '<input type="hidden" value="' + i + '" name="date[]" />' +
+                                    '<input type="hidden" value="" id="uid_' + i + '" name="uid[]" />' +
+                                    '<input type="hidden" value="" id="emp_id_' + i + '" name="emp_id[]" />' +
+                                    '<input type="hidden" value="' + month_id + '-' + i + '" id="date_' + i + '" name="date_e[]" />' +
+                                    '<input type="hidden" id="in_' + i + '" name="in_time[]" value="" />' +
+                                    '<input type="hidden" value="" id="existing_time_stamp_in_' + i + '" name="existing_time_stamp_in[]" />' +
+                                    '<input type="hidden" value="" id="existing_time_stamp_out_' + i + '" name="existing_time_stamp_out[]" />' +
+                                    '<input type="hidden" value="" id="existing_time_stamp_in_rfc_' + i + '" name="existing_time_stamp_in_rfc[]" />' +
+                                    '<input type="hidden" value="" id="existing_time_stamp_out_rfc_' + i + '" name="existing_time_stamp_out_rfc[]" />',
+
+                                    // OUT column - separate date + time inputs
+                                    '<div class="input-group input-group-sm">' +
+                                        '<input type="date" class="form-control form-control-sm out_date" id="out_date_' + i + '" value="' + formattedDate + '"/>' +
+                                        // '<div class="input-group-prepend input-group-append">' +
+                                        //     '<span class="input-group-text px-1"><i class="fa fa-clock-o"></i></span>' +
+                                        // '</div>' +
+                                        '<input type="time" class="form-control form-control-sm out_time_input" id="out_time_' + i + '" value=""/>' +
+                                    '</div>' +
+                                    '<input type="hidden" id="out_' + i + '" name="out_time[]" value="" />'
+
                                 ]).node().id = i;
-                                t.draw( false );
+
+                                t.draw(false);
                             }
 
-                            //loop through the response and fill the table
+                            // Fill existing attendance data
                             let attendances = res.attendances;
-                            $.each(attendances, function(key,value) {
-                                let date_no_arr = value.date.split(' ');
+                            $.each(attendances, function(key, value) {
+                                let date_no_arr  = value.date.split(' ');
                                 let date_only_arr = date_no_arr[0].split('-');
-                                let date_no = parseInt(date_only_arr[2]);
+                                let date_no      = parseInt(date_only_arr[2]);
 
-                                let in_selector = $('#in_'+date_no);
-                                let out_selector = $('#out_'+date_no);
-                                let uid_selector = $('#uid_'+date_no);
-                                let date_selector = $('#date_'+date_no);
-                                let existing_time_stamp_in_selector = $('#existing_time_stamp_in_'+date_no);
-                                let existing_time_stamp_out_selector = $('#existing_time_stamp_out_'+date_no);
-                                let existing_time_stamp_in_rfc_selector = $('#existing_time_stamp_in_rfc_'+date_no);
-                                let existing_time_stamp_out_rfc_selector = $('#existing_time_stamp_out_rfc_'+date_no);
-                                let emp_id_selector = $('#emp_id_'+date_no);
+                                let uid_selector                    = $('#uid_' + date_no);
+                                let date_selector                   = $('#date_' + date_no);
+                                let emp_id_selector                 = $('#emp_id_' + date_no);
+                                let existing_time_stamp_in_selector  = $('#existing_time_stamp_in_' + date_no);
+                                let existing_time_stamp_out_selector = $('#existing_time_stamp_out_' + date_no);
+                                let existing_time_stamp_in_rfc_selector  = $('#existing_time_stamp_in_rfc_' + date_no);
+                                let existing_time_stamp_out_rfc_selector = $('#existing_time_stamp_out_rfc_' + date_no);
 
                                 uid_selector.val(value.uid);
                                 date_selector.val(value.date);
                                 emp_id_selector.val(value.emp_id);
 
-                                if(value.firsttimestamp != ''){
-                                    in_selector.val(value.firsttime_24);
+                                // Fill IN date + time
+                                if (value.firsttimestamp != '') {
+                                    let inParts = value.firsttime_24.replace('T', ' ').split(' ');
+                                    let inDate  = inParts[0];
+                                    let inTime  = inParts[1].substring(0, 5);
+
+                                    $('#in_date_' + date_no).val(inDate);
+                                    $('#in_time_' + date_no).val(inTime);
+                                    $('#in_' + date_no).val(inDate + ' ' + inTime + ':00'); // hidden combined
+
                                     existing_time_stamp_in_selector.val(value.firsttime_24);
                                     existing_time_stamp_in_rfc_selector.val(value.firsttime_rfc);
                                 }
 
-                                if(value.lasttimestamp != ''){
-                                    out_selector.val(value.lasttime_24);
+                                // Fill OUT date + time
+                                if (value.lasttimestamp != '') {
+                                    let outParts = value.lasttime_24.replace('T', ' ').split(' ');
+                                    let outDate  = outParts[0];
+                                    let outTime  = outParts[1].substring(0, 5);
+
+                                    $('#out_date_' + date_no).val(outDate);
+                                    $('#out_time_' + date_no).val(outTime);
+                                    $('#out_' + date_no).val(outDate + ' ' + outTime + ':00'); // hidden combined
+
                                     existing_time_stamp_out_selector.val(value.lasttime_24);
                                     existing_time_stamp_out_rfc_selector.val(value.lasttime_rfc);
                                 }
-
-                                 $('#in_' + date_no).on('change', function() {
-                                        checkForChanges(date_no.toString());
-                                    });
-                                    
-                                    $('#out_' + date_no).on('change', function() {
-                                        checkForChanges(date_no.toString());
-                                    });
-
                             });
 
+                            // Sync date+time into hidden combined input
+                            function syncDateTime(i) {
+                                let inDate  = $('#in_date_' + i).val();
+                                let inTime  = $('#in_time_' + i).val() || '00:00';
+                                let outDate = $('#out_date_' + i).val();
+                                let outTime = $('#out_time_' + i).val() || '00:00';
+
+                                if (inDate)  $('#in_' + i).val(inDate + ' ' + inTime + ':00');
+                                if (outDate) $('#out_' + i).val(outDate + ' ' + outTime + ':00');
+
+                                checkForChanges(i.toString());
+                            }
+
+                            // Bind change events for all rows
                             for (let i = 1; i <= num_of_days; i++) {
-                                    $('#in_' + i).on('change', function() {
-                                        checkForChanges(i.toString());
+                                (function(i) {
+                                    $('#in_date_' + i + ', #in_time_' + i).on('change', function() {
+                                        syncDateTime(i);
                                     });
-                                    
-                                    $('#out_' + i).on('change', function() {
-                                        checkForChanges(i.toString());
+                                    $('#out_date_' + i + ', #out_time_' + i).on('change', function() {
+                                        syncDateTime(i);
                                     });
-                                }
+                                })(i);
+                            }
 
                             save_btn.html(btn_prev_text);
                             save_btn.prop("disabled", false);
 
-                        }else {
-                           
-                          if (res.errors) {
-                            const actionObj = {
-                                icon: 'fas fa-warning',
-                                title: '',
-                                message: 'Record Error',
-                                url: '',
-                                target: '_blank',
-                                type: 'danger'
-                            };
-                            const actionJSON = JSON.stringify(actionObj, null, 2);
-                            action(actionJSON);
-                        }
-
+                        } else {
+                            if (res.errors) {
+                                const actionObj = {
+                                    icon: 'fas fa-warning',
+                                    title: '',
+                                    message: 'Record Error',
+                                    url: '',
+                                    target: '_blank',
+                                    type: 'danger'
+                                };
+                                const actionJSON = JSON.stringify(actionObj, null, 2);
+                                action(actionJSON);
+                            }
 
                             save_btn.prop("disabled", false);
                             save_btn.html(btn_prev_text);
                         }
                     },
                     error: function(res) {
-                           if (data.errors) {
+                        if (res.responseJSON && res.responseJSON.errors) {
                             const actionObj = {
                                 icon: 'fas fa-warning',
                                 title: '',
@@ -959,9 +1151,11 @@
                             const actionJSON = JSON.stringify(actionObj, null, 2);
                             action(actionJSON);
                         }
+
+                        save_btn.prop("disabled", false);
+                        save_btn.html(btn_prev_text);
                     }
                 });
-
             }
 
             let changedRecords = [];
@@ -1062,21 +1256,21 @@
                 
                 let url_text = '{{ url("/attendance_update_bulk_submit") }}';
 
-                    console.log('Submitting changed records:', changedRecords);
+                console.log('Submitting changed records:', changedRecords);
 
-               let formData = new FormData();
-               let emp = $('#employee_m').val(); // Get the employee ID from the form
+                let formData = new FormData();
+                let emp = $('#employee_m').val(); // Get the employee ID from the form
     
-                    formData.append('changed_records', JSON.stringify(changedRecords));
-                    formData.append('emp_id', emp); // Add employee ID to form data
-                    formData.append('_token', $('meta[name="csrf-token"]').attr('content'));
-
+                formData.append('changed_records', JSON.stringify(changedRecords));
+                formData.append('emp_id', emp); // Add employee ID to form data
+                formData.append('_token', $('meta[name="csrf-token"]').attr('content'));
+                
                 $.ajax({
                     url: url_text,
                     type: 'POST',
                     contentType: false,
-                processData: false,
-                data: formData,
+                    processData: false,
+                    data: formData,
                     success: function(res) {
                         if (res.status == 1) {
                              const actionObj = {
@@ -2132,48 +2326,48 @@
         }
 
         function formatDateForDateTimeLocal(dateString, type = 'in') {
-    if (!dateString) return '';
-    
-    // If it's already in the right format, return as is
-    if (dateString.includes('T')) {
-        return dateString;
-    }
-    
-    // If it's just a date (YYYY-MM-DD), add time component based on type
-    if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
-        if (type === 'in') {
-            return dateString + 'T08:00'; // 8:00 AM for in-time
-        } else {
-            return dateString + 'T17:00'; // 5:00 PM for out-time
-        }
-    }
-    
-    // Try to parse and format the date
-    try {
-        var date = new Date(dateString);
-        if (!isNaN(date.getTime())) {
-            var year = date.getFullYear();
-            var month = String(date.getMonth() + 1).padStart(2, '0');
-            var day = String(date.getDate()).padStart(2, '0');
+            if (!dateString) return '';
             
-            // Set hours and minutes based on type
-            var hours, minutes;
-            if (type === 'in') {
-                hours = '08';
-                minutes = '00';
-            } else {
-                hours = '17';
-                minutes = '00';
+            // If it's already in the right format, return as is
+            if (dateString.includes('T')) {
+                return dateString;
             }
             
-            return year + '-' + month + '-' + day + 'T' + hours + ':' + minutes;
+            // If it's just a date (YYYY-MM-DD), add time component based on type
+            if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                if (type === 'in') {
+                    return dateString + 'T08:00'; // 8:00 AM for in-time
+                } else {
+                    return dateString + 'T17:00'; // 5:00 PM for out-time
+                }
+            }
+            
+            // Try to parse and format the date
+            try {
+                var date = new Date(dateString);
+                if (!isNaN(date.getTime())) {
+                    var year = date.getFullYear();
+                    var month = String(date.getMonth() + 1).padStart(2, '0');
+                    var day = String(date.getDate()).padStart(2, '0');
+                    
+                    // Set hours and minutes based on type
+                    var hours, minutes;
+                    if (type === 'in') {
+                        hours = '08';
+                        minutes = '00';
+                    } else {
+                        hours = '17';
+                        minutes = '00';
+                    }
+                    
+                    return year + '-' + month + '-' + day + 'T' + hours + ':' + minutes;
+                }
+            } catch (e) {
+                console.error('Date formatting error:', e);
+            }
+            
+            return dateString; // Fallback to original
         }
-    } catch (e) {
-        console.error('Date formatting error:', e);
-    }
-    
-    return dateString; // Fallback to original
-}
     </script>
 
 @endsection
