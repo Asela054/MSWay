@@ -177,6 +177,7 @@
                                                 <li role="presentation"><a href="#leaveinfo" aria-controls="leaveinfo" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-calendar-week"></i></span>Leave Info</a><span class="bgcolor-major-gradient-overlay"></span></li>
                                                 <li role="presentation"><a href="#salaryslip" aria-controls="salaryslip" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-receipt"></i></span>Salary Slips</a><span class="bgcolor-major-gradient-overlay"></span></li>
                                                 <li role="presentation"><a href="#production" aria-controls="production" role="tab" data-toggle="tab"><span class="icon"><i class="fa-light fa-ballot-check"></i></span>Production</a><span class="bgcolor-major-gradient-overlay"></span></li>
+                                                <li role="presentation"><a href="#markattendance" aria-controls="markattendance" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-clock"></i></span>Mark Attendance</a><span class="bgcolor-major-gradient-overlay"></span></li>
                                             </ul>
                                         </div>
                                         <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
@@ -386,6 +387,44 @@
                                                         </div>
                                                     </div>  
                                                 </div> 
+                                                <div role="tabpanel" class="tab-pane" id="markattendance">
+                                                <div class="card shadow-none bg-transparent">
+                                                    <div class="card-body">
+                                                        <div class="row mb-3">
+                                                            <div class="col-sm-12 col-md-4">
+                                                                <label class="small font-weight-bold text-dark">Select Location</label>
+                                                                <select id="mark_location" class="form-control form-control-sm">
+                                                                    <option value="">-- Select Location --</option>
+                                                                    @foreach($branches as $branch)
+                                                                        <option value="{{ $branch->id }}">{{ $branch->location }}</option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-sm-12 col-md-4 d-flex align-items-end">
+                                                                <button id="clockBtn" class="btn btn-success btn-sm px-4" disabled>
+                                                                    <i class="fas fa-clock mr-1"></i> <span id="clockBtnText">Clock In</span>
+                                                                </button>
+                                                                <span id="clock_status" class="ml-3 font-weight-bold"></span>
+                                                            </div>
+                                                        </div>
+                                                        <hr>
+                                                        <div class="center-block fix-width scroll-inner">
+                                                            <table class="table table-striped table-sm small nowrap" style="width:100%" id="markattendtable">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>NAME</th>
+                                                                        <th>LOCATION</th>
+                                                                        <th>DATE</th>
+                                                                        <th>CHECK IN</th>
+                                                                        <th>CHECK OUT</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody></tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                             </div>
                                         </div>
                                     </div>      
@@ -654,12 +693,12 @@
 @endsection
 @section('script')
 <script>
+    var empid = {{$emp_id}};
     $(document).ready(function () {
         $('#user_information_menu_link').addClass('active');
         $('#user_information_menu_link_icon').addClass('active');
         // $("#print_record").prop('disabled', true);
         var emprecordid = {{$emprecordid}};
-        var empid = {{$emp_id}};
         var empcompany = {{$emp_company}};
         var emp_name_with_initial = '{{$emp_name_with_initial}}';
         var calling_name = '{{$calling_name}}';
@@ -1741,6 +1780,120 @@
         $('#emailBody').val(body);
         return body;
     }
+
+    // MARK ATTENDANCE 
+    var userLat = null, userLng = null;
+    var ALLOWED_RADIUS_METERS = 200;
+
+    function getDistanceMeters(lat1, lon1, lat2, lon2) {
+        var R = 6371000;
+        var dLat = (lat2 - lat1) * Math.PI / 180;
+        var dLon = (lon2 - lon1) * Math.PI / 180;
+        var a = Math.sin(dLat/2)*Math.sin(dLat/2) +
+                Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
+                Math.sin(dLon/2)*Math.sin(dLon/2);
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
+
+    // Ask GPS
+    $('a[href="#markattendance"]').on('click', function() {
+        load_mark_attendance_dt(empid);
+        if (!navigator.geolocation) {
+            $('#clock_status').text('Geolocation not supported by your browser.');
+            return;
+        }
+        navigator.geolocation.getCurrentPosition(function(pos) {
+            userLat = pos.coords.latitude;
+            userLng = pos.coords.longitude;
+            if ($('#mark_location').val()) {
+                checkLocationDistance();
+            } else {
+                $('#clock_status').text('GPS Required. Select a location.');
+            }
+        }, function() {
+            $('#clock_status').text('Location permission denied.');
+        });
+    });
+
+    // On location dropdown
+    function checkLocationDistance() {
+        var branchId = $('#mark_location').val();
+        if (!branchId || userLat === null) return;
+
+        $.get('{{ url("get-branch-coords") }}/' + branchId, function(branch) {
+            var dist = getDistanceMeters(userLat, userLng, parseFloat(branch.latitude), parseFloat(branch.longitude));
+            if (dist <= ALLOWED_RADIUS_METERS) {
+                $('#clockBtn').prop('disabled', false);
+                $('#clock_status').text('Location verified.');
+            } else {
+                $('#clockBtn').prop('disabled', true);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Wrong Location',
+                    text: 'You are not in the selected location or you selected wrong location. Please select the correct location.'
+                });
+                $('#clock_status').text('Location not verified.');
+            }
+        });
+    }
+
+    $('#mark_location').on('change', function() {
+        $('#clockBtn').prop('disabled', true);
+        var branchId = $(this).val();
+        if (!branchId) return;
+        if (userLat === null) {
+            $('#clock_status').text('Acquiring GPS, please wait...');
+            return;
+        }
+        checkLocationDistance();
+    });
+
+    // Clock In / Clock Out button
+    $('#clockBtn').on('click', function() {
+        var branchId = $('#mark_location').val();
+        $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') } });
+        $.ajax({
+            url: '{{ route("mark.attendance.clock") }}',
+            method: 'POST',
+            data: { emp_id: empid, location_id: branchId },
+            dataType: 'json',
+            success: function(data) {
+                if (data.success) {
+                    var msg = data.action === 'clockin' ? 'Clocked In!' : 'Clocked Out!';
+                    $('#clock_status').text(msg);
+                    $('#clockBtnText').text(data.action === 'clockin' ? 'Clock Out' : 'Done');
+                    if (data.action === 'clockout') $('#clockBtn').prop('disabled', true);
+                    load_mark_attendance_dt(empid);
+                }
+            },
+            error: function(xhr) {
+                var msg = xhr.responseJSON ? xhr.responseJSON.error : 'Error occurred.';
+                Swal.fire({ icon: 'error', title: 'Error', text: msg });
+            }
+        });
+    });
+
+    // Datatable
+    function load_mark_attendance_dt(emp_id) {
+        $('#markattendtable').DataTable({
+            destroy: true,
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: "{!! route('get_employee_attendance') !!}",
+                data: { emp_id: emp_id, attendancemonth: new Date().toISOString().slice(0,7) }
+            },
+            columns: [
+                { data: 'emp_name_with_initial', name: 'emp_name_with_initial' },
+                { data: 'location', name: 'location' },
+                { data: 'formatted_date', name: 'formatted_date' },
+                { data: 'first_time_stamp', name: 'first_time_stamp' },
+                { data: 'last_time_stamp', name: 'last_time_stamp' }
+            ],
+            order: [[2, 'desc']]
+        });
+    }
+
 </script>
 
 @endsection
