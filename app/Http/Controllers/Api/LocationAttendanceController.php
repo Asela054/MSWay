@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Jobattendance;
+use App\Services\AttendancePolicyService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -13,7 +14,9 @@ use DateTime;
 
 class LocationAttendanceController extends Controller
 {
-    public function __construct()
+    protected $attendancePolicyService;
+
+    public function __construct(AttendancePolicyService $attendancePolicyService)
     {
 
         if (isset($_SERVER['HTTP_ORIGIN'])) {
@@ -41,6 +44,7 @@ class LocationAttendanceController extends Controller
 
             exit(0);
         }
+          $this->attendancePolicyService = $attendancePolicyService;
     }
 
     public function GetLocations(Request $request)
@@ -99,33 +103,47 @@ class LocationAttendanceController extends Controller
         $attendance->updated_by = '0';
         $attendance->save();
 
+         $employees = DB::table('employees')
+            ->select('employees.emp_location as location')
+            ->where('employees.emp_id', $empid)
+            ->first();
 
-        $data = array(
-            'emp_id' =>  $empid,
-            'uid' =>  $empid,
-            'state' => 1,
-            'timestamp' => $on_time,
-            'date' => $attendancedate,
-            'approved' => 0,
-            'type' => 255,
-            'devicesno' => '-',
-            'location' => $location
-        );
-         DB::table('attendances')->insert($data);
+            if ($on_time != '') {
+               $this->attendancePolicyService->attendanceInsertsingle_dep($empid, $on_time,$employees->location , $attendancedate);
+            }
 
-        //off time
-        $data = array(
-            'emp_id' => $empid,
-            'uid' => $empid,
-            'state' => 1,
-            'timestamp' => $off_time,
-            'date' => $attendancedate,
-            'approved' => 0,
-            'type' => 255,
-            'devicesno' => '-',
-            'location' => $location
-        );
-        DB::table('attendances')->insert($data);
+            if ($off_time != '') {
+                $this->attendancePolicyService->attendanceInsertsingle_dep($empid, $off_time,$employees->location , $attendancedate);
+            
+            }
+
+
+        // $data = array(
+        //     'emp_id' =>  $empid,
+        //     'uid' =>  $empid,
+        //     'state' => 1,
+        //     'timestamp' => $on_time,
+        //     'date' => $attendancedate,
+        //     'approved' => 0,
+        //     'type' => 255,
+        //     'devicesno' => '-',
+        //     'location' => $location
+        // );
+        //  DB::table('attendances')->insert($data);
+
+        // //off time
+        // $data = array(
+        //     'emp_id' => $empid,
+        //     'uid' => $empid,
+        //     'state' => 1,
+        //     'timestamp' => $off_time,
+        //     'date' => $attendancedate,
+        //     'approved' => 0,
+        //     'type' => 255,
+        //     'devicesno' => '-',
+        //     'location' => $location
+        // );
+        // DB::table('attendances')->insert($data);
 
         }else{
 
@@ -306,18 +324,29 @@ class LocationAttendanceController extends Controller
                     }
                 }
 
+
+            $employees = DB::table('employees')
+            ->select('employees.emp_location as location')
+            ->where('employees.emp_id', $empid)
+            ->first();
+
+            if ($timestamp != '') {
+               $this->attendancePolicyService->attendanceInsertsingle_dep($empid, $timestamp,$employees->location , $attendancedate);
+            }
+
+
           
-                $data = array(
-                'emp_id' =>  $empid,
-                'uid' =>  $empid,
-                'state' => 1,
-                'timestamp' => $timestamp,
-                'date' => $attendancedate,
-                'approved' => 0,
-                'type' => 255,
-                'devicesno' => '-',
-                'location' => $location );
-                DB::table('attendances')->insert($data);
+                // $data = array(
+                // 'emp_id' =>  $empid,
+                // 'uid' =>  $empid,
+                // 'state' => 1,
+                // 'timestamp' => $timestamp,
+                // 'date' => $attendancedate,
+                // 'approved' => 0,
+                // 'type' => 255,
+                // 'devicesno' => '-',
+                // 'location' => $location );
+                // DB::table('attendances')->insert($data);
 
 
 
