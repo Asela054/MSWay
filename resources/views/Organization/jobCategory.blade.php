@@ -326,6 +326,20 @@
                                                         </label>
                                                     </div>
                                                 </div>
+                                                <div class="col-md-3 col-6">
+                                                    <label class="small font-weight-bold text-dark">PoyaDay Covering Available</label>
+                                                    <br>
+                                                    <div class="form-check-inline">
+                                                        <label class="form-check-label">
+                                                            <input type="radio" class="form-check-input poya_covering_leave" name="poya_covering_leave" id="poya_covering_leave_0" value="0" checked>No
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-check-inline">
+                                                        <label class="form-check-label">
+                                                            <input type="radio" class="form-check-input poya_covering_leave" name="poya_covering_leave" id="poya_covering_leave_1" value="1">Yes
+                                                        </label>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -1040,6 +1054,12 @@ $(document).ready(function(){
                         $('#holiday_lunch_deduct_0').prop("checked", true);
                     } else if (data.result.holiday_lunch_deduct == 1) {
                         $('#holiday_lunch_deduct_1').prop("checked", true);
+                    }
+
+                    if (data.result.poya_covering_leave == 0) {
+                        $('#poya_covering_leave_0').prop("checked", true);
+                    } else if (data.result.poya_covering_leave == 1) {
+                        $('#poya_covering_leave_1').prop("checked", true);
                     }
 
                     if (data.result.lunch_deduct_type == 0) {
