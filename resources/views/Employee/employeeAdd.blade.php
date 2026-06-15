@@ -304,6 +304,15 @@
                                             </span>
                                         @endif
                                     </div>
+                                    <div class="col">
+                                        <label class="small font-weight-bolder">Join Date*</label>
+                                        <input type="date" name="emp_join_date" id="emp_join_date" class="form-control form-control-sm {{ $errors->has('emp_join_date') ? ' has-error' : '' }}" required />
+                                        @if ($errors->has('emp_join_date'))
+                                            <span class="help-block">
+                                                <strong>{{ $errors->first('emp_join_date') }}</strong>
+                                            </span>
+                                        @endif
+                                    </div>
                                 </div>
                                 
                                 <div class="form-row mb-1">
@@ -332,6 +341,20 @@
                                         @if ($errors->has('shift'))
                                             <span class="help-block">
                                                 <strong>{{ $errors->first('shift') }}</strong>
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <div class="col">
+                                        <label class="small font-weight-bolder">Job Category</label>
+                                        <select name="job_category_id" class="form-control form-control-sm shipClass {{ $errors->has('job_category_id') ? ' has-error' : '' }}">
+                                            <option value="">Select</option>
+                                            @foreach($job_categories as $category)
+                                                <option value="{{$category->id}}">{{$category->category}}</option>
+                                            @endforeach
+                                        </select>
+                                        @if ($errors->has('job_category_id'))
+                                            <span class="help-block">
+                                                <strong>{{ $errors->first('job_category_id') }}</strong>
                                             </span>
                                         @endif
                                     </div>
