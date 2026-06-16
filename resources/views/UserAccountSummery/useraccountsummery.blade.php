@@ -388,40 +388,32 @@
                                                     </div>  
                                                 </div> 
                                                 <div role="tabpanel" class="tab-pane" id="markattendance">
-                                                <div class="card shadow-none bg-transparent">
-                                                    <div class="card-body">
-                                                        <div class="row mb-3">
-                                                            <div class="col-sm-12 col-md-4">
-                                                                <label class="small font-weight-bold text-dark">Select Location</label>
-                                                                <select id="mark_location" class="form-control form-control-sm">
-                                                                    <option value="">-- Select Location --</option>
-                                                                    @foreach($branches as $branch)
-                                                                        <option value="{{ $branch->id }}">{{ $branch->location }}</option>
-                                                                    @endforeach
-                                                                </select>
+                                                    <div class="card shadow-none bg-transparent">
+                                                        <div class="card-body">
+                                                            <div class="row mb-3 align-items-end">
+                                                                <div class="col-12 col-md-4">
+                                                                    <label class="small font-weight-bold text-dark">Select Location</label>
+                                                                    <select id="mark_location" class="form-control form-control-sm">
+                                                                        <option value="">-- Select Location --</option>
+                                                                        @foreach($branches as $branch)
+                                                                            <option value="{{ $branch->id }}">{{ $branch->location }}</option>
+                                                                        @endforeach
+                                                                    </select>
+                                                                    <div id="reasonBox" class="mt-3" style="display:none;">
+                                                                        <textarea id="reason_text" maxlength="255" class="form-control form-control-sm" rows="3" placeholder="Enter the reason" style="resize:none;"></textarea>
+                                                                        <button type="button" id="submitReasonBtn" class="btn btn-primary btn-sm btn-block mt-2">Submit with Reason</button>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-12 col-md-8 mt-2">
+                                                                    <div class="d-flex align-items-center flex-wrap">
+                                                                        <button type="button" id="clockBtn" class="btn btn-success btn-sm px-4 flex-shrink-0" disabled>
+                                                                            <i class="fas fa-clock mr-1"></i><span id="clockBtnText">Clock In</span>
+                                                                        </button>
+                                                                        <span id="clock_status" class="ml-2 font-weight-bold small" style="word-break:break-word;min-width:0;"></span>
+                                                                    </div>
+                                                                </div>
                                                             </div>
-                                                            <div class="col-sm-12 col-md-4 d-flex align-items-end">
-                                                                <button id="clockBtn" class="btn btn-success btn-sm px-4" disabled>
-                                                                    <i class="fas fa-clock mr-1"></i> <span id="clockBtnText">Clock In</span>
-                                                                </button>
-                                                                <span id="clock_status" class="ml-3 font-weight-bold"></span>
-                                                            </div>
-                                                        </div>
-                                                        <hr>
-                                                        <div class="center-block fix-width scroll-inner">
-                                                            <table class="table table-striped table-sm small nowrap" style="width:100%" id="markattendtable">
-                                                                <thead>
-                                                                    <tr>
-                                                                        <th>NAME</th>
-                                                                        <th>LOCATION</th>
-                                                                        <th>DATE</th>
-                                                                        <th>CHECK IN</th>
-                                                                        <th>CHECK OUT</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody></tbody>
-                                                            </table>
-                                                        </div>
+                                                            <hr>
                                                     </div>
                                                 </div>
                                             </div>
@@ -1631,6 +1623,7 @@
     });
 
     function attendent_load_dt(emp_id) {
+        checkTodayAttendanceStatus();
         var attendancemonth = $('#attendancemonth').val();
         $('#attendtable').DataTable({
             destroy: true,
@@ -1784,6 +1777,7 @@
     // MARK ATTENDANCE 
     var userLat = null, userLng = null;
     var ALLOWED_RADIUS_METERS = 200;
+    var locationStatus = null;
 
     function getDistanceMeters(lat1, lon1, lat2, lon2) {
         var R = 6371000;
@@ -1795,9 +1789,11 @@
         return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     }
 
-    // Ask GPS
+    // Location permission
     $('a[href="#markattendance"]').on('click', function() {
-        load_mark_attendance_dt(empid);
+
+        checkTodayAttendanceStatus();
+
         if (!navigator.geolocation) {
             $('#clock_status').text('Geolocation not supported by your browser.');
             return;
@@ -1808,11 +1804,36 @@
             if ($('#mark_location').val()) {
                 checkLocationDistance();
             } else {
-                $('#clock_status').text('GPS Required. Select a location.');
+                $('#clock_status').text('Select a location.');
             }
-        }, function() {
-            $('#clock_status').text('Location permission denied.');
+        }, function(err) {
+            userLat = null;
+            userLng = null;
+            if (err.code === 1) {
+                $('#clock_status').text('Location access denied. Please enable it in and try again.');
+            } else {
+                $('#clock_status').text('Unable to get your location. Please try again.');
+            }
         });
+
+        // Check permission for location
+        if (navigator.permissions) {
+            navigator.permissions.query({ name: 'geolocation' }).then(function(status) {
+                status.onchange = function() {
+                    if (status.state === 'granted') {
+                        navigator.geolocation.getCurrentPosition(function(pos) {
+                            userLat = pos.coords.latitude;
+                            userLng = pos.coords.longitude;
+                            $('#clock_status').text('Location acquired. Select a location.');
+                            if ($('#mark_location').val()) checkLocationDistance();
+                        });
+                    } else {
+                        userLat = null;
+                        $('#clock_status').text('Location access denied. Please enable it and try again.');
+                    }
+                };
+            });
+        }
     });
 
     // On location dropdown
@@ -1822,23 +1843,34 @@
 
         $.get('{{ url("get-branch-coords") }}/' + branchId, function(branch) {
             var dist = getDistanceMeters(userLat, userLng, parseFloat(branch.latitude), parseFloat(branch.longitude));
+            $('#reasonBox').hide();
+           
             if (dist <= ALLOWED_RADIUS_METERS) {
-                $('#clockBtn').prop('disabled', false);
+                 $('#clockBtn').prop('disabled', false);
+                locationStatus = 1;
                 $('#clock_status').text('Location verified.');
             } else {
+                locationStatus = 2;
                 $('#clockBtn').prop('disabled', true);
+                $('#clock_status').text('Location not verified.');
                 Swal.fire({
                     icon: 'error',
                     title: 'Wrong Location',
-                    text: 'You are not in the selected location or you selected wrong location. Please select the correct location.'
-                });
-                $('#clock_status').text('Location not verified.');
+                    text: 'You are not in the selected location or you selected wrong location. Please select the correct location.',
+                    timer: 4000,
+                    timerProgressBar: true
+                }).then(function() {
+                     $('#reasonBox').show();
+            });
+               
             }
         });
     }
 
+    // On location change
     $('#mark_location').on('change', function() {
         $('#clockBtn').prop('disabled', true);
+        $('#reasonBox').hide();
         var branchId = $(this).val();
         if (!branchId) return;
         if (userLat === null) {
@@ -1848,51 +1880,126 @@
         checkLocationDistance();
     });
 
-    // Clock In / Clock Out button
-    $('#clockBtn').on('click', function() {
-        var branchId = $('#mark_location').val();
+
+    var isClockIn = true;
+
+    function checkTodayAttendanceStatus() {
         $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') } });
+        $.post('{{ route("get.attendance.shift") }}', { empid: empid, date: new Date().toISOString().slice(0,10) }, function(shiftData) {
+            var shift = shiftData.data ? shiftData.data : shiftData;
+            if (shift.attendanceinserttype == 1) {
+                isClockIn = true;
+                $('#clockBtnText').text('Clock In');
+                $('#clockBtn').removeAttr('data-done');
+            } else {
+                isClockIn = false;
+                $('#clockBtnText').text('Clock Out');
+                $('#clockBtn').removeAttr('data-done').prop('disabled', false);
+            }
+        }, 'json');
+    }
+
+    function getAttendanceShiftAndInsert(reason) {
+        var branchId = $('#mark_location').val();
+        var today = new Date().toISOString().slice(0,10);
+
+        $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') } });
+
         $.ajax({
-            url: '{{ route("mark.attendance.clock") }}',
+            url: '{{ route("get.attendance.shift") }}',
             method: 'POST',
-            data: { emp_id: empid, location_id: branchId },
+            data: { empid: empid, date: today },
             dataType: 'json',
-            success: function(data) {
-                if (data.success) {
-                    var msg = data.action === 'clockin' ? 'Clocked In!' : 'Clocked Out!';
-                    $('#clock_status').text(msg);
-                    $('#clockBtnText').text(data.action === 'clockin' ? 'Clock Out' : 'Done');
-                    if (data.action === 'clockout') $('#clockBtn').prop('disabled', true);
-                    load_mark_attendance_dt(empid);
-                }
+            success: function(shiftData) {
+                var shift = shiftData.data ? shiftData.data : shiftData;
+
+                $.ajax({
+                    url: '{{ route("single.location.attendance") }}',
+                    method: 'POST',
+                    data: {
+                        location_id: branchId,
+                        emp_id: empid,
+                        timestamp: new Date().toISOString().slice(0,19).replace('T',' '),
+                        attendaceshift: shift.attendaceshift,
+                        attendancedate: shift.attendancedate,
+                        attendanceinserttype: shift.attendanceinserttype,
+                        reason: (shift.attendanceinserttype == 1) ? (reason || '') : '',
+                        location_status: (shift.attendanceinserttype == 1) ? locationStatus : 1
+                    },
+                    dataType: 'json',
+                    success: function(data) {
+                      if (isClockIn) {
+                        isClockIn = false;
+                        $('#clockBtnText').text('Clock Out');
+                        $('#clockBtn').prop('disabled', false);
+                    } else {
+                        isClockIn = true;
+                        $('#clockBtnText').text('Done');
+                        $('#clockBtn').prop('disabled', true);
+                        $('#clockBtn').attr('data-done', '1');
+                    }
+                    Swal.fire({ 
+                        icon: 'success', 
+                        position: 'top-end',
+                        title: 'Attendance Marked Successfully.', 
+                        timer: 2000, 
+                        timerProgressBar: true, 
+                        showConfirmButton: false 
+                    });
+                    $('#reasonBox').hide();
+                    $('#reason_text').val('');
+                    },
+                    error: function(xhr) {
+                        Swal.fire({ 
+                            icon: 'error', 
+                            title: 'Error', 
+                            text: 'Failed to mark attendance.'
+                        });
+                    }
+                });
             },
             error: function(xhr) {
-                var msg = xhr.responseJSON ? xhr.responseJSON.error : 'Error occurred.';
-                Swal.fire({ icon: 'error', title: 'Error', text: msg });
+                Swal.fire({ 
+                    icon: 'error', 
+                    title: 'Error', 
+                    text: 'Failed to fetch shift info.'
+                });
             }
         });
+    }
+
+    // Clock button 
+    $('#clockBtn').on('click', function(e) {
+        e.preventDefault();
+        if ($(this).attr('data-done') === '1') {
+        Swal.fire({ 
+            icon: 'info', 
+            title: 'Already Marked', 
+            text: 'You have already clocked in and clocked out today.' });
+        return;
+    }
+       if (isClockIn && locationStatus === 2) {
+        $('#reasonBox').show();
+        return;
+    }
+        getAttendanceShiftAndInsert('');
     });
 
-    // Datatable
-    function load_mark_attendance_dt(emp_id) {
-        $('#markattendtable').DataTable({
-            destroy: true,
-            processing: true,
-            serverSide: true,
-            ajax: {
-                url: "{!! route('get_employee_attendance') !!}",
-                data: { emp_id: emp_id, attendancemonth: new Date().toISOString().slice(0,7) }
-            },
-            columns: [
-                { data: 'emp_name_with_initial', name: 'emp_name_with_initial' },
-                { data: 'location', name: 'location' },
-                { data: 'formatted_date', name: 'formatted_date' },
-                { data: 'first_time_stamp', name: 'first_time_stamp' },
-                { data: 'last_time_stamp', name: 'last_time_stamp' }
-            ],
-            order: [[2, 'desc']]
-        });
+    // Submit reason
+    $('#submitReasonBtn').on('click', function(e) {
+        e.preventDefault();
+        var reason = $('#reason_text').val().trim();
+        if (!reason) {
+            Swal.fire({ 
+                icon: 'warning', 
+                title: 'Reason Required', 
+                text: 'Please enter a reason.' });
+            return;
     }
+    getAttendanceShiftAndInsert(reason);
+    });
+
+    
 
 </script>
 
