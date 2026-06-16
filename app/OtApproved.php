@@ -3,6 +3,7 @@
 namespace App;
 
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 
 class OtApproved extends Model
@@ -71,4 +72,14 @@ class OtApproved extends Model
         return $status;
     }
     
+      public function get_ot_hours_monthly_ktClean($emp_id, $month ,$closedate)
+    {
+        $ot_hours =  DB::table('kt_shift_ot')
+                            ->where('emp_id', $emp_id)
+                            ->where('date', 'like', $month.'%')
+                            ->where('date', '<=', $closedate)
+                            ->where('approve_status', '=', 1)
+                            ->sum('ot_hours');
+        return $ot_hours;
+    }
 }

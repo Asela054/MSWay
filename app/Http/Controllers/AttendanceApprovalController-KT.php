@@ -420,6 +420,10 @@ class AttendanceApprovalController extends Controller
 
             $triple_ot_hours = (new \App\OtApproved)->get_triple_ot_hours_monthly($record->emp_id, $month, $closedate);
 
+            $normal_ot_hours_kt = (new \App\OtApproved)->get_ot_hours_monthly_ktClean($record->emp_id, $month, $closedate);
+
+            $normal_ot_hours = $normal_ot_hours +  $normal_ot_hours_kt; 
+
             $auditattedance = (new \App\Auditattendace)->apply_audit_attedance($record->emp_auto_id,$record->emp_id, $month);
             
             if(!empty($record->date)){

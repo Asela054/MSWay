@@ -282,7 +282,48 @@ public function get_duty_leaves($emp_id, $month ,$closedate){
         $total_dutyleaves = (!empty($dutyleaves[0]->total)) ? $dutyleaves[0]->total : 0;
 
         return $total_dutyleaves;
- }
+}
 
+public function get_dayoff_leaves($emp_id, $month, $closedate)
+{
+    $scheduledDates = DB::table('employee_roster_details')
+        ->where('emp_id', $emp_id)
+        ->where('work_date', 'like', $month . '%')
+        ->where('work_date', '<=', $closedate)
+        ->pluck('work_date')
+        ->map(function ($d) {
+            return Carbon::parse($d)->format('Y-m-d');
+        })
+        ->toArray();
+
+    $leaveDates = DB::table('leaves')
+        ->where('emp_id', $emp_id)
+        ->where('leave_from', 'like', $month . '%')
+        ->where('leave_from', '<=', $closedate)
+        ->where('status', 'Approved')
+        ->pluck('leave_from')
+        ->map(function ($d) {
+            return Carbon::parse($d)->format('Y-m-d');
+        })
+        ->toArray();
+
+    $start = Carbon::parse($month . '-01');
+    $end   = Carbon::parse($closedate);
+
+    $total_dutyleaves = 0;
+
+    for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
+        $d = $date->format('Y-m-d');
+
+        $isOffDay = !in_array($d, $scheduledDates);
+        $hasLeave = in_array($d, $leaveDates);
+
+        if ($isOffDay && !$hasLeave) {
+            $total_dutyleaves++;
+        }
+    }
+
+    return $total_dutyleaves;
+}
 
 }
