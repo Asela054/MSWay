@@ -294,12 +294,12 @@ class MealallowanceapproveController extends Controller
                 }
                 else if($allowancetype==4){
 
-                $settings = DB::table('hrm_general_settings as settings')
-                    ->join('hrm_general_settings_key_list as key_list', 'settings.key_id', '=', 'key_list.id')
-                    ->where('key_list.config_key', 'SAL_ADJ')
-                    ->where('settings.status', 1)
-                    ->select('settings.config_value' )
-                    ->first();
+                    $settings = DB::table('hrm_general_settings as settings')
+                        ->join('hrm_general_settings_key_list as key_list', 'settings.key_id', '=', 'key_list.id')
+                        ->where('key_list.config_key', 'SAL_ADJ')
+                        ->where('settings.status', 1)
+                        ->select('settings.config_value' )
+                        ->first();
 
                      if($settings &&  $settings->config_value == 1){
                         //manula pst deduction 

@@ -60,6 +60,7 @@ class JobCategoryController extends Controller
         $jobcategory->until_time_available = $request->input('until_time_available');
         $jobcategory->holiday_ot_start = $request->input('holiday_ot_start');
         $jobcategory->holiday_lunch_deduct = $request->input('holiday_lunch_deduct');
+        $jobcategory->poya_covering_leave = $request->input('poya_covering_leave');
         
 //        if($request->input('short_leave_enabled') !== null){
 //            $jobcategory->short_leave_enabled = 1;
@@ -159,6 +160,7 @@ class JobCategoryController extends Controller
             'until_time_available' => $request->until_time_available,
             'holiday_ot_start' => $request->holiday_ot_start,
             'holiday_lunch_deduct' => $request->holiday_lunch_deduct,
+            'poya_covering_leave' => $request->poya_covering_leave,
             'lunch_deduct_type' => $request->lunch_deduct_type,
             'lunch_deduct_min' => $request->lunch_deduct_min,
             'salary_without_attendace' => $request->salary_without_attendace,

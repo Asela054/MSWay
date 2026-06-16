@@ -72,6 +72,7 @@ class EmployeeController extends Controller
 
         $departments = Department::orderBy('id', 'asc')->get();
         $empposition = CompanyHierarchy::orderBy('order_number', 'asc')->get();
+        $job_categories = JobCategory::orderBy('id', 'asc')->get();
 
         if (isset($lastid)) {
 
@@ -82,7 +83,7 @@ class EmployeeController extends Controller
         }
         $device = FingerprintDevice::orderBy('id', 'asc')->where('status', '=', 1)->get();
 
-        return view('Employee.employeeAdd', compact('newid', 'employmentstatus', 'branch', 'device', 'title', 'shift_type', 'company', 'departments', 'empposition'));
+        return view('Employee.employeeAdd', compact('newid', 'employmentstatus', 'branch', 'device', 'title', 'shift_type', 'company', 'departments', 'empposition', 'job_categories'));
     }
 
     public function employeelist()
@@ -175,9 +176,11 @@ class EmployeeController extends Controller
         $Employee->emp_mobile = $request->input('emp_mobile');
         $Employee->emp_gender = $request->input('emp_gender');
         $Employee->emp_status = $request->input('status');
+        $Employee->emp_join_date = $request->input('emp_join_date');
         $Employee->emp_location = $request->input('location');
         $Employee->emp_job_code = $request->input('employeejob');
         $Employee->emp_shift = $request->input('shift');
+        $Employee->job_category_id = $request->input('job_category_id');
         $Employee->emp_company = $request->input('employeecompany');
         $Employee->emp_department = $request->input('department');
         $Employee->no_of_casual_leaves = 0; //$request->input('no_of_casual_leaves');
