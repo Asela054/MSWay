@@ -119,7 +119,7 @@
                             {{-- Template load status --}}
                             <div class="col-12">
                                 <div id="template_load_status" class="mb-2 d-none">
-                                    <span class="badge badge-info">
+                                    <span class="badge badge-primary">
                                         <i class="fas fa-spinner fa-spin mr-1"></i>
                                         Loading template...
                                     </span>
@@ -132,7 +132,7 @@
                                     <label class="small font-weight-bold text-dark">
                                         Letter Content
                                         <small class="text-muted font-weight-normal">
-                                            — auto-filled from template, edit if needed
+                                           - (Auto-filled from template, edit if needed)
                                         </small>
                                     </label>
                                     <textarea name="content" id="issueContent"
@@ -167,9 +167,9 @@
 @section('script')
 
 {{-- TinyMCE CDN --}}
-<!-- <script src="https://cdn.jsdelivr.net/npm/tinymce@6.8.4/tinymce.min.js"></script> -->
+<script src="https://cdn.jsdelivr.net/npm/tinymce@6.8.4/tinymce.min.js"></script>
 
-<script src="https://cdn.tiny.cloud/1/z64mwm01zqxthsm5lyhooo4ldelf75bcgg0b0el1e38cp1fp/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+<!-- <script src="https://cdn.tiny.cloud/1/z64mwm01zqxthsm5lyhooo4ldelf75bcgg0b0el1e38cp1fp/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script> -->
 
 
 <script>
