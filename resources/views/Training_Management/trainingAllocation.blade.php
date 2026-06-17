@@ -69,8 +69,8 @@
                                 <!-- Training Details -->
                                 <div class="form-row mb-2">
                                     <div class="col-md-6">
-                                        <label class="small font-weight-bold text-dark">Training Name</label>
-                                        <input type="text" name="training_name" id="training_name" class="form-control form-control-sm" />
+                                        <label class="small font-weight-bold text-dark">Training Name <span class="text-danger">*</span></label>
+                                        <input type="text" name="training_name" id="training_name" class="form-control form-control-sm" required/>
                                     </div>
 
                                     <div class="col-md-6">
@@ -656,6 +656,7 @@
         });
 
         // View Employees button
+        var newEmpEverAdded = false;
         $(document).on('click', '.Employee', function() {
             var id = $(this).attr('id');
             $('#empModalLabel').text('View Employees');
@@ -665,6 +666,7 @@
             $('#emp_employee').val(null).trigger('change');
             $('#emp_action_button').prop('disabled', false).html('<i class="fas fa-plus"></i>&nbsp;Save');
             removedEmpIds = [];
+            newEmpEverAdded = false;
 
             $.ajax({
                 url: "{{ url('TrainingAllocation') }}/" + id + "/employees",
@@ -712,6 +714,7 @@
                 return;
             }
 
+            newEmpEverAdded = true;
             $('#emplistbody').append('<tr class="pointer">' +
                 '<td>' + emp_id + '</td>' +
                 '<td>' + selectedText + '</td>' +
@@ -752,7 +755,8 @@
                 }
             });
 
-            if (removedEmpIds.length === 0 && newEmps.length === 0) {
+            var currentRowCount = $('#emplistbody tr').length;
+            if (removedEmpIds.length === 0 && newEmps.length === 0 && !newEmpEverAdded) {
                 $('#emp_action_button').prop('disabled', false).html('<i class="fas fa-plus"></i>&nbsp;Save');
                 const actionObj = {
                     icon: 'fas fa-info-circle',
