@@ -89,7 +89,8 @@ class UserAccountController extends Controller
 		$payment_period=PaymentPeriod::orderBy('id', 'desc')->get();
 		
         $employees = Employee::where('leave_approve_person', 1)->get();
-        return view('UserAccountSummery.useraccountsummery',compact('emprecordid','emp_id','emp_location','employee','leavetype','emp_name_with_initial','calling_name','payment_period','employees', 'emp_company'));
+        $branches = DB::table('branches')->select('id','location')->get();
+        return view('UserAccountSummery.useraccountsummery',compact('emprecordid','emp_id','emp_location','employee','leavetype','emp_name_with_initial','calling_name','payment_period','employees', 'emp_company', 'branches'));
     }
 
     public function get_employee_monthlysummery(Request $request)
@@ -1064,6 +1065,16 @@ class UserAccountController extends Controller
         }
 
 
+    }
+
+    //get branch coordinates
+    public function getBranchCoords($id)
+    {
+        $branch = DB::table('branches')->where('id', $id)->select('id', 'location', 'latitude', 'longitude')->first();
+        if (!$branch) {
+            return response()->json(['error' => 'Branch not found'], 404);
+        }
+        return response()->json($branch);
     }
 
 }

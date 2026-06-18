@@ -152,7 +152,7 @@
                     <div id="upload_response"></div>
                     <div class="row">
                         <div class="col">
-                            <a href="{{ url('/public/csvsample/KT Employee Allocation.csv') }}" class="control-label d-flex justify-content-end">CSV Format - Download Sample File</a>
+                            <a href="{{ url('/public/csvsample/kt_employee_allocation.csv') }}" class="control-label d-flex justify-content-end">CSV Format - Download Sample File</a>
                         </div>
                     </div>
                     <form method="post" id="formUpload" class="form-horizontal" enctype="multipart/form-data">

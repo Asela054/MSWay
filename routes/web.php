@@ -1268,6 +1268,10 @@ Route::post('/getEmployeeLeaveStatusSummary', 'UserAccountController@getemployee
 Route::post('EmployeeLeaveApply',['uses' => 'UserAccountController@leaveapply', 'as' => 'EmployeeLeaveApply']); 
 Route::put('/employees/{id}/update-image', 'UserAccountController@updateImage')->name('employees.update-image');
 
+Route::get('/get-branch-coords/{id}', 'UserAccountController@getBranchCoords')->name('get.branch.coords');
+Route::post('/get-attendance-shift', 'Api\LocationAttendanceController@Getattendanceshift')->name('get.attendance.shift');
+Route::post('/single-location-attendance', 'Api\LocationAttendanceController@Singlelocationattendanceinsert')->name('single.location.attendance');
+
 // Employee Shift Extend controller routes
 Route::get('/empshiftextend' ,'ShiftExtendController@index')->name('empshiftextend');
 Route::get('/empshiftextendlist' ,'ShiftExtendController@requestlist')->name('empshiftextendlist');

@@ -113,8 +113,8 @@
                                         </label>
                                         <div class="border rounded p-2 bg-light"
                                             style="max-height:420px; overflow-y:auto;">
-                                            <p class="text-muted mb-2" style="font-size:11px;">
-                                                Click to insert placeholders to your letter.
+                                            <p class="text-small mb-2" style="font-size:11px;">
+                                               (Click to insert placeholders to your letter.)
                                             </p>
                                             @foreach($placeholders as $ph => $label)
                                             <div class="mb-1">
@@ -158,9 +158,9 @@
 @section('script')
 
 {{-- TinyMCE CDN --}}
-<!-- <script src="https://cdn.jsdelivr.net/npm/tinymce@6.8.4/tinymce.min.js"></script> -->
+<script src="https://cdn.jsdelivr.net/npm/tinymce@6.8.4/tinymce.min.js"></script>
 
-<script src="https://cdn.tiny.cloud/1/z64mwm01zqxthsm5lyhooo4ldelf75bcgg0b0el1e38cp1fp/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+<!-- <script src="https://cdn.tiny.cloud/1/z64mwm01zqxthsm5lyhooo4ldelf75bcgg0b0el1e38cp1fp/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script> -->
 
 
 <script>
