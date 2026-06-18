@@ -82,4 +82,21 @@ class OtApproved extends Model
                             ->sum('ot_hours');
         return $ot_hours;
     }
+    
+   public function get_night_work_days($emp_id, $month, $closedate)
+    {
+        $night_days = DB::table('employee_roster_details')
+            ->where('employee_roster_details.emp_id', $emp_id)
+            ->where('employee_roster_details.work_date', 'like', $month.'%')
+            ->where('employee_roster_details.work_date', '<=', $closedate)
+            ->where('employee_roster_details.shift_id', '=', 4)
+            ->join('attendances', function ($join) use ($emp_id) {
+                $join->on(DB::raw('DATE(attendances.date)'), '=', 'employee_roster_details.work_date')
+                    ->where('attendances.emp_id', '=', $emp_id);
+            })
+            ->distinct('employee_roster_details.work_date')
+            ->count('employee_roster_details.work_date');
+
+        return $night_days;
+    }
 }
