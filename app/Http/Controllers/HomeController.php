@@ -474,8 +474,10 @@ class HomeController extends Controller
         $departmentdata = DB::table('departments')
                 ->select('id', 'name'); 
             if (!empty($userCompanyIds)) {
-                    $departmentdata->whereIn('company_id', $userCompanyIds);
-                }
+                $departmentdata->whereIn('company_id', $userCompanyIds);
+            }else{
+                $departmentdata->where('company_id', $request->company_id);
+            }
                 $departmentdata = $departmentdata->get()->toArray();
 
         $attendance= DB::table('attendances')
@@ -615,7 +617,9 @@ class HomeController extends Controller
                 ->select('id', 'name'); 
             if (!empty($userCompanyIds)) {
                     $departmentdata->whereIn('company_id', $userCompanyIds);
-                }
+            }else{
+                $departmentdata->where('company_id', $request->company_id);
+            }
                 $departmentdata = $departmentdata->get()->toArray();
 
         $late_times = DB::table('late_types')->where('id', 1)->first();
@@ -762,7 +766,9 @@ class HomeController extends Controller
                 ->select('id', 'name'); 
             if (!empty($userCompanyIds)) {
                     $departmentdata->whereIn('company_id', $userCompanyIds);
-                }
+            }else{
+                $departmentdata->where('company_id', $request->company_id);
+            }
                 $departmentdata = $departmentdata->get()->toArray();
 
         $attendance= DB::table('attendances')
@@ -896,8 +902,10 @@ class HomeController extends Controller
             $departmentdata = DB::table('departments')
                 ->select('id', 'name'); 
             if (!empty($userCompanyIds)) {
-                    $departmentdata->whereIn('company_id', $userCompanyIds);
-                }
+                $departmentdata->whereIn('company_id', $userCompanyIds);
+            }else{
+                $departmentdata->where('company_id', $request->company_id);
+            }
                 $departmentdata = $departmentdata->get()->toArray();
 
         $attendance= DB::table('attendances')
@@ -1042,8 +1050,10 @@ class HomeController extends Controller
        $departmentdata = DB::table('departments')
                 ->select('id', 'name'); 
             if (!empty($userCompanyIds)) {
-                    $departmentdata->whereIn('company_id', $userCompanyIds);
-                }
+                $departmentdata->whereIn('company_id', $userCompanyIds);
+            }else{
+                $departmentdata->where('company_id', $request->company_id);
+            }
                 $departmentdata = $departmentdata->get()->toArray();
 
        // $late_times = DB::table('late_types')->where('id', 1)->first();
@@ -1193,7 +1203,9 @@ class HomeController extends Controller
                 ->select('id', 'name'); 
             if (!empty($userCompanyIds)) {
                     $departmentdata->whereIn('company_id', $userCompanyIds);
-                }
+            }else{
+                $departmentdata->where('company_id', $request->company_id);
+            }
                 $departmentdata = $departmentdata->get()->toArray();
 
         $attendance= DB::table('attendances')
