@@ -1967,6 +1967,9 @@ Route::post('/departmentemployeewise_generatelatereport', 'Departmentemployeewis
 //Daily Summary Approve
 Route::get('daily_summary_approve', 'DailysummaryapprovControllr@index')->name('daily_summary_approve');
 
+//Assigned Devices Report
+Route::get('rpt_assigned_devices',['uses' => 'RptAssignedDevicesController@getassigneddevicelist', 'as' => 'rpt_assigned_devices']);
+
 
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');
