@@ -22,7 +22,13 @@ class OTApproveController extends Controller
             abort(403);
         }
 
-        return view('Attendent.ot_approve');
+        $appName = config('app.name');
+        if($appName == 'Kaosis'){
+            return view('Kosis_OTapproval.ot_approve');
+        }else{
+            return view('Attendent.ot_approve');
+        }
+        
     }
 
     public function get_ot_details(Request $request)
