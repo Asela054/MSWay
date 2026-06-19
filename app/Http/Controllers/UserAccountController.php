@@ -1077,4 +1077,17 @@ class UserAccountController extends Controller
         return response()->json($branch);
     }
 
+    //check attendance completed
+    public function checkAttendanceCompleted($empid)
+    {
+        $today = \Carbon\Carbon::now()->toDateString();
+        $row = DB::table('job_attendance')
+            ->where('employee_id', $empid)
+            ->where('attendance_date', $today)
+            ->whereNotNull('on_time')
+            ->whereNotNull('off_time')
+            ->first();
+        return response()->json(['completed' => $row ? true : false]);
+    }
+
 }

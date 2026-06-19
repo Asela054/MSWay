@@ -1869,6 +1869,7 @@
 
     // On location change
     $('#mark_location').on('change', function() {
+        if ($('#clockBtn').attr('data-done') === '1') return;
         $('#clockBtn').prop('disabled', true);
         $('#reasonBox').hide();
         var branchId = $(this).val();
@@ -1885,18 +1886,28 @@
 
     function checkTodayAttendanceStatus() {
         $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') } });
-        $.post('{{ route("get.attendance.shift") }}', { empid: empid, date: new Date().toISOString().slice(0,10) }, function(shiftData) {
-            var shift = shiftData.data ? shiftData.data : shiftData;
-            if (shift.attendanceinserttype == 1) {
-                isClockIn = true;
-                $('#clockBtnText').text('Clock In');
-                $('#clockBtn').removeAttr('data-done');
-            } else {
+        $.get('{{ url("check-attendance-completed") }}/' + empid, function(res) {
+            if (res.completed) {
                 isClockIn = false;
-                $('#clockBtnText').text('Clock Out');
-                $('#clockBtn').removeAttr('data-done').prop('disabled', false);
+                $('#clockBtnText').text('Done');
+                $('#clockBtn').prop('disabled', true).attr('data-done', '1');
+                $('#mark_location').prop('disabled', true);
+                $('#clock_status').text('');
+                return;
             }
-        }, 'json');
+            $.post('{{ route("get.attendance.shift") }}', { empid: empid, date: new Date().toISOString().slice(0,10) }, function(shiftData) {
+                var shift = shiftData.data ? shiftData.data : shiftData;
+                if (shift.attendanceinserttype == 1) {
+                    isClockIn = true;
+                    $('#clockBtnText').text('Clock In');
+                    $('#clockBtn').removeAttr('data-done');
+                } else {
+                    isClockIn = false;
+                    $('#clockBtnText').text('Clock Out');
+                    $('#clockBtn').removeAttr('data-done').prop('disabled', false);
+                }
+            }, 'json');
+        });
     }
 
     function getAttendanceShiftAndInsert(reason) {
@@ -1924,7 +1935,8 @@
                         attendancedate: shift.attendancedate,
                         attendanceinserttype: shift.attendanceinserttype,
                         reason: (shift.attendanceinserttype == 1) ? (reason || '') : '',
-                        location_status: (shift.attendanceinserttype == 1) ? locationStatus : 1
+                        off_reason: (shift.attendanceinserttype == 2) ? (reason || '') : '',
+                        location_status: locationStatus,
                     },
                     dataType: 'json',
                     success: function(data) {
@@ -1935,8 +1947,9 @@
                     } else {
                         isClockIn = true;
                         $('#clockBtnText').text('Done');
-                        $('#clockBtn').prop('disabled', true);
-                        $('#clockBtn').attr('data-done', '1');
+                        $('#clockBtn').prop('disabled', true).attr('data-done', '1');
+                        $('#mark_location').prop('disabled', true);
+                        $('#clock_status').text('');
                     }
                     Swal.fire({ 
                         icon: 'success', 
@@ -1971,14 +1984,8 @@
     // Clock button 
     $('#clockBtn').on('click', function(e) {
         e.preventDefault();
-        if ($(this).attr('data-done') === '1') {
-        Swal.fire({ 
-            icon: 'info', 
-            title: 'Already Marked', 
-            text: 'You have already clocked in and clocked out today.' });
-        return;
-    }
-       if (isClockIn && locationStatus === 2) {
+        
+       if (locationStatus === 2) {
         $('#reasonBox').show();
         return;
     }
