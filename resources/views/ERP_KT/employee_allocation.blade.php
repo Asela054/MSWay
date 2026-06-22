@@ -4,12 +4,12 @@
 <main>
     <div class="page-header shadow">
         <div class="container-fluid d-none d-sm-block shadow">
-            @include('ERP_KT.erp_nav_bar')
+            @include('layouts.shift_nav_bar')
         </div>
         <div class="container-fluid">
             <div class="page-header-content py-3 px-2">
                 <h1 class="page-header-title ">
-                    <div class="page-header-icon"><i class="fa-light fa-industry"></i></div>
+                    <div class="page-header-icon"><i class="fa-light fa-business-time"></i></div>
                     <span>Employee Allocation</span>
                 </h1>
             </div>
@@ -200,8 +200,8 @@
 <script>
     $(document).ready(function() {
 
-        $('#erp_menu_link_KT').addClass('active');
-        $('#erp_menu_link_KT_icon').addClass('active');
+        $('#shift_menu_link').addClass('active');
+        $('#shift_menu_link_icon').addClass('active');
         $('#erp_kt_shiftot').addClass('navbtnactive');
 
         // Employee Select2 Initialization
