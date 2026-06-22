@@ -98,11 +98,11 @@ class OTApproveController extends Controller
                 $query->where('employees.emp_department', $department);
             }
 
-    if ($company) {
-        $query->where('employees.emp_company', $company);
-    } else if ($userCompanyIds) {
-        $query->whereIn('employees.emp_company', $userCompanyIds);
-    }
+            if ($company) {
+                $query->where('employees.emp_company', $company);
+            } else if ($userCompanyIds) {
+                $query->whereIn('employees.emp_company', $userCompanyIds);
+            }
 
             if (!empty($employee)) {
                 $query->where('employees.emp_id', $employee);
@@ -147,11 +147,14 @@ class OTApproveController extends Controller
 
 
             $shift_detail = DB::table('employeeshiftdetails')
-                ->join('shift_types', 'employeeshiftdetails.shift_id', '=', 'shift_types.id')
+                ->leftJoin('shift_types', 'employeeshiftdetails.shift_id', '=', 'shift_types.id')
+                ->leftJoin('employeeshifts', 'employeeshiftdetails.employeeshift_id', '=', 'employeeshifts.id')
                 ->select('employeeshiftdetails.*', 'shift_types.onduty_time', 'shift_types.offduty_time','shift_types.id as shiftid') 
                 ->where('employeeshiftdetails.emp_id', $emp_id)
                 ->whereDate('employeeshiftdetails.date_from', '<=', $date)
                 ->whereDate('employeeshiftdetails.until_time', '>=', $date)
+                ->where('employeeshiftdetails.status', 1)
+                ->where('employeeshifts.approval_status', 1)
                 ->first();
 
                 // Check if date is Saturday (Carbon::SATURDAY = 6)
@@ -159,9 +162,9 @@ class OTApproveController extends Controller
 
                 if ($shift_detail) {
 
-                    $on_duty_time = $att->onduty_time;
-                    $off_duty_time =  $att->offduty_time;
-                    $emp_shift_id = $att->shift_id;
+                    $on_duty_time = $shift_detail->onduty_time;
+                    $off_duty_time =  $shift_detail->offduty_time;
+                    $emp_shift_id = $shift_detail->shift_id;
                     $shift_until_time = $shift_detail->until_time;
 
                     //  // Custom logic for Saturday with shift is night in opma
@@ -189,7 +192,7 @@ class OTApproveController extends Controller
                         $on_duty_time = $roster_detail->onduty_time;
                         $off_duty_time = $roster_detail->offduty_time;
                         $emp_shift_id = $roster_detail->shiftid;
-                         $shift_until_time = null;
+                        $shift_until_time = null;
                     }else{
                         $on_duty_time = $att->onduty_time;
                         $off_duty_time =  $att->offduty_time;
