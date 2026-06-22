@@ -332,7 +332,6 @@ class LeaveController extends Controller
             }
             $current_weekly_taken = (new \App\Leave)->taken_weekly_leaves($empid, $month_from_date, $month_to_date);
 
-
             $leave_msg = '';
             $annualData = $this->leavePolicyService->calculateAnnualLeaves($employee->emp_join_date, $employee->emp_id, $job_categoryid);
             $annual_leaves = $annualData['annual_leaves'];
@@ -345,6 +344,7 @@ class LeaveController extends Controller
             $medical_leaves = $this->leavePolicyService->getMedicalLeaves($employee->job_category_id);
             $weekly_leaves = $this->leavePolicyService->getweeklyLeaves($employee->job_category_id);
 
+              //dd($weekly_leaves);
 
             $total_no_of_annual_leaves = $annual_leaves;
             $total_no_of_casual_leaves = $casual_leaves;
@@ -367,8 +367,8 @@ class LeaveController extends Controller
             $monthly_leaves = 3;
             $renew_next_month = 1;
             
+            // Remove poya days from weekly leaves
             if($settings &&  $settings->config_value == 4 && $monthly_leaves >0 &&  $renew_next_month){
-                
                    $employeedetails = DB::table('employees')
                         ->leftJoin('job_categories', 'job_categories.id',  '=', 'employees.job_category_id' )
                         ->select('job_categories.poya_covering_leave')
@@ -381,6 +381,7 @@ class LeaveController extends Controller
                   $available_no_of_annual_leaves = $total_no_of_annual_leaves - $current_year_taken_a_l;
             }
           
+
             if($employee->emp_status != 1){
                 $emp_status = DB::table('employment_statuses')->where('id', $employee->emp_status)->first();
                 $leave_msg = 'Casual Leaves - '.$emp_status->emp_status.' Employee can have only a half day per month (Not a permanent employee)';

@@ -9,6 +9,7 @@ use App\ShiftType;
 use Auth;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
 
 use Carbon\Carbon;
 
@@ -53,6 +54,132 @@ class EmployeeRosterController extends Controller
         return response()->json($shifts);
         
      }
+
+    // public function getRosterInfo(Request $request){
+    //     $user = Auth::user();
+    //     $permission = $user->can('employee-roster');
+    //     if (!$permission) {
+    //          return response()->json(['error' => 'UnAuthorized']);
+    //     }
+      
+    //     $departmentId = $request->get('department_id');
+    //     $selectedMonth = $request->get('selectedMonth');
+        
+    //     // Parse the string and start at the 1st day of that month
+    //     $startOfMonth = Carbon::parse($selectedMonth)->startOfMonth();
+    //     $daysInMonth = $startOfMonth->daysInMonth;
+
+    //     $datesList = [];
+
+    //     for ($i = 0; $i < $daysInMonth; $i++) {
+    //         // Clone the start date and add the current loop index days
+    //         $currentDate = $startOfMonth->copy()->addDays($i);
+
+    //         $datesList[] = [
+    //             'date'     => $currentDate->toDateString(),       // e.g., "2026-06-01"
+    //             'day_name' => $currentDate->format('l'),          // e.g., "Monday"
+    //             'short_day'=> $currentDate->format('D'),          // e.g., "Mon" (Optional)
+    //             'dateshortday'=> $currentDate->format('d D'),          // e.g., "Mon" (Optional)
+    //             'datemonth'=> $currentDate->format('m_d'),          // e.g., "Mon" (Optional)
+    //         ];
+    //     }
+
+    //     $employees = Employee::where('emp_department', $departmentId)
+    //         ->select('emp_id AS id', 'emp_name_with_initial As fullname','calling_name As callingname')
+    //         ->where('deleted', 0)
+    //         ->get();
+
+    //     $shifts = ShiftType::select('id', 'shift_code AS code')
+    //         ->where('deleted', 0)
+    //         ->get();
+
+    //     $date = Carbon::parse($selectedMonth);
+    //     $year = $date->year;   
+    //     $month = $date->month;
+    //     $yearmonthname = $date->format('Y F');
+
+    //     $roster = DB::table('employee_roster_details')
+    //         ->select(
+    //             'id', 
+    //             'shift_id', 
+    //             'emp_id', 
+    //             'work_date', 
+    //             'scheduling_status', 
+    //             'remark'
+    //         )
+    //         ->whereYear('work_date', $year)
+    //         ->whereMonth('work_date', $month)
+    //         ->get();
+
+    //     // Render blade view to HTML string and return
+    //     $html = view('roster.addeditrosterinfo', compact('employees', 'datesList', 'shifts', 'roster', 'yearmonthname'))->render();
+    //     return response($html, 200);
+    // }
+
+    public function getRosterInfo(Request $request){
+        $user = Auth::user();
+        if (!$user->can('employee-roster')) {
+            return response()->json(['error' => 'UnAuthorized']);
+        }
+
+        $departmentId  = $request->get('department_id');
+        $selectedMonth = $request->get('selectedMonth');
+
+        // Parse once, reuse
+        $date         = Carbon::parse($selectedMonth);
+        $year         = $date->year;
+        $month        = $date->month;
+        $yearmonthname = $date->format('Y F');
+        $startOfMonth = $date->copy()->startOfMonth();
+        $daysInMonth  = $startOfMonth->daysInMonth;
+
+        // Build dates list
+        $datesList = [];
+        for ($i = 0; $i < $daysInMonth; $i++) {
+            $currentDate = $startOfMonth->copy()->addDays($i);
+            $datesList[] = [
+                'date'         => $currentDate->toDateString(),
+                'day_name'     => $currentDate->format('l'),
+                'short_day'    => $currentDate->format('D'),
+                'dateshortday' => $currentDate->format('d D'),
+                'datemonth'    => $currentDate->format('m_d'),
+            ];
+        }
+
+        // Get employee IDs for this department first
+        $employees = Employee::where('emp_department', $departmentId)
+            ->where('deleted', 0)
+            ->select('emp_id AS id', 'emp_name_with_initial AS fullname', 'calling_name AS callingname')
+            ->get();
+
+        $employeeIds = $employees->pluck('id')->toArray();
+
+        $shifts = ShiftType::where('deleted', 0)
+            ->select('id', 'shift_code AS code')
+            ->get();
+
+        // Filter roster by department employees only
+        $rosterRaw = DB::table('employee_roster_details')
+            ->select('shift_id', 'emp_id', 'work_date')
+            ->whereYear('work_date', $year)
+            ->whereMonth('work_date', $month)
+            ->whereIn('emp_id', $employeeIds)   // only this department
+            ->get();
+
+        // Build lookup array: [emp_id][work_date] => [shift_id, shift_id, ...]
+        // This replaces the slow $roster->where() in blade
+        $rosterMap = [];
+        foreach ($rosterRaw as $row) {
+            $workDate = Carbon::parse($row->work_date)->toDateString();
+            $rosterMap[$row->emp_id][$workDate][] = $row->shift_id;
+        }
+
+        $html = view('roster.addeditrosterinfo', compact(
+            'employees', 'datesList', 'shifts', 'rosterMap', 'yearmonthname'
+        ))->render();
+
+        return response($html, 200);
+    }
 
      public function employee_list(Request $request)
      {

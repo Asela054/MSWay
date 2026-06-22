@@ -50,6 +50,7 @@
                                     <th>WORKING HOURS</th>
                                     <th>LEAVE DAYS</th>
                                     <th>NO PAY DAYS</th>
+                                    <th>NIGHT WORK DAYS</th>
                                     {{-- <th>Last Time Stamp</th> --}}
                                     {{-- <th>Action</th> --}}
                                 </tr>
@@ -260,6 +261,7 @@ $(document).ready(function () {
                 { data: 'working_hours', name: 'working_hours' },
                 { data: 'leave_days', name: 'leave_days' },
                 { data: 'no_pay_days', name: 'no_pay_days' },
+                { data: 'night_work_days', name: 'night_work_days' },
                 // { data: 'uid' ,
                 //     render : function ( data, type, row, meta ) {
 
@@ -448,7 +450,7 @@ $(document).on('click', '#approvel', function () {
     function showInitialMessage() {
         $('.response').html(
             '<tr>' +
-            '<td colspan="9" class="text-center py-5">' + // Changed colspan to 9 to match your columns
+            '<td colspan="10" class="text-center py-5">' + // Changed colspan to 9 to match your columns
             '<div class="d-flex flex-column align-items-center">' +
             '<i class="fas fa-filter fa-3x text-muted mb-2"></i>' +
             '<h4 class="text-muted mb-2">No Records Found</h4>' +

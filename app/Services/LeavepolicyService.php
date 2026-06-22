@@ -231,7 +231,9 @@ class LeavepolicyService
        $jobleaves = DB::table('job_category_leaves')->where('job_id', $jobCategoryId)->where('leave_id',8)->first();
         if($jobleaves){
             
-             $weekly_leaves = 4;
+             $leavescount = DB::table('leave_types')->where('id', 8)->value('assigned_leave');
+
+             $weekly_leaves = $leavescount ?? 0;
         }else{
              $weekly_leaves = 0;
         }

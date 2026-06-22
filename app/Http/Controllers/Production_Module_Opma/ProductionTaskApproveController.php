@@ -104,13 +104,12 @@ class ProductionTaskApproveController extends Controller
                     ];
           }
 
-          $totalProduction = DB::table('opma_daily_production_summary')
+        $totalProduction = DB::table('opma_daily_production_summary')
         ->whereBetween('date', [$from_date, $to_date])
         ->selectRaw('SUM(target) as total_target, SUM(produce) as total_produce')
         ->first();
-
         $overallAvgPerformance = ($totalProduction->total_target > 0) ? round(($totalProduction->total_produce / $totalProduction->total_target) * 100): 0;
-
+        
         $existingEmpIds = array_column($data, 'emp_id');
 
         $deptEmployees = DB::table('employees')
@@ -160,7 +159,210 @@ class ProductionTaskApproveController extends Controller
                 ];
             }
 
+        // QC Final Average Apply to Quality Manger and Final Qc Team     
+        $deptEmployees = DB::table('employees')
+            ->select(
+                'id as emp_auto_id',
+                'emp_id',
+                'emp_name_with_initial'
+            )
+            ->where('deleted', 0)
+            ->where('is_resigned', 0)
+            ->where('emp_department', 3)
+            ->get();
+            
+        $empIds = $deptEmployees->pluck('emp_id');
 
+        $totalProduction = DB::table('opma_daily_production_summary')
+        ->whereBetween('date', [$from_date, $to_date])
+        ->whereIn('emp_id', $empIds)
+        ->selectRaw('SUM(target) as total_target, SUM(produce) as total_produce')
+        ->first();
+        $overallAvgPerformance = ($totalProduction->total_target > 0) ? round(($totalProduction->total_produce / $totalProduction->total_target) * 100): 0;
+
+
+         $QCEmployees = DB::table('employees')
+            ->select(
+                'id as emp_auto_id',
+                'emp_id',
+                'emp_name_with_initial'
+            )
+            ->where('deleted', 0)
+            ->where('is_resigned', 0)
+            ->where('emp_department', 3)
+            ->whereIn('emp_job_code',[43,73,74])
+            ->get();
+
+             foreach ($QCEmployees as $emp) {
+
+                $salaryAdjustment = DB::table('salary_adjustments')
+                    ->where('emp_id', $emp->emp_id)
+                    ->where('remuneration_id', 34)
+                    ->select('amount')
+                    ->first();
+
+                if ($salaryAdjustment) {
+                    $baseAmount = $salaryAdjustment->amount;
+
+                    if ($overallAvgPerformance > 80) {
+                        $emp_perf_amount = $baseAmount;
+                    } elseif ($overallAvgPerformance >= 50 && $overallAvgPerformance <= 80) {
+                        $emp_perf_amount = ($overallAvgPerformance / 100) * $baseAmount;
+                    } else {
+                        $emp_perf_amount = 0;
+                    }
+                } else {
+                    $emp_perf_amount = 0;
+                }
+
+                $data[] = [
+                    'emp_auto_id'           => $emp->emp_auto_id,
+                    'emp_id'                => $emp->emp_id,
+                    'emp_name_with_initial' => $emp->emp_name_with_initial,
+                    'target_total'          => 0,
+                    'produce_total'         => 0,
+                    'bonus_total'           => 0,
+                    'perfomance'            => round($overallAvgPerformance, 2),
+                    'perfomance_total'      => round($emp_perf_amount, 2),
+                ];
+            }
+
+
+        // Machine Final Production Average Should Apply to Production Team Supervisors & Lining Cutter    
+            $deptEmployees = DB::table('employees')
+                ->select(
+                    'id as emp_auto_id',
+                    'emp_id',
+                    'emp_name_with_initial'
+                )
+                ->where('deleted', 0)
+                ->where('is_resigned', 0)
+                ->where('emp_department', 1)
+                ->get();
+                
+            $empIds = $deptEmployees->pluck('emp_id');
+
+            $totalProduction = DB::table('opma_daily_production_summary')
+            ->whereBetween('date', [$from_date, $to_date])
+            ->whereIn('emp_id', $empIds)
+            ->selectRaw('SUM(target) as total_target, SUM(produce) as total_produce')
+            ->first();
+            $overallAvgPerformance = ($totalProduction->total_target > 0) ? round(($totalProduction->total_produce / $totalProduction->total_target) * 100): 0;
+
+
+            $MachineEmployees = DB::table('employees')
+                ->select(
+                    'id as emp_auto_id',
+                    'emp_id',
+                    'emp_name_with_initial'
+                )
+                ->where('deleted', 0)
+                ->where('is_resigned', 0)
+                ->where('emp_department', 1)
+                ->whereIn('emp_job_code',[65,83])
+                ->get();
+
+                foreach ($MachineEmployees as $emp) {
+
+                    $salaryAdjustment = DB::table('salary_adjustments')
+                        ->where('emp_id', $emp->emp_id)
+                        ->where('remuneration_id', 34)
+                        ->select('amount')
+                        ->first();
+
+                    if ($salaryAdjustment) {
+                        $baseAmount = $salaryAdjustment->amount;
+
+                        if ($overallAvgPerformance > 80) {
+                            $emp_perf_amount = $baseAmount;
+                        } elseif ($overallAvgPerformance >= 50 && $overallAvgPerformance <= 80) {
+                            $emp_perf_amount = ($overallAvgPerformance / 100) * $baseAmount;
+                        } else {
+                            $emp_perf_amount = 0;
+                        }
+                    } else {
+                        $emp_perf_amount = 0;
+                    }
+
+                    $data[] = [
+                        'emp_auto_id'           => $emp->emp_auto_id,
+                        'emp_id'                => $emp->emp_id,
+                        'emp_name_with_initial' => $emp->emp_name_with_initial,
+                        'target_total'          => 0,
+                        'produce_total'         => 0,
+                        'bonus_total'           => 0,
+                        'perfomance'            => round($overallAvgPerformance, 2),
+                        'perfomance_total'      => round($emp_perf_amount, 2),
+                    ];
+                }
+
+           // Printing Final Production Average Should Apply to Printing Supervisor or Print Department Head    
+            $deptEmployees = DB::table('employees')
+                ->select(
+                    'id as emp_auto_id',
+                    'emp_id',
+                    'emp_name_with_initial'
+                )
+                ->where('deleted', 0)
+                ->where('is_resigned', 0)
+                ->where('emp_department', 5)
+                ->get();
+                
+            $empIds = $deptEmployees->pluck('emp_id');
+
+            $totalProduction = DB::table('opma_daily_production_summary')
+            ->whereBetween('date', [$from_date, $to_date])
+            ->whereIn('emp_id', $empIds)
+            ->selectRaw('SUM(target) as total_target, SUM(produce) as total_produce')
+            ->first();
+            $overallAvgPerformance = ($totalProduction->total_target > 0) ? round(($totalProduction->total_produce / $totalProduction->total_target) * 100): 0;
+
+
+            $MachineEmployees = DB::table('employees')
+                ->select(
+                    'id as emp_auto_id',
+                    'emp_id',
+                    'emp_name_with_initial'
+                )
+                ->where('deleted', 0)
+                ->where('is_resigned', 0)
+                ->where('emp_department', 5)
+                ->whereIn('emp_job_code',[77,78])
+                ->get();
+
+                foreach ($MachineEmployees as $emp) {
+
+                    $salaryAdjustment = DB::table('salary_adjustments')
+                        ->where('emp_id', $emp->emp_id)
+                        ->where('remuneration_id', 34)
+                        ->select('amount')
+                        ->first();
+
+                    if ($salaryAdjustment) {
+                        $baseAmount = $salaryAdjustment->amount;
+
+                        if ($overallAvgPerformance > 80) {
+                            $emp_perf_amount = $baseAmount;
+                        } elseif ($overallAvgPerformance >= 50 && $overallAvgPerformance <= 80) {
+                            $emp_perf_amount = ($overallAvgPerformance / 100) * $baseAmount;
+                        } else {
+                            $emp_perf_amount = 0;
+                        }
+                    } else {
+                        $emp_perf_amount = 0;
+                    }
+
+                    $data[] = [
+                        'emp_auto_id'           => $emp->emp_auto_id,
+                        'emp_id'                => $emp->emp_id,
+                        'emp_name_with_initial' => $emp->emp_name_with_initial,
+                        'target_total'          => 0,
+                        'produce_total'         => 0,
+                        'bonus_total'           => 0,
+                        'perfomance'            => round($overallAvgPerformance, 2),
+                        'perfomance_total'      => round($emp_perf_amount, 2),
+                    ];
+                }
 
          return response()->json(['data' => $data ?? []]);
     }

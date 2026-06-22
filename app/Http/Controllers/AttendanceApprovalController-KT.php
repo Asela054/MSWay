@@ -22,7 +22,6 @@ class AttendanceApprovalController extends Controller
             abort(403);
         }
 
-        $appName = config('app.name');
         return view('Attendent.attendanceapprovel');
     }
 
@@ -142,13 +141,6 @@ class AttendanceApprovalController extends Controller
             ->addColumn('no_pay_days', function ($row) use ($month, $closedate) {
                 if ($row->attendance_id) {
                     return $no_pay_days = (new \App\Leave)->get_no_pay_days($row->emp_id, $month, $closedate);
-                }
-                return 0;
-               
-            })
-             ->addColumn('night_work_days', function ($row) use ($month, $closedate) {
-                if ($row->attendance_id) {
-                    return $night_work_days = (new \App\OtApproved)->get_night_work_days($row->emp_id, $month, $closedate);
                 }
                 return 0;
                
@@ -427,6 +419,10 @@ class AttendanceApprovalController extends Controller
             $double_ot_hours = (new \App\OtApproved)->get_double_ot_hours_monthly($record->emp_id, $month, $closedate);
 
             $triple_ot_hours = (new \App\OtApproved)->get_triple_ot_hours_monthly($record->emp_id, $month, $closedate);
+
+            $normal_ot_hours_kt = (new \App\OtApproved)->get_ot_hours_monthly_ktClean($record->emp_id, $month, $closedate);
+
+            $normal_ot_hours = $normal_ot_hours +  $normal_ot_hours_kt; 
 
             $auditattedance = (new \App\Auditattendace)->apply_audit_attedance($record->emp_auto_id,$record->emp_id, $month);
             

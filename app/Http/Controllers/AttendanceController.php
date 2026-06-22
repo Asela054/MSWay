@@ -955,12 +955,13 @@ class AttendanceController extends Controller
 
 
             $employees = DB::table('employees')
-                ->join('branches', 'employees.emp_location', '=', 'branches.id')
-                ->join('fingerprint_devices', 'branches.id', '=', 'fingerprint_devices.location')
-                ->select('fingerprint_devices.sno', 'fingerprint_devices.location')
-                ->groupBy('fingerprint_devices.location')
+                ->leftjoin('branches', 'employees.emp_location', '=', 'branches.id')
+                ->select('employees.emp_location AS location')
+                ->groupBy('location')
                 ->where('employees.emp_id', $emp_id[$i])
                 ->get();
+
+            // dd($employees);
 
             if ($in_datetime[$i] != '') {
                $this->attendancePolicyService->attendanceInsertsingle_dep($emp_id[$i], $in_datetime[$i],$employees[0]->location , $date);

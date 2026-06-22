@@ -18,6 +18,7 @@ class employeeWorkRate extends Model
         'nopay_days',
         'normal_rate_otwork_hrs',
         'double_rate_otwork_hrs',
+        'day_off',
         'created_by',
         'updated_by',
         'created_at',

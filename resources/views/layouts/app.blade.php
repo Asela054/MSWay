@@ -897,6 +897,70 @@
         text-decoration: none !important;
         }
     
+
+        .div-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            overflow: hidden !important; /* Hide any scrollbars */
+            }
+
+            .custom-loader {
+            width: 100px;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            padding: 1px;
+            background: conic-gradient(rgba(0, 0, 0, 0), #0061f2) content-box;
+            -webkit-mask: repeating-conic-gradient(
+                rgba(0, 0, 0, 0) 0deg,
+                #000 1deg 8.333deg,
+                rgba(0, 0, 0, 0) 9.333deg 12deg
+            ), radial-gradient(
+                farthest-side,
+                rgba(0, 0, 0, 0) calc(98% - 16px),
+                #000 calc(100% - 16px)
+            );
+            mask: repeating-conic-gradient(
+                rgba(0, 0, 0, 0) 0deg,
+                #000 1deg 8.333deg,
+                rgba(0, 0, 0, 0) 9.333deg 12deg
+            ), radial-gradient(
+                farthest-side,
+                rgba(0, 0, 0, 0) calc(98% - 16px),
+                #000 calc(100% - 16px)
+            );
+            -webkit-mask-composite: destination-in;
+            mask-composite: intersect;
+            animation: spin .85s infinite steps(30);
+            }
+
+            @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+            }
+
+            .swal2-container {
+            overflow: hidden !important; 
+            }
+
+            .fullscreen-swal {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100vw !important;
+            height: 100vh !important; 
+            max-width: none !important; 
+            border-radius: 0 !important; 
+            background: transparent !important; 
+            box-shadow: none !important; 
+            padding: 0 !important; 
+            overflow-y: hidden;
+            }
     </style>
     
     @php if(Auth::user()->hasRole('Employee')){ @endphp

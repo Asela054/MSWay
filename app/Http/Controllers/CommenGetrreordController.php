@@ -296,6 +296,7 @@ class CommenGetrreordController extends Controller
         $dept_id = Input::get('dept');
         $emp_list = DB::table('employees')
             ->where('deleted', 0)
+            ->where('is_resigned', 0)
             ->where('emp_department', $dept_id)
             ->orderBy('emp_name_with_initial')
             ->get();
