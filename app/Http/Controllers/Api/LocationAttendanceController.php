@@ -273,7 +273,7 @@ class LocationAttendanceController extends Controller
     }
 
 
-      public function Singlelocationattendanceinsert(Request $request)
+    public function Singlelocationattendanceinsert(Request $request)
     {
         $location = $request->input('location_id');
         $empid = $request->input('emp_id');
@@ -285,11 +285,16 @@ class LocationAttendanceController extends Controller
         $location_status = $request->input('location_status');
         $off_reason = $request->input('off_reason');
 
+        $employees = DB::table('employees')
+            ->select('employees.emp_location as location')
+            ->where('employees.emp_id', $empid)
+            ->first();
+
         if($attendanceinserttype == 1){
             $attendance = new Jobattendance();
             $attendance->attendance_date = $attendancedate;
             $attendance->employee_id = $empid;
-            $attendance->shift_id =  $attendaceshift;
+            $attendance->shift_id = $attendaceshift;
             $attendance->on_time = $timestamp;
             $attendance->off_time = null;
             $attendance->reason = $reason;
@@ -302,101 +307,39 @@ class LocationAttendanceController extends Controller
             $attendance->updated_by = '0';
             $attendance->save();
 
-                } else{
+        } else {
 
-                    $attendance = DB::table('job_attendance')
-                                ->select('*')
-                                ->where('employee_id', $empid)
-                                ->where('attendance_date', $attendancedate)
-                                ->where('shift_id', $attendaceshift)
-                                ->first();
+            $attendance = DB::table('job_attendance')
+                ->select('*')
+                ->where('employee_id', $empid)
+                ->where('attendance_date', $attendancedate)
+                ->whereNull('off_time')
+                ->first();
 
-                    if ($attendance) {
-
-                            DB::table('job_attendance')
-                                ->where('employee_id', $empid)
-                                ->where('attendance_date', $attendancedate)
-                                ->where('shift_id', $attendaceshift)
-                                ->whereNull('off_time')
-                                ->update([
-                                    'off_time' => $timestamp,
-                                    'updated_by' => $empid ]);
-                    }
-                }
-
-
-            $employees = DB::table('employees')
-            ->select('employees.emp_location as location')
-            ->where('employees.emp_id', $empid)
-            ->first();
+            if ($attendance) {
+                DB::table('job_attendance')
+                    ->where('id', $attendance->id)
+                    ->update([
+                        'off_time' => $timestamp,
+                        'off_reason' => $off_reason,
+                        'location_status' => $location_status,
+                        'approve_status' => ($location_status == 1) ? '1' : '0',
+                        'updated_by' => $empid
+                    ]);
+            }
+        }
 
             if ($timestamp != '') {
-               $this->attendancePolicyService->attendanceInsertsingle_dep($empid, $timestamp,$employees->location , $attendancedate);
+            try {
+                $this->attendancePolicyService->attendanceInsertsingle_dep(
+                    $empid, $timestamp, $employees->location, $attendancedate
+                );
+            } catch (\Exception $e) {
+                \Log::error('AttendancePolicyService error: ' . $e->getMessage());
             }
+        }
 
-
-          
-                // $data = array(
-                // 'emp_id' =>  $empid,
-                // 'uid' =>  $empid,
-                // 'state' => 1,
-                // 'timestamp' => $timestamp,
-                // 'date' => $attendancedate,
-                // 'approved' => 0,
-                // 'type' => 255,
-                // 'devicesno' => '-',
-                // 'location' => $location );
-                // DB::table('attendances')->insert($data);
-
-
-
-         }else{
-
-             if($attendanceinserttype == 1){
-                $attendance = new Jobattendance();
-                $attendance->attendance_date = $attendancedate;
-                $attendance->employee_id = $empid;
-                $attendance->shift_id =  $attendaceshift;
-                $attendance->on_time = $timestamp;
-                $attendance->off_time = null;
-                $attendance->reason = $reason;
-                $attendance->location_id = $location;
-                $attendance->allocation_id = null;
-                $attendance->status = '1';
-                $attendance->location_status = '2';
-                $attendance->approve_status = '0';
-                $attendance->created_by = $empid;
-                $attendance->updated_by = '0';
-                $attendance->save();
-
-                } else{
-
-                    $attendance = DB::table('job_attendance')
-                                ->select('*')
-                                ->where('employee_id', $empid)
-                                ->where('attendance_date', $attendancedate)
-                                ->where('shift_id', $attendaceshift)
-                                ->first();
-
-                    if ($attendance) {
-
-                            DB::table('job_attendance')
-                                ->where('employee_id', $empid)
-                                ->where('attendance_date', $attendancedate)
-                                ->where('shift_id', $attendaceshift)
-                                ->whereNull('off_time')
-                                ->update([
-                                    'reason' =>  $reason,
-                                    'off_time' => $timestamp,
-                                    'location_status' => '2',
-                                    'approve_status' => '0',
-                                    'updated_by' => $empid ]);
-                    }
-                }
-
-         }
-
-        return (new BaseController)->sendResponse($attendance, 'Location Attendance Added Successfully');
+        return (new BaseController)->sendResponse(['status' => 'ok'], 'Location Attendance Added Successfully');
     }
 
 

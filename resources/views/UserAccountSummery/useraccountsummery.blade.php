@@ -1895,7 +1895,7 @@
                 $('#clock_status').text('');
                 return;
             }
-            $.post('{{ route("get.attendance.shift") }}', { empid: empid, date: new Date().toISOString().slice(0,10) }, function(shiftData) {
+            $.post('/api/v1/Getattendanceshift', { empid: empid, date: new Date().toISOString().slice(0,10) }, function(shiftData) {
                 var shift = shiftData.data ? shiftData.data : shiftData;
                 if (shift.attendanceinserttype == 1) {
                     isClockIn = true;
@@ -1917,7 +1917,7 @@
         $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') } });
 
         $.ajax({
-            url: '{{ route("get.attendance.shift") }}',
+            url: '/api/v1/Getattendanceshift',
             method: 'POST',
             data: { empid: empid, date: today },
             dataType: 'json',
@@ -1925,7 +1925,7 @@
                 var shift = shiftData.data ? shiftData.data : shiftData;
 
                 $.ajax({
-                    url: '{{ route("single.location.attendance") }}',
+                    url: '/api/v1/Singlelocationattendanceinsert',
                     method: 'POST',
                     data: {
                         location_id: branchId,

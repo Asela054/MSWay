@@ -1269,8 +1269,6 @@ Route::post('EmployeeLeaveApply',['uses' => 'UserAccountController@leaveapply', 
 Route::put('/employees/{id}/update-image', 'UserAccountController@updateImage')->name('employees.update-image');
 
 Route::get('/get-branch-coords/{id}', 'UserAccountController@getBranchCoords')->name('get.branch.coords');
-Route::post('/get-attendance-shift', 'Api\LocationAttendanceController@Getattendanceshift')->name('get.attendance.shift');
-Route::post('/single-location-attendance', 'Api\LocationAttendanceController@Singlelocationattendanceinsert')->name('single.location.attendance');
 Route::get('/check-attendance-completed/{empid}', 'UserAccountController@checkAttendanceCompleted')->name('check.attendance.completed');
 
 // Employee Shift Extend controller routes
