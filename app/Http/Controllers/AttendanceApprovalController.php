@@ -429,6 +429,8 @@ class AttendanceApprovalController extends Controller
             $triple_ot_hours = (new \App\OtApproved)->get_triple_ot_hours_monthly($record->emp_id, $month, $closedate);
 
             $auditattedance = (new \App\Auditattendace)->apply_audit_attedance($record->emp_auto_id,$record->emp_id, $month);
+
+            $night_work_days = (new \App\OtApproved)->get_night_work_days($record->emp_id, $month, $closedate);
             
             if(!empty($record->date)){
 				$year_rec = Carbon::createFromFormat('Y-m-d H:i:s', $record->date)->year;
@@ -558,6 +560,7 @@ class AttendanceApprovalController extends Controller
 							'double_rate_otwork_hrs' => 0,
 							'triple_rate_otwork_hrs' => 0,
                             'day_off' => 0,
+                            'night_days' => 0,
 							'created_at' => date('Y-m-d H:i:s'),
 							'updated_at' => date('Y-m-d H:i:s')
 						);
@@ -578,6 +581,7 @@ class AttendanceApprovalController extends Controller
 							'double_rate_otwork_hrs' => $double_ot_hours,
 							'triple_rate_otwork_hrs' => $triple_ot_hours,
                             'day_off' => $dayoff_leaves,
+                            'night_days' => $night_work_days,
 							'created_at' => date('Y-m-d H:i:s'),
 							'updated_at' => date('Y-m-d H:i:s')
 						);
@@ -599,6 +603,7 @@ class AttendanceApprovalController extends Controller
 							'double_rate_otwork_hrs' => 0,
 							'triple_rate_otwork_hrs' => 0,
                             'day_off' => 0,
+                            'night_days' => 0,
 							'created_at' => date('Y-m-d H:i:s'),
 							'updated_at' => date('Y-m-d H:i:s')
 						);
@@ -619,6 +624,7 @@ class AttendanceApprovalController extends Controller
 							'double_rate_otwork_hrs' => $double_ot_hours,
 							'triple_rate_otwork_hrs' => $triple_ot_hours,
                             'day_off' => $dayoff_leaves,
+                            'night_days' => $night_work_days,
 							'created_at' => date('Y-m-d H:i:s'),
 							'updated_at' => date('Y-m-d H:i:s')
 						);

@@ -89,7 +89,7 @@ class OtApproved extends Model
             ->where('employee_roster_details.emp_id', $emp_id)
             ->where('employee_roster_details.work_date', 'like', $month.'%')
             ->where('employee_roster_details.work_date', '<=', $closedate)
-            ->where('employee_roster_details.shift_id', '=', 4)
+            ->whereIn('employee_roster_details.shift_id', '=', [11,12])
             ->join('attendances', function ($join) use ($emp_id) {
                 $join->on(DB::raw('DATE(attendances.date)'), '=', 'employee_roster_details.work_date')
                     ->where('attendances.emp_id', '=', $emp_id);
