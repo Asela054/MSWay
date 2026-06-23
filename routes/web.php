@@ -1940,19 +1940,19 @@ Route::post('KTSpecial_Rate/update', 'ERP_KT\ERPSpecialRateController@update')->
 Route::get('KTSpecial_Rate/destroy/{id}', 'ERP_KT\ERPSpecialRateController@destroy');
 
 // Shift OT - Employee Allocation Controller Routes
-Route::resource('KTEmployee_Allocation', 'ERP_KT\ERPEmployeeAllocationController');
-Route::get('kt_employee_allocation',['uses' => 'ERP_KT\ERPEmployeeAllocationController@index', 'as' => 'kt_employee_allocation']);
-Route::post('ky_addEmployee_Allocation',['uses' => 'ERP_KT\ERPEmployeeAllocationController@store', 'as' => 'ky_addEmployee_Allocation']);
-Route::post('KTEmployee_Allocation/update', 'ERP_KT\ERPEmployeeAllocationController@update')->name('KTEmployee_Allocation.update');
-Route::get('KTEmployee_Allocation/destroy/{id}', 'ERP_KT\ERPEmployeeAllocationController@destroy');
-Route::post('KTEmployee_Allocation/destroy', 'ERP_KT\ERPEmployeeAllocationController@destroy')->name('KTEmployee_Allocation/destroy/');
-Route::post('/kt_employee_allocation_csv', 'ERP_KT\ERPEmployeeAllocationController@upload_csv')->name('kt_employee_allocation_csv');
+Route::resource('KTEmployee_Allocation', 'ERPEmployeeAllocationController');
+Route::get('kt_employee_allocation',['uses' => 'ERPEmployeeAllocationController@index', 'as' => 'kt_employee_allocation']);
+Route::post('ky_addEmployee_Allocation',['uses' => 'ERPEmployeeAllocationController@store', 'as' => 'ky_addEmployee_Allocation']);
+Route::post('KTEmployee_Allocation/update', 'ERPEmployeeAllocationController@update')->name('KTEmployee_Allocation.update');
+Route::get('KTEmployee_Allocation/destroy/{id}', 'ERPEmployeeAllocationController@destroy');
+Route::post('KTEmployee_Allocation/destroy', 'ERPEmployeeAllocationController@destroy')->name('KTEmployee_Allocation/destroy/');
+Route::post('/kt_employee_allocation_csv', 'ERPEmployeeAllocationController@upload_csv')->name('kt_employee_allocation_csv');
 
 // Shift OT - OT Approve Controller Routes
-Route::resource('KTOT_Approve', 'ERP_KT\ERPOTApproveController');
-Route::get('kt_ot_approve', ['uses' => 'ERP_KT\ERPOTApproveController@index', 'as' => 'kt_ot_approve']);
-Route::post('kt_ot_approve_generate', ['uses' => 'ERP_KT\ERPOTApproveController@otapprovegenerate', 'as' => 'kt_ot_approve_generate']);
-Route::post('kt_ot_approve_submit', ['uses' => 'ERP_KT\ERPOTApproveController@otapprovesubmit', 'as' => 'kt_ot_approve_submit']);
+Route::resource('KTOT_Approve', 'ERPOTApproveController');
+Route::get('kt_ot_approve', ['uses' => 'ERPOTApproveController@index', 'as' => 'kt_ot_approve']);
+Route::post('kt_ot_approve_generate', ['uses' => 'ERPOTApproveController@otapprovegenerate', 'as' => 'kt_ot_approve_generate']);
+Route::post('kt_ot_approve_submit', ['uses' => 'ERPOTApproveController@otapprovesubmit', 'as' => 'kt_ot_approve_submit']);
 // End of KT Clean Routes
 
 // Attendance Approval Controller Routes
