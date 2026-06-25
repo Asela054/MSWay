@@ -428,6 +428,8 @@ class AttendanceApprovalController extends Controller
 
             $triple_ot_hours = (new \App\OtApproved)->get_triple_ot_hours_monthly($record->emp_id, $month, $closedate);
 
+            $normal_ot_hours_additional = (new \App\OtApproved)->get_ot_hours_monthly_ktClean($record->emp_id, $month, $closedate);
+
             $auditattedance = (new \App\Auditattendace)->apply_audit_attedance($record->emp_auto_id,$record->emp_id, $month);
 
             $night_work_days = (new \App\OtApproved)->get_night_work_days($record->emp_id, $month, $closedate);
@@ -561,6 +563,7 @@ class AttendanceApprovalController extends Controller
 							'triple_rate_otwork_hrs' => 0,
                             'day_off' => 0,
                             'night_days' => 0,
+                            'additional_OT' => 0,
 							'created_at' => date('Y-m-d H:i:s'),
 							'updated_at' => date('Y-m-d H:i:s')
 						);
@@ -582,6 +585,7 @@ class AttendanceApprovalController extends Controller
 							'triple_rate_otwork_hrs' => $triple_ot_hours,
                             'day_off' => $dayoff_leaves,
                             'night_days' => $night_work_days,
+                            'additional_OT' => $normal_ot_hours_additional,
 							'created_at' => date('Y-m-d H:i:s'),
 							'updated_at' => date('Y-m-d H:i:s')
 						);
@@ -604,6 +608,7 @@ class AttendanceApprovalController extends Controller
 							'triple_rate_otwork_hrs' => 0,
                             'day_off' => 0,
                             'night_days' => 0,
+                            'additional_OT' => 0,
 							'created_at' => date('Y-m-d H:i:s'),
 							'updated_at' => date('Y-m-d H:i:s')
 						);
@@ -625,6 +630,7 @@ class AttendanceApprovalController extends Controller
 							'triple_rate_otwork_hrs' => $triple_ot_hours,
                             'day_off' => $dayoff_leaves,
                             'night_days' => $night_work_days,
+                            'additional_OT' => $normal_ot_hours_additional,
 							'created_at' => date('Y-m-d H:i:s'),
 							'updated_at' => date('Y-m-d H:i:s')
 						);

@@ -20,6 +20,7 @@ class employeeWorkRate extends Model
         'double_rate_otwork_hrs',
         'day_off',
         'night_days',
+        'additional_OT',
         'created_by',
         'updated_by',
         'created_at',

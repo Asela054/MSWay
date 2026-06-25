@@ -43,9 +43,11 @@ class MealallowanceapproveController extends Controller
         if ($selectedmonth) {
             $firstDate = Carbon::createFromFormat('Y-m', $selectedmonth)->startOfMonth()->toDateString();
             $lastDate = Carbon::createFromFormat('Y-m', $selectedmonth)->endOfMonth()->toDateString();
+            $month = $selectedmonth;
         }else{
             $firstDate =  $request->input('from_date');
             $lastDate = $request->input('to_date');
+            $month = Carbon::parse($firstDate)->format('Y-m');
         }
         
         // Get accessible employee IDs based on user access rights
@@ -71,7 +73,7 @@ class MealallowanceapproveController extends Controller
             'payroll_profiles.basic_salary as basicsalary',
             'payroll_profiles.id as payroll_profiles_id')
         ->where('employees.emp_department', '=', $department)
-        ->where('payroll_profiles.payroll_process_type_id', '=',1)
+        //->where('payroll_profiles.payroll_process_type_id', '=',1)
         ->where('employees.deleted', '=',0)
         ->where('employees.is_resigned', '=',0)
         ->whereIn('employees.emp_id', $accessibleEmployeeIds)
@@ -82,6 +84,7 @@ class MealallowanceapproveController extends Controller
         ->get();
         // dd(DB::getQueryLog());
 
+       
         foreach ($query as $row) {
             // if($row->empid==7){
                 $empId = $row->empid;
@@ -154,14 +157,8 @@ class MealallowanceapproveController extends Controller
                 // $approvedallowancestatus = $approvedallowance ? 1 : 0;
                 $approvedallowancestatus = 0;
                 
-                $totalWorkingDays = DB::table('attendances')
-                    ->where('emp_id', $empId)
-                    ->whereBetween('date', [$firstDate, $lastDate])
-                    ->whereNull('deleted_at')
-                    ->distinct('date')
-                    ->count('date');
 
-                $totalWorkingDays;
+                $totalWorkingDays = (new \App\Attendance)->get_work_days($empId, $month, $lastDate);
 
                 $leavecount = DB::table('leaves')
                     ->select(DB::raw('IFNULL(SUM(no_of_days), 0) as total_days'))
@@ -408,8 +405,10 @@ class MealallowanceapproveController extends Controller
                     // echo $totalLeaveDays."-->".$empId."<br>";
 
                     if($allowancetype == 1){
+                        
                         $totalamount = $totalWorkingDays * $allowanceamount;
                         $monthlyremain = $totalamount;
+
                     }else{
                         if($workingDays>0){
                             $daliyamount = $allowanceamount /  $workingDays;
