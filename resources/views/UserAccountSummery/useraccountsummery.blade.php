@@ -364,7 +364,15 @@
                                                     <div class="card shadow-none bg-transparent">
                                                         <div class="card-body">
                                                             <div class="row">
+                                                                <div class="col-sm-12 col-md-6 col-lg-3 col-xl-3">
+                                                                    <div class="form-group">
+                                                                        <label for="productionmonth" class="col-form-label col-form-label-sm font-weight-bold text-dark">Month</label>
+                                                                        <input type="month" class="form-control form-control-sm" id="productionmonth" name="productionmonth" value="{{ date('Y-m') }}" max="{{ date('Y-m') }}">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
                                                                 <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                                                                    <hr>
                                                                     <div class="center-block fix-width scroll-inner">
                                                                         <table class="table table-striped table-sm small nowrap" style="width: 100%" id="productiondataTable">
                                                                             <thead>
@@ -384,7 +392,7 @@
                                                                         </table>
                                                                     </div>
                                                                 </div>
-                                                            </div>
+
                                                         </div>
                                                     </div>  
                                                 </div> 
@@ -444,8 +452,9 @@
                                                                                 <th>OT Hr:Mi</th>
                                                                                 <th>DOT Hr:Mi</th>
                                                                                 <th>TOT Hr:Mi</th>
-                                                                                <th>Leave Type</th>
-                                                                                <th>Leave Day</th>
+                                                                                <th>LEAVE TYPE</th>
+                                                                                <th>LEAVE DAY</th>
+                                                                                <th>Target Achivement</th>
                                                                             </tr>
                                                                         </thead>
                                                                         <tbody></tbody>
@@ -1344,6 +1353,11 @@
         // Also run on page load
         fetchEmployeeData();
 
+        //Production Timesheet tab
+        $('#productionmonth').change(function () {
+            load_production_dt();
+        });
+
         $('#attendancemonth').change(function () {
             attendent_load_dt(empid);
         });
@@ -1360,9 +1374,16 @@
         });
 
 
+        load_production_dt();
+
+        // load production datatable
+        function load_production_dt() {
+        var productionmonth = $('#productionmonth').val();
+        if ($.fn.DataTable.isDataTable('#productiondataTable')) {
+            $('#productiondataTable').DataTable().destroy();
+        }
         $('#productiondataTable').DataTable({
-             "destroy": true,
-                    "processing": true,
+             "processing": true,
                     "serverSide": true,
                     dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
                         "<'row'<'col-sm-5'i><'col-sm-7'p>>",
@@ -1402,7 +1423,9 @@
                          url: scripturl + '/Opma_Production/daily_employee_productionsummary_list.php',
                          type: 'POST',
                          data : 
-                            { employee :empid},
+                            { employee :empid,
+                              productionmonth :productionmonth
+                            },
                     },
                     columns: [
                         { data: 'emp_name', name: 'emp_name' },
@@ -1431,8 +1454,11 @@
                             }
                         },
                           { data: 'damage', name: 'damage' }
-                    ]
+                    ],
+                    "bDestroy": true
         });
+        } 
+        // end load_production_dt
 
 
 
@@ -1784,11 +1810,19 @@
                 tbody.empty();
 
                 if (!result || result.length === 0) {
-                    tbody.append('<tr><td colspan="12" class="text-center">No data found.</td></tr>');
+                    tbody.append('<tr><td colspan="13" class="text-center">No data found.</td></tr>');
                     return;
                 }
 
+                // Get _production_map from controller
+                var productionMap = {};
+                if (result._production_map) {
+                    productionMap = result._production_map;
+                    result = result._records;
+                }
+
                 $.each(result, function(i, row) {
+                    var aveg = productionMap[row.in_date] !== undefined ? productionMap[row.in_date] + '%' : '';
                     var tr;
                     if (row.in_time == null && row.leave_type == '') {
                         tr = '<tr>' +
@@ -1798,7 +1832,8 @@
                             '<td>' + (row.shift || '') + '</td>' +
                             '<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>' +
                             '<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>' +
-                            '<td>&nbsp;</td><td>&nbsp;</td></tr>';
+                            '<td>&nbsp;</td><td>&nbsp;</td>' +
+                            '<td>' + aveg + '</td></tr>';
                     } else if (row.in_time == null && row.leave_type != '') {
                         tr = '<tr>' +
                             '<td>' + (row.in_date || '') + '</td>' +
@@ -1808,7 +1843,8 @@
                             '<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>' +
                             '<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>' +
                             '<td>' + (row.leave_type || '') + '</td>' +
-                            '<td>' + (row.leave_days || '') + '</td></tr>';
+                            '<td>' + (row.leave_days || '') + '</td>' +
+                            '<td>' + aveg + '</td></tr>';
                     } else {
                         tr = '<tr>' +
                             '<td>' + (row.in_date || '') + '</td>' +
@@ -1822,7 +1858,8 @@
                             '<td>' + (row.double_ot || 0) + '</td>' +
                             '<td>' + (row.triple_ot || 0) + '</td>' +
                             '<td>' + (row.leave_type || '') + '</td>' +
-                            '<td>' + (row.leave_days || 0) + '</td></tr>';
+                            '<td>' + (row.leave_days || 0) + '</td>' +
+                            '<td>' + aveg + '</td></tr>';
                     }
                     tbody.append(tr);
                 });
@@ -1842,7 +1879,7 @@
                 });
             },
             error: function() {
-                $('#timesheettable tbody').html('<tr><td colspan="12" class="text-center text-danger">Error loading data.</td></tr>');
+                $('#timesheettable tbody').html('<tr><td colspan="13" class="text-center text-danger">Error loading data.</td></tr>');
             }
         });
     }

@@ -198,7 +198,22 @@ class UserAccountController extends Controller
             ];
         }
 
-        return response()->json($attendanceRecords);
+        // Fetch daily production averages
+        $productionRows = DB::table('opma_daily_production_summary')
+            ->select('date', DB::raw('ROUND((produce / NULLIF(target, 0)) * 100, 2) AS daily_aveg'))
+            ->where('emp_id', $emp_id_str)
+            ->whereBetween('date', [$from_date, $to_date])
+            ->get();
+
+        $productionMap = [];
+        foreach ($productionRows as $prod) {
+            $productionMap[$prod->date] = $prod->daily_aveg;
+        }
+
+        return response()->json([
+            '_records'        => $attendanceRecords,
+            '_production_map' => $productionMap,
+        ]);
     }
 
     public function get_employee_monthlysummery(Request $request)
