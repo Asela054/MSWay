@@ -178,18 +178,18 @@ class SalaryAdvanceController extends Controller
         // Check minimum attendance days in the requested month
         if (!is_null($employee->salary_advance_min_date) && $employee->salary_advance_min_date > 0) {
             $monthStart = $referenceDate->copy()->startOfMonth()->toDateString();
-            $monthEnd   = $referenceDate->copy()->endOfMonth()->toDateString();
+            $selectedDate = $referenceDate->toDateString();
 
             $attendedDays = DB::table('attendances')
                 ->where('emp_id', $employee->emp_id)
-                ->whereBetween('date', [$monthStart, $monthEnd])
+                ->whereBetween('date', [$monthStart, $selectedDate])
                 ->distinct('date')
                 ->count('date');
 
             if ($attendedDays < $employee->salary_advance_min_date) {
                 return response()->json([
                     'available_amount' => 0,
-                    'errors' => 'Minimum attendance of ' . $employee->salary_advance_min_date . ' day(s) not reached for this month. Current attendance: ' . $attendedDays . ' day(s).'
+                    'errors' => 'Minimum attendance of ' . $employee->salary_advance_min_date . ' day(s) not reached up to the selected date. Current attendance: ' . $attendedDays . ' day(s).'
                 ]);
             }
         }
