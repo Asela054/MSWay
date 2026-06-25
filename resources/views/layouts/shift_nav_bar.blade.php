@@ -9,6 +9,12 @@
         <!-- <a role="button" class="btn navbtncolor" href="{{ route('AdditionalShift.index') }}" id="additional_shift_link">Additional Shifts <span class="caret"></span></a> -->
       
         <a role="button" class="btn navbtncolor" href="{{ route('employeeshift') }}" id="employeeshift_link">Additional Work Hours Assign <span class="caret"></span></a>
+
+          <a role="button" data-toggle="dropdown" class="btn navbtncolor" href="#" id="erp_kt_shiftot">Addtional Shift OT<span class="caret"></span></a>
+            <ul class="dropdown-menu multi-level dropdownmenucolor" role="menu" aria-labelledby="dropdownMenu">
+              <li><a class="dropdown-item" href="{{ route('kt_employee_allocation')}}">Employee Allocation</a></li>
+              <li><a class="dropdown-item" href="{{ route('kt_ot_approve')}}">OT Approve</a></li>
+          </ul>
         
         <!-- <a role="button" class="btn navbtncolor" href="{{ route('empshiftextend') }}" id="employeeshift_extend_link">Employee Shift Extend Assign <span class="caret"></span></a> -->
         

@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\ERP_KT;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\ERP_KT\EmployeeAllocation;
+use App\EmployeeAllocation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -27,7 +27,7 @@ class ERPEmployeeAllocationController extends Controller
 
         $shifts = DB::table('shift_types')->where('deleted', 0)->orderBy('id', 'asc')->get();
 
-        return view('ERP_KT.employee_allocation', compact('shifts'));
+        return view('EmployeeShift.employee_allocation', compact('shifts'));
     }
 
     public function store(Request $request)

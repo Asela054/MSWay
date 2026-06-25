@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\ERP_KT;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -19,7 +19,7 @@ class ERPOTApproveController extends Controller
         }
 
         $remunerations = DB::table('remunerations')->select('*')->where('remuneration_type', 'Addition')->get();
-        return view('ERP_KT.ot_approve', compact('remunerations'));
+        return view('EmployeeShift.ot_approve', compact('remunerations'));
     }
 
     public function otapprovegenerate(Request $request)
