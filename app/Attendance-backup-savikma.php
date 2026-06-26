@@ -17,50 +17,60 @@ class Attendance extends Model
 
     use softDeletes;
 
-    public function get_work_days($emp_id, $month,$closedate)
+    public function get_work_days($emp_id, $month, $closedate)
     {
+        $shiftQuery = "SELECT st.onduty_time, st.offduty_time 
+                FROM employees emp 
+                JOIN shift_types st ON emp.emp_shift = st.id 
+                WHERE emp.emp_id = $emp_id 
+                LIMIT 1";
 
-         $shiftQuery = "SELECT st.onduty_time, st.offduty_time 
-                   FROM employees emp 
-                   JOIN shift_types st ON emp.emp_shift = st.id 
-                   WHERE emp.emp_id = $emp_id 
-                   LIMIT 1";
-    
-            $shiftInfo = \DB::select($shiftQuery);
-            
-            if (empty($shiftInfo)) {
-                $expectedHours = 8;
-                $halfDayHours = 4;
-            } else {
-                $shift = $shiftInfo[0];
-                
-                   // Parse times using Carbon
-                $ondutyTime = Carbon::parse($shift->onduty_time);
-                $offdutyTime = Carbon::parse($shift->offduty_time);
-                
-                 $expectedHours = $ondutyTime->diffInHours($offdutyTime);
-                 $halfDayHours = $expectedHours / 2;
-            }
+        $shiftInfo = \DB::select($shiftQuery);
 
-         $empjob_cat = DB::table('employees')
-            ->leftJoin('job_categories', 'job_categories.id' , '=', 'employees.job_category_id')
+        if (empty($shiftInfo)) {
+            $expectedHours = 8;
+            $halfDayHours = 4;
+        } else {
+            $shift = $shiftInfo[0];
+            $ondutyTime = Carbon::parse($shift->onduty_time);
+            $offdutyTime = Carbon::parse($shift->offduty_time);
+            $expectedHours = $ondutyTime->diffInHours($offdutyTime);
+            $halfDayHours = $expectedHours / 2;
+        }
+
+        $empjob_cat = DB::table('employees')
+            ->leftJoin('job_categories', 'job_categories.id', '=', 'employees.job_category_id')
             ->select('job_categories.full_day_work_hours')
             ->where('emp_id', $emp_id)
             ->first();
 
         $full_day_work_hours = $empjob_cat ? $empjob_cat->full_day_work_hours : 8;
 
-        $query = "SELECT Max(at1.timestamp) as lasttimestamp,
-        Min(at1.timestamp) as firsttimestamp
-        FROM attendances as at1
-        WHERE at1.emp_id = $emp_id
-        AND at1.date LIKE '$month%'
-        AND at1.date <= '$closedate'
-        AND at1.deleted_at IS NULL
-        group by at1.uid, at1.date
-        ";
-        $attendance = \DB::select($query);
+        if ($month === '2026-05') {
+            $startDate = '2026-05-27';
+            $query = "SELECT Max(at1.timestamp) as lasttimestamp,
+                Min(at1.timestamp) as firsttimestamp
+                FROM attendances as at1
+                WHERE at1.emp_id = $emp_id
+                AND at1.date >= '$startDate'
+                AND at1.date <= '$closedate'
+                AND at1.deleted_at IS NULL
+                group by at1.uid, at1.date
+                ";
+        } else {
+            $query = "SELECT Max(at1.timestamp) as lasttimestamp,
+                Min(at1.timestamp) as firsttimestamp
+                FROM attendances as at1
+                WHERE at1.emp_id = $emp_id
+                AND at1.date LIKE '$month%'
+                AND at1.date <= '$closedate'
+                AND at1.deleted_at IS NULL
+                group by at1.uid, at1.date
+                ";
+        }
 
+        $attendance = \DB::select($query);
+        
         $work_days = 0;
         foreach ($attendance as $att) {
 
@@ -73,20 +83,20 @@ class Attendance extends Model
                 ->where('work_level', '=', '2')
                 ->first();
 
-            if(!EMPTY($holiday_check)){
+            if (!empty($holiday_check)) {
                 continue;
             }
 
             $work_days++;
-            //get difference in hours
-           $diff = round((strtotime($last_time) - strtotime($first_time)) / 3600, 1);
+            $diff = round((strtotime($last_time) - strtotime($first_time)) / 3600, 1);
 
             if ($diff >= $full_day_work_hours) {
                 $work_days++;
-            } else{
+            } else {
                 $work_days += 0.5;
             }
         }
+
         return $work_days;
     }
 

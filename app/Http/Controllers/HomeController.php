@@ -339,22 +339,42 @@ class HomeController extends Controller
 
         $events = array_merge($birthdayEvents, $holidayEvents);
 
-        
-        return view('home', compact(
-            'empcount',
-            'todaycount',
-            'todaylatecount',
-            'yesterdaycount',
-            'yesterdaylatecount',
-            'todayBirthdayCount',
-            'thisweekBirthdayCount',
-            'thismonthBirthdayCount',
-            'nextmonthBirthdayCount',
-            'leavedatalist',
-            'events',
-            'companiesAttendanceData'
-        ));
+        $appName = config('app.name');
+         if($appName == 'OpmaHRM'){
 
+             return view('opmahome', compact(
+                'empcount',
+                'todaycount',
+                'todaylatecount',
+                'yesterdaycount',
+                'yesterdaylatecount',
+                'todayBirthdayCount',
+                'thisweekBirthdayCount',
+                'thismonthBirthdayCount',
+                'nextmonthBirthdayCount',
+                'leavedatalist',
+                'events',
+                'companiesAttendanceData'
+            ));
+
+         }else{
+             return view('home', compact(
+                'empcount',
+                'todaycount',
+                'todaylatecount',
+                'yesterdaycount',
+                'yesterdaylatecount',
+                'todayBirthdayCount',
+                'thisweekBirthdayCount',
+                'thismonthBirthdayCount',
+                'nextmonthBirthdayCount',
+                'leavedatalist',
+                'events',
+                'companiesAttendanceData'
+            ));
+
+         }
+       
     }
 
     public function nextmonth_birthday() {
