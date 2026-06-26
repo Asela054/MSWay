@@ -2071,7 +2071,7 @@
                 $('#clock_status').text('');
                 return;
             }
-            $.post('/api/v1/Getattendanceshift', { empid: empid, date: new Date().toISOString().slice(0,10) }, function(shiftData) {
+            $.post('/api/v1/Getattendanceshift', { empid: empid, date: new Date(new Date().getTime() + 5.5*60*60*1000).toISOString().slice(0,10) }, function(shiftData) {
                 var shift = shiftData.data ? shiftData.data : shiftData;
                 if (shift.attendanceinserttype == 1) {
                     isClockIn = true;
@@ -2088,7 +2088,7 @@
 
     function getAttendanceShiftAndInsert(reason) {
         var branchId = $('#mark_location').val();
-        var today = new Date().toISOString().slice(0,10);
+        var today = new Date(new Date().getTime() + 5.5*60*60*1000).toISOString().slice(0,10);
 
         $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') } });
 
@@ -2106,7 +2106,7 @@
                     data: {
                         location_id: branchId,
                         emp_id: empid,
-                        timestamp: new Date().toISOString().slice(0,19).replace('T',' '),
+                        timestamp: (function(){ var d = new Date(new Date().getTime() + 5.5*60*60*1000); return d.toISOString().slice(0,19).replace('T',' '); })(),
                         attendaceshift: shift.attendaceshift,
                         attendancedate: shift.attendancedate,
                         attendanceinserttype: shift.attendanceinserttype,
