@@ -194,9 +194,19 @@
                     maxDate: endDate,
                     disableMobile: true,
                     onChange: function (selectedDates) {
-                        let formattedDates = selectedDates.map(date => 
-                            date.toISOString().split('T')[0]
-                        ).join(',');
+                        let [year, month] = $('#month').val().split('-');
+                        let formattedDates = selectedDates
+                            .filter(date => 
+                                date.getFullYear() === parseInt(year) && 
+                                (date.getMonth() + 1) === parseInt(month)
+                            )
+                            .map(date => {
+                                let y = date.getFullYear();
+                                let m = String(date.getMonth() + 1).padStart(2, '0');
+                                let d = String(date.getDate()).padStart(2, '0');
+                                return `${y}-${m}-${d}`;
+                            })
+                            .join(',');
                         $('#selected_dates').val(formattedDates);
                     }
                 });
