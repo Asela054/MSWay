@@ -220,7 +220,7 @@
                                                 </div>
                                                 <div class="col-md-3 col-6">
                                                     <label class="small font-weight-bold text-dark">After how hours W.Days Double? <span class="text-danger">*</span></label>
-                                                    <input type="number" name="week_after_double" id="week_after_double" class="form-control form-control-sm" required />
+                                                    <input type="number" name="week_after_double" step="0.01" id="week_after_double" class="form-control form-control-sm" required />
                                                 </div>
                                                 <div class="col-md-3 col-6">
                                                     <label class="small font-weight-bold text-dark">Morning OT Applicable</label>
