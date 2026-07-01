@@ -58,6 +58,12 @@ if (!empty($_POST['from_date']) && !empty($_POST['to_date'])) {
     $to_date = $_POST['to_date'];
     $sql .= " AND `ep`.`date` BETWEEN '$from_date' AND '$to_date'";
 }
+if (!empty($_POST['productionmonth'])) {
+    $productionmonth = $_POST['productionmonth']; // format: YYYY-MM
+    $from_date = $productionmonth . '-01';
+    $to_date = date('Y-m-t', strtotime($from_date));
+    $sql .= " AND `ep`.`date` BETWEEN '$from_date' AND '$to_date'";
+}
 
 $joinQuery = "FROM (" . $sql . ") as `u`";
 
