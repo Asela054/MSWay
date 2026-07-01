@@ -1976,6 +1976,10 @@ Route::get('rpt_assigned_devices',['uses' => 'RptAssignedDevicesController@getas
 
 Route::get('opma_machinechart', ['uses' => 'Additionals\OpmaDashdoardController@machinechart', 'as' => 'opma_machinechart']);
 
+//all timestapmp report controller
+Route::get('/timestampreport' ,'RpttimestampsController@index')->name('timestampreport');
+Route::get('/generate_timestamp_report' ,'RpttimestampsController@generate_timestamp_report')->name('generate_timestamp_report');
+
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');
     Artisan::call('config:clear');

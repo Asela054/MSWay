@@ -10,6 +10,7 @@
             <li><a class="dropdown-item" href="{{ route('ot_report')}}">O.T. Report</a></li>
             <li><a class="dropdown-item" href="{{ route('no_pay_report')}}">No Pay Report</a></li>
             <li><a class="dropdown-item" id="absent_report_link" href="{{ route('employee_absent_report') }}">Employee Absent Report</a></li>
+            <li><a class="dropdown-item" href="{{ route('timestampreport')}}">All Timestamp Report</a></li>
         </ul>
   </div>
 
