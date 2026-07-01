@@ -1974,6 +1974,7 @@ Route::get('daily_summary_approve', 'DailysummaryapprovControllr@index')->name('
 //Assigned Devices Report
 Route::get('rpt_assigned_devices',['uses' => 'RptAssignedDevicesController@getassigneddevicelist', 'as' => 'rpt_assigned_devices']);
 
+Route::get('opma_machinechart', ['uses' => 'Additionals\OpmaDashdoardController@machinechart', 'as' => 'opma_machinechart']);
 
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');
