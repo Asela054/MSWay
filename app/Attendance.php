@@ -77,9 +77,8 @@ class Attendance extends Model
                 continue;
             }
 
-            $work_days;
-            //get difference in hours
-           $diff = round((strtotime($last_time) - strtotime($first_time)) / 3600, 1);
+            // $work_days++;
+            $diff = round((strtotime($last_time) - strtotime($first_time)) / 3600, 1);
 
             if ($diff >= $full_day_work_hours) {
                 $work_days++;
