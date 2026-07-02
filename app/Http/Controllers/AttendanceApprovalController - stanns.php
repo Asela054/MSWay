@@ -97,7 +97,6 @@ class AttendanceApprovalController extends Controller
         if ($department != '' && $department != 'All') {
             $query->where(['departments.id' => $department]);
         }
-
         $query->where('employees.deleted', 0);
         $query->where('employees.is_resigned', 0);
         
@@ -428,7 +427,9 @@ class AttendanceApprovalController extends Controller
 
             $triple_ot_hours = (new \App\OtApproved)->get_triple_ot_hours_monthly($record->emp_id, $month, $closedate);
 
-            $normal_ot_hours_additional = (new \App\OtApproved)->get_ot_hours_monthly_ktClean($record->emp_id, $month, $closedate);
+           // $normal_ot_hours_additional = (new \App\OtApproved)->get_ot_hours_monthly_ktClean($record->emp_id, $month, $closedate);
+              $normal_ot_hours_additional = 0;
+
 
             $auditattedance = (new \App\Auditattendace)->apply_audit_attedance($record->emp_auto_id,$record->emp_id, $month);
 
@@ -499,12 +500,15 @@ class AttendanceApprovalController extends Controller
 
 				//Insert Work Rate Table
 				if($workHourDate === "Hour"){//Daily Or Weekly Salary
+               
 					foreach ($dateRange as $todayDate) {
 						$ignoredate = DB::table('ignore_days')
 							->select('ignore_days.*')
 							->whereDate('date', $todayDate)
 							->first();
-	
+
+                             dd($dateRange);
+                            
 						if(!$ignoredate){
 							 $query = DB::table('attendances as at1')
                                         ->select(
@@ -524,20 +528,20 @@ class AttendanceApprovalController extends Controller
                                 $count = count($timestamps);
 
                                 // skip if odd number of timestamps
-                                if ($count % 2 !== 0) {
-                                    continue;
-                                }
+                                    if ($count % 2 === 0) {
+                                        $totalMinutes = 0;
 
-                                for ($i = 0; $i < $count; $i += 2) {
-                                    $in  = Carbon::parse($timestamps[$i]);
-                                    $out = Carbon::parse($timestamps[$i + 1]);
+                                        for ($i = 0; $i < $count; $i += 2) {
+                                        $in  = Carbon::parse($timestamps[$i])->second(0);
+                                        $out = Carbon::parse($timestamps[$i + 1])->second(0);
 
-                                    if ($in && $out && $in != $out) {
-                                        $diffInMinutes = $in->diffInMinutes($out);
-                                        $workHours = round($diffInMinutes / 60, 2);
-                                        $totalworkHours += $workHours;
+                                            if ($in && $out && $in != $out) {
+                                                $totalMinutes += $in->diffInMinutes($out);
+                                            }
+                                        }
+
+                                        $totalworkHours += round($totalMinutes / 60, 2);
                                     }
-                                }
 							}
 	
 						}
@@ -545,10 +549,11 @@ class AttendanceApprovalController extends Controller
 
 	
 					$totalregularweekworkshours = $totalworkHours -($normal_ot_hours + $double_ot_hours);
-
+                    
                     // this use to add duty leaves hours count to day salaries 
                     $totalweekworkshours = $totalregularweekworkshours + ($shift_hours * $duty_leaves);
 
+                    
 
 					if($salarystatus == 1 &&  $totalweekworkshours==0 && $empstatus == 1){
 						$data3 = array(
