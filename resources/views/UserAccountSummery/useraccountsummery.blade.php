@@ -178,6 +178,7 @@
                                                 <li role="presentation"><a href="#salaryslip" aria-controls="salaryslip" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-receipt"></i></span>Salary Slips</a><span class="bgcolor-major-gradient-overlay"></span></li>
                                                 <li role="presentation"><a href="#production" aria-controls="production" role="tab" data-toggle="tab"><span class="icon"><i class="fa-light fa-ballot-check"></i></span>Production</a><span class="bgcolor-major-gradient-overlay"></span></li>
                                                 <li role="presentation"><a href="#markattendance" aria-controls="markattendance" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-clock"></i></span>Mark Attendance</a><span class="bgcolor-major-gradient-overlay"></span></li>
+                                                <li role="presentation"><a href="#attendancetimesheet" aria-controls="attendancetimesheet" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-file-contract"></i></span>Time Sheet</a><span class="bgcolor-major-gradient-overlay"></span></li>
                                             </ul>
                                         </div>
                                         <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
@@ -416,6 +417,44 @@
                                                             <hr>
                                                     </div>
                                                 </div>
+                                                <div role="tabpanel" class="tab-pane" id="attendancetimesheet">   
+                                                    <div class="card shadow-none bg-transparent">
+                                                        <div class="card-body">
+                                                            <div class="row">
+                                                                <div class="col-sm-12 col-md-6 col-lg-3 col-xl-3">
+                                                                    <div class="form-group">
+                                                                        <label for="timesheetmonth" class="col-form-label col-form-label-sm font-weight-bold text-dark">Month</label>
+                                                                        <input type="month" class="form-control form-control-sm" id="timesheetmonth" name="timesheetmonth" value="{{ date('Y-m') }}" max="{{ date('Y-m') }}">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                                                                <hr>
+                                                                <div class="center-block fix-width scroll-inner">
+                                                                    <table class="table table-striped table-sm small nowrap" style="width: 100%" id="timesheettable">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th>IN DATE</th>
+                                                                                <th>OUT DATE</th>
+                                                                                <th>DAY TYPE</th>
+                                                                                <th>SHIFT</th>
+                                                                                <th>IN TIME</th>
+                                                                                <th>OUT TIME</th>
+                                                                                <th>LATE MIN</th>
+                                                                                <th>OT Hr:Mi</th>
+                                                                                <th>DOT Hr:Mi</th>
+                                                                                <th>TOT Hr:Mi</th>
+                                                                                <th>Leave Type</th>
+                                                                                <th>Leave Day</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody></tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>  
                                             </div>
                                             </div>
                                         </div>
@@ -1309,6 +1348,17 @@
             attendent_load_dt(empid);
         });
 
+        // Attendance Timesheet tab
+        $('#timesheetmonth').change(function () {
+            load_timesheet(empid);
+        });
+
+        $('#attendancetimesheet').insertAfter($('#markattendance'));
+
+        $('a[href="#attendancetimesheet"]').on('shown.bs.tab', function () {
+            load_timesheet(empid);
+        });
+
 
         $('#productiondataTable').DataTable({
              "destroy": true,
@@ -1708,6 +1758,95 @@
         });
     }
 
+    // Atendance Timesheet
+    function load_timesheet(emp_id) {
+        var month = $('#timesheetmonth').val();
+        if (!month) return;
+
+        var from_date = month + '-01';
+        var d = new Date(month.split('-')[0], parseInt(month.split('-')[1]), 0);
+        var to_date = month + '-' + String(d.getDate()).padStart(2, '0');
+
+        $.ajax({
+            url: "{{ route('user_timesheet_data') }}",
+            method: "POST",
+            data: {
+                emp_id: emp_id,
+                from_date: from_date,
+                to_date: to_date,
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(result) {
+                if ($.fn.DataTable.isDataTable('#timesheettable')) {
+                    $('#timesheettable').DataTable().destroy();
+                }
+                var tbody = $('#timesheettable tbody');
+                tbody.empty();
+
+                if (!result || result.length === 0) {
+                    tbody.append('<tr><td colspan="12" class="text-center">No data found.</td></tr>');
+                    return;
+                }
+
+                $.each(result, function(i, row) {
+                    var tr;
+                    if (row.in_time == null && row.leave_type == '') {
+                        tr = '<tr>' +
+                            '<td>' + (row.in_date || '') + '</td>' +
+                            '<td>&nbsp;</td>' +
+                            '<td>' + (row.day_type || '') + '</td>' +
+                            '<td>' + (row.shift || '') + '</td>' +
+                            '<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>' +
+                            '<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>' +
+                            '<td>&nbsp;</td><td>&nbsp;</td></tr>';
+                    } else if (row.in_time == null && row.leave_type != '') {
+                        tr = '<tr>' +
+                            '<td>' + (row.in_date || '') + '</td>' +
+                            '<td>&nbsp;</td>' +
+                            '<td>' + (row.day_type || '') + '</td>' +
+                            '<td>' + (row.shift || '') + '</td>' +
+                            '<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>' +
+                            '<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>' +
+                            '<td>' + (row.leave_type || '') + '</td>' +
+                            '<td>' + (row.leave_days || '') + '</td></tr>';
+                    } else {
+                        tr = '<tr>' +
+                            '<td>' + (row.in_date || '') + '</td>' +
+                            '<td>' + (row.out_date || '') + '</td>' +
+                            '<td>' + (row.day_type || '') + '</td>' +
+                            '<td>' + (row.shift || '') + '</td>' +
+                            '<td>' + (row.in_time || '') + '</td>' +
+                            '<td>' + (row.out_time || '') + '</td>' +
+                            '<td>' + (row.late_min || 0) + '</td>' +
+                            '<td>' + (row.ot_hours || 0) + '</td>' +
+                            '<td>' + (row.double_ot || 0) + '</td>' +
+                            '<td>' + (row.triple_ot || 0) + '</td>' +
+                            '<td>' + (row.leave_type || '') + '</td>' +
+                            '<td>' + (row.leave_days || 0) + '</td></tr>';
+                    }
+                    tbody.append(tr);
+                });
+
+                $('#timesheettable').DataTable({
+                    destroy: true,
+                    dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" +
+                         "<'row'<'col-sm-12'tr>>" +
+                         "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+                    buttons: [
+                        { extend: 'csv',   className: 'btn btn-success btn-sm', title: 'Attendance Time Sheet', text: '<i class="fas fa-file-csv mr-2"></i> CSV' },
+                        { extend: 'pdf',   className: 'btn btn-danger btn-sm',  title: 'Attendance Time Sheet', text: '<i class="fas fa-file-pdf mr-2"></i> PDF', orientation: 'landscape', pageSize: 'legal' },
+                        { extend: 'print', className: 'btn btn-primary btn-sm', title: 'Attendance Time Sheet', text: '<i class="fas fa-print mr-2"></i> Print' }
+                    ],
+                    order: [[0, 'asc']],
+                    paging: false
+                });
+            },
+            error: function() {
+                $('#timesheettable tbody').html('<tr><td colspan="12" class="text-center text-danger">Error loading data.</td></tr>');
+            }
+        });
+    }
+
     function generateEmailBody() {
         let body = "LEAVE APPLICATION DETAILS<br>";
         body += "=========================<br><br>";
@@ -1869,6 +2008,7 @@
 
     // On location change
     $('#mark_location').on('change', function() {
+        if ($('#clockBtn').attr('data-done') === '1') return;
         $('#clockBtn').prop('disabled', true);
         $('#reasonBox').hide();
         var branchId = $(this).val();
@@ -1885,18 +2025,28 @@
 
     function checkTodayAttendanceStatus() {
         $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') } });
-        $.post('{{ route("get.attendance.shift") }}', { empid: empid, date: new Date().toISOString().slice(0,10) }, function(shiftData) {
-            var shift = shiftData.data ? shiftData.data : shiftData;
-            if (shift.attendanceinserttype == 1) {
-                isClockIn = true;
-                $('#clockBtnText').text('Clock In');
-                $('#clockBtn').removeAttr('data-done');
-            } else {
+        $.get('{{ url("check-attendance-completed") }}/' + empid, function(res) {
+            if (res.completed) {
                 isClockIn = false;
-                $('#clockBtnText').text('Clock Out');
-                $('#clockBtn').removeAttr('data-done').prop('disabled', false);
+                $('#clockBtnText').text('Done');
+                $('#clockBtn').prop('disabled', true).attr('data-done', '1');
+                $('#mark_location').prop('disabled', true);
+                $('#clock_status').text('');
+                return;
             }
-        }, 'json');
+            $.post('/api/v1/Getattendanceshift', { empid: empid, date: new Date().toISOString().slice(0,10) }, function(shiftData) {
+                var shift = shiftData.data ? shiftData.data : shiftData;
+                if (shift.attendanceinserttype == 1) {
+                    isClockIn = true;
+                    $('#clockBtnText').text('Clock In');
+                    $('#clockBtn').removeAttr('data-done');
+                } else {
+                    isClockIn = false;
+                    $('#clockBtnText').text('Clock Out');
+                    $('#clockBtn').removeAttr('data-done').prop('disabled', false);
+                }
+            }, 'json');
+        });
     }
 
     function getAttendanceShiftAndInsert(reason) {
@@ -1906,7 +2056,7 @@
         $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') } });
 
         $.ajax({
-            url: '{{ route("get.attendance.shift") }}',
+            url: '/api/v1/Getattendanceshift',
             method: 'POST',
             data: { empid: empid, date: today },
             dataType: 'json',
@@ -1914,7 +2064,7 @@
                 var shift = shiftData.data ? shiftData.data : shiftData;
 
                 $.ajax({
-                    url: '{{ route("single.location.attendance") }}',
+                    url: '/api/v1/Singlelocationattendanceinsert',
                     method: 'POST',
                     data: {
                         location_id: branchId,
@@ -1924,7 +2074,8 @@
                         attendancedate: shift.attendancedate,
                         attendanceinserttype: shift.attendanceinserttype,
                         reason: (shift.attendanceinserttype == 1) ? (reason || '') : '',
-                        location_status: (shift.attendanceinserttype == 1) ? locationStatus : 1
+                        off_reason: (shift.attendanceinserttype == 2) ? (reason || '') : '',
+                        location_status: locationStatus,
                     },
                     dataType: 'json',
                     success: function(data) {
@@ -1935,8 +2086,9 @@
                     } else {
                         isClockIn = true;
                         $('#clockBtnText').text('Done');
-                        $('#clockBtn').prop('disabled', true);
-                        $('#clockBtn').attr('data-done', '1');
+                        $('#clockBtn').prop('disabled', true).attr('data-done', '1');
+                        $('#mark_location').prop('disabled', true);
+                        $('#clock_status').text('');
                     }
                     Swal.fire({ 
                         icon: 'success', 
@@ -1971,14 +2123,8 @@
     // Clock button 
     $('#clockBtn').on('click', function(e) {
         e.preventDefault();
-        if ($(this).attr('data-done') === '1') {
-        Swal.fire({ 
-            icon: 'info', 
-            title: 'Already Marked', 
-            text: 'You have already clocked in and clocked out today.' });
-        return;
-    }
-       if (isClockIn && locationStatus === 2) {
+        
+       if (locationStatus === 2) {
         $('#reasonBox').show();
         return;
     }

@@ -93,6 +93,114 @@ class UserAccountController extends Controller
         return view('UserAccountSummery.useraccountsummery',compact('emprecordid','emp_id','emp_location','employee','leavetype','emp_name_with_initial','calling_name','payment_period','employees', 'emp_company', 'branches'));
     }
 
+    // Get user attendance timesheet data
+    public function getUserTimesheetData(Request $request)
+    {
+        $emp_id_str  = $request->input('emp_id');   // emp_id string (e.g. "EMP001")
+        $from_date   = $request->input('from_date'); // Y-m-d
+        $to_date     = $request->input('to_date');   // Y-m-d
+
+        // Fetch the employee row using the emp_id string
+        $employee = DB::selectOne("
+            SELECT emp.id, emp.emp_id, emp.emp_etfno, emp.emp_fullname, emp.emp_gender,
+                   emp.emp_shift,
+                   COALESCE(esd_shift.shift_name, st.shift_name) AS shiftname
+            FROM employees emp
+            LEFT JOIN shift_types st ON st.id = emp.emp_shift
+            LEFT JOIN employeeshiftdetails esd
+                ON esd.emp_id = emp.emp_id
+            LEFT JOIN shift_types esd_shift ON esd.shift_id = esd_shift.id
+            WHERE emp.emp_id = ? AND emp.deleted = 0
+            LIMIT 1
+        ", [$emp_id_str]);
+
+        if (!$employee) {
+            return response()->json([]);
+        }
+
+        // Build date range
+        $startDate = new \DateTime($from_date);
+        $endDate   = new \DateTime($to_date);
+        $dateRange = [];
+        while ($startDate <= $endDate) {
+            $dateRange[] = $startDate->format('Y-m-d');
+            $startDate->modify('+1 day');
+        }
+
+        $attendanceRecords = [];
+        foreach ($dateRange as $date) {
+            $record = DB::select("
+                SELECT
+                    DATE_FORMAT(?, '%Y-%m-%d') AS in_date,
+                    DATE_FORMAT(?, '%Y-%m-%d') AS out_date,
+                    COALESCE(h.holiday_name,
+                        CASE WHEN WEEKDAY(?) IN (5,6) THEN DAYNAME(?)
+                        ELSE 'Weekday' END) AS day_type,
+                    COALESCE(roster_shift.shift_name, esd_shift.shift_name, st.shift_name) AS shift,
+                    DATE_FORMAT(MIN(att.timestamp), '%h:%i %p') AS in_time,
+                    DATE_FORMAT(MAX(att.timestamp), '%h:%i %p') AS out_time,
+                    ROUND(COALESCE(la.minites_count, 0), 2)  AS late_min,
+                    COALESCE(leave_data.leavename, '')        AS leave_type,
+                    ROUND(COALESCE(leave_data.no_of_days, 0), 2) AS leave_days,
+                    ROUND(COALESCE(ot.hours, 0) + COALESCE(ot.holiday_normal_hours, 0), 2) AS ot_hours,
+                    ROUND(COALESCE(ot.double_hours, 0), 2)   AS double_ot,
+                    ROUND(COALESCE(ot.triple_hours, 0), 2)   AS triple_ot
+                FROM (SELECT ? AS date) dr
+                LEFT JOIN employee_roster_details erd
+                    ON erd.emp_id = ? AND erd.work_date = ?
+                LEFT JOIN shift_types roster_shift ON roster_shift.id = erd.shift_id
+                LEFT JOIN attendances att ON att.emp_id = ? AND att.date = ?
+                LEFT JOIN shift_types st ON st.id = ?
+                LEFT JOIN employeeshiftdetails esd
+                    ON esd.emp_id = ? AND ? BETWEEN esd.date_from AND esd.until_time
+                LEFT JOIN shift_types esd_shift ON esd.shift_id = esd_shift.id
+                LEFT JOIN employee_late_attendance_minites la
+                    ON la.emp_id = ? AND la.attendance_date = ?
+                LEFT JOIN (
+                    SELECT ot.emp_id, ot.date, ot.hours, ot.double_hours, ot.triple_hours,
+                           ot.holiday_normal_hours
+                    FROM ot_approved ot
+                ) ot ON ot.emp_id = ? AND ot.date = ?
+                LEFT JOIN (
+                    SELECT l.emp_id, lt.leave_type AS leavename, l.no_of_days, l.leave_from, l.leave_to
+                    FROM leaves l
+                    LEFT JOIN leave_types lt ON l.leave_type = lt.id
+                    WHERE l.status = 'Approved'
+                ) leave_data ON leave_data.emp_id = ? AND ? BETWEEN leave_data.leave_from AND leave_data.leave_to
+                LEFT JOIN holidays h ON h.date = ?
+                GROUP BY dr.date
+            ", [
+                $date, $date, $date, $date,          // date formatting / weekday check
+                $date,                                // dr alias
+                $employee->emp_id, $date,             // roster
+                $employee->emp_id, $date,             // attendance
+                $employee->emp_shift,                 // shift_types
+                $employee->emp_id, $date,             // employeeshiftdetails
+                $employee->emp_id, $date,             // late attendance
+                $employee->emp_id, $date,             // OT
+                $employee->emp_id, $date,             // leave
+                $date,                                // holiday
+            ]);
+
+            $attendanceRecords[] = $record[0] ?? (object)[
+                'in_date'    => $date,
+                'out_date'   => $date,
+                'day_type'   => '',
+                'shift'      => '',
+                'in_time'    => null,
+                'out_time'   => null,
+                'late_min'   => 0,
+                'leave_type' => '',
+                'leave_days' => 0,
+                'ot_hours'   => 0,
+                'double_ot'  => 0,
+                'triple_ot'  => 0,
+            ];
+        }
+
+        return response()->json($attendanceRecords);
+    }
+
     public function get_employee_monthlysummery(Request $request)
     {
         $salaryperiodid = $request->input('salaryperiodid');
@@ -1075,6 +1183,19 @@ class UserAccountController extends Controller
             return response()->json(['error' => 'Branch not found'], 404);
         }
         return response()->json($branch);
+    }
+
+    //check attendance completed
+    public function checkAttendanceCompleted($empid)
+    {
+        $today = \Carbon\Carbon::now()->toDateString();
+        $row = DB::table('job_attendance')
+            ->where('employee_id', $empid)
+            ->where('attendance_date', $today)
+            ->whereNotNull('on_time')
+            ->whereNotNull('off_time')
+            ->first();
+        return response()->json(['completed' => $row ? true : false]);
     }
 
 }

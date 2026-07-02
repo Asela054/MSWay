@@ -639,14 +639,14 @@ $(document).ready(function () {
 
     });
 
-    flatpickr("#date", {
-        allowInput: true,
-        enable: [
-            function(date) {
-                return date.getDate() >= 25;
-            }
-        ]
-    });
+    // flatpickr("#date", {
+    //     allowInput: true,
+    //     enable: [
+    //         function(date) {
+    //             return date.getDate() >= 25;
+    //         }
+    //     ]
+    // });
 
     // pay details 
     $(document).on('click', '.paid', function () {

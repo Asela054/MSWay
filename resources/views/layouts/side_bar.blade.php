@@ -351,6 +351,16 @@
                         <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('Shift') }}">Employee Shifts</a>
                         <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('ShiftType') }}">Work Shifts</a>
                         <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('AdditionalShift.index') }}">Additional Shifts</a>
+                        
+                        <a href="javascript:void(0);" data-toggle="collapse" data-target="#collapshiftot" aria-expanded="false" aria-controls="collapshiftot" class="py-1">
+                                <span class="links_name">Addtional Shift OT<i class="fas fa-angle-down"></i></span>
+                            </a>
+                            <div class="collapse" id="collapshiftot">
+                                <nav class="sidenav-menu-nested nav">
+                                    <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('kt_employee_allocation')}}">Employee Allocation</a>
+                                    <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('kt_ot_approve')}}">OT Approve</a>
+                                </nav>
+                            </div>
                         <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('employeeshift') }}">Employee Night Shift Assign</a>
                         <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('empshiftextend') }}">Employee Shift Extend Assign</a>
                     </nav>
@@ -630,16 +640,6 @@
                                     <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('kt_inquiry_approve')}}">Inquiry Approve</a>
                                     <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('kt_job_create')}}">Job Create</a>
                                     <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('kt_special_rate')}}">Special Rate</a>
-                                </nav>
-                            </div>
-
-                            <a href="javascript:void(0);" data-toggle="collapse" data-target="#collapshiftot" aria-expanded="false" aria-controls="collapshiftot" class="py-1">
-                                <span class="links_name">Shift OT<i class="fas fa-angle-down"></i></span>
-                            </a>
-                            <div class="collapse" id="collapshiftot" data-parent="#accordionSubkt_erp">
-                                <nav class="sidenav-menu-nested nav">
-                                    <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('kt_employee_allocation')}}">Employee Allocation</a>
-                                    <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('kt_ot_approve')}}">OT Approve</a>
                                 </nav>
                             </div>
                     </nav>

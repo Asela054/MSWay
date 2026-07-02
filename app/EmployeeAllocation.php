@@ -1,6 +1,6 @@
 <?php
 
-namespace App\ERP_KT;
+namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
