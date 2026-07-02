@@ -3211,9 +3211,10 @@ class Attendance extends Model
             $dateRange[] = $closedateObj->format('Y-m-d');
         }
 
+
             $totalworkHours = 0;
             $totalweekworkshours = 0;
-            $totalWorkHoursFormatted = 0;
+            $totalMinutesAll  = 0;
 
             foreach ($dateRange as $todayDate) {
 
@@ -3222,7 +3223,6 @@ class Attendance extends Model
                 ->select('ignore_days.*')
                 ->whereDate('date', $todayDate)
                 ->first();
-
 
                 if(!$ignoredate){
                     $query = DB::table('attendances as at1')
@@ -3254,22 +3254,18 @@ class Attendance extends Model
                                    $out = Carbon::parse($timestamps[$i + 1])->second(0);
 
                                     if ($in && $out && $in != $out) {
-                                        $totalMinutes += $in->diffInMinutes($out);
+                                        $totalMinutesAll  += $in->diffInMinutes($out);
                                     }
                                 }
-
-                                $hours   = intdiv($totalMinutes, 60);
-                                $minutes = $totalMinutes % 60;
-                                $totalWorkHoursFormatted = sprintf('%d:%02d', $hours, $minutes);
-                                // still keep decimal version too if needed elsewhere:
-                                $totalworkHours += round($totalMinutes / 60, 2);
                             }
                         }
 
                 }
             }
-
-        
+            
+            $hours   = intdiv($totalMinutesAll, 60);
+            $minutes = $totalMinutesAll % 60;
+            $totalWorkHoursFormatted = sprintf('%d:%02d', $hours, $minutes);
 
             return $totalWorkHoursFormatted;
     }
