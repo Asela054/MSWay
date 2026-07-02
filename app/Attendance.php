@@ -3213,6 +3213,7 @@ class Attendance extends Model
 
             $totalworkHours = 0;
             $totalweekworkshours = 0;
+            $totalWorkHoursFormatted = 0;
 
             foreach ($dateRange as $todayDate) {
 
@@ -3222,45 +3223,55 @@ class Attendance extends Model
                 ->whereDate('date', $todayDate)
                 ->first();
 
+
                 if(!$ignoredate){
                     $query = DB::table('attendances as at1')
-                    ->select(
-                        'at1.id',
-                        'at1.emp_id',
-                        'at1.timestamp',
-                        'at1.date',
-                        DB::raw('MIN(at1.timestamp) AS firsttimestamp'),
-                        DB::raw('CASE WHEN MIN(at1.timestamp) = MAX(at1.timestamp) THEN NULL 
-                                ELSE MAX(at1.timestamp) END AS lasttimestamp'),
-                        'shift_types.onduty_time',
-                        'shift_types.offduty_time'
-                    )
-                    ->leftJoin('employees', 'at1.emp_id', '=', 'employees.emp_id')
-                    ->leftJoin('shift_types', 'employees.emp_shift', '=', 'shift_types.id')
-                    ->whereNull('at1.deleted_at')
-                    ->where('at1.emp_id', $emp_id)
-                    ->where('at1.date', 'LIKE', $todayDate . '%')
-                    ->havingRaw('MIN(at1.timestamp) != MAX(at1.timestamp)')
-                    ->get();
+                            ->select(
+                                'at1.id',
+                                'at1.emp_id',
+                                'at1.timestamp',
+                                'at1.date',
+                                'shift_types.onduty_time',
+                                'shift_types.offduty_time'
+                            )
+                            ->leftJoin('employees', 'at1.emp_id', '=', 'employees.emp_id')
+                            ->leftJoin('shift_types', 'employees.emp_shift', '=', 'shift_types.id')
+                            ->whereNull('at1.deleted_at')
+                            ->where('at1.emp_id', $emp_id)
+                            ->where('at1.date', 'LIKE', $todayDate . '%')
+                            ->orderBy('at1.timestamp', 'asc')
+                            ->get();
 
-                
-                if ($query->isNotEmpty()) {
-                    $firsttimestamp = Carbon::parse($query->first()->firsttimestamp);
-                    $lasttimestamp = Carbon::parse($query->first()->lasttimestamp);
-                
-                    if ($firsttimestamp && $lasttimestamp && $firsttimestamp != $lasttimestamp) {
-                        $diffInMinutes = $firsttimestamp->diffInMinutes($lasttimestamp);
-                        $workHours = round($diffInMinutes / 60, 2);
-                        $totalworkHours+= $workHours; 
-                    }
-                }
+                      if ($query->isNotEmpty()) {
+                            $timestamps = $query->pluck('timestamp')->toArray();
+                            $count = count($timestamps);
+
+                            if ($count % 2 === 0) {
+                                $totalMinutes = 0;
+
+                                for ($i = 0; $i < $count; $i += 2) {
+                                   $in  = Carbon::parse($timestamps[$i])->second(0);
+                                   $out = Carbon::parse($timestamps[$i + 1])->second(0);
+
+                                    if ($in && $out && $in != $out) {
+                                        $totalMinutes += $in->diffInMinutes($out);
+                                    }
+                                }
+
+                                $hours   = intdiv($totalMinutes, 60);
+                                $minutes = $totalMinutes % 60;
+                                $totalWorkHoursFormatted = sprintf('%d:%02d', $hours, $minutes);
+                                // still keep decimal version too if needed elsewhere:
+                                $totalworkHours += round($totalMinutes / 60, 2);
+                            }
+                        }
 
                 }
             }
-            
-            $totalweekworkshours = $totalworkHours -($normal_ot_hours + $double_ot_hours);
 
-            return $totalweekworkshours;
+        
+
+            return $totalWorkHoursFormatted;
     }
 
 }

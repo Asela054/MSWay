@@ -1334,7 +1334,7 @@ Route::get('attendance_list_for_approve',['uses' => 'AttendanceApprovalControlle
 Route::post('AttendentAprovelBatch', 'AttendanceApprovalController@AttendentAprovelBatch')->name('AttendentAprovelBatch');
 Route::get('/getAttendanceApprovel', 'AttendanceApprovalController@getAttendanceApprovel');
 Route::post('AttendentAprovel', 'AttendanceApprovalController@AttendentAprovel')->name('AttendentAprovel');
-
+Route::get('attendance_list_for_approve_avamaria',['uses' => 'AttendanceApprovalController@attendance_list_for_approve_avamaria', 'as' => 'attendance_list_for_approve_avamaria']);
 
 // Late Attendance Controller Routes
 
