@@ -23,12 +23,7 @@ class AttendanceApprovalController extends Controller
         }
 
         $appName = config('app.name');
-        if($appName == 'AveMariaHospital'){
-             return view('Avamaria.attendanceapprovel');
-        }else{
-             return view('Attendent.attendanceapprovel');
-        }
-        
+        return view('Attendent.attendanceapprovel');
     }
 
     public function attendance_list_for_approve(Request $request)
@@ -102,7 +97,6 @@ class AttendanceApprovalController extends Controller
         if ($department != '' && $department != 'All') {
             $query->where(['departments.id' => $department]);
         }
-
         $query->where('employees.deleted', 0);
         $query->where('employees.is_resigned', 0);
         
@@ -433,7 +427,9 @@ class AttendanceApprovalController extends Controller
 
             $triple_ot_hours = (new \App\OtApproved)->get_triple_ot_hours_monthly($record->emp_id, $month, $closedate);
 
-            $normal_ot_hours_additional = (new \App\OtApproved)->get_ot_hours_monthly_ktClean($record->emp_id, $month, $closedate);
+           // $normal_ot_hours_additional = (new \App\OtApproved)->get_ot_hours_monthly_ktClean($record->emp_id, $month, $closedate);
+              $normal_ot_hours_additional = 0;
+
 
             $auditattedance = (new \App\Auditattendace)->apply_audit_attedance($record->emp_auto_id,$record->emp_id, $month);
 
@@ -504,42 +500,48 @@ class AttendanceApprovalController extends Controller
 
 				//Insert Work Rate Table
 				if($workHourDate === "Hour"){//Daily Or Weekly Salary
+               
 					foreach ($dateRange as $todayDate) {
 						$ignoredate = DB::table('ignore_days')
 							->select('ignore_days.*')
 							->whereDate('date', $todayDate)
 							->first();
-	
+
+                             dd($dateRange);
+                            
 						if(!$ignoredate){
-							$query = DB::table('attendances as at1')
-							->select(
-								'at1.id',
-								'at1.emp_id',
-								'at1.timestamp',
-								'at1.date',
-								DB::raw('MIN(at1.timestamp) AS firsttimestamp'),
-								DB::raw('CASE WHEN MIN(at1.timestamp) = MAX(at1.timestamp) THEN NULL 
-										ELSE MAX(at1.timestamp) END AS lasttimestamp'),
-								'shift_types.onduty_time',
-								'shift_types.offduty_time'
-							)
-							->leftJoin('employees', 'at1.emp_id', '=', 'employees.emp_id')
-							->leftJoin('shift_types', 'employees.emp_shift', '=', 'shift_types.id')
-							->whereNull('at1.deleted_at')
-							->where('at1.emp_id', $record->emp_id)
-							->where('at1.date', 'LIKE', $todayDate . '%')
-							->havingRaw('MIN(at1.timestamp) != MAX(at1.timestamp)')
-							->get();
+							 $query = DB::table('attendances as at1')
+                                        ->select(
+                                            'at1.id',
+                                            'at1.emp_id',
+                                            'at1.timestamp',
+                                            'at1.date'
+                                        )
+                                        ->whereNull('at1.deleted_at')
+                                        ->where('at1.emp_id', $record->emp_id)
+                                        ->where('at1.date', 'LIKE', $todayDate . '%')
+                                        ->orderBy('at1.timestamp', 'asc')
+                                        ->get();
 	
 							if ($query->isNotEmpty()) {
-								$firsttimestamp = Carbon::parse($query->first()->firsttimestamp);
-								$lasttimestamp = Carbon::parse($query->first()->lasttimestamp);
-							
-								if ($firsttimestamp && $lasttimestamp && $firsttimestamp != $lasttimestamp) {
-									$diffInMinutes = $firsttimestamp->diffInMinutes($lasttimestamp);
-									$workHours = round($diffInMinutes / 60, 2);
-									$totalworkHours+= $workHours; 
-								}
+								$timestamps = $query->pluck('timestamp')->toArray();
+                                $count = count($timestamps);
+
+                                // skip if odd number of timestamps
+                                    if ($count % 2 === 0) {
+                                        $totalMinutes = 0;
+
+                                        for ($i = 0; $i < $count; $i += 2) {
+                                        $in  = Carbon::parse($timestamps[$i])->second(0);
+                                        $out = Carbon::parse($timestamps[$i + 1])->second(0);
+
+                                            if ($in && $out && $in != $out) {
+                                                $totalMinutes += $in->diffInMinutes($out);
+                                            }
+                                        }
+
+                                        $totalworkHours += round($totalMinutes / 60, 2);
+                                    }
 							}
 	
 						}
@@ -547,10 +549,11 @@ class AttendanceApprovalController extends Controller
 
 	
 					$totalregularweekworkshours = $totalworkHours -($normal_ot_hours + $double_ot_hours);
-
+                    
                     // this use to add duty leaves hours count to day salaries 
                     $totalweekworkshours = $totalregularweekworkshours + ($shift_hours * $duty_leaves);
 
+                    
 
 					if($salarystatus == 1 &&  $totalweekworkshours==0 && $empstatus == 1){
 						$data3 = array(
@@ -649,146 +652,5 @@ class AttendanceApprovalController extends Controller
         return response()->json(['success' => true, 'message' => 'Attendance Successfully  Approved']);
     }
 
-
-    // Ava Maria Attendance Approval List
-    public function attendance_list_for_approve_avamaria(Request $request)
-    {
-        $user = Auth::user();
-        $permission = $user->can('attendance-approve');
-
-        if(!$permission){
-            return response()->json(['error' => 'UnAuthorized'], 401);
-        }
-
-        $location = $request->get('company');
-        $department = $request->get('department');
-        $month = $request->get('month');
-        $closedate = $request->get('closedate');
-        
-        // Get accessible employee IDs based on user access rights
-        $userId = Auth::id();
-        $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
-
-        $userBranchIds = DB::table('user_has_companies')
-            ->where('user_id', $userId)
-            ->pluck('branch_id')
-            ->toArray();
-
-        $query = DB::query()
-            ->select('at1.id as attendance_id',
-                'at1.emp_id',
-                'at1.uid',
-                'at1.state',
-                'at1.timestamp',
-                'at1.date',
-                'at1.approved',
-                'at1.type',
-                'at1.devicesno',
-                DB::raw('Min(at1.timestamp) as firsttimestamp'),
-                DB::raw('(CASE 
-                        WHEN Min(at1.timestamp) = Max(at1.timestamp) THEN ""  
-                        ELSE Max(at1.timestamp)
-                        END) AS lasttimestamp'),
-                'employees.emp_name_with_initial',
-                'employees.emp_location',
-                'branches.location',
-                'departments.name as dept_name'
-            )
-            ->from('employees as employees')
-            // ->leftJoin('attendances as at1', 'employees.emp_id', '=', 'at1.uid')
-            ->leftJoin('attendances as at1', function ($join) use ($month) {
-                $join->on('employees.emp_id', '=', 'at1.uid')
-                    ->whereNull('at1.deleted_at'); 
-                if (!empty($month)) {
-                    $m_str = $month . "%";
-                    $join->where('at1.date', 'like', $m_str); 
-                }
-                if (!empty($closedate)) {
-                    $join->where('at1.date', '<=', $closedate);
-                }
-            })
-            ->leftJoin('branches', 'at1.location', '=', 'branches.id')
-            ->leftJoin('departments', 'departments.id', '=', 'employees.emp_department');
-
-        // Apply user access rights filter
-        if (!empty($accessibleEmployeeIds)) {
-            $query->whereIn('employees.emp_id', $accessibleEmployeeIds);
-        }
-
-         if (!empty($userBranchIds)) {
-            $query->whereIn('employees.emp_location', $userBranchIds);
-        }
-
-        if ($department != '' && $department != 'All') {
-            $query->where(['departments.id' => $department]);
-        }
-
-        $query->where('employees.deleted', 0);
-        $query->where('employees.is_resigned', 0);
-        
-        $query->groupBy('employees.emp_id');
-
-        return Datatables::of($query)
-            ->addIndexColumn()
-            ->editColumn('date', function ($row) {
-                if ($row->date) {
-                    $rec_date = Carbon::parse($row->date)->toDateString();
-                    $date_c = Carbon::createFromFormat('Y-m-d', $rec_date);
-                    return $date_c->format('Y-m');
-                }
-                return '-';
-            })
-            ->addColumn('work_days', function ($row) use ($month, $closedate) {
-                if ($row->attendance_id) {
-                    return $work_days = (new \App\Attendance)->get_work_days($row->emp_id, $month, $closedate);
-                }
-                return 0;
-            })
-            ->addColumn('working_week_days', function ($row) use ($month , $closedate) {
-                if ($row->attendance_id) {
-                    $working_week_days_arr = (new \App\Attendance)->get_working_week_days($row->emp_id, $month, $closedate);
-                    return $working_week_days_arr['no_of_working_workdays'];
-                }
-                return 0;
-                
-            })
-            ->addColumn('working_hours', function ($row) use ($month, $closedate) {
-                if ($row->attendance_id) {
-                    return $working_hours  = (new \App\Attendance)->get_working_hours($row->emp_id, $month, $closedate);
-                }
-                return 0;
-            })
-            ->addColumn('leave_days', function ($row) use ($month, $closedate) {
-                if ($row->attendance_id) {
-                    return $leave_days = (new \App\Leave)->get_leave_days($row->emp_id, $month, $closedate);
-                }
-                return 0;
-            })
-            ->addColumn('no_pay_days', function ($row) use ($month, $closedate) {
-                if ($row->attendance_id) {
-                    return $no_pay_days = (new \App\Leave)->get_no_pay_days($row->emp_id, $month, $closedate);
-                }
-                return 0;
-               
-            })
-             ->addColumn('night_work_days', function ($row) use ($month, $closedate) {
-                if ($row->attendance_id) {
-                    return $night_work_days = (new \App\OtApproved)->get_night_work_days($row->emp_id, $month, $closedate);
-                }
-                return 0;
-               
-            })
-            
-             ->addColumn('additional_ot_hours', function ($row) use ($month, $closedate) {
-                if ($row->attendance_id) {
-                    return $additional_ot_hours = (new \App\OtApproved)->get_ot_hours_monthly_ktClean($row->emp_id, $month, $closedate);
-                }
-                return 0;
-               
-            })
-            ->rawColumns(['date'])
-            ->make(true);
-
-    }
 
 }

@@ -1334,7 +1334,7 @@ Route::get('attendance_list_for_approve',['uses' => 'AttendanceApprovalControlle
 Route::post('AttendentAprovelBatch', 'AttendanceApprovalController@AttendentAprovelBatch')->name('AttendentAprovelBatch');
 Route::get('/getAttendanceApprovel', 'AttendanceApprovalController@getAttendanceApprovel');
 Route::post('AttendentAprovel', 'AttendanceApprovalController@AttendentAprovel')->name('AttendentAprovel');
-
+Route::get('attendance_list_for_approve_avamaria',['uses' => 'AttendanceApprovalController@attendance_list_for_approve_avamaria', 'as' => 'attendance_list_for_approve_avamaria']);
 
 // Late Attendance Controller Routes
 
@@ -1974,6 +1974,11 @@ Route::get('daily_summary_approve', 'DailysummaryapprovControllr@index')->name('
 //Assigned Devices Report
 Route::get('rpt_assigned_devices',['uses' => 'RptAssignedDevicesController@getassigneddevicelist', 'as' => 'rpt_assigned_devices']);
 
+Route::get('opma_machinechart', ['uses' => 'Additionals\OpmaDashdoardController@machinechart', 'as' => 'opma_machinechart']);
+
+//all timestapmp report controller
+Route::get('/timestampreport' ,'RpttimestampsController@index')->name('timestampreport');
+Route::get('/generate_timestamp_report' ,'RpttimestampsController@generate_timestamp_report')->name('generate_timestamp_report');
 
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');

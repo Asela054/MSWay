@@ -22,60 +22,33 @@ class OtApproved extends Model
         'created_at',
         'created_by'];
 
-    public function get_ot_hours_monthly($emp_id, $month, $closedate)
+    public function get_ot_hours_monthly($emp_id, $month ,$closedate)
     {
-        if ($month === '2026-05') {
-            $ot_hours = OtApproved::where('emp_id', $emp_id)
-                                ->where('date', '>=', '2026-05-27')
-                                ->where('date', '<=', $closedate)
-                                ->where('status', '!=', 3)
-                                ->sum('hours');
-        } else {
-            $ot_hours = OtApproved::where('emp_id', $emp_id)
-                                ->where('date', 'like', $month . '%')
-                                ->where('date', '<=', $closedate)
-                                ->where('status', '!=', 3)
-                                ->sum('hours');
-        }
-
+        $ot_hours = OtApproved::where('emp_id', $emp_id)
+                            ->where('date', 'like', $month.'%')
+                            ->where('date', '<=', $closedate)
+                            ->where('status', '!=', 3)
+                            ->sum('hours');
         return $ot_hours;
     }
 
     public function get_double_ot_hours_monthly($emp_id, $month ,$closedate)
     {
-
-        if ($month === '2026-05') {
-            $double_ot_hours = OtApproved::where('emp_id', $emp_id)
-                                ->where('date', '>=', '2026-05-27')
-                                ->where('date', '<=', $closedate)
-                                ->where('status', '!=', 3)
-                                ->sum('double_hours');
-        } else {
-            $double_ot_hours = OtApproved::where('emp_id', $emp_id)
-                                ->where('date', 'like', $month . '%')
-                                ->where('date', '<=', $closedate)
-                                ->where('status', '!=', 3)
-                                ->sum('double_hours');
-        }
-
+        $double_ot_hours = OtApproved::where('emp_id', $emp_id)
+                            ->where('date', 'like', $month.'%')
+                            ->where('date', '<=', $closedate)
+                            ->where('status', '!=', 3)
+                            ->sum('double_hours');
         return $double_ot_hours;
     }
 
     public function get_triple_ot_hours_monthly($emp_id, $month ,$closedate)
     {
-        if ($month === '2026-05') {
-            $triple_ot_hours = OtApproved::where('emp_id', $emp_id)
-                                ->where('date', '>=', '2026-05-27')
-                                ->where('date', '<=', $closedate)
-                                ->where('status', '!=', 3)
-                                ->sum('triple_hours');
-        } else {
-            $triple_ot_hours = OtApproved::where('emp_id', $emp_id)
-                                ->where('date', 'like', $month . '%')
-                                ->where('date', '<=', $closedate)
-                                ->where('status', '!=', 3)
-                                ->sum('triple_hours');
-        }
+        $triple_ot_hours = OtApproved::where('emp_id', $emp_id)
+                            ->where('date', 'like', $month.'%')
+                            ->where('date', '<=', $closedate)
+                            ->where('status', '!=', 3)
+                            ->sum('triple_hours');
         return $triple_ot_hours;
     }
 
@@ -112,31 +85,17 @@ class OtApproved extends Model
     
    public function get_night_work_days($emp_id, $month, $closedate)
     {
-        if ($month === '2026-05') {
-            $night_days = DB::table('employee_roster_details')
-                ->where('employee_roster_details.emp_id', $emp_id)
-                ->where('employee_roster_details.work_date', '>=', '2026-05-27')
-                ->where('employee_roster_details.work_date', '<=', $closedate)
-                ->whereIn('employee_roster_details.shift_id', [11, 12])
-                ->join('attendances', function ($join) use ($emp_id) {
-                    $join->on(DB::raw('DATE(attendances.date)'), '=', 'employee_roster_details.work_date')
-                        ->where('attendances.emp_id', '=', $emp_id);
-                })
-                ->distinct('employee_roster_details.work_date')
-                ->count('employee_roster_details.work_date');
-        } else {
-            $night_days = DB::table('employee_roster_details')
-                ->where('employee_roster_details.emp_id', $emp_id)
-                ->where('employee_roster_details.work_date', 'like', $month . '%')
-                ->where('employee_roster_details.work_date', '<=', $closedate)
-                ->whereIn('employee_roster_details.shift_id', [11, 12])
-                ->join('attendances', function ($join) use ($emp_id) {
-                    $join->on(DB::raw('DATE(attendances.date)'), '=', 'employee_roster_details.work_date')
-                        ->where('attendances.emp_id', '=', $emp_id);
-                })
-                ->distinct('employee_roster_details.work_date')
-                ->count('employee_roster_details.work_date');
-        }
+        $night_days = DB::table('employee_roster_details')
+            ->where('employee_roster_details.emp_id', $emp_id)
+            ->where('employee_roster_details.work_date', 'like', $month.'%')
+            ->where('employee_roster_details.work_date', '<=', $closedate)
+            ->whereIn('employee_roster_details.shift_id', [11, 12])
+            ->join('attendances', function ($join) use ($emp_id) {
+                $join->on(DB::raw('DATE(attendances.date)'), '=', 'employee_roster_details.work_date')
+                    ->where('attendances.emp_id', '=', $emp_id);
+            })
+            ->distinct('employee_roster_details.work_date')
+            ->count('employee_roster_details.work_date');
 
         return $night_days;
     }
