@@ -2080,7 +2080,11 @@
                 } else {
                     isClockIn = false;
                     $('#clockBtnText').text('Clock Out');
-                    $('#clockBtn').removeAttr('data-done').prop('disabled', false);
+                    $('#clockBtn').removeAttr('data-done');
+
+                    // Clock out - disable and wait till location selection
+                    $('#clockBtn').prop('disabled', true);
+                    $('#clock_status').text('Please select location to clock out.');
                 }
             }, 'json');
         });
@@ -2118,8 +2122,12 @@
                     success: function(data) {
                       if (isClockIn) {
                         isClockIn = false;
+                        locationStatus = null;
                         $('#clockBtnText').text('Clock Out');
-                        $('#clockBtn').prop('disabled', false);
+                       
+                        // location re-verification for clock-out
+                        $('#clockBtn').prop('disabled', true);
+                        $('#clock_status').text('Please select location to clock out.');
                     } else {
                         isClockIn = true;
                         $('#clockBtnText').text('Done');
@@ -2137,8 +2145,11 @@
                     });
                     $('#reasonBox').hide();
                     $('#reason_text').val('');
+                    $('#submitReasonBtn').prop('disabled', false);
                     },
                     error: function(xhr) {
+                        $('#clockBtn').prop('disabled', false);
+                        $('#submitReasonBtn').prop('disabled', false);
                         Swal.fire({ 
                             icon: 'error', 
                             title: 'Error', 
@@ -2148,6 +2159,8 @@
                 });
             },
             error: function(xhr) {
+                 $('#clockBtn').prop('disabled', false);
+                 $('#submitReasonBtn').prop('disabled', false);
                 Swal.fire({ 
                     icon: 'error', 
                     title: 'Error', 
@@ -2161,10 +2174,11 @@
     $('#clockBtn').on('click', function(e) {
         e.preventDefault();
         
-       if (locationStatus === 2) {
-        $('#reasonBox').show();
-        return;
-    }
+        if (locationStatus === 2) {
+            $('#reasonBox').show();
+            return;
+        }
+        $('#clockBtn').prop('disabled', true);
         getAttendanceShiftAndInsert('');
     });
 
@@ -2179,6 +2193,7 @@
                 text: 'Please enter a reason.' });
             return;
     }
+    $('#submitReasonBtn').prop('disabled', true);
     getAttendanceShiftAndInsert(reason);
     });
 
