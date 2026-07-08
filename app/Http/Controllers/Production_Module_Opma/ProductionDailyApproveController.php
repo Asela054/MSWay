@@ -5,12 +5,21 @@ namespace App\Http\Controllers\Production_Module_Opma;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\ProductionModule_Opma\ProductionemployeeDailyEnding;
+use App\Services\Opma_Daily_approvePolicy_Service;
 use Auth;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class ProductionDailyApproveController extends Controller
 {
+     protected $Opma_Daily_approvePolicy_Service;
+
+    public function __construct(Opma_Daily_approvePolicy_Service $Opma_Daily_approvePolicy_Service)
+    {
+        $this->Opma_Daily_approvePolicy_Service = $Opma_Daily_approvePolicy_Service;
+    }
+
+
      public function index()
     {
         $user = Auth::user();
@@ -119,6 +128,7 @@ class ProductionDailyApproveController extends Controller
             $total_target = $row['total_target'];
             $total_produce_qty = $row['total_produce_qty'];
             $total_difference = $row['total_difference'];
+            $daily_aveg = $row['daily_aveg'];
             $total_amount = str_replace([','], '', $row['total_amount']);
             $total_damage = $row['total_damage'];
 
@@ -156,6 +166,8 @@ class ProductionDailyApproveController extends Controller
                     $dailyending->created_at = $current_date_time;
                     $dailyending->save(); 
                 }
+
+                $this->Opma_Daily_approvePolicy_Service->Production_storeDailyApprove($empid, $date, $total_target, $total_produce_qty, $daily_aveg,$total_amount);
             }
 
 
