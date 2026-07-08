@@ -20,7 +20,7 @@ class Attendance extends Model
     public function get_work_days($emp_id, $month,$closedate)
     {
 
-         $shiftQuery = "SELECT st.onduty_time, st.offduty_time 
+         $shiftQuery = "SELECT st.onduty_time, st.offduty_time, st.saturday_onduty_time, st.saturday_offduty_time 
                    FROM employees emp 
                    JOIN shift_types st ON emp.emp_shift = st.id 
                    WHERE emp.emp_id = $emp_id 
@@ -31,15 +31,23 @@ class Attendance extends Model
             if (empty($shiftInfo)) {
                 $expectedHours = 8;
                 $halfDayHours = 4;
+                $saturdayExpectedHours = 8;
+                $saturdayHalfDayHours = 4;
             } else {
                 $shift = $shiftInfo[0];
                 
                    // Parse times using Carbon
                 $ondutyTime = Carbon::parse($shift->onduty_time);
                 $offdutyTime = Carbon::parse($shift->offduty_time);
-                
+
+                $saturdayOndutyTime = Carbon::parse($shift->saturday_onduty_time);
+                $saturdayOffdutyTime = Carbon::parse($shift->saturday_offduty_time);
+
                  $expectedHours = $ondutyTime->diffInHours($offdutyTime);
                  $halfDayHours = $expectedHours / 2;
+
+                 $saturdayExpectedHours = $saturdayOndutyTime->diffInHours($saturdayOffdutyTime);
+                 $saturdayHalfDayHours = $saturdayExpectedHours / 2;
             }
 
          $empjob_cat = DB::table('employees')
@@ -80,7 +88,13 @@ class Attendance extends Model
             // $work_days++;
             $diff = round((strtotime($last_time) - strtotime($first_time)) / 3600, 1);
 
-            if ($diff >= $full_day_work_hours) {
+               if ($date->isSaturday()) {
+                    $required_full_hours = $saturdayExpectedHours;
+                } else {
+                    $required_full_hours = $full_day_work_hours;
+                }
+                
+            if ($diff >= $required_full_hours) {
                 $work_days++;
             } else{
                 $work_days += 0.5;

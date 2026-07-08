@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\EmployeeHelper;
 use App\Helpers\UserHelper;
 use App\OtApproved;
+use App\Services\Opma_Daily_approvePolicy_Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -15,6 +16,14 @@ use DateTime;
 
 class OTApproveController extends Controller
 {
+     protected $Opma_Daily_approvePolicy_Service;
+
+    public function __construct(Opma_Daily_approvePolicy_Service $Opma_Daily_approvePolicy_Service)
+    {
+        $this->Opma_Daily_approvePolicy_Service = $Opma_Daily_approvePolicy_Service;
+    }
+
+
      public function ot_approve(Request $request)
     {
         $permission = Auth::user()->can('ot-approve');
@@ -285,7 +294,6 @@ class OTApproveController extends Controller
         $checked = $request->ot_data;
 
         foreach ($checked as $ch) {
-
             $data = array(
                 'emp_id' => $ch['emp_id'],
                 'date' => $ch['date'],
@@ -299,8 +307,15 @@ class OTApproveController extends Controller
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s')
             );
-
             OtApproved::query()->insert($data);
+
+            $emp_id = $ch['emp_id'];
+            $date = $ch['date'];
+            $hours = $ch['hours'];
+            $double_hours = $ch['double_hours'];
+            $triple_hours = $ch['triple_hours'];
+
+            $this->Opma_Daily_approvePolicy_Service->OT_LatestoreDailyApprove($emp_id, $date, $hours, $double_hours, $triple_hours);
 
         }
 

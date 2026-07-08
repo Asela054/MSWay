@@ -310,6 +310,7 @@ $(document).ready(function(){
                                 total_target: rowData.total_target,
                                 total_produce_qty: rowData.total_produce_qty,
                                 total_difference: rowData.total_difference,
+                                daily_aveg: rowData.daily_aveg,
                                 total_amount: rowData.total_amount,
                                 total_damage: rowData.total_damage,
                             });

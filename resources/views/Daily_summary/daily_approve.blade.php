@@ -92,8 +92,7 @@
                             </div>
 
                             <div class="center-block fix-width scroll-inner">
-                                <table class="table table-striped table-bordered table-sm small nowrap" style="width: 100%"
-                                    id="dataTable">
+                                <table class="table table-striped table-bordered table-sm small nowrap" id="daliyproduction">
                                     <thead>
                                         <tr>
                                             <th></th>
@@ -275,7 +274,7 @@
                         employee: employee,
                         location: location,
                         from_date: from_date,
-                        to_date: to_date,
+                        to_date: from_date,
                         _token: '{{csrf_token()}}'
                     },
                     success: function (res) {
@@ -509,10 +508,9 @@
 
 
     function load_dt_production(employee, from_date) {
-        $('#dataTable').DataTable({
-                "destroy": true,
-                "processing": true,
-                "serverSide": true,
+        $('#daliyproduction').DataTable({
+                 destroy: true,
+                 responsive: true,
                 dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
                     "<'row'<'col-sm-5'i><'col-sm-7'p>>",
                 "buttons": [{
@@ -612,8 +610,8 @@
                 var from_date = $('#from_date').val();
 
                     selectedRowIdsapprove = [];
-                    $('#dataTable tbody .selectCheck:checked').each(function () {
-                        var rowData = $('#dataTable').DataTable().row($(this).closest('tr')).data();
+                    $('#daliyproduction tbody .selectCheck:checked').each(function () {
+                        var rowData = $('#daliyproduction').DataTable().row($(this).closest('tr')).data();
                         if (rowData) {
                             selectedRowIdsapprove.push({
                                 empid: rowData.emp_id,
@@ -621,6 +619,7 @@
                                 total_target: rowData.total_target,
                                 total_produce_qty: rowData.total_produce_qty,
                                 total_difference: rowData.total_difference,
+                                daily_aveg: rowData.daily_aveg,
                                 total_amount: rowData.total_amount,
                                 total_damage: rowData.total_damage,
                             });
@@ -685,7 +684,7 @@
 
 
     $('#selectAll_production').click(function (e) {
-        $('#dataTable').closest('table').find('td input:checkbox').prop('checked', this.checked);
+        $('#daliyproduction').closest('table').find('td input:checkbox').prop('checked', this.checked);
     });
 
     $(document).on('click', '.employee-info-icon', function() {
