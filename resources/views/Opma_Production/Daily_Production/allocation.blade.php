@@ -20,10 +20,20 @@
         <div class="card">
             <div class="card-body p-0 p-2">
                 <div class="row">
-                    <div class="col-12">
-                        <button type="button" class="btn btn-primary btn-sm fa-pull-right mr-2" name="create_record"
+
+                <div class="col-sm-12 col-md-12">
+                  <div class="d-flex flex-wrap justify-content-end mb-2">
+                    <div class="col-sm-12 col-md-auto mb-1 px-1">
+                        <button type="button" class="btn btn-primary btn-sm px-2 w-100" name="create_record"
                         id="create_record"><i class="fas fa-plus mr-2"></i>Add Employee</button>
                     </div>
+                     <div class="col-sm-12 col-md-auto mb-1 px-1">
+                        <button type="button" class="btn btn-primary btn-sm px-2 w-100" name="create_record_dept_wise" id="create_record_dept_wise">
+                            <i class="fas fa-plus mr-2"></i>Add - Department Wise
+                        </button>
+                    </div>
+                  </div>
+                </div>
                     <div class="col-12">
                         <hr class="border-dark">
                     </div>
@@ -265,6 +275,79 @@
     </div>
 
 
+
+        <!-- Modal Area Start -->
+    <div class="modal fade" id="formModal_dpt" data-backdrop="static" data-keyboard="false" tabindex="-1"
+              aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content">
+                <div class="modal-header p-2">
+                    <h5 class="modal-title" id="staticBackdropLabel">Add Production - Department Wise</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col">
+                            <span id="form_result"></span>
+                            <form method="post" id="formTitle_dpt" class="form-horizontal">
+                                {{ csrf_field() }}
+                                
+                                <div class="row">
+                                    <div class="col-sm-12 col-md-3">
+                                            <label class="small font-weight-bold text-dark">Company <span class="text-danger">*</span> </label>
+                                            <select name="company" id="company_dept_wise" class="form-control form-control-sm">
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-12 col-md-3">
+                                            <label class="small font-weight-bold text-dark">Department <span class="text-danger">*</span> </label>
+                                            <select name="department" id="department_dept_wise" class="form-control form-control-sm" required>
+                                            </select>
+                                        </div>
+                                    <div class="col-sm-12 col-md-3">
+                                        <label class="small font-weight-bolder">Date*</label>
+                                        <input type="date" name="allocation_date" id="allocation_date"
+                                            class="form-control form-control-sm" required />
+                                    </div>
+                                     <div class="col-sm-12 col-md-3">
+                                            <label class="small font-weight-bold text-dark">&nbsp; </label> <br>
+                                            <button type="button" name="search_button" id="search_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-search"></i>&nbsp;Search</button>
+                                        </div>
+                                    
+                                </div>
+                                 <br>
+                                <div class="center-block fix-width scroll-inner">
+                                <table class="table table-striped table-bordered table-sm small nowrap display" id="dpt_allocationtbl" style="width:100%;">
+                                    <thead>
+                                        <tr>
+                                            <th>EMP ID</th>
+                                            <th>NAME</th>
+                                            <th>MACHINE</th>
+                                            <th>SHIFT</th>
+                                            <th>STYLE</th>
+                                            <th>SIZE</th>
+                                            <th>TARGET</th>
+                                            <th>SCALE</th>
+                                            <th>REMARK</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="dptemplistbody">
+                                    </tbody>
+                                </table>
+                                </div>
+
+                                <div class="form-group mt-3">
+                                    <button type="button" name="dptaction_button" id="dptaction_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Area End -->     
 </main>
               
@@ -276,6 +359,44 @@ $(document).ready(function(){
     $('#production_menu_link_opma').addClass('active');
     $('#production_menu_link_icon').addClass('active');
     $('#dailyprocess_opma').addClass('navbtnactive');
+
+      let company_f = $('#company_dept_wise');
+      let department_f = $('#department_dept_wise');
+
+        company_f.select2({
+            placeholder: 'Select...',
+            width: '100%',
+            allowClear: true,
+            ajax: {
+                url: '{{url("company_list_sel2")}}',
+                dataType: 'json',
+                data: function (params) {
+                    return {
+                        term: params.term || '',
+                        page: params.page || 1
+                    }
+                },
+                cache: true
+            }
+        });
+
+        department_f.select2({
+            placeholder: 'Select...',
+            width: '100%',
+            allowClear: true,
+            ajax: {
+                url: '{{url("department_list_sel2")}}',
+                dataType: 'json',
+                data: function (params) {
+                    return {
+                        term: params.term || '',
+                        page: params.page || 1,
+                        company: company_f.val()
+                    }
+                },
+                cache: true
+            }
+        });
 
     // Modal close handlers
     $('#viewconfirmModal .close').click(function(){
@@ -728,6 +849,176 @@ $(document).ready(function(){
         })
     });
 
+    // Department wise employee list
+    $('#create_record_dept_wise').click(function () {
+        $('#dptemplistbody').empty();
+        $('#formModal_dpt').modal('show');
+    });
+
+     $('#search_button').click(function () {
+            var allocation_date = $('#allocation_date').val();
+            var department = $('#department_dept_wise').val();
+
+            $.ajax({
+                method: "POST",
+                dataType: "json",
+                url: '{!! route("opma_productdpt_allocation_list") !!}',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    department: department,
+                    allocation_date: allocation_date,
+                },
+                
+                success: function (data) {
+                      $('#dptemplistbody').html(data.html);
+                }
+            });
+    });
+
+    $('#dptemplistbody').on('change', '.style-select', function () {
+        var styleId = $(this).val();
+        var empId = $(this).data('emp');
+        var $row = $(this).closest('tr');
+        var sizeDropdown = $row.find('.size-select');
+
+        if (styleId) {
+            $.ajax({
+                url: '{{ route("opma_getStyleSizes") }}',
+                type: 'POST',
+                data: {
+                    style_id: styleId,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function (response) {
+                    sizeDropdown.empty().append('<option value="">Select Size</option>');
+
+                    if (response.length > 0) {
+                        $.each(response, function (index, size) {
+                            sizeDropdown.append('<option value="' + size.id + '">' + size.size + '</option>');
+                        });
+                    } else {
+                        sizeDropdown.append('<option value="">No sizes available</option>');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error loading sizes:', error);
+                }
+            });
+        } else {
+            sizeDropdown.empty().append('<option value="">Select Size</option>');
+        }
+    });
+
+
+    $('#dptaction_button').click(function () {
+            $('#dptaction_button').prop('disabled', true).html(
+                '<i class="fas fa-circle-notch fa-spin mr-2"></i> Processing');
+
+            var tbody = $("#dptemplistbody");
+
+            if (tbody.children().length > 0) {
+
+                var jsonObj = [];
+
+                $("#dptemplistbody tr").each(function () {
+                    var $row = $(this);
+
+                    var emp_id     = $row.find('td').eq(0).text().trim();
+                    var machine_id = $row.find('.machine-select').val() || $row.find('input[name^="machine_id"]').val();
+                    var shift_id   = $row.find('.shift-select').val();
+                    var style_id   = $row.find('.style-select').val();
+                    var size_id    = $row.find('.size-select').val();
+                    var target     = $row.find('input[name^="target"]').val();
+                    var scale      = $row.find('input[name^="scale"]').val();
+                    var remark     = $row.find('input[name^="remark"]').val();
+
+                    // only include row if the key fields are filled
+                    if (shift_id && style_id && target) {
+                        jsonObj.push({
+                            emp_id: emp_id,
+                            emp_name: $row.find('td').eq(1).text().trim(),
+                            machine_id: machine_id,
+                            shift_id: shift_id,
+                            style_id: style_id,
+                            size_id: size_id,
+                            target: target,
+                            scale: scale,
+                            remark: remark,
+                        });
+                    }
+                });
+
+                if (jsonObj.length === 0) {
+                    Swal.fire({
+                        position: "top-end",
+                        icon: 'warning',
+                        title: 'No Rows Filled!',
+                        showConfirmButton: false,
+                        timer: 2500
+                    });
+                    $('#dptaction_button').prop('disabled', false).html('<i class="fas fa-plus"></i>&nbsp;Add');
+                    return;
+                }
+
+                console.log('Filled rows:', jsonObj);
+
+                var allocation_date = $('#allocation_date').val();
+                var department = $('#department_dept_wise').val();
+
+                $.ajax({
+                    method: "POST",
+                    dataType: "json",
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        tableData: jsonObj,
+                        department: department,
+                        allocation_date: allocation_date,
+                    },
+                    url: '{!! route("opma_productdpt_allocation_insert") !!}',
+                    success: function (data) {
+                        if (data.errors) {
+                            const actionObj = {
+                                icon: 'fas fa-warning',
+                                title: '',
+                                message: 'Record Error',
+                                url: '',
+                                target: '_blank',
+                                type: 'danger'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            action(actionJSON);
+                        }
+                        if (data.success) {
+                            const actionObj = {
+                                icon: 'fas fa-save',
+                                title: '',
+                                message: data.success,
+                                url: '',
+                                target: '_blank',
+                                type: 'success'
+                            };
+                            const actionJSON = JSON.stringify(actionObj, null, 2);
+                            actionreload(actionJSON);
+                        }
+                    },
+                    error: function () {
+                        $('#dptaction_button').prop('disabled', false).html('<i class="fas fa-plus"></i>&nbsp;Add');
+                    }
+                });
+
+            } else {
+                Swal.fire({
+                    position: "top-end",
+                    icon: 'warning',
+                    title: 'Cannot Create..Table Empty!',
+                    showConfirmButton: false,
+                    timer: 2500
+                });
+
+                $('#dptaction_button').prop('disabled', false).html('<i class="fas fa-plus"></i>&nbsp;Add');
+            }
+    });
+    
 });
 
  function productDelete(ctl) {

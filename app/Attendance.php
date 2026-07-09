@@ -17,60 +17,58 @@ class Attendance extends Model
 
     use softDeletes;
 
-    public function get_work_days($emp_id, $month, $closedate)
+    public function get_work_days($emp_id, $month,$closedate)
     {
-        $shiftQuery = "SELECT st.onduty_time, st.offduty_time 
-                FROM employees emp 
-                JOIN shift_types st ON emp.emp_shift = st.id 
-                WHERE emp.emp_id = $emp_id 
-                LIMIT 1";
 
-        $shiftInfo = \DB::select($shiftQuery);
+         $shiftQuery = "SELECT st.onduty_time, st.offduty_time, st.saturday_onduty_time, st.saturday_offduty_time 
+                   FROM employees emp 
+                   JOIN shift_types st ON emp.emp_shift = st.id 
+                   WHERE emp.emp_id = $emp_id 
+                   LIMIT 1";
+    
+            $shiftInfo = \DB::select($shiftQuery);
+            
+            if (empty($shiftInfo)) {
+                $expectedHours = 8;
+                $halfDayHours = 4;
+                $saturdayExpectedHours = 8;
+                $saturdayHalfDayHours = 4;
+            } else {
+                $shift = $shiftInfo[0];
+                
+                   // Parse times using Carbon
+                $ondutyTime = Carbon::parse($shift->onduty_time);
+                $offdutyTime = Carbon::parse($shift->offduty_time);
 
-        if (empty($shiftInfo)) {
-            $expectedHours = 8;
-            $halfDayHours = 4;
-        } else {
-            $shift = $shiftInfo[0];
-            $ondutyTime = Carbon::parse($shift->onduty_time);
-            $offdutyTime = Carbon::parse($shift->offduty_time);
-            $expectedHours = $ondutyTime->diffInHours($offdutyTime);
-            $halfDayHours = $expectedHours / 2;
-        }
+                $saturdayOndutyTime = Carbon::parse($shift->saturday_onduty_time);
+                $saturdayOffdutyTime = Carbon::parse($shift->saturday_offduty_time);
 
-        $empjob_cat = DB::table('employees')
-            ->leftJoin('job_categories', 'job_categories.id', '=', 'employees.job_category_id')
+                 $expectedHours = $ondutyTime->diffInHours($offdutyTime);
+                 $halfDayHours = $expectedHours / 2;
+
+                 $saturdayExpectedHours = $saturdayOndutyTime->diffInHours($saturdayOffdutyTime);
+                 $saturdayHalfDayHours = $saturdayExpectedHours / 2;
+            }
+
+         $empjob_cat = DB::table('employees')
+            ->leftJoin('job_categories', 'job_categories.id' , '=', 'employees.job_category_id')
             ->select('job_categories.full_day_work_hours')
             ->where('emp_id', $emp_id)
             ->first();
 
         $full_day_work_hours = $empjob_cat ? $empjob_cat->full_day_work_hours : 8;
 
-        if ($month === '2026-05') {
-            $startDate = '2026-05-27';
-            $query = "SELECT Max(at1.timestamp) as lasttimestamp,
-                Min(at1.timestamp) as firsttimestamp
-                FROM attendances as at1
-                WHERE at1.emp_id = $emp_id
-                AND at1.date >= '$startDate'
-                AND at1.date <= '$closedate'
-                AND at1.deleted_at IS NULL
-                group by at1.uid, at1.date
-                ";
-        } else {
-            $query = "SELECT Max(at1.timestamp) as lasttimestamp,
-                Min(at1.timestamp) as firsttimestamp
-                FROM attendances as at1
-                WHERE at1.emp_id = $emp_id
-                AND at1.date LIKE '$month%'
-                AND at1.date <= '$closedate'
-                AND at1.deleted_at IS NULL
-                group by at1.uid, at1.date
-                ";
-        }
-
+        $query = "SELECT Max(at1.timestamp) as lasttimestamp,
+        Min(at1.timestamp) as firsttimestamp
+        FROM attendances as at1
+        WHERE at1.emp_id = $emp_id
+        AND at1.date LIKE '$month%'
+        AND at1.date <= '$closedate'
+        AND at1.deleted_at IS NULL
+        group by at1.uid, at1.date
+        ";
         $attendance = \DB::select($query);
-        
+
         $work_days = 0;
         foreach ($attendance as $att) {
 
@@ -83,20 +81,25 @@ class Attendance extends Model
                 ->where('work_level', '=', '2')
                 ->first();
 
-            if (!empty($holiday_check)) {
+            if(!EMPTY($holiday_check)){
                 continue;
             }
 
-            $work_days++;
+            // $work_days++;
             $diff = round((strtotime($last_time) - strtotime($first_time)) / 3600, 1);
 
-            if ($diff >= $full_day_work_hours) {
+               if ($date->isSaturday()) {
+                    $required_full_hours = $saturdayExpectedHours;
+                } else {
+                    $required_full_hours = $full_day_work_hours;
+                }
+                
+            if ($diff >= $required_full_hours) {
                 $work_days++;
-            } else {
+            } else{
                 $work_days += 0.5;
             }
         }
-
         return $work_days;
     }
 
@@ -3222,8 +3225,10 @@ class Attendance extends Model
             $dateRange[] = $closedateObj->format('Y-m-d');
         }
 
+
             $totalworkHours = 0;
             $totalweekworkshours = 0;
+            $totalMinutesAll  = 0;
 
             foreach ($dateRange as $todayDate) {
 
@@ -3235,43 +3240,48 @@ class Attendance extends Model
 
                 if(!$ignoredate){
                     $query = DB::table('attendances as at1')
-                    ->select(
-                        'at1.id',
-                        'at1.emp_id',
-                        'at1.timestamp',
-                        'at1.date',
-                        DB::raw('MIN(at1.timestamp) AS firsttimestamp'),
-                        DB::raw('CASE WHEN MIN(at1.timestamp) = MAX(at1.timestamp) THEN NULL 
-                                ELSE MAX(at1.timestamp) END AS lasttimestamp'),
-                        'shift_types.onduty_time',
-                        'shift_types.offduty_time'
-                    )
-                    ->leftJoin('employees', 'at1.emp_id', '=', 'employees.emp_id')
-                    ->leftJoin('shift_types', 'employees.emp_shift', '=', 'shift_types.id')
-                    ->whereNull('at1.deleted_at')
-                    ->where('at1.emp_id', $emp_id)
-                    ->where('at1.date', 'LIKE', $todayDate . '%')
-                    ->havingRaw('MIN(at1.timestamp) != MAX(at1.timestamp)')
-                    ->get();
+                            ->select(
+                                'at1.id',
+                                'at1.emp_id',
+                                'at1.timestamp',
+                                'at1.date',
+                                'shift_types.onduty_time',
+                                'shift_types.offduty_time'
+                            )
+                            ->leftJoin('employees', 'at1.emp_id', '=', 'employees.emp_id')
+                            ->leftJoin('shift_types', 'employees.emp_shift', '=', 'shift_types.id')
+                            ->whereNull('at1.deleted_at')
+                            ->where('at1.emp_id', $emp_id)
+                            ->where('at1.date', 'LIKE', $todayDate . '%')
+                            ->orderBy('at1.timestamp', 'asc')
+                            ->get();
 
-                
-                if ($query->isNotEmpty()) {
-                    $firsttimestamp = Carbon::parse($query->first()->firsttimestamp);
-                    $lasttimestamp = Carbon::parse($query->first()->lasttimestamp);
-                
-                    if ($firsttimestamp && $lasttimestamp && $firsttimestamp != $lasttimestamp) {
-                        $diffInMinutes = $firsttimestamp->diffInMinutes($lasttimestamp);
-                        $workHours = round($diffInMinutes / 60, 2);
-                        $totalworkHours+= $workHours; 
-                    }
-                }
+                      if ($query->isNotEmpty()) {
+                            $timestamps = $query->pluck('timestamp')->toArray();
+                            $count = count($timestamps);
+
+                            if ($count % 2 === 0) {
+                                $totalMinutes = 0;
+
+                                for ($i = 0; $i < $count; $i += 2) {
+                                   $in  = Carbon::parse($timestamps[$i])->second(0);
+                                   $out = Carbon::parse($timestamps[$i + 1])->second(0);
+
+                                    if ($in && $out && $in != $out) {
+                                        $totalMinutesAll  += $in->diffInMinutes($out);
+                                    }
+                                }
+                            }
+                        }
 
                 }
             }
             
-            $totalweekworkshours = $totalworkHours -($normal_ot_hours + $double_ot_hours);
+            $hours   = intdiv($totalMinutesAll, 60);
+            $minutes = $totalMinutesAll % 60;
+            $totalWorkHoursFormatted = sprintf('%d:%02d', $hours, $minutes);
 
-            return $totalweekworkshours;
+            return $totalWorkHoursFormatted;
     }
 
 }

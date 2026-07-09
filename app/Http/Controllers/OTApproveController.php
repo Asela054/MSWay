@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\EmployeeHelper;
 use App\Helpers\UserHelper;
 use App\OtApproved;
+use App\Services\Opma_Daily_approvePolicy_Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -15,6 +16,14 @@ use DateTime;
 
 class OTApproveController extends Controller
 {
+     protected $Opma_Daily_approvePolicy_Service;
+
+    public function __construct(Opma_Daily_approvePolicy_Service $Opma_Daily_approvePolicy_Service)
+    {
+        $this->Opma_Daily_approvePolicy_Service = $Opma_Daily_approvePolicy_Service;
+    }
+
+
      public function ot_approve(Request $request)
     {
         $permission = Auth::user()->can('ot-approve');
@@ -124,13 +133,9 @@ class OTApproveController extends Controller
                 $query->whereDate('at1.date', '<=', $to_date);
             }
 
-            $query->groupBy('at1.uid', 'at1.date')
-                ->orderBy('at1.date');
+            $query->groupBy('at1.uid', 'at1.date')->orderBy('at1.date');
 
             $attendance_data = $query->get();
-            
-
-       
 
         $ot_data = array();
 
@@ -145,6 +150,8 @@ class OTApproveController extends Controller
             $emp_id = $att->uid;
             $date = $att->date;
 
+            // Check if date is Saturday (Carbon::SATURDAY = 6)
+            $isSaturday = Carbon::parse($date)->isSaturday();
 
             $shift_detail = DB::table('employeeshiftdetails')
                 ->leftJoin('shift_types', 'employeeshiftdetails.shift_id', '=', 'shift_types.id')
@@ -155,151 +162,123 @@ class OTApproveController extends Controller
                 ->whereDate('employeeshiftdetails.until_time', '>=', $date)
                 ->where('employeeshiftdetails.status', 1)
                 ->where('employeeshifts.approval_status', 1)
-                ->first();
+                ->get();
 
-                // Check if date is Saturday (Carbon::SATURDAY = 6)
-                $isSaturday = Carbon::parse($date)->isSaturday();
-
-                if ($shift_detail) {
-
-                    $on_duty_time = $shift_detail->onduty_time;
-                    $off_duty_time =  $shift_detail->offduty_time;
-                    $emp_shift_id = $shift_detail->shift_id;
-                    $shift_until_time = $shift_detail->until_time;
-
-                    //  // Custom logic for Saturday with shift is night in opma
-                    // if($isSaturday && $shift_detail->shiftid == 2){
-                    //     $on_duty_time = $att->onduty_time;
-                    //     $off_duty_time =  $att->offduty_time;
-                    //     $emp_shift_id = $att->shift_id;
-
-                    // }else{
-                    //     $on_duty_time = $shift_detail->onduty_time;
-                    //     $off_duty_time = $shift_detail->offduty_time;
-                    //     $emp_shift_id = $shift_detail->shiftid;
-                    // }
-                   
-                   
-                }
-                else{
-                    $roster_detail = DB::table('employee_roster_details')
+                // Go to to roster / attendance-derived shift if no shift assignment found
+            if ($shift_detail->isEmpty()) {
+                $roster_detail = DB::table('employee_roster_details')
                     ->join('shift_types', 'employee_roster_details.shift_id', '=', 'shift_types.id')
-                    ->select('employee_roster_details.*', 'shift_types.onduty_time', 'shift_types.offduty_time','shift_types.id as shiftid') 
+                    ->select('employee_roster_details.*', 'shift_types.onduty_time', 'shift_types.offduty_time', 'shift_types.id as shiftid')
                     ->where('employee_roster_details.emp_id', $emp_id)
                     ->where('employee_roster_details.work_date', $date)
                     ->first();
-                    if($roster_detail){
-                        $on_duty_time = $roster_detail->onduty_time;
-                        $off_duty_time = $roster_detail->offduty_time;
-                        $emp_shift_id = $roster_detail->shiftid;
-                        $shift_until_time = null;
-                    }else{
-                        $on_duty_time = $att->onduty_time;
-                        $off_duty_time =  $att->offduty_time;
-                        $emp_shift_id = $att->shift_id;
-                        $shift_until_time = null;
-                    }
+
+                if ($roster_detail) {
+                    $shift_detail = collect([(object)[
+                        'onduty_time' => $roster_detail->onduty_time,
+                        'offduty_time' => $roster_detail->offduty_time,
+                        'shiftid' => $roster_detail->shiftid,
+                        'until_time' => null,
+                    ]]);
+                } else {
+                    $shift_detail = collect([(object)[
+                        'onduty_time' => $att->onduty_time,
+                        'offduty_time' => $att->offduty_time,
+                        'shiftid' => $att->shift_id,
+                        'until_time' => null,
+                    ]]);
                 }
-
-            $ot_hours = (new \App\Attendance)->get_ot_hours_by_date($emp_id, $att->lasttimestamp, $att->first_checkin, $date,  $on_duty_time, $off_duty_time, $att->emp_department,$emp_shift_id ,$shift_until_time);
-           
-            //$ot_hours = (new \App\Attendance)->get_ot_hours_by_date_morning_evening($emp_id, $att->lasttimestamp, $att->first_checkin, $date, $att->onduty_time, $att->offduty_time, $att->emp_department);
-            // $is_approved = (new \App\OtApproved)->is_exists_in_ot_approved($emp_id, $date);
-            // //if ot_breakdown is a key in the array
-            // if (array_key_exists('ot_breakdown', $ot_hours)) {
-
-            //     $ot_breakdown = array('ot_breakdown'=> $ot_hours['ot_breakdown'], 'is_approved' => $is_approved);
-
-            //     $normal_rate_otwork_hrs = $ot_hours['normal_rate_otwork_hrs'];
-            //     $double_rate_otwork_hrs = $ot_hours['double_rate_otwork_hrs'];
-
-            //     //push ot_breakdown to ot_data
-            //     if (!empty($ot_breakdown)) {
-            //         array_push($ot_data, $ot_breakdown);
-            //     }
-
-            // }
-            if(empty($ot_hours['ot_breakdown'])) {
-                continue; // Skip if no OT hours found
             }
 
-            if(count($ot_hours['ot_breakdown']) == 2) {
-                $OTmorningfrom = Carbon::parse($ot_hours['ot_breakdown'][0]['from_24']);
-                $OTeveningfrom = Carbon::parse($ot_hours['ot_breakdown'][1]['from_24']);
-                $is_approved_morning = (new \App\OtApproved)->is_exists_in_ot_approved($emp_id, $date, $OTmorningfrom);
-                $is_approved_evening = (new \App\OtApproved)->is_exists_in_ot_approved($emp_id, $date, $OTeveningfrom);
-            } else {
-                $OTeveningfrom = Carbon::parse($ot_hours['ot_breakdown'][0]['from_24']);
-                $is_approved_evening = (new \App\OtApproved)->is_exists_in_ot_approved($emp_id, $date, $OTeveningfrom);
-            }
-            //$ot_hours = (new \App\Attendance)->get_ot_hours_by_date_morning_evening($emp_id, $att->lasttimestamp, $att->first_checkin, $date, $att->onduty_time, $att->offduty_time, $att->emp_department);
-            //if ot_breakdown is a key in the array
-            if (array_key_exists('ot_breakdown', $ot_hours)) {
-                // if(count($ot_hours['ot_breakdown']) == 2) {
-                //     $ot_breakdown_morning = array('ot_breakdown'=> $ot_hours['ot_breakdown'][0], 'is_approved' => $is_approved_morning);
-                //     $ot_breakdown_evening = array('ot_breakdown'=> $ot_hours['ot_breakdown'][1], 'is_approved' => $is_approved_evening);
-                // } else {
-                //     $ot_breakdown_evening = array('ot_breakdown'=> $ot_hours['ot_breakdown'][0], 'is_approved' => $is_approved_evening);
-                // }
-                
-                // $normal_rate_otwork_hrs = $ot_hours['normal_rate_otwork_hrs'];
-                // $double_rate_otwork_hrs = $ot_hours['double_rate_otwork_hrs'];
+             $day_punches = DB::table('attendances')
+                            ->whereNull('deleted_at')
+                            ->where('uid', $emp_id)
+                            ->whereDate('date', $date)
+                            ->orderBy('timestamp')
+                            ->pluck('timestamp');
+            // Extract just the date part before concatenating with time strings
+                $date_only = Carbon::parse($date)->format('Y-m-d');
 
-                
-      
-                // Opma OT Approval Summary Data
-                $dailyAverage = 0;
+                // Sort shifts chronologically by onduty_time
+                $sorted_shifts = $shift_detail->sortBy(function ($s) use ($date_only) {
+                    return Carbon::parse($date_only . ' ' . $s->onduty_time)->timestamp;
+                })->values();
 
-                $dailysummary = DB::table('opma_daily_production_summary')
-                ->select('opma_daily_production_summary.*')
-                ->where('emp_id', $emp_id)
-                ->where('date',  $date)
-                ->first();
+            // Sort punches chronologically (should already be sorted from the query, but just in case)
+            $sorted_punches = $day_punches->sort()->values();
 
-                if($dailysummary){
+            foreach ($sorted_shifts as $index =>  $shift_details) {
+                $on_duty_time = $shift_details->onduty_time;
+                $off_duty_time = $shift_details->offduty_time;
+                $emp_shift_id = $shift_details->shiftid;
+                $shift_until_time = $shift_details->until_time ?? null;
 
-                    $target = $dailysummary->target;
-                    $produce = $dailysummary->produce;
-                    $dailyAverage = 0;
-                    if ($target > 0) {
-                        $dailyAverage = round(($produce / $target) * 100, 2);
+                if (empty($on_duty_time) || empty($off_duty_time)) {
+                    continue; // can't match punches without a shift window
+                }
+            
+               // Take punches 2 at a time: shift 0 -> punches[0],[1], shift 1 -> punches[2],[3], etc.
+               $first_checkin = $sorted_punches->get($index * 2);
+               $lasttimestamp = $sorted_punches->get($index * 2 + 1);
+
+                if (empty($first_checkin) || empty($lasttimestamp)) {
+                        continue; // not enough punches for this shift
                     }
 
-                }
+                $ot_hours = (new \App\Attendance)->get_ot_hours_by_date(
+                    $emp_id, 
+                     $lasttimestamp,
+                     $first_checkin,
+                    $date,  
+                    $on_duty_time, 
+                    $off_duty_time, 
+                    $att->emp_department,
+                    $emp_shift_id ,
+                    $shift_until_time);
+            
 
-                 
-                if(count($ot_hours['ot_breakdown']) == 2) {
-                    $ot_breakdown_morning = [
-                        'ot_breakdown'  => $ot_hours['ot_breakdown'][0],
-                        'is_approved'   => $is_approved_morning,
-                        'daily_average' => $dailyAverage, 
-                    ];
-                    $ot_breakdown_evening = [
-                        'ot_breakdown'  => $ot_hours['ot_breakdown'][1],
-                        'is_approved'   => $is_approved_evening,
-                        'daily_average' => $dailyAverage,
-                    ];
-                } else {
-                    $ot_breakdown_evening = [
-                        'ot_breakdown'  => $ot_hours['ot_breakdown'][0],
-                        'is_approved'   => $is_approved_evening,
-                        'daily_average' => $dailyAverage,
-                    ];
+                if(empty($ot_hours['ot_breakdown'])) {
+                    continue;
                 }
-
-                $normal_rate_otwork_hrs = $ot_hours['normal_rate_otwork_hrs'];
-                $double_rate_otwork_hrs = $ot_hours['double_rate_otwork_hrs'];
 
                 if(count($ot_hours['ot_breakdown']) == 2) {
-                    if (!empty($ot_breakdown_morning)) array_push($ot_data, $ot_breakdown_morning);
-                    if (!empty($ot_breakdown_evening)) array_push($ot_data, $ot_breakdown_evening);
+                    $OTmorningfrom = Carbon::parse($ot_hours['ot_breakdown'][0]['from_24']);
+                    $OTeveningfrom = Carbon::parse($ot_hours['ot_breakdown'][1]['from_24']);
+                    $is_approved_morning = (new \App\OtApproved)->is_exists_in_ot_approved($emp_id, $date, $OTmorningfrom);
+                    $is_approved_evening = (new \App\OtApproved)->is_exists_in_ot_approved($emp_id, $date, $OTeveningfrom);
                 } else {
-                    if (!empty($ot_breakdown_evening)) array_push($ot_data, $ot_breakdown_evening);
+                    $OTeveningfrom = Carbon::parse($ot_hours['ot_breakdown'][0]['from_24']);
+                    $is_approved_evening = (new \App\OtApproved)->is_exists_in_ot_approved($emp_id, $date, $OTeveningfrom);
                 }
 
+                //if ot_breakdown is a key in the array
+                if (array_key_exists('ot_breakdown', $ot_hours)) {
+                    if(count($ot_hours['ot_breakdown']) == 2) {
+                        $ot_breakdown_morning = array('ot_breakdown'=> $ot_hours['ot_breakdown'][0], 'is_approved' => $is_approved_morning);
+                        $ot_breakdown_evening = array('ot_breakdown'=> $ot_hours['ot_breakdown'][1], 'is_approved' => $is_approved_evening);
+                    } else {
+                        $ot_breakdown_evening = array('ot_breakdown'=> $ot_hours['ot_breakdown'][0], 'is_approved' => $is_approved_evening);
+                    }
+                    
+                    $normal_rate_otwork_hrs = $ot_hours['normal_rate_otwork_hrs'];
+                    $double_rate_otwork_hrs = $ot_hours['double_rate_otwork_hrs'];
 
-
-                     
+                    if(count($ot_hours['ot_breakdown']) == 2) {
+                        //push ot_breakdown to ot_data
+                        if (!empty($ot_breakdown_morning)) {
+                            array_push($ot_data, $ot_breakdown_morning);
+                        }
+                        if (!empty($ot_breakdown_evening)) {
+                            array_push($ot_data, $ot_breakdown_evening);
+                        }
+                    }
+                    else {
+                        //push ot_breakdown to ot_data
+                        if (!empty($ot_breakdown_evening)) {
+                            array_push($ot_data, $ot_breakdown_evening);
+                        }
+                    }
+                }
             }
         }
         return response()->json(['ot_data' => $ot_data]);
@@ -315,7 +294,6 @@ class OTApproveController extends Controller
         $checked = $request->ot_data;
 
         foreach ($checked as $ch) {
-
             $data = array(
                 'emp_id' => $ch['emp_id'],
                 'date' => $ch['date'],
@@ -329,8 +307,15 @@ class OTApproveController extends Controller
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s')
             );
-
             OtApproved::query()->insert($data);
+
+            $emp_id = $ch['emp_id'];
+            $date = $ch['date'];
+            $hours = $ch['hours'];
+            $double_hours = $ch['double_hours'];
+            $triple_hours = $ch['triple_hours'];
+
+            $this->Opma_Daily_approvePolicy_Service->OT_LatestoreDailyApprove($emp_id, $date, $hours, $double_hours, $triple_hours);
 
         }
 

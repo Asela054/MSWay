@@ -230,17 +230,29 @@ class LocationAttendanceController extends Controller
                         ->select('*')
                         ->where('employee_id', $empid)
                         ->where('attendance_date', $previous_day)
-                        ->where('shift_id', $empshiftid)
+                        ->whereNotNull('on_time')
+                        ->whereNull('off_time')
                         ->first();
 
 
-                         if ($attendancecheckinfo && $attendancecheckinfo->on_time != '' && $attendancecheckinfo->off_time == '') {
+                         if ($attendancecheckinfo && $attendancecheckinfo->on_time != '' && ($attendancecheckinfo->off_time === null || $attendancecheckinfo->off_time === '')) {
 
                             $attendanceinsertstatus = 2 ;
                             $attendancedate = $previous_day;
-                         }else{
-                             $attendanceinsertstatus = 1 ;
-
+                         } else {
+                             // check on same day
+                             $samedaycheckinfo = DB::table('job_attendance')
+                                 ->where('employee_id', $empid)
+                                 ->where('attendance_date', $date)
+                                 ->whereNotNull('on_time')
+                                 ->whereNull('off_time')
+                                 ->first();
+                             if ($samedaycheckinfo) {
+                                 $attendanceinsertstatus = 2;
+                                 // attendancedate stays as $date
+                             } else {
+                                 $attendanceinsertstatus = 1;
+                             }
                          }
 
                     }else{
@@ -249,11 +261,12 @@ class LocationAttendanceController extends Controller
                         ->select('*')
                         ->where('employee_id', $empid)
                         ->where('attendance_date', $date)
-                        ->where('shift_id', $empshiftid)
+                        ->whereNotNull('on_time')
+                        ->whereNull('off_time')
                         ->first();
 
 
-                         if ($attendancecheckinfo && $attendancecheckinfo->on_time != '' && $attendancecheckinfo->off_time == '') {
+                         if ($attendancecheckinfo && $attendancecheckinfo->on_time != '' && ($attendancecheckinfo->off_time === null || $attendancecheckinfo->off_time === '')) {
 
                             $attendanceinsertstatus = 2 ;
                          }else{
@@ -313,18 +326,23 @@ class LocationAttendanceController extends Controller
                 ->select('*')
                 ->where('employee_id', $empid)
                 ->where('attendance_date', $attendancedate)
+                ->whereNotNull('on_time')
                 ->whereNull('off_time')
                 ->first();
 
             if ($attendance) {
+                // if both location_status are 2 then location_status will be 2 otherwise it will be 1
+                $loc_status = ($attendance->location_status == 2 || $location_status == 2) ? 2 : 1;
+
                 DB::table('job_attendance')
                     ->where('id', $attendance->id)
                     ->update([
-                        'off_time' => $timestamp,
-                        'off_reason' => $off_reason,
-                        'location_status' => $location_status,
-                        'approve_status' => ($location_status == 1) ? '1' : '0',
-                        'updated_by' => $empid
+                        'off_time'        => $timestamp,
+                        'off_reason'      => $off_reason,
+                        'location_status' => $loc_status,
+                        'approve_status'  => ($loc_status == 1) ? '1' : '0',
+                        'updated_by'      => $empid,
+                        'updated_at'      => \Carbon\Carbon::now()
                     ]);
             }
         }

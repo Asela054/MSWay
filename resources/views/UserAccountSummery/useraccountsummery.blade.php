@@ -364,7 +364,15 @@
                                                     <div class="card shadow-none bg-transparent">
                                                         <div class="card-body">
                                                             <div class="row">
+                                                                <div class="col-sm-12 col-md-6 col-lg-3 col-xl-3">
+                                                                    <div class="form-group">
+                                                                        <label for="productionmonth" class="col-form-label col-form-label-sm font-weight-bold text-dark">Month</label>
+                                                                        <input type="month" class="form-control form-control-sm" id="productionmonth" name="productionmonth" value="{{ date('Y-m') }}" max="{{ date('Y-m') }}">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
                                                                 <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                                                                    <hr>
                                                                     <div class="center-block fix-width scroll-inner">
                                                                         <table class="table table-striped table-sm small nowrap" style="width: 100%" id="productiondataTable">
                                                                             <thead>
@@ -384,7 +392,7 @@
                                                                         </table>
                                                                     </div>
                                                                 </div>
-                                                            </div>
+
                                                         </div>
                                                     </div>  
                                                 </div> 
@@ -432,20 +440,23 @@
                                                                 <hr>
                                                                 <div class="center-block fix-width scroll-inner">
                                                                     <table class="table table-striped table-sm small nowrap" style="width: 100%" id="timesheettable">
-                                                                        <thead>
+                                                                       <thead>
                                                                             <tr>
-                                                                                <th>IN DATE</th>
-                                                                                <th>OUT DATE</th>
-                                                                                <th>DAY TYPE</th>
-                                                                                <th>SHIFT</th>
+                                                                                <th>DATE</th>
                                                                                 <th>IN TIME</th>
                                                                                 <th>OUT TIME</th>
-                                                                                <th>LATE MIN</th>
-                                                                                <th>OT Hr:Mi</th>
-                                                                                <th>DOT Hr:Mi</th>
-                                                                                <th>TOT Hr:Mi</th>
-                                                                                <th>Leave Type</th>
-                                                                                <th>Leave Day</th>
+                                                                                <th>LATE</th>
+                                                                                <th>MC NO</th>
+                                                                                <th>STYLE DETAILS</th>
+                                                                                <th>TARGET</th>
+                                                                                <th>PRODUCE</th>
+                                                                                <th>PRO AVG</th>
+                                                                                <th>PRO INS</th>
+                                                                                <th>OT</th>
+                                                                                <th>TRP: ALL</th>
+                                                                                <th>ATT: ALL</th>
+                                                                                <th>NIG: ALL</th>
+                                                                                <th>TRG: BO</th>
                                                                             </tr>
                                                                         </thead>
                                                                         <tbody></tbody>
@@ -1344,6 +1355,11 @@
         // Also run on page load
         fetchEmployeeData();
 
+        //Production Timesheet tab
+        $('#productionmonth').change(function () {
+            load_production_dt();
+        });
+
         $('#attendancemonth').change(function () {
             attendent_load_dt(empid);
         });
@@ -1360,9 +1376,16 @@
         });
 
 
+        load_production_dt();
+
+        // load production datatable
+        function load_production_dt() {
+        var productionmonth = $('#productionmonth').val();
+        if ($.fn.DataTable.isDataTable('#productiondataTable')) {
+            $('#productiondataTable').DataTable().destroy();
+        }
         $('#productiondataTable').DataTable({
-             "destroy": true,
-                    "processing": true,
+             "processing": true,
                     "serverSide": true,
                     dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
                         "<'row'<'col-sm-5'i><'col-sm-7'p>>",
@@ -1402,7 +1425,9 @@
                          url: scripturl + '/Opma_Production/daily_employee_productionsummary_list.php',
                          type: 'POST',
                          data : 
-                            { employee :empid},
+                            { employee :empid,
+                              productionmonth :productionmonth
+                            },
                     },
                     columns: [
                         { data: 'emp_name', name: 'emp_name' },
@@ -1431,8 +1456,11 @@
                             }
                         },
                           { data: 'damage', name: 'damage' }
-                    ]
+                    ],
+                    "bDestroy": true
         });
+        } 
+        // end load_production_dt
 
 
 
@@ -1763,17 +1791,17 @@
         var month = $('#timesheetmonth').val();
         if (!month) return;
 
-        var from_date = month + '-01';
-        var d = new Date(month.split('-')[0], parseInt(month.split('-')[1]), 0);
-        var to_date = month + '-' + String(d.getDate()).padStart(2, '0');
+        if ($.fn.DataTable.isDataTable('#timesheettable')) {
+             $('#timesheettable').DataTable().destroy();
+         }
+
 
         $.ajax({
             url: "{{ route('user_timesheet_data') }}",
             method: "POST",
             data: {
                 emp_id: emp_id,
-                from_date: from_date,
-                to_date: to_date,
+                month: month,
                 _token: '{{ csrf_token() }}'
             },
             success: function(result) {
@@ -1784,65 +1812,98 @@
                 tbody.empty();
 
                 if (!result || result.length === 0) {
-                    tbody.append('<tr><td colspan="12" class="text-center">No data found.</td></tr>');
+                    tbody.append('<tr><td colspan="22" class="text-center">No data found.</td></tr>');
                     return;
                 }
 
-                $.each(result, function(i, row) {
-                    var tr;
-                    if (row.in_time == null && row.leave_type == '') {
-                        tr = '<tr>' +
-                            '<td>' + (row.in_date || '') + '</td>' +
-                            '<td>&nbsp;</td>' +
-                            '<td>' + (row.day_type || '') + '</td>' +
-                            '<td>' + (row.shift || '') + '</td>' +
-                            '<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>' +
-                            '<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>' +
-                            '<td>&nbsp;</td><td>&nbsp;</td></tr>';
-                    } else if (row.in_time == null && row.leave_type != '') {
-                        tr = '<tr>' +
-                            '<td>' + (row.in_date || '') + '</td>' +
-                            '<td>&nbsp;</td>' +
-                            '<td>' + (row.day_type || '') + '</td>' +
-                            '<td>' + (row.shift || '') + '</td>' +
-                            '<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>' +
-                            '<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>' +
-                            '<td>' + (row.leave_type || '') + '</td>' +
-                            '<td>' + (row.leave_days || '') + '</td></tr>';
-                    } else {
-                        tr = '<tr>' +
-                            '<td>' + (row.in_date || '') + '</td>' +
-                            '<td>' + (row.out_date || '') + '</td>' +
-                            '<td>' + (row.day_type || '') + '</td>' +
-                            '<td>' + (row.shift || '') + '</td>' +
-                            '<td>' + (row.in_time || '') + '</td>' +
-                            '<td>' + (row.out_time || '') + '</td>' +
-                            '<td>' + (row.late_min || 0) + '</td>' +
-                            '<td>' + (row.ot_hours || 0) + '</td>' +
-                            '<td>' + (row.double_ot || 0) + '</td>' +
-                            '<td>' + (row.triple_ot || 0) + '</td>' +
-                            '<td>' + (row.leave_type || '') + '</td>' +
-                            '<td>' + (row.leave_days || 0) + '</td></tr>';
-                    }
-                    tbody.append(tr);
-                });
-
                 $('#timesheettable').DataTable({
-                    destroy: true,
-                    dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" +
-                         "<'row'<'col-sm-12'tr>>" +
-                         "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+                    processing: true,
+                    serverSide: true,
+                    dom:    "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" +
+                            "<'row'<'col-sm-12'tr>>" +
+                            "<'row'<'col-sm-5'i><'col-sm-7'p>>",
                     buttons: [
-                        { extend: 'csv',   className: 'btn btn-success btn-sm', title: 'Attendance Time Sheet', text: '<i class="fas fa-file-csv mr-2"></i> CSV' },
-                        { extend: 'pdf',   className: 'btn btn-danger btn-sm',  title: 'Attendance Time Sheet', text: '<i class="fas fa-file-pdf mr-2"></i> PDF', orientation: 'landscape', pageSize: 'legal' },
-                        { extend: 'print', className: 'btn btn-primary btn-sm', title: 'Attendance Time Sheet', text: '<i class="fas fa-print mr-2"></i> Print' }
-                    ],
+                                { 
+                                    extend: 'csv', 
+                                    className: 'btn btn-success btn-sm', 
+                                    title: 'Attendance Time Sheet', 
+                                    text: '<i class="fas fa-file-csv mr-2"></i> CSV' 
+                                },
+                                { 
+                                    extend: 'pdf', 
+                                    className: 'btn btn-danger btn-sm', 
+                                    title: 'Attendance Time Sheet', 
+                                    text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
+                                    orientation: 'landscape', 
+                                    pageSize: 'legal'
+                                },
+                                { 
+                                    extend: 'print', 
+                                    className: 'btn btn-primary btn-sm', 
+                                    title: 'Attendance Time Sheet', 
+                                    text: '<i class="fas fa-print mr-2"></i> Print' 
+                                }
+                            ],
+                    ajax: {
+                            url: "{{ route('user_timesheet_data') }}",
+                            type: 'POST',
+                            data: {
+                                emp_id: emp_id,
+                                month: month
+                            }
+                    },
+                    columns: [
+                            { data: 'formatted_date', name: 'date' },
+                            { data: 'in_time', name: 'on_time' },
+                            { data: 'out_time', name: 'off_time' },
+                            { data: 'late_min', name: 'late_minites' },
+                            { 
+                                data: 'mc_no',
+                                name: 'machine_id',
+                                render: function(data) {
+                                    return data ? data.replace(/,/g, '<br>') : '';
+                                }
+                            },
+                            { 
+                                data: 'style_details',
+                                name: 'style_id',
+                                render: function(data) {
+                                    return data ? data.replace(/,/g, '<br>') : '';
+                                }
+                            },
+                            { 
+                                data: 'target',
+                                name: 'target',
+                                render: function(data) {
+                                    return data ? data.replace(/,/g, '<br>') : '';
+                                }
+                            },
+                            { 
+                                data: 'produced',
+                                name: 'produced',
+                                render: function(data) {
+                                    return data ? data.replace(/,/g, '<br>') : '';
+                                }
+                            },
+                            { 
+                                data: 'pro_avg',
+                                name: 'average',
+                                render: function(data) {
+                                    return data ? data.replace(/,/g, '<br>') : '';
+                                }
+                            },
+                                { data: 'pro_ins', name: 'pro_ins', render: function(data) { return data == 1 ? '<span class="badge badge-success">Allowed</span>' : '<span class="badge badge-danger">Not Allowed</span>'; } },
+                                { data: 'ot', name: 'normal_ot', render: function(data) { return data == 1 ? '<span class="badge badge-success">Allowed</span>' : '<span class="badge badge-danger">Not Allowed</span>'; } },
+                                { data: 'trp_all', name: 'trp_all', render: function(data) { return data == 1 ? '<span class="badge badge-success">Allowed</span>' : '<span class="badge badge-danger">Not Allowed</span>'; } },
+                                { data: 'att_all', name: 'att_all', render: function(data) { return data == 1 ? '<span class="badge badge-success">Allowed</span>' : '<span class="badge badge-danger">Not Allowed</span>'; } },
+                                { data: 'nig_all', name: 'nig_all', render: function(data) { return data == 1 ? '<span class="badge badge-success">Allowed</span>' : '<span class="badge badge-danger">Not Allowed</span>'; } },
+                                { data: 'trg_bo', name: 'target_bonus' }
+                        ],
                     order: [[0, 'asc']],
-                    paging: false
                 });
             },
             error: function() {
-                $('#timesheettable tbody').html('<tr><td colspan="12" class="text-center text-danger">Error loading data.</td></tr>');
+                $('#timesheettable tbody').html('<tr><td colspan="22" class="text-center text-danger">Error loading data.</td></tr>');
             }
         });
     }
@@ -2034,7 +2095,7 @@
                 $('#clock_status').text('');
                 return;
             }
-            $.post('/api/v1/Getattendanceshift', { empid: empid, date: new Date().toISOString().slice(0,10) }, function(shiftData) {
+            $.post('/api/v1/Getattendanceshift', { empid: empid, date: new Date(new Date().getTime() + 5.5*60*60*1000).toISOString().slice(0,10) }, function(shiftData) {
                 var shift = shiftData.data ? shiftData.data : shiftData;
                 if (shift.attendanceinserttype == 1) {
                     isClockIn = true;
@@ -2043,7 +2104,11 @@
                 } else {
                     isClockIn = false;
                     $('#clockBtnText').text('Clock Out');
-                    $('#clockBtn').removeAttr('data-done').prop('disabled', false);
+                    $('#clockBtn').removeAttr('data-done');
+
+                    // Clock out - disable and wait till location selection
+                    $('#clockBtn').prop('disabled', true);
+                    $('#clock_status').text('Please select location to clock out.');
                 }
             }, 'json');
         });
@@ -2051,7 +2116,7 @@
 
     function getAttendanceShiftAndInsert(reason) {
         var branchId = $('#mark_location').val();
-        var today = new Date().toISOString().slice(0,10);
+        var today = new Date(new Date().getTime() + 5.5*60*60*1000).toISOString().slice(0,10);
 
         $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') } });
 
@@ -2069,7 +2134,7 @@
                     data: {
                         location_id: branchId,
                         emp_id: empid,
-                        timestamp: new Date().toISOString().slice(0,19).replace('T',' '),
+                        timestamp: (function(){ var d = new Date(new Date().getTime() + 5.5*60*60*1000); return d.toISOString().slice(0,19).replace('T',' '); })(),
                         attendaceshift: shift.attendaceshift,
                         attendancedate: shift.attendancedate,
                         attendanceinserttype: shift.attendanceinserttype,
@@ -2081,8 +2146,12 @@
                     success: function(data) {
                       if (isClockIn) {
                         isClockIn = false;
+                        locationStatus = null;
                         $('#clockBtnText').text('Clock Out');
-                        $('#clockBtn').prop('disabled', false);
+                       
+                        // location re-verification for clock-out
+                        $('#clockBtn').prop('disabled', true);
+                        $('#clock_status').text('Please select location to clock out.');
                     } else {
                         isClockIn = true;
                         $('#clockBtnText').text('Done');
@@ -2100,8 +2169,11 @@
                     });
                     $('#reasonBox').hide();
                     $('#reason_text').val('');
+                    $('#submitReasonBtn').prop('disabled', false);
                     },
                     error: function(xhr) {
+                        $('#clockBtn').prop('disabled', false);
+                        $('#submitReasonBtn').prop('disabled', false);
                         Swal.fire({ 
                             icon: 'error', 
                             title: 'Error', 
@@ -2111,6 +2183,8 @@
                 });
             },
             error: function(xhr) {
+                 $('#clockBtn').prop('disabled', false);
+                 $('#submitReasonBtn').prop('disabled', false);
                 Swal.fire({ 
                     icon: 'error', 
                     title: 'Error', 
@@ -2124,10 +2198,11 @@
     $('#clockBtn').on('click', function(e) {
         e.preventDefault();
         
-       if (locationStatus === 2) {
-        $('#reasonBox').show();
-        return;
-    }
+        if (locationStatus === 2) {
+            $('#reasonBox').show();
+            return;
+        }
+        $('#clockBtn').prop('disabled', true);
         getAttendanceShiftAndInsert('');
     });
 
@@ -2142,6 +2217,7 @@
                 text: 'Please enter a reason.' });
             return;
     }
+    $('#submitReasonBtn').prop('disabled', true);
     getAttendanceShiftAndInsert(reason);
     });
 
