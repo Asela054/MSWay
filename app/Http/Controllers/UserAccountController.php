@@ -18,6 +18,7 @@ use App\Holiday;
 use App\Leave;
 use App\Company;
 use App\Employee;
+use App\ProductionModule_Opma\OpmaDailyApprovalSummary;
 use Illuminate\Support\Facades\Session;
 use App\RemunerationTaxation;
 use Yajra\Datatables\Datatables;
@@ -96,123 +97,55 @@ class UserAccountController extends Controller
     // Get user attendance timesheet data
     public function getUserTimesheetData(Request $request)
     {
-        $emp_id_str  = $request->input('emp_id');   // emp_id string (e.g. "EMP001")
-        $from_date   = $request->input('from_date'); // Y-m-d
-        $to_date     = $request->input('to_date');   // Y-m-d
+        $emp_id  = $request->input('emp_id');
+        $month = $request->input('month');
+        // Calculate date range
+        $from_date = $month . '-01';
+        $to_date = date('Y-m-t', strtotime($month . '-01'));
 
-        // Fetch the employee row using the emp_id string
-        $employee = DB::selectOne("
-            SELECT emp.id, emp.emp_id, emp.emp_etfno, emp.emp_fullname, emp.emp_gender,
-                   emp.emp_shift,
-                   COALESCE(esd_shift.shift_name, st.shift_name) AS shiftname
-            FROM employees emp
-            LEFT JOIN shift_types st ON st.id = emp.emp_shift
-            LEFT JOIN employeeshiftdetails esd
-                ON esd.emp_id = emp.emp_id
-            LEFT JOIN shift_types esd_shift ON esd.shift_id = esd_shift.id
-            WHERE emp.emp_id = ? AND emp.deleted = 0
-            LIMIT 1
-        ", [$emp_id_str]);
+        // Fetch summary records with details
+        $summaries = OpmaDailyApprovalSummary::with('details')
+            ->where('emp_id', $emp_id)
+            ->whereBetween('date', [$from_date, $to_date])
+            ->orderBy('date', 'asc')
+            ->get();
 
-        if (!$employee) {
-            return response()->json([]);
-        }
+        $data = [];
 
-        // Build date range
-        $startDate = new \DateTime($from_date);
-        $endDate   = new \DateTime($to_date);
-        $dateRange = [];
-        while ($startDate <= $endDate) {
-            $dateRange[] = $startDate->format('Y-m-d');
-            $startDate->modify('+1 day');
-        }
+        foreach ($summaries as $summary) {
+           
+            $mc_nos = $summary->details->pluck('machine_id')->implode(','); // or machine description
+            $styles = $summary->details->pluck('style_id')->implode(',');  // or style description
+            $targets = $summary->details->pluck('target')->implode(',');
+            $produced = $summary->details->pluck('produced')->implode(',');
+            $averages = $summary->details->pluck('average')->map(function($val) { 
+                return number_format($val, 2) . '%'; 
+            })->implode(',');
 
-        $attendanceRecords = [];
-        foreach ($dateRange as $date) {
-            $record = DB::select("
-                SELECT
-                    DATE_FORMAT(?, '%Y-%m-%d') AS in_date,
-                    DATE_FORMAT(?, '%Y-%m-%d') AS out_date,
-                    COALESCE(h.holiday_name,
-                        CASE WHEN WEEKDAY(?) IN (5,6) THEN DAYNAME(?)
-                        ELSE 'Weekday' END) AS day_type,
-                    COALESCE(roster_shift.shift_name, esd_shift.shift_name, st.shift_name) AS shift,
-                    DATE_FORMAT(MIN(att.timestamp), '%h:%i %p') AS in_time,
-                    DATE_FORMAT(MAX(att.timestamp), '%h:%i %p') AS out_time,
-                    ROUND(COALESCE(la.minites_count, 0), 2)  AS late_min,
-                    COALESCE(leave_data.leavename, '')        AS leave_type,
-                    ROUND(COALESCE(leave_data.no_of_days, 0), 2) AS leave_days,
-                    ROUND(COALESCE(ot.hours, 0) + COALESCE(ot.holiday_normal_hours, 0), 2) AS ot_hours,
-                    ROUND(COALESCE(ot.double_hours, 0), 2)   AS double_ot,
-                    ROUND(COALESCE(ot.triple_hours, 0), 2)   AS triple_ot
-                FROM (SELECT ? AS date) dr
-                LEFT JOIN employee_roster_details erd
-                    ON erd.emp_id = ? AND erd.work_date = ?
-                LEFT JOIN shift_types roster_shift ON roster_shift.id = erd.shift_id
-                LEFT JOIN attendances att ON att.emp_id = ? AND att.date = ?
-                LEFT JOIN shift_types st ON st.id = ?
-                LEFT JOIN employeeshiftdetails esd
-                    ON esd.emp_id = ? AND ? BETWEEN esd.date_from AND esd.until_time
-                LEFT JOIN shift_types esd_shift ON esd.shift_id = esd_shift.id
-                LEFT JOIN employee_late_attendance_minites la
-                    ON la.emp_id = ? AND la.attendance_date = ?
-                LEFT JOIN (
-                    SELECT ot.emp_id, ot.date, ot.hours, ot.double_hours, ot.triple_hours,
-                           ot.holiday_normal_hours
-                    FROM ot_approved ot
-                ) ot ON ot.emp_id = ? AND ot.date = ?
-                LEFT JOIN (
-                    SELECT l.emp_id, lt.leave_type AS leavename, l.no_of_days, l.leave_from, l.leave_to
-                    FROM leaves l
-                    LEFT JOIN leave_types lt ON l.leave_type = lt.id
-                    WHERE l.status = 'Approved'
-                ) leave_data ON leave_data.emp_id = ? AND ? BETWEEN leave_data.leave_from AND leave_data.leave_to
-                LEFT JOIN holidays h ON h.date = ?
-                GROUP BY dr.date
-            ", [
-                $date, $date, $date, $date,          // date formatting / weekday check
-                $date,                                // dr alias
-                $employee->emp_id, $date,             // roster
-                $employee->emp_id, $date,             // attendance
-                $employee->emp_shift,                 // shift_types
-                $employee->emp_id, $date,             // employeeshiftdetails
-                $employee->emp_id, $date,             // late attendance
-                $employee->emp_id, $date,             // OT
-                $employee->emp_id, $date,             // leave
-                $date,                                // holiday
-            ]);
-
-            $attendanceRecords[] = $record[0] ?? (object)[
-                'in_date'    => $date,
-                'out_date'   => $date,
-                'day_type'   => '',
-                'shift'      => '',
-                'in_time'    => null,
-                'out_time'   => null,
-                'late_min'   => 0,
-                'leave_type' => '',
-                'leave_days' => 0,
-                'ot_hours'   => 0,
-                'double_ot'  => 0,
-                'triple_ot'  => 0,
+            $data[] = [
+                'formatted_date' => \Carbon\Carbon::parse($summary->date)->format('Y-m-d'),
+                'in_time' => \Carbon\Carbon::parse($summary->on_time)->format('H:i'),
+                'out_time' => \Carbon\Carbon::parse($summary->off_time)->format('H:i'),
+                'late_min' => $summary->late_minites ?? 0,
+                'mc_no' => $mc_nos,
+                'style_details' => $styles,
+                'target' => $targets,
+                'produced' => $produced,
+                'pro_avg' => $averages,
+                'pro_ins' => $summary->daily_average >= 50 ? 1 : 0,
+                'ot'      => $summary->daily_average >= 50 ? 1 : 0,
+                'trp_all' => $summary->daily_average >= 50 ? 1 : 0,
+                'att_all' => $summary->daily_average >= 50 ? 1 : 0,
+                'nig_all' => $summary->daily_average >= 50 ? 1 : 0, 
+                'trg_bo' => $summary->target_bonus ?? '',
             ];
         }
 
-        // Fetch daily production averages
-        $productionRows = DB::table('opma_daily_production_summary')
-            ->select('date', DB::raw('ROUND((produce / NULLIF(target, 0)) * 100, 2) AS daily_aveg'))
-            ->where('emp_id', $emp_id_str)
-            ->whereBetween('date', [$from_date, $to_date])
-            ->get();
-
-        $productionMap = [];
-        foreach ($productionRows as $prod) {
-            $productionMap[$prod->date] = $prod->daily_aveg;
-        }
-
         return response()->json([
-            '_records'        => $attendanceRecords,
-            '_production_map' => $productionMap,
+            'draw' => $request->input('draw', 1),
+            'recordsTotal' => count($data),
+            'recordsFiltered' => count($data),
+            'data' => $data
         ]);
     }
 
