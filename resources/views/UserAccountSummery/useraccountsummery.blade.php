@@ -454,7 +454,7 @@
                                                                                 <th>TOT Hr:Mi</th>
                                                                                 <th>LEAVE TYPE</th>
                                                                                 <th>LEAVE DAY</th>
-                                                                                <th>Target Achivement</th>
+                                                                                <th>TARGET ACHIVEMENT</th>
                                                                             </tr>
                                                                         </thead>
                                                                         <tbody></tbody>
