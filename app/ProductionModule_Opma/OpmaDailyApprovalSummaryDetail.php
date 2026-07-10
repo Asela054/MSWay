@@ -30,6 +30,6 @@ class OpmaDailyApprovalSummaryDetail extends Model
 
     public function style()
     {
-        return $this->belongsTo(Style::class, 'style_id');
+        return $this->belongsTo(Product::class, 'style_id');
     }
 }
