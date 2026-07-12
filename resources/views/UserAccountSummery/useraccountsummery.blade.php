@@ -451,6 +451,7 @@
                                                                                 <th>TARGET</th>
                                                                                 <th>PRODUCE</th>
                                                                                 <th>PRO AVG</th>
+                                                                                <th>WEIGHTED AVG</th>
                                                                                 <th>PRO INS</th>
                                                                                 <th>OT</th>
                                                                                 <th>TRP: ALL</th>
@@ -1812,7 +1813,7 @@
                 tbody.empty();
 
                 if (!result || result.length === 0) {
-                    tbody.append('<tr><td colspan="22" class="text-center">No data found.</td></tr>');
+                    tbody.append('<tr><td colspan="23" class="text-center">No data found.</td></tr>');
                     return;
                 }
 
@@ -1892,6 +1893,13 @@
                                     return data ? data.replace(/,/g, '<br>') : '';
                                 }
                             },
+                            { 
+                                data: 'weighted_avg', 
+                                name: 'average',
+                                render: function(data) {
+                                    return data ? data.replace(/,/g, '<br>') : '';
+                                }
+                            },
                                 { data: 'pro_ins', name: 'pro_ins', render: function(data) { return data == 1 ? '<span class="badge badge-success">Allowed</span>' : '<span class="badge badge-danger">Not Allowed</span>'; } },
                                 { data: 'ot', name: 'normal_ot', render: function(data) { return data == 1 ? '<span class="badge badge-success">Allowed</span>' : '<span class="badge badge-danger">Not Allowed</span>'; } },
                                 { data: 'trp_all', name: 'trp_all', render: function(data) { return data == 1 ? '<span class="badge badge-success">Allowed</span>' : '<span class="badge badge-danger">Not Allowed</span>'; } },
@@ -1903,7 +1911,7 @@
                 });
             },
             error: function() {
-                $('#timesheettable tbody').html('<tr><td colspan="22" class="text-center text-danger">Error loading data.</td></tr>');
+                $('#timesheettable tbody').html('<tr><td colspan="23" class="text-center text-danger">Error loading data.</td></tr>');
             }
         });
     }
