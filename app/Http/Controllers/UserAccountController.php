@@ -114,8 +114,13 @@ class UserAccountController extends Controller
 
         foreach ($summaries as $summary) {
            
-            $mc_nos = $summary->details->pluck('machine_id')->implode(','); // or machine description
-            $styles = $summary->details->pluck('style_id')->implode(',');  // or style description
+            $mc_nos = $summary->details->map(function($d) {
+                return $d->machine ? $d->machine->machine : $d->machine_id;
+            })->implode(',');
+
+            $styles = $summary->details->map(function($d) {
+                return $d->style ? $d->style->title : $d->style_id;
+            })->implode(',');  // or style description
             $targets = $summary->details->pluck('target')->implode(',');
             $produced = $summary->details->pluck('produced')->implode(',');
             $averages = $summary->details->pluck('average')->map(function($val) { 
