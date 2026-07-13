@@ -91,6 +91,7 @@ class AttendanceproductionreportController extends Controller
                         'target' => $targets,
                         'produced' => $produced,
                         'pro_avg' => $averages,
+                        'weighted_avg' => number_format($summary->details->avg('average'), 2) . '%',
                         'pro_ins' => $summary->daily_average >= 50 ? 1 : 0,
                         'ot'      => $summary->daily_average >= 50 ? 1 : 0,
                         'trp_all' => $summary->daily_average >= 50 ? 1 : 0,
