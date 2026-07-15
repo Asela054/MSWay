@@ -1883,6 +1883,12 @@ Route::get('rpt_assigned_devices',['uses' => 'RptAssignedDevicesController@getas
 Route::get('/timestampreport' ,'RpttimestampsController@index')->name('timestampreport');
 Route::get('/generate_timestamp_report' ,'RpttimestampsController@generate_timestamp_report')->name('generate_timestamp_report');
 
+
+// AttendanceApprovalController_st Controller Routes
+Route::get('attendance_list_for_approve_st',['uses' => 'AttendanceApprovalController_st@attendance_list_for_approve', 'as' => 'attendance_list_for_approve_st']);
+Route::post('AttendentAprovelBatch_st', 'AttendanceApprovalController_st@AttendentAprovelBatch')->name('AttendentAprovelBatch_st');
+
+
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');
     Artisan::call('config:clear');
