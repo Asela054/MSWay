@@ -17,7 +17,15 @@ class EmployeeWorkRateController extends Controller
         if (!$user->can('employee-work-rate-list')) {
             abort(403);
         }
-        return view('EmployeeWorkRates.employeeWorkRate');
+
+        $appName = config('app.name');
+        if($appName == 'KoasisV2'){
+            return view('EmployeeWorkRates.employeeWorkRate_Ko');
+        }
+        else{
+             return view('EmployeeWorkRates.employeeWorkRate');
+        }
+
     }
 
     public function emp_work_rate_list(Request $request)
