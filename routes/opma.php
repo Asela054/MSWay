@@ -96,6 +96,10 @@ Route::post('opma_getEmployeeProductionDetails', 'Production_Module_Opma\Product
 Route::get('opma_machinechart', ['uses' => 'Additionals\OpmaDashdoardController@machinechart', 'as' => 'opma_machinechart']);
 
 
+// Attendance & Production Summary Report routs
+Route::get('/opma_attendanceproductionreport', 'Production_Module_Opma\AttendanceproductionreportController@index')->name('opma_attendanceproductionreport');
+Route::post('/opma_attendanceproduction_generatereport' ,'Production_Module_Opma\AttendanceproductionreportController@generatereport')->name('opma_attendanceproduction_generatereport');
+
 
 // End of Opma Production Section Routes
 

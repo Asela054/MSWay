@@ -25,7 +25,10 @@ class AttendanceApprovalController extends Controller
         $appName = config('app.name');
         if($appName == 'AveMariaHospital'){
              return view('Avamaria.attendanceapprovel');
-        }else{
+        }elseif($appName == 'St_Anne_Rubber_HRM'){
+            return view('Attendent.attendanceapprovel_st');
+        }
+        else{
              return view('Attendent.attendanceapprovel');
         }
         
