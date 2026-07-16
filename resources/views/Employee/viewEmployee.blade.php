@@ -135,6 +135,18 @@
 											@endif
 										</div>
 										<div class="col-md-4 col-sm-6 col-12 mb-2">
+											<label class="small font-weight-bold text-dark">Mobile Device MAC ID</label>
+											<input type="text" name="mac_id" id="mac_id" value="{{ old('mac_id', $deviceCheck->mac_id ?? '') }}" class="form-control form-control-sm" />
+											@if ($errors->has('mac_id'))
+												<span class="help-block">
+													<strong>{{ $errors->first('mac_id') }}</strong>
+												</span>
+											@endif
+										</div>
+										
+									</div>
+									<div class="form-row mb-1">
+										<div class="col-md-4 col-sm-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">Office Extension</label>
 											<input type="text" name="emp_work_telephone" id="emp_work_telephone" value="{{$employee->emp_work_telephone}}" class="form-control form-control-sm {{ $errors->has('emp_work_telephone') ? ' has-error' : '' }}" />
 											@if ($errors->has('emp_work_telephone'))
@@ -143,8 +155,6 @@
 												</span>
 											@endif
 										</div>
-									</div>
-									<div class="form-row mb-1">
 										<div class="col-md-4 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">Photograph</label>
 											<input type="file" data-preview="#preview" class="form-control form-control-sm {{ $errors->has('photograph') ? ' has-error' : '' }}" name="photograph" id="photograph">
