@@ -48,6 +48,7 @@ class AuthController extends Controller
         $validator = \Validator::make($request->all(), [
             'email' => 'required',
             'password' => 'required',
+            'device_id' => 'required',
         ]);
 
         if($validator->fails()){
@@ -65,6 +66,15 @@ class AuthController extends Controller
 
         $user = Auth::user();
         
+        $deviceCheck = DB::table('employee_devices_mac_id')
+                            ->where('emp_id', $user->emp_id)
+                            ->where('mac_id', $request->device_id)
+                            ->where('status', 1)
+                            ->first();
+
+                        $isValidDevice = $deviceCheck ? true : false;
+
+
         $employee = DB::table('employees')
         ->leftJoin('job_categories', 'employees.job_category_id', '=', 'job_categories.id')
         ->leftJoin('employment_statuses', 'employees.emp_status', '=', 'employment_statuses.id')
@@ -139,7 +149,8 @@ class AuthController extends Controller
         $data = [
             'user' => Auth::user(),
             'employee_details' => $employee,
-            'api_key' => $accessToken
+            'api_key' => $accessToken,
+            'Valid_Device_status' => $isValidDevice
         ];
         return (new BaseController)->sendResponse($data, 'Login Success');
 

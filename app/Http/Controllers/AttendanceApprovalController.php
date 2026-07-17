@@ -379,7 +379,8 @@ class AttendanceApprovalController extends Controller
                 'employees.emp_name_with_initial',
                 'branches.location',
                 'departments.name as dept_name',
-                'job_categories.late_attend_min'                
+                'job_categories.late_attend_min',  
+                'job_categories.salary_without_attendace'              
             )
             ->from('employees as employees')
             // ->leftJoin('attendances as at1', 'employees.emp_id', '=', 'at1.uid')
@@ -404,10 +405,9 @@ class AttendanceApprovalController extends Controller
 
         $query->where('employees.deleted', 0);
         $query->where('employees.is_resigned', 0);
-        
+        $query->where('employees.emp_id', 1);
         $query->groupBy('employees.emp_id');
         $results = $query->get();
-
         foreach ($results as $record) {
             $totalworkHours = 0;
             $totalweekworkshours = 0;
@@ -436,12 +436,13 @@ class AttendanceApprovalController extends Controller
 
             $triple_ot_hours = (new \App\OtApproved)->get_triple_ot_hours_monthly($record->emp_id, $month, $closedate);
 
-            $normal_ot_hours_additional = (new \App\OtApproved)->get_ot_hours_monthly_ktClean($record->emp_id, $month, $closedate);
+            //$normal_ot_hours_additional = (new \App\OtApproved)->get_ot_hours_monthly_ktClean($record->emp_id, $month, $closedate);
 
             $auditattedance = (new \App\Auditattendace)->apply_audit_attedance($record->emp_auto_id,$record->emp_id, $month);
 
-            $night_work_days = (new \App\OtApproved)->get_night_work_days($record->emp_id, $month, $closedate);
+           $night_work_days = (new \App\OtApproved)->get_night_work_days($record->emp_id, $month, $closedate);
             
+            $normal_ot_hours_additional =0;
             if(!empty($record->date)){
 				$year_rec = Carbon::createFromFormat('Y-m-d H:i:s', $record->date)->year;
 				$month_rec = Carbon::createFromFormat('Y-m-d H:i:s', $record->date)->month;
@@ -645,7 +646,39 @@ class AttendanceApprovalController extends Controller
 						employeeWorkRate::create($data2);
 					}
 				}  
-			}
+			}elseif($record->salary_without_attendace != 0){
+
+                $year_rec = Carbon::createFromFormat('Y-m-d', $closedate)->year;
+				$month_rec = Carbon::createFromFormat('Y-m-d', $closedate)->month;
+
+                DB::table('employee_work_rates')
+					->where('emp_id', $record->emp_auto_id)
+					->where('work_year', $year_rec)
+					->where('work_month', $month_rec)
+					->delete();
+
+                $data2 = array(
+                    'emp_id' => $record->emp_auto_id,
+                    'emp_etfno' => $record->emp_id,
+                    'work_year' => $year_rec,
+                    'work_month' => $month_rec,
+                    'work_days' => 0,
+                    'working_week_days' => 0,
+                    'work_hours' => 0,
+                    'leave_days' => 0,
+                    'nopay_days' => 0,
+                    'normal_rate_otwork_hrs' => 0,
+                    'double_rate_otwork_hrs' => 0,
+                    'triple_rate_otwork_hrs' => 0,
+                    'day_off' => 0,
+                    'night_days' => 0,
+                    'additional_OT' => 0,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s')
+                );
+                employeeWorkRate::create($data2);
+            }
+
         }
 
         //return success msg json

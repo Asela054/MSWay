@@ -280,7 +280,14 @@ class EmployeeController extends Controller
             $empposition = CompanyHierarchy::orderBy('order_number', 'asc')->get();
             $empfinancial = FinancialCategory::orderBy('id', 'asc')->get();
 
-            return view('Employee.viewEmployee', compact('job_categories', 'employee', 'id', 'jobtitles', 'employmentstatus', 'branch', 'shift_type', 'company', 'departments', 'work_categories', 'dsdivisions', 'gsndivision', 'policestation', 'empposition', 'empfinancial'));
+           $deviceCheck = DB::table('employee_devices_mac_id')
+                ->where('emp_id', $employee->emp_id)
+                ->where('status', 1)
+                ->first();
+
+
+
+            return view('Employee.viewEmployee', compact('job_categories', 'employee', 'id', 'jobtitles', 'employmentstatus', 'branch', 'shift_type', 'company', 'departments', 'work_categories', 'dsdivisions', 'gsndivision', 'policestation', 'empposition', 'empfinancial','deviceCheck'));
             
         } catch (\Exception $e) {
             \Log::error('Error loading employee view: ' . $e->getMessage());
@@ -547,6 +554,57 @@ class EmployeeController extends Controller
                 return redirect('viewEmployee/' . $id);
             }
         }
+
+        // Handle Mobile Device MAC ID
+        $mac_id = $request->input('mac_id');
+
+        if ($mac_id) {
+             $employeeUser = DB::table('users')->where('emp_id', $emp_id)->first();
+             $userId = $employeeUser->id ?? null;
+
+            $existingDevice = DB::table('employee_devices_mac_id')
+                ->where('emp_id', $emp_id)
+                ->first();
+
+            if (!$existingDevice) {
+                // No record at all -> insert new
+                DB::table('employee_devices_mac_id')->insert([
+                    'emp_id' => $emp_id,
+                    'user_id' => $userId,
+                    'mac_id' => $mac_id,
+                    'status' => 1,
+                    'created_at' => Carbon::now()->toDateTimeString(),
+                    'updated_at' => Carbon::now()->toDateTimeString(),
+                ]);
+            } elseif ($existingDevice->mac_id === $mac_id) {
+                // Same mac_id -> just update (touch updated_at / ensure active)
+                DB::table('employee_devices_mac_id')
+                    ->where('id', $existingDevice->id)
+                    ->update([
+                        'status' => 1,
+                        'updated_at' => Carbon::now()->toDateTimeString(),
+                    ]);
+            } else {
+                // Different mac_id -> deactivate old record, insert new one
+                DB::table('employee_devices_mac_id')
+                    ->where('id', $existingDevice->id)
+                    ->update([
+                        'status' => 3,
+                        'updated_at' => Carbon::now()->toDateTimeString(),
+                    ]);
+
+                DB::table('employee_devices_mac_id')->insert([
+                    'emp_id' => $emp_id,
+                    'user_id' => $userId,
+                    'mac_id' => $mac_id,
+                    'status' => 1,
+                    'created_at' => Carbon::now()->toDateTimeString(),
+                    'updated_at' => Carbon::now()->toDateTimeString(),
+                ]);
+            }
+        }
+
+
         Session::flash('success', 'The Employee Details Successfully Updated');
         return redirect('viewEmployee/' . $id);
 
