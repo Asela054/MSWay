@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
 use App\Http\Controllers\Controller;
 
-class EmployeeWorkRateController extends Controller
+class EmployeeWorkRateController_Ko extends Controller
 {
     public function empworkrate()
     {
@@ -28,7 +28,7 @@ class EmployeeWorkRateController extends Controller
 
     }
 
-    public function emp_work_rate_list(Request $request)
+    public function emp_work_rate_list_ko(Request $request)
     {
         $user = Auth::user();
         if (!$user->can('employee-work-rate-list')) {
@@ -52,25 +52,18 @@ class EmployeeWorkRateController extends Controller
             [$work_year, $work_month] = explode('-', $month);
         }
 
-        $monthStr = '';
         if ($work_year && $work_month) {
-            $monthStr = sprintf('%04d-%02d', (int)$work_year, (int)$work_month);
+            $hasRecords = DB::table('employee_work_rates')
+                ->where('work_year', $work_year)
+                ->where('work_month', $work_month)
+                ->exists();
+
+            if (!$hasRecords) {
+                return response()->json([
+                    'error' => 'First, please approve attendance and leaves.'
+                ], 422);
+            }
         }
-
-        $rosterSql = "
-            SELECT
-                era.emp_id AS r_emp_id,
-                ROUND(SUM(era.count), 2) AS roster_work_days,
-                ROUND(SUM(era.count * (MOD(TIME_TO_SEC(st.offduty_time) - TIME_TO_SEC(st.onduty_time) + 86400, 86400) / 3600)), 2) AS roster_working_hours,
-                MAX(era.max_work_days) AS roster_max_work_days
-            FROM employee_roster_approve AS era
-            INNER JOIN shift_types AS st ON st.id = era.shift_id
-            " . ($monthStr ? "WHERE DATE_FORMAT(era.month, '%Y-%m') = ?" : "") . "
-            GROUP BY era.emp_id
-        ";
-
-        $rosterBindings = $monthStr ? [$monthStr] : [];
-
 
         $query = DB::table('employees')
             ->leftJoin('departments', 'departments.id', '=', 'employees.emp_department')
@@ -83,12 +76,7 @@ class EmployeeWorkRateController extends Controller
                         ->where('ewr.work_month', '=', $work_month);
                 }
             })
-            ->leftJoin(DB::raw("({$rosterSql}) AS roster"), function ($join) use ($rosterBindings) {
-                $join->on('roster.r_emp_id', '=', 'employees.emp_id');
-            })
-            ->addBinding($rosterBindings, 'join')
             ->select([
-                // Core employee fields
                 'employees.emp_id              as uid',
                 'employees.emp_name_with_initial',
                 'employees.id                  as emp_auto_id',
@@ -96,7 +84,6 @@ class EmployeeWorkRateController extends Controller
                 'departments.name              as dept_name',
                 'branches.location',
                 'companies.name                as company_name',
-                // Previously saved work-rate fields (right / read-only side)
                 'ewr.id                        as ewr_id',
                 'ewr.work_days',
                 'ewr.work_hours                as working_hours',
@@ -109,29 +96,6 @@ class EmployeeWorkRateController extends Controller
                 'ewr.holiday_nopay_days',
                 'ewr.holiday_normal_ot_hrs     as holiday_normal_ot_hours',
                 'ewr.holiday_double_ot_hrs     as holiday_double_ot_hours',
-                //Roster-calculated fields (left / editable side) 
-                'roster.roster_work_days',
-                'roster.roster_working_hours',
-                'roster.roster_max_work_days',
-                // LEAVE DAYS  : max_work_days − total_count  (only when count < max)
-                DB::raw('CASE
-                            WHEN roster.roster_work_days IS NOT NULL
-                            AND roster.roster_max_work_days IS NOT NULL
-                            AND roster.roster_work_days < roster.roster_max_work_days
-                            THEN ROUND(roster.roster_max_work_days - roster.roster_work_days, 2)
-                            ELSE NULL
-                        END AS roster_leave_days'),
-                // NORMAL OT HRS : excess_days × avg_hours_per_day  (only when count > max)
-                DB::raw('CASE
-                            WHEN roster.roster_work_days IS NOT NULL
-                            AND roster.roster_max_work_days IS NOT NULL
-                            AND roster.roster_work_days > roster.roster_max_work_days
-                            THEN ROUND(
-                                (roster.roster_work_days - roster.roster_max_work_days)
-                                * (roster.roster_working_hours / NULLIF(roster.roster_work_days, 0)),
-                                2)
-                            ELSE NULL
-                        END AS roster_normal_ot_hours'),
             ])
             ->where('employees.deleted',     0)
             ->where('employees.is_resigned', 0);
@@ -155,7 +119,7 @@ class EmployeeWorkRateController extends Controller
     /**
      * Save / update a single employee's work rate row.
      */
-    public function emp_work_rate_add(Request $request)
+    public function emp_work_rate_add_ko(Request $request)
     {
         $user = Auth::user();
         if (!$user->can('employee-work-rate-add')) {
