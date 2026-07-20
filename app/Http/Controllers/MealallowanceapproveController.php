@@ -309,7 +309,7 @@ class MealallowanceapproveController extends Controller
                                 $attendancePercentage = 0;
                             }
 
-                            if ($attendancePercentage == 100) {
+                            if ($attendancePercentage >= 100) {
                                 $totalamount = 10000.00;
                             } elseif ($attendancePercentage >= 95) {
                                 $totalamount = 8000.00;

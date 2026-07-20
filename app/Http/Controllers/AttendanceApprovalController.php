@@ -405,7 +405,6 @@ class AttendanceApprovalController extends Controller
 
         $query->where('employees.deleted', 0);
         $query->where('employees.is_resigned', 0);
-        $query->where('employees.emp_id', 1);
         $query->groupBy('employees.emp_id');
         $results = $query->get();
         foreach ($results as $record) {
