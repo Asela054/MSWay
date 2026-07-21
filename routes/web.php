@@ -1892,6 +1892,12 @@ Route::get('attendance_list_for_approve_st',['uses' => 'AttendanceApprovalContro
 Route::post('AttendentAprovelBatch_st', 'AttendanceApprovalController_st@AttendentAprovelBatch')->name('AttendentAprovelBatch_st');
 
 
+// DepartmentwiseOpmaReportsController Controller Routes
+Route::get('departmentemployee_wise_attendanceleave_report', 'DepartmentwiseOpmaReportsController@index')->name('departmentemployee_wise_attendanceleave_report');
+Route::post('/departmentwise_generateattendanceleave_report', 'DepartmentwiseOpmaReportsController@generateattendanceleavereport')->name('departmentwise_generateattendanceleave_report');
+
+
+
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');
     Artisan::call('config:clear');

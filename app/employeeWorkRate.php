@@ -14,6 +14,7 @@ class employeeWorkRate extends Model
         'work_month',
         'work_days',
         'working_week_days',
+        'work_hours',
         'leave_days',
         'nopay_days',
         'normal_rate_otwork_hrs',
