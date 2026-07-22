@@ -920,10 +920,13 @@ $(document).ready(function(){
 
                 var jsonObj = [];
 
+                var missingMachine = [];
+
                 $("#dptemplistbody tr").each(function () {
                     var $row = $(this);
 
                     var emp_id     = $row.find('td').eq(0).text().trim();
+                    var emp_name   = $row.find('td').eq(1).text().trim();
                     var machine_id = $row.find('.machine-select').val() || $row.find('input[name^="machine_id"]').val();
                     var shift_id   = $row.find('.shift-select').val();
                     var style_id   = $row.find('.style-select').val();
@@ -934,9 +937,13 @@ $(document).ready(function(){
 
                     // only include row if the key fields are filled
                     if (shift_id && style_id && target) {
+                        if (!machine_id) {
+                            missingMachine.push(emp_name);
+                            return;
+                        }
                         jsonObj.push({
                             emp_id: emp_id,
-                            emp_name: $row.find('td').eq(1).text().trim(),
+                            emp_name: emp_name,
                             machine_id: machine_id,
                             shift_id: shift_id,
                             style_id: style_id,
@@ -947,6 +954,19 @@ $(document).ready(function(){
                         });
                     }
                 });
+
+                if (missingMachine.length > 0) {
+                        Swal.fire({
+                            position: "top-end",
+                            icon: 'warning',
+                            title: 'Please select machine for: ' + missingMachine.join(", "),
+                            showConfirmButton: false,
+                            timer: 2500
+                        });
+                        $('#dptaction_button').prop('disabled', false).html('<i class="fas fa-plus"></i>&nbsp;Add');
+                        return;
+                    }
+
 
                 if (jsonObj.length === 0) {
                     Swal.fire({
