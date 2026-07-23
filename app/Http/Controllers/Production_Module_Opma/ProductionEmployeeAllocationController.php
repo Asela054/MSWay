@@ -483,7 +483,7 @@ class ProductionEmployeeAllocationController extends Controller
             $assigned = $machine_emp->get($emp->emp_id);
             $assigned_machine_id = $assigned ? $assigned->opma_machine_id : null;
 
-            $machine_dd = '<select class="form-control machine-select form-control-sm" name="machine_id[' . $emp->emp_id . ']" ' . ($assigned_machine_id ? 'disabled' : '') . '>';
+            $machine_dd = '<select class="form-control machine-select form-control-sm" name="machine_id[' . $emp->emp_id . ']" ' . ($assigned_machine_id ? : '') . '>';
             $machine_dd .= '<option value="">-- Select --</option>';
             foreach ($machines as $m) {
                 $selected = ($assigned_machine_id == $m->id) ? 'selected' : '';

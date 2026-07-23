@@ -207,7 +207,9 @@ class AttendanceSyncController extends Controller
         $name = new ZKLib(
             $ip // '112.135.69.27' //your device IP
         );
+
         $ret = $name->connect();
+        
         if ($ret) {
             $name->disableDevice();
 
