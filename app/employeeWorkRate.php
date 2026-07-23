@@ -22,6 +22,8 @@ class employeeWorkRate extends Model
         'day_off',
         'night_days',
         'additional_OT',
+        'poya_day_work_days',
+        'pbm_work_days',
         'created_by',
         'updated_by',
         'created_at',
