@@ -440,6 +440,10 @@ class AttendanceApprovalController extends Controller
             $auditattedance = (new \App\Auditattendace)->apply_audit_attedance($record->emp_auto_id,$record->emp_id, $month);
 
            $night_work_days = (new \App\OtApproved)->get_night_work_days($record->emp_id, $month, $closedate);
+
+           $poya_work_days = (new \App\OtApproved)->getWorking_Poya_Days($record->emp_id, $month, $closedate);
+
+           $PBM_work_days = (new \App\OtApproved)->getWorking_PBM_days($record->emp_id, $month, $closedate);
             
             $normal_ot_hours_additional =0;
             if(!empty($record->date)){
@@ -572,6 +576,8 @@ class AttendanceApprovalController extends Controller
                             'day_off' => 0,
                             'night_days' => 0,
                             'additional_OT' => 0,
+                            'poya_day_work_days' => $poya_work_days,
+                            'pbm_work_days' => $PBM_work_days,
 							'created_at' => date('Y-m-d H:i:s'),
 							'updated_at' => date('Y-m-d H:i:s')
 						);
@@ -594,6 +600,8 @@ class AttendanceApprovalController extends Controller
                             'day_off' => $dayoff_leaves,
                             'night_days' => $night_work_days,
                             'additional_OT' => $normal_ot_hours_additional,
+                            'poya_day_work_days' => 0,
+                            'pbm_work_days' => 0,
 							'created_at' => date('Y-m-d H:i:s'),
 							'updated_at' => date('Y-m-d H:i:s')
 						);
@@ -617,6 +625,8 @@ class AttendanceApprovalController extends Controller
                             'day_off' => 0,
                             'night_days' => 0,
                             'additional_OT' => 0,
+                            'poya_day_work_days' => 0,
+                            'pbm_work_days' => 0,
 							'created_at' => date('Y-m-d H:i:s'),
 							'updated_at' => date('Y-m-d H:i:s')
 						);
@@ -639,6 +649,8 @@ class AttendanceApprovalController extends Controller
                             'day_off' => $dayoff_leaves,
                             'night_days' => $night_work_days,
                             'additional_OT' => $normal_ot_hours_additional,
+                            'poya_day_work_days' => $poya_work_days,
+                            'pbm_work_days' => $PBM_work_days,
 							'created_at' => date('Y-m-d H:i:s'),
 							'updated_at' => date('Y-m-d H:i:s')
 						);
@@ -672,6 +684,8 @@ class AttendanceApprovalController extends Controller
                     'day_off' => 0,
                     'night_days' => 0,
                     'additional_OT' => 0,
+                    'poya_day_work_days' => 0,
+                    'pbm_work_days' => 0,
                     'created_at' => date('Y-m-d H:i:s'),
                     'updated_at' => date('Y-m-d H:i:s')
                 );

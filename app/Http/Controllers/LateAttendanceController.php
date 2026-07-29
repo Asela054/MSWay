@@ -267,11 +267,11 @@ class LateAttendanceController extends Controller
 
         $selected_cb = $request->selected_cb;
 
-
         if (empty($selected_cb)) {
             return response()->json(['status' => false, 'msg' => 'Select one or more employees']);
         }
 
+         $appName = config('app.name');
 
         $data_arr = array();
         foreach ($selected_cb as $cr) {
@@ -306,9 +306,33 @@ class LateAttendanceController extends Controller
                  ->where('id', $empshiftid)
                 ->first();
 
+                
+        if($appName == 'AveMariaHospital'){
+             if ($shiftType && $shiftType->onduty_time) {
+                        $ondutyTime = new DateTime($shiftType->onduty_time);
+                        $checkInTime = new DateTime($cr['timestamp']);
 
+                        $interval = $checkInTime->diff($ondutyTime);
+                        $minutesDifference = ($interval->h * 60) + $interval->i;
 
-                if ($shiftType && $shiftType->onduty_time) {
+                        // Check if check-in time is after on-duty time
+                        if ($checkInTime > $ondutyTime) {
+                            $interval = $checkInTime->diff($ondutyTime);
+                            $minutesDifference = ($interval->h * 60) + $interval->i;
+
+                             $roundedMinutes = $this->calculateLateMinutes($minutesDifference);
+
+                            $late_minutes_data[] = array(
+                                'attendance_id' => $cr['id'],
+                                'emp_id' => $cr['uid'],
+                                'attendance_date' => $cr['date'],
+                                'minites_count' => $roundedMinutes,
+                            );
+                        }
+            }
+        }else{
+
+              if ($shiftType && $shiftType->onduty_time) {
                             $ondutyTime = new DateTime($shiftType->onduty_time);
                             $checkInTime = new DateTime($cr['timestamp']);
 
@@ -328,8 +352,8 @@ class LateAttendanceController extends Controller
                                 );
                             }
                 }
-                
 
+        }
                 $data_arr[] = array(
                     'attendance_id' => $cr['id'],
                     'emp_id' => $cr['uid'],
@@ -358,6 +382,24 @@ class LateAttendanceController extends Controller
         return response()->json(['status' => true, 'msg' => 'Updated successfully.']);
     }
 
+    private function calculateLateMinutes($minutesDifference)
+    {
+            $hours = intdiv($minutesDifference, 60);
+            $remainder = $minutesDifference % 60;
+
+            if ($remainder <= 15) {
+                $roundedRemainder = $remainder;
+            } elseif ($remainder <= 30) {
+                $roundedRemainder = 30;
+            } elseif ($remainder <= 45) {
+                $roundedRemainder = $remainder;
+            } else {
+                $roundedRemainder = 60;
+            }
+
+            return ($hours * 60) + $roundedRemainder;
+    }
+
     public function late_attendance_by_time_approve()
     {
         $user = Auth::user();
@@ -370,8 +412,7 @@ class LateAttendanceController extends Controller
         return view('Attendent.late_attendance_by_time_approve', compact('leave_types'));
     }
 
-
-        public function lateAttendance_mark_as_late_approve(Request $request)
+    public function lateAttendance_mark_as_late_approve(Request $request)
     {
         $user = Auth::user();
         $permission = $user->can('late-attendance-approve');

@@ -99,4 +99,54 @@ class OtApproved extends Model
 
         return $night_days;
     }
+
+    public function getWorking_Poya_Days($emp_id, $month, $closedate)
+    {
+        $holidays = DB::table('holidays')
+            ->where('holiday_type', 1)
+            ->whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$month])
+            ->where('date', '<=', $closedate)
+            ->pluck('date');
+
+        $count = 0;
+
+        foreach ($holidays as $hDate) {
+            $attended = DB::table('attendances')
+                ->where('emp_id', $emp_id)
+                ->where('date', $hDate)
+                ->whereNull('deleted_at')
+                ->exists();
+
+            if ($attended) {
+                $count++;
+            }
+        }
+
+        return $count;
+    }
+
+    public function getWorking_PBM_days($emp_id, $month, $closedate)
+    {
+        $holidays = DB::table('holidays')
+            ->where('holiday_type', 3)
+            ->whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$month])
+            ->where('date', '<=', $closedate)
+            ->pluck('date');
+
+        $count = 0;
+
+        foreach ($holidays as $hDate) {
+            $attended = DB::table('attendances')
+                ->where('emp_id', $emp_id)
+                ->where('date', $hDate)
+                ->whereNull('deleted_at')
+                ->exists();
+
+            if ($attended) {
+                $count++;
+            }
+        }
+
+        return $count;
+    }
 }

@@ -236,7 +236,20 @@
                         selectedmonth: selectedmonth
                     },
                     success: function (response) {
-                        $('#tableContainer').html(response.html);
+                       const exportButtonHtml = `
+                                    <div class="d-flex justify-content-end mb-3">
+                                        <button type="button" class="btn btn-danger btn-sm" id="exportLateReportPDF">
+                                            <i class="fas fa-file-pdf mr-2"></i> Export PDF
+                                        </button>
+                                    </div>
+                                `;
+                                
+                                $('#tableContainer').html(exportButtonHtml + response.html);
+                                
+                                // Bind the export button click event
+                                $('#exportLateReportPDF').off('click').on('click', function() {
+                                    generateLeaveReportPDF();
+                                });
                         $('#leave_report').DataTable({});
                     }
                 });
@@ -251,13 +264,182 @@
         });
 
          function showInitialMessage() {
-        $('#tableContainer').html(
-            '<div class="d-flex flex-column align-items-center">' +
-            '<i class="fas fa-filter fa-3x text-muted mb-2"></i>' +
-            '<h4 class="text-muted mb-2">No Records Found</h4>' +
-            '<p class="text-muted">Use the filter options to get records</p>' +
-            '</div>'
-        );
+            $('#tableContainer').html(
+                '<div class="d-flex flex-column align-items-center">' +
+                '<i class="fas fa-filter fa-3x text-muted mb-2"></i>' +
+                '<h4 class="text-muted mb-2">No Records Found</h4>' +
+                '<p class="text-muted">Use the filter options to get records</p>' +
+                '</div>'
+            );
+        }
+
+        function generateLeaveReportPDF() {
+            const table = $('#leave_report');
+
+            if (!table.length || table.find('tbody tr').length === 0) {
+                alert('No data available to export');
+                return;
+            }
+
+            const doc = new jsPDF('l', 'mm', 'a4');
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const margin = 8;
+
+            // ===== READ MONTH GROUP LABELS FROM ROW 1 (skip EMP ID / EMPLOYEE) =====
+            const monthLabels = [];
+            table.find('thead tr').eq(0).find('th').each(function(i) {
+                if (i < 2) return; // skip EMP ID, EMPLOYEE
+                monthLabels.push($(this).text().trim());
+            });
+
+            // ===== READ SUB-HEADERS (ANNUAL / CASUAL / NOPAY / MEDICAL groups) FROM ROW 2 =====
+            const subHeaders = [];
+            table.find('thead tr').eq(1).find('th').each(function() {
+                subHeaders.push($(this).text().trim());
+            });
+
+            // ===== BUILD TWO-ROW HEAD =====
+            const headRow1 = [
+                { content: 'EMP ID', rowSpan: 2 },
+                { content: 'EMPLOYEE', rowSpan: 2 }
+            ];
+            monthLabels.forEach(label => {
+                headRow1.push({ content: label, colSpan: 4, halign: 'center' });
+            });
+
+            const headRow2 = subHeaders.map(text => ({ content: text }));
+
+            const head = [headRow1, headRow2];
+
+            // ===== BUILD BODY DATA =====
+            const bodyData = [];
+            table.find('tbody tr').each(function() {
+                const row = [];
+                $(this).find('td').each(function() {
+                    row.push($(this).text().trim());
+                });
+                if (row.length) bodyData.push(row);
+            });
+
+            // ===== FIX TOTAL ROW - merge first two cells (colspan=2 in HTML) =====
+            let totalRowIndex = -1;
+            if (bodyData.length > 0) {
+                const lastRow = bodyData[bodyData.length - 1];
+                if (lastRow[0].toUpperCase() === 'TOTAL') {
+                    lastRow.splice(1, 0, ''); // add blank cell to represent colspan=2
+                    totalRowIndex = bodyData.length - 1;
+                }
+            }
+
+            // ===== REPORT HEADER =====
+            const deptName = $('#department_name_display').val()
+                || $('#department option:selected').text()
+                || 'All Departments';
+
+            doc.setFontSize(13);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Department-Wise Employee Leave Report - ' + deptName, pageWidth / 2, 11, { align: 'center' });
+
+            const reporttype = $('#reporttype').val();
+            let periodText = '';
+            if (reporttype == '1') {
+                const selectedMonth = $('#selectedmonth').val();
+                periodText = selectedMonth
+                    ? new Date(selectedMonth + '-01').toLocaleString('default', { month: 'long', year: 'numeric' })
+                    : '';
+            } else if (reporttype == '2') {
+                const fromDate = $('#from_date').val();
+                const toDate = $('#to_date').val();
+                periodText = (fromDate && toDate) ? `${fromDate} to ${toDate}` : '';
+            }
+            const currentDate = new Date().toLocaleDateString();
+
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Period: ${periodText}`, margin, 16);
+            doc.text(`Generated on: ${currentDate}`, pageWidth - margin, 16, { align: 'right' });
+
+            doc.setLineWidth(0.3);
+            doc.line(margin, 18, pageWidth - margin, 18);
+
+            // ===== COLUMN WIDTHS =====
+            const maxWidth = pageWidth - (margin * 2);
+            const columnStyles = {
+                0: { halign: 'center', cellWidth: 20 },  // EMP ID
+                1: { halign: 'left', cellWidth: 50 }     // EMPLOYEE
+            };
+            const leaveColCount = monthLabels.length * 4;
+            const leaveColWidth = (maxWidth - 70) / leaveColCount;
+            for (let i = 0; i < leaveColCount; i++) {
+                columnStyles[2 + i] = { halign: 'center', cellWidth: leaveColWidth };
+            }
+
+            // ===== GENERATE TABLE =====
+            doc.autoTable({
+                startY: 20,
+                head: head,
+                body: bodyData,
+                theme: 'grid',
+                styles: {
+                    fontSize: 7,
+                    cellPadding: 2,
+                    overflow: 'linebreak',
+                    valign: 'middle',
+                    lineWidth: 0.2,
+                    lineColor: [100, 100, 100]
+                },
+                headStyles: {
+                    fillColor: [41, 128, 185],
+                    textColor: [255, 255, 255],
+                    fontStyle: 'bold',
+                    halign: 'center',
+                    fontSize: 7
+                },
+                columnStyles: columnStyles,
+                alternateRowStyles: {
+                    fillColor: [240, 240, 240]
+                },
+                didParseCell: function(data) {
+                    // Bold/highlight the TOTAL row
+                    if (totalRowIndex !== -1 && data.row.index === totalRowIndex && data.row.section === 'body') {
+                        data.cell.styles.fillColor = [200, 200, 200];
+                        data.cell.styles.fontStyle = 'bold';
+                    }
+                },
+                margin: { left: margin, right: margin },
+                tableWidth: maxWidth,
+                showHead: 'everyPage',
+                pageBreak: 'auto',
+                rowPageBreak: 'avoid',
+                didDrawPage: function(data) {
+                    doc.setFontSize(6);
+                    doc.setFont('helvetica', 'normal');
+                    const companyName = $('#company_name').val() || 'Organization';
+                    doc.text(companyName, margin, 3);
+
+                    const pageCount = doc.internal.getNumberOfPages();
+                    doc.text(
+                        `Page ${data.pageNumber} of ${pageCount}`,
+                        pageWidth - margin - 10,
+                        doc.internal.pageSize.getHeight() - 3,
+                        { align: 'right' }
+                    );
+                }
+            });
+
+            // ===== FOOTER =====
+            doc.setFontSize(6);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(100, 100, 100);
+            const generatedBy = $('#emp_name').val() || 'System User';
+            doc.text(
+                `Generated by: ${generatedBy} | ${currentDate}`,
+                margin,
+                doc.internal.pageSize.getHeight() - 4
+            );
+
+            // ===== SAVE =====
+            doc.save('Leave_Report_' + new Date().getTime() + '.pdf');
         }
     </script>
 

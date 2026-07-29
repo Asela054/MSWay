@@ -42,6 +42,7 @@
           <li><a class="dropdown-item" href="{{ route('departmentemployee_wise_latereport')}}">Department-Wise Employee Late Report</a></li>
           <li><a class="dropdown-item" href="{{ route('joballocationreport')}}">Job Allocation Report</a></li>
           <li><a class="dropdown-item" href="{{ route('opma_attendanceproductionreport') }}">Attendance & Production Summary Report</a></li>
+          <li><a class="dropdown-item" href="{{ route('departmentemployee_wise_attendanceleave_report') }}">Department-Wise Attendance & Leave Report</a></li>
         </ul>
   </div>
 
