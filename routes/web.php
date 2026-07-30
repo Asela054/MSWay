@@ -1864,6 +1864,9 @@ Route::post('kt_ot_approve_submit', ['uses' => 'ERPOTApproveController@otapprove
 Route::get('empworkrate',['uses' => 'EmployeeWorkRates\EmployeeWorkRateController@empworkrate', 'as' => 'empworkrate']);
 Route::get('emp_work_rate_list',['uses' => 'EmployeeWorkRates\EmployeeWorkRateController@emp_work_rate_list', 'as' => 'emp_work_rate_list']);
 Route::post('emp_work_rate_add', 'EmployeeWorkRates\EmployeeWorkRateController@emp_work_rate_add')->name('emp_work_rate_add');
+//KoasisV2 Routes
+Route::get('emp_work_rate_list_ko',['uses' => 'EmployeeWorkRates\EmployeeWorkRateController_Ko@emp_work_rate_list_ko', 'as' => 'emp_work_rate_list_ko']);
+Route::post('emp_work_rate_add_ko', 'EmployeeWorkRates\EmployeeWorkRateController_Ko@emp_work_rate_add_ko')->name('emp_work_rate_add_ko');
 
 //department wise reports
 Route::get('departmentemployee_wise_leavereport', 'DepartmentemployeewisereportController@index')->name('departmentemployee_wise_leavereport');
