@@ -117,14 +117,40 @@ class EmployeeRosterDetailsController extends Controller
 
             // Group new shifts by emp_id + work_date
             // $newShiftMap[emp_id][work_date] = [shift_id, shift_id, ...]
-            $newShiftMap = [];
+            // Entries with shift_id = null are deletion-only sentinels (all shifts removed).
+            $newShiftMap    = []; // emp+date → [shift_ids]  (only real shifts)
+            $deletionOnly   = []; // emp+date combos where user cleared all shifts
+
             foreach ($rosterData as $row) {
-                $newShiftMap[$row['emp_id']][$row['work_date']][] = $row['shift_id'];
+                $empId    = $row['emp_id'];
+                $workDate = $row['work_date'];
+
+                if (is_null($row['shift_id'])) {
+                    // Sentinel: user removed all shifts for this emp+date
+                    if (!isset($newShiftMap[$empId][$workDate])) {
+                        // Only register as deletion-only if no real shifts were also sent
+                        $deletionOnly[$empId][$workDate] = true;
+                    }
+                } else {
+                    $newShiftMap[$empId][$workDate][] = $row['shift_id'];
+                    // Remove from deletion-only if a real shift arrived
+                    unset($deletionOnly[$empId][$workDate]);
+                }
+            }
+
+            // Merge deletion-only keys into newShiftMap as empty arrays so they
+            // go through the delete step but produce nothing in the insert step.
+            foreach ($deletionOnly as $empId => $dates) {
+                foreach ($dates as $workDate => $_) {
+                    if (!isset($newShiftMap[$empId][$workDate])) {
+                        $newShiftMap[$empId][$workDate] = [];
+                    }
+                }
             }
 
             // Get all affected emp_ids and dates
-            $empIds    = array_keys($newShiftMap);
-            $allDates  = [];
+            $empIds   = array_keys($newShiftMap);
+            $allDates = [];
             foreach ($newShiftMap as $empId => $dates) {
                 $allDates = array_merge($allDates, array_keys($dates));
             }
@@ -152,10 +178,14 @@ class EmployeeRosterDetailsController extends Controller
                     $newShiftIds = array_values($newShiftIds);
 
                     $maxCount = max(count($oldShiftIds), count($newShiftIds));
+                    if ($maxCount === 0) continue;
 
                     for ($i = 0; $i < $maxCount; $i++) {
                         $oldShiftId = $oldShiftIds[$i] ?? null;
                         $newShiftId = $newShiftIds[$i] ?? null;
+
+                        // Skip if nothing actually changed
+                        if ($oldShiftId === $newShiftId) continue;
 
                         $logData[] = [
                             'emp_id'       => $empId,
@@ -170,7 +200,8 @@ class EmployeeRosterDetailsController extends Controller
                 }
             }
 
-            // Delete existing records for affected emp+date
+            // Delete existing records for ALL affected emp+date combos
+            // (including deletion-only ones where user cleared all shifts)
             foreach ($newShiftMap as $empId => $dates) {
                 DB::table('employee_roster_details')
                     ->where('emp_id', $empId)
@@ -178,21 +209,27 @@ class EmployeeRosterDetailsController extends Controller
                     ->delete();
             }
 
-            // Bulk insert new roster
+            // Bulk insert new roster (skip rows with no real shifts)
             $insertData = [];
-            foreach ($rosterData as $row) {
-                $insertData[] = [
-                    'shift_id'          => $row['shift_id'],
-                    'emp_id'            => $row['emp_id'],
-                    'work_date'         => $row['work_date'],
-                    'scheduling_status' => null,
-                    'remark'            => null,
-                    'created_at'        => $now,
-                    'updated_at'        => $now,
-                ];
+            foreach ($newShiftMap as $empId => $dates) {
+                foreach ($dates as $workDate => $shiftIds) {
+                    foreach ($shiftIds as $shiftId) {
+                        $insertData[] = [
+                            'shift_id'          => $shiftId,
+                            'emp_id'            => $empId,
+                            'work_date'         => $workDate,
+                            'scheduling_status' => null,
+                            'remark'            => null,
+                            'created_at'        => $now,
+                            'updated_at'        => $now,
+                        ];
+                    }
+                }
             }
 
-            DB::table('employee_roster_details')->insert($insertData);
+            if (!empty($insertData)) {
+                DB::table('employee_roster_details')->insert($insertData);
+            }
 
             // Bulk insert log (only if there are changes)
             if (!empty($logData)) {
