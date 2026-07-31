@@ -497,19 +497,20 @@
                 didOpen: () => {
                     document.body.style.overflow = 'hidden';
 
-                    let rosterData = [];
+                    let rosterData    = [];
+                    let deletionKeys  = []; // emp+date combos where all shifts were cleared
 
                     // Loop each select2shift select
                     $('.select2shift').each(function () {
                         let select      = $(this);
                         let selectedIds = select.val(); // array of selected shift IDs
 
-                        if (selectedIds && selectedIds.length > 0) {
-                            // Get emp_id and work_date from first option's data attributes
-                            let firstOption = select.find('option').first();
-                            let empId       = firstOption.data('empid');
-                            let workDate    = firstOption.data('rosterdate');
+                        // Get emp_id and work_date from first option's data attributes
+                        let firstOption = select.find('option').first();
+                        let empId       = firstOption.data('empid');
+                        let workDate    = firstOption.data('rosterdate');
 
+                        if (selectedIds && selectedIds.length > 0) {
                             $.each(selectedIds, function (i, shiftId) {
                                 rosterData.push({
                                     shift_id  : shiftId,
@@ -517,12 +518,21 @@
                                     work_date : workDate
                                 });
                             });
+                        } else {
+                            // No shifts selected — mark this emp+date for deletion
+                            deletionKeys.push({
+                                shift_id  : null,
+                                emp_id    : empId,
+                                work_date : workDate
+                            });
                         }
                     });
 
-                    if (rosterData.length === 0) {
-                        // alert('No roster data to save.');
-                        Swal.fire('Error!', 'No roster data to save..', 'error');
+                    // Combine: deletionKeys tells the backend which emp+dates to clear
+                    let payload = rosterData.concat(deletionKeys);
+
+                    if (payload.length === 0) {
+                        Swal.fire('Error!', 'No roster data to save.', 'error');
                         return;
                     }
                     // console.log(rosterData);
@@ -532,7 +542,7 @@
                         type: 'POST',
                         data: {
                             _token      : '{{ csrf_token() }}',
-                            roster_data : JSON.stringify(rosterData)
+                            roster_data : JSON.stringify(payload)
                         },
                         success: function (response) {
                             Swal.close();
