@@ -305,22 +305,6 @@ class LeaverequestController extends Controller
             ->update($data);
 
         }
-
-        $data = array(
-            'emp_id' => $employee,
-            'from_date' => $fromdate,
-            'to_date' => $todate,
-            'leave_category' => $half_short,
-            'reason' => $reason,
-            'leave_type' => $leavetype,
-            'from_time' => $from_time,
-            'to_time' => $to_time,
-            'request_approve_status' => 0,
-            'updated_by' => Auth::id(),
-        );
-
-        LeaveRequest::where('id', $hidden_id)
-        ->update($data);
         return response()->json(['success' => 'Leave Request Details Updated successfully.']);
     }
 
