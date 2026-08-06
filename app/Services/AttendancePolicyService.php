@@ -14,7 +14,7 @@ class AttendancePolicyService
 {
     // Max allowed gap for a "seamless" shift transition (minutes).
     // e.g. night shift off at 8am, day shift on at 9am should still count as "seamless".
-    private $seamlessTransitionGraceMinutes = 60;
+    private $seamlessTransitionGraceMinutes = 360;
 
     public function attendanceInsertcsv_txt($full_emp_id, $date_input, $timestamp, $date)
     {
@@ -66,7 +66,10 @@ class AttendancePolicyService
         $timestamp = $date_input . ' ' . $timestamp;
         $attendance_date = null;
 
-
+        // ============================================================
+        // Branch 1: off_next_day = 0, on_next_day = 1
+        // (left untouched as requested - kept as-is)
+        // ============================================================
         if ($shift && $shift->off_next_day == '0' && $shift->on_next_day == '1' && $date == $date_input) {
             $next_day = (new DateTime($date_input))->modify('+1 day')->format('Y-m-d');
             $shif_ontime = Carbon::parse($shift->onduty_time);
@@ -106,10 +109,15 @@ class AttendancePolicyService
             $matched = false;
 
             // (a) Previous day's shift overflow window
-            //     e.g. prev_day onduty_time -> date_input offduty_time (+ buffer)
+            //     e.g. prev_day onduty_time -> offduty_time (+ buffer)
+            //     offduty_time falls on date_input ONLY if prevShift itself
+            //     crosses midnight (off_next_day = 1). Otherwise it falls
+            //     on previous_day itself (e.g. a normal day shift).
             if ($prevShift && $prevShift->onduty_time && $prevShift->offduty_time) {
+                $prevOffDate = ($prevShift->off_next_day == '1') ? $date_input : $previous_day;
+
                 $prevWindowStart = Carbon::parse($previous_day . ' ' . $prevShift->onduty_time)->subMinutes(60);
-                $prevWindowEnd   = Carbon::parse($date_input . ' ' . $prevShift->offduty_time)->addMinutes(60);
+                $prevWindowEnd   = Carbon::parse($prevOffDate . ' ' . $prevShift->offduty_time)->addMinutes(60);
 
                 if ($ts->between($prevWindowStart, $prevWindowEnd)) {
                     $attendance_date = $previous_day;
@@ -226,7 +234,7 @@ class AttendancePolicyService
         $checkinTimestamp = $currOnTimestamp->format('Y-m-d H:i:s');
 
         // Checkout - one minute before checkin (so the order stays correct)
-        $checkoutTimestamp = $prevOffTimestamp->copy()->subMinute()->format('Y-m-d H:i:s');
+        $checkoutTimestamp = $currOnTimestamp->copy()->subMinute()->format('Y-m-d H:i:s');
 
         // Check if a physical punch already exists near this boundary
         $exists = AppAttendance::where('emp_id', $full_emp_id)
@@ -346,9 +354,14 @@ class AttendancePolicyService
             $matched = false;
 
             // (a) Previous day's shift overflow window
+            //     offduty_time falls on attendacedate ONLY if prevShift
+            //     itself crosses midnight (off_next_day = 1). Otherwise
+            //     it falls on previous_day itself.
             if ($prevShift && $prevShift->onduty_time && $prevShift->offduty_time) {
+                $prevOffDate = ($prevShift->off_next_day == '1') ? $attendacedate : $previous_day;
+
                 $prevWindowStart = Carbon::parse($previous_day . ' ' . $prevShift->onduty_time)->subMinutes(60);
-                $prevWindowEnd   = Carbon::parse($attendacedate . ' ' . $prevShift->offduty_time)->addMinutes(60);
+                $prevWindowEnd   = Carbon::parse($prevOffDate . ' ' . $prevShift->offduty_time)->addMinutes(60);
 
                 if ($ts->between($prevWindowStart, $prevWindowEnd)) {
                     $attendance_date = $previous_day;
