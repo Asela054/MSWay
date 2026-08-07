@@ -51,6 +51,7 @@ class ProductionDailyApproveController extends Controller
         ->leftjoin('opma_employee_production', 'employees.emp_id', '=', 'opma_employee_production.emp_id')
         ->where('employees.deleted', 0)
         ->where('employees.is_resigned', 0)
+        ->where('opma_employee_production.status', 1)
         ->where('opma_employee_production.date', $from_date);
         if ($employee != '') {
             $query->where('employees.emp_id', $employee);
@@ -62,6 +63,7 @@ class ProductionDailyApproveController extends Controller
                 $productionRecords = DB::table('opma_employee_production')
                     ->where('emp_id', $record->emp_id)
                     ->where('date', $from_date)
+                    ->where('status',1)
                     ->get();
                 
                 $totalTarget = 0;
