@@ -27,10 +27,19 @@
                                         aria-controls="offcanvasRight"><i class="fas fa-filter mr-1"></i> Filter
                                         Records</button>
                                 </div><br><br>
-                    <div class="col-12">
-                        <button type="button" class="btn btn-primary btn-sm fa-pull-right mr-2" name="create_record" id="create_record">
-                            <i class="fas fa-plus mr-2"></i>Salary Advances
-                        </button>
+                    <div class="col-sm-12 col-md-12">
+                        <div class="d-flex flex-wrap justify-content-end mb-2">
+                            <div class="col-sm-12 col-md-auto mb-1 px-1">
+                            <button type="button" class="btn btn-primary btn-sm px-2 w-100" name="create_record" id="create_record">
+                                <i class="fas fa-plus mr-2"></i>Salary Advances
+                            </button>
+                            </div>
+                            <div class="col-sm-12 col-md-auto mb-1 px-1">
+                                <button type="button" class="btn btn-primary btn-sm px-2 w-100" name="create_record_dept_wise" id="create_record_dept_wise">
+                                    <i class="fas fa-plus mr-2"></i>Add - Department Wise
+                                </button>
+                            </div>
+                        </div>
                     </div>
                     <div class="col-12">
                         <hr class="border-dark">
@@ -47,6 +56,9 @@
                                         <th>REQUESTED AMOUNT</th>
                                         <th>PAID AMOUNT</th>
                                         <th class="text-right">Action</th>
+                                        <th class="d-none">ID</th>
+                                        <th class="d-none">Emp Name With Initial</th>
+                                        <th class="d-none">Calling Name</th>
                                     </tr>
                                 </thead>
                                 <tbody></tbody>
@@ -183,6 +195,76 @@
             </div>
         </div>
 
+        <div class="modal fade" id="formModal_dpt" data-backdrop="static" data-keyboard="false" tabindex="-1"
+                aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header p-2">
+                        <h5 class="modal-title" id="staticBackdropLabel">Add Salary Advance - Department Wise</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col">
+                                <span id="form_result"></span>
+                                <form method="post" id="formTitle_dpt" class="form-horizontal">
+                                    {{ csrf_field() }}
+                                    
+                                    <div class="row">
+                                        <div class="col-sm-12 col-md-3">
+                                                <label class="small font-weight-bold text-dark">Company <span class="text-danger">*</span> </label>
+                                                <select name="company" id="company_dept_wise" class="form-control form-control-sm">
+                                                </select>
+                                            </div>
+                                            <div class="col-sm-12 col-md-3">
+                                                <label class="small font-weight-bold text-dark">Department <span class="text-danger">*</span> </label>
+                                                <select name="department" id="department_dept_wise" class="form-control form-control-sm" required>
+                                                </select>
+                                            </div>
+                                        <div class="col-sm-12 col-md-3">
+                                            <label class="small font-weight-bolder">Date*</label>
+                                            <input type="date" name="allocation_date" id="allocation_date"
+                                                class="form-control form-control-sm" required />
+                                        </div>
+                                        <div class="col-sm-12 col-md-3">
+                                                <label class="small font-weight-bold text-dark">&nbsp; </label> <br>
+                                                <button type="button" name="search_button" id="search_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-search"></i>&nbsp;Search</button>
+                                            </div>
+                                        
+                                    </div>
+                                    <br>
+                                    <div class="center-block fix-width scroll-inner">
+                                    <table class="table table-striped table-bordered table-sm small nowrap display" id="dpt_allocationtbl" style="width:100%;">
+                                        <thead>
+                                            <tr>
+                                                <th style="width:40px;" class="text-center">
+                                                    <input type="checkbox" id="check_all_dpt" title="Select / Deselect All">
+                                                </th>
+                                                <th>EMP ID</th>
+                                                <th>NAME</th>
+                                                <th>AVAILABLE AMOUNT</th>
+                                                <th>REQUEST AMOUNT</th>
+                                                <th>REMARK</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="dptemplistbody">
+                                        </tbody>
+                                    </table>
+                                    </div>
+
+                                    <div class="form-group mt-3">
+                                        <button type="button" name="dptaction_button" id="dptaction_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="modal fade" id="paidformModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
             aria-labelledby="paidformModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-sm">
@@ -226,6 +308,45 @@ $(document).ready(function () {
     $('#payrollmenu_icon').addClass('active');
     $('#policymanagement').addClass('navbtnactive');
 
+    // department wise salary advance modal
+    let company_d = $('#company_dept_wise');
+    let department_d = $('#department_dept_wise');
+
+    company_d.select2({
+        placeholder: 'Select...',
+        width: '100%',
+        allowClear: true,
+        ajax: {
+            url: '{{url("company_list_sel2")}}',
+            dataType: 'json',
+            data: function (params) {
+                return {
+                    term: params.term || '',
+                    page: params.page || 1
+                }
+            },
+            cache: true
+        }
+    });
+
+    department_d.select2({
+        placeholder: 'Select...',
+        width: '100%',
+        allowClear: true,
+        ajax: {
+            url: '{{url("department_list_sel2")}}',
+            dataType: 'json',
+            data: function (params) {
+                return {
+                    term: params.term || '',
+                    page: params.page || 1,
+                    company: company_d.val()
+                }
+            },
+            cache: true
+        }
+    });
+
     // Initialize filter dropdowns
     let company_f = $('#company_f');
     let department_f = $('#department_f');
@@ -236,6 +357,7 @@ $(document).ready(function () {
         placeholder: 'Select a Company',
         width: '100%',
         allowClear: true,
+        dropdownParent: $('#offcanvasRight'),
         ajax: {
             url: '{{url("company_list_sel2")}}',
             dataType: 'json',
@@ -253,6 +375,7 @@ $(document).ready(function () {
         placeholder: 'Select a Department',
         width: '100%',
         allowClear: true,
+        dropdownParent: $('#offcanvasRight'),
         ajax: {
             url: '{{url("department_list_sel2")}}',
             dataType: 'json',
@@ -272,6 +395,7 @@ $(document).ready(function () {
         placeholder: 'Select an Employee',
         width: '100%',
         allowClear: true,
+        dropdownParent: $('#offcanvasRight'),
         ajax: {
             url: '{{url("employee_list_sel2")}}',
             dataType: 'json',
@@ -292,6 +416,7 @@ $(document).ready(function () {
         placeholder: 'Select Location',
         width: '100%',
         allowClear: true,
+        dropdownParent: $('#offcanvasRight'),
         ajax: {
             url: '{{url("location_list_sel2")}}',
             dataType: 'json',
@@ -449,7 +574,7 @@ $(document).ready(function () {
                         var approve_status = row.approve_status;
                         var buttons = '';
 
-                        if (paid_status === '0') {
+                        if (approve_status !== '1') {
                             buttons += '<button style="margin:1px;" data-toggle="tooltip" data-placement="bottom" title="Edit" class="btn btn-primary btn-sm edit" id="' + row.id + '"><i class="fas fa-pencil-alt"></i></button>';
                         }
                         if (paid_status === '0' || paid_status === '1' && approve_status !== '1') {
@@ -469,6 +594,7 @@ $(document).ready(function () {
     }
 
     load_dt('', '', '', '', '', '');
+
 
     $('#formFilter').on('submit', function(e) {
         e.preventDefault();
@@ -724,6 +850,256 @@ $(document).ready(function () {
                 });
             }
         }
+    });
+
+    // Department wise employee list
+    $('#create_record_dept_wise').click(function () {
+        $('#dptemplistbody').empty();
+        $('#formModal_dpt').modal('show');
+    });
+
+    $('#search_button').click(function () {
+        var allocation_date = $('#allocation_date').val();
+        var department      = $('#department_dept_wise').val();
+        var company         = $('#company_dept_wise').val();
+
+        if (!company || !department) {
+            Swal.fire({ icon: 'warning', title: 'Please select Company and Department', timer: 2000, showConfirmButton: false });
+            return;
+        }
+        if (!allocation_date) {
+            Swal.fire({ icon: 'warning', title: 'Please select a Date', timer: 2000, showConfirmButton: false });
+            return;
+        }
+
+        var $btn = $(this);
+        $btn.prop('disabled', true).html('<i class="fas fa-circle-notch fa-spin mr-1"></i> Searching...');
+        $('#check_all_dpt').prop('checked', false);
+
+        $.ajax({
+            method: 'POST',
+            dataType: 'json',
+            url: '{!! route("salary_advance_dept_allocation_list") !!}',
+            data: {
+                _token: '{{ csrf_token() }}',
+                company: company,
+                department: department,
+                allocation_date: allocation_date,
+            },
+            success: function (data) {
+                if (data.error) {
+                    Swal.fire({ icon: 'error', title: data.error, timer: 2500, showConfirmButton: false });
+                    return;
+                }
+
+                var employees = data.employees || [];
+                var html = '';
+
+                if (employees.length === 0) {
+                    html = '<tr><td colspan="6" class="text-center text-muted">No employees found for the selected department.</td></tr>';
+                } else {
+                    $.each(employees, function (i, emp) {
+                        html += '<tr data-emp-id="' + emp.emp_id + '">';
+                        html += '  <td class="text-center">';
+                        html += '    <input type="checkbox" class="dpt-emp-chk" data-emp-id="' + emp.emp_id + '">';
+                        html += '  </td>';
+                        html += '  <td>' + emp.emp_id + '</td>';
+                        html += '  <td>' + emp.emp_name_with_initial + '</td>';
+                        html += '  <td class="avail-amt text-right" data-value="">—</td>';
+                        html += '  <td><input type="number" class="form-control form-control-sm dpt-request-amt" step="0.01" min="0" placeholder="Request Amount" disabled></td>';
+                        html += '  <td><input type="text"   class="form-control form-control-sm dpt-remark" placeholder="Remark" disabled></td>';
+                        html += '</tr>';
+                    });
+                }
+
+                $('#dptemplistbody').html(html);
+            },
+            error: function () {
+                Swal.fire({ icon: 'error', title: 'Failed to load employees.', timer: 2500, showConfirmButton: false });
+            },
+            complete: function () {
+                $btn.prop('disabled', false).html('<i class="fas fa-search"></i>&nbsp;Search');
+            }
+        });
+    });
+
+    $('#check_all_dpt').on('change', function () {
+        // Only toggle rows that already have their available amount loaded
+        $('#dptemplistbody .dpt-emp-chk').each(function () {
+            var $chk = $(this);
+            var $row = $chk.closest('tr');
+            var avail = parseFloat($row.find('.avail-amt').data('value')) || 0;
+            if (avail > 0) {
+                $chk.prop('checked', $('#check_all_dpt').is(':checked'));
+                var checked = $chk.is(':checked');
+                $row.find('.dpt-request-amt, .dpt-remark').prop('disabled', !checked);
+                if (!checked) {
+                    $row.find('.dpt-request-amt').val('');
+                    $row.find('.dpt-remark').val('');
+                }
+            }
+        });
+    });
+
+    $(document).on('change', '.dpt-emp-chk', function () {
+        var $chk     = $(this);
+        var $row     = $chk.closest('tr');
+        var emp_id   = $chk.data('emp-id');
+        var $avail   = $row.find('.avail-amt');
+        var $reqAmt  = $row.find('.dpt-request-amt');
+        var $remark  = $row.find('.dpt-remark');
+        var alloc_date = $('#allocation_date').val();
+
+        if ($chk.is(':checked')) {
+            // If already loaded, just re-enable inputs
+            var existingVal = parseFloat($avail.data('value')) || 0;
+            if (existingVal > 0) {
+                $reqAmt.prop('disabled', false).attr('max', existingVal);
+                $remark.prop('disabled', false);
+                return;
+            }
+
+            // Fetch available amount
+            $chk.prop('disabled', true);
+            $avail.html('<i class="fas fa-circle-notch fa-spin"></i>');
+
+            $.ajax({
+                url: '{{ url("SalaryAdvance/available-amount") }}/' + emp_id,
+                type: 'GET',
+                data: { date: alloc_date },
+                success: function (res) {
+                    if (res.errors) {
+                        // Attendance / validation failed
+                        $avail.html('<span class="text-danger" title="' + res.errors + '">0.00 <i class="fas fa-exclamation-triangle"></i></span>');
+                        $avail.data('value', 0);
+                        $reqAmt.prop('disabled', true).val('');
+                        $remark.prop('disabled', true).val('');
+                        $chk.prop('checked', false);
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Attendance check failed',
+                            text: res.errors,
+                            confirmButtonText: 'OK'
+                        });
+                    } else {
+                        var avail = parseFloat(res.available_amount) || 0;
+                        $avail.text(avail.toFixed(2));
+                        $avail.data('value', avail);
+                        $reqAmt.prop('disabled', false).attr('max', avail).val('');
+                        $remark.prop('disabled', false);
+                    }
+                },
+                error: function () {
+                    $avail.html('<span class="text-danger">Error</span>');
+                    $chk.prop('checked', false);
+                },
+                complete: function () {
+                    $chk.prop('disabled', false);
+                }
+            });
+
+        } else {
+            // Unchecked — disable inputs but keep available amount cell
+            $reqAmt.prop('disabled', true).val('');
+            $remark.prop('disabled', true).val('');
+        }
+    });
+
+    $(document).on('input', '.dpt-request-amt', function () {
+        var $row  = $(this).closest('tr');
+        var avail = parseFloat($row.find('.avail-amt').data('value')) || 0;
+        var val   = parseFloat($(this).val()) || 0;
+        if (avail > 0 && val > avail) {
+            $(this).val(avail);
+        }
+    });
+
+    $('#dptaction_button').click(function () {
+        var $btn = $(this);
+        $btn.prop('disabled', true).html('<i class="fas fa-circle-notch fa-spin mr-2"></i> Processing');
+
+        var tbody = $('#dptemplistbody');
+
+        if (tbody.children().length === 0) {
+            Swal.fire({ position: 'top-end', icon: 'warning', title: 'Table is empty. Please search first.', showConfirmButton: false, timer: 2500 });
+            $btn.prop('disabled', false).html('<i class="fas fa-plus"></i>&nbsp;Add');
+            return;
+        }
+
+        var jsonObj        = [];
+        var validationFail = [];
+        var allocation_date = $('#allocation_date').val();
+
+        // Collect ONLY checked rows
+        $('#dptemplistbody .dpt-emp-chk:checked').each(function () {
+            var $row           = $(this).closest('tr');
+            var emp_id         = $row.data('emp-id');
+            var available_amount = parseFloat($row.find('.avail-amt').data('value')) || 0;
+            var request_amount   = parseFloat($row.find('.dpt-request-amt').val()) || 0;
+            var remark           = $row.find('.dpt-remark').val() || '';
+
+            if (request_amount <= 0) {
+                validationFail.push('Employee ' + emp_id + ': Please enter a request amount.');
+                return; // continue each
+            }
+            if (request_amount > available_amount) {
+                validationFail.push('Employee ' + emp_id + ': Request amount exceeds available amount of ' + available_amount + '.');
+                return;
+            }
+
+            jsonObj.push({
+                emp_id:           emp_id,
+                request_amount:   request_amount,
+                available_amount: available_amount,
+                remark:           remark
+            });
+        });
+
+        if (validationFail.length > 0) {
+            Swal.fire({ icon: 'error', title: 'Validation Errors', html: validationFail.join('<br>') });
+            $btn.prop('disabled', false).html('<i class="fas fa-plus"></i>&nbsp;Add');
+            return;
+        }
+
+        if (jsonObj.length === 0) {
+            Swal.fire({ position: 'top-end', icon: 'warning', title: 'No rows selected!', text: 'Please tick at least one employee checkbox.', showConfirmButton: false, timer: 2500 });
+            $btn.prop('disabled', false).html('<i class="fas fa-plus"></i>&nbsp;Add');
+            return;
+        }
+
+        var department = $('#department_dept_wise').val();
+
+        $.ajax({
+            method: 'POST',
+            dataType: 'json',
+            data: {
+                _token: '{{ csrf_token() }}',
+                tableData: jsonObj,
+                department: department,
+                allocation_date: allocation_date,
+            },
+            url: '{!! route("salary_advance_dept_allocation_insert") !!}',
+            success: function (data) {
+                if (data.errors) {
+                    const actionObj = { icon: 'fas fa-warning', title: '', message: data.errors, url: '', target: '_blank', type: 'danger' };
+                    action(JSON.stringify(actionObj, null, 2));
+                    $btn.prop('disabled', false).html('<i class="fas fa-plus"></i>&nbsp;Add');
+                    return;
+                }
+                if (data.success) {
+                    // Show any per-row errors if some rows were skipped
+                    if (data.row_errors && data.row_errors.length > 0) {
+                        Swal.fire({ icon: 'warning', title: 'Saved with warnings', html: data.row_errors.join('<br>') });
+                    }
+                    const actionObj = { icon: 'fas fa-save', title: '', message: data.success, url: '', target: '_blank', type: 'success' };
+                    actionreload(JSON.stringify(actionObj, null, 2));
+                }
+            },
+            error: function () {
+                Swal.fire({ icon: 'error', title: 'Server error. Please try again.' });
+                $btn.prop('disabled', false).html('<i class="fas fa-plus"></i>&nbsp;Add');
+            }
+        });
     });
 
 });
