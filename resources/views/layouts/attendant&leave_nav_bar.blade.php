@@ -42,6 +42,8 @@
           <li><a class="dropdown-item" href="{{ route('mealallowanceapproval')}}">Salary Adjustments Approval</a></li>
           
           <li><a class="dropdown-item" href="{{ route('holidaydeductionapproval')}}">Leave Deduction Approval</a></li>
+
+          <li><a class="dropdown-item" href="{{ route('AdditionalTimesApproval')}}">Additional Timestamps Approval</a></li> 
           
           
         </ul>

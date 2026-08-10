@@ -113,6 +113,26 @@ class AttendancePolicyService
                 }
 
                 if($date == $date_input){
+
+
+                 // last timestamp check - 1 min threshold
+                $lastAttendance = DB::table('attendances')
+                    ->where('emp_id', $full_emp_id)
+                    ->where('date', $attendance_date)
+                    ->whereNull('deleted_at')
+                    ->orderBy('timestamp', 'desc')
+                    ->first();
+
+                if ($lastAttendance) {
+                    $lastTime = Carbon::parse($lastAttendance->timestamp);
+                    $newTime  = Carbon::parse($timestamp);
+
+                    if ($newTime->diffInSeconds($lastTime) < 60) {
+                        return true; // too close to last punch, skip
+                    }
+                }
+
+
                     $Attendance = AppAttendance::firstOrNew(['timestamp' => $timestamp, 'emp_id' => $full_emp_id]);
                     $Attendance->uid = $full_emp_id;
                     $Attendance->emp_id = $full_emp_id;
