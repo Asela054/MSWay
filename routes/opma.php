@@ -100,6 +100,9 @@ Route::get('opma_machinechart', ['uses' => 'Additionals\OpmaDashdoardController@
 Route::get('/opma_attendanceproductionreport', 'Production_Module_Opma\AttendanceproductionreportController@index')->name('opma_attendanceproductionreport');
 Route::post('/opma_attendanceproduction_generatereport' ,'Production_Module_Opma\AttendanceproductionreportController@generatereport')->name('opma_attendanceproduction_generatereport');
 
+//Production Unlock Controller Routes
+Route::get('opma_production_unlock', 'Production_Module_Opma\ProductionUnlockController@index')->name('opma_production_unlock');
+Route::post('opma_production_unlockdelete', 'Production_Module_Opma\ProductionUnlockController@delete')->name('opma_production_unlockdelete');
 
 // End of Opma Production Section Routes
 

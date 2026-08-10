@@ -318,6 +318,7 @@
                                 <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('lateminitesapprovel')}}">Late Deduction Approval</a>
                                 <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('mealallowanceapproval')}}">Salary Adjustments Approval</a>
                                 <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('holidaydeductionapproval')}}">Leave Deduction Approval</a>
+                                <a class="nav-link p-0 px-3 py-1 small text-dark" href="{{ route('AdditionalTimesApproval')}}">Additional Timestamps Approval</a>
                             </nav>
                         </div>
                         <a href="javascript:void(0);" data-toggle="collapse" data-target="#collapsLeave" aria-expanded="false" aria-controls="collapsLeave" class="py-1">

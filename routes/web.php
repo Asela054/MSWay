@@ -1898,7 +1898,10 @@ Route::post('AttendentAprovelBatch_st', 'AttendanceApprovalController_st@Attende
 Route::get('departmentemployee_wise_attendanceleave_report', 'DepartmentwiseOpmaReportsController@index')->name('departmentemployee_wise_attendanceleave_report');
 Route::post('/departmentwise_generateattendanceleave_report', 'DepartmentwiseOpmaReportsController@generateattendanceleavereport')->name('departmentwise_generateattendanceleave_report');
 
-
+//Additional times approval controller
+Route::get('/AdditionalTimesApproval' ,'AttendanceadditionaltimesController@index')->name('AdditionalTimesApproval');
+Route::post('/AdditionalTimesApprovallist' ,'AttendanceadditionaltimesController@gettimestapslist')->name('AdditionalTimesApprovallist');
+Route::post('/AdditionalTimesApprove' ,'AttendanceadditionaltimesController@approvetimestaps')->name('AdditionalTimesApprove');
 
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');

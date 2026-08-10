@@ -366,24 +366,38 @@ class Attendance_st extends Model
                             ->orderBy('at1.timestamp', 'asc')
                             ->get();
 
-                      if ($query->isNotEmpty()) {
-                            $timestamps = $query->pluck('timestamp')->toArray();
-                            $count = count($timestamps);
+                     if ($query->isNotEmpty()) {
+                        $timestamps = $query->pluck('timestamp')->toArray();
+                        $count = count($timestamps);
 
-                            if ($count % 2 === 0) {
-                                $totalMinutes = 0;
+                        if ($count >= 2) {
+                            $in  = Carbon::parse($timestamps[0])->second(0);
+                            $out = Carbon::parse($timestamps[$count - 1])->second(0);
 
-                                for ($i = 0; $i < $count; $i += 2) {
-                                   $in  = Carbon::parse($timestamps[$i])->second(0);
-                                   $out = Carbon::parse($timestamps[$i + 1])->second(0);
+                            $totalMinutes = 0;
 
-                                    if ($in && $out && $in != $out) {
-                                        $totalMinutesAll  += $in->diffInMinutes($out);
-                                    }
-                                }
+                            if ($in && $out && $in != $out) {
+                                $totalMinutes = $in->diffInMinutes($out);
                             }
-                        }
 
+                            // approved additional timestamps duration
+                            $additionalDuration = DB::table('attendance_additional_timestamps')
+                                ->where('emp_id', $emp_id)
+                                ->where('date', $todayDate)
+                                ->where('status', 1)
+                                ->sum('duration');
+
+                            $additionalMinutes = round($additionalDuration * 60);
+
+                            $totalMinutes -= $additionalMinutes;
+
+                            if ($totalMinutes < 0) {
+                                $totalMinutes = 0;
+                            }
+
+                            $totalMinutesAll += $totalMinutes;
+                        }
+                    }
                 }
             }
             

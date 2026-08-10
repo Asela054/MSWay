@@ -154,6 +154,7 @@ class DepartmentviseNopayController extends Controller
               ->where('leave_type', $leavetype)
               ->whereDate('leave_from', '<=', $emp_date)
               ->whereDate('leave_to', '>=', $emp_date)
+              ->where('status', 'Approved')
               ->first();
               if ($leave) {
                 $leave->update([
