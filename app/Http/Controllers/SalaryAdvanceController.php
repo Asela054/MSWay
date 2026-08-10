@@ -55,9 +55,10 @@ class SalaryAdvanceController extends Controller
         $advance->emp_id = $request->input('employee');
         $advance->date = $request->input('date');
         $advance->request_amount = $request->input('request_amount');
-        $advance->paid_amount = '0';
+        $advance->paid_amount = $request->input('request_amount');
         $advance->remark = $request->input('remark');
         $advance->status = '1';
+        $advance->paid_status = '1';
         $advance->created_by = Auth::id();
         $advance->created_at = Carbon::now()->toDateTimeString();
 
@@ -116,6 +117,7 @@ class SalaryAdvanceController extends Controller
             'emp_id'     => $request->employee,
             'date'       => $request->date,
             'request_amount'     => $request->request_amount,
+            'paid_amount'     => $request->request_amount,
             'remark'     => $request->remark,
             'updated_by' => Auth::id(),
             'updated_at' => Carbon::now()->toDateTimeString()
@@ -250,5 +252,106 @@ class SalaryAdvanceController extends Controller
         }
 
         return response()->json(['errors' => ['Failed to update paid amount.']]);
+    }
+
+    public function dpt_allocation_list(Request $request)
+    {
+        $user = Auth::user();
+        $permission = $user->can('salary-advance-create');
+        if (!$permission) {
+            return response()->json(['error' => 'UnAuthorized'], 401);
+        }
+
+        $department = $request->input('department');
+
+        $emp_List = DB::table('employees')
+            ->select(
+                'emp_id',
+                'emp_name_with_initial'
+            )
+            ->where('emp_department', $department)
+            ->where('deleted', 0)
+            ->where('is_resigned', 0)
+            ->orderBy('emp_name_with_initial')
+            ->get();
+
+        return response()->json(['employees' => $emp_List]);
+    }
+
+    public function dpt_allocation_insert(Request $request)
+    {
+        $user = Auth::user();
+        $permission = $user->can('salary-advance-create');
+        if (!$permission) {
+            return response()->json(['error' => 'UnAuthorized'], 401);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $allocation_date = $request->input('allocation_date');
+            $tableData       = $request->input('tableData', []);
+
+            if (empty($tableData)) {
+                return response()->json(['errors' => 'No employee data provided.']);
+            }
+
+            $errors = [];
+
+            foreach ($tableData as $row) {
+                $emp_id         = $row['emp_id'];
+                $request_amount = floatval($row['request_amount'] ?? 0);
+                $remark         = $row['remark'] ?? '';
+
+                // Server-side re-validate available amount and attendance
+                $availableResponse = $this->getAvailableAmount($emp_id, $allocation_date);
+                $availableData     = json_decode($availableResponse->getContent(), true);
+
+                if (isset($availableData['errors'])) {
+                    $errors[] = 'Employee ' . $emp_id . ': ' . $availableData['errors'];
+                    continue;
+                }
+
+                $available_amount = floatval($availableData['available_amount'] ?? 0);
+
+                if ($request_amount <= 0) {
+                    $errors[] = 'Employee ' . $emp_id . ': Request amount must be greater than zero.';
+                    continue;
+                }
+
+                if ($request_amount > $available_amount) {
+                    $errors[] = 'Employee ' . $emp_id . ': Request amount exceeds available limit of ' . $available_amount . '.';
+                    continue;
+                }
+
+                $advance                = new SalaryAdvance();
+                $advance->emp_id        = $emp_id;
+                $advance->date          = $allocation_date;
+                $advance->request_amount = $request_amount;
+                $advance->paid_amount   = $request_amount;
+                $advance->remark        = $remark;
+                $advance->status        = '1';
+                $advance->paid_status   = '1';
+                $advance->created_by    = Auth::id();
+                $advance->updated_by    = 0;
+                $advance->created_at    = Carbon::now()->toDateTimeString();
+                $advance->save();
+            }
+
+            DB::commit();
+
+            if (!empty($errors)) {
+                return response()->json([
+                    'success' => 'Salary advances saved. Some rows had issues.',
+                    'row_errors' => $errors,
+                ]);
+            }
+
+            return response()->json(['success' => 'Department salary advances saved successfully.']);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['errors' => 'An error occurred: ' . $e->getMessage()], 422);
+        }
     }
 }
