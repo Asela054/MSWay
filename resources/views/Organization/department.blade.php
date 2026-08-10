@@ -34,6 +34,7 @@
                                     <th>ID </th>
                                     <th>Name</th>
                                     <th>Head</th>
+                                    <th>MAXIMUM EMPLOYEES</th>
                                     <th class="text-right">Action</th>
                                 </tr>
                                 </thead>
@@ -64,12 +65,16 @@
                                     <div class="form-row mb-1">
                                         <div class="col-12">
                                             <label class="small font-weight-bold text-dark">Name*</label>
-                                            <input type="text" name="name" id="name" class="form-control form-control-sm" />
+                                            <input type="text" name="name" id="name" class="form-control form-control-sm" required />
                                         </div>
                                         <div class="col-12" id="employee_f_wrapper">
                                             <label class="small font-weight-bold text-dark">Department Head</label>
                                             <select name="employee" id="employee_f" class="form-control form-control-sm">
                                             </select>
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="small font-weight-bold text-dark">Maximum Employees</label>
+                                            <input type="number" name="max_employees" id="max_employees" class="form-control form-control-sm" />
                                         </div>
 {{--                                        <div class="col">--}}
 {{--                                            <label class="small font-weight-bold text-dark">Code*</label>--}}
@@ -206,6 +211,11 @@
                         name: 'emp_name',
                         defaultContent: '<span class="text-muted">N/A</span>'
                     },
+                    { 
+                        data: 'max_employees', 
+                        name: 'max_employees',
+                        defaultContent: '<span class="text-muted">N/A</span>'
+                    },
                     {
                         data: 'id',
                         name: 'action',
@@ -235,6 +245,7 @@
                 $('#action').val('Add');
                 $('#form_result').html('');
                 $('#formTitle')[0].reset();
+                $('#max_employees').val('');
                 $('#employee_f_wrapper').hide();
 
                 $('#formModal').modal('show');
@@ -296,6 +307,7 @@
                         dataType: "json",
                         success: function (data) {
                             $('#name').val(data.result.name);
+                            $('#max_employees').val(data.result.max_employees);
                             $('#hidden_id').val(id);
                             $('.modal-title').text('Edit Department');
                             $('#action_button').html('Edit');

@@ -55,6 +55,7 @@ class DepartmentController extends Controller
 
         $department = new Department();
         $department->name = $request->input('name');
+        $department->max_employees = $request->input('max_employees');
         $department->company_id = $request->input('company_id');
         $department->create_by = Auth::id();
         $department->save();
@@ -108,6 +109,7 @@ class DepartmentController extends Controller
         $form_data = array(
             'name'            => $request->name,
             'dep_head_emp_id' => $request->employee,
+            'max_employees'   => $request->max_employees,
             'update_by'       => Auth::id(),
             'updated_at'      => $current_date_time,
         );
