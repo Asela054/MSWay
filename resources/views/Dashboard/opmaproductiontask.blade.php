@@ -278,7 +278,14 @@ $(document).ready(function(){
                         },
                         {
                             data: 'daily_average', name: 'night', orderable: false,
-                            render: function(data) { return renderComponent(data, 'night'); }
+                            render: function(data, type, row) {
+                                if (type !== 'display') return data;
+                                var tier = getTier(data);
+                                var isNightPass = tier.allow.indexOf('night') !== -1 && parseInt(row.shift_id) === 4;
+                                return isNightPass
+                                    ? '<span>Pass</span>'
+                                    : '<span class="text-muted">-</span>';
+                            }
                         },
                         {
                             data: 'daily_average', name: 'attendance', orderable: false,
