@@ -151,6 +151,19 @@ class EmployeeController extends Controller
             return response()->json(['errors' => [$nicValidation['message']]]);
         }
 
+        $department = $request->input('department');
+        if ($department) {
+            $departmentData = Department::find($department);
+            if ($departmentData && !empty($departmentData->max_employees)) {
+                $currentCount = Employee::where('emp_department', $department)
+                    ->where('deleted', 0)
+                    ->count();
+                if ($currentCount >= $departmentData->max_employees) {
+                    return response()->json(['errors' => ['The selected department has reached its maximum employee limit (' . $departmentData->max_employees . ').']]);
+                }
+            }
+        }
+
         if ($request->hasFile('photograph')) {
             $image = $request->file('photograph');
             $name = time() . '.' . $image->getClientOriginalExtension();
@@ -368,6 +381,21 @@ class EmployeeController extends Controller
         $shift = $request->shift;
         $employeecompany = $request->employeecompany;
         $department = $request->department;
+
+        if ($department) {
+            $departmentData = Department::find($department);
+            if ($departmentData && !empty($departmentData->max_employees)) {
+                $currentCount = Employee::where('emp_department', $department)
+                    ->where('id', '!=', $id)
+                    ->where('deleted', 0)
+                    ->count();
+                if ($currentCount >= $departmentData->max_employees) {
+                    Session::flash('error', 'The selected department has reached its maximum employee limit (' . $departmentData->max_employees . ').');
+                    return redirect()->back()->withInput();
+                }
+            }
+        }
+        
         $job_category_id = $request->job_category_id;
         $work_category_id = $request->work_category_id;
         $leave_approve_person = $request->leave_approve_person;

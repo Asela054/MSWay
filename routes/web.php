@@ -1692,6 +1692,8 @@ Route::get('salaryAdvance/destroy/{id}', 'SalaryAdvanceController@destroy');
 Route::get('SalaryAdvance/available-amount/{emp_id}', 'SalaryAdvanceController@getAvailableAmount')->name('salaryAdvance.availableAmount');
 Route::get('SalaryAdvance/get-paid-amount', 'SalaryAdvanceController@getPaidAmount')->name('SalaryAdvance/get-paid-amount');
 Route::post('SalaryAdvance/paid-amount', 'SalaryAdvanceController@storePaidAmount')->name('SalaryAdvance/paid-amount');
+Route::post('salary_advance_dept_allocation_list' ,'SalaryAdvanceController@dpt_allocation_list')->name('salary_advance_dept_allocation_list');
+Route::post('/salary_advance_dept_allocation_insert' ,'SalaryAdvanceController@dpt_allocation_insert')->name('salary_advance_dept_allocation_insert');
 // Salary Advance Approval Controller Routes
 Route::get('/salaryAdvanceApproval' ,'SalaryAdvanceApprovalController@index')->name('salaryAdvanceApproval');
 Route::post('/salaryAdvanceApprovalgenerate' ,'SalaryAdvanceApprovalController@generatesalaryadvance')->name('salaryAdvanceApprovalgenerate');

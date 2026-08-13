@@ -11,6 +11,7 @@ $primaryKey = 'id';
 $columns = array(
     array('db' => '`u`.`id`', 'dt' => 'id', 'field' => 'id'),
     array('db' => '`u`.`name`', 'dt' => 'name', 'field' => 'name'),
+    array('db' => '`u`.`max_employees`', 'dt' => 'max_employees', 'field' => 'max_employees'),
     array('db' => '`e`.`emp_name_with_initial`', 'dt' => 'emp_name_with_initial', 'field' => 'emp_name_with_initial', 'visible' => false),
     array('db' => '`e`.`calling_name`', 'dt' => 'calling_name', 'field' => 'calling_name', 'visible' => false),
     array('db' => '`u`.`dep_head_emp_id`', 'dt' => 'emp_name', 'field' => 'dep_head_emp_id',
