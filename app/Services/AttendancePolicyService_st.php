@@ -342,11 +342,11 @@ class AttendancePolicyService
 
             if ($isSaturday && $shiftType->saturday_onduty_time && $shiftType->saturday_offduty_time) {
 
-                $onDutyTime  = Carbon::parse($shiftType->saturday_onduty_time);
-                $offDutyTime = Carbon::parse($shiftType->saturday_offduty_time);
+                $onDutyTime = Carbon::parse($date . ' ' . $shiftType->saturday_onduty_time);
+                $offDutyTime = Carbon::parse($date . ' ' . $shiftType->saturday_offduty_time);
             } else {
-                $onDutyTime  = Carbon::parse($shiftType->onduty_time);
-                $offDutyTime = Carbon::parse($shiftType->offduty_time);
+                $onDutyTime  = Carbon::parse($date . ' ' . $shiftType->onduty_time);
+                $offDutyTime = Carbon::parse($date . ' ' . $shiftType->offduty_time);
             }
 
             $checkInTime = Carbon::parse($firstCheckin);
@@ -365,7 +365,7 @@ class AttendancePolicyService
 
                 if ($shiftType->late_time) {
 
-                    $ondutylateTime = new DateTime($shiftType->late_time);
+                    $ondutylateTime = new DateTime($date . ' ' . $shiftType->late_time);
                     $checkInTime = new DateTime($firstCheckin);
 
                     $interval = $checkInTime->diff($ondutylateTime);

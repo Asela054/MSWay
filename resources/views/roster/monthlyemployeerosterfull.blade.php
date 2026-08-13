@@ -232,6 +232,10 @@
         // Load shift options first
         fetch('getrostershifts').then(response => response.json()).then(data => {
             shiftOptions = data.filter(opt => opt.id !== '' && opt.id !== null);
+             shiftOptions.push(
+                { id: 100, code: 'SD' },
+                { id: 101, code: 'DO' }
+            );
         }).catch(error => {
             console.error('Error loading shift options:', error);
         });
