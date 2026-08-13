@@ -66,7 +66,8 @@ class SalaryAdvanceApprovalController extends Controller
                 ->from('salary_advances')
                 ->whereColumn('salary_advances.emp_id', 'employees.emp_id')
                 ->whereBetween('salary_advances.date', [$from_date, $to_date])
-                ->where('salary_advances.paid_status', 1); 
+                ->where('salary_advances.paid_status', 1)
+                ->where('salary_advances.status', '!=', 3); 
         });
 
         $query->groupBy(
@@ -87,12 +88,14 @@ class SalaryAdvanceApprovalController extends Controller
                 ->whereBetween('date', [$from_date, $to_date])
                 ->where('emp_id', $record->emp_id)
                 ->where('paid_status', 1)
+                ->where('status', '!=', 3)
                 ->get();
 
             $totalCount    = $allocations->count();
             $approvedCount = $allocations->where('approve_status', 1)->count();
             $request_amount = $allocations->sum('request_amount'); 
             $paid_amount    = $allocations->sum('paid_amount');
+            $date           = $allocations->max('date');
 
             $data[] = [
                 'emp_auto_id'           => $record->emp_auto_id,
@@ -101,6 +104,7 @@ class SalaryAdvanceApprovalController extends Controller
                 'department_name'       => $record->department_name,
                 'request_amount'        => $request_amount,
                 'paid_amount'           => $paid_amount,
+                'date'                  => $date,
                 'is_approved'           => ($totalCount > 0 && $approvedCount == $totalCount) ? 1 : 0,
             ];
         }
@@ -137,9 +141,10 @@ class SalaryAdvanceApprovalController extends Controller
 
             DB::table('salary_advances')
                 ->where('emp_id', $empid)          
-                ->where('paid_status', 1)           
+                ->where('paid_status', 1) 
+                ->where('status', '!=', 3)          
                 ->whereBetween('date', [$from_date, $to_date])
-                ->update(['approve_status' => 1]);
+                ->update(['approve_status' => 1, 'approve_by' => Auth::id(), 'updated_by' => Auth::id(), 'updated_at' => $current_date_time]);
 
             $profiles = DB::table('payroll_profiles')
                 ->join('payroll_process_types', 'payroll_profiles.payroll_process_type_id', '=', 'payroll_process_types.id')
