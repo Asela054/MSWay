@@ -77,7 +77,7 @@ class AttendancePolicyService
                 
                 if ($shift && $shift->off_next_day == '0' && $shift->on_next_day == '1' && $date == $date_input) {
                       $next_day = (new DateTime($date_input))->modify('+1 day')->format('Y-m-d');
-                      $shif_ontime = Carbon::parse($shift->onduty_time);
+                      $shif_ontime = Carbon::parse($date . ' ' . $shift->onduty_time);
                       $attendance_time = Carbon::parse($timestamp);
                     
                     if($shif_ontime->format('H:i:s') > $attendance_time->format('H:i:s')){
@@ -89,7 +89,7 @@ class AttendancePolicyService
 
                 }elseif ($shift && $shift->off_next_day == '1' && $shift->on_next_day == '0' && $date == $date_input) {
                     $previous_day = (new DateTime($date_input))->modify('-1 day')->format('Y-m-d');
-                      $shif_ontime = Carbon::parse($shift->onduty_time);
+                      $shif_ontime = Carbon::parse($date . ' ' . $shift->onduty_time);
                       $attendance_time = Carbon::parse($timestamp);
                     
                     if($shif_ontime->format('H:i:s') > $attendance_time->format('H:i:s')){
@@ -210,7 +210,7 @@ class AttendancePolicyService
 
         if ($shift && $shift->off_next_day == '0' && $shift->on_next_day == '1' && $date == $date_input) {
                       $next_day = (new DateTime($date_input))->modify('+1 day')->format('Y-m-d');
-                      $shif_ontime = Carbon::parse($shift->onduty_time);
+                      $shif_ontime = Carbon::parse($attendacedate . ' ' . $shift->onduty_time);
                       $txt_datetime = Carbon::parse($time_h . ':' . $time_m . ':00');
                     
                     if($shif_ontime->format('H:i:s') > $txt_datetime->format('H:i:s')){
@@ -226,7 +226,7 @@ class AttendancePolicyService
         elseif ($shift && $shift->off_next_day == '1' && $shift->on_next_day == '0' && $date_stamp == $attendacedate) {
                 $previous_day = (new DateTime($attendacedate))->modify('-1 day')->format('Y-m-d');
 
-                $shif_ontime = Carbon::parse($shift->onduty_time);
+                $shif_ontime = Carbon::parse($attendacedate . ' ' . $shift->onduty_time);
                 $txt_datetime = Carbon::parse($time_h . ':' . $time_m . ':00');
 
                 if($shif_ontime > $txt_datetime){

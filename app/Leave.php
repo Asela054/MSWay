@@ -286,11 +286,21 @@ public function get_duty_leaves($emp_id, $month ,$closedate){
 
 public function get_dayoff_leaves($emp_id, $month, $closedate)
 {
+    $holidayDates = DB::table('holidays')
+        ->where('date', 'like', $month . '%')
+        ->where('date', '<=', $closedate)
+        ->pluck('date')
+        ->map(function ($d) {
+            return Carbon::parse($d)->format('Y-m-d');
+        })
+        ->toArray();
+
     $specialShiftCount = DB::table('employee_roster_details')
         ->where('emp_id', $emp_id)
         ->where('work_date', 'like', $month . '%')
         ->where('work_date', '<=', $closedate)
         ->whereIn('shift_id', [100, 101])
+        ->whereIn('work_date', $holidayDates)
         ->count();
 
     return [
