@@ -52,6 +52,7 @@
                                     <th>EMPLOYEE</th>
                                     <th>REQUESTED AMOUNT</th>
                                     <th>PAID AMOUNT</th>
+                                    <th>DATE</th>
                                     <th class="d-none">Employee auto id</th>
                                 </tr>
                             </thead>
@@ -198,7 +199,7 @@ $(document).ready(function(){
 
     $('#payrollmenu').addClass('active');
     $('#payrollmenu_icon').addClass('active');
-    $('#policymanagement').addClass('navbtnactive');
+    $('#advancesincentives').addClass('navbtnactive');
 
      let company_f = $('#company_f');
      let employee_f = $('#employee_f');
@@ -327,6 +328,7 @@ $(document).ready(function(){
                 { data: 'emp_name_with_initial', name: 'emp_name_with_initial' },
                 { data: 'request_amount', name: 'request_amount' },
                 { data: 'paid_amount', name: 'paid_amount' },
+                { data: 'date', name: 'date' },
                 {
                     data: 'emp_auto_id',
                     name: 'emp_auto_id',
