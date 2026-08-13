@@ -306,7 +306,7 @@ $(document).ready(function () {
     
     $('#payrollmenu').addClass('active');
     $('#payrollmenu_icon').addClass('active');
-    $('#policymanagement').addClass('navbtnactive');
+    $('#advancesincentives').addClass('navbtnactive');
 
     // department wise salary advance modal
     let company_d = $('#company_dept_wise');
@@ -744,7 +744,7 @@ $(document).ready(function () {
         if (r == true) {
             user_id = $(this).attr('id');
             $.ajax({
-                url: "{{ url('SalaryAdvance/destroy/') }}/" + user_id,
+                url: "{{ url('salaryAdvance/destroy/') }}/" + user_id,
                 beforeSend: function () {
                     $('#ok_button').text('Deleting...');
                 },
@@ -924,21 +924,36 @@ $(document).ready(function () {
     });
 
     $('#check_all_dpt').on('change', function () {
-        // Only toggle rows that already have their available amount loaded
-        $('#dptemplistbody .dpt-emp-chk').each(function () {
-            var $chk = $(this);
-            var $row = $chk.closest('tr');
-            var avail = parseFloat($row.find('.avail-amt').data('value')) || 0;
-            if (avail > 0) {
-                $chk.prop('checked', $('#check_all_dpt').is(':checked'));
-                var checked = $chk.is(':checked');
-                $row.find('.dpt-request-amt, .dpt-remark').prop('disabled', !checked);
-                if (!checked) {
-                    $row.find('.dpt-request-amt').val('');
-                    $row.find('.dpt-remark').val('');
+        var isChecked = $(this).is(':checked');
+
+        if (!isChecked) {
+            // Uncheck all rows and disable their inputs
+            $('#dptemplistbody .dpt-emp-chk').each(function () {
+                var $chk = $(this);
+                var $row = $chk.closest('tr');
+                $chk.prop('checked', false);
+                $row.find('.dpt-request-amt').prop('disabled', true).val('');
+                $row.find('.dpt-remark').prop('disabled', true).val('');
+            });
+        } else {
+            // Check each row: if available amount already loaded, enable directly;
+            // otherwise trigger the individual change event to fetch it
+            $('#dptemplistbody .dpt-emp-chk').each(function () {
+                var $chk  = $(this);
+                var $row  = $chk.closest('tr');
+                var avail = parseFloat($row.find('.avail-amt').data('value')) || 0;
+
+                if (avail > 0) {
+                    // Available amount already fetched — just check and enable
+                    $chk.prop('checked', true);
+                    $row.find('.dpt-request-amt').prop('disabled', false).attr('max', avail);
+                    $row.find('.dpt-remark').prop('disabled', false);
+                } else {
+                    // Trigger individual checkbox change to fetch available amount
+                    $chk.prop('checked', true).trigger('change');
                 }
-            }
-        });
+            });
+        }
     });
 
     $(document).on('change', '.dpt-emp-chk', function () {
