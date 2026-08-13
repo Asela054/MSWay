@@ -1699,6 +1699,20 @@ Route::get('/salaryAdvanceApproval' ,'SalaryAdvanceApprovalController@index')->n
 Route::post('/salaryAdvanceApprovalgenerate' ,'SalaryAdvanceApprovalController@generatesalaryadvance')->name('salaryAdvanceApprovalgenerate');
 Route::post('/salaryAdvanceApprovalapprove' ,'SalaryAdvanceApprovalController@approvesalaryadvance')->name('salaryAdvanceApprovalapprove');
 
+// Salary Incentive Controller Routes
+Route::resource('salaryIncentive', 'SalaryIncentiveController');
+Route::get('salaryIncentive',['uses' => 'SalaryIncentiveController@index', 'as' => 'salaryIncentive']);
+Route::post('addSalaryIncentive',['uses' => 'SalaryIncentiveController@store', 'as' => 'addSalaryIncentive']); 
+Route::post('salaryIncentive/update', 'SalaryIncentiveController@update')->name('salaryIncentive.update');
+Route::get('salaryIncentive/destroy/{id}', 'SalaryIncentiveController@destroy');
+Route::post('salary_incentive_dept_allocation_list' ,'SalaryIncentiveController@dpt_allocation_list')->name('salary_incentive_dept_allocation_list');
+Route::post('/salary_incentive_dept_allocation_insert' ,'SalaryIncentiveController@dpt_allocation_insert')->name('salary_incentive_dept_allocation_insert');
+Route::get('salaryIncentive/by-emp-month', 'SalaryIncentiveController@getByEmpMonth')->name('salaryIncentive.byEmpMonth');
+// Salary Incentive Approval Controller Routes
+Route::get('/salaryIncentiveApproval' ,'SalaryIncentiveApprovalController@index')->name('salaryIncentiveApproval');
+Route::post('/salaryIncentiveApprovalgenerate' ,'SalaryIncentiveApprovalController@generatesalaryincentive')->name('salaryIncentiveApprovalgenerate');
+Route::post('/salaryIncentiveApprovalapprove' ,'SalaryIncentiveApprovalController@approvesalaryincentive')->name('salaryIncentiveApprovalapprove');
+
 // Koasis 
 // Dashboard controller
 Route::get('/getattendancesummarychart', 'Additionals\DashboarddetailedController@attendacechart')->name('getattendancesummarychart');
