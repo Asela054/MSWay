@@ -8,8 +8,6 @@
       <li><a class="dropdown-item" href="{{ url('EmployeeLoanList') }}" id="loans">Loans</a></li>
       <li><a class="dropdown-item" href="{{ url('EmployeeLoanAdmin') }}">Loan Approval</a></li>
       <li><a class="dropdown-item" href="{{ url('EmployeeLoanInstallmentList') }}" id="loanSettlement">Loan Settlement</a></li>
-      <li><a class="dropdown-item" href="{{ url('salaryAdvance') }}" id="salaryAdvance">Salary Advances</a></li>
-      <li><a class="dropdown-item" href="{{ url('salaryAdvanceApproval') }}" id="salaryAdvanceApproval">Salary Advance Approval</a></li>
       <li><a class="dropdown-item" href="{{ url('EmployeeTermPaymentList') }}" id="SalaryAdditions">Salary Additions /
           Deduction</a></li>
       <li><a href="{{ url('EmployeeExtraPaymentList') }}" id="SalaryInAdvance" class="dropdown-item">Advance Payments</a></li>
@@ -56,6 +54,16 @@
       <li><a class="dropdown-item" href="{{ url('EmpSalaryJournalVoucher') }}">Employee Salary (Journal Voucher)</a>
       </li>
       <li><a class="dropdown-item" href="{{ url('EmpEpfEtfJournalVoucher') }}">EPF and ETF (Journal Voucher)</a></li>
+    </ul>
+  </div>
+  <div class="dropdown">
+    <a role="button" data-toggle="dropdown" class="btn navbtncolor" href="javascript:void(0);" id="advancesincentives">
+      Advances & Incentives <span class="caret"></span></a>
+    <ul class="dropdown-menu multi-level dropdownmenucolor" role="menu" aria-labelledby="dropdownMenu">
+      <li><a class="dropdown-item" href="{{ url('salaryAdvance') }}" id="salaryAdvance">Salary Advances</a></li>
+      <li><a class="dropdown-item" href="{{ url('salaryAdvanceApproval') }}" id="salaryAdvanceApproval">Salary Advance Approval</a></li>
+      <li><a class="dropdown-item" href="{{ url('salaryIncentive') }}" id="salaryIncentive">Salary Incentives</a></li>
+      <li><a class="dropdown-item" href="{{ url('salaryIncentiveApproval') }}" id="salaryIncentiveApproval">Salary Incentive Approval</a></li>
     </ul>
   </div>
 </div>
