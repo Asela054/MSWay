@@ -51,7 +51,7 @@
                                     <tr>
                                         <th>EMP ID</th>
                                         <th>EMP NAME</th>
-                                        <th>JOB CATEGORY</th>
+                                        <th>DEPARTMENT</th>
                                         <th>MONTH</th>
                                         <th>PAID AMOUNT</th>
                                         <th class="text-right">Action</th>
@@ -489,7 +489,7 @@ $(document).ready(function () {
             columns: [
                 { data: 'emp_id', name: 'emp_id' },
                 { data: 'employee_display', name: 'employee_display' },
-                { data: 'category', name: 'category' },
+                { data: 'department_name', name: 'department_name' },
                 { data: 'month', name: 'month' },
                 { data: 'paid_amount', name: 'paid_amount' },
                 {
