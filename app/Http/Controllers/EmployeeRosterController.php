@@ -157,6 +157,8 @@ class EmployeeRosterController extends Controller
         $shifts = ShiftType::where('deleted', 0)
             ->select('id', 'shift_code AS code')
             ->get();
+        $shifts->push((object) ['id' => 100, 'code' => 'SD']);
+        $shifts->push((object) ['id' => 101, 'code' => 'DO']);
 
         // Filter roster by department employees only
         $rosterRaw = DB::table('employee_roster_details')

@@ -427,12 +427,10 @@ class AttendanceApprovalController extends Controller
             $leave_days = (new \App\Leave)->get_leave_days($record->emp_id, $month , $closedate);
             $no_pay_days = (new \App\Leave)->get_no_pay_days($record->emp_id, $month, $closedate);
             $duty_leaves = (new \App\Leave)->get_duty_leaves($record->emp_id, $month, $closedate);
-            $dayoff_dayhours = (new \App\Leave)->get_dayoff_leaves($record->emp_id, $month, $closedate);
-            $dayoff_leaves  = $dayoff_dayhours['days'];
-            $dayoff_hours = $dayoff_dayhours['hours'];
+            $dayoff_leaves = (new \App\Leave)->get_dayoff_leaves($record->emp_id, $month, $closedate);
+
             $normal_ot_hours = (new \App\OtApproved)->get_ot_hours_monthly($record->emp_id, $month, $closedate);
-            $normal_ot_hours += $dayoff_hours;
-            
+
             $double_ot_hours = (new \App\OtApproved)->get_double_ot_hours_monthly($record->emp_id, $month, $closedate);
 
             $triple_ot_hours = (new \App\OtApproved)->get_triple_ot_hours_monthly($record->emp_id, $month, $closedate);
@@ -575,21 +573,6 @@ class AttendanceApprovalController extends Controller
 							'normal_rate_otwork_hrs' => 0,
 							'double_rate_otwork_hrs' => 0,
 							'triple_rate_otwork_hrs' => 0,
-                            'day_off' => 0,
-                            'night_days' => 0,
-                            'additional_OT' => 0,
-                            'holiday_nopay_days' => 0,
-                            'holiday_normal_ot_hrs' => 0,
-                            'holiday_double_ot_hrs' => 0,
-                            'sunday_work_days' => 0,
-                            'poya_work_days' => 0,
-                            'poya_nopay_days' => 0,
-                            'mercantile_work_days' => 0,
-                            'mercantile_nopay_days' => 0,
-                            'sunday_double_ot_hrs' => 0,
-                            'poya_extended_normal_ot_hrs' => 0,
-                            'absent_nopay' => 0,
-                            'excess_working_days' => 0,
 							'created_at' => date('Y-m-d H:i:s'),
 							'updated_at' => date('Y-m-d H:i:s')
 						);
@@ -609,21 +592,6 @@ class AttendanceApprovalController extends Controller
 							'normal_rate_otwork_hrs' => $normal_ot_hours,
 							'double_rate_otwork_hrs' => $double_ot_hours,
 							'triple_rate_otwork_hrs' => $triple_ot_hours,
-                            'day_off' => $dayoff_leaves,
-                            'night_days' => $night_work_days,
-                            'additional_OT' => $normal_ot_hours_additional,
-                            'holiday_nopay_days' => 0,
-                            'holiday_normal_ot_hrs' => 0,
-                            'holiday_double_ot_hrs' => 0,
-                            'sunday_work_days' => 0,
-                            'poya_work_days' => $poya_work_days,
-                            'poya_nopay_days' => $poya_work_days,
-                            'mercantile_work_days' => $PBM_work_days,
-                            'mercantile_nopay_days' => $PBM_work_days,
-                            'sunday_double_ot_hrs' => 0,
-                            'poya_extended_normal_ot_hrs' => 0,
-                            'absent_nopay' => 0,
-                            'excess_working_days' => 0,
 							'created_at' => date('Y-m-d H:i:s'),
 							'updated_at' => date('Y-m-d H:i:s')
 						);
@@ -644,21 +612,6 @@ class AttendanceApprovalController extends Controller
 							'normal_rate_otwork_hrs' => 0,
 							'double_rate_otwork_hrs' => 0,
 							'triple_rate_otwork_hrs' => 0,
-                            'day_off' => 0,
-                            'night_days' => 0,
-                            'additional_OT' => 0,
-                            'holiday_nopay_days' => 0,
-                            'holiday_normal_ot_hrs' => 0,
-                            'holiday_double_ot_hrs' => 0,
-                            'sunday_work_days' => 0,
-                            'poya_work_days' => 0,
-                            'poya_nopay_days' => 0,
-                            'mercantile_work_days' => 0,
-                            'mercantile_nopay_days' => 0,
-                            'sunday_double_ot_hrs' => 0,
-                            'poya_extended_normal_ot_hrs' => 0,
-                            'absent_nopay' => 0,
-                            'excess_working_days' => 0,
 							'created_at' => date('Y-m-d H:i:s'),
 							'updated_at' => date('Y-m-d H:i:s')
 						);
@@ -678,21 +631,6 @@ class AttendanceApprovalController extends Controller
 							'normal_rate_otwork_hrs' => $normal_ot_hours,
 							'double_rate_otwork_hrs' => $double_ot_hours,
 							'triple_rate_otwork_hrs' => $triple_ot_hours,
-                            'day_off' => $dayoff_leaves,
-                            'night_days' => $night_work_days,
-                            'additional_OT' => $normal_ot_hours_additional,
-                            'holiday_nopay_days' => 0,
-                            'holiday_normal_ot_hrs' => 0,
-                            'holiday_double_ot_hrs' => 0,
-                            'sunday_work_days' => 0,
-                            'poya_work_days' => $poya_work_days,
-                            'poya_nopay_days' => $poya_work_days,
-                            'mercantile_work_days' => $PBM_work_days,
-                            'mercantile_nopay_days' => $PBM_work_days,
-                            'sunday_double_ot_hrs' => 0,
-                            'poya_extended_normal_ot_hrs' => 0,
-                            'absent_nopay' => 0,
-                            'excess_working_days' => 0,
 							'created_at' => date('Y-m-d H:i:s'),
 							'updated_at' => date('Y-m-d H:i:s')
 						);
@@ -723,21 +661,6 @@ class AttendanceApprovalController extends Controller
                     'normal_rate_otwork_hrs' => 0,
                     'double_rate_otwork_hrs' => 0,
                     'triple_rate_otwork_hrs' => 0,
-                    'day_off' => 0,
-                    'night_days' => 0,
-                    'additional_OT' => 0,
-                    'holiday_nopay_days' => 0,
-                    'holiday_normal_ot_hrs' => 0,
-                    'holiday_double_ot_hrs' => 0,
-                    'sunday_work_days' => 0,
-                    'poya_work_days' => 0,
-                    'poya_nopay_days' => 0,
-                    'mercantile_work_days' => 0,
-                    'mercantile_nopay_days' => 0,
-                    'sunday_double_ot_hrs' => 0,
-                    'poya_extended_normal_ot_hrs' => 0,
-                    'absent_nopay' => 0,
-                    'excess_working_days' => 0,
                     'created_at' => date('Y-m-d H:i:s'),
                     'updated_at' => date('Y-m-d H:i:s')
                 );

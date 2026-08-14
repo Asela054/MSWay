@@ -72,7 +72,7 @@ class AttendancePolicyService
         // ============================================================
         if ($shift && $shift->off_next_day == '0' && $shift->on_next_day == '1' && $date == $date_input) {
             $next_day = (new DateTime($date_input))->modify('+1 day')->format('Y-m-d');
-            $shif_ontime = Carbon::parse($date . ' ' . $shift->onduty_time);
+            $shif_ontime = Carbon::parse($shift->onduty_time);
             $attendance_time = Carbon::parse($timestamp);
 
             if ($shif_ontime->format('H:i:s') > $attendance_time->format('H:i:s')) {
@@ -139,7 +139,7 @@ class AttendancePolicyService
 
             // (c) If it doesn't fall in either window, fall back to the original AM/PM logic
             if (!$matched) {
-                $shif_ontime = Carbon::parse($date . ' ' . $shift->onduty_time);
+                $shif_ontime = Carbon::parse($shift->onduty_time);
                 $attendance_time = Carbon::parse($timestamp);
 
                 if ($shif_ontime->format('H:i:s') > $attendance_time->format('H:i:s')) {
@@ -316,7 +316,7 @@ class AttendancePolicyService
 
         if ($shift && $shift->off_next_day == '0' && $shift->on_next_day == '1' && $date == $date_input) {
             $next_day = (new DateTime($date_input))->modify('+1 day')->format('Y-m-d');
-            $shif_ontime = Carbon::parse($attendacedate . ' ' . $shift->onduty_time);
+            $shif_ontime = Carbon::parse($shift->onduty_time);
             $txt_datetime = Carbon::parse($time_h . ':' . $time_m . ':00');
 
             if ($shif_ontime->format('H:i:s') > $txt_datetime->format('H:i:s')) {
@@ -382,7 +382,7 @@ class AttendancePolicyService
 
             // (c) If it doesn't fall in either window, fall back to the original AM/PM logic
             if (!$matched) {
-                $shif_ontime = Carbon::parse($attendacedate . ' ' . $shift->onduty_time);
+                $shif_ontime = Carbon::parse($shift->onduty_time);
                 $txt_datetime = Carbon::parse($time_h . ':' . $time_m . ':00');
 
                 if ($shif_ontime > $txt_datetime) {
@@ -431,7 +431,6 @@ class AttendancePolicyService
     private function checkAndInsertLateAttendance($empId, $date, $firstCheckin, $attendanceId)
     {
 
-   
         $latePolicyService = new LatePolicyService();
 
         $lateMinutes = 0;
@@ -500,17 +499,15 @@ class AttendancePolicyService
 
             if ($isSaturday && $shiftType->saturday_onduty_time && $shiftType->saturday_offduty_time) {
 
-                $onDutyTime = Carbon::parse($date . ' ' . $shiftType->saturday_onduty_time);
-                $offDutyTime = Carbon::parse($date . ' ' . $shiftType->saturday_offduty_time);
+                $onDutyTime = Carbon::parse($shiftType->saturday_onduty_time);
+                $offDutyTime = Carbon::parse($shiftType->saturday_offduty_time);
             } else {
-                $onDutyTime = Carbon::parse($date . ' ' . $shiftType->onduty_time);
-                $offDutyTime = Carbon::parse($date . ' ' . $shiftType->offduty_time);
+                $onDutyTime = Carbon::parse($shiftType->onduty_time);
+                $offDutyTime = Carbon::parse($shiftType->offduty_time);
             }
 
             $checkInTime = Carbon::parse($firstCheckin);
 
-                         
-            $checkInTime = Carbon::parse($firstCheckin);
             // Determine whether this punch is a check-in or a check-out by measuring how close the punch time is to each boundary.
             // If the punch is closer to off-duty time than on-duty time,
             // it is most likely a check-out punch — so we skip late marking to avoid incorrectly flagging a clock-out as a late arrival.
@@ -525,19 +522,15 @@ class AttendancePolicyService
 
             if ($shiftType->late_time) {
 
-                $ondutylateTime = new DateTime($date . ' ' . $shiftType->late_time);
+                $ondutylateTime = new DateTime($shiftType->late_time);
                 $checkInTime = new DateTime($firstCheckin);
+
+                $interval = $checkInTime->diff($ondutylateTime);
+                $lateMinutes = ($interval->h * 60) + $interval->i;
 
                 // Check if check-in time is after on-duty time
                 if ($checkInTime > $ondutylateTime) {
                     $isLate = true;
-
-                    $interval = $checkInTime->diff($ondutylateTime);
-                    $elapsedMinutes = ($interval->h * 60) + $interval->i;
-
-                    // Tiered rounding: every 30-min window past late_time rounds up to the next 30-min bucket
-                    // e.g. 0-29 min late -> 30, 30-59 min late -> 60, 60-89 min late -> 90 ...
-                    $lateMinutes = (intdiv($elapsedMinutes, 30) + 1) * 30;
                 }
             }
 

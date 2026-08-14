@@ -163,6 +163,8 @@ $(document).ready(function() {
         .then(response => response.json())
         .then(data => {
             shiftCodeMap = Object.fromEntries(data.map(s => [s.id, s.code]));
+             shiftCodeMap[100] = 'SD';
+             shiftCodeMap[101] = 'DO';
         });
 
     // Department change event
