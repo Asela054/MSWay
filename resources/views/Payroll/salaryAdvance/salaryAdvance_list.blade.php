@@ -51,6 +51,7 @@
                                     <tr>
                                         <th>EMP ID</th>
                                         <th>EMP NAME</th>
+                                        <th>DEPARTMENT</th>
                                         <th>JOB CATEGORY</th>
                                         <th>DATE</th>
                                         <th>REQUESTED AMOUNT</th>
@@ -559,6 +560,7 @@ $(document).ready(function () {
             columns: [
                 { data: 'emp_id', name: 'emp_id' },
                 { data: 'employee_display', name: 'employee_display' },
+                { data: 'department_name', name: 'department_name' },
                 { data: 'category', name: 'category' },
                 { data: 'date', name: 'date' },
                 { data: 'request_amount', name: 'request_amount' },
