@@ -158,7 +158,14 @@ class MealallowanceapproveController extends Controller
                 $approvedallowancestatus = 0;
                 
 
-                $totalWorkingDays = (new \App\Attendance)->get_work_days($empId, $month, $lastDate);
+                
+
+                  $appName = config('app.name');
+                    if($appName == 'OpmaHRM'){
+                       $totalWorkingDays = (new \App\ProductionModule_Opma\OpmaAttendance)->get_work_days($empId, $month, $lastDate);
+                    }else{
+                       $totalWorkingDays = (new \App\Attendance)->get_work_days($empId, $month, $lastDate);
+                    }
 
                 $leavecount = DB::table('leaves')
                     ->select(DB::raw('IFNULL(SUM(no_of_days), 0) as total_days'))
@@ -345,21 +352,30 @@ class MealallowanceapproveController extends Controller
                 }
                 else if($allowancetype==5){
                     // Using Query Builder
-                        $count = DB::table('employee_roster_details as erd')
+                        $count = DB::table('employeeshiftdetails as erd')
                             ->where('erd.emp_id', $empId)
-                            ->whereBetween('erd.work_date', [$firstDate, $lastDate])
+                            ->whereBetween('erd.date_from', [$firstDate, $lastDate])
                             ->where('erd.shift_id', 4)
+                            ->where('erd.status', 1)
                             ->whereExists(function ($query) use ($empId) {
                                 $query->select(DB::raw(1))
                                     ->from('attendances as a')
                                     ->whereRaw('a.emp_id = erd.emp_id')
-                                    ->whereRaw('DATE(a.date) = erd.work_date')
+                                    ->whereRaw('DATE(a.date) = erd.date_from')
                                     ->whereNull('a.deleted_at'); 
                             })
+                            ->whereExists(function ($query) use ($empId) {
+                                $query->select(DB::raw(1))
+                                    ->from('opma_daily_approval_summary as das')
+                                    ->whereRaw('das.emp_id = erd.emp_id')
+                                    ->whereRaw('das.date = erd.date_from')
+                                    ->where('das.daily_average', '>=', 71);
+                            })
                             ->count();
-                            
-                    $totalamount = $count * $allowanceamount;
-                    $monthlyremain = $totalamount;
+                        $totalWorkingDays = $count;
+                        $totalamount = $count * $allowanceamount;
+                        $monthlyremain = $totalamount;
+                   
                 }
 
                 else{//Daily or monthly salary adjustment deductions
