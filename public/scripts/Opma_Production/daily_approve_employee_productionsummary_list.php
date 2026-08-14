@@ -12,7 +12,8 @@ $columns = array(
     array('db' => '`u`.`emp_name_with_initial`', 'dt' => 'emp_name', 'field' => 'emp_name_with_initial'),
     array('db' => '`u`.`date`', 'dt' => 'date', 'field' => 'date'),
     array('db' => '`u`.`daily_average`', 'dt' => 'daily_average', 'field' => 'daily_average'),
-    array('db' => '`u`.`target_bonus`', 'dt' => 'target_bonus', 'field' => 'target_bonus')
+    array('db' => '`u`.`target_bonus`', 'dt' => 'target_bonus', 'field' => 'target_bonus'),
+    array('db' => '`u`.`shift_id`', 'dt' => 'shift_id', 'field' => 'shift_id')
 );
 
 // SQL server connection information
@@ -36,9 +37,20 @@ $sql = "SELECT
         `ep`.`daily_produce`,
         `ep`.`daily_average`,
         `ep`.`target_bonus`,
-        `ep`.`status`
+        `ep`.`status`,
+        `esd`.`shift_id`
     FROM `opma_daily_approval_summary` AS `ep`
     LEFT JOIN `employees` AS `e` ON `ep`.`emp_id` = `e`.`emp_id`
+    LEFT JOIN `employeeshiftdetails` AS `esd` ON `esd`.`id` = (
+        SELECT `esd2`.`id`
+        FROM `employeeshiftdetails` AS `esd2`
+        WHERE `esd2`.`emp_id` = `ep`.`emp_id`
+          AND `esd2`.`status` = 1
+          AND DATE(`esd2`.`date_from`) <= `ep`.`date`
+          AND (`esd2`.`until_time` IS NULL OR DATE(`esd2`.`until_time`) >= `ep`.`date`)
+        ORDER BY `esd2`.`date_from` DESC, `esd2`.`id` DESC
+        LIMIT 1
+    )
     WHERE 1=1
     AND `ep`.`status` = 1
     AND `ep`.`daily_average` IS NOT NULL AND `ep`.`daily_average` != 0";

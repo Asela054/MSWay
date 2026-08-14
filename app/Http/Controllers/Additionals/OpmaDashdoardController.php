@@ -60,11 +60,7 @@ class OpmaDashdoardController extends Controller
 
     public function machinechart(Request $request)
 {
-    //$today = Carbon::today()->toDateString();
-      $date = '2026-06-02';
-
-   // $today = Carbon::today()->toDateString();
-   $today = $date;
+    $today = Carbon::today()->toDateString();
     $devices = DB::table('assigned_devices')
         ->select('id', 'device_name','remarks')
         ->where('id', '>=', 15)
@@ -107,11 +103,16 @@ class OpmaDashdoardController extends Controller
 
             if (!$hasAttendance) continue;
 
-            $rosterShift = DB::table('employee_roster_details')
-                ->select('shift_id')
-                ->where('emp_id', $emp_id)
-                ->where('work_date', $today)
-                ->first();
+            $rosterShift = DB::selectOne("
+                SELECT `shift_id`
+                FROM `employeeshiftdetails`
+                WHERE `emp_id` = ?
+                  AND `status` = 1
+                  AND DATE(`date_from`) <= ?
+                  AND (`until_time` IS NULL OR DATE(`until_time`) >= ?)
+                ORDER BY `date_from` DESC, `id` DESC
+                LIMIT 1
+            ", [$emp_id, $today, $today]);
 
             $shiftId = $rosterShift ? $rosterShift->shift_id : $employee->emp_shift;
 
