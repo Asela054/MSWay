@@ -143,12 +143,24 @@ class AuthController extends Controller
             
         }
         
+        $role = DB::table('user_has_roles')
+                            ->where('user_id', $user->id)
+                            ->first();
+
+
+        $appconfig = DB::table('company_mobile_app_config')
+                            ->where('company_id', $employee->emp_company)
+                            ->where('role_id', $role->role_id)
+                            ->get();
+
+
 
         $accessToken = Auth::user()->createToken('authToken')->accessToken;
 
         $data = [
             'user' => Auth::user(),
             'employee_details' => $employee,
+            'app_Permissions' => $appconfig,
             'api_key' => $accessToken,
             'Valid_Device_status' => $isValidDevice
         ];
