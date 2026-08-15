@@ -128,6 +128,18 @@ Route::post('/attendancesyncAPI', ['uses' => '\App\Http\Controllers\AttendanceSy
 //Production API list
 Route::post('v1/GetproductionList_opma', ['uses' => '\App\Http\Controllers\Api\OPMA_APIProductionDashboardController@GetproductionList', 'as' => 'GetproductionList_opma']);
 
+//OT API list
+Route::post('v1/GetOTdetailList', ['uses' => '\App\Http\Controllers\Api\ApiOTApproveController@get_ot_details', 'as' => 'GetOTdetailList']);
+Route::post('v1/OTdetailApprove', ['uses' => '\App\Http\Controllers\Api\ApiOTApproveController@ot_approve_post', 'as' => 'OTdetailApprove']);
+
+//Late API list
+Route::post('v1/GetLateList', ['uses' => '\App\Http\Controllers\Api\ApiLateController@approved_late_list', 'as' => 'GetLateList']);
+Route::post('v1/LateAttendanceDelete', ['uses' => '\App\Http\Controllers\Api\ApiLateController@late_attendacne_delete', 'as' => 'LateAttendanceDelete']);
+
+// Common Records API list
+Route::post('v1/Getcompanylist', ['uses' => '\App\Http\Controllers\Api\APIEmployeeController@Getcompanylist', 'as' => 'Getcompanylist']);
+Route::post('v1/Getdepartmentlist', ['uses' => '\App\Http\Controllers\Api\APIEmployeeController@Getdepartmentlist', 'as' => 'Getdepartmentlist']);
+
 
 Route::get('/download-pdf/{pdfId}', function($pdfId) {
     $pdfData = session()->get($pdfId);

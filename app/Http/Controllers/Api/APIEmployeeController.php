@@ -123,4 +123,33 @@ class APIEmployeeController extends Controller
 
         return (new BaseController)->sendResponse($data, 'employees');
     }
+
+
+     public function Getcompanylist(Request $request)
+    {
+        $companies = DB::table('companies')
+        ->select('*')
+        ->get();
+
+        $data = array(
+            'companies' => $companies
+        );
+
+        return (new BaseController)->sendResponse($data, 'companies');
+    }
+
+     public function Getdepartmentlist(Request $request)
+    {
+        $id = Request('Companyid');
+        $departments = DB::table('departments')
+        ->select('*')
+        ->where('company_id', $id)
+        ->get();
+
+        $data = array(
+            'departments' => $departments
+        );
+
+        return (new BaseController)->sendResponse($data, 'departments');
+    }
 }
