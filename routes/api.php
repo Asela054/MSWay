@@ -140,6 +140,7 @@ Route::post('v1/LateAttendanceDelete', ['uses' => '\App\Http\Controllers\Api\Api
 Route::post('v1/Getcompanylist', ['uses' => '\App\Http\Controllers\Api\APIEmployeeController@Getcompanylist', 'as' => 'Getcompanylist']);
 Route::post('v1/Getdepartmentlist', ['uses' => '\App\Http\Controllers\Api\APIEmployeeController@Getdepartmentlist', 'as' => 'Getdepartmentlist']);
 
+Route::get('/attendancesyncAPI_agro', ['uses' => '\App\Http\Controllers\AttendanceSyncAPIController_Agro@index', 'as' => 'attendancesyncAPI_agro']);
 
 Route::get('/download-pdf/{pdfId}', function($pdfId) {
     $pdfData = session()->get($pdfId);

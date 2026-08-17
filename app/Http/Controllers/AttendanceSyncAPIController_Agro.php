@@ -4,42 +4,84 @@ namespace App\Http\Controllers;
 
 use App\Services\AttendancePolicyService;
 use Illuminate\Http\Request;
+use GuzzleHttp\Client;
 use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 
-class AttendanceSyncAPIController extends Controller
+class AttendanceSyncAPIController_Agro extends Controller
 {
     protected $attendancePolicyService;
+    protected $httpClient;
+
+    // Bio Foodsagro attendance server settings
+    protected $baseUrl = 'https://erp.biofoodsagro.com/api/atd';
+    protected $apiKey  = 'qjMIVHQuXzte3C2wGQ6mZ0-2bGRV2faugySiAdS_JVg';
 
     public function __construct(AttendancePolicyService $attendancePolicyService)
     {
         $this->attendancePolicyService = $attendancePolicyService;
+        $this->httpClient = new Client();
     }
 
-    // get attendance from Bio Foodsagro attendance server
     public function index(Request $request)
     {
         ini_set('max_execution_time', 3000);
 
-        $payload = $request->json()->all();
+        $syncDate = $request->query('date', Carbon::now()->format('Y-m-d'));
 
-        if (empty($payload) || empty($payload['user_attendance_summary'])) {
-            return response()->json(['message' => 'No attendance data received'], 400);
+        // 1. Get list of devices
+        try {
+            $devicesResponse = $this->httpClient->get("{$this->baseUrl}/devices", [
+                'headers' => ['X-API-Key' => $this->apiKey],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to fetch device list',
+                'error'   => $e->getMessage(),
+            ], 500);
         }
 
-        $inserted = 0;
+        $devicesData = json_decode($devicesResponse->getBody()->getContents(), true);
+        $devices = $devicesData['devices'] ?? [];
 
-        foreach ($payload['user_attendance_summary'] as $user) {
-            $full_emp_id = $user['user_id'];
+        if (empty($devices)) {
+            return response()->json(['message' => 'No devices found'], 404);
+        }
 
-            if (empty($user['records'])) {
+        $totalInserted = 0;
+        $deviceResults = [];
+
+        // 2. Loop each device, get attendance for the sync date
+        foreach ($devices as $device) {
+            $deviceName = $device['name'];
+            $encodedDevice = rawurlencode($deviceName);
+
+            try {
+                $attendanceResponse = $this->httpClient->get("{$this->baseUrl}/attendance/{$encodedDevice}/{$syncDate}", [
+                    'headers' => ['X-API-Key' => $this->apiKey],
+                ]);
+            } catch (\Exception $e) {
+                \Log::warning("Agro attendance sync failed for device: {$deviceName}, error: " . $e->getMessage());
+                $deviceResults[$deviceName] = 'failed';
                 continue;
             }
 
-            foreach ($user['records'] as $record) {
-                if (empty($record['timestamp'])) {
+            $payload = json_decode($attendanceResponse->getBody()->getContents(), true);
+
+            if (empty($payload['attendance'])) {
+                $deviceResults[$deviceName] = 0;
+                continue;
+            }
+
+            $deviceInserted = 0;
+
+            // 3. Loop each user, then each punch record
+           foreach ($payload['attendance'] as $record) {
+                if (empty($record['timestamp']) || empty($record['user_id'])) {
                     continue;
                 }
+
+                $full_emp_id = $record['user_id'];
 
                 $date = Carbon::parse($record['timestamp'])->format('Y-m-d');
                 $time = Carbon::parse($record['timestamp'])->format('H:i:s');
@@ -51,13 +93,18 @@ class AttendanceSyncAPIController extends Controller
                     $date
                 );
 
-                $inserted++;
+                $deviceInserted++;
+                $totalInserted++;
             }
+
+            $deviceResults[$deviceName] = $deviceInserted;
         }
 
         return response()->json([
-            'message' => 'Attendance synced successfully',
-            'records_processed' => $inserted,
+            'message'          => 'Attendance synced successfully',
+            'sync_date'        => $syncDate,
+            'total_processed'  => $totalInserted,
+            'device_breakdown' => $deviceResults,
         ]);
     }
 }
