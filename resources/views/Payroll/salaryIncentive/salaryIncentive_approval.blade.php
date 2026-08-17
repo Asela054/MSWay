@@ -11,7 +11,7 @@
             <div class="page-header-content py-3 px-2">
                 <h1 class="page-header-title ">
                     <div class="page-header-icon"><i class="fa-light fa-money-check-dollar-pen"></i></div>
-                    <span>Salary Advance Approval</span>
+                    <span>Salary Incentive Approval</span>
                 </h1>
             </div>
         </div>
@@ -50,9 +50,8 @@
                                     <th></th>
                                     <th>EMPLOYEE ID</th>
                                     <th>EMPLOYEE</th>
-                                    <th>REQUESTED AMOUNT</th>
                                     <th>PAID AMOUNT</th>
-                                    <th>DATE</th>
+                                    <th>MONTH</th>
                                     <th class="d-none">Employee auto id</th>
                                 </tr>
                             </thead>
@@ -97,17 +96,8 @@
                           </li>
                           <li class="mb-2">
                               <div class="col-md-12">
-                                  <label class="small font-weight-bolder text-dark"> From Date* </label>
-                                  <input type="date" id="from_date" name="from_date"
-                                      class="form-control form-control-sm" placeholder="yyyy-mm-dd"
-                                      value="{{date('Y-m-d') }}" required>
-                              </div>
-                          </li>
-                          <li class="mb-2">
-                              <div class="col-md-12">
-                                  <label class="small font-weight-bolder text-dark"> To Date*</label>
-                                  <input type="date" id="to_date" name="to_date" class="form-control form-control-sm"
-                                      placeholder="yyyy-mm-dd" value="{{date('Y-m-d') }}" required>
+                                  <label class="small font-weight-bold text-dark"> Month </label>
+                                  <input type="month" name="month" id="month_f" class="form-control form-control-sm" placeholder="yyyy-mm">
                               </div>
                           </li>
                           <li>
@@ -132,7 +122,7 @@
         <div class="modal-dialog modal-dialog-centered modal-md">
             <div class="modal-content">
                 <div class="modal-header p-2">
-                    <h5 class="modal-title" id="staticBackdropLabel">Approve Salary Advance Data </h5>
+                    <h5 class="modal-title" id="staticBackdropLabel">Approve Salary Incentive Data </h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -158,7 +148,7 @@
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Approve Salary Advance Data</h5>
+                        <h5 class="modal-title" id="exampleModalLabel">Approve Salary Incentive Data</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -168,12 +158,11 @@
                         <form class="form-horizontal" id="formApprove">
                             <div class="form-group mb-1">
                                 <div class="col-12">
-                                        <label class="small font-weight-bolder text-dark">Deduction Type</label>
+                                        <label class="small font-weight-bolder text-dark">Addition Type</label>
                                         <select name="remunitiontype" id="remunitiontype" class="form-control form-control-sm">
                                             <option value="">Select Remuneration</option>
-                                                @foreach ($remunerations as $remuneration){
+                                            @foreach ($remunerations as $remuneration)
                                                     <option value="{{$remuneration->id}}" >{{$remuneration->remuneration_name}}</option>
-                                                }  
                                                 @endforeach
                                         </select>
                                 </div>
@@ -259,7 +248,7 @@ $(document).ready(function(){
         }
     });
 
-    function load_dt(company, department, employee, from_date, to_date) {
+    function load_dt(company, department, employee, month) {
         $('#dataTable').DataTable({
         "destroy": true,
             "processing": true,
@@ -269,13 +258,13 @@ $(document).ready(function(){
             "buttons": [{
                     extend: 'csv',
                     className: 'btn btn-success btn-sm',
-                    title: 'Salary Advance Approve Information',
+                    title: 'Salary Incentive Approve Information',
                     text: '<i class="fas fa-file-csv mr-2"></i> CSV',
                 },
                 { 
                     extend: 'pdf', 
                     className: 'btn btn-danger btn-sm', 
-                    title: 'Salary Advance Approve Information', 
+                    title: 'Salary Incentive Approve Information', 
                     text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
                     orientation: 'landscape', 
                     pageSize: 'legal', 
@@ -285,7 +274,7 @@ $(document).ready(function(){
                 },
                 {
                     extend: 'print',
-                    title: 'Salary Advance Approve Information',
+                    title: 'Salary Incentive Approve Information',
                     className: 'btn btn-primary btn-sm',
                     text: '<i class="fas fa-print mr-2"></i> Print',
                     customize: function(win) {
@@ -299,15 +288,14 @@ $(document).ready(function(){
                 [1, "desc"]
             ],
             ajax: {
-                url:  "{{url('/salaryAdvanceApprovalgenerate')}}",
+                url:  "{{url('/salaryIncentiveApprovalgenerate')}}",
                 type: 'POST',
                 data: { 
                         _token: '{{ csrf_token() }}',
                     company: company,
                     department: department,
                     employee: employee, 
-                    from_date: from_date,
-                    to_date: to_date
+                    month: month
                 },
             },
             columns: [
@@ -326,9 +314,8 @@ $(document).ready(function(){
                 },
                 { data: 'emp_id', name: 'emp_id' },
                 { data: 'emp_name_with_initial', name: 'emp_name_with_initial' },
-                { data: 'request_amount', name: 'request_amount' },
                 { data: 'paid_amount', name: 'paid_amount' },
-                { data: 'date', name: 'date' },
+                { data: 'month', name: 'month' },
                 {
                     data: 'emp_auto_id',
                     name: 'emp_auto_id',
@@ -344,20 +331,9 @@ $(document).ready(function(){
         let company = $('#company_f').val();
         let department = $('#department_f').val();
         let employee = $('#employee_f').val();
-        let from_date = $('#from_date').val();
-        let to_date = $('#to_date').val();
+        let month = $('#month_f').val() || '';
 
-        if (!from_date || !to_date) {
-            alert('Please select both From and To dates');
-            return;
-        }
-        
-        if (from_date > to_date) {
-            alert('From date cannot be greater than To date');
-            return;
-        }
-
-        load_dt(company, department, employee, from_date, to_date);
+        load_dt(company, department, employee, month);
         closeOffcanvasSmoothly();
     });
 
@@ -366,7 +342,8 @@ $(document).ready(function(){
         company_f.val(null).trigger('change');
         department_f.val(null).trigger('change');
         employee_f.val(null).trigger('change');
-        
+        $('#month_f').val('');
+
         if ($.fn.DataTable.isDataTable('#dataTable')) {
             $('#dataTable').DataTable().destroy();
         }
@@ -408,8 +385,7 @@ $(document).ready(function(){
         e.preventDefault();
         var remunitiontype = $('#remunitiontype').val();
         var employee = $('#employee_f').val();
-        var from_date = $('#from_date').val();
-        var to_date = $('#to_date').val();
+        var month = $('#month').val();
 
         if(remunitiontype == ''){
             $('.message_modal').html('<div class="alert alert-warning">Please select Remuneration Type!</div>');
@@ -426,15 +402,14 @@ $(document).ready(function(){
         });
 
         $.ajax({
-            url: '{!! route("salaryAdvanceApprovalapprove") !!}',
+            url: '{!! route("salaryIncentiveApprovalapprove") !!}',
             type: 'POST',
             dataType: "json",
             data: {
                 dataarry: selectedRowIdsapprove,
                 remunitiontype: remunitiontype,
                 employee_f: employee,
-                from_date: from_date,
-                to_date: to_date
+                month: $('#month_f').val()
             },
             success: function (data) {
                 if (data.success) {

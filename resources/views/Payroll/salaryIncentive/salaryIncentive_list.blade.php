@@ -11,7 +11,7 @@
             <div class="page-header-content py-3 px-2">
                 <h1 class="page-header-title ">
                     <div class="page-header-icon"><i class="fa-light fa-money-check-dollar-pen"></i></div>
-                    <span>Salary Advances</span>
+                    <span>Salary Incentive</span>
                 </h1>
             </div>
         </div>
@@ -31,7 +31,7 @@
                         <div class="d-flex flex-wrap justify-content-end mb-2">
                             <div class="col-sm-12 col-md-auto mb-1 px-1">
                             <button type="button" class="btn btn-primary btn-sm px-2 w-100" name="create_record" id="create_record">
-                                <i class="fas fa-plus mr-2"></i>Salary Advances
+                                <i class="fas fa-plus mr-2"></i>Salary Incentive
                             </button>
                             </div>
                             <div class="col-sm-12 col-md-auto mb-1 px-1">
@@ -52,9 +52,7 @@
                                         <th>EMP ID</th>
                                         <th>EMP NAME</th>
                                         <th>DEPARTMENT</th>
-                                        <th>JOB CATEGORY</th>
-                                        <th>DATE</th>
-                                        <th>REQUESTED AMOUNT</th>
+                                        <th>MONTH</th>
                                         <th>PAID AMOUNT</th>
                                         <th class="text-right">Action</th>
                                         <th class="d-none">ID</th>
@@ -107,17 +105,8 @@
                           </li>
                           <li class="mb-2">
                               <div class="col-md-12">
-                                  <label class="small font-weight-bolder text-dark"> From Date* </label>
-                                  <input type="date" id="from_date" name="from_date"
-                                      class="form-control form-control-sm" placeholder="yyyy-mm-dd"
-                                      value="{{date('Y-m-d') }}">
-                              </div>
-                          </li>
-                          <li class="mb-2">
-                              <div class="col-md-12">
-                                  <label class="small font-weight-bolder text-dark"> To Date*</label>
-                                  <input type="date" id="to_date" name="to_date" class="form-control form-control-sm"
-                                      placeholder="yyyy-mm-dd" value="{{date('Y-m-d') }}">
+                                  <label class="small font-weight-bold text-dark"> Month </label>
+                                  <input type="month" name="month" id="month_f" class="form-control form-control-sm" placeholder="yyyy-mm">
                               </div>
                           </li>
                           <li>
@@ -142,7 +131,7 @@
             <div class="modal-dialog modal-dialog-centered modal-lg">
                 <div class="modal-content">
                     <div class="modal-header p-2">
-                        <h5 class="modal-title" id="staticBackdropLabel">Add Salary Advance</h5>
+                        <h5 class="modal-title" id="staticBackdropLabel">Add Salary Incentive</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -161,20 +150,16 @@
                                             </select>
                                         </div>
                                         <div class="col-md-6">
-                                            <label class="small font-weight-bolder text-dark">Date*</label>
-                                            <input type="date" name="date" id="date" class="form-control form-control-sm" required>
-                                            <span id="date_error" class="text-danger small"></span>
+                                            <label class="small font-weight-bolder text-dark">Month*</label>
+                                            <input type="month" name="month" id="month"  placeholder="yyyy-mm" class="form-control form-control-sm" required>
+                                            <span id="month_error" class="text-danger small"></span>
                                         </div>
                                     </div>
                                     
                                     <div class="form-row mb-2">
                                         <div class="col-md-6">
-                                            <label class="small font-weight-bold text-dark">Available Amount</label>
-                                            <input type="number" name="available_amount" id="available_amount" class="form-control form-control-sm" placeholder="Available Amount" step="0.01" readonly>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="small font-weight-bold text-dark">Request Amount*</label>
-                                            <input type="number" name="request_amount" id="request_amount" class="form-control form-control-sm" placeholder="Request Amount" step="0.01" required>
+                                            <label class="small font-weight-bold text-dark">Paid Amount*</label>
+                                            <input type="number" name="paid_amount" id="paid_amount" class="form-control form-control-sm" placeholder="Paid Amount" step="0.01" required>
                                         </div>
                                     </div>
                                     <div class="form-row mb-2">
@@ -201,7 +186,7 @@
             <div class="modal-dialog modal-dialog-centered modal-xl">
                 <div class="modal-content">
                     <div class="modal-header p-2">
-                        <h5 class="modal-title" id="staticBackdropLabel">Add Salary Advance - Department Wise</h5>
+                        <h5 class="modal-title" id="staticBackdropLabel">Add Salary Incentive - Department Wise</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -225,8 +210,8 @@
                                                 </select>
                                             </div>
                                         <div class="col-sm-12 col-md-3">
-                                            <label class="small font-weight-bolder">Date*</label>
-                                            <input type="date" name="allocation_date" id="allocation_date"
+                                            <label class="small font-weight-bolder">Month*</label>
+                                            <input type="month" name="allocation_month" id="allocation_month"
                                                 class="form-control form-control-sm" required />
                                         </div>
                                         <div class="col-sm-12 col-md-3">
@@ -245,8 +230,7 @@
                                                 </th>
                                                 <th>EMP ID</th>
                                                 <th>NAME</th>
-                                                <th>AVAILABLE AMOUNT</th>
-                                                <th>REQUEST AMOUNT</th>
+                                                <th>PAID AMOUNT</th>
                                                 <th>REMARK</th>
                                             </tr>
                                         </thead>
@@ -259,36 +243,6 @@
                                         <button type="button" name="dptaction_button" id="dptaction_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
                                     </div>
                                 </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal fade" id="paidformModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-            aria-labelledby="paidformModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-sm">
-                <div class="modal-content">
-                    <div class="modal-header p-2">
-                        <h5 class="modal-title" id="paidformModalLabel">Paid Details</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col">
-                                <div id="paidform_result"></div>
-                                <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">Paid Amount</label>
-                                    <input type="number" class="form-control form-control-sm" id="paid_amount" name="paid_amount">
-                                </div>
-                                <div class="form-group mt-3">
-                                    <button type="button" name="paid_button" id="paid_button" class="btn btn-primary btn-sm fa-pull-right px-4 paid_button">
-                                        <i class="fas fa-plus"></i>&nbsp;Paid
-                                    </button>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -450,63 +404,39 @@ $(document).ready(function () {
         }
     });
 
-    // Fetch available request_amount when employee is selected
-    $('#employee').on('change', function () {
-        var emp_id = $(this).val();
-        $('#available_amount').val('');
-        if (emp_id) {
-            $.ajax({
-                url: '{{ url("SalaryAdvance/available-amount") }}/' + emp_id,
-                type: 'GET',
-                success: function (data) {
-                    $('#available_amount').val(data.available_amount);
-                    $('#request_amount').attr('max', data.available_amount);
-                }
-            });
-        }
-    });
-
-    // Prevent request_amount from exceeding available request_amount on client side
-    $('#request_amount').on('input', function () {
-        var available = parseFloat($('#available_amount').val()) || 0;
-        var entered   = parseFloat($(this).val()) || 0;
-        if (available > 0 && entered > available) {
-            $(this).val(available);
-        }
-    });
-
-    // Fetch available request_amount when employee or date changes
-    function fetchAvailableAmount() {
+    // Auto-load existing paid_amount when employee + month both selected in formModal
+    function loadExistingIncentive() {
         var emp_id = $('#employee').val();
-        var date   = $('#date').val();
-        $('#available_amount').val('');
-        $('#request_amount').removeAttr('max');
-        $('#date_error').text('');
+        var month  = $('#month').val();
+        if (!emp_id || !month || $('#action').val() === 'Edit') return;
 
-        if (emp_id && date) {
-            $.ajax({
-                url: '{{ url("SalaryAdvance/available-amount") }}/' + emp_id,
-                type: 'GET',
-                data: { date: date },
-                success: function (data) {
-                    if (data.errors) {
-                        $('#available_amount').val(0);
-                        $('#request_amount').attr('max', 0);
-                        $('#date_error').text(data.errors);
-                    } else {
-                        $('#date_error').text('');
-                        $('#available_amount').val(data.available_amount);
-                        $('#request_amount').attr('max', data.available_amount);
-                    }
+        $.ajax({
+            url: '{{ route("salaryIncentive.byEmpMonth") }}',
+            type: 'GET',
+            data: { emp_id: emp_id, month: month },
+            dataType: 'json',
+            success: function (data) {
+                if (data.result) {
+                    $('#paid_amount').val(data.result.paid_amount);
+                    $('#remark').val(data.result.remark);
+                    $('#hidden_id').val(data.result.id);
+                    $('#action').val('Edit');
+                    $('#action_button').html('<i class="fas fa-edit"></i>&nbsp;Update');
+                } else {
+                    $('#paid_amount').val('');
+                    $('#remark').val('');
+                    $('#hidden_id').val('');
+                    $('#action').val('Add');
+                    $('#action_button').html('<i class="fas fa-plus"></i>&nbsp;Add');
                 }
-            });
-        }
+            }
+        });
     }
 
-    $('#employee').on('change', fetchAvailableAmount);
-    $('#date').on('change',     fetchAvailableAmount);
+    $('#employee').on('change', function() { loadExistingIncentive(); });
+    $('#month').on('change', function() { loadExistingIncentive(); });
 
-    function load_dt(company, department, employee, location, from_date, to_date) {
+    function load_dt(company, department, employee, location, month) {
         $('#dataTable').DataTable({
             "destroy": true,
             "processing": true,
@@ -516,13 +446,13 @@ $(document).ready(function () {
             "buttons": [{
                     extend: 'csv',
                     className: 'btn btn-success btn-sm',
-                    title: 'Salary Advance Information',
+                    title: 'Salary Incentive Information',
                     text: '<i class="fas fa-file-csv mr-2"></i> CSV',
                 },
                 { 
                     extend: 'pdf', 
                     className: 'btn btn-danger btn-sm', 
-                    title: 'Salary Advance Information', 
+                    title: 'Salary Incentive Information', 
                     text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
                     orientation: 'portrait', 
                     pageSize: 'legal', 
@@ -532,7 +462,7 @@ $(document).ready(function () {
                 },
                 {
                     extend: 'print',
-                    title: 'Salary Advance Information',
+                    title: 'Salary Incentive Information',
                     className: 'btn btn-primary btn-sm',
                     text: '<i class="fas fa-print mr-2"></i> Print',
                     customize: function(win) {
@@ -546,24 +476,21 @@ $(document).ready(function () {
                 [0, "desc"]
             ],
             ajax: {
-                url: scripturl + '/salary_advance_list.php',
+                url: scripturl + '/salary_incentive_list.php',
                 type: "POST",
                 data: {
                     company: company,
                     department: department,
                     employee: employee,
                     location: location,
-                    from_date: from_date,
-                    to_date: to_date
+                    month: month
                 },
             },
             columns: [
                 { data: 'emp_id', name: 'emp_id' },
                 { data: 'employee_display', name: 'employee_display' },
                 { data: 'department_name', name: 'department_name' },
-                { data: 'category', name: 'category' },
-                { data: 'date', name: 'date' },
-                { data: 'request_amount', name: 'request_amount' },
+                { data: 'month', name: 'month' },
                 { data: 'paid_amount', name: 'paid_amount' },
                 {
                     data: 'id',
@@ -579,9 +506,6 @@ $(document).ready(function () {
                         if (approve_status !== '1') {
                             buttons += '<button style="margin:1px;" data-toggle="tooltip" data-placement="bottom" title="Edit" class="btn btn-primary btn-sm edit" id="' + row.id + '"><i class="fas fa-pencil-alt"></i></button>';
                         }
-                        if (paid_status === '0' || paid_status === '1' && approve_status !== '1') {
-                            buttons += '<button style="margin:1px;" data-toggle="tooltip" data-placement="bottom" title="Paid Details" class="btn btn-success btn-sm paid" id="' + row.id + '"><i class="fas fa-dollar-sign"></i></button>';
-                        }
                         if (paid_status === '0' || paid_status === '1') {
                             buttons += '<button style="margin:1px;" data-toggle="tooltip" data-placement="bottom" title="Delete" class="btn btn-danger btn-sm delete" id="' + row.id + '"><i class="far fa-trash-alt"></i></button>';
                         }
@@ -595,7 +519,7 @@ $(document).ready(function () {
         });
     }
 
-    load_dt('', '', '', '', '', '');
+    load_dt('', '', '', '', '');
 
 
     $('#formFilter').on('submit', function(e) {
@@ -604,9 +528,8 @@ $(document).ready(function () {
         let department = department_f.val() || '';
         let employee = employee_f.val() || '';
         let location = location_f.val() || '';
-        let from_date = $('#from_date').val();
-        let to_date = $('#to_date').val();
-        load_dt(company, department, employee, location, from_date, to_date);
+        let month = $('#month_f').val() || '';
+        load_dt(company, department, employee, location, month);
         closeOffcanvasSmoothly();
     });
 
@@ -616,41 +539,30 @@ $(document).ready(function () {
         department_f.val(null).trigger('change');
         employee_f.val(null).trigger('change');
         location_f.val(null).trigger('change');
-        load_dt('', '', '', '', '', '');
+        $('#month_f').val('');
+        load_dt('', '', '', '', '');
     });
 
     $('#create_record').click(function(){
-        $('.modal-title').text('Add Salary Advance Detail');
+        $('.modal-title').text('Add Salary Incentive Detail');
         $('#action_button').html('<i class="fas fa-plus"></i>&nbsp;Add');
         $('#action').val('Add');
         $('#form_result').html('');
         $('#formTitle')[0].reset();
         $('#employee').val(null).trigger('change');  
-        $('#available_amount').val('');              
-        $('#request_amount').removeAttr('max');             
+        $('#paid_amount').removeAttr('max');             
         $('#formModal').modal('show');
     });
  
     $('#formTitle').on('submit', function(event){
         event.preventDefault();
 
-        // Block submission if attendance validation failed
-        if ($('#date_error').text().trim() !== '') {
-            return false;
-        }
-
-        // Block submission if available request_amount is 0 or empty
-        var available = parseFloat($('#available_amount').val()) || 0;
-        if (available <= 0) {
-            return false;
-        }
-
         var action_url = '';
         if ($('#action').val() == 'Add') {
-            action_url = "{{ route('addSalaryAdvance') }}";
+            action_url = "{{ route('addSalaryIncentive') }}";
         }
         if ($('#action').val() == 'Edit') {
-            action_url = "{{ route('salaryAdvance.update') }}";
+            action_url = "{{ route('salaryIncentive.update') }}";
         }
 
         $.ajax({
@@ -692,46 +604,24 @@ $(document).ready(function () {
         if (r == true) {
             var id = $(this).attr('id');
             $('#form_result').html('');
-            $('#date_error').text('');
 
             $.ajax({
-                url: "salaryAdvance/" + id + "/edit",
+                url: "salaryIncentive/" + id + "/edit",
                 dataType: "json",
                 success: function (data) {
-                    // Set date first
-                    $('#date').val(data.result.date);
+                    $('#month').val(data.result.month);
 
-                    // Set employee option then trigger change with date already set
                     if ($('#employee').find('option[value="' + data.result.employee_id + '"]').length === 0) {
                         $('#employee').append('<option value="' + data.result.employee_id + '" selected>' + data.result.employee_name + '</option>');
                     }
                     $('#employee').val(data.result.employee_id).trigger('change');
 
+                    $('#paid_amount').val(data.result.paid_amount);
                     $('#remark').val(data.result.remark);
                     $('#hidden_id').val(id);
-                    $('.modal-title').text('Edit Salary Advance Detail');
+                    $('.modal-title').text('Edit Salary Incentive Detail');
                     $('#action_button').html('<i class="fas fa-edit"></i>&nbsp;Edit');
                     $('#action').val('Edit');
-
-                    // Manually fetch available request_amount with both emp_id and date
-                    $.ajax({
-                        url: '{{ url("SalaryAdvance/available-amount") }}/' + data.result.employee_id,
-                        type: 'GET',
-                        data: { date: data.result.date },
-                        success: function (res) {
-                            if (res.errors) {
-                                $('#available_amount').val(0);
-                                $('#request_amount').attr('max', 0);
-                                $('#date_error').text(res.errors);
-                            } else {
-                                $('#date_error').text('');
-                                $('#available_amount').val(res.available_amount);
-                                $('#request_amount').attr('max', res.available_amount);
-                            }
-                            // Set request_amount after available request_amount is ready
-                            $('#request_amount').val(data.result.request_amount);
-                        }
-                    });
 
                     $('#formModal').modal('show');
                 }
@@ -746,7 +636,7 @@ $(document).ready(function () {
         if (r == true) {
             user_id = $(this).attr('id');
             $.ajax({
-                url: "{{ url('salaryAdvance/destroy/') }}/" + user_id,
+                url: "{{ url('salaryIncentive/destroy/') }}/" + user_id,
                 beforeSend: function () {
                     $('#ok_button').text('Deleting...');
                 },
@@ -767,93 +657,6 @@ $(document).ready(function () {
 
     });
 
-    // flatpickr("#date", {
-    //     allowInput: true,
-    //     enable: [
-    //         function(date) {
-    //             return date.getDate() >= 25;
-    //         }
-    //     ]
-    // });
-
-    // pay details 
-    $(document).on('click', '.paid', function () {
-        user_id = $(this).attr('id');
-
-        $('#paidform_result').html('');
-        $('#paidformModal').modal('show');
-        $('#paid_amount').val(''); 
-
-        $.ajax({
-            url: '{!! route("SalaryAdvance/get-paid-amount") !!}',
-            type: 'GET',
-            data: { id: user_id },
-            success: function (response) {
-                if (response.paid_amount !== undefined && response.paid_amount !== null) {
-                    $('#paid_amount').val(response.paid_amount);
-                } else {
-                    alert('Failed to fetch the paid amount.');
-                }
-            },
-            error: function () {
-                alert('An error occurred while fetching the paid amount.');
-            }
-        });
-    });
-    
-    $(document).on('click', '.paid_button', async function () {
-        var checkpaidamount = $('#paid_amount').val();
-        if (checkpaidamount == '') {
-            alert('Please Enter Amount');
-        } else {
-            var r = await Otherconfirmation("You want to paid this employee? ");
-            if (r == true) {
-                var paid_amount = $('#paid_amount').val();
-
-                $.ajaxSetup({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    }
-                });
-
-                $.ajax({
-                    url: '{!! route("SalaryAdvance/paid-amount") !!}',
-                    type: 'POST',
-                    dataType: "json",
-                    data: {
-                        recordID: user_id,
-                        paid_amount: paid_amount,
-                    },
-                    success: function (data) {
-                        if (data.success) {
-                            const actionObj = {
-                                icon: 'fas fa-check-circle',
-                                title: '',
-                                message: data.success,
-                                url: '',
-                                target: '_blank',
-                                type: 'success'
-                            };
-                            const actionJSON = JSON.stringify(actionObj, null, 2);
-                            actionreload(actionJSON);
-                            $('#paidformModal').modal('hide');
-                        } else if (data.errors) {
-                            var html = '<div class="alert alert-danger">';
-                            for (var count = 0; count < data.errors.length; count++) {
-                                html += '<p>' + data.errors[count] + '</p>';
-                            }
-                            html += '</div>';
-                            $('#paidform_result').html(html);
-                        }
-                    },
-                    error: function (xhr, status, error) {
-                        console.log('Error:', error);
-                    }
-                });
-            }
-        }
-    });
-
     // Department wise employee list
     $('#create_record_dept_wise').click(function () {
         $('#dptemplistbody').empty();
@@ -861,7 +664,7 @@ $(document).ready(function () {
     });
 
     $('#search_button').click(function () {
-        var allocation_date = $('#allocation_date').val();
+        var allocation_month = $('#allocation_month').val();
         var department      = $('#department_dept_wise').val();
         var company         = $('#company_dept_wise').val();
 
@@ -869,8 +672,8 @@ $(document).ready(function () {
             Swal.fire({ icon: 'warning', title: 'Please select Company and Department', timer: 2000, showConfirmButton: false });
             return;
         }
-        if (!allocation_date) {
-            Swal.fire({ icon: 'warning', title: 'Please select a Date', timer: 2000, showConfirmButton: false });
+        if (!allocation_month) {
+            Swal.fire({ icon: 'warning', title: 'Please select a Month', timer: 2000, showConfirmButton: false });
             return;
         }
 
@@ -881,12 +684,12 @@ $(document).ready(function () {
         $.ajax({
             method: 'POST',
             dataType: 'json',
-            url: '{!! route("salary_advance_dept_allocation_list") !!}',
+            url: '{!! route("salary_incentive_dept_allocation_list") !!}',
             data: {
                 _token: '{{ csrf_token() }}',
                 company: company,
                 department: department,
-                allocation_date: allocation_date,
+                allocation_month: allocation_month,
             },
             success: function (data) {
                 if (data.error) {
@@ -898,18 +701,23 @@ $(document).ready(function () {
                 var html = '';
 
                 if (employees.length === 0) {
-                    html = '<tr><td colspan="6" class="text-center text-muted">No employees found for the selected department.</td></tr>';
+                    html = '<tr><td colspan="5" class="text-center text-muted">No employees found for the selected department.</td></tr>';
                 } else {
                     $.each(employees, function (i, emp) {
+                        var hasRecord  = emp.has_record;
+                        var paidAmt    = emp.paid_amount || '';
+                        var remark     = emp.remark || '';
+                        var checked    = hasRecord ? 'checked' : '';
+                        var disabled   = hasRecord ? '' : 'disabled';
+
                         html += '<tr data-emp-id="' + emp.emp_id + '">';
                         html += '  <td class="text-center">';
-                        html += '    <input type="checkbox" class="dpt-emp-chk" data-emp-id="' + emp.emp_id + '">';
+                        html += '    <input type="checkbox" class="dpt-emp-chk" data-emp-id="' + emp.emp_id + '" ' + checked + '>';
                         html += '  </td>';
                         html += '  <td>' + emp.emp_id + '</td>';
                         html += '  <td>' + emp.emp_name_with_initial + '</td>';
-                        html += '  <td class="avail-amt text-right" data-value="">—</td>';
-                        html += '  <td><input type="number" class="form-control form-control-sm dpt-request-amt" step="0.01" min="0" placeholder="Request Amount" disabled></td>';
-                        html += '  <td><input type="text"   class="form-control form-control-sm dpt-remark" placeholder="Remark" disabled></td>';
+                        html += '  <td><input type="number" class="form-control form-control-sm dpt-paid-amt" step="0.01" min="0" placeholder="Paid Amount" value="' + paidAmt + '" ' + disabled + '></td>';
+                        html += '  <td><input type="text" class="form-control form-control-sm dpt-remark" placeholder="Remark" value="' + remark + '" ' + disabled + '></td>';
                         html += '</tr>';
                     });
                 }
@@ -927,109 +735,33 @@ $(document).ready(function () {
 
     $('#check_all_dpt').on('change', function () {
         var isChecked = $(this).is(':checked');
-
-        if (!isChecked) {
-            // Uncheck all rows and disable their inputs
-            $('#dptemplistbody .dpt-emp-chk').each(function () {
-                var $chk = $(this);
-                var $row = $chk.closest('tr');
-                $chk.prop('checked', false);
-                $row.find('.dpt-request-amt').prop('disabled', true).val('');
-                $row.find('.dpt-remark').prop('disabled', true).val('');
-            });
-        } else {
-            // Check each row: if available amount already loaded, enable directly;
-            // otherwise trigger the individual change event to fetch it
-            $('#dptemplistbody .dpt-emp-chk').each(function () {
-                var $chk  = $(this);
-                var $row  = $chk.closest('tr');
-                var avail = parseFloat($row.find('.avail-amt').data('value')) || 0;
-
-                if (avail > 0) {
-                    // Available amount already fetched — just check and enable
-                    $chk.prop('checked', true);
-                    $row.find('.dpt-request-amt').prop('disabled', false).attr('max', avail);
-                    $row.find('.dpt-remark').prop('disabled', false);
-                } else {
-                    // Trigger individual checkbox change to fetch available amount
-                    $chk.prop('checked', true).trigger('change');
-                }
-            });
-        }
+        $('#dptemplistbody .dpt-emp-chk').each(function () {
+            var $chk = $(this);
+            var $row = $chk.closest('tr');
+            $chk.prop('checked', isChecked);
+            $row.find('.dpt-paid-amt, .dpt-remark').prop('disabled', !isChecked);
+            if (!isChecked) {
+                $row.find('.dpt-paid-amt').val('');
+                $row.find('.dpt-remark').val('');
+            }
+        });
     });
 
     $(document).on('change', '.dpt-emp-chk', function () {
-        var $chk     = $(this);
-        var $row     = $chk.closest('tr');
-        var emp_id   = $chk.data('emp-id');
-        var $avail   = $row.find('.avail-amt');
-        var $reqAmt  = $row.find('.dpt-request-amt');
-        var $remark  = $row.find('.dpt-remark');
-        var alloc_date = $('#allocation_date').val();
+        var $chk   = $(this);
+        var $row   = $chk.closest('tr');
+        var $paid  = $row.find('.dpt-paid-amt');
+        var $rem   = $row.find('.dpt-remark');
 
         if ($chk.is(':checked')) {
-            // If already loaded, just re-enable inputs
-            var existingVal = parseFloat($avail.data('value')) || 0;
-            if (existingVal > 0) {
-                $reqAmt.prop('disabled', false).attr('max', existingVal);
-                $remark.prop('disabled', false);
-                return;
-            }
-
-            // Fetch available amount
-            $chk.prop('disabled', true);
-            $avail.html('<i class="fas fa-circle-notch fa-spin"></i>');
-
-            $.ajax({
-                url: '{{ url("SalaryAdvance/available-amount") }}/' + emp_id,
-                type: 'GET',
-                data: { date: alloc_date },
-                success: function (res) {
-                    if (res.errors) {
-                        // Attendance / validation failed
-                        $avail.html('<span class="text-danger" title="' + res.errors + '">0.00 <i class="fas fa-exclamation-triangle"></i></span>');
-                        $avail.data('value', 0);
-                        $reqAmt.prop('disabled', true).val('');
-                        $remark.prop('disabled', true).val('');
-                        $chk.prop('checked', false);
-                        Swal.fire({
-                            icon: 'warning',
-                            title: 'Attendance check failed',
-                            text: res.errors,
-                            confirmButtonText: 'OK'
-                        });
-                    } else {
-                        var avail = parseFloat(res.available_amount) || 0;
-                        $avail.text(avail.toFixed(2));
-                        $avail.data('value', avail);
-                        $reqAmt.prop('disabled', false).attr('max', avail).val('');
-                        $remark.prop('disabled', false);
-                    }
-                },
-                error: function () {
-                    $avail.html('<span class="text-danger">Error</span>');
-                    $chk.prop('checked', false);
-                },
-                complete: function () {
-                    $chk.prop('disabled', false);
-                }
-            });
-
+            $paid.prop('disabled', false);
+            $rem.prop('disabled', false);
         } else {
-            // Unchecked — disable inputs but keep available amount cell
-            $reqAmt.prop('disabled', true).val('');
-            $remark.prop('disabled', true).val('');
+            $paid.prop('disabled', true).val('');
+            $rem.prop('disabled', true).val('');
         }
     });
 
-    $(document).on('input', '.dpt-request-amt', function () {
-        var $row  = $(this).closest('tr');
-        var avail = parseFloat($row.find('.avail-amt').data('value')) || 0;
-        var val   = parseFloat($(this).val()) || 0;
-        if (avail > 0 && val > avail) {
-            $(this).val(avail);
-        }
-    });
 
     $('#dptaction_button').click(function () {
         var $btn = $(this);
@@ -1045,29 +777,23 @@ $(document).ready(function () {
 
         var jsonObj        = [];
         var validationFail = [];
-        var allocation_date = $('#allocation_date').val();
+        var allocation_month = $('#allocation_month').val();
 
         // Collect ONLY checked rows
         $('#dptemplistbody .dpt-emp-chk:checked').each(function () {
             var $row           = $(this).closest('tr');
             var emp_id         = $row.data('emp-id');
-            var available_amount = parseFloat($row.find('.avail-amt').data('value')) || 0;
-            var request_amount   = parseFloat($row.find('.dpt-request-amt').val()) || 0;
+            var paid_amount   = parseFloat($row.find('.dpt-paid-amt').val()) || 0;
             var remark           = $row.find('.dpt-remark').val() || '';
 
-            if (request_amount <= 0) {
-                validationFail.push('Employee ' + emp_id + ': Please enter a request amount.');
+            if (paid_amount <= 0) {
+                validationFail.push('Employee ' + emp_id + ': Please enter a paid amount.');
                 return; // continue each
-            }
-            if (request_amount > available_amount) {
-                validationFail.push('Employee ' + emp_id + ': Request amount exceeds available amount of ' + available_amount + '.');
-                return;
             }
 
             jsonObj.push({
                 emp_id:           emp_id,
-                request_amount:   request_amount,
-                available_amount: available_amount,
+                paid_amount:      paid_amount,
                 remark:           remark
             });
         });
@@ -1093,9 +819,9 @@ $(document).ready(function () {
                 _token: '{{ csrf_token() }}',
                 tableData: jsonObj,
                 department: department,
-                allocation_date: allocation_date,
+                allocation_month: allocation_month,
             },
-            url: '{!! route("salary_advance_dept_allocation_insert") !!}',
+            url: '{!! route("salary_incentive_dept_allocation_insert") !!}',
             success: function (data) {
                 if (data.errors) {
                     const actionObj = { icon: 'fas fa-warning', title: '', message: data.errors, url: '', target: '_blank', type: 'danger' };
@@ -1121,7 +847,5 @@ $(document).ready(function () {
 
 });
 </script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
 @endsection

@@ -9,24 +9,24 @@ use Auth;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
-class SalaryAdvanceApprovalController extends Controller
+class SalaryIncentiveApprovalController extends Controller
 {
     public function index()
     {
         $user = Auth::user();
-        $permission = $user->can('salary-advance-approval-list');
+        $permission = $user->can('salary-incentive-approval-list');
         if (!$permission) {
             return response()->json(['error' => 'UnAuthorized'], 401);
         }
 
-        $remunerations=DB::table('remunerations')->select('*')->where('remuneration_type', 'Deduction')->get();
-        return view('Payroll.salaryAdvance.salaryAdvance_approval', compact('remunerations'));
+        $remunerations=DB::table('remunerations')->select('*')->where('remuneration_type', 'Addition')->get();
+        return view('Payroll.salaryIncentive.salaryIncentive_approval', compact('remunerations'));
     }
 
-    public function generatesalaryadvance(Request $request)
+    public function generatesalaryincentive(Request $request)
     {
         $user = Auth::user();
-        $permission = $user->can('salary-advance-approval-create');
+        $permission = $user->can('salary-incentive-approval-create');
 
         if(!$permission){
             return response()->json(['error' => 'UnAuthorized'], 401);
@@ -35,8 +35,12 @@ class SalaryAdvanceApprovalController extends Controller
         $company    = $request->get('company');
         $department = $request->get('department');
         $employee   = $request->get('employee');
-        $from_date  = $request->get('from_date');
-        $to_date    = $request->get('to_date');
+        $month      = $request->get('month');
+
+        // Convert yyyy-mm to first-of-month for DB comparison
+        if ($month) {
+            $month = Carbon::parse($month)->startOfMonth()->toDateString();
+        }
 
         $query = DB::table('employees as employees')
             ->select(
@@ -60,14 +64,14 @@ class SalaryAdvanceApprovalController extends Controller
             $query->where('employees.emp_department', $department);
         }
 
-        
-        $query->whereExists(function ($sub) use ($from_date, $to_date) {
+        $query->whereExists(function ($sub) use ($month) {
             $sub->select(DB::raw(1))
-                ->from('salary_advances')
-                ->whereColumn('salary_advances.emp_id', 'employees.emp_id')
-                ->whereBetween('salary_advances.date', [$from_date, $to_date])
-                ->where('salary_advances.paid_status', 1)
-                ->where('salary_advances.status', '!=', 3); 
+                ->from('salary_incentives')
+                ->whereColumn('salary_incentives.emp_id', 'employees.emp_id')
+                ->where('salary_incentives.status', '!=', 3);
+            if ($month) {
+                $sub->where('salary_incentives.month', $month);
+            }
         });
 
         $query->groupBy(
@@ -84,27 +88,28 @@ class SalaryAdvanceApprovalController extends Controller
 
         foreach ($results as $record) {
 
-            $allocations = DB::table('salary_advances')
-                ->whereBetween('date', [$from_date, $to_date])
+            $incentives = DB::table('salary_incentives')
                 ->where('emp_id', $record->emp_id)
-                ->where('paid_status', 1)
-                ->where('status', '!=', 3)
-                ->get();
+                ->where('status', '!=', 3);
 
-            $totalCount    = $allocations->count();
-            $approvedCount = $allocations->where('approve_status', 1)->count();
-            $request_amount = $allocations->sum('request_amount'); 
-            $paid_amount    = $allocations->sum('paid_amount');
-            $date           = $allocations->max('date');
+            if ($month) {
+                $incentives->where('month', $month);
+            }
+
+            $incentives = $incentives->get();
+
+            $totalCount    = $incentives->count();
+            $approvedCount = $incentives->where('approve_status', 1)->count();
+            $paid_amount   = $incentives->sum('paid_amount');
+            $recordMonth   = $incentives->first() ? $incentives->first()->month : null;
 
             $data[] = [
                 'emp_auto_id'           => $record->emp_auto_id,
                 'emp_id'                => $record->emp_id,
                 'emp_name_with_initial' => $record->emp_name_with_initial,
                 'department_name'       => $record->department_name,
-                'request_amount'        => $request_amount,
                 'paid_amount'           => $paid_amount,
-                'date'                  => $date,
+                'month'                 => $recordMonth ? Carbon::parse($recordMonth)->format('Y-m') : '',
                 'is_approved'           => ($totalCount > 0 && $approvedCount == $totalCount) ? 1 : 0,
             ];
         }
@@ -116,18 +121,21 @@ class SalaryAdvanceApprovalController extends Controller
         ]);
     }
 
-
-    public function approvesalaryadvance(Request $request)
+    public function approvesalaryincentive(Request $request)
     {
-        $permission = \Auth::user()->can('salary-advance-approval-create'); 
+        $permission = \Auth::user()->can('salary-incentive-approval-create'); 
         if (!$permission) {
             abort(403);
         }
 
         $dataarry       = $request->input('dataarry');
         $remunitiontype = $request->input('remunitiontype');
-        $from_date      = $request->input('from_date');
-        $to_date        = $request->input('to_date');
+        $month          = $request->input('month');
+
+        // Convert yyyy-mm to first-of-month
+        if ($month) {
+            $month = Carbon::parse($month)->startOfMonth()->toDateString();
+        }
 
         $current_date_time = Carbon::now()->toDateTimeString();
         $errors = [];
@@ -139,11 +147,10 @@ class SalaryAdvanceApprovalController extends Controller
             $advance_payment = $row['paid_amount']; 
             $autoid         = $row['emp_auto_id'];
 
-            DB::table('salary_advances')
-                ->where('emp_id', $empid)          
-                ->where('paid_status', 1) 
-                ->where('status', '!=', 3)          
-                ->whereBetween('date', [$from_date, $to_date])
+            DB::table('salary_incentives')
+                ->where('emp_id', $empid)
+                ->where('status', '!=', 3)
+                ->where('month', $month)
                 ->update(['approve_status' => 1, 'approve_by' => Auth::id(), 'updated_by' => Auth::id(), 'updated_at' => $current_date_time]);
 
             $profiles = DB::table('payroll_profiles')
