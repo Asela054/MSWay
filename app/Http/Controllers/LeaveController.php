@@ -670,6 +670,11 @@ class LeaveController extends Controller
 
         Leave::whereId($request->id)->update($form_data);
 
+         $leaves = DB::table('leaves')
+        ->where('id', $request->id)
+        ->get();
+
+
         if ($request->status == 'Rejected') {
 
             $leaves = DB::table('leaves')
@@ -688,6 +693,12 @@ class LeaveController extends Controller
             return response()->json(['success' => 'Leave Rejected']);
 
         } else {
+             // Only send "Approved" SMS on final approval level
+            if ($applevel != 1) {
+                $this->sendLeaveStatusSms($leaves[0], 'Approved');
+            }
+
+
             return response()->json(['success' => 'Leave  Approved']);
         }
 
@@ -845,4 +856,40 @@ class LeaveController extends Controller
             'working_days' => number_format($workingDays, 2),
         ]);
     }
+
+    /**
+     * Send leave status SMS to the employee
+    */
+
+    private function sendLeaveStatusSms($leave, $status)
+    {
+        $employee = DB::table('employees')
+            ->where('id', $leave->emp_id)
+            ->first();
+
+        if (!$employee) {
+            return;
+        }
+        
+        $mobile = $employee->emp_mobile;
+
+        if (!$mobile) {
+            return;
+        }
+
+        // Clean mobile number to 9-digit format required by eSMS (e.g. 714551682)
+        $mobile = preg_replace('/[^0-9]/', '', $mobile);
+        if (strlen($mobile) == 10 && $mobile[0] == '0') {
+            $mobile = substr($mobile, 1);
+        } elseif (strlen($mobile) == 11 && substr($mobile, 0, 2) == '94') {
+            $mobile = substr($mobile, 2);
+        }
+
+        $message = "Dear " . $employee->calling_name . ", your leave request ("
+            . $leave->leave_from . " to " . $leave->leave_to . ") has been " . $status . ".";
+
+        $smsService = new \App\Services\Opma_Sms_policyService();
+        $smsService->sendSms($mobile, $message);
+    }
+
 }
