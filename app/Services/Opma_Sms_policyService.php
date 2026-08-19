@@ -2,17 +2,17 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Http;
+use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class Opma_Sms_policyService
 {
-    protected string $username;
-    protected string $password;
-    protected string $sourceAddress;
-    protected string $loginUrl = 'https://e-sms.dialog.lk/api/v2/user/login';
-    protected string $smsUrl   = 'https://e-sms.dialog.lk/api/v2/sms';
+    protected $username;
+    protected $password;
+    protected $sourceAddress;
+    protected $loginUrl = 'https://e-sms.dialog.lk/api/v2/user/login';
+    protected $smsUrl   = 'https://e-sms.dialog.lk/api/v2/sms';
 
     public function __construct()
     {
@@ -26,9 +26,9 @@ class Opma_Sms_policyService
      *
      * @param string $recipientNumber 9-digit mobile number (e.g. 714551682)
      * @param string $message         SMS content
-     * @return array                  ['success' => bool, 'message' => string, 'data' => array|null]
+     * @return array
      */
-    public function sendSms(string $recipientNumber, string $message): array
+    public function sendSms($recipientNumber, $message)
     {
         $token = $this->getAuthToken();
 
@@ -40,22 +40,9 @@ class Opma_Sms_policyService
             ];
         }
 
-        $transactionId = time() . rand(100, 999); // unique per request
+        $transactionId = time() . rand(100, 999);
 
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $token,
-            'Content-Type'  => 'application/json',
-        ])->post($this->smsUrl, [
-            'msisdn' => [
-                ['mobile' => $recipientNumber],
-            ],
-            'sourceAddress'  => $this->sourceAddress,
-            'message'        => $message,
-            'transaction_id' => (int) $transactionId,
-            'payment_method' => 0,
-        ]);
-
-        $result = $response->json();
+        $result = $this->postSms($token, $recipientNumber, $message, $transactionId);
 
         // If token expired mid-flight, refresh once and retry
         if (($result['errCode'] ?? null) == 100) {
@@ -70,20 +57,7 @@ class Opma_Sms_policyService
                 ];
             }
 
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $token,
-                'Content-Type'  => 'application/json',
-            ])->post($this->smsUrl, [
-                'msisdn' => [
-                    ['mobile' => $recipientNumber],
-                ],
-                'sourceAddress'  => $this->sourceAddress,
-                'message'        => $message,
-                'transaction_id' => (int) ($transactionId + 1),
-                'payment_method' => 0,
-            ]);
-
-            $result = $response->json();
+            $result = $this->postSms($token, $recipientNumber, $message, $transactionId + 1);
         }
 
         if (($result['status'] ?? null) === 'success') {
@@ -104,26 +78,73 @@ class Opma_Sms_policyService
     }
 
     /**
-     * Get a cached auth token, or fetch a new one if missing/expired
+     * Make the actual SMS POST request
      */
-    protected function getAuthToken(): ?string
+    protected function postSms($token, $recipientNumber, $message, $transactionId)
     {
-        return Cache::remember('esms_auth_token', now()->addHours(11), function () {
-            $response = Http::withHeaders([
-                'Content-Type' => 'application/json',
-            ])->post($this->loginUrl, [
-                'username' => $this->username,
-                'password' => $this->password,
+        $client = new Client();
+
+        try {
+            $response = $client->post($this->smsUrl, [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $token,
+                    'Content-Type'  => 'application/json',
+                ],
+                'json' => [
+                    'msisdn' => [
+                        ['mobile' => $recipientNumber],
+                    ],
+                    'sourceAddress'  => $this->sourceAddress,
+                    'message'        => $message,
+                    'transaction_id' => (int) $transactionId,
+                    'payment_method' => 0,
+                ],
             ]);
 
-            $result = $response->json();
+            return json_decode($response->getBody()->getContents(), true);
 
-            if (($result['status'] ?? null) === 'success' && !empty($result['token'])) {
-                return $result['token'];
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
+            if ($e->hasResponse()) {
+                return json_decode($e->getResponse()->getBody()->getContents(), true);
             }
 
-            Log::error('eSMS login failed', $result ?? []);
+            Log::error('eSMS request exception', ['error' => $e->getMessage()]);
             return null;
+        }
+    }
+
+    /**
+     * Get a cached auth token, or fetch a new one if missing/expired
+     */
+    protected function getAuthToken()
+    {
+        return Cache::remember('esms_auth_token', 660, function () {
+            $client = new Client();
+
+            try {
+                $response = $client->post($this->loginUrl, [
+                    'headers' => [
+                        'Content-Type' => 'application/json',
+                    ],
+                    'json' => [
+                        'username' => $this->username,
+                        'password' => $this->password,
+                    ],
+                ]);
+
+                $result = json_decode($response->getBody()->getContents(), true);
+
+                if (($result['status'] ?? null) === 'success' && !empty($result['token'])) {
+                    return $result['token'];
+                }
+
+                Log::error('eSMS login failed', $result ?? []);
+                return null;
+
+            } catch (\GuzzleHttp\Exception\RequestException $e) {
+                Log::error('eSMS login exception', ['error' => $e->getMessage()]);
+                return null;
+            }
         });
     }
 }

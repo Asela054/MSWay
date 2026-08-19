@@ -690,6 +690,10 @@ class LeaveController extends Controller
                 ->where('leave_type', $leaves[0]->leave_type)
                 ->increment('total_leave', $diff_days);
 
+            if ($applevel != 1) {
+                $this->sendLeaveStatusSms($leaves[0], 'Rejected');
+            }
+
             return response()->json(['success' => 'Leave Rejected']);
 
         } else {
@@ -781,6 +785,14 @@ class LeaveController extends Controller
                     ->where('leave_type', $leaves[0]->leave_type)
                     ->increment('total_leave', $diff_days);
     
+                 if ($app_level != 1) {
+                    $this->sendLeaveStatusSms($leaves[0], 'Rejected');
+                }
+            }else{
+                  // Only send "Approved" SMS on final approval level
+                if ($app_level != 1) {
+                    $this->sendLeaveStatusSms($leaves[0], 'Approved');
+                }
             }
 
 
@@ -863,21 +875,23 @@ class LeaveController extends Controller
 
     private function sendLeaveStatusSms($leave, $status)
     {
+      
         $employee = DB::table('employees')
-            ->where('id', $leave->emp_id)
+            ->where('emp_id', $leave->emp_id)
             ->first();
 
         if (!$employee) {
+            \Log::warning('SMS not sent: employee not found', ['emp_id' => $leave->emp_id]);
             return;
         }
-        
+
         $mobile = $employee->emp_mobile;
 
         if (!$mobile) {
+            \Log::warning('SMS not sent: no mobile number', ['emp_id' => $leave->emp_id]);
             return;
         }
 
-        // Clean mobile number to 9-digit format required by eSMS (e.g. 714551682)
         $mobile = preg_replace('/[^0-9]/', '', $mobile);
         if (strlen($mobile) == 10 && $mobile[0] == '0') {
             $mobile = substr($mobile, 1);
@@ -889,7 +903,13 @@ class LeaveController extends Controller
             . $leave->leave_from . " to " . $leave->leave_to . ") has been " . $status . ".";
 
         $smsService = new \App\Services\Opma_Sms_policyService();
-        $smsService->sendSms($mobile, $message);
+        $result = $smsService->sendSms($mobile, $message);
+
+        \Log::info('eSMS send result', [
+            'emp_id'  => $leave->emp_id,
+            'mobile'  => $mobile,
+            'result'  => $result,
+        ]);
     }
 
 }
