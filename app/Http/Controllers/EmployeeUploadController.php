@@ -86,7 +86,7 @@ class EmployeeUploadController extends Controller
                     'branch' => 'required|string',
                     'company_code' => 'required|string',
                     'status' => 'required|string',
-                    'basic_salary' => 'required|numeric',
+                    'basic_salary' => 'required|numeric|regex:/^\d+(\.\d{1,2})?$/',
                     'bank_ac_no' => 'required|string|max:20',
                     'bank_code' => 'required|string|max:10',
                     'branch_code' => 'required|string|max:10',
@@ -127,10 +127,13 @@ class EmployeeUploadController extends Controller
                     continue;
                 }
 
-                $existingEtf = Employee::where('emp_etfno', $employeeData['etfno'])
-                    ->where('emp_company', $companyId)
-                    ->where('emp_id', '!=', $employeeData['emp_id'])
-                    ->exists();
+                $existingEtf = false;
+                if ($employeeData['etfno'] !== '0') {
+                    $existingEtf = Employee::where('emp_etfno', $employeeData['etfno'])
+                        ->where('emp_company', $companyId)
+                        ->where('emp_id', '!=', $employeeData['emp_id'])
+                        ->exists();
+                }
 
                 if ($existingEtf) {
                     $errors[] = "Line {$currentLine}: ETF No '{$employeeData['etfno']}' already exists in this company.";
