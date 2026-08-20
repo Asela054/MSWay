@@ -40,6 +40,8 @@
       <li><a class="dropdown-item" href="{{ url('ReportSixMonth') }}" id="sixmonth">Six Month Report</a></li>
       <li><a class="dropdown-item" href="{{ url('ReportAddition') }}" id="additionreport">Additions Report</a></li>
       <li><a class="dropdown-item" href="{{ url('SalaryReconciliation') }}" id="salaryreconslationreport">Salary Reconciliation</a></li>
+      <li><a class="dropdown-item" href="{{ url('salaryAdvanceReport') }}" id="salaryadvancereport">Salary Advance Report</a></li>
+      <li><a class="dropdown-item" href="{{ url('salaryIncentiveReport') }}" id="salaryincentivereport">Salary Incentive Report</a></li>
     </ul>
   </div>
   <div class="dropdown">

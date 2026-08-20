@@ -1698,6 +1698,8 @@ Route::post('/salary_advance_dept_allocation_insert' ,'SalaryAdvanceController@d
 Route::get('/salaryAdvanceApproval' ,'SalaryAdvanceApprovalController@index')->name('salaryAdvanceApproval');
 Route::post('/salaryAdvanceApprovalgenerate' ,'SalaryAdvanceApprovalController@generatesalaryadvance')->name('salaryAdvanceApprovalgenerate');
 Route::post('/salaryAdvanceApprovalapprove' ,'SalaryAdvanceApprovalController@approvesalaryadvance')->name('salaryAdvanceApprovalapprove');
+// Salary Advance Report Controller Routes
+Route::get('/salaryAdvanceReport' ,'SalaryAdvanceReportController@index')->name('salaryAdvanceReport');
 
 // Salary Incentive Controller Routes
 Route::resource('salaryIncentive', 'SalaryIncentiveController');
@@ -1712,6 +1714,8 @@ Route::get('salaryIncentive/by-emp-month', 'SalaryIncentiveController@getByEmpMo
 Route::get('/salaryIncentiveApproval' ,'SalaryIncentiveApprovalController@index')->name('salaryIncentiveApproval');
 Route::post('/salaryIncentiveApprovalgenerate' ,'SalaryIncentiveApprovalController@generatesalaryincentive')->name('salaryIncentiveApprovalgenerate');
 Route::post('/salaryIncentiveApprovalapprove' ,'SalaryIncentiveApprovalController@approvesalaryincentive')->name('salaryIncentiveApprovalapprove');
+// Salary Incentive Report Controller Routes
+Route::get('/salaryIncentiveReport' ,'SalaryIncentiveReportController@index')->name('salaryIncentiveReport');
 
 // Koasis 
 // Dashboard controller
