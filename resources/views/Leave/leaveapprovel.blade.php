@@ -485,6 +485,20 @@ $(document).ready(function () {
                     const actionJSON = JSON.stringify(actionObj, null, 2);
                     actionreload(actionJSON);
                 }
+
+                 if (data.sms_warning) {
+                    const smsWarningObj = {
+                        icon: 'fas fa-warning',
+                        title: '',
+                        message: data.sms_warning,
+                        url: '',
+                        target: '_blank',
+                        type: 'warning'
+                    };
+                    const smsWarningJSON = JSON.stringify(smsWarningObj, null, 2);
+                    action(smsWarningJSON);
+                }
+
             }
         });
     });

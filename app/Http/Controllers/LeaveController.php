@@ -690,20 +690,34 @@ class LeaveController extends Controller
                 ->where('leave_type', $leaves[0]->leave_type)
                 ->increment('total_leave', $diff_days);
 
+            $smsResult = null;
             if ($applevel != 1) {
                 $this->sendLeaveStatusSms($leaves[0], 'Rejected');
             }
 
-            return response()->json(['success' => 'Leave Rejected']);
+             $response = ['success' => 'Leave Rejected'];
+
+        if ($smsResult && !$smsResult['success']) {
+            $response['sms_warning'] = 'SMS not sent: ' . $smsResult['message'];
+        }
+
+            return response()->json($response);
 
         } else {
+            $smsResult = null;
              // Only send "Approved" SMS on final approval level
             if ($applevel != 1) {
                 $this->sendLeaveStatusSms($leaves[0], 'Approved');
             }
 
 
-            return response()->json(['success' => 'Leave  Approved']);
+             $response = ['success' => 'Leave  Approved'];
+
+            if ($smsResult && !$smsResult['success']) {
+                $response['sms_warning'] = 'SMS not sent: ' . $smsResult['message'];
+            }
+
+            return response()->json($response);
         }
 
 
@@ -785,10 +799,14 @@ class LeaveController extends Controller
                     ->where('leave_type', $leaves[0]->leave_type)
                     ->increment('total_leave', $diff_days);
     
+                      $smsResult = null;
+
                  if ($app_level != 1) {
                     $this->sendLeaveStatusSms($leaves[0], 'Rejected');
                 }
+                
             }else{
+                  $smsResult = null;
                   // Only send "Approved" SMS on final approval level
                 if ($app_level != 1) {
                     $this->sendLeaveStatusSms($leaves[0], 'Approved');
@@ -904,12 +922,12 @@ class LeaveController extends Controller
 
         $smsService = new \App\Services\Opma_Sms_policyService();
         $result = $smsService->sendSms($mobile, $message);
-
         \Log::info('eSMS send result', [
             'emp_id'  => $leave->emp_id,
             'mobile'  => $mobile,
             'result'  => $result,
         ]);
+        return $result;
     }
 
 }

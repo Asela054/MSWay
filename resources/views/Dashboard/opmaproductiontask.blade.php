@@ -327,14 +327,14 @@ function getTier(avg) {
     avg = parseFloat(avg);
     if (isNaN(avg)) return { key: 'na', label: '-', allow: [] };
 
-    if (avg >= 91) {
+    if (avg >= 90) {
         return { key: 'dgreen', label: 'Pass', allow: ['basic','ot','transport','incentive','night','attendance','bonus'] };
-    } else if (avg >= 71) {
+    } else if (avg >= 70) {
         return { key: 'lgreen', label: 'Pass', allow: ['basic','ot','transport','incentive','night','attendance'] };
     } else if (avg >= 60) {
-        return { key: 'yellow', label: 'Pass', allow: ['basic','ot'] };
+        return { key: 'yellow', label: 'Pass', allow: ['basic','ot','attendance','night'] };
     } else if (avg >= 50) {
-        return { key: 'orange', label: 'Pass', allow: ['basic'] };
+        return { key: 'orange', label: 'Pass', allow: ['basic','ot','attendance'] };
     } else {
         return { key: 'red', label: 'WORNING', allow: [] };
     }

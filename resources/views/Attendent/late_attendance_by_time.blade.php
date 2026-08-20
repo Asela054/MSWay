@@ -125,13 +125,13 @@
                                         placeholder="yyyy-mm-dd">
                                 </div>
                             </li>
-                            <li class="mb-2">
+                            {{-- <li class="mb-2">
                                 <div class="col-md-12">
                                     <label class="small font-weight-bolder text-dark">Late Type</label>
                                     <select name="late_type" id="late_type" class="form-control form-control-sm">
                                     </select>
                                 </div>
-                            </li>
+                            </li> --}}
                             <li>
                                 <div class="col-md-12 d-flex justify-content-between">
                                     
