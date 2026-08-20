@@ -1035,6 +1035,10 @@ $(document).ready(function () {
                         }
 
                         if (is_resigned == 0) {
+                            buttons += '<a style="margin:1px;" data-toggle="tooltip" data-placement="bottom" title="View Account Summary" class="btn btn-info btn-sm" href="useraccountsummery/user/' + row.id + '"><i class="fas fa-user-circle"></i></a>';
+                        }
+
+                        if (is_resigned == 0) {
                             buttons += '<button style="margin:1px;" data-toggle="tooltip" data-placement="bottom" title="Add Employee Fingerprint Details" class="btn btn-primary btn-sm addfp" id="' + row.emp_id + '" name="' + (row.emp_name_with_initial || '') + '"><i class="fas fa-sign-in-alt"></i></button>';
                         }
 
