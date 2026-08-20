@@ -33,8 +33,10 @@ class SalaryAdvanceController extends Controller
     {
         $user = auth()->user();
         $permission = $user->can('salary-advance-create');
+        // Employees may create advances for themselves
+        $isSelf = ($user->emp_id == $request->input('employee'));
 
-        if(!$permission) {
+        if (!$permission && !$isSelf) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -55,10 +57,10 @@ class SalaryAdvanceController extends Controller
         $advance->emp_id = $request->input('employee');
         $advance->date = $request->input('date');
         $advance->request_amount = $request->input('request_amount');
-        $advance->paid_amount = $request->input('request_amount');
+        $advance->paid_amount = 0;
         $advance->remark = $request->input('remark');
         $advance->status = '1';
-        $advance->paid_status = '1';
+        $advance->paid_status = '0';
         $advance->created_by = Auth::id();
         $advance->created_at = Carbon::now()->toDateTimeString();
 
@@ -71,8 +73,11 @@ class SalaryAdvanceController extends Controller
     {
         $user = auth()->user();
         $permission = $user->can('salary-advance-edit');
+        // Employees may edit their own records
+        $record = DB::table('salary_advances')->where('id', $id)->value('emp_id');
+        $isSelf = ($user->emp_id == $record);
 
-        if(!$permission) {
+        if (!$permission && !$isSelf) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -95,8 +100,10 @@ class SalaryAdvanceController extends Controller
     {
         $user = auth()->user();
         $permission = $user->can('salary-advance-edit');
+        // Employees may update their own records
+        $isSelf = ($user->emp_id == $request->employee);
 
-        if(!$permission) {
+        if (!$permission && !$isSelf) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -117,7 +124,6 @@ class SalaryAdvanceController extends Controller
             'emp_id'     => $request->employee,
             'date'       => $request->date,
             'request_amount'     => $request->request_amount,
-            'paid_amount'     => $request->request_amount,
             'remark'     => $request->remark,
             'updated_by' => Auth::id(),
             'updated_at' => Carbon::now()->toDateTimeString()
@@ -132,8 +138,11 @@ class SalaryAdvanceController extends Controller
     {
         $user = auth()->user();
         $permission = $user->can('salary-advance-delete');
+        // Employees may delete their own unapproved records
+        $record = DB::table('salary_advances')->where('id', $id)->value('emp_id');
+        $isSelf = ($user->emp_id == $record);
 
-        if(!$permission) {
+        if (!$permission && !$isSelf) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -146,12 +155,6 @@ class SalaryAdvanceController extends Controller
 
     public function getAvailableAmount($emp_id, $request_date = null)
     {
-        $user = auth()->user();
-        $permission = $user->can('salary-advance-list');
-        if (!$permission) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
-
         // If called via HTTP GET, pick up the date query param
         if ($request_date === null) {
             $request_date = request()->query('date');
