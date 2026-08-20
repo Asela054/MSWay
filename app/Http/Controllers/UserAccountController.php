@@ -41,23 +41,8 @@ class UserAccountController extends Controller
             return redirect()->route('login');
 		}
 
-         $user = Auth::user();
+        $user = Auth::user();
 
-        if($empautoid){
-
-        $employee = DB::table('employees')
-            ->select('users.*')
-            ->leftjoin('users','users.emp_id','employees.emp_id')
-            ->where('employees.id', $empautoid)
-            ->first();
-
-            $users_id=$employee->id;
-        }else{
-              $users_id = $user->id;
-        }
-		
-       
-      
 		$user->hasRole('Employee');
 		// $user->can('user-account-summery-list');
 		
@@ -66,18 +51,53 @@ class UserAccountController extends Controller
             abort(403);
         }	
         
-        $employee = DB::table('users')
-            ->select('employees.*','employee_pictures.emp_pic_filename','departments.name AS departmentname','companies.name AS companyname','branches.location','employment_statuses.emp_status AS emp_statusname','job_categories.category','job_titles.title','users.emp_id','employees.id AS emprecordid','employees.emp_location')
-            ->leftjoin('employees','employees.emp_id','users.emp_id')
-            ->leftjoin('job_categories','job_categories.id','employees.job_category_id')
-            ->leftjoin('job_titles','job_titles.id','employees.emp_job_code')
-            ->leftjoin('employment_statuses','employment_statuses.id','employees.emp_status')
-            ->leftjoin('branches','branches.id','employees.emp_location')
-            ->leftjoin('companies','companies.id','employees.emp_company')
-            ->leftjoin('departments','departments.id','employees.emp_department')
-            ->leftjoin('employee_pictures','employee_pictures.emp_id','employees.id')
-            ->where('users.id', $users_id)
-            ->first();
+        if ($empautoid) {
+            // Query directly from employees table — works for ALL employees,
+            // even those who do not have a user login account yet.
+            $employee = DB::table('employees')
+                ->select(
+                    'employees.*',
+                    'employee_pictures.emp_pic_filename',
+                    'departments.name AS departmentname',
+                    'companies.name AS companyname',
+                    'branches.location',
+                    'employment_statuses.emp_status AS emp_statusname',
+                    'job_categories.category',
+                    'job_titles.title',
+                    'employees.emp_id',
+                    'employees.id AS emprecordid',
+                    'employees.emp_location'
+                )
+                ->leftJoin('job_categories', 'job_categories.id', 'employees.job_category_id')
+                ->leftJoin('job_titles', 'job_titles.id', 'employees.emp_job_code')
+                ->leftJoin('employment_statuses', 'employment_statuses.id', 'employees.emp_status')
+                ->leftJoin('branches', 'branches.id', 'employees.emp_location')
+                ->leftJoin('companies', 'companies.id', 'employees.emp_company')
+                ->leftJoin('departments', 'departments.id', 'employees.emp_department')
+                ->leftJoin('employee_pictures', 'employee_pictures.emp_id', 'employees.id')
+                ->where('employees.id', $empautoid)
+                ->first();
+        } else {
+            // Own account — query via users table (original logic)
+            $users_id = $user->id;
+
+            $employee = DB::table('users')
+                ->select('employees.*','employee_pictures.emp_pic_filename','departments.name AS departmentname','companies.name AS companyname','branches.location','employment_statuses.emp_status AS emp_statusname','job_categories.category','job_titles.title','users.emp_id','employees.id AS emprecordid','employees.emp_location')
+                ->leftJoin('employees','employees.emp_id','users.emp_id')
+                ->leftJoin('job_categories','job_categories.id','employees.job_category_id')
+                ->leftJoin('job_titles','job_titles.id','employees.emp_job_code')
+                ->leftJoin('employment_statuses','employment_statuses.id','employees.emp_status')
+                ->leftJoin('branches','branches.id','employees.emp_location')
+                ->leftJoin('companies','companies.id','employees.emp_company')
+                ->leftJoin('departments','departments.id','employees.emp_department')
+                ->leftJoin('employee_pictures','employee_pictures.emp_id','employees.id')
+                ->where('users.id', $users_id)
+                ->first();
+        }
+
+        if (!$employee) {
+            return redirect()->back()->with('error', 'Employee details could not be found.');
+        }
 			
         $emprecordid=$employee->emprecordid;
         $emp_id=$employee->emp_id;
