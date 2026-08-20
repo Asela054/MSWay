@@ -175,8 +175,9 @@
                                                 <li class="active" role="presentation"><a href="#profileinfo" aria-controls="profileinfo" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-user"></i></span>Profile Info</a><span class="bgcolor-major-gradient-overlay"></span></li>
                                                 <li role="presentation"><a href="#attendanceinfo" aria-controls="attendanceinfo" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-calendar"></i></span>Attendance</a><span class="bgcolor-major-gradient-overlay"></span></li>
                                                 <li role="presentation"><a href="#leaveinfo" aria-controls="leaveinfo" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-calendar-week"></i></span>Leave Info</a><span class="bgcolor-major-gradient-overlay"></span></li>
+                                                <li role="presentation"><a href="#salaryadvance" aria-controls="salaryadvance" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-money-bill"></i></span>Salary Advance</a><span class="bgcolor-major-gradient-overlay"></span></li>
                                                 <li role="presentation"><a href="#salaryslip" aria-controls="salaryslip" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-receipt"></i></span>Salary Slips</a><span class="bgcolor-major-gradient-overlay"></span></li>
-                                                <li role="presentation"><a href="#production" aria-controls="production" role="tab" data-toggle="tab"><span class="icon"><i class="fa-light fa-ballot-check"></i></span>Production</a><span class="bgcolor-major-gradient-overlay"></span></li>
+                                                <li role="presentation"><a href="#production" aria-controls="production" role="tab" data-toggle="tab"><span class="icon"><i class="fa-light fa-ballot-check"></i></span>My Jobs</a><span class="bgcolor-major-gradient-overlay"></span></li>
                                                 <li role="presentation"><a href="#markattendance" aria-controls="markattendance" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-clock"></i></span>Mark Attendance</a><span class="bgcolor-major-gradient-overlay"></span></li>
                                                 <li role="presentation"><a href="#attendancetimesheet" aria-controls="attendancetimesheet" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-file-contract"></i></span>Time Sheet</a><span class="bgcolor-major-gradient-overlay"></span></li>
                                             </ul>
@@ -278,7 +279,7 @@
                                                         <div class="card-body">
                                                             <div class="row">
                                                                 <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12 text-right">
-                                                                    <button type="button" class="btn btn-outline-primary btn-sm fa-pull-right px-3" name="create_record" id="create_record"><i class="fas fa-plus mr-2"></i>Add Leave Request</button>
+                                                                    <button type="button" class="btn btn-primary btn-sm fa-pull-right px-3" name="create_record" id="create_record"><i class="fas fa-plus mr-2"></i>Add Leave Request</button>
                                                                 </div>
                                                                 <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
                                                                     <hr>
@@ -300,6 +301,40 @@
                                                                                     <th class="text-right">ACTION</th>
                                                                                     <th class="d-none">empname</th>
                                                                                     <th class="d-none">empname</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>  
+                                                </div>         
+                                                <div role="tabpanel" class="tab-pane" id="salaryadvance"> 
+                                                    <div class="card shadow-none bg-transparent">
+                                                        <div class="card-body">
+                                                            <div class="row">
+                                                                <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12 text-right">
+                                                                    <button type="button" class="btn btn-primary btn-sm fa-pull-right px-3" name="create_record_advance" id="create_record_advance"><i class="fas fa-plus mr-2"></i>Salary Advance Request</button>
+                                                                </div>
+                                                                <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                                                                    <hr>
+                                                                    <div class="center-block fix-width scroll-inner">
+                                                                        <table class="table table-striped table-sm small nowrap" style="width: 100%" id="salaryadvancetable">
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    <th>EMP ID</th>
+                                                                                    <th>EMPLOYEE</th>
+                                                                                    <th>DEPARTMENT</th>
+                                                                                    <th>DATE</th>
+                                                                                    <th>REQUEST AMOUNT</th>
+                                                                                    <th>PAID AMOUNT</th>
+                                                                                    <th>APPROVE STATUS</th>
+                                                                                    <th class="text-right">ACTION</th>
+                                                                                    <th class="d-none">id</th>
+                                                                                    <th class="d-none">emp_name_with_initial</th>
                                                                                 </tr>
                                                                             </thead>
                                                                             <tbody>
@@ -733,10 +768,84 @@
     </div>
 </div>
 
+<!-- ========== SALARY ADVANCE MODAL ========== -->
+<div class="modal fade" id="saFormModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+        aria-labelledby="saModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header p-2">
+                <h5 class="modal-title" id="saModalLabel">Salary Advance Request</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col">
+                        <span id="sa_form_result"></span>
+                        <form method="post" id="saFormTitle" class="form-horizontal">
+                            {{ csrf_field() }}
+
+                            <div class="form-row mb-2">
+                                <div class="col-md-6">
+                                    <label class="small font-weight-bolder text-dark">Select Employee*</label>
+                                    <select name="employee" id="sa_employee" class="form-control form-control-sm"
+                                        style="pointer-events: none; background-color: #e9ecef;" required>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="small font-weight-bolder text-dark">Date*</label>
+                                    <input type="date" name="date" id="sa_date" class="form-control form-control-sm" required>
+                                    <span id="sa_date_error" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <div class="form-row mb-2">
+                                <div class="col-md-6">
+                                    <label class="small font-weight-bold text-dark">Available Amount</label>
+                                    <input type="number" name="available_amount" id="sa_available_amount"
+                                        class="form-control form-control-sm" placeholder="Available Amount"
+                                        step="0.01" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="small font-weight-bold text-dark">Request Amount*</label>
+                                    <input type="number" name="request_amount" id="sa_request_amount"
+                                        class="form-control form-control-sm" placeholder="Request Amount"
+                                        step="0.01" required>
+                                </div>
+                            </div>
+
+                            <div class="form-row mb-2">
+                                <div class="col-md-6">
+                                    <label class="small font-weight-bold text-dark">Reason</label>
+                                    <input type="text" name="remark" id="sa_remark"
+                                        class="form-control form-control-sm" placeholder="Reason">
+                                </div>
+                            </div>
+
+                            <div class="form-group mt-2">
+                                <button type="submit" name="sa_action_button" id="sa_action_button"
+                                    class="btn btn-primary btn-sm fa-pull-right px-4">
+                                    <i class="fas fa-plus"></i>&nbsp;Add
+                                </button>
+                            </div>
+                            <input type="hidden" name="action" id="sa_action" value="Add" />
+                            <input type="hidden" name="hidden_id" id="sa_hidden_id" />
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ========== END SALARY ADVANCE MODAL ========== -->
+
 @endsection
 @section('script')
 <script>
     var empid = {{$emp_id}};
+    var emp_name_with_initial = '{{$emp_name_with_initial}}';
+    var calling_name = '{{$calling_name}}';
     $(document).ready(function () {
         $('#user_information_menu_link').addClass('active');
         $('#user_information_menu_link_icon').addClass('active');
@@ -860,7 +969,7 @@
 
             if (emp_id != '') {
                 $.ajax({
-                    url: "getEmployeeLeaveStatus",
+                    url: "{{ url('getEmployeeLeaveStatus') }}",
                     method: "POST",
                     data: {
                         status: status,
@@ -910,7 +1019,7 @@
 
             if (leavetype != '' && emp_id != '') {
                 $.ajax({
-                    url: "getEmployeeLeaveStatus",
+                    url: "{{ url('getEmployeeLeaveStatus') }}",
                     method: "POST",
                     data: {
                         status: status,
@@ -955,7 +1064,7 @@
 
             if (emp_id != '') {
                 $.ajax({
-                    url: "getEmployeeCategory",
+                    url: "{{ url('getEmployeeCategory') }}",
                     method: "POST",
                     dataType: 'json',
                     data: {
@@ -988,7 +1097,7 @@
 
             if (emp_id != '') {
                 $.ajax({
-                    url: "getEmployeeCategory",
+                    url: "{{ url('getEmployeeCategory') }}",
                     method: "POST",
                     dataType: 'json',
                     data: {
@@ -1590,7 +1699,7 @@
 
         if (emp_id != '') {
             $.ajax({
-                url: "getEmployeeCategory",
+                url: "{{ url('getEmployeeCategory') }}",
                 method: "POST",
                 dataType: 'json',
                 data: {
@@ -1598,6 +1707,7 @@
                     _token: _token
                 },
                 success: function (data) {
+                    if (!data.result) return;
                     $('#companyemail').val(data.result.company_email);
                     $('#companyname').val(data.result.company_name);
                     $('#employeeemail').val(data.result.employee_email);
@@ -2230,6 +2340,255 @@
     });
 
     
+
+    // SALARY ADVANCE TAB
+    // Pre-fill the SA employee select with only the current employee (read-only, no AJAX search)
+    // This mirrors the "Add Leave Request" pattern where the employee is locked to the current user.
+    if (empid && emp_name_with_initial) {
+        if (!$('#sa_employee').find('option[value="' + empid + '"]').length) {
+            $('#sa_employee').append(new Option(emp_name_with_initial, empid, true, true));
+        }
+        $('#sa_employee').val(empid);
+    }
+
+    // Fetch available amount when employee or date changes
+    function sa_fetchAvailableAmount() {
+        var emp_id = $('#sa_employee').val();
+        var date   = $('#sa_date').val();
+        $('#sa_available_amount').val('');
+        $('#sa_request_amount').removeAttr('max');
+        $('#sa_date_error').text('');
+
+        if (emp_id && date) {
+            $.ajax({
+                url: '{{ url("SalaryAdvance/available-amount") }}/' + emp_id,
+                type: 'GET',
+                data: { date: date },
+                success: function(data) {
+                    if (data.errors) {
+                        $('#sa_available_amount').val(0);
+                        $('#sa_request_amount').attr('max', 0);
+                        $('#sa_date_error').text(data.errors);
+                    } else {
+                        $('#sa_date_error').text('');
+                        $('#sa_available_amount').val(data.available_amount);
+                        $('#sa_request_amount').attr('max', data.available_amount);
+                    }
+                }
+            });
+        }
+    }
+
+    $('#sa_employee').on('change', sa_fetchAvailableAmount);
+    $('#sa_date').on('change', sa_fetchAvailableAmount);
+
+    // Clamp request amount to available amount on client side
+    $('#sa_request_amount').on('input', function() {
+        var available = parseFloat($('#sa_available_amount').val()) || 0;
+        var entered   = parseFloat($(this).val()) || 0;
+        if (available > 0 && entered > available) {
+            $(this).val(available);
+        }
+    });
+
+    // Load salary advance DataTable
+    function load_salary_advance_dt(empid) {
+        if ($.fn.DataTable.isDataTable('#salaryadvancetable')) {
+            $('#salaryadvancetable').DataTable().destroy();
+        }
+        $('#salaryadvancetable').DataTable({
+            destroy: true,
+            processing: true,
+            serverSide: true,
+            dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" +
+                 "<'row'<'col-sm-12'tr>>" +
+                 "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+            buttons: [
+                { extend: 'csv',   className: 'btn btn-success btn-sm', title: 'Salary Advance Information', text: '<i class="fas fa-file-csv mr-2"></i> CSV' },
+                { extend: 'pdf',   className: 'btn btn-danger btn-sm',  title: 'Salary Advance Information', text: '<i class="fas fa-file-pdf mr-2"></i> PDF', orientation: 'portrait', pageSize: 'legal', customize: function(doc) { doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split(''); } },
+                { extend: 'print', className: 'btn btn-primary btn-sm', title: 'Salary Advance Information', text: '<i class="fas fa-print mr-2"></i> Print', customize: function(win) { $(win.document.body).find('table').addClass('compact').css('font-size', 'inherit'); } }
+            ],
+            order: [[0, 'desc']],
+            ajax: {
+                url: scripturl + '/salary_advance_list.php',
+                type: 'POST',
+                data: { employee: empid }
+            },
+            columns: [
+                { data: 'emp_id',           name: 'emp_id' },
+                { data: 'employee_display', name: 'employee_display' },
+                { data: 'department_name',  name: 'department_name' },
+                { data: 'date',             name: 'date' },
+                { data: 'request_amount',   name: 'request_amount' },
+                { data: 'paid_amount',      name: 'paid_amount' },
+                {
+                    data: 'approve_status',
+                    name: 'approve_status',
+                    render: function(data) {
+                        if (data == 1) {
+                            return '<span class="badge badge-success">Approved</span>';
+                        }
+                        return '<span class="badge badge-warning">Pending</span>';
+                    }
+                },
+                {
+                    data: 'id',
+                    name: 'action',
+                    className: 'text-right',
+                    orderable: false,
+                    searchable: false,
+                    render: function(data, type, row) {
+                        var buttons = '';
+                        if (row.approve_status != 1) {
+                            buttons += '<button style="margin:1px;" data-toggle="tooltip" title="Edit" class="sa_edit btn btn-primary btn-sm" id="' + row.id + '"><i class="fas fa-pencil-alt"></i></button>';
+                            buttons += '<button style="margin:1px;" data-toggle="tooltip" title="Delete" class="sa_delete btn btn-danger btn-sm" id="' + row.id + '"><i class="far fa-trash-alt"></i></button>';
+                        }
+                        return buttons;
+                    }
+                },
+                { data: 'id',                   name: 'id',                   visible: false },
+                { data: 'emp_name_with_initial', name: 'emp_name_with_initial', visible: false }
+            ],
+            drawCallback: function() {
+                $('[data-toggle="tooltip"]').tooltip();
+            }
+        });
+    }
+
+    // Load salary advance table when tab is activated
+    $('a[href="#salaryadvance"]').on('shown.bs.tab', function() {
+        load_salary_advance_dt(empid);
+    });
+
+    // Open Salary Advance Request modal
+    $('#create_record_advance').click(function() {
+        $('#saModalLabel').text('Salary Advance Request');
+        $('#sa_action_button').html('<i class="fas fa-plus"></i>&nbsp;Add');
+        $('#sa_action').val('Add');
+        $('#sa_form_result').html('');
+        $('#saFormTitle')[0].reset();
+        $('#sa_date_error').text('');
+        $('#sa_available_amount').val('');
+        $('#sa_request_amount').removeAttr('max');
+
+        // Lock employee to the current user (same behaviour as Add Leave Request)
+        $('#sa_employee').val(empid).trigger('change');
+
+        $('#saFormModal').modal('show');
+    });
+
+    // Submit Salary Advance form (Add / Edit)
+    $('#saFormTitle').on('submit', function(event) {
+        event.preventDefault();
+
+        // Block if attendance validation failed
+        if ($('#sa_date_error').text().trim() !== '') {
+            return false;
+        }
+
+        // Block if available amount is 0
+        var available = parseFloat($('#sa_available_amount').val()) || 0;
+        if (available <= 0) {
+            return false;
+        }
+
+        var action_url = '';
+        if ($('#sa_action').val() === 'Add') {
+            action_url = "{{ route('addSalaryAdvance') }}";
+        } else {
+            action_url = "{{ route('salaryAdvance.update') }}";
+        }
+
+        $.ajax({
+            url: action_url,
+            method: 'POST',
+            data: $(this).serialize(),
+            dataType: 'json',
+            success: function(data) {
+                if (data.errors) {
+                    const actionObj = { icon: 'fas fa-warning', title: '', message: data.errors, url: '', target: '_blank', type: 'danger' };
+                    action(JSON.stringify(actionObj, null, 2));
+                }
+                if (data.success) {
+                    const actionObj = { icon: 'fas fa-save', title: '', message: data.success, url: '', target: '_blank', type: 'success' };
+                    $('#saFormModal').modal('hide');
+                    load_salary_advance_dt(empid);
+                    actionreload(JSON.stringify(actionObj, null, 2));
+                }
+            }
+        });
+    });
+
+    // Edit salary advance record
+    $(document).on('click', '.sa_edit', async function() {
+        var r = await Otherconfirmation('You want to Edit this ?');
+        if (r === true) {
+            var id = $(this).attr('id');
+            $('#sa_form_result').html('');
+            $('#sa_date_error').text('');
+
+            $.ajax({
+                url: '{{ url("salaryAdvance") }}/' + id + '/edit',
+                dataType: 'json',
+                success: function(data) {
+                    // Set date first
+                    $('#sa_date').val(data.result.date);
+
+                    // Set employee option then trigger change with date already set
+                    if ($('#sa_employee').find('option[value="' + data.result.employee_id + '"]').length === 0) {
+                        $('#sa_employee').append('<option value="' + data.result.employee_id + '" selected>' + data.result.employee_name + '</option>');
+                    }
+                    $('#sa_employee').val(data.result.employee_id).trigger('change');
+
+                    $('#sa_remark').val(data.result.remark);
+                    $('#sa_hidden_id').val(id);
+                    $('#saModalLabel').text('Edit Salary Advance');
+                    $('#sa_action_button').html('<i class="fas fa-edit"></i>&nbsp;Update');
+                    $('#sa_action').val('Edit');
+
+                    // Fetch available amount and then set request_amount
+                    $.ajax({
+                        url: '{{ url("SalaryAdvance/available-amount") }}/' + data.result.employee_id,
+                        type: 'GET',
+                        data: { date: data.result.date },
+                        success: function(res) {
+                            if (res.errors) {
+                                $('#sa_available_amount').val(0);
+                                $('#sa_request_amount').attr('max', 0);
+                                $('#sa_date_error').text(res.errors);
+                            } else {
+                                $('#sa_date_error').text('');
+                                $('#sa_available_amount').val(res.available_amount);
+                                $('#sa_request_amount').attr('max', res.available_amount);
+                            }
+                            $('#sa_request_amount').val(data.result.request_amount);
+                        }
+                    });
+
+                    $('#saFormModal').modal('show');
+                }
+            });
+        }
+    });
+
+    // Delete salary advance record
+    $(document).on('click', '.sa_delete', async function() {
+        var r = await Otherconfirmation('You want to remove this ?');
+        if (r === true) {
+            var id = $(this).attr('id');
+            $.ajax({
+                url: "{{ url('salaryAdvance/destroy/') }}/" + id,
+                success: function(data) {
+                    const actionObj = { icon: 'fas fa-trash-alt', title: '', message: 'Record Removed Successfully', url: '', target: '_blank', type: 'danger' };
+                    load_salary_advance_dt(empid);
+                    actionreload(JSON.stringify(actionObj, null, 2));
+                }
+            });
+        }
+    });
+
+    // END SALARY ADVANCE TAB
+
 
 </script>
 
