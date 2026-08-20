@@ -377,7 +377,6 @@ class MealallowanceapproveController extends Controller
                         $monthlyremain = $totalamount;
                    
                 }
-
                 else{//Daily or monthly salary adjustment deductions
                     if($remunerationtype == 21){
                         $totalWeekDays = DB::table('leaves')
@@ -417,33 +416,38 @@ class MealallowanceapproveController extends Controller
                             ->first();
 
                         $totalLeaveDays = $totalDays->total_days;
-                    }
-                    // echo $totalLeaveDays."-->".$empId."<br>";
-
-                    if($allowancetype == 1){
-                        
-                        $totalamount = $totalWorkingDays * $allowanceamount;
-                        $monthlyremain = $totalamount;
-
-                    }else{
-                        if($workingDays>0){
-                            $daliyamount = $allowanceamount /  $workingDays;
-                            
-                            if($totalWorkingDays>0 && $totalWorkingDays<20){
-                                if($joindate<$firstDate){
-                                    $totalamount = ($workingDays-$totalLeaveDays) * $daliyamount;
-                                }
-                                else{
-                                    $totalamount = $totalWorkingDays * $daliyamount;
-                                }
-                            }
-                            else if($totalWorkingDays>0){$totalamount = ($workingDays-$totalLeaveDays) * $daliyamount;}
-                            else{$totalamount = 0;}
+                    }else if($remunerationtype == 33 && $appName == 'OpmaHRM'){
+                          $totalWorkingDays = (new \App\ProductionModule_Opma\OpmaAttendance)->get_work_days_for_transport($empId, $month, $lastDate);
+                           $totalamount = $totalWorkingDays * $allowanceamount;
                             $monthlyremain = $totalamount;
+                    }else{
+
+                        if($allowancetype == 1){
                             
-                            // $totalamount = $totalDays->total_days * $daliyamount;
-                            // $monthlyremain = $allowanceamount -  $totalamount;
+                            $totalamount = $totalWorkingDays * $allowanceamount;
+                            $monthlyremain = $totalamount;
+
+                        }else{
+                            if($workingDays>0){
+                                $daliyamount = $allowanceamount /  $workingDays;
+                                
+                                if($totalWorkingDays>0 && $totalWorkingDays<20){
+                                    if($joindate<$firstDate){
+                                        $totalamount = ($workingDays-$totalLeaveDays) * $daliyamount;
+                                    }
+                                    else{
+                                        $totalamount = $totalWorkingDays * $daliyamount;
+                                    }
+                                }
+                                else if($totalWorkingDays>0){$totalamount = ($workingDays-$totalLeaveDays) * $daliyamount;}
+                                else{$totalamount = 0;}
+                                $monthlyremain = $totalamount;
+                                
+                                // $totalamount = $totalDays->total_days * $daliyamount;
+                                // $monthlyremain = $allowanceamount -  $totalamount;
+                            }
                         }
+
                     }
                 }                
                 

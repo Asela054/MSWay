@@ -40,7 +40,9 @@ class Opma_Sms_policyService
             ];
         }
 
-        $transactionId = time() . rand(100, 999);
+        $transactionId = $this->generateTransactionId();
+
+         error_log('=== Generated transaction_id: ' . $transactionId . ' ===');
 
         $result = $this->postSms($token, $recipientNumber, $message, $transactionId);
 
@@ -59,6 +61,11 @@ class Opma_Sms_policyService
 
             $result = $this->postSms($token, $recipientNumber, $message, $transactionId + 1);
         }
+
+          // If transaction_id somehow still duplicate, retry once with a fresh id
+    if (($result['errCode'] ?? null) == 104) {
+        $result = $this->postSms($token, $recipientNumber, $message, $this->generateTransactionId());
+    }
 
         if (($result['status'] ?? null) === 'success') {
             return [
@@ -146,5 +153,12 @@ class Opma_Sms_policyService
                 return null;
             }
         });
+    }
+
+    protected function generateTransactionId()
+    {
+        $randomPart = str_pad(mt_rand(0, 999), 8, '0', STR_PAD_LEFT); // 3-digit random
+
+        return (int) ($randomPart); // max 11 digits — safe on 64-bit, close on 32-bit
     }
 }
