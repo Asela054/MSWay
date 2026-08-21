@@ -5,6 +5,7 @@ namespace App\Services;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class Opma_Sms_policyService
 {
@@ -63,26 +64,50 @@ class Opma_Sms_policyService
         }
 
           // If transaction_id somehow still duplicate, retry once with a fresh id
-    if (($result['errCode'] ?? null) == 104) {
-        $result = $this->postSms($token, $recipientNumber, $message, $this->generateTransactionId());
-    }
-
-        if (($result['status'] ?? null) === 'success') {
-            return [
-                'success' => true,
-                'message' => $result['comment'] ?? 'SMS sent successfully',
-                'data'    => $result['data'] ?? null,
-            ];
+         if (($result['errCode'] ?? null) == 104) {
+            $transactionId = $this->generateTransactionId();
+            $result = $this->postSms($token, $recipientNumber, $message, $transactionId);
         }
 
-        Log::error('eSMS send failed', $result ?? []);
+            if (($result['status'] ?? null) === 'success') {
+                $this->logSms($recipientNumber, $message, $transactionId, 'success', $result['comment'] ?? null);
+                
+                return [
+                    'success' => true,
+                    'message' => $result['comment'] ?? 'SMS sent successfully',
+                    'data'    => $result['data'] ?? null,
+                ];
+            }
 
-        return [
-            'success' => false,
-            'message' => $result['comment'] ?? 'Failed to send SMS',
-            'data'    => null,
-        ];
+            $this->logSms($recipientNumber, $message, $transactionId, 'failed', $result['comment'] ?? null);
+            Log::error('eSMS send failed', $result ?? []);
+
+            return [
+                'success' => false,
+                'message' => $result['comment'] ?? 'Failed to send SMS',
+                'data'    => null,
+            ];
     }
+
+     protected function logSms($mobile, $message, $transactionId, $status, $responseMessage = null)
+    {
+        try {
+            DB::table('opma_sms_logs')->insert([
+                'mobile'            => $mobile,
+                'message'           => $message,
+                'transaction_id'    => $transactionId,
+                'status'            => $status,
+                'response_message'  => $responseMessage,
+                'sent_at'           => date('Y-m-d H:i:s'),
+                'created_at'        => date('Y-m-d H:i:s'),
+                'updated_at'        => date('Y-m-d H:i:s'),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to write sms_logs record', ['error' => $e->getMessage()]);
+        }
+    }
+
+
 
     /**
      * Make the actual SMS POST request

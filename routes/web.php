@@ -1921,6 +1921,10 @@ Route::get('/AdditionalTimesApproval' ,'AttendanceadditionaltimesController@inde
 Route::post('/AdditionalTimesApprovallist' ,'AttendanceadditionaltimesController@gettimestapslist')->name('AdditionalTimesApprovallist');
 Route::post('/AdditionalTimesApprove' ,'AttendanceadditionaltimesController@approvetimestaps')->name('AdditionalTimesApprove');
 
+// Rpt employee Attendance summary ControllerRoutes
+Route::get('/RptemployeeAttendancesummary' ,'RptemployeeAttendancesummaryController@index')->name('RptemployeeAttendancesummary');
+Route::get('/Rptattendance_list' ,'RptemployeeAttendancesummaryController@attendance_list')->name('Rptattendance_list');
+
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');
     Artisan::call('config:clear');

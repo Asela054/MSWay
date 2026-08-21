@@ -147,6 +147,21 @@ class UserAccountController extends Controller
                 return number_format($val, 2) . '%'; 
             })->implode(',');
 
+             // Get the applicable shift_id for this emp on this date
+                    $shift = DB::selectOne("
+                        SELECT `shift_id`
+                        FROM `employeeshiftdetails`
+                        WHERE `emp_id` = ?
+                        AND `status` = 1
+                        AND DATE(`date_from`) <= ?
+                        AND (`until_time` IS NULL OR DATE(`until_time`) >= ?)
+                        ORDER BY `date_from` DESC, `id` DESC
+                        LIMIT 1
+                    ", [$summary->emp_id, $summary->date, $summary->date]);
+
+                    $shift_id = $shift->shift_id ?? null;
+
+
             $data[] = [
                 'formatted_date' => \Carbon\Carbon::parse($summary->date)->format('Y-m-d'),
                 'in_time' => \Carbon\Carbon::parse($summary->on_time)->format('H:i'),
@@ -158,11 +173,11 @@ class UserAccountController extends Controller
                 'produced' => $produced,
                 'pro_avg' => $averages,
                 'weighted_avg' => number_format($summary->details->avg('average'), 2) . '%',
-                'pro_ins' => $summary->daily_average >= 50 ? 1 : 0,
+                'pro_ins' => $summary->daily_average >= 70 ? 1 : 0,
                 'ot'      => $summary->daily_average >= 50 ? 1 : 0,
-                'trp_all' => $summary->daily_average >= 50 ? 1 : 0,
+                'trp_all' => $summary->daily_average >= 70 ? 1 : 0,
                 'att_all' => $summary->daily_average >= 50 ? 1 : 0,
-                'nig_all' => $summary->daily_average >= 50 ? 1 : 0, 
+                'nig_all' => ($summary->daily_average >= 60 && $shift_id == 4) ? 1 : 0, 
                 'trg_bo' => $summary->target_bonus ?? '',
             ];
         }
