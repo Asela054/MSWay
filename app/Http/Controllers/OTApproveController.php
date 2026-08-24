@@ -518,9 +518,63 @@ class OTApproveController extends Controller
         }
 
         $id = $request->get('id');
+
+         $otRecord = DB::table('ot_approved')
+            ->where('id', $id)
+            ->first();
+
         OtApproved::query()->where('id', $id)->update(['status' => 3]);
-        return response()->json([
+
+       $smsResult = null;
+        if ($otRecord) {
+            $smsResult = $this->sendOtDeleteSms($otRecord);
+        }
+
+        $response = [
             'success' => true,
-            'msg' => 'Deleted']);
+            'msg' => 'Deleted'
+        ];
+
+        if ($smsResult && !$smsResult['success']) {
+            $response['sms_warning'] = 'SMS not sent: ' . $smsResult['message'];
+        }
+
+        return response()->json($response);
     }
+
+    private function sendOtDeleteSms($otRecord)
+    {
+        $employee = DB::table('employees')
+            ->where('emp_id', $otRecord->emp_id)
+            ->first();
+
+        if (!$employee) {
+            \Log::warning('OT delete SMS not sent: employee not found', ['emp_id' => $otRecord->emp_id]);
+            return ['success' => false, 'message' => 'Employee not found'];
+        }
+
+        $mobile = '777474169';
+
+        $mobile = preg_replace('/[^0-9]/', '', $mobile);
+        if (strlen($mobile) == 10 && $mobile[0] == '0') {
+            $mobile = substr($mobile, 1);
+        } elseif (strlen($mobile) == 11 && substr($mobile, 0, 2) == '94') {
+            $mobile = substr($mobile, 2);
+        }
+
+        $message = "Dear " . $employee->emp_name_with_initial . ",Empoloyee OT record for "
+            . $otRecord->date . " has been deleted.";
+
+        $smsService = new \App\Services\Opma_Sms_policyService();
+        $result = $smsService->sendSms($mobile, $message);
+
+        \Log::info('eSMS OT delete result', [
+            'emp_id' => $otRecord->emp_id,
+            'mobile' => $mobile,
+            'result' => $result,
+        ]);
+
+        return $result;
+    }
+
 }

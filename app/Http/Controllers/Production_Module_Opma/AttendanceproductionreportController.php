@@ -107,11 +107,11 @@ class AttendanceproductionreportController extends Controller
                         'produced' => $produced,
                         'pro_avg' => $averages,
                         'weighted_avg' => number_format($summary->daily_average, 2) . '%',
-                        'pro_ins' => $summary->daily_average >= 50 ? 1 : 0,
+                        'pro_ins' => $summary->daily_average >= 70 ? 1 : 0,
                         'ot'      => $summary->daily_average >= 50 ? 1 : 0,
                         'trp_all' => $summary->daily_average >= 70 ? 1 : 0,
                         'att_all' => $summary->daily_average >= 50 ? 1 : 0,
-                        'nig_all' => ($summary->daily_average >= 50 && $shift_id == 4) ? 1 : 0,
+                        'nig_all' => ($summary->daily_average >= 60 && $shift_id == 4) ? 1 : 0,
                         'trg_bo' => $summary->target_bonus ?? '',
                     ];
                 }
