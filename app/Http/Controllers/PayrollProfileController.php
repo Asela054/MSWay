@@ -371,13 +371,24 @@ class PayrollProfileController extends Controller
 			}
 
 			if (!empty($payrollChangedFields)) {
-				$payrollChangedFields['emp_auto_id'] = $originalProfileForUpdate->emp_id;
-				$payrollChangedFields['created_by']  = Auth::user()->name;
-				$payrollChangedFields['updated_by']  = Auth::user()->name;
-				$payrollChangedFields['created_at']  = \Carbon\Carbon::now()->toDateTimeString();
-				$payrollChangedFields['updated_at']  = \Carbon\Carbon::now()->toDateTimeString();
+				$backupInsert = $payrollChangedFields;
+				$backupInsert['emp_auto_id'] = $originalProfileForUpdate->emp_id;
+				$backupInsert['created_by']  = Auth::user()->name;
+				$backupInsert['updated_by']  = Auth::user()->name;
+				$backupInsert['created_at']  = \Carbon\Carbon::now()->toDateTimeString();
+				$backupInsert['updated_at']  = \Carbon\Carbon::now()->toDateTimeString();
 
-				DB::table('employee_backup_records')->insert($payrollChangedFields);
+				DB::table('employee_backup_records')->insert($backupInsert);
+
+				// Send SMS notification only when fields actually changed and app is OpmaHRM
+				$appName = config('app.name');
+				if ($appName == 'OpmaHRM') {
+					$this->sendPayrollProfileUpdateSms(
+						$originalProfileForUpdate->emp_id,
+						$payrollUpdateBackupFields,
+						$payrollChangedFields
+					);
+				}
 			}
 		}
 
@@ -420,4 +431,74 @@ class PayrollProfileController extends Controller
 	/*
 	
 	*/
+
+	/**
+	 * Send an SMS notification when a Payroll Profile is updated.
+	 *
+	 * @param int   $empId              employees.id of the affected employee
+	 * @param array $allFieldDiff       full ['field' => ['old'=>…, 'new'=>…], …] map
+	 * @param array $changedFieldsOld   only the fields that actually changed (old values)
+	 */
+	private function sendPayrollProfileUpdateSms($empId, array $allFieldDiff, array $changedFieldsOld)
+	{
+		// Human-readable labels for each tracked field
+		$fieldLabels = [
+			'payroll_process_type_id'  => 'Process Type',
+			'payroll_act_id'           => 'Job Category',
+			'employee_bank_id'         => 'Bank Account',
+			'employee_executive_level' => 'Executive Level',
+			'basic_salary'             => 'Basic Salary',
+			'day_salary'               => 'Day Salary',
+			'epfetf_contribution'      => 'EPF/ETF Contribution',
+			'employee_payday_id'       => 'Payday',
+		];
+
+		try {
+			// Fetch employee name using employees.id = payroll_profiles.emp_id
+			$employee = DB::table('employees')
+				->join('payroll_profiles', 'employees.id', '=', 'payroll_profiles.emp_id')
+				->where('employees.id', $empId)
+				->select('employees.emp_name_with_initial', 'employees.emp_first_name')
+				->first();
+
+			$empName = $employee
+				? ($employee->emp_name_with_initial ?? $employee->emp_first_name ?? 'Employee')
+				: 'Employee';
+
+			// Build the list of changed fields with old → new values
+			$changeLines = [];
+			foreach ($changedFieldsOld as $field => $oldValue) {
+				$label    = $fieldLabels[$field] ?? $field;
+				$newValue = $allFieldDiff[$field]['new'] ?? '';
+				$changeLines[] = $label . ': ' . $oldValue . ' -> ' . $newValue;
+			}
+
+			$message = 'Payroll Profile Updated - ' . $empName . '. '
+				. 'Changes: ' . implode(', ', $changeLines) . '.';
+
+			$mobile = '777474169';
+			// Normalise to 9-digit local format expected by the SMS gateway
+			$mobile = preg_replace('/[^0-9]/', '', $mobile);
+			if (strlen($mobile) == 10 && $mobile[0] == '0') {
+				$mobile = substr($mobile, 1);
+			} elseif (strlen($mobile) == 11 && substr($mobile, 0, 2) == '94') {
+				$mobile = substr($mobile, 2);
+			}
+
+			$smsService = new \App\Services\Opma_Sms_policyService();
+			$result = $smsService->sendSms($mobile, $message);
+
+			\Log::info('Payroll Profile update SMS sent', [
+				'emp_id'  => $empId,
+				'mobile'  => $mobile,
+				'changes' => $changeLines,
+				'result'  => $result,
+			]);
+		} catch (\Exception $e) {
+			\Log::error('Payroll Profile update SMS failed', [
+				'emp_id' => $empId,
+				'error'  => $e->getMessage(),
+			]);
+		}
+	}
 }
