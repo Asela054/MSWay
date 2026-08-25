@@ -518,13 +518,20 @@ class EmployeeController extends Controller
         }
 
         if (!empty($changedFields)) {
-            $changedFields['emp_auto_id'] = $id;
-            $changedFields['created_by']  = Auth::user()->name;
-            $changedFields['updated_by']  = Auth::user()->name;
-            $changedFields['created_at']  = Carbon::now()->toDateTimeString();
-            $changedFields['updated_at']  = Carbon::now()->toDateTimeString();
+            $backupInsert = $changedFields;
+            $backupInsert['emp_auto_id'] = $id;
+            $backupInsert['created_by']  = Auth::user()->name;
+            $backupInsert['updated_by']  = Auth::user()->name;
+            $backupInsert['created_at']  = Carbon::now()->toDateTimeString();
+            $backupInsert['updated_at']  = Carbon::now()->toDateTimeString();
 
-            DB::table('employee_backup_records')->insert($changedFields);
+            DB::table('employee_backup_records')->insert($backupInsert);
+
+            // Send SMS notification only when fields actually changed and app is OpmaHRM
+            $appName = config('app.name');
+            if ($appName == 'OpmaHRM') {
+                $this->sendEmployeeUpdateSms($id, $backupFields, $changedFields);
+            }
         }
 
         $employee->save();
@@ -828,4 +835,86 @@ class EmployeeController extends Controller
     }
 
      
+    /**
+     * Send an SMS notification when an Employee record is updated.
+     *
+     * @param int   $empId            employees.id of the affected employee
+     * @param array $allFieldDiff     full ['field' => ['old'=>…, 'new'=>…], …] map
+     * @param array $changedFieldsOld only the fields that actually changed (old values)
+     */
+    private function sendEmployeeUpdateSms($empId, array $allFieldDiff, array $changedFieldsOld)
+    {
+        // Human-readable labels for each tracked field
+        $fieldLabels = [
+            'emp_id'                => 'Employee ID',
+            'emp_etfno'             => 'EPF No.',
+            'emp_name_with_initial' => 'Name with Initials',
+            'calling_name'          => 'Calling Name',
+            'emp_status'            => 'Employment Status',
+            'emp_birthday'          => 'Birthday',
+            'emp_nationality'       => 'Nationality',
+            'emp_join_date'         => 'Join Date',
+            'emp_permanent_date'    => 'Permanent Date',
+            'emp_assign_date'       => 'Assign Date',
+            'emp_address'           => 'Address',
+            'emp_department'        => 'Department',
+            'no_of_casual_leaves'   => 'Casual Leaves',
+            'no_of_annual_leaves'   => 'Annual Leaves',
+            'emp_email'             => 'Email',
+            'emp_location'          => 'Location',
+            'emp_shift'             => 'Shift',
+            'emp_job_code'          => 'Job Title',
+            'emp_company'           => 'Company',
+            'job_category_id'       => 'Job Category',
+            'work_category_id'      => 'Work Category',
+            'leave_approve_person'  => 'Leave Approver',
+            'hierarchy_id'          => 'Hierarchy',
+            'financial_id'          => 'Financial Category',
+        ];
+
+        try {
+            $employee = Employee::find($empId);
+
+            $empName = $employee
+                ? ($employee->emp_name_with_initial ?? $employee->emp_first_name ?? 'Employee')
+                : 'Employee';
+
+            // Build the list of changed fields with old → new values
+            $changeLines = [];
+            foreach ($changedFieldsOld as $field => $oldValue) {
+                $label    = $fieldLabels[$field] ?? $field;
+                $newValue = $allFieldDiff[$field]['new'] ?? '';
+                $changeLines[] = $label . ': ' . $oldValue . ' -> ' . $newValue;
+            }
+
+            $message = 'Employee Updated - ' . $empName . '. '
+                . 'Changes: ' . implode(', ', $changeLines) . '.';
+
+            $mobile = '777474169';
+            // Normalise to 9-digit local format expected by the SMS gateway
+            $mobile = preg_replace('/[^0-9]/', '', $mobile);
+            if (strlen($mobile) == 10 && $mobile[0] == '0') {
+                $mobile = substr($mobile, 1);
+            } elseif (strlen($mobile) == 11 && substr($mobile, 0, 2) == '94') {
+                $mobile = substr($mobile, 2);
+            }
+
+            $smsService = new \App\Services\Opma_Sms_policyService();
+            $result = $smsService->sendSms($mobile, $message);
+
+            \Log::info('Employee update SMS sent', [
+                'emp_id'  => $empId,
+                'mobile'  => $mobile,
+                'changes' => $changeLines,
+                'result'  => $result,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Employee update SMS failed', [
+                'emp_id' => $empId,
+                'error'  => $e->getMessage(),
+            ]);
+        }
+    }
+
 }
+
