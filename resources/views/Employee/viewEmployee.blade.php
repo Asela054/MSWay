@@ -287,7 +287,7 @@
 										<div class="col-md-3 col-sm-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">Position</label>
 											<select id="hierarchy_id" class="form-control form-control-sm" name="hierarchy_id">
-												<option value="">Choose...</option>
+												<option value="0">Choose...</option>
 												@foreach($empposition as $emppositions)
 													<option value="{{$emppositions->id}}"
 														{{$emppositions->id== $employee->hierarchy_id  ? 'selected' : ''}}>
@@ -299,7 +299,7 @@
 										<div class="col-md-3 col-sm-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">Financial Category</label>
 											<select id="financial_id" class="form-control form-control-sm" name="financial_id">
-												<option value="">Choose...</option>
+												<option value="0">Choose...</option>
 												@foreach($empfinancial as $empfinancials)
 													<option value="{{$empfinancials->id}}"
 														{{$empfinancials->id== $employee->financial_id  ? 'selected' : ''}}>
