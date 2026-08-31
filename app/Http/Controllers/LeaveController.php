@@ -17,6 +17,7 @@ use DB;
 use Yajra\Datatables\Datatables;
 use App\Holiday;
 use App\Services\LeavepolicyService;
+use App\Services\Opma_Sms_policyService;
 
 class LeaveController extends Controller
 {
@@ -489,11 +490,6 @@ class LeaveController extends Controller
         $leave->request_id = $request->input('request_id');
         $leave->save();
 
-        // $leaveEmailController = new LeaveEmailController();
-        // $result = $leaveEmailController->generateemail($leave);
-        // $result = $leaveEmailController->testEmail($leave);
-
-        // dd($result);
 
         $users = DB::table('leave_details')
             ->where('emp_id', $request->employee)
@@ -523,6 +519,15 @@ class LeaveController extends Controller
             ->update($form_data);
         }
 
+        $employeeDept = DB::table('employees')
+                            ->select('emp_department')
+                            ->where('emp_id', $request->input('employee'))
+                            ->value('emp_department');
+
+        $appName = config('app.name');
+        if($appName == 'OpmaHRM' && $employeeDept == 4){
+            $this->sendAdminlevel_sms( $request->input('employee'), [$request->input('fromdate'), $request->input('todate')]);
+        }
         return response()->json(['success' => 'Leave Details Successfully Insert']);
 
     }
@@ -626,6 +631,22 @@ class LeaveController extends Controller
             return response()->json(['error' => 'UnAuthorized'], 401);
         }
 
+        $leave = Leave::find($request->id);
+
+        if (!$leave) {
+            return response()->json(['error' => 'Leave record not found'], 404);
+        }
+
+        $user = Auth::user();
+        $users_id = $user->emp_id;
+
+        $isAdmin = Auth::user()->hasRole('Admin');
+        $isApprover = ($leave->leave_approv_person == $users_id);
+
+        if (!($isApprover || $isAdmin)) {
+            return response()->json(['error' => 'UnAuthorized. Only the assigned approver or admin can approve this leave.'], 401);
+        }
+
         $rules = array(
             'status' => 'required',
             'emp_id' => 'required'
@@ -697,9 +718,9 @@ class LeaveController extends Controller
 
              $response = ['success' => 'Leave Rejected'];
 
-        if ($smsResult && !$smsResult['success']) {
-            $response['sms_warning'] = 'SMS not sent: ' . $smsResult['message'];
-        }
+            if ($smsResult && !$smsResult['success']) {
+                $response['sms_warning'] = 'SMS not sent: ' . $smsResult['message'];
+            }
 
             return response()->json($response);
 
@@ -719,8 +740,6 @@ class LeaveController extends Controller
 
             return response()->json($response);
         }
-
-
     }
 
     /**
@@ -930,4 +949,49 @@ class LeaveController extends Controller
         return $result;
     }
 
+
+     private function sendAdminlevel_sms($emp_id, $dates)
+    {
+        // Normalize to array — accepts either a single date string or an array of dates
+        $dates = is_array($dates) ? $dates : [$dates];
+
+        $employee = DB::table('employees')
+            ->select('emp_id', 'emp_name_with_initial', 'emp_department')
+            ->where('emp_id', $emp_id)
+            ->first();
+
+        if (!$employee) {
+            \Log::warning('Attendance edit SMS not sent: employee not found', ['emp_id' => $emp_id]);
+            return ['success' => false, 'message' => 'Employee not found'];
+        }
+
+        $mobile = '777474169';
+
+        $mobile = preg_replace('/[^0-9]/', '', $mobile);
+        if (strlen($mobile) == 10 && $mobile[0] == '0') {
+            $mobile = substr($mobile, 1);
+        } elseif (strlen($mobile) == 11 && substr($mobile, 0, 2) == '94') {
+            $mobile = substr($mobile, 2);
+        }
+
+        $employeeName = $employee->emp_name_with_initial;
+        $dateList = implode(', ', $dates);
+
+        $dateWord = count($dates) > 1 ? 'on: ' : 'on ';
+
+        $message = "Leave request for " . $employeeName
+            . " " . $dateWord . $dateList . ".";
+
+        $smsService = new Opma_Sms_policyService();
+        $result = $smsService->sendSms($mobile, $message);
+
+        \Log::info('eSMS leave apply result', [
+            'emp_id'     => $emp_id,
+            'mobile'     => $mobile,
+            'dates'      => $dates,
+            'result'     => $result,
+        ]);
+
+        return $result;
+    }
 }

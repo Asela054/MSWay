@@ -42,6 +42,7 @@ class EmployeeRosterController extends Controller
                 $currentMonth->copy()->addMonth(),
             ];
             
+            
          return view('roster.monthlyemployeerosterfull', compact('months','currentMonth'));
     }
 
@@ -251,11 +252,11 @@ class EmployeeRosterController extends Controller
         }
 
          $currentMonth = \Carbon\Carbon::now();
-            $months = [
-                $currentMonth->copy()->subMonth(),
-                $currentMonth,
-                $currentMonth->copy()->addMonth(),
-            ];
+           $months = [];
+
+            for ($i = 5; $i >= 0; $i--) {
+                $months[] = $currentMonth->copy()->subMonths($i);
+            }
             
          return view('roster.employeesrosterview', compact('months','currentMonth'));
     }

@@ -9,55 +9,6 @@ use App\Http\Controllers\Controller;
 
 class OpmaDashdoardController extends Controller
 {
-    //  public function machinechart(Request $request)
-    //  {
-    //       $today = Carbon::today()->toDateString();
-
-    //        $devices = DB::table('assigned_devices')
-    //                     ->select('id', 'device_name', 'remarks', 'created_at', 'updated_at')
-    //                     ->where('id', '>=', 15)
-    //                     ->get();
-    //         foreach ($devices as $device) {
-    //            $employeedevices = DB::table('employee_assigned_devices')
-    //                     ->select('id', 'emp_id')
-    //                     ->where('device_type', '=',$device->id)
-    //                     ->where('status', '=',1)
-    //                     ->get();
-    //                 foreach ($employeedevices as $employeedevice) {
-    //                     $emp_id = $employeedevice->emp_id;
-
-    //                     $employee = DB::table('employees')
-    //                         ->select('emp_name_with_initial', 'emp_shift', 'job_titles.title as job_title')
-    //                         ->leftjoin('job_titles', 'employees.emp_job_code', '=', 'job_titles.id')
-    //                         ->where('emp_id', '=', $emp_id)
-    //                         ->first();
-
-    //                     if ($employee) {
-    //                         $emp_name = $employee->emp_name_with_initial;
-    //                         $emp_shift = $employee->emp_shift;
-    //                         $job_title = $employee->job_title;
-
-    //                           $emprosterinfo = DB::table('employee_roster_details')
-    //                                         ->select('emp_id', 'shift_id')
-    //                                         ->where('emp_id', $emp_id)
-    //                                         ->where('work_date', $today)
-    //                                         ->first();
-
-    //                                     if ($emprosterinfo) {
-    //                                         $empshiftid = $emprosterinfo->shift_id;   
-
-
-    //                                     }else{
-    //                                         $empshiftid = $emp_shift;
-    //                                     }
-    //                     }
-
-    //                 }
-
-        
-    //         }
-    //  }
-
     public function machinechart(Request $request)
 {
     $today = Carbon::today()->toDateString();
@@ -104,15 +55,13 @@ class OpmaDashdoardController extends Controller
             if (!$hasAttendance) continue;
 
             $rosterShift = DB::selectOne("
-                SELECT `shift_id`
-                FROM `employeeshiftdetails`
+                SELECT `shift_id`, `emp_id`, `work_date`
+                FROM `employee_roster_details`
                 WHERE `emp_id` = ?
-                  AND `status` = 1
-                  AND DATE(`date_from`) <= ?
-                  AND (`until_time` IS NULL OR DATE(`until_time`) >= ?)
-                ORDER BY `date_from` DESC, `id` DESC
+                AND `work_date` = ?
+                ORDER BY `id` DESC
                 LIMIT 1
-            ", [$emp_id, $today, $today]);
+            ", [$emp_id, $today]);
 
             $shiftId = $rosterShift ? $rosterShift->shift_id : $employee->emp_shift;
 
@@ -227,4 +176,5 @@ class OpmaDashdoardController extends Controller
     return response($html);
 
 }
+
 }
