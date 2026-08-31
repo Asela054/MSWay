@@ -760,7 +760,7 @@ class LeaveController extends Controller
 
     public function leave_approve_batch(Request $request){
 
-        $permission = Auth::user()->can('leave-approve');
+        $permission = Auth::user()->can('leave-approve-batch');
         if (!$permission) {
             return response()->json(['error' => 'UnAuthorized'], 401);
         }
