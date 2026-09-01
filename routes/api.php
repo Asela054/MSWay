@@ -147,6 +147,8 @@ Route::get('/attendancesyncAPI_agro', ['uses' => '\App\Http\Controllers\Attendan
 Route::get('GetEmployees', ['uses' => '\App\Http\Controllers\Api\Opma_production\CommenrecordController@Getemployees', 'as' => 'GetEmployees']);
 Route::get('GetCompanyList', ['uses' => '\App\Http\Controllers\Api\Opma_production\CommenrecordController@Getcompanylist', 'as' => 'GetCompanyList']);
 Route::post('GetDepartmentList', ['uses' => '\App\Http\Controllers\Api\Opma_production\CommenrecordController@Getdepartmentlist', 'as' => 'GetDepartmentList']);
+Route::post('ApproveDailySummary', ['uses' => '\App\Http\Controllers\Api\Opma_production\OpmaDailyProductionController@approvedailysummary', 'as' => 'ApproveDailySummary']);
+
 
 Route::get('/download-pdf/{pdfId}', function($pdfId) {
     $pdfData = session()->get($pdfId);
