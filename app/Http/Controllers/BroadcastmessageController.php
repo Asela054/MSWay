@@ -1,0 +1,81 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Helpers\UserHelper;
+use App\Services\Opma_Sms_policyService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+use Yajra\Datatables\Datatables;
+use Carbon\Carbon;
+use DateInterval;
+use DateTime;
+
+class BroadcastmessageController extends Controller
+{
+     public function index()
+    {
+        $user = Auth::user();
+        $permission = $user->can('broadcast-message');
+        if(!$permission){
+            abort(403);
+        }
+
+        return view('Organization.broadcast_sms');
+        
+    }
+
+    public function sendsms(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user->can('broadcast-message-create')) {
+            abort(403);
+        }
+
+        $companyId    = $request->input('company');
+        $type         = $request->input('type');    
+        $departmentId = $request->input('department');
+        $employeeIds  = $request->input('employees', []);
+        $message      = $request->input('message');
+
+        $current_date_time = Carbon::now()->toDateTimeString();
+
+       
+        $employees = DB::table('employees')
+            ->where('emp_company', $companyId)
+            ->where('is_resigned', 0)
+            ->where('deleted', 0);
+
+        if ($type == 2) {
+            $employees->where('emp_department', $departmentId);
+        } elseif ($type == 3) {
+            $employees->whereIn('emp_id', $employeeIds);
+        }
+
+        $recipients = $employees->get(['emp_id', 'emp_name_with_initial', 'emp_mobile']);
+
+        if ($recipients->isEmpty()) {
+            return response()->json([
+                'message' => 'No employees found for the selected criteria.',
+            ], 422);
+        }
+ 
+            DB::table('broadcast_messages')->insert([
+                'date'          => Carbon::now()->toDateString(),
+                'type'          => $type,
+                'department_id' => $type == 2 ? $departmentId : null,
+                'employee_ids'  => $type == 3 ? implode(',', $employeeIds) : null,
+                'message'       => $message,
+                'sent_by'       => Auth::id(),
+                'created_at'    => $current_date_time,
+                'updated_at'    => $current_date_time,
+            ]);
+
+            return response()->json(['success' => 'Broadcast message Successfully Sent']);
+    }
+
+    
+
+}

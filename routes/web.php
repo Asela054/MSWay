@@ -1925,6 +1925,10 @@ Route::post('/AdditionalTimesApprove' ,'AttendanceadditionaltimesController@appr
 Route::get('/RptemployeeAttendancesummary' ,'RptemployeeAttendancesummaryController@index')->name('RptemployeeAttendancesummary');
 Route::get('/Rptattendance_list' ,'RptemployeeAttendancesummaryController@attendance_list')->name('Rptattendance_list');
 
+// Broadcast message ControllerRoutes
+Route::get('/Broadcastsms' ,'BroadcastmessageController@index')->name('Broadcastsms');
+Route::post('/broadcast_messages_send', 'BroadcastmessageController@sendsms')->name('broadcast_messages_send');
+
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');
     Artisan::call('config:clear');
