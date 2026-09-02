@@ -146,6 +146,13 @@ class SalaryAdvanceApprovalController extends Controller
                 ->whereBetween('date', [$from_date, $to_date])
                 ->update(['approve_status' => 1, 'approve_by' => Auth::id(), 'updated_by' => Auth::id(), 'updated_at' => $current_date_time]);
 
+            // Send SMS to employee if app is OpmaHRM
+            $appName = config('app.name');
+            if ($appName == 'OpmaHRM') {
+                $this->sendSalaryAdvanceSms($autoid, $advance_payment);
+            }
+
+
             $profiles = DB::table('payroll_profiles')
                 ->join('payroll_process_types', 'payroll_profiles.payroll_process_type_id', '=', 'payroll_process_types.id')
                 ->where('payroll_profiles.emp_id', $autoid)
@@ -208,5 +215,56 @@ class SalaryAdvanceApprovalController extends Controller
         return response()->json(['success' => 'Salary Advance is successfully Approved']);
     }
 
+
+    /**
+     * Send an SMS to the employee when their salary advance is approved.
+     *
+     * @param int        $empAutoId  employees.id of the employee
+     * @param float|int  $amount     The approved advance amount
+     */
+    private function sendSalaryAdvanceSms($empAutoId, $amount)
+    {
+        try {
+            $employee = DB::table('employees')->where('id', $empAutoId)->first();
+
+            if (!$employee) {
+                \Log::warning('Salary advance SMS not sent: employee not found', ['emp_auto_id' => $empAutoId]);
+                return;
+            }
+
+            $mobile = $employee->emp_mobile;
+
+            if (!$mobile) {
+                \Log::warning('Salary advance SMS not sent: no mobile number', ['emp_auto_id' => $empAutoId]);
+                return;
+            }
+
+            // Normalise to 9-digit local format expected by the SMS gateway
+            $mobile = preg_replace('/[^0-9]/', '', $mobile);
+            if (strlen($mobile) == 10 && $mobile[0] == '0') {
+                $mobile = substr($mobile, 1);
+            } elseif (strlen($mobile) == 11 && substr($mobile, 0, 2) == '94') {
+                $mobile = substr($mobile, 2);
+            }
+
+            $name    = $employee->calling_name ?? $employee->emp_name_with_initial ?? 'Employee';
+            $message = 'Dear ' . $name . ', your salary advance of Rs. ' . number_format($amount, 2) . ' has been approved.';
+
+            $smsService = new \App\Services\Opma_Sms_policyService();
+            $result = $smsService->sendSms($mobile, $message);
+
+            \Log::info('Salary advance approval SMS sent', [
+                'emp_auto_id' => $empAutoId,
+                'mobile'      => $mobile,
+                'amount'      => $amount,
+                'result'      => $result,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Salary advance approval SMS failed', [
+                'emp_auto_id' => $empAutoId,
+                'error'       => $e->getMessage(),
+            ]);
+        }
+    }
 
 }

@@ -324,6 +324,22 @@
 												</label>
 											</div>
 										</div>
+										<div class="col-md-3 col-sm-6 col-12 mb-2">
+											<label class="small font-weight-bold text-dark">OT Applicable</label>
+											<br>
+											<div class="form-check-inline">
+												<label class="form-check-label">
+													<input type="radio" class="form-check-input ot_applicable" name="ot_applicable" id="ot_applicable_0" value="0" 
+														{{ $employee->ot_applicable == 0 ? 'checked' : '' }}>No
+												</label>
+											</div>
+											<div class="form-check-inline">
+												<label class="form-check-label">
+													<input type="radio" class="form-check-input ot_applicable" name="ot_applicable" id="ot_applicable_1" value="1"
+														{{ $employee->ot_applicable == 1 ? 'checked' : '' }}>Yes
+												</label>
+											</div>
+										</div>
 									</div>
 								</div>
 							</div>
