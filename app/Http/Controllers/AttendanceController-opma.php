@@ -986,51 +986,56 @@ class AttendanceController extends Controller
             return response()->json(['error' => 'UnAuthorized'], 401);
         }
 
-        // Get the main employee ID from form data
         $main_emp_id = $request->input('emp_id');
-        
-        // Get the JSON string and decode it
+
+        $empshift = DB::table('employees')
+            ->select('emp_id', 'emp_shift', 'emp_location', 'emp_name_with_initial')
+            ->where('emp_id', $main_emp_id)
+            ->first();
+
+        if (is_null($empshift)) {
+            return response()->json(['status' => false, 'msg' => 'Employee not found.']);
+        }
+
+        $employeeLocation = $empshift->emp_location;
+
         $changed_records_json = $request->input('changed_records');
         $changed_records = json_decode($changed_records_json, true);
-        
+
         if (empty($changed_records)) {
             return response()->json(['status' => false, 'msg' => 'No changes detected.']);
         }
 
         $updatedDates = [];
+        $changes = []; 
 
         foreach ($changed_records as $record) {
-            // Use main employee ID if record emp_id is empty
             $emp_id = $main_emp_id;
             $full_date = $record['date'];
             $uid = $emp_id;
             $dateChanged = false;
-        
+
             // Process IN time
             if (($record['new_in_time'] != '') && ($record['new_in_time'] != $record['old_in_time'])) {
                 $full_time_in = $record['new_in_time'];
-
                 $new_timestamp_in = date('Y-m-d H:i:s', strtotime($full_time_in));
 
                 if ($record['old_in_time'] != '') {
-
                     $old_timestamp_in = $record['old_in_time'];
                     if (strpos($old_timestamp_in, 'T') !== false) {
                         $old_timestamp_in = date('Y-m-d H:i:s', strtotime($old_timestamp_in));
                     }
 
-                $attendance = Attendance::where('emp_id', $emp_id)
-                                            ->where('date', $full_date . ' 00:00:00')
-                                            ->where('timestamp', 'LIKE', $old_timestamp_in . '%')
-                                            ->first();
-
+                    $attendance = Attendance::where('emp_id', $emp_id)
+                        ->where('date', $full_date . ' 00:00:00')
+                        ->where('timestamp', 'LIKE', $old_timestamp_in . '%')
+                        ->first();
 
                     if ($attendance) {
                         $prev_timestamp = $attendance->timestamp;
                         $attendance->timestamp = $new_timestamp_in;
                         $attendance->save();
 
-                        
                         $log_data = [
                             'attendance_id' => $attendance->id,
                             'emp_id' => $attendance->emp_id,
@@ -1041,14 +1046,14 @@ class AttendanceController extends Controller
                         ];
                         AttendanceEdited::create($log_data);
                         $dateChanged = true;
+
+                        $changes[] = [
+                            'old' => $prev_timestamp,
+                            'new' => $new_timestamp_in,
+                        ];
                     }
                 } else {
-                         $employee = DB::table('employees')
-                                    ->select('employees.emp_location as location')
-                                    ->where('employees.emp_id', $emp_id)
-                                    ->first();
-
-                    if ($employee) {
+                    if ($employeeLocation) {
                         $data = [
                             'emp_id' => $emp_id,
                             'uid' => $uid,
@@ -1058,9 +1063,16 @@ class AttendanceController extends Controller
                             'approved' => 0,
                             'type' => 255,
                             'devicesno' => 0,
-                            'location' => $employee->location
+                            'location' => $employeeLocation
                         ];
                         DB::table('attendances')->insert($data);
+                        $dateChanged = true;
+
+                        // ✅ new IN record added
+                        $changes[] = [
+                            'old' => null,
+                            'new' => $new_timestamp_in,
+                        ];
                     }
                 }
             }
@@ -1068,21 +1080,18 @@ class AttendanceController extends Controller
             // Process OUT time
             if (($record['new_out_time'] != '') && ($record['new_out_time'] != $record['old_out_time'])) {
                 $full_time_out = $record['new_out_time'];
-
                 $new_timestamp_out = date('Y-m-d H:i:s', strtotime($full_time_out));
 
-
                 if ($record['old_out_time'] != '') {
-
-                $old_timestamp_out = $record['old_out_time'];
+                    $old_timestamp_out = $record['old_out_time'];
                     if (strpos($old_timestamp_out, 'T') !== false) {
                         $old_timestamp_out = date('Y-m-d H:i:s', strtotime($old_timestamp_out));
                     }
 
-                $attendance = Attendance::where('emp_id', $emp_id)
-                                ->where('date', $full_date . ' 00:00:00')
-                                ->where('timestamp', 'LIKE', $old_timestamp_out . '%')
-                                ->first();
+                    $attendance = Attendance::where('emp_id', $emp_id)
+                        ->where('date', $full_date . ' 00:00:00')
+                        ->where('timestamp', 'LIKE', $old_timestamp_out . '%')
+                        ->first();
 
                     if ($attendance) {
                         $prev_timestamp = $attendance->timestamp;
@@ -1099,15 +1108,13 @@ class AttendanceController extends Controller
                         ];
                         AttendanceEdited::create($log_data);
                         $dateChanged = true;
+                        $changes[] = [
+                            'old' => $prev_timestamp,
+                            'new' => $new_timestamp_out,
+                        ];
                     }
-                    
                 } else {
-                        $employee = DB::table('employees')
-                                    ->select('employees.emp_location as location')
-                                    ->where('employees.emp_id', $emp_id)
-                                    ->first();
-
-                    if ($employee) {
+                    if ($employeeLocation) {
                         $data = [
                             'emp_id' => $emp_id,
                             'uid' => $uid,
@@ -1117,20 +1124,27 @@ class AttendanceController extends Controller
                             'approved' => 0,
                             'type' => 255,
                             'devicesno' => 0,
-                            'location' => $employee->location
+                            'location' => $employeeLocation
                         ];
                         DB::table('attendances')->insert($data);
+                        $dateChanged = true;
+
+                        // ✅ new OUT record added
+                        $changes[] = [
+                            'old' => null,
+                            'new' => $new_timestamp_out,
+                        ];
                     }
                 }
             }
 
             if ($dateChanged && !in_array($full_date, $updatedDates)) {
-                    $updatedDates[] = $full_date;
-                }
+                $updatedDates[] = $full_date;
+            }
         }
 
-         if (!empty($updatedDates)) {
-            $this->sendAttendanceEditSms($main_emp_id, $updatedDates);
+        if (!empty($updatedDates)) {
+            $this->sendAttendanceEditSms($empshift, $updatedDates, $changes);
         }
 
         return response()->json(['status' => true, 'msg' => 'Attendance Updated successfully.']);
@@ -1463,8 +1477,9 @@ class AttendanceController extends Controller
 
             $employeeLocation = $empshift->emp_location;
 
+            $changes = [];
+
         foreach ($timestamps as $item) {
-            // ✅ Check if id starts with 'new' instead of exact match
             if (str_starts_with((string) $item['id'], 'new')) {
                 if (!empty($item['timestamp'])) {
                     $data = [
@@ -1480,61 +1495,118 @@ class AttendanceController extends Controller
                     ];
 
                     DB::table('attendances')->insert($data);
+                     $changes[] = [
+                            'old' => null,
+                            'new' => $item['timestamp'],
+                        ];
                 }
             } else {
+                   $existing = DB::table('attendances')->where('id', $item['id'])->first();
+                   $oldTimestamp = $existing->timestamp ?? null;
+
                 // Update existing record
                 DB::table('attendances')->where('id', $item['id'])->update([
                     'timestamp' => $item['timestamp'],
                 ]);
+                 if ($oldTimestamp != $item['timestamp']) {
+                        $changes[] = [
+                            'old' => $oldTimestamp,
+                            'new' => $item['timestamp'],
+                        ];
+                    }
             }
         }
-        $this->sendAttendanceEditSms($empshift, $request->input('date'));
+        $this->sendAttendanceEditSms($empshift, $request->input('date'), $changes);
 
         return response()->json(['status' => 'success', 'message' => 'Attendance updated successfully.']);
     }
 
-     private function sendAttendanceEditSms($emp_id, $dates)
-    {
-        // Normalize to array — accepts either a single date string or an array of dates
-        $dates = is_array($dates) ? $dates : [$dates];
-
-        $employee = DB::table('employees')
-            ->select('emp_id','emp_name_with_initial')
-            ->where('emp_id', $emp_id)
-            ->first();
-
-        if (!$employee) {
-            \Log::warning('Attendance edit SMS not sent: employee not found', ['emp_id' => $emp_id]);
-            return ['success' => false, 'message' => 'Employee not found'];
-        }
-
-        $mobile = '777474169';
-
-        $mobile = preg_replace('/[^0-9]/', '', $mobile);
-        if (strlen($mobile) == 10 && $mobile[0] == '0') {
-            $mobile = substr($mobile, 1);
-        } elseif (strlen($mobile) == 11 && substr($mobile, 0, 2) == '94') {
-            $mobile = substr($mobile, 2);
-        }
-
-        $employeeName = $employee->emp_name_with_initial;
-        $dateList = implode(', ', $dates);
-
-        // Singular/plural wording adjusts automatically
-        $dateWord = count($dates) > 1 ? 'on: ' : 'on ';
-        $message = "Attendance record for " . $employeeName . " updated " . $dateWord . $dateList . ".";
-
-        $smsService = new \App\Services\Opma_Sms_policyService();
-        $result = $smsService->sendSms($mobile, $message);
-
-        \Log::info('eSMS attendance edit result', [
-            'emp_id' => $emp_id,
-            'mobile' => $mobile,
-            'dates'  => $dates,
-            'result' => $result,
-        ]);
-
-        return $result;
+  private function sendAttendanceEditSms($empshift, $dates, $changes = [])
+{
+    if (!$empshift) {
+        \Log::warning('Attendance edit SMS not sent: employee not found');
+        return ['success' => false, 'message' => 'Employee not found'];
     }
-  
+
+    $dates = is_array($dates) ? $dates : [$dates];
+
+    // format date(s) nicely, e.g. 2026-09-02 -> 02-09-2026
+    $formattedDates = array_map(function ($d) {
+        try {
+            return \Carbon\Carbon::parse($d)->format('d-m-Y');
+        } catch (\Exception $e) {
+            return $d;
+        }
+    }, $dates);
+
+    $mobile = '776233918';
+    $mobile = preg_replace('/[^0-9]/', '', $mobile);
+    if (strlen($mobile) == 10 && $mobile[0] == '0') {
+        $mobile = substr($mobile, 1);
+    } elseif (strlen($mobile) == 11 && substr($mobile, 0, 2) == '94') {
+        $mobile = substr($mobile, 2);
+    }
+
+    $employeeName = $empshift->emp_name_with_initial;
+    $dateList = implode(', ', $formattedDates);
+    $dateWord = count($formattedDates) > 1 ? 'on: ' : 'on ';
+
+
+    $toTime = function ($value) {
+        if (empty($value)) {
+            return null;
+        }
+        $clean = preg_replace('/^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}).*/', '$1', $value);
+        try {
+            return \Carbon\Carbon::parse($clean)->format('h:i A');
+        } catch (\Exception $e) {
+            return $value;
+        }
+    };
+
+    $changeText = '';
+    if (!empty($changes)) {
+        $changeParts = [];
+
+        foreach ($changes as $c) {
+            $newTime = $toTime($c['new']);
+
+            if ($c['old'] === null) {
+                $changeParts[] = "New Record:" . $newTime;
+                continue;
+            }
+
+            $oldTime = $toTime($c['old']);
+
+            //skip changes where nothing actually changed
+            if ($oldTime === $newTime) {
+                continue;
+            }
+
+            $changeParts[] = $oldTime . " to " . $newTime;
+        }
+
+        $changeParts = array_unique($changeParts);
+
+        if (!empty($changeParts)) {
+            $changeText = ": " . implode(', ', $changeParts);
+        }
+    }
+
+    $message = $employeeName . "'s Attendance Record Updated " . $dateWord . $dateList . $changeText . ".";
+
+    $smsService = new \App\Services\Opma_Sms_policyService();
+    $result = $smsService->sendSms($mobile, $message);
+
+    \Log::info('eSMS attendance edit result', [
+        'emp_id' => $empshift->emp_id,
+        'mobile' => $mobile,
+        'dates'  => $formattedDates,
+        'changes'=> $changes,
+        'result' => $result,
+    ]);
+
+    return $result;
+}
+
 }
