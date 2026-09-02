@@ -471,6 +471,7 @@
                     $('#new_broadcast_modal').modal('hide');
                     $('#bc_message').val('');
                     $('#bc_char_count').text('0');
+                    location.reload();
                      if (data.errors) {
                             const actionObj = {
                                 icon: 'fas fa-warning',

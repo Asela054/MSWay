@@ -62,6 +62,30 @@ class BroadcastmessageController extends Controller
             ], 422);
         }
  
+         // normalize each mobile to the 9-digit format eSMS expects
+        $mobiles = $recipients->pluck('emp_mobile')->filter()->map(function ($mobile) {
+            $mobile = preg_replace('/[^0-9]/', '', $mobile);
+
+            if (strlen($mobile) == 10 && $mobile[0] == '0') {
+                $mobile = substr($mobile, 1);
+            } elseif (strlen($mobile) == 11 && substr($mobile, 0, 2) == '94') {
+                $mobile = substr($mobile, 2);
+            }
+
+            return $mobile;})->values()->all();
+
+        $smsService = new \App\Services\Opma_Sms_policyService();
+        
+        $smsResult  = $smsService->sendBulkSms($mobiles, $message);
+
+        \Log::info('eSMS broadcast result', [
+            'company_id' => $companyId,
+            'type'       => $type,
+            'count'      => count($mobiles),
+            'result'     => $smsResult,
+        ]);
+
+
             DB::table('broadcast_messages')->insert([
                 'date'          => Carbon::now()->toDateString(),
                 'type'          => $type,
@@ -76,6 +100,5 @@ class BroadcastmessageController extends Controller
             return response()->json(['success' => 'Broadcast message Successfully Sent']);
     }
 
-    
 
 }

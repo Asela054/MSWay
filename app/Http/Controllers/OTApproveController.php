@@ -101,6 +101,7 @@ class OTApproveController extends Controller
         ->leftJoin('branches', 'at1.location', '=', 'branches.id')
         ->leftJoin('departments', 'employees.emp_department', '=', 'departments.id')
         ->whereNull('at1.deleted_at')
+        ->where('employees.ot_applicable', 1)
         ->whereIn('employees.emp_id', $accessibleEmployeeIds); 
             // Apply filters
             if (!empty($department)) {
@@ -142,10 +143,10 @@ class OTApproveController extends Controller
         foreach ($attendance_data as $att) {
 
              $employeeObj = (object)[
-            'emp_id' => $att->emp_id,
-            'emp_name_with_initial' => $att->emp_name_with_initial,
-            'calling_name' => $att->calling_name
-        ];
+                'emp_id' => $att->emp_id,
+                'emp_name_with_initial' => $att->emp_name_with_initial,
+                'calling_name' => $att->calling_name
+            ];
 
             $emp_id = $att->uid;
             $date = $att->date;
