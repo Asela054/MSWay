@@ -14,6 +14,7 @@ class AttendancePolicyService
 {
     // Max allowed gap for a "seamless" shift transition (minutes).
     // e.g. night shift off at 8am, day shift on at 9am should still count as "seamless".
+    private $seamlessTransitionGraceMinutes = 360;
 
     public function attendanceInsertcsv_txt($full_emp_id, $date_input, $timestamp, $date)
     {
@@ -172,7 +173,7 @@ class AttendancePolicyService
             // matches the current shift's on time within the grace period,
             // insert virtual checkout/checkin records at that boundary since
             // there's no physical punch there.
-            //$this->handleSeamlessShiftTransition($full_emp_id, $date_input, $employeeLocation);
+            $this->handleSeamlessShiftTransition($full_emp_id, $date_input, $employeeLocation);
 
             return $this->checkAndInsertLateAttendance($full_emp_id, $attendance_date, $timestamp, $insertId);
         }
@@ -188,80 +189,80 @@ class AttendancePolicyService
      * record pair at that boundary, since without a physical timestamp there
      * the system could misread both shifts as a single continuous session.
      */
-    // private function handleSeamlessShiftTransition($full_emp_id, $date_input, $employeeLocation = null)
-    // {
-    //     $previous_day = (new DateTime($date_input))->modify('-1 day')->format('Y-m-d');
+    private function handleSeamlessShiftTransition($full_emp_id, $date_input, $employeeLocation = null)
+    {
+        $previous_day = (new DateTime($date_input))->modify('-1 day')->format('Y-m-d');
 
-    //     $prevRoster = DB::table('employee_roster_details')
-    //         ->where('emp_id', $full_emp_id)
-    //         ->where('work_date', $previous_day)
-    //         ->first();
+        $prevRoster = DB::table('employee_roster_details')
+            ->where('emp_id', $full_emp_id)
+            ->where('work_date', $previous_day)
+            ->first();
 
-    //     $currRoster = DB::table('employee_roster_details')
-    //         ->where('emp_id', $full_emp_id)
-    //         ->where('work_date', $date_input)
-    //         ->first();
+        $currRoster = DB::table('employee_roster_details')
+            ->where('emp_id', $full_emp_id)
+            ->where('work_date', $date_input)
+            ->first();
 
-    //     if (!$prevRoster || !$currRoster) {
-    //         return; // doesn't apply if either roster is missing
-    //     }
+        if (!$prevRoster || !$currRoster) {
+            return; // doesn't apply if either roster is missing
+        }
 
-    //     $prevShift = DB::table('shift_types')->where('id', $prevRoster->shift_id)->first();
-    //     $currShift = DB::table('shift_types')->where('id', $currRoster->shift_id)->first();
+        $prevShift = DB::table('shift_types')->where('id', $prevRoster->shift_id)->first();
+        $currShift = DB::table('shift_types')->where('id', $currRoster->shift_id)->first();
 
-    //     if (!$prevShift || !$currShift || !$prevShift->offduty_time || !$currShift->onduty_time) {
-    //         return;
-    //     }
+        if (!$prevShift || !$currShift || !$prevShift->offduty_time || !$currShift->onduty_time) {
+            return;
+        }
 
-    //     // Previous shift's off time - resolve to the actual date
-    //     // (if off_next_day = 1, the off time falls on date_input; otherwise on previous_day)
-    //     $prevOffDate = ($prevShift->off_next_day == '1') ? $date_input : $previous_day;
-    //     $prevOffTimestamp = Carbon::parse($prevOffDate . ' ' . $prevShift->offduty_time);
+        // Previous shift's off time - resolve to the actual date
+        // (if off_next_day = 1, the off time falls on date_input; otherwise on previous_day)
+        $prevOffDate = ($prevShift->off_next_day == '1') ? $date_input : $previous_day;
+        $prevOffTimestamp = Carbon::parse($prevOffDate . ' ' . $prevShift->offduty_time);
 
-    //     // Current shift's on time
-    //     $currOnTimestamp = Carbon::parse($date_input . ' ' . $currShift->onduty_time);
+        // Current shift's on time
+        $currOnTimestamp = Carbon::parse($date_input . ' ' . $currShift->onduty_time);
 
-    //     // Diff in minutes - curr on time must come after prev off time (>= 0)
-    //     $diffMinutes = $prevOffTimestamp->diffInMinutes($currOnTimestamp, false);
+        // Diff in minutes - curr on time must come after prev off time (>= 0)
+        $diffMinutes = $prevOffTimestamp->diffInMinutes($currOnTimestamp, false);
 
-    //     // If negative (curr on time is before prev off time), or outside the grace period - doesn't apply
-    //     if ($diffMinutes < 0 || $diffMinutes > $this->seamlessTransitionGraceMinutes) {
-    //         return;
-    //     }
+        // If negative (curr on time is before prev off time), or outside the grace period - doesn't apply
+        if ($diffMinutes < 0 || $diffMinutes > $this->seamlessTransitionGraceMinutes) {
+            return;
+        }
 
-    //     // Checkin - exactly at the current shift's on time
-    //     $checkinTimestamp = $currOnTimestamp->format('Y-m-d H:i:s');
+        // Checkin - exactly at the current shift's on time
+        $checkinTimestamp = $currOnTimestamp->format('Y-m-d H:i:s');
 
-    //     // Checkout - one minute before checkin (so the order stays correct)
-    //     $checkoutTimestamp = $currOnTimestamp->copy()->subMinute()->format('Y-m-d H:i:s');
+        // Checkout - one minute before checkin (so the order stays correct)
+        $checkoutTimestamp = $currOnTimestamp->copy()->subMinute()->format('Y-m-d H:i:s');
 
-    //     // Check if a physical punch already exists near this boundary
-    //     $exists = AppAttendance::where('emp_id', $full_emp_id)
-    //         ->whereIn('timestamp', [$checkoutTimestamp, $checkinTimestamp])
-    //         ->exists();
+        // Check if a physical punch already exists near this boundary
+        $exists = AppAttendance::where('emp_id', $full_emp_id)
+            ->whereIn('timestamp', [$checkoutTimestamp, $checkinTimestamp])
+            ->exists();
 
-    //     if ($exists) {
-    //         return; // physical punches already exist near here
-    //     }
+        if ($exists) {
+            return; // physical punches already exist near here
+        }
 
-    //     // 1. Previous shift's checkout (attributed to previous_day)
-    //     $checkoutRecord = new AppAttendance();
-    //     $checkoutRecord->uid = $full_emp_id;
-    //     $checkoutRecord->emp_id = $full_emp_id;
-    //     $checkoutRecord->timestamp = $checkoutTimestamp;
-    //     $checkoutRecord->date = $previous_day;
-    //     $checkoutRecord->location = $employeeLocation;
-    //     $checkoutRecord->save();
+        // 1. Previous shift's checkout (attributed to previous_day)
+        $checkoutRecord = new AppAttendance();
+        $checkoutRecord->uid = $full_emp_id;
+        $checkoutRecord->emp_id = $full_emp_id;
+        $checkoutRecord->timestamp = $checkoutTimestamp;
+        $checkoutRecord->date = $previous_day;
+        $checkoutRecord->location = $employeeLocation;
+        $checkoutRecord->save();
 
-    //     // 2. Current shift's checkin (attributed to date_input)
-    //     $checkinRecord = new AppAttendance();
-    //     $checkinRecord->uid = $full_emp_id;
-    //     $checkinRecord->emp_id = $full_emp_id;
-    //     $checkinRecord->timestamp = $checkinTimestamp;
-    //     $checkinRecord->date = $date_input;
-    //     $checkinRecord->location = $employeeLocation;
-    //     $checkinRecord->save();
-    // }
+        // 2. Current shift's checkin (attributed to date_input)
+        $checkinRecord = new AppAttendance();
+        $checkinRecord->uid = $full_emp_id;
+        $checkinRecord->emp_id = $full_emp_id;
+        $checkinRecord->timestamp = $checkinTimestamp;
+        $checkinRecord->date = $date_input;
+        $checkinRecord->location = $employeeLocation;
+        $checkinRecord->save();
+    }
 
     public function attendanceInsertsingle_dep($empid, $attendacetimestamp, $location, $attendacedate)
     {
@@ -417,7 +418,7 @@ class AttendancePolicyService
             $insertId = DB::table('attendances')->insertGetId($data);
 
             // Seamless shift transition check - same as attendanceInsertcsv_txt
-           // $this->handleSeamlessShiftTransition($empid, $attendacedate, $location);
+            $this->handleSeamlessShiftTransition($empid, $attendacedate, $location);
 
             return $this->checkAndInsertLateAttendance($empid, $attendacedate, $attendacetimestamp, $insertId);
 
