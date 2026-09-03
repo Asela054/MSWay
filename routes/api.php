@@ -149,6 +149,11 @@ Route::get('GetCompanyList', ['uses' => '\App\Http\Controllers\Api\Opma_producti
 Route::post('GetDepartmentList', ['uses' => '\App\Http\Controllers\Api\Opma_production\CommenrecordController@Getdepartmentlist', 'as' => 'GetDepartmentList']);
 Route::post('ApproveDailySummary', ['uses' => '\App\Http\Controllers\Api\Opma_production\OpmaDailyProductionController@approvedailysummary', 'as' => 'ApproveDailySummary']);
 
+// Salary Advance API
+Route::post('v1/get_available_amount', ['uses' => '\App\Http\Controllers\Api\APISalaryAdvanceController@getAvailableAmount', 'as' => 'get_available_amount']);
+Route::post('v1/salary_advance_create', ['uses' => '\App\Http\Controllers\Api\APISalaryAdvanceController@salary_advance_create', 'as' => 'salary_advance_create']);
+Route::post('v1/get_salary_advance_list', ['uses' => '\App\Http\Controllers\Api\APISalaryAdvanceController@Getsalaryadvancelist', 'as' => 'get_salary_advance_list']);
+
 
 Route::get('/download-pdf/{pdfId}', function($pdfId) {
     $pdfData = session()->get($pdfId);
