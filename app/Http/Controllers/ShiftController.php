@@ -7,6 +7,7 @@ use App\Employee;
 use App\Helpers\EmployeeHelper;
 use App\ShiftType;
 use App\Branch;
+use App\JobCategory;
 use Illuminate\Http\Request;
 use Validator;
 use DB;
@@ -32,12 +33,12 @@ class ShiftController extends Controller
         if(!$permission) {
             abort(403);
         }
-        $shifttype= ShiftType::orderBy('id', 'asc')->get();
+        $shifttype= ShiftType::where('deleted', 0)->orderBy('id', 'asc')->get();
         $employee=Employee::orderBy('id', 'desc')->get();
         $branch=Branch::orderBy('id', 'desc')->get();
+        $jobcategories = JobCategory::orderBy('id', 'asc')->get();
 
-    //   dd($shift);
-        return view('Shift.shift',compact('employee','shifttype','branch'));
+        return view('Shift.shift',compact('employee','shifttype','branch','jobcategories'));
     }
 
     public function shift_list_dt(Request $request)
@@ -55,6 +56,10 @@ class ShiftController extends Controller
         $query = DB::table('employees')
             ->leftjoin('shift_types', 'shift_types.id', '=',   'employees.emp_shift')
             ->leftjoin('departments', 'employees.emp_department', '=', 'departments.id')
+            ->leftjoin('job_categories', 'job_categories.id', '=', 'employees.job_category_id')
+             ->where(function($q) {
+                    $q->where('shift_types.deleted', 0)->orWhereNull('shift_types.deleted');
+                })
             ->select('employees.emp_id',
                 'employees.calling_name',
                 'employees.emp_first_name',
@@ -63,7 +68,9 @@ class ShiftController extends Controller
                 'shift_types.offduty_time',
                 'employees.emp_name_with_initial',
                 'shift_types.id as shift_type_id',
-                'departments.name as dep_name'
+                'departments.name as dep_name',
+                'employees.job_category_id',
+                'job_categories.category'
             );
 
 
@@ -103,6 +110,7 @@ class ShiftController extends Controller
                                         data-onduty_time="'.$row->onduty_time.'"
                                         data-offduty_time="'.$row->offduty_time.'"
                                         data-shift_type_id="'.$row->shift_type_id.'"
+                                        data-job_category_id="'.($row->job_category_id ?? '').'"
                                         class="edit btn btn-primary btn-sm" type="submit"><i class="fas fa-pencil-alt"></i></button> ';
                 $btn .= '<button type="submit" name="delete" data-id="'.$row->emp_id.'" class="delete btn btn-danger btn-sm"><i class="far fa-trash-alt"></i></button>';
 
@@ -277,12 +285,17 @@ class ShiftController extends Controller
         
         $shift->save();
         
+        $updateData = ['emp_shift' => $request->shift];
+        if ($request->has('job_category') && $request->job_category != '') {
+            $updateData['job_category_id'] = $request->job_category;
+        }
+
         DB::table('employees')
         ->where('emp_id', $request->uid)
-        ->update(['emp_shift' => $request->shift]);
+        ->update($updateData);
        
 
-        return response()->json(['success' => 'Employee Shift Changed']);
+        return response()->json(['success' => 'Employee Shift & Job Category Updated']);
     }
 
     /**
@@ -304,5 +317,112 @@ class ShiftController extends Controller
             ->update(['emp_shift' => '']);
 
         return response()->json(['success' => 'Employee Shift Deleted']);
+    }
+
+    public function dpt_allocation_list(Request $request)
+    {
+        $user = Auth::user();
+        $permission = $user->can('shift-list');
+        if (!$permission) {
+            return response()->json(['error' => 'UnAuthorized'], 401);
+        }
+
+        $department = $request->input('department');
+
+        $empList = DB::table('employees')
+            ->where('emp_department', $department)
+            ->where('deleted', 0)
+            ->where('is_resigned', 0)
+            ->orderBy('emp_name_with_initial')
+            ->select('emp_id', 'emp_name_with_initial', 'emp_shift', 'job_category_id')
+            ->get();
+
+        $shiftTypes    = ShiftType::where('deleted', 0)->orderBy('id')->get();
+        $jobCategories = JobCategory::orderBy('id')->get();
+
+        if ($empList->isEmpty()) {
+            $html = '<tr><td colspan="4" class="text-center text-muted">No employees found for the selected department.</td></tr>';
+            return response()->json(['html' => $html]);
+        }
+
+        $html = '';
+        foreach ($empList as $emp) {
+            // Build Shift select
+            $shiftSelect  = '<select class="form-control form-control-sm shift-select">';
+            $shiftSelect .= '<option value="">-- Select Shift --</option>';
+            foreach ($shiftTypes as $st) {
+                $selected     = ($emp->emp_shift == $st->id) ? ' selected' : '';
+                $shiftSelect .= '<option value="' . $st->id . '"' . $selected . '>' . htmlspecialchars($st->shift_name) . ' - ' . htmlspecialchars($st->shift_code) . '</option>';
+            }
+            $shiftSelect .= '</select>';
+
+            // Build Job Category select
+            $jobSelect  = '<select class="form-control form-control-sm job-cat-select">';
+            $jobSelect .= '<option value="">-- Select --</option>';
+            foreach ($jobCategories as $jc) {
+                $selected  = ($emp->job_category_id == $jc->id) ? ' selected' : '';
+                $jobSelect .= '<option value="' . $jc->id . '"' . $selected . '>' . htmlspecialchars($jc->category) . '</option>';
+            }
+            $jobSelect .= '</select>';
+
+            $html .= '<tr data-emp-id="' . $emp->emp_id . '">';
+            $html .= '<td>' . $emp->emp_id . '</td>';
+            $html .= '<td>' . htmlspecialchars($emp->emp_name_with_initial) . '</td>';
+            $html .= '<td>' . $shiftSelect . '</td>';
+            $html .= '<td>' . $jobSelect . '</td>';
+            $html .= '</tr>';
+        }
+
+        return response()->json(['html' => $html]);
+    }
+
+
+    /**
+     * Bulk-update emp_shift and job_category_id for a list of employees.
+     */
+    public function dpt_allocation_update(Request $request)
+    {
+        $user = Auth::user();
+        $permission = $user->can('shift-edit');
+        if (!$permission) {
+            return response()->json(['error' => 'UnAuthorized'], 401);
+        }
+
+        $tableData = $request->input('tableData', []);
+
+        if (empty($tableData)) {
+            return response()->json(['errors' => 'No employee data provided.']);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            foreach ($tableData as $row) {
+                $emp_id          = $row['emp_id'];
+                $shift_id        = $row['shift_id']        ?? null;
+                $job_category_id = $row['job_category_id'] ?? null;
+
+                $updateData = [];
+                if (!is_null($shift_id) && $shift_id !== '') {
+                    $updateData['emp_shift'] = $shift_id;
+                }
+                if (!is_null($job_category_id) && $job_category_id !== '') {
+                    $updateData['job_category_id'] = $job_category_id;
+                }
+
+                if (!empty($updateData)) {
+                    DB::table('employees')
+                        ->where('emp_id', $emp_id)
+                        ->update($updateData);
+                }
+            }
+
+            DB::commit();
+            return response()->json(['success' => 'Shifts & Job Categories updated successfully.']);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['errors' => 'An error occurred: ' . $e->getMessage()], 422);
+        }
     }
 }
