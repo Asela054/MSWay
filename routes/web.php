@@ -384,6 +384,8 @@ Route::post('Shift/update', 'ShiftController@update')->name('Shift.update');
 Route::get('Shift/destroy/{id}', 'ShiftController@destroy');
 Route::post('/Shiftupdate', 'ShiftController@Shiftupdate');
 Route::get('/Getshift', 'ShiftController@getshift');
+Route::post('shift_dpt_allocation_list',   'ShiftController@dpt_allocation_list')  ->name('shift_dpt_allocation_list');
+Route::post('shift_dpt_allocation_update', 'ShiftController@dpt_allocation_update')->name('shift_dpt_allocation_update');
 
 Route::resource('AdditionalShift', 'AdditionalShiftController');
 Route::post('addAdditionalShift',['uses' => 'AdditionalShiftController@store', 'as' => 'addAdditionalShift']);
