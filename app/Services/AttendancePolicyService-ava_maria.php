@@ -37,7 +37,23 @@ class AttendancePolicyService
 
         if ($emprosterinfo) {
             $empshiftid = $emprosterinfo->shift_id;
-        } else {
+
+            if ($empshiftid == 0 || $empshiftid == 100 || $empshiftid == 101){
+                $previous_day = (new DateTime($date_input))->modify('-1 day')->format('Y-m-d');
+                $emprosterinfo = DB::table('employee_roster_details')
+                    ->select('emp_id', 'shift_id')
+                    ->where('emp_id', $full_emp_id)
+                    ->where('work_date', $previous_day)
+                    ->first();
+
+                if ($emprosterinfo) {
+                    $empshiftid = $emprosterinfo->shift_id;
+                } else {
+                    $empshiftid = $empshift->emp_shift;
+                }
+            }
+        }
+         else {
             $previous_day = (new DateTime($date_input))->modify('-1 day')->format('Y-m-d');
             $emprosterinfo = DB::table('employee_roster_details')
                 ->select('emp_id', 'shift_id')
@@ -295,6 +311,22 @@ class AttendancePolicyService
 
         if ($emprosterinfo) {
             $empshiftid = $emprosterinfo->shift_id;
+
+              if ($empshiftid == 0 || $empshiftid == 100 || $empshiftid == 101){
+                $previous_day = (new DateTime($attendacedate))->modify('-1 day')->format('Y-m-d');
+                $emprosterinfo = DB::table('employee_roster_details')
+                    ->select('emp_id', 'shift_id')
+                    ->where('emp_id', $empid)
+                    ->where('work_date', $previous_day)
+                    ->first();
+
+                if ($emprosterinfo) {
+                    $empshiftid = $emprosterinfo->shift_id;
+                } else {
+                    $empshiftid = $empshift->emp_shift;
+                }
+            }
+
         } else {
             $empshiftid = $empshift->emp_shift;
         }
@@ -303,6 +335,7 @@ class AttendancePolicyService
             ->where('id', $empshiftid)
             ->first();
 
+        
         $previousDate = Carbon::parse($date_stamp)->subDay()->format('Y-m-d');
         $employeeshiftdetails = DB::table('employeeshiftdetails')
             ->where('date_from', $previousDate)
