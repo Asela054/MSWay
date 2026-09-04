@@ -14,7 +14,33 @@ class AttendancePolicyService
 {
     // Max allowed gap for a "seamless" shift transition (minutes).
     // e.g. night shift off at 8am, day shift on at 9am should still count as "seamless".
-    private $seamlessTransitionGraceMinutes = 360;
+
+
+    private function getRosterShiftForDate($empId, $workDate, $preferOvernight = null)
+    {
+        $shifts = DB::table('employee_roster_details')
+            ->join('shift_types', 'employee_roster_details.shift_id', '=', 'shift_types.id')
+            ->select('shift_types.*', 'employee_roster_details.shift_id as roster_shift_id')
+            ->where('employee_roster_details.emp_id', $empId)
+            ->where('employee_roster_details.work_date', $workDate)
+            ->get();
+
+        if ($shifts->isEmpty()) {
+            return null;
+        }
+
+        if ($shifts->count() > 1 && !is_null($preferOvernight)) {
+            $match = $shifts->first(function ($s) use ($preferOvernight) {
+                $isOvernight = ($s->off_next_day == '1' || $s->on_next_day == '1');
+                return $preferOvernight ? $isOvernight : !$isOvernight;
+            });
+            if ($match) {
+                return $match;
+            }
+        }
+
+        return $shifts->first();
+    }
 
     public function attendanceInsertcsv_txt($full_emp_id, $date_input, $timestamp, $date)
     {
@@ -67,12 +93,50 @@ class AttendancePolicyService
         $attendance_date = null;
 
         // ============================================================
+        // NEW: Pre-check — regardless of what shift is rostered for
+        // date_input, check if the PREVIOUS day had an overnight
+        // (off_next_day = 1) shift, and whether this punch falls inside
+        // that shift's overflow window. This catches the case where
+        // date_input's own rostered shift is a normal day shift (so
+        // Branch 1/2 below never trigger), but the punch is actually the
+        // tail-end checkout of the previous night's overnight shift
+        // (e.g. 09-03 21:45 on -> 09-04 06:25 off, while 09-04 is also
+        // rostered with its own day shift).
+        // Only runs when date_input's OWN shift is not itself an
+        // overnight shift, so it never overlaps with Branch 1/2's logic.
+        // ============================================================
+        $overnightCarryoverMatched = false;
+
+        if ($date == $date_input && (!$shift || $shift->off_next_day != '1')) {
+            $previous_day_chk = (new DateTime($date_input))->modify('-1 day')->format('Y-m-d');
+            $prevOvernightShift = $this->getRosterShiftForDate($full_emp_id, $previous_day_chk, true);
+
+            if ($prevOvernightShift
+                && $prevOvernightShift->off_next_day == '1'
+                && $prevOvernightShift->onduty_time
+                && $prevOvernightShift->offduty_time) {
+
+                $ts = Carbon::parse($timestamp);
+                $prevWindowStart = Carbon::parse($previous_day_chk . ' ' . $prevOvernightShift->onduty_time)->subMinutes(60);
+                $prevWindowEnd   = Carbon::parse($date_input . ' ' . $prevOvernightShift->offduty_time)->addMinutes(60);
+
+                if ($ts->between($prevWindowStart, $prevWindowEnd)) {
+                    $attendance_date = $previous_day_chk;
+                    $overnightCarryoverMatched = true;
+                }
+            }
+        }
+
+        if ($overnightCarryoverMatched) {
+            // attendance_date already set above - fall through to save logic
+
+        // ============================================================
         // Branch 1: off_next_day = 0, on_next_day = 1
         // (left untouched as requested - kept as-is)
         // ============================================================
-        if ($shift && $shift->off_next_day == '0' && $shift->on_next_day == '1' && $date == $date_input) {
+        } elseif ($shift && $shift->off_next_day == '0' && $shift->on_next_day == '1' && $date == $date_input) {
             $next_day = (new DateTime($date_input))->modify('+1 day')->format('Y-m-d');
-            $shif_ontime = Carbon::parse($shift->onduty_time);
+            $shif_ontime = Carbon::parse($date . ' ' . $shift->onduty_time);
             $attendance_time = Carbon::parse($timestamp);
 
             if ($shif_ontime->format('H:i:s') > $attendance_time->format('H:i:s')) {
@@ -83,36 +147,17 @@ class AttendancePolicyService
 
         // ============================================================
         // Branch 2: off_next_day = 1, on_next_day = 0
-        // FIX: Instead of the AM/PM heuristic, this checks the timestamp
-        // against two actual shift windows (previous day's overflow
-        // window + current day's fresh window) to decide the date.
-        // This fixes the issue where a night shift's tail (checkout)
-        // was wrongly attributed to a different shift starting the
-        // same day.
         // ============================================================
         } elseif ($shift && $shift->off_next_day == '1' && $shift->on_next_day == '0' && $date == $date_input) {
 
             $previous_day = (new DateTime($date_input))->modify('-1 day')->format('Y-m-d');
             $next_day = (new DateTime($date_input))->modify('+1 day')->format('Y-m-d');
 
-            // Fetch previous day's roster shift too (needed for window comparison)
-            $prevRosterInfo = DB::table('employee_roster_details')
-                ->select('emp_id', 'shift_id')
-                ->where('emp_id', $full_emp_id)
-                ->where('work_date', $previous_day)
-                ->first();
-            $prevShift = $prevRosterInfo
-                ? DB::table('shift_types')->where('id', $prevRosterInfo->shift_id)->first()
-                : $shift; // fallback to the same shift if no roster found
+            $prevShift = $this->getRosterShiftForDate($full_emp_id, $previous_day, true) ?: $shift;
 
             $ts = Carbon::parse($timestamp);
             $matched = false;
 
-            // (a) Previous day's shift overflow window
-            //     e.g. prev_day onduty_time -> offduty_time (+ buffer)
-            //     offduty_time falls on date_input ONLY if prevShift itself
-            //     crosses midnight (off_next_day = 1). Otherwise it falls
-            //     on previous_day itself (e.g. a normal day shift).
             if ($prevShift && $prevShift->onduty_time && $prevShift->offduty_time) {
                 $prevOffDate = ($prevShift->off_next_day == '1') ? $date_input : $previous_day;
 
@@ -125,8 +170,6 @@ class AttendancePolicyService
                 }
             }
 
-            // (b) Current day's fresh shift window
-            //     e.g. date_input onduty_time -> next_day offduty_time (+ buffer)
             if (!$matched && $shift && $shift->onduty_time && $shift->offduty_time) {
                 $currWindowStart = Carbon::parse($date_input . ' ' . $shift->onduty_time)->subMinutes(60);
                 $currWindowEnd   = Carbon::parse($next_day . ' ' . $shift->offduty_time)->addMinutes(60);
@@ -137,9 +180,8 @@ class AttendancePolicyService
                 }
             }
 
-            // (c) If it doesn't fall in either window, fall back to the original AM/PM logic
             if (!$matched) {
-                $shif_ontime = Carbon::parse($shift->onduty_time);
+                $shif_ontime = Carbon::parse($date . ' ' . $shift->onduty_time);
                 $attendance_time = Carbon::parse($timestamp);
 
                 if ($shif_ontime->format('H:i:s') > $attendance_time->format('H:i:s')) {
@@ -169,99 +211,11 @@ class AttendancePolicyService
 
             $insertId = $Attendance->id;
 
-            // Seamless shift transition check - if the previous shift's off time
-            // matches the current shift's on time within the grace period,
-            // insert virtual checkout/checkin records at that boundary since
-            // there's no physical punch there.
-            $this->handleSeamlessShiftTransition($full_emp_id, $date_input, $employeeLocation);
+            //$this->handleSeamlessShiftTransition($full_emp_id, $date_input, $employeeLocation);
 
             return $this->checkAndInsertLateAttendance($full_emp_id, $attendance_date, $timestamp, $insertId);
         }
         return true;
-    }
-
-    /**
-     * For some employees, the previous day's shift off time coincides with
-     * the current day's shift on time (within a grace period) - meaning no
-     * physical punch is recorded at that transition point (e.g. night shift
-     * ends at 8am and the day shift starts at that exact same time). This
-     * generates a virtual checkout (previous shift) / checkin (current shift)
-     * record pair at that boundary, since without a physical timestamp there
-     * the system could misread both shifts as a single continuous session.
-     */
-    private function handleSeamlessShiftTransition($full_emp_id, $date_input, $employeeLocation = null)
-    {
-        $previous_day = (new DateTime($date_input))->modify('-1 day')->format('Y-m-d');
-
-        $prevRoster = DB::table('employee_roster_details')
-            ->where('emp_id', $full_emp_id)
-            ->where('work_date', $previous_day)
-            ->first();
-
-        $currRoster = DB::table('employee_roster_details')
-            ->where('emp_id', $full_emp_id)
-            ->where('work_date', $date_input)
-            ->first();
-
-        if (!$prevRoster || !$currRoster) {
-            return; // doesn't apply if either roster is missing
-        }
-
-        $prevShift = DB::table('shift_types')->where('id', $prevRoster->shift_id)->first();
-        $currShift = DB::table('shift_types')->where('id', $currRoster->shift_id)->first();
-
-        if (!$prevShift || !$currShift || !$prevShift->offduty_time || !$currShift->onduty_time) {
-            return;
-        }
-
-        // Previous shift's off time - resolve to the actual date
-        // (if off_next_day = 1, the off time falls on date_input; otherwise on previous_day)
-        $prevOffDate = ($prevShift->off_next_day == '1') ? $date_input : $previous_day;
-        $prevOffTimestamp = Carbon::parse($prevOffDate . ' ' . $prevShift->offduty_time);
-
-        // Current shift's on time
-        $currOnTimestamp = Carbon::parse($date_input . ' ' . $currShift->onduty_time);
-
-        // Diff in minutes - curr on time must come after prev off time (>= 0)
-        $diffMinutes = $prevOffTimestamp->diffInMinutes($currOnTimestamp, false);
-
-        // If negative (curr on time is before prev off time), or outside the grace period - doesn't apply
-        if ($diffMinutes < 0 || $diffMinutes > $this->seamlessTransitionGraceMinutes) {
-            return;
-        }
-
-        // Checkin - exactly at the current shift's on time
-        $checkinTimestamp = $currOnTimestamp->format('Y-m-d H:i:s');
-
-        // Checkout - one minute before checkin (so the order stays correct)
-        $checkoutTimestamp = $currOnTimestamp->copy()->subMinute()->format('Y-m-d H:i:s');
-
-        // Check if a physical punch already exists near this boundary
-        $exists = AppAttendance::where('emp_id', $full_emp_id)
-            ->whereIn('timestamp', [$checkoutTimestamp, $checkinTimestamp])
-            ->exists();
-
-        if ($exists) {
-            return; // physical punches already exist near here
-        }
-
-        // 1. Previous shift's checkout (attributed to previous_day)
-        $checkoutRecord = new AppAttendance();
-        $checkoutRecord->uid = $full_emp_id;
-        $checkoutRecord->emp_id = $full_emp_id;
-        $checkoutRecord->timestamp = $checkoutTimestamp;
-        $checkoutRecord->date = $previous_day;
-        $checkoutRecord->location = $employeeLocation;
-        $checkoutRecord->save();
-
-        // 2. Current shift's checkin (attributed to date_input)
-        $checkinRecord = new AppAttendance();
-        $checkinRecord->uid = $full_emp_id;
-        $checkinRecord->emp_id = $full_emp_id;
-        $checkinRecord->timestamp = $checkinTimestamp;
-        $checkinRecord->date = $date_input;
-        $checkinRecord->location = $employeeLocation;
-        $checkinRecord->save();
     }
 
     public function attendanceInsertsingle_dep($empid, $attendacetimestamp, $location, $attendacedate)
@@ -314,9 +268,48 @@ class AttendancePolicyService
         $final_timestamp = null;
         $attendance_date = null;
 
-        if ($shift && $shift->off_next_day == '0' && $shift->on_next_day == '1' && $date == $date_input) {
-            $next_day = (new DateTime($date_input))->modify('+1 day')->format('Y-m-d');
-            $shif_ontime = Carbon::parse($shift->onduty_time);
+        // ============================================================
+        // NEW: Pre-check — same fix as in attendanceInsertcsv_txt.
+        // Regardless of what shift is rostered for attendacedate, check
+        // if the PREVIOUS day had an overnight (off_next_day = 1) shift,
+        // and whether this punch falls inside that shift's overflow
+        // window. Catches the case where attendacedate's own rostered
+        // shift is a normal day shift (so the branches below never
+        // trigger for it), but the punch is actually the tail-end
+        // checkout of the previous night's overnight shift.
+        // Only runs when attendacedate's OWN shift is not itself an
+        // overnight shift, so it never overlaps with the branches below.
+        // ============================================================
+        $overnightCarryoverMatched = false;
+
+        if ($date_stamp == $attendacedate && (!$shift || $shift->off_next_day != '1')) {
+            $previous_day_chk = (new DateTime($attendacedate))->modify('-1 day')->format('Y-m-d');
+            $prevOvernightShift = $this->getRosterShiftForDate($empid, $previous_day_chk, true);
+
+            if ($prevOvernightShift
+                && $prevOvernightShift->off_next_day == '1'
+                && $prevOvernightShift->onduty_time
+                && $prevOvernightShift->offduty_time) {
+
+                $candidate_timestamp = $attendacedate . ' ' . $time_h . ':' . $time_m . ':00';
+                $ts = Carbon::parse($candidate_timestamp);
+                $prevWindowStart = Carbon::parse($previous_day_chk . ' ' . $prevOvernightShift->onduty_time)->subMinutes(60);
+                $prevWindowEnd   = Carbon::parse($attendacedate . ' ' . $prevOvernightShift->offduty_time)->addMinutes(60);
+
+                if ($ts->between($prevWindowStart, $prevWindowEnd)) {
+                    $final_timestamp = $candidate_timestamp;
+                    $attendance_date = $previous_day_chk;
+                    $overnightCarryoverMatched = true;
+                }
+            }
+        }
+
+        if ($overnightCarryoverMatched) {
+            // final_timestamp / attendance_date already set above - fall through to save logic
+
+        } elseif ($shift && $shift->off_next_day == '0' && $shift->on_next_day == '1' && $date_stamp == $attendacedate) {
+            $next_day = (new DateTime($attendacedate))->modify('+1 day')->format('Y-m-d');
+            $shif_ontime = Carbon::parse($attendacedate . ' ' . $shift->onduty_time);
             $txt_datetime = Carbon::parse($time_h . ':' . $time_m . ':00');
 
             if ($shif_ontime->format('H:i:s') > $txt_datetime->format('H:i:s')) {
@@ -329,10 +322,11 @@ class AttendancePolicyService
 
         // ============================================================
         // off_next_day = 1, on_next_day = 0
-        // FIX: same fix as in attendanceInsertcsv_txt - instead of the
-        // AM/PM heuristic, checks the timestamp against the previous
-        // day's and current day's shift windows to decide the
-        // attendance_date.
+        // UPDATE: $prevShift now resolved via getRosterShiftForDate()
+        // with $preferOvernight = true, same reasoning as
+        // attendanceInsertcsv_txt — avoids ->first() arbitrarily picking
+        // a day-shift row when the employee has two roster rows for the
+        // same previous_day.
         // ============================================================
         } elseif ($shift && $shift->off_next_day == '1' && $shift->on_next_day == '0' && $date_stamp == $attendacedate) {
             $previous_day = (new DateTime($attendacedate))->modify('-1 day')->format('Y-m-d');
@@ -340,23 +334,11 @@ class AttendancePolicyService
 
             $final_timestamp = $attendacedate . ' ' . $time_h . ':' . $time_m . ':00';
 
-            // Fetch previous day's roster shift too (needed for window comparison)
-            $prevRosterInfo = DB::table('employee_roster_details')
-                ->select('emp_id', 'shift_id')
-                ->where('emp_id', $empid)
-                ->where('work_date', $previous_day)
-                ->first();
-            $prevShift = $prevRosterInfo
-                ? DB::table('shift_types')->where('id', $prevRosterInfo->shift_id)->first()
-                : $shift; // fallback to the same shift if no roster found
+            $prevShift = $this->getRosterShiftForDate($empid, $previous_day, true) ?: $shift;
 
             $ts = Carbon::parse($final_timestamp);
             $matched = false;
 
-            // (a) Previous day's shift overflow window
-            //     offduty_time falls on attendacedate ONLY if prevShift
-            //     itself crosses midnight (off_next_day = 1). Otherwise
-            //     it falls on previous_day itself.
             if ($prevShift && $prevShift->onduty_time && $prevShift->offduty_time) {
                 $prevOffDate = ($prevShift->off_next_day == '1') ? $attendacedate : $previous_day;
 
@@ -369,7 +351,6 @@ class AttendancePolicyService
                 }
             }
 
-            // (b) Current day's fresh shift window
             if (!$matched && $shift && $shift->onduty_time && $shift->offduty_time) {
                 $currWindowStart = Carbon::parse($attendacedate . ' ' . $shift->onduty_time)->subMinutes(60);
                 $currWindowEnd   = Carbon::parse($next_day . ' ' . $shift->offduty_time)->addMinutes(60);
@@ -380,9 +361,8 @@ class AttendancePolicyService
                 }
             }
 
-            // (c) If it doesn't fall in either window, fall back to the original AM/PM logic
             if (!$matched) {
-                $shif_ontime = Carbon::parse($shift->onduty_time);
+                $shif_ontime = Carbon::parse($attendacedate . ' ' . $shift->onduty_time);
                 $txt_datetime = Carbon::parse($time_h . ':' . $time_m . ':00');
 
                 if ($shif_ontime > $txt_datetime) {
@@ -418,19 +398,17 @@ class AttendancePolicyService
             $insertId = DB::table('attendances')->insertGetId($data);
 
             // Seamless shift transition check - same as attendanceInsertcsv_txt
-            $this->handleSeamlessShiftTransition($empid, $attendacedate, $location);
+            // $this->handleSeamlessShiftTransition($empid, $attendacedate, $location);
 
             return $this->checkAndInsertLateAttendance($empid, $attendacedate, $attendacetimestamp, $insertId);
-
         }
         return true;
-
     }
-
 
     private function checkAndInsertLateAttendance($empId, $date, $firstCheckin, $attendanceId)
     {
 
+   
         $latePolicyService = new LatePolicyService();
 
         $lateMinutes = 0;
@@ -499,15 +477,17 @@ class AttendancePolicyService
 
             if ($isSaturday && $shiftType->saturday_onduty_time && $shiftType->saturday_offduty_time) {
 
-                $onDutyTime = Carbon::parse($shiftType->saturday_onduty_time);
-                $offDutyTime = Carbon::parse($shiftType->saturday_offduty_time);
+                $onDutyTime = Carbon::parse($date . ' ' . $shiftType->saturday_onduty_time);
+                $offDutyTime = Carbon::parse($date . ' ' . $shiftType->saturday_offduty_time);
             } else {
-                $onDutyTime = Carbon::parse($shiftType->onduty_time);
-                $offDutyTime = Carbon::parse($shiftType->offduty_time);
+                $onDutyTime = Carbon::parse($date . ' ' . $shiftType->onduty_time);
+                $offDutyTime = Carbon::parse($date . ' ' . $shiftType->offduty_time);
             }
 
             $checkInTime = Carbon::parse($firstCheckin);
 
+                         
+            $checkInTime = Carbon::parse($firstCheckin);
             // Determine whether this punch is a check-in or a check-out by measuring how close the punch time is to each boundary.
             // If the punch is closer to off-duty time than on-duty time,
             // it is most likely a check-out punch — so we skip late marking to avoid incorrectly flagging a clock-out as a late arrival.
@@ -522,15 +502,19 @@ class AttendancePolicyService
 
             if ($shiftType->late_time) {
 
-                $ondutylateTime = new DateTime($shiftType->late_time);
+                $ondutylateTime = new DateTime($date . ' ' . $shiftType->late_time);
                 $checkInTime = new DateTime($firstCheckin);
-
-                $interval = $checkInTime->diff($ondutylateTime);
-                $lateMinutes = ($interval->h * 60) + $interval->i;
 
                 // Check if check-in time is after on-duty time
                 if ($checkInTime > $ondutylateTime) {
                     $isLate = true;
+
+                    $interval = $checkInTime->diff($ondutylateTime);
+                    $elapsedMinutes = ($interval->h * 60) + $interval->i;
+
+                    // Tiered rounding: every 30-min window past late_time rounds up to the next 30-min bucket
+                    // e.g. 0-29 min late -> 30, 30-59 min late -> 60, 60-89 min late -> 90 ...
+                    $lateMinutes = (intdiv($elapsedMinutes, 30) + 1) * 30;
                 }
             }
 
