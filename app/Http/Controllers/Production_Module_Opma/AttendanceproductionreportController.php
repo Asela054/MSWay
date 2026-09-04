@@ -82,17 +82,14 @@ class AttendanceproductionreportController extends Controller
                     })->implode(',');
 
                      // Get the applicable shift_id for this emp on this date
-                    $shift = DB::selectOne("
-                        SELECT `shift_id`
-                        FROM `employeeshiftdetails`
-                        WHERE `emp_id` = ?
-                        AND `status` = 1
-                        AND DATE(`date_from`) <= ?
-                        AND (`until_time` IS NULL OR DATE(`until_time`) >= ?)
-                        ORDER BY `date_from` DESC, `id` DESC
-                        LIMIT 1
-                    ", [$summary->emp_id, $summary->date, $summary->date]);
-
+                       $shift = DB::selectOne("
+                            SELECT `shift_id`, `emp_id`, `work_date`
+                            FROM `employee_roster_details`
+                            WHERE `emp_id` = ?
+                            AND `work_date` = ?
+                            ORDER BY `id` DESC
+                            LIMIT 1
+                        ", [$summary->emp_id, $summary->date,]);
                     $shift_id = $shift->shift_id ?? null;
 
 

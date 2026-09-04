@@ -38,17 +38,15 @@ $sql = "SELECT
         `ep`.`daily_average`,
         `ep`.`target_bonus`,
         `ep`.`status`,
-        `esd`.`shift_id`
+        `erd`.`shift_id`
     FROM `opma_daily_approval_summary` AS `ep`
     LEFT JOIN `employees` AS `e` ON `ep`.`emp_id` = `e`.`emp_id`
-    LEFT JOIN `employeeshiftdetails` AS `esd` ON `esd`.`id` = (
-        SELECT `esd2`.`id`
-        FROM `employeeshiftdetails` AS `esd2`
-        WHERE `esd2`.`emp_id` = `ep`.`emp_id`
-          AND `esd2`.`status` = 1
-          AND DATE(`esd2`.`date_from`) <= `ep`.`date`
-          AND (`esd2`.`until_time` IS NULL OR DATE(`esd2`.`until_time`) >= `ep`.`date`)
-        ORDER BY `esd2`.`date_from` DESC, `esd2`.`id` DESC
+    LEFT JOIN `employee_roster_details` AS `erd` ON `erd`.`id` = (
+        SELECT `erd2`.`id`
+        FROM `employee_roster_details` AS `erd2`
+        WHERE `erd2`.`emp_id` = `ep`.`emp_id`
+          AND `erd2`.`work_date` = `ep`.`date`
+        ORDER BY `erd2`.`id` DESC
         LIMIT 1
     )
     WHERE 1=1
@@ -69,15 +67,12 @@ if (!empty($_POST['from_date']) && !empty($_POST['to_date'])) {
     $to_date = $_POST['to_date'];
     $sql .= " AND `ep`.`date` BETWEEN '$from_date' AND '$to_date'";
 } else {
-    // no date range given -> pull the last available date's records
-    // (only rows where daily_target & daily_produce are populated, status = 1)
     $lastDateSql = "SELECT MAX(`date`) AS `max_date` 
                      FROM `opma_daily_approval_summary` 
                      WHERE `status` = 1
                        AND `daily_target` IS NOT NULL AND `daily_target` != ''
                        AND `daily_produce` IS NOT NULL AND `daily_produce` != ''";
 
-    // apply the same department/employee filters to the max-date lookup, if given
     if (!empty($_POST['department'])) {
         $lastDateSql .= " AND `department_id` = '" . $_POST['department'] . "'";
     }
