@@ -18,6 +18,7 @@ class AttendancePolicyService
 
     public function attendanceInsertcsv_txt($full_emp_id, $date_input, $timestamp, $date)
     {
+        $workDate = Carbon::parse($date_input)->toDateString();
         $empshift = DB::table('employees')
             ->select('emp_id', 'emp_shift', 'emp_location')
             ->where('emp_id', $full_emp_id)
@@ -26,19 +27,34 @@ class AttendancePolicyService
         if (is_null($empshift)) {
             return false;
         }
-
         $employeeLocation = $empshift->emp_location;
 
         $emprosterinfo = DB::table('employee_roster_details')
             ->select('emp_id', 'shift_id')
             ->where('emp_id', $full_emp_id)
-            ->where('work_date', $date_input)
+            ->where('work_date', $workDate)
             ->first();
 
         if ($emprosterinfo) {
             $empshiftid = $emprosterinfo->shift_id;
+
+             if ($empshiftid == 0 || $empshiftid == 100 || $empshiftid == 101){
+                $previous_day = (new DateTime($workDate))->modify('-1 day')->format('Y-m-d');
+                $emprosterinfo = DB::table('employee_roster_details')
+                    ->select('emp_id', 'shift_id')
+                    ->where('emp_id', $full_emp_id)
+                    ->where('work_date', $previous_day)
+                    ->first();
+
+                if ($emprosterinfo) {
+                    $empshiftid = $emprosterinfo->shift_id;
+                } else {
+                    $empshiftid = $empshift->emp_shift;
+                }
+            }
+
         } else {
-            $previous_day = (new DateTime($date_input))->modify('-1 day')->format('Y-m-d');
+            $previous_day = (new DateTime($workDate))->modify('-1 day')->format('Y-m-d');
             $emprosterinfo = DB::table('employee_roster_details')
                 ->select('emp_id', 'shift_id')
                 ->where('emp_id', $full_emp_id)
@@ -55,23 +71,26 @@ class AttendancePolicyService
         $shift = DB::table('shift_types')
             ->where('id', $empshiftid)
             ->first();
-
+        $shift_id = $shift->id;
+        $shift_code = $shift->shift_code;
+        
         $previousDate = Carbon::parse($date)->subDay()->format('Y-m-d');
         $employeeshiftdetails = DB::table('employeeshiftdetails')
             ->where('date_from', $previousDate)
             ->where('emp_id', $full_emp_id)
             ->first();
 
+
         $period = (new DateTime($timestamp))->format('A');
-        $timestamp = $date_input . ' ' . $timestamp;
+        $timestamp = $workDate . ' ' . $timestamp;
         $attendance_date = null;
 
         // ============================================================
         // Branch 1: off_next_day = 0, on_next_day = 1
         // (left untouched as requested - kept as-is)
         // ============================================================
-        if ($shift && $shift->off_next_day == '0' && $shift->on_next_day == '1' && $date == $date_input) {
-            $next_day = (new DateTime($date_input))->modify('+1 day')->format('Y-m-d');
+        if ($shift && $shift->off_next_day == '0' && $shift->on_next_day == '1' && $date == $workDate) {
+            $next_day = (new DateTime($workDate))->modify('+1 day')->format('Y-m-d');
             $shif_ontime = Carbon::parse($shift->onduty_time);
             $attendance_time = Carbon::parse($timestamp);
 
@@ -90,10 +109,10 @@ class AttendancePolicyService
         // was wrongly attributed to a different shift starting the
         // same day.
         // ============================================================
-        } elseif ($shift && $shift->off_next_day == '1' && $shift->on_next_day == '0' && $date == $date_input) {
+        } elseif ($shift && $shift->off_next_day == '1' && $shift->on_next_day == '0' && $date == $workDate) {
 
-            $previous_day = (new DateTime($date_input))->modify('-1 day')->format('Y-m-d');
-            $next_day = (new DateTime($date_input))->modify('+1 day')->format('Y-m-d');
+            $previous_day = (new DateTime($workDate))->modify('-1 day')->format('Y-m-d');
+            $next_day = (new DateTime($workDate))->modify('+1 day')->format('Y-m-d');
 
             // Fetch previous day's roster shift too (needed for window comparison)
             $prevRosterInfo = DB::table('employee_roster_details')
@@ -114,7 +133,7 @@ class AttendancePolicyService
             //     crosses midnight (off_next_day = 1). Otherwise it falls
             //     on previous_day itself (e.g. a normal day shift).
             if ($prevShift && $prevShift->onduty_time && $prevShift->offduty_time) {
-                $prevOffDate = ($prevShift->off_next_day == '1') ? $date_input : $previous_day;
+                $prevOffDate = ($prevShift->off_next_day == '1') ? $workDate : $previous_day;
 
                 $prevWindowStart = Carbon::parse($previous_day . ' ' . $prevShift->onduty_time)->subMinutes(60);
                 $prevWindowEnd   = Carbon::parse($prevOffDate . ' ' . $prevShift->offduty_time)->addMinutes(60);
@@ -128,11 +147,11 @@ class AttendancePolicyService
             // (b) Current day's fresh shift window
             //     e.g. date_input onduty_time -> next_day offduty_time (+ buffer)
             if (!$matched && $shift && $shift->onduty_time && $shift->offduty_time) {
-                $currWindowStart = Carbon::parse($date_input . ' ' . $shift->onduty_time)->subMinutes(60);
+                $currWindowStart = Carbon::parse($workDate . ' ' . $shift->onduty_time)->subMinutes(60);
                 $currWindowEnd   = Carbon::parse($next_day . ' ' . $shift->offduty_time)->addMinutes(60);
 
                 if ($ts->between($currWindowStart, $currWindowEnd)) {
-                    $attendance_date = $date_input;
+                    $attendance_date = $workDate;
                     $matched = true;
                 }
             }
@@ -149,16 +168,34 @@ class AttendancePolicyService
                 }
             }
 
-        } else if ($date == $date_input) {
+        } else if ($date == $workDate) {
             if ($employeeshiftdetails) {
-                $previous_day = (new DateTime($date_input))->modify('-1 day')->format('Y-m-d');
+                $previous_day = (new DateTime($workDate))->modify('-1 day')->format('Y-m-d');
                 $attendance_date = ($period === 'AM') ? $previous_day : substr($timestamp, 0, 10);
             } else {
                 $attendance_date = substr($timestamp, 0, 10);
             }
         }
 
-        if ($date == $date_input) {
+        if ($date == $workDate) {
+
+            // last timestamp check - 1 min threshold
+            $lastAttendance = DB::table('attendances')
+                ->where('emp_id', $full_emp_id)
+                ->where('date', $attendance_date)
+                ->whereNull('deleted_at')
+                ->orderBy('timestamp', 'desc')
+                ->first();
+
+            if ($lastAttendance) {
+                $lastTime = Carbon::parse($lastAttendance->timestamp);
+                $newTime  = Carbon::parse($timestamp);
+
+                if ($newTime->diffInSeconds($lastTime) < 60) {
+                    return true; // too close to last punch, skip
+                }
+            }
+
             $Attendance = AppAttendance::firstOrNew(['timestamp' => $timestamp, 'emp_id' => $full_emp_id]);
             $Attendance->uid = $full_emp_id;
             $Attendance->emp_id = $full_emp_id;
@@ -166,14 +203,52 @@ class AttendancePolicyService
             $Attendance->date = $attendance_date;
             $Attendance->location = $employeeLocation;
             $Attendance->save();
-
             $insertId = $Attendance->id;
 
+                $attendacesummary = DB::table('attendance_summaries')
+                        ->where('emp_id', $full_emp_id)
+                        ->where('work_date', $attendance_date)
+                        ->where('shift_id', $shift_id)
+                        ->whereNull('actual_out')
+                        ->first();
+
+                    if ($attendacesummary) {
+                        // Open record found (actual_out is null) - this punch is the OUT
+                        $sessionStart   = Carbon::parse($attendacesummary->actual_in);
+                        $sessionOut     = Carbon::parse($timestamp);
+                        $sessionMinutes = $sessionOut->diffInMinutes($sessionStart);
+                        $workedHours    = round($sessionMinutes / 60, 2);
+
+                        DB::table('attendance_summaries')
+                            ->where('id', $attendacesummary->id)
+                            ->update([
+                                'actual_out'   => $timestamp,
+                                'worked_hours' => $workedHours,
+                                'updated_at'   => Carbon::now(),
+                            ]);
+
+                    } else {
+                        // No open record - this punch is a fresh IN, create a new record
+                        DB::table('attendance_summaries')->insert([
+                            'emp_id'          => $full_emp_id,
+                            'work_date'       => $attendance_date,
+                            'shift_id'        => $shift_id,
+                            'shift_code'      => $shift_code,
+                            'scheduled_start' => $attendance_date . ' ' . $shift->onduty_time,
+                            'scheduled_end'   => $attendance_date . ' ' . $shift->offduty_time,
+                            'actual_in'       => $timestamp,
+                            'location'        => $employeeLocation,
+                            'status'          => 1,
+                            'approved'        => 0,
+                            'created_at'      => Carbon::now(),
+                            'updated_at'      => Carbon::now(),
+                        ]);
+                    }
             // Seamless shift transition check - if the previous shift's off time
             // matches the current shift's on time within the grace period,
             // insert virtual checkout/checkin records at that boundary since
             // there's no physical punch there.
-            $this->handleSeamlessShiftTransition($full_emp_id, $date_input, $employeeLocation);
+            $this->handleSeamlessShiftTransition($full_emp_id, $workDate, $employeeLocation);
 
             return $this->checkAndInsertLateAttendance($full_emp_id, $attendance_date, $timestamp, $insertId);
         }
@@ -302,6 +377,8 @@ class AttendancePolicyService
         $shift = DB::table('shift_types')
             ->where('id', $empshiftid)
             ->first();
+        $shift_id = $shift->id;
+        $shift_code = $shift->shift_code;
 
         $previousDate = Carbon::parse($date_stamp)->subDay()->format('Y-m-d');
         $employeeshiftdetails = DB::table('employeeshiftdetails')
@@ -416,6 +493,46 @@ class AttendancePolicyService
             );
 
             $insertId = DB::table('attendances')->insertGetId($data);
+
+             $attendacesummary = DB::table('attendance_summaries')
+                        ->where('emp_id', $empid)
+                        ->where('work_date', $attendance_date)
+                        ->where('shift_id', $shift_id)
+                        ->whereNull('actual_out')
+                        ->first();
+
+                    if ($attendacesummary) {
+                        // Open record found (actual_out is null) - this punch is the OUT
+                        $sessionStart   = Carbon::parse($attendacesummary->actual_in);
+                        $sessionOut     = Carbon::parse($final_timestamp ?? $attendacetimestamp);
+                        $sessionMinutes = $sessionOut->diffInMinutes($sessionStart);
+                        $workedHours    = round($sessionMinutes / 60, 2);
+
+                        DB::table('attendance_summaries')
+                            ->where('id', $attendacesummary->id)
+                            ->update([
+                                'actual_out'   => $final_timestamp ?? $attendacetimestamp,
+                                'worked_hours' => $workedHours,
+                                'updated_at'   => Carbon::now(),
+                            ]);
+
+                    } else {
+                        // No open record - this punch is a fresh IN, create a new record
+                        DB::table('attendance_summaries')->insert([
+                            'emp_id'          => $empid,
+                            'work_date'       => $attendance_date,
+                            'shift_id'        => $shift_id,
+                            'shift_code'      => $shift_code,
+                            'scheduled_start' => $attendance_date . ' ' . $shift->onduty_time,
+                            'scheduled_end'   => $attendance_date . ' ' . $shift->offduty_time,
+                            'actual_in'       => $final_timestamp ?? $attendacetimestamp,
+                            'location'        => $location,
+                            'status'          => 1,
+                            'approved'        => 0,
+                            'created_at'      => Carbon::now(),
+                            'updated_at'      => Carbon::now(),
+                        ]);
+                    }
 
             // Seamless shift transition check - same as attendanceInsertcsv_txt
             $this->handleSeamlessShiftTransition($empid, $attendacedate, $location);
