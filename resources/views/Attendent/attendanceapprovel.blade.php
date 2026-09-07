@@ -45,7 +45,7 @@
                                     <th>EMPLOYEE NAME</th>
                                     <th>WORK MONTH</th>
                                     <th>DEPARTMENT</th>
-                                    <th>COMPANY</th>
+                                    <th>LOCATION</th>
                                     <th>WORKING WEEK DAYS</th>
                                     <th>WORKING HOURS</th>
                                     <th>LEAVE DAYS</th>
