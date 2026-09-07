@@ -399,6 +399,7 @@ class EmployeeController extends Controller
         $job_category_id = $request->job_category_id;
         $work_category_id = $request->work_category_id;
         $leave_approve_person = $request->leave_approve_person;
+        $ot_applicable = $request->ot_applicable;
         $emergency_contact_person = $request->emergency_contact_person;
         $emergency_contact_tp = $request->emergency_contact_tp;
         $dsdivision = $request->dsdivision;
@@ -458,6 +459,7 @@ class EmployeeController extends Controller
         $employee->police_station = $policestation;
         $employee->police_contactno = $policecontat;
         $employee->leave_approve_person = $leave_approve_person;
+        $employee->ot_applicable = $ot_applicable;
         $employee->emp_work_telephone = $request->input('emp_work_telephone');
         $employee->tp1 = $request->input('telephone');
         $employee->emp_mobile = $request->input('emp_mobile');
@@ -506,6 +508,7 @@ class EmployeeController extends Controller
             'job_category_id'       => ['old' => $originalEmployee->job_category_id,        'new' => $job_category_id],
             'work_category_id'      => ['old' => $originalEmployee->work_category_id,       'new' => $work_category_id],
             'leave_approve_person'  => ['old' => $originalEmployee->leave_approve_person,   'new' => $leave_approve_person],
+            'ot_applicable'          => ['old' => $originalEmployee->ot_applicable,           'new' => $ot_applicable],
             'hierarchy_id'          => ['old' => $originalEmployee->hierarchy_id,           'new' => $hierarchy_id],
             'financial_id'          => ['old' => $originalEmployee->financial_id,           'new' => $financial_id],
         ];
@@ -868,6 +871,7 @@ class EmployeeController extends Controller
             'job_category_id'       => 'Job Category',
             'work_category_id'      => 'Work Category',
             'leave_approve_person'  => 'Leave Approver',
+            'ot_applicable'         => 'OT Applicable',
             'hierarchy_id'          => 'Hierarchy',
             'financial_id'          => 'Financial Category',
         ];

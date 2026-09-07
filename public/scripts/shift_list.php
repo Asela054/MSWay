@@ -1,7 +1,10 @@
 <?php
 session_start();
 
+use App\Helpers\EmployeeHelper;
 use App\Helpers\UserHelper;
+
+require_once __DIR__ . '/../../app/Helpers/EmployeeHelper.php';
 require_once __DIR__ . '/../../app/Helpers/UserHelper.php';
 
 
@@ -16,17 +19,25 @@ $columns = array(
     array('db' => '`employees`.`emp_id`', 'dt' => 'emp_id', 'field' => 'emp_id'),
     array('db' => '`employees`.`calling_name`', 'dt' => 'calling_name', 'field' => 'calling_name'),
     array('db' => '`employees`.`emp_first_name`', 'dt' => 'emp_first_name', 'field' => 'emp_first_name'),
-    
-    // ✅ shift type id
     array('db' => '`shift_types`.`id`', 'dt' => 'shift_type_id', 'field' => 'id'),
-    
     array('db' => '`shift_types`.`shift_name`', 'dt' => 'shift_name', 'field' => 'shift_name'),
     array('db' => '`shift_types`.`onduty_time`', 'dt' => 'onduty_time', 'field' => 'onduty_time'),
     array('db' => '`shift_types`.`offduty_time`', 'dt' => 'offduty_time', 'field' => 'offduty_time'),
+    array('db' => '`employees`.`job_category_id`', 'dt' => 'job_category_id', 'field' => 'job_category_id'),
+    array('db' => '`job_categories`.`category`', 'dt' => 'category', 'field' => 'category'),
     array('db' => '`employees`.`emp_name_with_initial`', 'dt' => 'emp_name_with_initial', 'field' => 'emp_name_with_initial'),
-    
-    // ✅ fixed department aliasing
-    array('db' => '`departments`.`name`', 'dt' => 'departmentname', 'field' => 'name')
+    array('db' => '`departments`.`name`', 'dt' => 'departmentname', 'field' => 'name'),
+    array('db' => 'employees.emp_id', 'dt' => 'employee_display', 'field' => 'emp_id', 
+          'formatter' => function($d, $row) {
+              $employee = (object)[
+                  'emp_name_with_initial' => $row['emp_name_with_initial'],
+                  'calling_name' => $row['calling_name'],
+                  'emp_id' => $row['emp_id']
+              ];
+              
+              return EmployeeHelper::getDisplayName($employee);
+          }
+    )
 );
 
 
@@ -97,7 +108,10 @@ if ($userId) {
     $mysqli->close();
 }
 // end of filter based on user access rights
-
+if (!empty($_POST['company'])) {
+    $company = $_POST['company'];
+    $extraWhere .= " AND employees.emp_company = '$company'";
+}
 if (!empty($_POST['department'])) {
     $department = $_POST['department'];
     $extraWhere .= " AND departments.id = '$department'";
