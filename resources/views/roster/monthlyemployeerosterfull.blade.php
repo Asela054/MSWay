@@ -76,14 +76,7 @@
                     <li class="mb-2">
                         <div class="col-12">
                             <label class="small font-weight-bolder text-dark">Select Month:</label>
-                            <select id="month" class="form-control form-control-sm" required>
-                                @foreach ($months as $month)
-                                <option value="{{ $month->format('Y-m') }}"
-                                    {{ $month->isSameMonth($currentMonth) ? 'selected' : '' }}>
-                                    {{ $month->format('F Y') }}
-                                </option>
-                                @endforeach
-                            </select>
+                             <input type="month" id="month" name="month" class="form-control form-control-sm" placeholder="yyyy-mm" required>
                         </div>
                     </li>
                     <li class="mb-2">
