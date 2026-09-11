@@ -33,6 +33,7 @@
                                 <tr>
                                     <th>ID</th>
                                     <th>SHIFT</th> 
+                                    <th>CODE</th>
                                     <th>ONDUTY TIME</th>                                                
                                     <th>OFFDUTY TIME</th>                                                
                                     <th>OFFDUTY DATE</th>                                               
@@ -351,6 +352,10 @@ $(document).ready(function(){
             { 
                 data: 'shift_name', 
                 name: 'shift_name'
+            },
+            { 
+                data: 'shift_code', 
+                name: 'shift_code'
             },
             { 
                 data: 'onduty_time', 
