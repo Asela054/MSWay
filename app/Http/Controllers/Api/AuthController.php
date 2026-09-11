@@ -74,6 +74,23 @@ class AuthController extends Controller
 
                         $isValidDevice = $deviceCheck ? true : false;
 
+        if (!$isValidDevice) {
+            $hasAnyDevice = DB::table('employee_devices_mac_id')
+                                ->where('emp_id', $user->emp_id)
+                                ->exists();
+
+            if (!$hasAnyDevice) {
+                DB::table('employee_devices_mac_id')->insert([
+                    'emp_id'     => $user->emp_id,
+                    'mac_id'     => $request->device_id,
+                    'status'     => 1
+                ]);
+
+                $isValidDevice = true;
+            }else{
+                   return (new BaseController)->sendError('Mac ID is Invalid', ['error' => 'Mac ID is Invalid']);
+            }
+        }
 
         $employee = DB::table('employees')
         ->leftJoin('job_categories', 'employees.job_category_id', '=', 'job_categories.id')

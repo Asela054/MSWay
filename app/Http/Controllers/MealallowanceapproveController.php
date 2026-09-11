@@ -352,24 +352,23 @@ class MealallowanceapproveController extends Controller
                 }
                 else if($allowancetype==5){
                     // Using Query Builder
-                        $count = DB::table('employeeshiftdetails as erd')
+                        $count = DB::table('employee_roster_details as erd')
                             ->where('erd.emp_id', $empId)
-                            ->whereBetween('erd.date_from', [$firstDate, $lastDate])
+                            ->whereBetween('erd.work_date', [$firstDate, $lastDate])
                             ->where('erd.shift_id', 4)
-                            ->where('erd.status', 1)
                             ->whereExists(function ($query) use ($empId) {
                                 $query->select(DB::raw(1))
                                     ->from('attendances as a')
                                     ->whereRaw('a.emp_id = erd.emp_id')
-                                    ->whereRaw('DATE(a.date) = erd.date_from')
+                                    ->whereRaw('DATE(a.date) = erd.work_date')
                                     ->whereNull('a.deleted_at'); 
                             })
                             ->whereExists(function ($query) use ($empId) {
                                 $query->select(DB::raw(1))
                                     ->from('opma_daily_approval_summary as das')
                                     ->whereRaw('das.emp_id = erd.emp_id')
-                                    ->whereRaw('das.date = erd.date_from')
-                                    ->where('das.daily_average', '>=', 71);
+                                    ->whereRaw('das.date = erd.work_date')
+                                    ->where('das.daily_average', '>=', 60);
                             })
                             ->count();
                         $totalWorkingDays = $count;
