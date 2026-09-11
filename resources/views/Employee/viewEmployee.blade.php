@@ -239,6 +239,10 @@
 												</span>
 											@endif
 										</div>
+										<div class="col-md-3 col-sm-6 col-12 mb-2">
+											<label class="small font-weight-bold text-dark">Join Date</label>
+											<input type="date" class="form-control form-control-sm" id="joindate" name="joindate" value="{{$employee->emp_join_date ? date('Y-m-d', strtotime($employee->emp_join_date)) : ''}}">
+										</div>
 									</div>
 									<div class="form-row mb-1">
 										<div class="col-md-3 col-sm-6 col-12 mb-2">
@@ -256,10 +260,6 @@
 									</div>
 									<div class="form-row mb-1">
 										<div class="col-md-3 col-sm-6 col-12 mb-2">
-											<label class="small font-weight-bold text-dark">Join Date</label>
-											<input type="date" class="form-control form-control-sm" id="joindate" name="joindate" value="{{$employee->emp_join_date ? date('Y-m-d', strtotime($employee->emp_join_date)) : ''}}">
-										</div>
-										<div class="col-md-5 col-sm-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">Job Title</label>
 											<select id="jobtitle" class="form-control form-control-sm" name="jobtitle">
 												<option selected>Select</option>
@@ -270,7 +270,7 @@
 												@endforeach
 											</select>
 										</div>
-										<div class="col-md-4 col-sm-6 col-12 mb-2">
+										<div class="col-md-3 col-sm-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">Job Status</label>
 											<select id="jobstatus" class="form-control form-control-sm" name="jobstatus">
 												<option selected>Choose...</option>
@@ -278,6 +278,18 @@
 													<option value="{{$employmentstatu->id}}"
 														{{$employmentstatu->id== $employee->emp_status  ? 'selected' : ''}}>
 														{{$employmentstatu->emp_status}}
+													</option>
+												@endforeach
+											</select>
+										</div>
+										<div class="col-md-3 col-sm-6 col-12 mb-2">
+											<label class="small font-weight-bold text-dark">Payroll type</label>
+											<select id="payroll_process_type_id" class="form-control form-control-sm" name="payroll_process_type_id">
+												<option selected>Choose...</option>
+												@foreach($payroll_process_type as $payrollprocesstype)
+													<option value="{{$payrollprocesstype->id}}"
+														{{$payrollprocesstype->id== $employee->payroll_process_type_id  ? 'selected' : ''}}>
+														{{$payrollprocesstype->process_name}}
 													</option>
 												@endforeach
 											</select>
