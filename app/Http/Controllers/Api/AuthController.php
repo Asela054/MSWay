@@ -68,6 +68,7 @@ class AuthController extends Controller
         
         $deviceCheck = DB::table('employee_devices_mac_id')
                             ->where('emp_id', $user->emp_id)
+                            ->where('user_id', $user->id)
                             ->where('mac_id', $request->device_id)
                             ->where('status', 1)
                             ->first();
@@ -82,6 +83,7 @@ class AuthController extends Controller
             if (!$hasAnyDevice) {
                 DB::table('employee_devices_mac_id')->insert([
                     'emp_id'     => $user->emp_id,
+                    'user_id'    => $user->id,
                     'mac_id'     => $request->device_id,
                     'status'     => 1
                 ]);
