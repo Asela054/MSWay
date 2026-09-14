@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
 
 class AuthController extends Controller
 {
@@ -65,9 +66,11 @@ class AuthController extends Controller
         }
 
         $user = Auth::user();
+        $current_date_time = Carbon::now()->toDateTimeString();
         
         $deviceCheck = DB::table('employee_devices_mac_id')
                             ->where('emp_id', $user->emp_id)
+                            ->where('user_id', $user->id)
                             ->where('mac_id', $request->device_id)
                             ->where('status', 1)
                             ->first();
@@ -77,13 +80,19 @@ class AuthController extends Controller
         if (!$isValidDevice) {
             $hasAnyDevice = DB::table('employee_devices_mac_id')
                                 ->where('emp_id', $user->emp_id)
+                                ->where('status', 1)
                                 ->exists();
 
             if (!$hasAnyDevice) {
                 DB::table('employee_devices_mac_id')->insert([
                     'emp_id'     => $user->emp_id,
+                    'user_id'    => $user->id,
                     'mac_id'     => $request->device_id,
-                    'status'     => 1
+                    'brand_name'     => $request->mobile_brand,
+                    'model_name'     => $request->mobile_model,
+                    'status'     => 1,
+                    'created_at' => $current_date_time,
+                    'updated_at' => $current_date_time,
                 ]);
 
                 $isValidDevice = true;
@@ -164,6 +173,9 @@ class AuthController extends Controller
                             ->where('user_id', $user->id)
                             ->first();
 
+        if (!$role) {
+                return (new BaseController)->sendError('User role not assigned.', ['error' => 'No role found for this user'], '403');
+            }
 
         $appconfig = DB::table('company_mobile_app_config')
                             ->where('company_id', $employee->emp_company)

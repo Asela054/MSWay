@@ -103,7 +103,7 @@ class EmployeetimesheetContrller extends Controller
                             DATE_FORMAT(?, '%Y-%m-%d') AS out_date,
                             COALESCE(h.holiday_name, 
                                 CASE WHEN WEEKDAY(?) IN (5,6) THEN DAYNAME(?) 
-                                ELSE 'Weekday' END) AS day_type,
+                                ELSE 'Workday' END) AS day_type,
                             COALESCE(roster_shift.shift_name, esd_shift.shift_name, st.shift_name) AS shift,
                             DATE_FORMAT(MIN(att.timestamp), '%h:%i %p') AS in_time, 
                             DATE_FORMAT(MAX(att.timestamp), '%h:%i %p') AS out_time,
