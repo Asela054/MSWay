@@ -350,6 +350,7 @@ Route::get('Leaveleavecreate', 'LeaveController@leaveleavecreate')->name('leavel
 
 
 Route::get('EmpoloyeeReport',['uses' => 'Report@getemployeelist', 'as' => 'EmpoloyeeReport']);
+Route::get('EmployeeReassignedReport',['uses' => 'Report@getemployeeReassignedlist', 'as' => 'EmployeeReassignedReport']);
 Route::get('employee_report_list',['uses' => 'Report@employee_report_list', 'as' => 'employee_report_list']);
  
 Route::get('exportEmployeeReport', 'Report@exportempoloyeereport')->name('exportEmployeeReport'); 
