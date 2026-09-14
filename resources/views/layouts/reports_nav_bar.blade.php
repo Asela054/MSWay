@@ -28,6 +28,7 @@
           <li><a class="dropdown-item" href="{{ route('employeetimesheet') }}">Employee Attendance Time Sheet</a></li>
           <li><a class="dropdown-item" href="{{ route('clearanceReport') }}">Employee Clearance Report</a></li>
           <li><a class="dropdown-item" href="{{ route('rpt_assigned_devices') }}">Employee Assigned Devices Report</a></li>
+          <li><a class="dropdown-item" href="{{ route('EmployeeReassignedReport') }}">Employee Reassigned Report</a></li>
         </ul>
   </div>
 
