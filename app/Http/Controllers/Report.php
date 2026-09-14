@@ -54,6 +54,23 @@ class Report extends Controller
         return view('Report.employeereport', compact('company_name'));
     }
 
+    public function getemployeeReassignedlist()
+    {
+        $permission = Auth::user()->can('employee-report');
+        if (!$permission) {
+            abort(403);
+        }
+
+        if (!Session::has('company_name')) {
+            $company_name = DB::table('companies')->value('name');
+            Session::put('company_name', $company_name);
+        } else {
+            $company_name = Session::get('company_name');
+        }
+        
+        return view('Report.employeeReassignedReport', compact('company_name'));
+    }
+
     public function employee_report_list(Request $request)
     {
         $permission = Auth::user()->can('employee-report');
