@@ -305,16 +305,22 @@
                                             <select name="department" id="department_dept_wise" class="form-control form-control-sm" required>
                                             </select>
                                         </div>
-                                    <div class="col-sm-12 col-md-3">
-                                        <label class="small font-weight-bolder">Date*</label>
-                                        <input type="date" name="allocation_date" id="allocation_date"
-                                            class="form-control form-control-sm" required />
-                                    </div>
-                                     <div class="col-sm-12 col-md-3">
+                                         <div class="col-sm-12 col-md-3">
+                                            <label class="small font-weight-bolder text-dark">Month</label>
+                                            <input type="month" id="month" name="month" class="form-control form-control-sm" placeholder="yyyy-mm" required>
+                                        </div>
+                                        <div class="col-sm-12 col-md-3">
+                                            <label class="small font-weight-bolder text-dark">Dates</label>
+                                            <div id="date-picker-container">
+                                            </div>
+                                            <input type="hidden" id="selected_dates" name="selected_dates">
+                                        </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12 col-md-12">
                                             <label class="small font-weight-bold text-dark">&nbsp; </label> <br>
                                             <button type="button" name="search_button" id="search_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-search"></i>&nbsp;Search</button>
                                         </div>
-                                    
                                 </div>
                                  <br>
                                 <div class="center-block fix-width scroll-inner">
@@ -354,6 +360,8 @@
 @endsection
 
 @section('script')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.9/flatpickr.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.9/flatpickr.min.js"></script>
 <script>
 $(document).ready(function(){
     $('#production_menu_link_opma').addClass('active');
@@ -853,10 +861,53 @@ $(document).ready(function(){
     $('#create_record_dept_wise').click(function () {
         $('#dptemplistbody').empty();
         $('#formModal_dpt').modal('show');
+         let monthInput = $('#month');
+            let datePickerContainer = $('#date-picker-container');
+
+            monthInput.off('change').on('change', function () {
+                let selectedMonth = $(this).val();
+                if (selectedMonth) {
+                    let [year, month] = selectedMonth.split('-');
+                    let daysInMonth = new Date(year, month, 0).getDate();
+
+                    let startDate = new Date(year, month - 1, 1);
+                    let endDate = new Date(year, month - 1, daysInMonth);
+
+                    datePickerContainer.empty().append('<input type="text" id="date-picker" class="form-control form-control-sm" placeholder="Select Dates" required>');
+                    
+                    $('#selected_dates').val('');
+
+                    flatpickr("#date-picker", {
+                        mode: "multiple",
+                        dateFormat: "Y-m-d", 
+                        minDate: startDate,
+                        maxDate: endDate,
+                        disableMobile: true,
+                        onChange: function (selectedDates) {
+                            let [year, month] = $('#month').val().split('-');
+                            let formattedDates = selectedDates
+                                .filter(date => 
+                                    date.getFullYear() === parseInt(year) && 
+                                    (date.getMonth() + 1) === parseInt(month)
+                                )
+                                .map(date => {
+                                    let y = date.getFullYear();
+                                    let m = String(date.getMonth() + 1).padStart(2, '0');
+                                    let d = String(date.getDate()).padStart(2, '0');
+                                    return `${y}-${m}-${d}`;
+                                })
+                                .join(',');
+                            $('#selected_dates').val(formattedDates);
+                        }
+                    });
+                } else {
+                    datePickerContainer.empty();
+                    $('#selected_dates').val('');
+                }
+            });
     });
 
      $('#search_button').click(function () {
-            var allocation_date = $('#allocation_date').val();
             var department = $('#department_dept_wise').val();
 
             $.ajax({
@@ -866,7 +917,6 @@ $(document).ready(function(){
                 data: {
                     _token: '{{ csrf_token() }}',
                     department: department,
-                    allocation_date: allocation_date,
                 },
                 
                 success: function (data) {
@@ -911,8 +961,8 @@ $(document).ready(function(){
 
 
     $('#dptaction_button').click(function () {
-            $('#dptaction_button').prop('disabled', true).html(
-                '<i class="fas fa-circle-notch fa-spin mr-2"></i> Processing');
+            // $('#dptaction_button').prop('disabled', true).html(
+            //     '<i class="fas fa-circle-notch fa-spin mr-2"></i> Processing');
 
             var tbody = $("#dptemplistbody");
 
@@ -982,8 +1032,22 @@ $(document).ready(function(){
 
                 console.log('Filled rows:', jsonObj);
 
-                var allocation_date = $('#allocation_date').val();
+                var allocationDates = $('#selected_dates').val();
                 var department = $('#department_dept_wise').val();
+
+                 
+                if (!allocationDates) {
+                    const actionObj = {
+                        icon: 'fas fa-warning',
+                        title: '',
+                        message: 'Please select at least one date',
+                        url: '',
+                        target: '_blank',
+                        type: 'danger'
+                    };
+                    action(JSON.stringify(actionObj, null, 2));
+                    return;
+                }
 
                 $.ajax({
                     method: "POST",
@@ -992,7 +1056,7 @@ $(document).ready(function(){
                         _token: '{{ csrf_token() }}',
                         tableData: jsonObj,
                         department: department,
-                        allocation_date: allocation_date,
+                        allocation_dates: allocationDates,
                     },
                     url: '{!! route("opma_productdpt_allocation_insert") !!}',
                     success: function (data) {
