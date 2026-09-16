@@ -40,11 +40,11 @@
                                     <th>EMP ID</th>
                                     <th>NAME</th>
                                     <th>NIC NO</th>
-                                    <th>ETF NO</th>
+                                    <th>COMPANY</th>
                                     <th>DEPARTMENT</th>
                                     <th>JOIN DATE</th>
-                                    <th>POSITION</th>
                                     <th>JOB CATEGORY</th>
+                                    <th>SHIFT</th>
                                     <th class="text-center">STATUS</th>
                                     <th class="text-right">ACTION</th>
                                     <th class="d-none">ID</th>
@@ -988,24 +988,24 @@ $(document).ready(function () {
                     name: 'emp_national_id'
                 },
                 { 
-                    data: 'emp_etfno', 
-                    name: 'emp_etfno'
+                    data: 'company', 
+                    name: 'company'
                 },
                 { 
-                    data: 'name', 
-                    name: 'name'
+                    data: 'department', 
+                    name: 'department'
                 },
                 { 
                     data: 'emp_join_date', 
                     name: 'emp_join_date'
                 },
                 { 
-                    data: 'title', 
-                    name: 'title'
-                },
-                { 
                     data: 'category', 
                     name: 'category'
+                },
+                { 
+                    data: 'shift', 
+                    name: 'shift'
                 },
                 {
                     "targets": -1,
