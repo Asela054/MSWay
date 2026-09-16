@@ -711,6 +711,27 @@ class EmployeeController extends Controller
         return response()->json(['error' => 'Employee not found'], 404);
     }
 
+    public function checkEmployeeUser(Request $request)
+    {
+        $permission = Auth::user()->can('employee-create');
+        if (!$permission) {
+            return response()->json(['errors' => ['Unauthorized access']], 403);
+        }
+
+        $emp_id = $request->input('emp_id');
+        $existingUser = User::where('emp_id', $emp_id)->first();
+
+        if ($existingUser) {
+            return response()->json([
+                'exists'   => true,
+                'email'    => $existingUser->email,
+                'user_id'  => $existingUser->id,
+            ]);
+        }
+
+        return response()->json(['exists' => false]);
+    }
+
     public function usercreate(Request $request)
     {
         $permission = Auth::user()->can('employee-create');
@@ -719,11 +740,11 @@ class EmployeeController extends Controller
         }
 
         $rules = array(
-            'userid' => 'required',
-            'name' => 'required|string|max:255',
+            'userid'     => 'required',
+            'name'       => 'required|string|max:255',
             'company_id' => 'required',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6|confirmed'
+            'email'      => 'required|string|email|max:255|unique:users',
+            'password'   => 'required|string|min:6|confirmed'
         );
 
         $error = Validator::make($request->all(), $rules);
@@ -739,19 +760,93 @@ class EmployeeController extends Controller
 
         try {
             $user = new User;
-            $user->emp_id = $request->input('userid');
-            $user->name = $request->input('name');
-            $user->email = $request->input('email');
-            $user->company_id = $request->input('company_id');
-            $user->password = bcrypt($request->input('password'));
+            $user->emp_id      = $request->input('userid');
+            $user->name        = $request->input('name');
+            $user->email       = $request->input('email');
+            $user->company_id  = $request->input('company_id');
+            $user->password    = bcrypt($request->input('password'));
             $user->save();
-            
+
             $user->assignRole('Employee');
 
             return response()->json(['success' => 'User Login is successfully Created']);
-            
+
         } catch (\Exception $e) {
             return response()->json(['errors' => ['Failed to create user login: ' . $e->getMessage()]]);
+        }
+    }
+
+    public function userupdate(Request $request)
+    {
+        $permission = Auth::user()->can('employee-create');
+        if (!$permission) {
+            return response()->json(['errors' => ['Unauthorized access']], 403);
+        }
+
+        $rules = array(
+            'userid'    => 'required',
+            'hidden_id' => 'required|integer',
+            'email'     => 'required|string|email|max:255',
+            'password'  => 'nullable|string|min:6|confirmed',
+        );
+
+        $error = Validator::make($request->all(), $rules);
+
+        if ($error->fails()) {
+            return response()->json(['errors' => $error->errors()->all()]);
+        }
+
+        $user = User::find($request->input('hidden_id'));
+
+        if (!$user || (string)$user->emp_id !== (string)$request->input('userid')) {
+            return response()->json(['errors' => ['User record not found']]);
+        }
+
+        // Check email uniqueness (exclude current user)
+        $emailTaken = User::where('email', $request->input('email'))
+            ->where('id', '!=', $user->id)
+            ->exists();
+
+        if ($emailTaken) {
+            return response()->json(['errors' => ['The email has already been taken']]);
+        }
+
+        $oldEmail    = $user->email;
+        $newEmail    = $request->input('email');
+        $newPassword = $request->input('password');
+
+        $emailChanged    = $oldEmail !== $newEmail;
+        $passwordChanged = !empty($newPassword);
+
+        if (!$emailChanged && !$passwordChanged) {
+            return response()->json(['errors' => ['No changes detected']]);
+        }
+
+        try {
+            // Update user record
+            if ($emailChanged) {
+                $user->email = $newEmail;
+            }
+            if ($passwordChanged) {
+                $user->password = bcrypt($newPassword);
+            }
+            $user->save();
+
+            // Log the change to employee_user_changes
+            DB::table('employee_user_changes')->insert([
+                'emp_id'     => $user->emp_id,
+                'old_email'  => $oldEmail,
+                'new_email'  => $newEmail,
+                'created_by' => Auth::id(),
+                'updated_by' => Auth::id(),
+                'created_at' => Carbon::now()->toDateTimeString(),
+                'updated_at' => Carbon::now()->toDateTimeString(),
+            ]);
+
+            return response()->json(['success' => 'User Login is successfully Updated']);
+
+        } catch (\Exception $e) {
+            return response()->json(['errors' => ['Failed to update user login: ' . $e->getMessage()]]);
         }
     }
 
