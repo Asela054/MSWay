@@ -18,6 +18,8 @@ class AttendancePolicyService
 
     public function attendanceInsertcsv_txt($full_emp_id, $date_input, $timestamp, $date)
     {
+        $lateAttendanceData = 0;
+
         $empshift = DB::table('employees')
             ->select('emp_id', 'emp_shift', 'emp_location')
             ->where('emp_id', $full_emp_id)
@@ -159,6 +161,20 @@ class AttendancePolicyService
         }
 
         if ($date == $date_input) {
+
+            $existingTimestampCount = DB::table('attendances')
+                    ->where('emp_id', $full_emp_id)
+                    ->where('date', $attendance_date)
+                    ->whereNull('deleted_at')
+                    ->count();
+
+                if ($existingTimestampCount > 0) {
+                   $lateAttendanceData = 0;
+                }else{
+                    $lateAttendanceData = 1;
+                }
+
+
             $Attendance = AppAttendance::firstOrNew(['timestamp' => $timestamp, 'emp_id' => $full_emp_id]);
             $Attendance->uid = $full_emp_id;
             $Attendance->emp_id = $full_emp_id;
@@ -173,9 +189,12 @@ class AttendancePolicyService
             // matches the current shift's on time within the grace period,
             // insert virtual checkout/checkin records at that boundary since
             // there's no physical punch there.
-            $this->handleSeamlessShiftTransition($full_emp_id, $date_input, $employeeLocation);
+             if($lateAttendanceData == 1){
+                 return $this->checkAndInsertLateAttendance($full_emp_id, $attendance_date, $timestamp, $insertId);
+             }
 
-            return $this->checkAndInsertLateAttendance($full_emp_id, $attendance_date, $timestamp, $insertId);
+            $this->handleSeamlessShiftTransition($full_emp_id, $date_input, $employeeLocation);
+           
         }
         return true;
     }
@@ -266,6 +285,8 @@ class AttendancePolicyService
 
     public function attendanceInsertsingle_dep($empid, $attendacetimestamp, $location, $attendacedate)
     {
+        $lateAttendanceData = 0;
+
         $datetime_parts = explode('T', $attendacetimestamp);
 
         $timestampdate = $datetime_parts[0];
@@ -403,6 +424,19 @@ class AttendancePolicyService
         }
 
         if ($date_stamp == $attendacedate) {
+
+            $existingTimestampCount = DB::table('attendances')
+                ->where('emp_id', $empid)
+                ->where('date', $attendance_date)
+                ->whereNull('deleted_at')
+                ->count();
+
+            if ($existingTimestampCount > 0) {
+                $lateAttendanceData = 0;
+            }else{
+                $lateAttendanceData = 1;
+            }
+
             $data = array(
                 'emp_id' => $empid,
                 'uid' => $empid,
@@ -418,15 +452,14 @@ class AttendancePolicyService
             $insertId = DB::table('attendances')->insertGetId($data);
 
             // Seamless shift transition check - same as attendanceInsertcsv_txt
+            if($lateAttendanceData == 1){
+                 return $this->checkAndInsertLateAttendance($empid, $attendacedate, $attendacetimestamp, $insertId);
+            }
             $this->handleSeamlessShiftTransition($empid, $attendacedate, $location);
-
-            return $this->checkAndInsertLateAttendance($empid, $attendacedate, $attendacetimestamp, $insertId);
 
         }
         return true;
-
     }
-
 
     private function checkAndInsertLateAttendance($empId, $date, $firstCheckin, $attendanceId)
     {
