@@ -66,6 +66,8 @@ Route::get('addEmployee',['uses' => 'EmployeeController@index', 'as' => 'addEmpl
 Route::post('empoyeeUpdate',['uses' => 'EmployeeController@edit', 'as' => 'empoyeeUpdate']); 
 Route::post('empoyeeRegister',['uses' => 'EmployeeController@store', 'as' => 'empoyeeRegister']); 
 Route::post('addUserLogin',['uses' => 'EmployeeController@usercreate', 'as' => 'addUserLogin']); 
+Route::get('checkEmployeeUser',['uses' => 'EmployeeController@checkEmployeeUser', 'as' => 'checkEmployeeUser']);
+Route::post('updateUserLogin',['uses' => 'EmployeeController@userupdate', 'as' => 'updateUserLogin']);
 Route::get('EmployeeDestroy/destroy/{id}', 'EmployeeController@destroy');
 Route::get('exportEmpoloyee', 'EmployeeController@exportempoloyee')->name('exportEmpoloyee');
 Route::get('/viewEmployee/{id}',['uses' => 'EmployeeController@show', 'as' => 'viewEmployee']);
