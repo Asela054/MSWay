@@ -1311,24 +1311,54 @@ $(document).ready(function () {
     // userlog 
 
     $(document).on('click', '.adduserlog', function () {
-        $('.modal-title').text('Add Employee User Login');
-        $('#userlog_action_button').html('<i class="fas fa-plus"></i>&nbsp;Add');
-        $('#userlog_action_button').val('Add');
-        var id = $(this).attr('id');
-        var name = $(this).attr('name');
+        var id          = $(this).attr('id');
+        var name        = $(this).attr('name');
         var emp_company = $(this).attr('emp_company');
-        $('#userlog_userid').val(id);
-        $('#userlog_name').val(name);
-        $('#userlog_company').val(emp_company);
-        $('#userlog_action').val('Add');
-        $('#userlogform_result').html('');
+
+        // Reset the form first
         $('#userlogform')[0].reset();
-        
+        $('#userlogform_result').html('');
         $('#email').val('');
         $('#userlog_password').val('');
         $('#password-confirm').val('');
+        $('#userlog_hidden_id').val('');
 
-        $('#userlogModal').modal('show');
+        $('#userlog_userid').val(id);
+        $('#userlog_name').val(name);
+        $('#userlog_company').val(emp_company);
+
+        // Check if a user account already exists for this employee
+        $.ajax({
+            url: "{{ route('checkEmployeeUser') }}",
+            method: "GET",
+            data: { emp_id: id },
+            dataType: "json",
+            success: function (data) {
+                if (data.exists) {
+                    // Existing user – switch to Update mode
+                    $('.modal-title').text('Update Employee User Login');
+                    $('#userlog_action_button').html('<i class="fas fa-save"></i>&nbsp;Update');
+                    $('#userlog_action').val('Update');
+                    $('#userlog_hidden_id').val(data.user_id);
+                    $('#email').val(data.email);
+                    // Show a hint that password is optional for update
+                    $('#userlogform_result').html('<div class="alert alert-info small mb-2">User account exists. Email is pre-filled. Leave password blank to keep current password.</div>');
+                } else {
+                    // New user – Add mode
+                    $('.modal-title').text('Add Employee User Login');
+                    $('#userlog_action_button').html('<i class="fas fa-plus"></i>&nbsp;Add');
+                    $('#userlog_action').val('Add');
+                }
+                $('#userlogModal').modal('show');
+            },
+            error: function () {
+                // Fallback – open in Add mode
+                $('.modal-title').text('Add Employee User Login');
+                $('#userlog_action_button').html('<i class="fas fa-plus"></i>&nbsp;Add');
+                $('#userlog_action').val('Add');
+                $('#userlogModal').modal('show');
+            }
+        });
     });
 
     //empadd
@@ -1406,46 +1436,67 @@ $(document).ready(function () {
 
     $('#userlogform').on('submit', function (event) {
         event.preventDefault();
-        
+
         $('#userlogform_result').html('');
-        
-        var email = $.trim($('#email').val());
-        var password = $.trim($('#userlog_password').val());
+
+        var action      = $('#userlog_action').val();
+        var email       = $.trim($('#email').val());
+        var password    = $.trim($('#userlog_password').val());
         var password_confirmation = $.trim($('#password-confirm').val());
-        
+
         if (email === '') {
             var html = '<div class="alert alert-danger">Email is required</div>';
             $('#userlogform_result').html(html);
             return false;
         }
-        
-        if (password === '') {
-            var html = '<div class="alert alert-danger">Password is required</div>';
-            $('#userlogform_result').html(html);
-            return false;
-        }
-        
-        if (password_confirmation === '') {
-            var html = '<div class="alert alert-danger">Confirm password is required</div>';
-            $('#userlogform_result').html(html);
-            return false;
-        }
-        
-        if (password !== password_confirmation) {
-            var html = '<div class="alert alert-danger">Passwords do not match</div>';
-            $('#userlogform_result').html(html);
-            return false;
-        }
-        
-        if (password.length < 6) {
-            var html = '<div class="alert alert-danger">Password must be at least 6 characters</div>';
-            $('#userlogform_result').html(html);
-            return false;
-        }
-        
-        var action_url = "{{ route('addUserLogin') }}";
 
-        $('#userlog_action_button').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>&nbsp;Creating...');
+        if (action === 'Add') {
+            // Strict validation for new user creation
+            if (password === '') {
+                var html = '<div class="alert alert-danger">Password is required</div>';
+                $('#userlogform_result').html(html);
+                return false;
+            }
+
+            if (password_confirmation === '') {
+                var html = '<div class="alert alert-danger">Confirm password is required</div>';
+                $('#userlogform_result').html(html);
+                return false;
+            }
+
+            if (password !== password_confirmation) {
+                var html = '<div class="alert alert-danger">Passwords do not match</div>';
+                $('#userlogform_result').html(html);
+                return false;
+            }
+
+            if (password.length < 6) {
+                var html = '<div class="alert alert-danger">Password must be at least 6 characters</div>';
+                $('#userlogform_result').html(html);
+                return false;
+            }
+        } else {
+            // Update mode – password is optional, but if provided must match
+            if (password !== '' || password_confirmation !== '') {
+                if (password !== password_confirmation) {
+                    var html = '<div class="alert alert-danger">Passwords do not match</div>';
+                    $('#userlogform_result').html(html);
+                    return false;
+                }
+                if (password.length < 6) {
+                    var html = '<div class="alert alert-danger">Password must be at least 6 characters</div>';
+                    $('#userlogform_result').html(html);
+                    return false;
+                }
+            }
+        }
+
+        var action_url = (action === 'Update')
+            ? "{{ route('updateUserLogin') }}"
+            : "{{ route('addUserLogin') }}";
+
+        var buttonLabel = (action === 'Update') ? 'Updating...' : 'Creating...';
+        $('#userlog_action_button').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>&nbsp;' + buttonLabel);
 
         $.ajax({
             url: action_url,
@@ -1461,7 +1512,8 @@ $(document).ready(function () {
                     }
                     html += '</div>';
                     $('#userlogform_result').html(html);
-                    $('#userlog_action_button').prop('disabled', false).html('<i class="fas fa-plus"></i>&nbsp;Add');
+                    var btnLabel = (action === 'Update') ? '<i class="fas fa-save"></i>&nbsp;Update' : '<i class="fas fa-plus"></i>&nbsp;Add';
+                    $('#userlog_action_button').prop('disabled', false).html(btnLabel);
                 }
                 if (data.success) {
                     html = '<div class="alert alert-success">' + data.success + '</div>';
@@ -1484,7 +1536,8 @@ $(document).ready(function () {
                 }
                 html += '</div>';
                 $('#userlogform_result').html(html);
-                $('#userlog_action_button').prop('disabled', false).html('<i class="fas fa-plus"></i>&nbsp;Add');
+                var btnLabel = (action === 'Update') ? '<i class="fas fa-save"></i>&nbsp;Update' : '<i class="fas fa-plus"></i>&nbsp;Add';
+                $('#userlog_action_button').prop('disabled', false).html(btnLabel);
             }
         });
     });
