@@ -26,6 +26,7 @@ use App\Policestation;
 use App\CompanyHierarchy;
 use App\FinancialCategory;
 use App\EmployeeResignBy;
+use App\PayrollProcessType;
 use DB;
 use Excel;
 use Illuminate\Support\Facades\Auth;
@@ -292,6 +293,7 @@ class EmployeeController extends Controller
             $policestation = Policestation::orderBy('id', 'asc')->where('status', '=', 1)->get();
             $empposition = CompanyHierarchy::orderBy('order_number', 'asc')->get();
             $empfinancial = FinancialCategory::orderBy('id', 'asc')->get();
+            $payroll_process_type=PayrollProcessType::orderBy('id', 'asc')->get();
 
            $deviceCheck = DB::table('employee_devices_mac_id')
                 ->where('emp_id', $employee->emp_id)
@@ -300,7 +302,7 @@ class EmployeeController extends Controller
 
 
 
-            return view('Employee.viewEmployee', compact('job_categories', 'employee', 'id', 'jobtitles', 'employmentstatus', 'branch', 'shift_type', 'company', 'departments', 'work_categories', 'dsdivisions', 'gsndivision', 'policestation', 'empposition', 'empfinancial','deviceCheck'));
+            return view('Employee.viewEmployee', compact('job_categories', 'employee', 'id', 'jobtitles', 'employmentstatus', 'branch', 'shift_type', 'company', 'departments', 'work_categories', 'dsdivisions', 'gsndivision', 'policestation', 'empposition', 'empfinancial','deviceCheck','payroll_process_type'));
             
         } catch (\Exception $e) {
             \Log::error('Error loading employee view: ' . $e->getMessage());
@@ -376,6 +378,7 @@ class EmployeeController extends Controller
         $joindate = $request->joindate;
         $jobtitle = $request->jobtitle;
         $jobstatus = $request->jobstatus;
+        $payroll_process_type_id = $request->payroll_process_type_id;
         $dateassign = $request->dateassign;
         $location = $request->location;
         $shift = $request->shift;
@@ -446,6 +449,7 @@ class EmployeeController extends Controller
         $employee->emp_join_date = $joindate;
         $employee->emp_job_code = $jobtitle;
         $employee->emp_status = $jobstatus;
+        $employee->payroll_process_type_id = $payroll_process_type_id;
         $employee->emp_location = $location;
         $employee->emp_shift = $shift;
         $employee->emp_company = $employeecompany;
@@ -894,7 +898,7 @@ class EmployeeController extends Controller
             $message = 'Employee Updated - ' . $empName . '. '
                 . 'Changes: ' . implode(', ', $changeLines) . '.';
 
-            $mobile = '777474169';
+            $mobile = '775084722';
             // Normalise to 9-digit local format expected by the SMS gateway
             $mobile = preg_replace('/[^0-9]/', '', $mobile);
             if (strlen($mobile) == 10 && $mobile[0] == '0') {
