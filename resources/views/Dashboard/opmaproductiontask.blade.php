@@ -21,6 +21,8 @@
     <div class="container-fluid mt-2 p-0 p-2">
        <div class="card">
            <div class="card-body p-0 p-2">
+            <div id="notTodayAlert" class="alert alert-danger py-2 px-3 mb-2 shadow-sm" style="display:none; border-left: 5px solid #dc3545;">
+                </div>
                <div class="row">
                    <div class="col-md-12">
                        <button class="btn btn-warning btn-sm filter-btn float-right px-3" type="button"
@@ -243,9 +245,14 @@ $(document).ready(function(){
                          data : 
                             { department :department, 
                               employee :employee,
-                            from_date: from_date,
-                            to_date: to_date},
+                                from_date: from_date,
+                                to_date: to_date
+                            },  dataSrc: function (json) {
+                                updatePendingAlert(json.data);
+                                return json.data;
+                            }
                     },
+                    
                     columns: [
                         { data: 'emp_id', name: 'emp_id' },
                         { data: 'emp_name', name: 'emp_name' },
@@ -297,29 +304,28 @@ $(document).ready(function(){
                         }
                     ],
                   rowCallback: function(row, data) {
-    var tier = getTier(data.daily_average);
+                var tier = getTier(data.daily_average);
 
-    var colors = {
-        'red':    { bg: '#ff6b6b', color: '#000' },
-        'orange': { bg: '#ff9900', color: '#000' },
-        'yellow': { bg: '#ffff00', color: '#000' },
-        'lgreen': { bg: '#99e64d', color: '#000' },
-        'dgreen': { bg: '#2f4f2f', color: '#fff' },
-        'na':     { bg: '', color: '' }
-    };
+                var colors = {
+                    'red':    { bg: '#ff6b6b', color: '#000' },
+                    'orange': { bg: '#ff9900', color: '#000' },
+                    'yellow': { bg: '#ffff00', color: '#000' },
+                    'lgreen': { bg: '#99e64d', color: '#000' },
+                    'dgreen': { bg: '#2f4f2f', color: '#fff' },
+                    'na':     { bg: '', color: '' }
+                };
 
-    var c = colors[tier.key] || colors['na'];
+                var c = colors[tier.key] || colors['na'];
 
-    // apply to the row itself
-    $(row).css('background-color', c.bg);
-    $(row).css('color', c.color);
+                                // apply to the row itself
+                                $(row).css('background-color', c.bg);
+                                $(row).css('color', c.color);
 
-    // apply to every cell too (in case striping/hover CSS targets td directly)
-    $(row).find('> td').css('background-color', c.bg).css('color', c.color);
-}
+                                // apply to every cell too (in case striping/hover CSS targets td directly)
+                                $(row).find('> td').css('background-color', c.bg).css('color', c.color);
+                     }
                 });
         }
-
 
 });
 
@@ -346,6 +352,75 @@ function renderComponent(avg, key) {
         ? '<span>Pass</span>'
         : '<span class="text-muted">-</span>';
 }
+
+
+function getTodayStr() {
+    let today = new Date();
+    let y = today.getFullYear();
+    let m = String(today.getMonth() + 1).padStart(2, '0');
+    let d = String(today.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
+
+function formatDisplayDate(dateStr) {
+
+    let d = new Date(dateStr);
+    let options = { day: '2-digit', month: 'short', year: 'numeric' };
+    return d.toLocaleDateString('en-GB', options);
+}
+
+function updatePendingAlert(rows) {
+    let alertBox = $('#notTodayAlert');
+
+    if (!rows || rows.length === 0) {
+        alertBox.slideUp(150);
+        return;
+    }
+
+    let dates = rows.map(r => r.date).filter(Boolean);
+
+    if (dates.length === 0) {
+        alertBox.slideUp(150);
+        return;
+    }
+
+    dates.sort();
+    let minDate = dates[0];
+    let today = getTodayStr();
+
+    // minDate eke records approve karala thiyana nisa, ita passe dawasa idn pending range eka patan ganna
+    let startDate = new Date(minDate);
+    startDate.setDate(startDate.getDate() + 1);
+    let y = startDate.getFullYear();
+    let m = String(startDate.getMonth() + 1).padStart(2, '0');
+    let d = String(startDate.getDate()).padStart(2, '0');
+    let pendingStart = `${y}-${m}-${d}`;
+
+    // pendingStart eka today eken passe nam (i.e. okkoma approve wela), alert eka epa
+    if (pendingStart > today) {
+        alertBox.slideUp(150);
+        return;
+    }
+
+    console.log('Pending approval from:', pendingStart, 'to Today:', today);
+    let messageHtml = '';
+
+    if (pendingStart === today) {
+        messageHtml = `<i class="fas fa-exclamation-triangle mr-2"></i>
+            <strong>Action Required!</strong> Today's (<strong>${formatDisplayDate(today)}</strong>)
+            production daily summary records are still not approved.
+            Please approve immediately.`;
+    } else {
+        messageHtml = `<i class="fas fa-exclamation-triangle mr-2"></i>
+            <strong>Action Required!</strong> Production daily summary records from
+            <strong>${formatDisplayDate(pendingStart)}</strong> to
+            <strong>${formatDisplayDate(today)}</strong> are still not approved.
+            Please approve them as soon as possible.`;
+    }
+
+    alertBox.html(messageHtml).slideDown(150);
+}
+
 </script>
 
 @endsection

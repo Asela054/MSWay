@@ -22,6 +22,8 @@ Route::post('v2/UpdatePasswordFromForgotPassword', ['uses' => '\App\Http\Control
 Route::post('v2/UpdatePassword', ['uses' => '\App\Http\Controllers\Api\AuthController@UpdatePassword', 'as' => 'UpdatePassword']);
 Route::post('v2/resetPasswordRequestOTP',['uses' => '\App\Http\Controllers\Api\AuthController@resetPasswordRequestOTP', 'as' => 'resetPasswordRequestOTP']);
 
+Route::post('v1/AuthenticateUseradmin',['uses' => '\App\Http\Controllers\Api\AuthController@AuthenticateUser_admin', 'as' => 'AuthenticateUseradmin']);
+
 Route::post('v1/company_list', ['uses' => '\App\Http\Controllers\Api\V1MainController@company_list', 'as' => 'company_list']);
 Route::post('v1/department_list', ['uses' => '\App\Http\Controllers\Api\V1MainController@department_list', 'as' => 'department_list']);
 Route::post('v1/allowance_list', ['uses' => '\App\Http\Controllers\Api\V1MainController@allowance_list', 'as' => 'allowance_list']);

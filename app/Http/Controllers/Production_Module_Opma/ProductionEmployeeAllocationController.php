@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use Datatables;
 use DB;
 use App\ShiftType;
+use DateTime;
 
 class ProductionEmployeeAllocationController extends Controller
 {
@@ -444,7 +445,6 @@ class ProductionEmployeeAllocationController extends Controller
         }
 
         $department = $request->input('department');
-        $date = $request->input('allocation_date');
 
         
 
@@ -543,81 +543,94 @@ class ProductionEmployeeAllocationController extends Controller
             DB::beginTransaction();
 
             $department = $request->input('department');
-            $date = $request->input('allocation_date');
             $tableData = $request->input('tableData');
 
-            foreach ($tableData as $rowtabledata) {
-                    $emp_id = $rowtabledata['emp_id'];
-                    $machine_id = $rowtabledata['machine_id'];
-                    $shift_id = $rowtabledata['shift_id'];
-                    $style_id = $rowtabledata['style_id'];
-                    $size_id = $rowtabledata['size_id'];
-                    $target = $rowtabledata['target'];
-                    $scale = $rowtabledata['scale'];
-                    $remark = $rowtabledata['remark'];
-                    
-                // 1. check main allocation table for this date/machine/shift/style/target combo
-                $existingAllocation = DB::table('opma_emp_product_allocation')
-                    ->where('date', $date)
-                    ->where('machine_id', $machine_id)
-                    ->where('shift_id', $shift_id)
-                    ->where('product_id', $style_id)
-                    ->where('target', $target)
-                    ->where('production_status', 0)
-                    ->where('status', 1)
-                    ->first();
+            $datesString = $request->input('allocation_dates');
+            $allocationDates = array_filter(array_map('trim', explode(',', $datesString)));
 
-                if ($existingAllocation) {
-                    $requestID = $existingAllocation->id;
-                } else {
-                    // no matching main record, insert new one
-                    $EmpProductAllocation = new EmpProductAllocation();
-                    $EmpProductAllocation->date = $date;
-                    $EmpProductAllocation->machine_id = $machine_id;
-                    $EmpProductAllocation->product_id = $style_id;
-                    $EmpProductAllocation->shift_id = $shift_id;
-                    $EmpProductAllocation->target = $target;
-                    $EmpProductAllocation->scale = $scale;
-                    $EmpProductAllocation->size = $size_id;
-                    $EmpProductAllocation->remark = $remark;
-                    $EmpProductAllocation->production_status = '0';
-                    $EmpProductAllocation->status = '1';
-                    $EmpProductAllocation->created_by = Auth::id();
-                    $EmpProductAllocation->updated_by = '0';
-                    $EmpProductAllocation->save();
-
-                    $requestID = $EmpProductAllocation->id;
-                }
-
-                // 2. check if this employee is already added under that allocation details table
-                $existingDetail = DB::table('opma_emp_product_allocation_details')
-                    ->where('allocation_id', $requestID)
-                    ->where('emp_id', $emp_id)
-                    ->where('status', 1)
-                    ->first();
-
-                if ($existingDetail) {
-                    // already added, update instead of duplicate insert
-                    DB::table('opma_emp_product_allocation_details')
-                        ->where('id', $existingDetail->id)
-                        ->update([
-                            'emp_id'  => $emp_id,
-                            'date'  => $date,
-                            'updated_by'  => Auth::id()
-                        ]);
-                } else {
-
-                    // not added yet, insert new detail row
-                    $EmpProductAllocationDetail = new EmpProductAllocationDetail();
-                    $EmpProductAllocationDetail->allocation_id = $requestID;
-                    $EmpProductAllocationDetail->emp_id = $emp_id;
-                    $EmpProductAllocationDetail->date = $date;
-                    $EmpProductAllocationDetail->status = '1';
-                    $EmpProductAllocationDetail->created_by = Auth::id();
-                    $EmpProductAllocationDetail->updated_by = '0';
-                    $EmpProductAllocationDetail->save();
-                }
+            if (empty($allocationDates)) {
+                return response()->json(['errors' => ['allocation_dates' => 'No valid dates provided']]);
             }
+
+            foreach ($allocationDates as $date) {
+
+                if (!DateTime::createFromFormat('Y-m-d', $date)) {
+                    continue; // or return error
+                }
+                
+                foreach ($tableData as $rowtabledata) {
+                        $emp_id = $rowtabledata['emp_id'];
+                        $machine_id = $rowtabledata['machine_id'];
+                        $shift_id = $rowtabledata['shift_id'];
+                        $style_id = $rowtabledata['style_id'];
+                        $size_id = $rowtabledata['size_id'];
+                        $target = $rowtabledata['target'];
+                        $scale = $rowtabledata['scale'];
+                        $remark = $rowtabledata['remark'];
+                        
+                    // 1. check main allocation table for this date/machine/shift/style/target combo
+                    $existingAllocation = DB::table('opma_emp_product_allocation')
+                        ->where('date', $date)
+                        ->where('machine_id', $machine_id)
+                        ->where('shift_id', $shift_id)
+                        ->where('product_id', $style_id)
+                        ->where('target', $target)
+                        ->where('production_status', 0)
+                        ->where('status', 1)
+                        ->first();
+
+                    if ($existingAllocation) {
+                        $requestID = $existingAllocation->id;
+                    } else {
+                        // no matching main record, insert new one
+                        $EmpProductAllocation = new EmpProductAllocation();
+                        $EmpProductAllocation->date = $date;
+                        $EmpProductAllocation->machine_id = $machine_id;
+                        $EmpProductAllocation->product_id = $style_id;
+                        $EmpProductAllocation->shift_id = $shift_id;
+                        $EmpProductAllocation->target = $target;
+                        $EmpProductAllocation->scale = $scale;
+                        $EmpProductAllocation->size = $size_id;
+                        $EmpProductAllocation->remark = $remark;
+                        $EmpProductAllocation->production_status = '0';
+                        $EmpProductAllocation->status = '1';
+                        $EmpProductAllocation->created_by = Auth::id();
+                        $EmpProductAllocation->updated_by = '0';
+                        $EmpProductAllocation->save();
+
+                        $requestID = $EmpProductAllocation->id;
+                    }
+
+                    // 2. check if this employee is already added under that allocation details table
+                    $existingDetail = DB::table('opma_emp_product_allocation_details')
+                        ->where('allocation_id', $requestID)
+                        ->where('emp_id', $emp_id)
+                        ->where('status', 1)
+                        ->first();
+
+                    if ($existingDetail) {
+                        // already added, update instead of duplicate insert
+                        DB::table('opma_emp_product_allocation_details')
+                            ->where('id', $existingDetail->id)
+                            ->update([
+                                'emp_id'  => $emp_id,
+                                'date'  => $date,
+                                'updated_by'  => Auth::id()
+                            ]);
+                    } else {
+
+                        // not added yet, insert new detail row
+                        $EmpProductAllocationDetail = new EmpProductAllocationDetail();
+                        $EmpProductAllocationDetail->allocation_id = $requestID;
+                        $EmpProductAllocationDetail->emp_id = $emp_id;
+                        $EmpProductAllocationDetail->date = $date;
+                        $EmpProductAllocationDetail->status = '1';
+                        $EmpProductAllocationDetail->created_by = Auth::id();
+                        $EmpProductAllocationDetail->updated_by = '0';
+                        $EmpProductAllocationDetail->save();
+                    }
+                }
+             }
             DB::commit();
             return response()->json(['success' => 'Employee Production Allocation Successfully Inserted']);
         } catch (\Exception $e) {
