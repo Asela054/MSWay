@@ -12,8 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 class AttendancePolicyService
 {
-    // Max allowed gap for a "seamless" shift transition (minutes).
-    // e.g. night shift off at 8am, day shift on at 9am should still count as "seamless".
+
 
 
     private function getRosterShiftForDate($empId, $workDate, $preferOvernight = null)
@@ -44,6 +43,8 @@ class AttendancePolicyService
 
     public function attendanceInsertcsv_txt($full_emp_id, $date_input, $timestamp, $date)
     {
+        $lateAttendanceData = 0;
+
         $empshift = DB::table('employees')
             ->select('emp_id', 'emp_shift', 'emp_location')
             ->where('emp_id', $full_emp_id)
@@ -55,15 +56,45 @@ class AttendancePolicyService
 
         $employeeLocation = $empshift->emp_location;
 
-        $emprosterinfo = DB::table('employee_roster_details')
-            ->select('emp_id', 'shift_id')
-            ->where('emp_id', $full_emp_id)
-            ->where('work_date', $date_input)
-            ->first();
+        $fullTimestamp = Carbon::parse($date_input . ' ' . $timestamp);
 
-        if ($emprosterinfo) {
-            $empshiftid = $emprosterinfo->shift_id;
+        $rosteredShifts = DB::table('employee_roster_details')
+            ->join('shift_types', 'employee_roster_details.shift_id', '=', 'shift_types.id')
+            ->select('shift_types.*', 'employee_roster_details.shift_id as roster_shift_id')
+            ->where('employee_roster_details.emp_id', $full_emp_id)
+            ->where('employee_roster_details.work_date', $date_input)
+            ->get();
+
+        $shift = null;
+        $empshiftid = null;
+
+        if ($rosteredShifts->isNotEmpty()) {
+            if ($rosteredShifts->count() > 1) {
+                // Check each shift to see if timestamp fits into its window (+/- 2 hours buffer)
+                foreach ($rosteredShifts as $s) {
+                    if ($s->onduty_time && $s->offduty_time) {
+                        $start = Carbon::parse($date_input . ' ' . $s->onduty_time)->subHours(2);
+                        $endDate = ($s->off_next_day == '1' || $s->on_next_day == '1')
+                            ? (new DateTime($date_input))->modify('+1 day')->format('Y-m-d')
+                            : $date_input;
+                        $end = Carbon::parse($endDate . ' ' . $s->offduty_time)->addHours(2);
+
+                        if ($fullTimestamp->between($start, $end)) {
+                            $shift = $s;
+                            $empshiftid = $s->roster_shift_id;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // Fallback if multi-shift window didn't match or only 1 shift exists
+            if (!$shift) {
+                $shift = $rosteredShifts->first();
+                $empshiftid = $shift->roster_shift_id;
+            }
         } else {
+            // Fallback to previous day roster check or default employee shift
             $previous_day = (new DateTime($date_input))->modify('-1 day')->format('Y-m-d');
             $emprosterinfo = DB::table('employee_roster_details')
                 ->select('emp_id', 'shift_id')
@@ -76,11 +107,9 @@ class AttendancePolicyService
             } else {
                 $empshiftid = $empshift->emp_shift;
             }
-        }
 
-        $shift = DB::table('shift_types')
-            ->where('id', $empshiftid)
-            ->first();
+            $shift = DB::table('shift_types')->where('id', $empshiftid)->first();
+        }
 
         $previousDate = Carbon::parse($date)->subDay()->format('Y-m-d');
         $employeeshiftdetails = DB::table('employeeshiftdetails')
@@ -92,24 +121,29 @@ class AttendancePolicyService
         $timestamp = $date_input . ' ' . $timestamp;
         $attendance_date = null;
 
-        // ============================================================
-        // NEW: Pre-check — regardless of what shift is rostered for
-        // date_input, check if the PREVIOUS day had an overnight
-        // (off_next_day = 1) shift, and whether this punch falls inside
-        // that shift's overflow window. This catches the case where
-        // date_input's own rostered shift is a normal day shift (so
-        // Branch 1/2 below never trigger), but the punch is actually the
-        // tail-end checkout of the previous night's overnight shift
-        // (e.g. 09-03 21:45 on -> 09-04 06:25 off, while 09-04 is also
-        // rostered with its own day shift).
-        // Only runs when date_input's OWN shift is not itself an
-        // overnight shift, so it never overlaps with Branch 1/2's logic.
-        // ============================================================
         $overnightCarryoverMatched = false;
 
         if ($date == $date_input && (!$shift || $shift->off_next_day != '1')) {
             $previous_day_chk = (new DateTime($date_input))->modify('-1 day')->format('Y-m-d');
-            $prevOvernightShift = $this->getRosterShiftForDate($full_emp_id, $previous_day_chk, true);
+
+            $prevShiftsChk = DB::table('employee_roster_details')
+                ->join('shift_types', 'employee_roster_details.shift_id', '=', 'shift_types.id')
+                ->select('shift_types.*', 'employee_roster_details.shift_id as roster_shift_id')
+                ->where('employee_roster_details.emp_id', $full_emp_id)
+                ->where('employee_roster_details.work_date', $previous_day_chk)
+                ->get();
+
+            $prevOvernightShift = null;
+            if ($prevShiftsChk->isNotEmpty()) {
+                if ($prevShiftsChk->count() > 1) {
+                    $match = $prevShiftsChk->first(function ($s) {
+                        return ($s->off_next_day == '1' || $s->on_next_day == '1');
+                    });
+                    $prevOvernightShift = $match ?: $prevShiftsChk->first();
+                } else {
+                    $prevOvernightShift = $prevShiftsChk->first();
+                }
+            }
 
             if ($prevOvernightShift
                 && $prevOvernightShift->off_next_day == '1'
@@ -128,12 +162,7 @@ class AttendancePolicyService
         }
 
         if ($overnightCarryoverMatched) {
-            // attendance_date already set above - fall through to save logic
 
-        // ============================================================
-        // Branch 1: off_next_day = 0, on_next_day = 1
-        // (left untouched as requested - kept as-is)
-        // ============================================================
         } elseif ($shift && $shift->off_next_day == '0' && $shift->on_next_day == '1' && $date == $date_input) {
             $next_day = (new DateTime($date_input))->modify('+1 day')->format('Y-m-d');
             $shif_ontime = Carbon::parse($date . ' ' . $shift->onduty_time);
@@ -145,15 +174,30 @@ class AttendancePolicyService
                 $attendance_date = $next_day;
             }
 
-        // ============================================================
         // Branch 2: off_next_day = 1, on_next_day = 0
-        // ============================================================
         } elseif ($shift && $shift->off_next_day == '1' && $shift->on_next_day == '0' && $date == $date_input) {
-
             $previous_day = (new DateTime($date_input))->modify('-1 day')->format('Y-m-d');
             $next_day = (new DateTime($date_input))->modify('+1 day')->format('Y-m-d');
 
-            $prevShift = $this->getRosterShiftForDate($full_emp_id, $previous_day, true) ?: $shift;
+            $prevShiftsB2 = DB::table('employee_roster_details')
+                ->join('shift_types', 'employee_roster_details.shift_id', '=', 'shift_types.id')
+                ->select('shift_types.*', 'employee_roster_details.shift_id as roster_shift_id')
+                ->where('employee_roster_details.emp_id', $full_emp_id)
+                ->where('employee_roster_details.work_date', $previous_day)
+                ->get();
+
+            $prevShift = null;
+            if ($prevShiftsB2->isNotEmpty()) {
+                if ($prevShiftsB2->count() > 1) {
+                    $match = $prevShiftsB2->first(function ($s) {
+                        return ($s->off_next_day == '1' || $s->on_next_day == '1');
+                    });
+                    $prevShift = $match ?: $prevShiftsB2->first();
+                } else {
+                    $prevShift = $prevShiftsB2->first();
+                }
+            }
+            $prevShift = $prevShift ?: $shift;
 
             $ts = Carbon::parse($timestamp);
             $matched = false;
@@ -191,6 +235,7 @@ class AttendancePolicyService
                 }
             }
 
+        // Fallback branch
         } else if ($date == $date_input) {
             if ($employeeshiftdetails) {
                 $previous_day = (new DateTime($date_input))->modify('-1 day')->format('Y-m-d');
@@ -200,45 +245,95 @@ class AttendancePolicyService
             }
         }
 
-        if ($date == $date_input) {
+        if ($date != $date_input) {
+            return true;
+        }
 
-         // last timestamp check - 1 min threshold
-                $lastAttendance = DB::table('attendances')
+        $lastAttendance = DB::table('attendances')
+            ->where('emp_id', $full_emp_id)
+            ->where('date', $attendance_date)
+            ->whereNull('deleted_at')
+            ->orderBy('timestamp', 'desc')
+            ->first();
+
+        if ($lastAttendance) {
+            $lastTime = Carbon::parse($lastAttendance->timestamp);
+            $newTime  = Carbon::parse($timestamp);
+
+            if ($newTime->diffInSeconds($lastTime) < 60) {
+                return true; // too close to last punch, skip
+            }
+        }
+
+        $maxRolloverDays = 5;
+
+        while ($maxRolloverDays > 0) {
+            $rosteredShiftCount = DB::table('employee_roster_details')
+                ->where('emp_id', $full_emp_id)
+                ->where('work_date', $attendance_date)
+                ->count();
+
+            $existingPunchCount = DB::table('attendances')
+                ->where('emp_id', $full_emp_id)
+                ->where('date', $attendance_date)
+                ->whereNull('deleted_at')
+                ->count();
+
+            if ($rosteredShiftCount < 2 || $existingPunchCount < 4) {
+                break; 
+            }
+
+            $attendance_date = Carbon::parse($attendance_date)->addDay()->format('Y-m-d');
+            $maxRolloverDays--;
+
+            $lastAttendanceNext = DB::table('attendances')
+                ->where('emp_id', $full_emp_id)
+                ->where('date', $attendance_date)
+                ->whereNull('deleted_at')
+                ->orderBy('timestamp', 'desc')
+                ->first();
+
+            if ($lastAttendanceNext) {
+                $lastTimeNext = Carbon::parse($lastAttendanceNext->timestamp);
+                $newTime = Carbon::parse($timestamp);
+
+                if ($newTime->diffInSeconds($lastTimeNext) < 60) {
+                    return true; 
+                }
+            }
+        }
+
+
+          $existingTimestampCount = DB::table('attendances')
                     ->where('emp_id', $full_emp_id)
                     ->where('date', $attendance_date)
                     ->whereNull('deleted_at')
-                    ->orderBy('timestamp', 'desc')
-                    ->first();
+                    ->count();
 
-                if ($lastAttendance) {
-                    $lastTime = Carbon::parse($lastAttendance->timestamp);
-                    $newTime  = Carbon::parse($timestamp);
-
-                    if ($newTime->diffInSeconds($lastTime) < 60) {
-                        return true; // too close to last punch, skip
-                    }
+                if ($existingTimestampCount > 0) {
+                   $lateAttendanceData = 0;
+                }else{
+                    $lateAttendanceData = 1;
                 }
 
-                
-            $Attendance = AppAttendance::firstOrNew(['timestamp' => $timestamp, 'emp_id' => $full_emp_id]);
-            $Attendance->uid = $full_emp_id;
-            $Attendance->emp_id = $full_emp_id;
-            $Attendance->timestamp = $timestamp;
-            $Attendance->date = $attendance_date;
-            $Attendance->location = $employeeLocation;
-            $Attendance->save();
+        $Attendance = AppAttendance::firstOrNew(['timestamp' => $timestamp, 'emp_id' => $full_emp_id]);
+        $Attendance->uid = $full_emp_id;
+        $Attendance->emp_id = $full_emp_id;
+        $Attendance->timestamp = $timestamp;
+        $Attendance->date = $attendance_date;
+        $Attendance->location = $employeeLocation;
+        $Attendance->save();
 
-            $insertId = $Attendance->id;
+        $insertId = $Attendance->id;
 
-            //$this->handleSeamlessShiftTransition($full_emp_id, $date_input, $employeeLocation);
-
+       if($lateAttendanceData == 1){
             return $this->checkAndInsertLateAttendance($full_emp_id, $attendance_date, $timestamp, $insertId);
         }
-        return true;
     }
 
     public function attendanceInsertsingle_dep($empid, $attendacetimestamp, $location, $attendacedate)
     {
+         $lateAttendanceData = 0;
         $datetime_parts = explode('T', $attendacetimestamp);
 
         $timestampdate = $datetime_parts[0];
@@ -420,6 +515,19 @@ class AttendancePolicyService
                 }
 
 
+             $existingTimestampCount = DB::table('attendances')
+                ->where('emp_id', $empid)
+                ->where('date', $attendance_date)
+                ->whereNull('deleted_at')
+                ->count();
+
+                if ($existingTimestampCount > 0) {
+                   $lateAttendanceData = 0;
+                }else{
+                    $lateAttendanceData = 1;
+                }
+
+
             $data = array(
                 'emp_id' => $empid,
                 'uid' => $empid,
@@ -437,7 +545,9 @@ class AttendancePolicyService
             // Seamless shift transition check - same as attendanceInsertcsv_txt
             // $this->handleSeamlessShiftTransition($empid, $attendacedate, $location);
 
-            return $this->checkAndInsertLateAttendance($empid, $attendacedate, $attendacetimestamp, $insertId);
+            if($lateAttendanceData == 1){
+                 return $this->checkAndInsertLateAttendance($empid, $attendacedate, $attendacetimestamp, $insertId);
+            }
         }
         return true;
     }
