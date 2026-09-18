@@ -130,6 +130,10 @@ class UserAccountController extends Controller
             ->orderBy('date', 'asc')
             ->get();
 
+        $existing_dates = $summaries->pluck('date')->map(function($date) {
+            return \Carbon\Carbon::parse($date)->format('Y-m-d');
+        })->toArray();
+
         $data = [];
 
         foreach ($summaries as $summary) {
@@ -179,11 +183,91 @@ class UserAccountController extends Controller
             ];
         }
 
+        // Find dates in the selected month that are missing from OpmaDailyApprovalSummary
+        $period = \Carbon\CarbonPeriod::create($from_date, $to_date);
+        $missingDates = [];
+        foreach ($period as $date) {
+            $dateStr = $date->format('Y-m-d');
+            if (!in_array($dateStr, $existing_dates)) {
+                $missingDates[] = $dateStr;
+            }
+        }
+
+        $missing_data = [];
+
+        if (!empty($missingDates)) {
+            // Fetch all allocation detail records for this employee for missing dates
+            // Note: cast emp_id to string for safe comparison across DB types
+            $allocationDetails = DB::table('opma_emp_product_allocation_details as ead')
+                ->join('opma_emp_product_allocation as epa', 'epa.id', '=', 'ead.allocation_id')
+                ->leftJoin('opma_machines as m', 'epa.machine_id', '=', 'm.id')
+                ->leftJoin('opma_styles as s', 'epa.product_id', '=', 's.id')
+                ->select(
+                    DB::raw('DATE(ead.date) as date'),
+                    'epa.machine_id',
+                    'm.machine as machine_name',
+                    'epa.product_id',
+                    's.title as style_title'
+                )
+                ->where('ead.emp_id', (string) $emp_id)
+                ->whereIn(DB::raw('DATE(ead.date)'), $missingDates)
+                ->orderBy('ead.date', 'asc')
+                ->orderBy('ead.id', 'asc')
+                ->get();
+
+            // Group allocation records by date
+            $allocationByDate = [];
+            foreach ($allocationDetails as $detail) {
+                $allocationByDate[$detail->date][] = $detail;
+            }
+
+            foreach ($missingDates as $missingDate) {
+                if (isset($allocationByDate[$missingDate])) {
+                    // Has allocation records — "Not Approved by Admin Department"
+                    $allocations = $allocationByDate[$missingDate];
+                    $rowCount = count($allocations);
+                    $firstRow = true;
+
+                    foreach ($allocations as $alloc) {
+                        $missing_data[] = [
+                            'type'           => 'not_approved',
+                            'formatted_date' => $missingDate,
+                            'date_rowspan'   => $firstRow ? $rowCount : 0,
+                            'mc_no'          => $alloc->machine_name ?? ($alloc->machine_id ?? ''),
+                            'style_details'  => $alloc->style_title ?? ($alloc->product_id ?? ''),
+                        ];
+                        $firstRow = false;
+                    }
+                } else {
+                    // No allocation — "Not Allocated"
+                    $missing_data[] = [
+                        'type'           => 'not_allocated',
+                        'formatted_date' => $missingDate,
+                        'date_rowspan'   => 1,
+                        'mc_no'          => '',
+                        'style_details'  => '',
+                    ];
+                }
+            }
+        }
+
         return response()->json([
-            'draw' => $request->input('draw', 1),
-            'recordsTotal' => count($data),
+            'draw'            => $request->input('draw', 1),
+            'recordsTotal'    => count($data),
             'recordsFiltered' => count($data),
-            'data' => $data
+            'data'            => $data,
+            'missing_data'    => $missing_data,
+            // Debug info — remove after confirming
+            '_debug' => [
+                'emp_id_received'    => $emp_id,
+                'month'              => $month,
+                'from_date'          => $from_date,
+                'to_date'            => $to_date,
+                'existing_dates'     => $existing_dates,
+                'missing_dates'      => $missingDates,
+                'missing_data_count' => count($missing_data),
+                'allocation_found'   => isset($allocationDetails) ? count($allocationDetails) : 'query_skipped',
+            ],
         ]);
     }
 
