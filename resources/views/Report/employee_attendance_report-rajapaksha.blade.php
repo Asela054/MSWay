@@ -240,11 +240,12 @@
 
                                     $.each(objattendance, function (j, item) {
                                         if (objattendance[j].in_time == null && objattendance[j].leave_type == '') {
+                                             var status = (objattendance[j].day_type == 'Workday') ? 'Absent' : 'OFF';
                                             html += '<tr>'
                                                 + '<td>' + objattendance[j].in_date + '</td>'
                                                 + '<td>' + objattendance[j].shift + '</td>'
                                                 + '<td>' + objattendance[j].day_type + '</td>'
-                                                + '<td>OFF</td>'
+                                                 + '<td>' + status + '</td>'
                                                 + '<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>'
                                                 + '<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>'
                                                 + '<td>&nbsp;</td><td>&nbsp;</td>'
