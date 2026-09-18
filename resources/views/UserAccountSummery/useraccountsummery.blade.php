@@ -473,6 +473,10 @@
                                                             </div>
                                                             <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
                                                                 <hr>
+                                                                <div class="mb-2">
+                                                                    <span class="badge px-2 mb-2" style="background-color:#f8d7da;color:#842029;">&nbsp;</span> Not Approved
+                                                                    <span class="badge px-2 mb-2" style="background-color:#fff3cd;color:#664d03;">&nbsp;</span> Pending
+                                                                </div>
                                                                 <div class="center-block fix-width scroll-inner">
                                                                     <table class="table table-striped table-sm small nowrap" style="width: 100%" id="timesheettable">
                                                                        <thead>
@@ -496,6 +500,7 @@
                                                                             </tr>
                                                                         </thead>
                                                                         <tbody></tbody>
+                                                                        <tbody id="timesheetMissingTbody"></tbody>
                                                                     </table>
                                                                 </div>
                                                             </div>
@@ -1897,15 +1902,17 @@
         });
     }
 
-    // Atendance Timesheet
+    // Attendance Timesheet
     function load_timesheet(emp_id) {
         var month = $('#timesheetmonth').val();
         if (!month) return;
 
-        if ($.fn.DataTable.isDataTable('#timesheettable')) {
-             $('#timesheettable').DataTable().destroy();
-         }
+        // Clear missing rows from previous load immediately
+        $('#timesheetMissingTbody').empty();
 
+        if ($.fn.DataTable.isDataTable('#timesheettable')) {
+            $('#timesheettable').DataTable().destroy();
+        }
 
         $.ajax({
             url: "{{ route('user_timesheet_data') }}",
@@ -1922,14 +1929,10 @@
                 var tbody = $('#timesheettable tbody');
                 tbody.empty();
 
-                if (!result || result.length === 0) {
-                    tbody.append('<tr><td colspan="23" class="text-center">No data found.</td></tr>');
-                    return;
-                }
-
                 $('#timesheettable').DataTable({
-                    processing: true,
-                    serverSide: true,
+                    processing: false,
+                    serverSide: false,          
+                    data: result.data,          
                     dom:    "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" +
                             "<'row'<'col-sm-12'tr>>" +
                             "<'row'<'col-sm-5'i><'col-sm-7'p>>",
@@ -1955,14 +1958,6 @@
                                     text: '<i class="fas fa-print mr-2"></i> Print' 
                                 }
                             ],
-                    ajax: {
-                            url: "{{ route('user_timesheet_data') }}",
-                            type: 'POST',
-                            data: {
-                                emp_id: emp_id,
-                                month: month
-                            }
-                    },
                     columns: [
                             { data: 'formatted_date', name: 'date' },
                             { data: 'in_time', name: 'on_time' },
@@ -2018,10 +2013,85 @@
                                 { data: 'trg_bo', name: 'target_bonus' }
                         ],
                     order: [[0, 'asc']],
+                    // Re-attach the static missing-rows tbody after every DataTable draw,
+                    // because DataTable.destroy() + re-init detaches it from the DOM.
+                    initComplete: function() {
+                        var missingTbody = document.getElementById('timesheetMissingTbody');
+                        if (missingTbody) {
+                            document.getElementById('timesheettable').appendChild(missingTbody);
+                        }
+                    }
                 });
+
+                // Render missing dates below the DataTable
+                var missingData = result.missing_data || [];
+                if (missingData.length === 0) {
+                    return;
+                }
+
+                var html = '';
+                // Separator row to visually separate approved from missing
+                html += '<tr><td colspan="16" style="border-top:2px dashed #dee2e6;padding:2px 0;"></td></tr>';
+
+                // Today at midnight (local), for date comparisons
+                var today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                $.each(missingData, function(i, row) {
+                    if (row.type === 'not_approved') {
+                        var rowDate = new Date(row.formatted_date);
+                        rowDate.setHours(0, 0, 0, 0);
+                        var isPast = rowDate < today;
+
+                        // Styling based on date
+                        var trClass   = isPast ? 'table-danger'  : 'table-warning';
+                        var tdStyle   = isPast ? 'color:#842029;' : 'color:#664d03;';
+                        var icon      = isPast ? 'fa-times-circle' : 'fa-clock';
+                        var label     = isPast ? 'Not Approved by Admin Department' : 'Pending';
+
+                        if (row.date_rowspan > 0) {
+                            // First row for this date — DATE cell spans all allocation rows
+                            html += '<tr class="' + trClass + '">' +
+                                '<td rowspan="' + row.date_rowspan + '" class="align-middle font-weight-bold" style="white-space:nowrap;">' +
+                                    row.formatted_date +
+                                '</td>' +
+                                '<td></td>' +
+                                '<td></td>' +
+                                '<td></td>' +
+                                '<td>' + (row.mc_no || '') + '</td>' +
+                                '<td>' + (row.style_details || '') + '</td>' +
+                                '<td colspan="10" class="text-center font-weight-bold" style="' + tdStyle + '">' +
+                                    '<i class="fas ' + icon + ' mr-1"></i>' + label +
+                                '</td>' +
+                            '</tr>';
+                        } else {
+                            // Continuation row — date cell already rowspanned
+                            html += '<tr class="' + trClass + '">' +
+                                '<td></td>' +
+                                '<td></td>' +
+                                '<td></td>' +
+                                '<td>' + (row.mc_no || '') + '</td>' +
+                                '<td>' + (row.style_details || '') + '</td>' +
+                                '<td colspan="10" class="text-center font-weight-bold" style="' + tdStyle + '">' +
+                                    '<i class="fas ' + icon + ' mr-1"></i>' + label +
+                                '</td>' +
+                            '</tr>';
+                        }
+                    } else {
+                        // not_allocated
+                        html += '<tr>' +
+                            '<td class="font-weight-bold" style="white-space:nowrap;">' + row.formatted_date + '</td>' +
+                            '<td colspan="15" class="text-center text-muted">' +
+                                '<i class="fas fa-calendar-times mr-1"></i>Not Allocated' +
+                            '</td>' +
+                        '</tr>';
+                    }
+                });
+
+                $('#timesheetMissingTbody').html(html);
             },
             error: function() {
-                $('#timesheettable tbody').html('<tr><td colspan="23" class="text-center text-danger">Error loading data.</td></tr>');
+                $('#timesheettable tbody').html('<tr><td colspan="16" class="text-center text-danger">Error loading data.</td></tr>');
             }
         });
     }
