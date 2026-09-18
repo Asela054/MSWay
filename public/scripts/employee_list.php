@@ -18,8 +18,8 @@ $columns = array(
     array('db' => 'employees.emp_id', 'dt' => 'emp_id', 'field' => 'emp_id'),
     array('db' => 'employees.emp_national_id', 'dt' => 'emp_national_id', 'field' => 'emp_national_id'),
     array('db' => 'employees.emp_etfno', 'dt' => 'emp_etfno', 'field' => 'emp_etfno'),
-    array('db' => 'departments.name as department_name', 'dt' => 'department', 'field' => 'department_name'),
-    array('db' => 'companies.name as company_name', 'dt' => 'company', 'field' => 'company_name'),
+    array('db' => 'departments.department_name', 'dt' => 'department', 'field' => 'department_name'),
+    array('db' => 'companies.company_name', 'dt' => 'company', 'field' => 'company_name'),
     array('db' => 'shift_types.shift_name', 'dt' => 'shift', 'field' => 'shift_name'),
     array('db' => 'employees.emp_join_date', 'dt' => 'emp_join_date', 'field' => 'emp_join_date'),
     array('db' => 'job_titles.title', 'dt' => 'title', 'field' => 'title'),
@@ -141,9 +141,9 @@ if (!empty($_POST['from_date']) && !empty($_POST['to_date'])) {
 
 $joinQuery = "FROM employees
 LEFT JOIN employment_statuses ON employees.emp_status = employment_statuses.id
-LEFT JOIN companies ON employees.emp_company = companies.id
+LEFT JOIN (SELECT id, name AS company_name FROM companies) companies ON employees.emp_company = companies.id
 LEFT JOIN branches ON employees.emp_location = branches.id
-LEFT JOIN departments ON employees.emp_department = departments.id
+LEFT JOIN (SELECT id, name AS department_name FROM departments) departments ON employees.emp_department = departments.id
 LEFT JOIN job_titles ON employees.emp_job_code = job_titles.id
 LEFT JOIN job_categories ON employees.job_category_id = job_categories.id
 LEFT JOIN shift_types ON employees.emp_shift = shift_types.id
