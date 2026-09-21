@@ -36,7 +36,6 @@
                                     <th>CODE</th>
                                     <th>ONDUTY TIME</th>                                                
                                     <th>OFFDUTY TIME</th>                                                
-                                    <th>OFFDUTY DATE</th>                                               
                                     <th>SATURDAY ONDUTY TIME</th>
                                     <th>SATURDAY OFFDUTY TIME</th>                                               
                                     <th>BEGINING CHECKIN</th>                                                
@@ -129,7 +128,7 @@
                                         <input type="time" name="endingcheckout" id="endingcheckout" class="form-control form-control-sm" required/>
                                     </div>                                    
                                 </div> --}}
-                                <div class="form-row mb-1">
+                                {{--<div class="form-row mb-1">
                                     <div class="col">
                                         <label class="small font-weight-bold text-dark">Workdays Count*</label>
                                         <input type="number" step="0.01" name="workdayscount" id="workdayscount" class="form-control form-control-sm" required/>
@@ -138,7 +137,7 @@
                                         <label class="small font-weight-bold text-dark">Minute Count*</label>
                                         <input type="number" step="0.01" name="minutecount" id="minutecount" class="form-control form-control-sm" required/>
                                     </div>                                    
-                                </div>
+                                </div>--}}
                                 <div class="form-row mb-1">
                                     <div class="col">
                                         <label class="small font-weight-bold text-dark">Weekly Maximum Normal OT</label>
@@ -165,7 +164,7 @@
                                         <input type="time" name="shift_end_time" id="shift_end_time" class="form-control form-control-sm"/>
                                     </div>                                
                                 </div>
-                                <div class="form-row mb-1">
+                                {{--<div class="form-row mb-1">
                                     <div class="col">
                                         <label class="small font-weight-bold text-dark">Actual OT calculation</label>
                                         <br>
@@ -189,9 +188,9 @@
                                                 </label>
                                             </div>
                                     </div>
-                                </div>
+                                </div>--}}
                                 <div class="form-row mb-1">
-                                    <div class="col">
+                                    {{--<div class="col">
                                         <label class="small font-weight-bold text-dark">Off duty Day</label>
                                         <br>
                                         <div class="form-check-inline">
@@ -204,7 +203,7 @@
                                                 <input type="radio" class="form-check-input offduty_day" name="offduty_day" id="offduty_day_0" value="0">Next day
                                             </label>
                                         </div>
-                                    </div>
+                                    </div>--}}
                                     {{-- <div class="col">
                                         <label class="small font-weight-bold text-dark">Color</label>
                                         <input type="color" name="color" id="color" class="form-control form-control-sm" required/>
@@ -365,20 +364,6 @@ $(document).ready(function(){
                 data: 'offduty_time', 
                 name: 'offduty_time'
             },
-            { 
-                data: 'offduty_day', 
-                name: 'offduty_day',
-                render: function(data, type, row) {
-                    if (data == 1) {
-                        return 'Today';
-                    } else if (data == 0) {
-                        return 'Next day';
-                    } else {
-                        return '';
-                    }
-                }
-            },
-           
             { 
                 data: 'saturday_onduty_time', 
                 name: 'saturday_onduty_time'
