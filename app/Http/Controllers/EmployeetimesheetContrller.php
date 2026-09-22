@@ -33,14 +33,17 @@ class EmployeetimesheetContrller extends Controller
         $limit = 100;
 
         // Step 1: Fetch Employee Data
-        $employees = DB::select("
+         $employees = DB::select("
             SELECT emp.id, emp.emp_id, emp.emp_etfno, emp.emp_fullname, emp.emp_gender, 
                 dept.name AS departmentname, cam.name AS companyname, job.title AS jobtitlename, emp.emp_shift, 
-                COALESCE(esd_shift.shift_name, st.shift_name) AS shiftname
+                COALESCE(esd_shift.shift_name, st.shift_name) AS shiftname,
+                jc.is_sat_ot_type_as_act,
+                jc.is_sun_ot_type_as_act
             FROM employees emp
             LEFT JOIN departments dept ON emp.emp_department = dept.id
             LEFT JOIN companies cam ON emp.emp_company = cam.id
             LEFT JOIN job_titles job ON emp.emp_job_code = job.id
+            LEFT JOIN job_categories jc ON emp.job_category_id = jc.id
             LEFT JOIN shift_types st ON emp.emp_shift = st.id
             LEFT JOIN employeeshiftdetails esd 
                 ON esd.emp_id = emp.id
@@ -103,7 +106,7 @@ class EmployeetimesheetContrller extends Controller
                             DATE_FORMAT(?, '%Y-%m-%d') AS out_date,
                             COALESCE(h.holiday_name, 
                                 CASE WHEN WEEKDAY(?) IN (5,6) THEN DAYNAME(?) 
-                                ELSE 'Workday' END) AS day_type,
+                                ELSE 'Work' END) AS day_type,
                             COALESCE(roster_shift.shift_name, esd_shift.shift_name, st.shift_name) AS shift,
                             DATE_FORMAT(MIN(att.timestamp), '%h:%i %p') AS in_time, 
                             DATE_FORMAT(MAX(att.timestamp), '%h:%i %p') AS out_time,
@@ -178,6 +181,8 @@ class EmployeetimesheetContrller extends Controller
                     'companyname' => $employee->companyname,
                     'emp_gender' => $employee->emp_gender,
                     'shiftname' => $employee->shiftname,
+                    'is_sat_ot_type_as_act' => $employee->is_sat_ot_type_as_act,
+                     'is_sun_ot_type_as_act' => $employee->is_sun_ot_type_as_act,
                     'attendance' => $attendanceRecords
                 ];
 
