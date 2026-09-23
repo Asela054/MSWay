@@ -91,7 +91,7 @@
                                 </div>
                                 <div class="form-group mb-1">
                                     <label class="small font-weight-bold text-dark">Latitude</label>
-                                    <input type="text" name="altitude" id="altitude"
+                                    <input type="text" name="latitude" id="latitude"
                                         class="form-control form-control-sm" />
                                 </div>
                                 <div class="form-group mb-1">
@@ -285,16 +285,12 @@ $(document).ready(function(){
             dataType: "json",
             success: function (data) { //alert(data);        
                 if (data.errors) {
-                    const actionObj = {
-                        icon: 'fas fa-warning',
-                        title: '',
-                        message: 'Record Error',
-                        url: '',
-                        target: '_blank',
-                        type: 'danger'
-                    };
-                    const actionJSON = JSON.stringify(actionObj, null, 2);
-                    action(actionJSON);
+                    var errorHtml = '<div class="alert alert-danger p-2 mb-2"><ul class="mb-0 pl-3">';
+                    $.each(data.errors, function(key, value) {
+                        errorHtml += '<li>' + value + '</li>';
+                    });
+                    errorHtml += '</ul></div>';
+                    $('#form_result').html(errorHtml);
                 }
                 if (data.success) {
                     const actionObj = {
@@ -324,10 +320,10 @@ $(document).ready(function(){
                 success: function (data) {
                     $('#location').val(data.result.location);
                     $('#contactno').val(data.result.contactno);
-                     $('#code').val(data.result.code);
+                    $('#code').val(data.result.code);
                     $('#epf').val(data.result.epf);
                     $('#etf').val(data.result.etf);
-                     $('#altitude').val(data.result.latitude);
+                    $('#latitude').val(data.result.latitude);
                     $('#longitude').val(data.result.longitude);
 
                     if(data.result.outside_location == 1){
