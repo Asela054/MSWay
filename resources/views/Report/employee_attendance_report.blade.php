@@ -243,7 +243,7 @@
                                             var status;
                                                 if (objattendance[j].day_type == 'Work') {
                                                     status = 'Absent';
-                                                } else if (objattendance[j].day_type == 'Saturday' && datalist[i].is_sat_ot_type_as_act == 2) {
+                                                } else if (objattendance[j].day_type == 'Saturday' && datalist[i].is_sat_ot_type_as_act != 0) {
                                                     status = 'Absent';
                                                 } else if (objattendance[j].day_type == 'Sunday' && datalist[i].is_sun_ot_type_as_act == 2) {
                                                     status = 'Absent';
