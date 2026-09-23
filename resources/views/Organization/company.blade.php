@@ -132,7 +132,7 @@
                                         <input type="text" name="zone_code" id="zone_code" class="form-control form-control-sm" />
                                     </div>                         
                                 </div>
-                                <div class="form-row mb-1">
+                                {{--<div class="form-row mb-1">
                                     <div class="col">
                                         <label class="small font-weight-bolder">Bank Account Name</label>
                                         <input type="text" name="account_name" id="account_name" class="form-control form-control-sm" />
@@ -145,7 +145,7 @@
                                         <label class="small font-weight-bolder">Branch Code</label>
                                         <input type="text" name="account_branchcode" id="account_branchcode" class="form-control form-control-sm" />
                                     </div>
-                                </div>
+                                </div>--}}
                                 <div class="form-row mb-1">
                                     <div class="col">
                                         <label class="small font-weight-bolder">Employee No</label>
