@@ -148,35 +148,54 @@ class APILeaveController extends Controller
         return (new BaseController)->sendResponse($main_arr, 'Leave Details');
     }
 
-      public function leaverequestinsert(Request $request)
+    public function leaverequestinsert(Request $request)
     {
+        try {
+            $employee = $request->input('employee');
+            $fromdate = $request->input('fromdate');
+            $todate = $request->input('todate');
+            $half_short = $request->input('half_short');
+            $reason = $request->input('reason');
+            $leavetype = $request->input('leavetype');
+            $from_time = $request->input('from_time');
+            $to_time = $request->input('to_time');
 
-        $employee=$request->input('employee');
-        $fromdate=$request->input('fromdate');
-        $todate=$request->input('todate');
-        $half_short=$request->input('half_short');
-        $reason=$request->input('reason');
-        $leavetype=$request->input('leavetype');
-        $from_time=$request->input('from_time');
-        $to_time=$request->input('to_time');
+           
 
-        $request = new LeaveRequest();
-        $request->emp_id=$employee;
-        $request->from_date=$fromdate;
-        $request->to_date=$todate;
-        $request->leave_category=$half_short;
-        $request->reason=$reason;
-        $request->leave_type=$leavetype;
-        $request->from_time=$from_time;
-        $request->to_time=$to_time;
-        $request->status= '1';
-        $request->created_by=$employee;
-        $request->updated_by = '0';
-        $request->approve_status = '0';
-        $request->request_approve_status = '0';
-        $request->save();
+            // Check if a leave request with status 1 already exists for this employee on overlapping dates
+            $existingLeave = DB::table('leave_request')
+                ->where('emp_id', $employee)
+                ->where('status', '1')
+                ->where('from_date', '<=', $todate)
+                ->where('to_date', '>=', $fromdate)
+                ->first();
+  
+            if ($existingLeave) {
+                return (new BaseController)->sendResponse(['status' => 'error'], 'A Leave Request Already Exists For This Date');
+            }
 
-        return (new BaseController)->sendResponse($request, 'Leave Request Details Successfully Insert');
+            $leaveRequest = new LeaveRequest();
+            $leaveRequest->emp_id = $employee;
+            $leaveRequest->from_date = $fromdate;
+            $leaveRequest->to_date = $todate;
+            $leaveRequest->leave_category = $half_short;
+            $leaveRequest->reason = $reason;
+            $leaveRequest->leave_type = $leavetype;
+            $leaveRequest->from_time = $from_time;
+            $leaveRequest->to_time = $to_time;
+            $leaveRequest->status = '1';
+            $leaveRequest->created_by = $employee;
+            $leaveRequest->updated_by = '0';
+            $leaveRequest->approve_status = '0';
+            $leaveRequest->request_approve_status = '0';
+            $leaveRequest->save();
+
+            return (new BaseController)->sendResponse($leaveRequest, 'Leave Request Details Successfully Insert');
+
+        } catch (\Exception $e) {
+            \Log::error('leaverequestinsert error: ' . $e->getMessage());
+            return (new BaseController)->sendResponse(['status' => 'error'], 'Something went wrong. Please try again.');
+        }
     }
 
       public function getemployeeleaverequest(Request $request)
@@ -248,5 +267,28 @@ class APILeaveController extends Controller
 
     }
 
+    public function leaverequestdelete(Request $request)
+    {
+
+     $validator = \Validator::make($request->all(), [
+            'id' => 'required'
+        ]);
+
+        if($validator->fails()){
+            return (new BaseController())->sendError('Validation Error.', $validator->errors(), '400');
+        }
+
+        $id = $request->id;
+        $emp_id = $request->emp_id;
+        $form_data = array(
+            'status' =>  '2',
+            'request_approve_status' =>  '2',
+            'updated_by' => $emp_id
+        );
+        LeaveRequest::where('id',$id)
+        ->update($form_data);
+
+        return (new BaseController)->sendResponse($request->id, 'Leave Request Rejected');
+    }
 
 }

@@ -18,11 +18,11 @@
         
         <!-- <a role="button" class="btn navbtncolor" href="{{ route('empshiftextend') }}" id="employeeshift_extend_link">Employee Shift Extend Assign <span class="caret"></span></a> -->
         
-        <a role="button" class="btn navbtncolor" href="{{ route('Roster') }}" id="monthlyshifts">Month Shifts <span class="caret"></span></a>
+        <a role="button" class="btn navbtncolor" href="{{ route('Roster') }}" id="monthlyshifts">Month Rooster <span class="caret"></span></a>
        
-        <a role="button" class="btn navbtncolor" href="{{ route('rosterview') }}" id="monthlyshifts_view">Month Shifts View <span class="caret"></span></a>
+        <a role="button" class="btn navbtncolor" href="{{ route('rosterview') }}" id="monthlyshifts_view">Month Rooster View <span class="caret"></span></a>
         
-        <a role="button" class="btn navbtncolor" href="{{ route('rosterapproveView') }}" id="monthlyshifts_approve_view">Month Shifts Approve <span class="caret"></span></a>
+        <a role="button" class="btn navbtncolor" href="{{ route('rosterapproveView') }}" id="monthlyshifts_approve_view">Month Rooster Approve <span class="caret"></span></a>
 
        
       </div>

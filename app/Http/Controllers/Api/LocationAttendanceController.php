@@ -197,7 +197,7 @@ class LocationAttendanceController extends Controller
          $date = $request->input('date');
 
         $attendanceinsertstatus = 1 ;
-         $attendancedate =  $date;
+        $attendancedate =  $date;
 
          $empshift = DB::table('employees')
             ->select('emp_id', 'emp_shift')
@@ -285,108 +285,130 @@ class LocationAttendanceController extends Controller
 
     }
 
-
     public function Singlelocationattendanceinsert(Request $request)
     {
-        $location = $request->input('location_id');
-        $empid = $request->input('emp_id');
-        $timestamp = $request->input('timestamp');
-        $attendaceshift = $request->input('attendaceshift');
-        $attendancedate = $request->input('attendancedate');
-        $attendanceinserttype = $request->input('attendanceinserttype');
-        $reason = $request->input('reason');
-        $location_status = $request->input('location_status');
-        $off_reason = $request->input('off_reason');
-        $latitude = $request->input('latitude');
-        $longitude = $request->input('longitude');
+        try {
+            $location = $request->input('location_id');
+            $empid = $request->input('emp_id');
+            $timestamp = $request->input('timestamp');
+            $attendaceshift = $request->input('attendaceshift');
+            $attendancedate = $request->input('attendancedate');
+            $attendanceinserttype = $request->input('attendanceinserttype');
+            $reason = $request->input('reason');
+            $location_status = $request->input('location_status');
+            $off_reason = $request->input('off_reason');
+            $latitude = $request->input('latitude');
+            $longitude = $request->input('longitude');
 
-        $employees = DB::table('employees')
-            ->select('employees.emp_location as location')
-            ->where('employees.emp_id', $empid)
-            ->first();
+          if (!array_key_exists('latitude', $request->all()) || !array_key_exists('longitude', $request->all())) {
+                return (new BaseController)->sendResponse(['status' => 'error'], 'Please Update Your HRM Application');
+            }
 
-        if(!empty($latitude) && !empty($longitude)){
-              if($attendanceinserttype == 1){
 
-                $attendance = new Jobattendance();
-                $attendance->attendance_date = $attendancedate;
-                $attendance->employee_id = $empid;
-                $attendance->shift_id = $attendaceshift;
-                $attendance->on_time = $timestamp;
-                $attendance->off_time = null;
-                $attendance->reason = $reason;
-                $attendance->location_id = $location;
-                $attendance->allocation_id = null;
-                $attendance->status = '1';
-                $attendance->location_status = $location_status;
-                $attendance->approve_status = ($location_status == 1) ? '1' : '0';
-                $attendance->created_by = $empid;
-                $attendance->updated_by = '0';
-                $attendance->save();
-                $attendanceId = $attendance->id;
+            $employees = DB::table('employees')
+                ->select('employees.emp_location as location')
+                ->where('employees.emp_id', $empid)
+                ->first();
 
-                if($location_status == 2){
-                    DB::table('job_attendance_locations')->insert([
-                            'job_attendance_id' => $attendanceId,
-                            'latitude' => $latitude,
-                            'longitude' => $longitude,
-                            'created_at' => date('Y-m-d H:i:s'),
-                            'updated_at' => date('Y-m-d H:i:s'),
-                        ]);
-                }
+            $fullDayLeave = DB::table('leaves')
+                ->where('emp_id', $empid)
+                ->where('status', 'Approved')
+                ->where('no_of_days', 1.00)
+                ->where('leave_from', '<=', $attendancedate)
+                ->where('leave_to', '>=', $attendancedate)
+                ->first();
 
+            if ($fullDayLeave) {
+                return (new BaseController)->sendResponse(['status' => 'error'], 'Employee has an approved full day leave on this date');
             } else {
 
-                $attendance = DB::table('job_attendance')
-                    ->select('*')
-                    ->where('employee_id', $empid)
-                    ->where('attendance_date', $attendancedate)
-                    ->whereNotNull('on_time')
-                    ->whereNull('off_time')
-                    ->first();
+                if (!empty($latitude) && !empty($longitude)) {
+                    if ($attendanceinserttype == 1) {
 
-                if ($attendance) {
-                    // if both location_status are 2 then location_status will be 2 otherwise it will be 1
-                    $loc_status = ($attendance->location_status == 2 || $location_status == 2) ? 2 : 1;
+                        $attendance = new Jobattendance();
+                        $attendance->attendance_date = $attendancedate;
+                        $attendance->employee_id = $empid;
+                        $attendance->shift_id = $attendaceshift;
+                        $attendance->on_time = $timestamp;
+                        $attendance->off_time = null;
+                        $attendance->reason = $reason;
+                        $attendance->location_id = $location;
+                        $attendance->allocation_id = null;
+                        $attendance->status = '1';
+                        $attendance->location_status = $location_status;
+                        $attendance->approve_status = ($location_status == 1) ? '1' : '0';
+                        $attendance->created_by = $empid;
+                        $attendance->updated_by = '0';
+                        $attendance->save();
+                        $attendanceId = $attendance->id;
 
-                    DB::table('job_attendance')
-                        ->where('id', $attendance->id)
-                        ->update([
-                            'off_time'        => $timestamp,
-                            'off_reason'      => $off_reason,
-                            'location_status' => $loc_status,
-                            'approve_status'  => ($loc_status == 1) ? '1' : '0',
-                            'updated_by'      => $empid,
-                            'updated_at'      => \Carbon\Carbon::now()
-                        ]);
-
-                        if($location_status == 2){
+                        if ($location_status == 2) {
                             DB::table('job_attendance_locations')->insert([
+                                'job_attendance_id' => $attendanceId,
+                                'latitude' => $latitude,
+                                'longitude' => $longitude,
+                                'created_at' => date('Y-m-d H:i:s'),
+                                'updated_at' => date('Y-m-d H:i:s'),
+                            ]);
+                        }
+
+                    } else {
+
+                        $attendance = DB::table('job_attendance')
+                            ->select('*')
+                            ->where('employee_id', $empid)
+                            ->where('attendance_date', $attendancedate)
+                            ->whereNotNull('on_time')
+                            ->whereNull('off_time')
+                            ->first();
+
+                        if ($attendance) {
+                            // if both location_status are 2 then location_status will be 2 otherwise it will be 1
+                            $loc_status = ($attendance->location_status == 2 || $location_status == 2) ? 2 : 1;
+
+                            DB::table('job_attendance')
+                                ->where('id', $attendance->id)
+                                ->update([
+                                    'off_time'        => $timestamp,
+                                    'off_reason'      => $off_reason,
+                                    'location_status' => $loc_status,
+                                    'approve_status'  => ($loc_status == 1) ? '1' : '0',
+                                    'updated_by'      => $empid,
+                                    'updated_at'      => \Carbon\Carbon::now()
+                                ]);
+
+                            if ($location_status == 2) {
+                                DB::table('job_attendance_locations')->insert([
                                     'job_attendance_id' => $attendance->id,
                                     'latitude' => $latitude,
                                     'longitude' => $longitude,
                                     'created_at' => date('Y-m-d H:i:s'),
                                     'updated_at' => date('Y-m-d H:i:s'),
                                 ]);
+                            }
                         }
+                    }
+
+                    if ($timestamp != '') {
+                        try {
+                            $this->attendancePolicyService->attendanceInsertsingle_dep(
+                                $empid, $timestamp, $employees->location, $attendancedate
+                            );
+                        } catch (\Exception $e) {
+                            \Log::error('AttendancePolicyService error: ' . $e->getMessage());
+                        }
+                    }
+
+                    return (new BaseController)->sendResponse(['status' => 'ok'], 'Location Attendance Added Successfully');
+                } else {
+
+                    return (new BaseController)->sendResponse(['status' => 'error'], 'Location Latitude Or Longitude Missing');
+
                 }
             }
-
-            if ($timestamp != '') {
-                try {
-                    $this->attendancePolicyService->attendanceInsertsingle_dep(
-                        $empid, $timestamp, $employees->location, $attendancedate
-                    );
-                } catch (\Exception $e) {
-                    \Log::error('AttendancePolicyService error: ' . $e->getMessage());
-                }
-            }
-
-            return (new BaseController)->sendResponse(['status' => 'ok'], 'Location Attendance Added Successfully');
-        }else{
-
-            return (new BaseController)->sendResponse(['status' => 'error'], 'Location Latitude Or Longitude Missing');
-
+        } catch (\Exception $e) {
+            \Log::error('Singlelocationattendanceinsert error: ' . $e->getMessage());
+            return (new BaseController)->sendResponse(['status' => 'error'], 'Something went wrong. Please try again.');
         }
     }
 

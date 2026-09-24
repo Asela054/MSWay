@@ -317,7 +317,8 @@ class LeaverequestController extends Controller
 
         $id = Request('id');
         $form_data = array(
-            'status' =>  '3',
+            'status' =>  '2',
+            'request_approve_status' =>  '2',
             'updated_by' => Auth::id()
         );
         LeaveRequest::where('id',$id)

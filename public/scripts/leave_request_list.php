@@ -73,7 +73,7 @@ require('ssp.customized.class.php');
     LEFT JOIN `departments` ON `emp`.`emp_department` = `departments`.`id`
     LEFT JOIN `leaves` ON `leave_request`.`id` = `leaves`.`request_id`
     LEFT JOIN `leave_types` ON `leaves`.`leave_type` = `leave_types`.`id`
-    WHERE `leave_request`.`status` = 1";
+    WHERE `leave_request`.`status` != 3";
 
     if (!empty($_REQUEST['department'])) {
         $department = $_REQUEST['department'];
