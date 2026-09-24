@@ -92,6 +92,7 @@ Route::post('v1/GetLeaveBalance', ['uses' => '\App\Http\Controllers\Api\APILeave
 Route::post('v1/leaverequest_list', ['uses' => '\App\Http\Controllers\Api\APILeaveController@leaverequest_list', 'as' => 'leaverequest_list']); 
 Route::post('v1/Leaverequestdetails', ['uses' => '\App\Http\Controllers\Api\APILeaveController@getemployeeleaverequest', 'as' => 'Leaverequestdetails']); 
 Route::post('v1/leaverequestinsert', ['uses' => '\App\Http\Controllers\Api\APILeaveController@leaverequestinsert', 'as' => 'leaverequestinsert']); 
+Route::post('v1/leaverequestdelete', ['uses' => '\App\Http\Controllers\Api\APILeaveController@leaverequestdelete', 'as' => 'leaverequestdelete']); 
 
 // Employee API List
 Route::post('v1/GetEmployeeProfileDetails', ['uses' => '\App\Http\Controllers\Api\APIEmployeeController@GetEmployeeProfileDetails', 'as' => 'GetEmployeeProfileDetails']);

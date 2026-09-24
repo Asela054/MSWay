@@ -385,6 +385,8 @@
                             data: 'approvestatus', name: 'approvestatus', render: function(data, type, row) {
                                 if (data == 0) {
                                     return "Not Approved";
+                                } else if (data == 2) {
+                                    return "Rejected";
                                 } else {
                                     return "Approved";
                                 }
@@ -414,14 +416,16 @@
                         render: function(data, type, row) {
                             var buttons = '';
 
+
                             if (row.approvestatus == 0 ) {
                                 buttons += '<button type="submit" name="approve" id="'+row.id+'" class="approve btn btn-warning btn-sm" style="margin:1px;" data-toggle="tooltip" title="Approve" ><i class="fas fa-check"></i></button>';
                             }
-                    
+
+                            if(row.approvestatus != 2){
                                 buttons += '<button name="edit" id="'+row.id+'" class="edit btn btn-primary btn-sm" style="margin:1px;" type="submit" data-toggle="tooltip" title="Edit"><i class="fas fa-pencil-alt"></i></button>';
 
                                 buttons += '<button type="submit" name="delete" id="'+row.id+'" class="delete btn btn-danger btn-sm" style="margin:1px;" data-toggle="tooltip" title="Remove" ><i class="far fa-trash-alt"></i></button>';
-                            
+                            }
 
                             return buttons;
                         }
