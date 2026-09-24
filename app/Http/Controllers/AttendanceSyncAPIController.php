@@ -25,6 +25,7 @@ class AttendanceSyncAPIController extends Controller
          ini_set('max_execution_time', 3000);
        
             $attendance = $request->json()->all();
+            $insert_type = 1;
 
             if (!empty($attendance)) {
                 foreach ($attendance as $link) {
@@ -34,7 +35,7 @@ class AttendanceSyncAPIController extends Controller
                 $date = Carbon::parse($link['AttTime'])->format('Y-m-d');
                 $time = Carbon::parse($link['AttTime'])->format('H:i:s');
 
-                 $this->attendancePolicyService->attendanceInsertcsv_txt( $full_emp_id,  $date, $time, $date );
+                 $this->attendancePolicyService->attendanceInsertcsv_txt( $full_emp_id,  $date, $time, $date, $insert_type);
                 
                 }
             }

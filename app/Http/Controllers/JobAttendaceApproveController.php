@@ -85,12 +85,14 @@ class JobAttendaceApproveController extends Controller
             ->where('employees.emp_id', $empid)
             ->first();
 
+            $insert_type = 4;
+
             if ($on_time != '') {
-               $this->attendancePolicyService->attendanceInsertsingle_dep($empid, $on_time,$employees->location , $attendance_date);
+               $this->attendancePolicyService->attendanceInsertsingle_dep($empid, $on_time,$employees->location , $attendance_date, $insert_type);
             }
 
             if ($off_time != '') {
-                $this->attendancePolicyService->attendanceInsertsingle_dep($empid, $off_time,$employees->location , $attendance_date);
+                $this->attendancePolicyService->attendanceInsertsingle_dep($empid, $off_time,$employees->location , $attendance_date, $insert_type);
             
             }
             
