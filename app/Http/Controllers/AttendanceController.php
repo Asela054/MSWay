@@ -112,17 +112,18 @@ class AttendanceController extends Controller
         $outtime =  $request->out_time_s;
         $attendance_date = explode('T', $intime)[0];
 
+        $insert_type = 2;
         $employees = DB::table('employees')
             ->select('employees.emp_location as location')
             ->where('employees.emp_id', $empid)
             ->first();
 
             if ($intime != '') {
-               $this->attendancePolicyService->attendanceInsertsingle_dep($empid, $intime,$employees->location , $attendance_date);
+               $this->attendancePolicyService->attendanceInsertsingle_dep($empid, $intime,$employees->location , $attendance_date,$insert_type);
             }
 
             if ($outtime != '') {
-                $this->attendancePolicyService->attendanceInsertsingle_dep($empid, $outtime,$employees->location , $attendance_date);
+                $this->attendancePolicyService->attendanceInsertsingle_dep($empid, $outtime,$employees->location , $attendance_date,$insert_type);
             
             }
 
@@ -421,8 +422,8 @@ class AttendanceController extends Controller
         $form_data = array(
             'uid' => $request->uid,
             'timestamp' => $request->timestamp,
-            'date' => $attendance->date = $timestampdate = substr($request->timestamp, 0, -9)
-
+            'date' => $attendance->date = $timestampdate = substr($request->timestamp, 0, -9),
+            'type' => 2
         );
 
         $attendanceedited = new AttendanceEdited;
@@ -866,12 +867,15 @@ class AttendanceController extends Controller
             return response()->json(['error' => 'UnAuthorized'], 401);
         }
 
+        $insert_type = 3;
+
         $date_input = $request->date;
         $date_from = $request->date_from;
         $date_to = $request->date_to;
         $companytype = $request->companytype;
         $txt_file_u = $request->txt_file_u;
 
+        
         $content = fopen($txt_file_u,'r');
 
         $data = array();
@@ -905,7 +909,7 @@ class AttendanceController extends Controller
                     $timestamp = $time_h . ':' . $time_m . ':' . $time_s;
     
                     if($companytype == 0){
-                         $this->attendancePolicyService->attendanceInsertcsv_txt( $full_emp_id,  $date_input, $timestamp, $date );
+                         $this->attendancePolicyService->attendanceInsertcsv_txt( $full_emp_id,  $date_input, $timestamp, $date, $insert_type);
                     }else{
 
                          // Create date objects for from and to dates
@@ -916,7 +920,7 @@ class AttendanceController extends Controller
                             for ($current_date = $start_date; $current_date->lte($end_date); $current_date->addDay()) 
                                 {
                                     $current_date_string = $current_date->format('Y-m-d');
-                                    $this->attendancePolicyService->attendanceInsertcsv_txt($full_emp_id, $current_date_string, $timestamp, $date);
+                                    $this->attendancePolicyService->attendanceInsertcsv_txt($full_emp_id, $current_date_string, $timestamp, $date, $insert_type);
 
                                 }
                 }
@@ -951,6 +955,8 @@ class AttendanceController extends Controller
         $in_datetime = $request->in_datetime;
         $out_datetime = $request->out_datetime;
 
+        $insert_type = 2;
+
         for ($i = 0; $i < count($emp_id); $i++) {
 
 
@@ -964,11 +970,11 @@ class AttendanceController extends Controller
             // dd($employees);
 
             if ($in_datetime[$i] != '') {
-               $this->attendancePolicyService->attendanceInsertsingle_dep($emp_id[$i], $in_datetime[$i],$employees[0]->location , $date);
+               $this->attendancePolicyService->attendanceInsertsingle_dep($emp_id[$i], $in_datetime[$i],$employees[0]->location , $date, $insert_type);
             }
 
             if ($out_datetime[$i] != '') {
-                $this->attendancePolicyService->attendanceInsertsingle_dep($emp_id[$i], $out_datetime[$i], $employees[0]->location , $date);
+                $this->attendancePolicyService->attendanceInsertsingle_dep($emp_id[$i], $out_datetime[$i], $employees[0]->location , $date ,$insert_type);
             
             }
 
@@ -985,7 +991,7 @@ class AttendanceController extends Controller
         if (!$permission) {
             return response()->json(['error' => 'UnAuthorized'], 401);
         }
-
+         $insert_type = 2;
         // Get the main employee ID from form data
         $main_emp_id = $request->input('emp_id');
         
@@ -1052,7 +1058,7 @@ class AttendanceController extends Controller
                             'timestamp' => $full_time_in,
                             'date' => $full_date,
                             'approved' => 0,
-                            'type' => 255,
+                            'type' => $insert_type,
                             'devicesno' => 0,
                             'location' => $employee->location
                         ];
@@ -1109,7 +1115,7 @@ class AttendanceController extends Controller
                             'timestamp' => $full_time_out,
                             'date' => $full_date,
                             'approved' => 0,
-                            'type' => 255,
+                            'type' => $insert_type,
                             'devicesno' => 0,
                             'location' => $employee->location
                         ];

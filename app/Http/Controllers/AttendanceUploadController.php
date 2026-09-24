@@ -36,6 +36,7 @@ class AttendanceUploadController extends Controller
             return response()->json(['errors' => $validator->errors()->all()]);
         }
 
+        $insert_type = 3;
         $filename = $request->file('import_csv');
         $file = fopen($filename, 'r');
 
@@ -135,7 +136,7 @@ class AttendanceUploadController extends Controller
                 // ]);
 
       
-                $this->attendancePolicyService->attendanceInsertcsv_txt( $employeeId,  $date, $inTime, $date );
+                $this->attendancePolicyService->attendanceInsertcsv_txt( $employeeId,  $date, $inTime, $date, $insert_type);
 
 
                 // Insert OUT time
@@ -151,7 +152,7 @@ class AttendanceUploadController extends Controller
                 //     'location' => $location,
                 // ]);
 
-                $this->attendancePolicyService->attendanceInsertcsv_txt( $employeeId,  $date, $outTime, $date );
+                $this->attendancePolicyService->attendanceInsertcsv_txt( $employeeId,  $date, $outTime, $date, $insert_type);
 
                 $successCount++;
 

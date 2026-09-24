@@ -16,7 +16,7 @@ class AttendancePolicyService
     // e.g. night shift off at 8am, day shift on at 9am should still count as "seamless".
     private $seamlessTransitionGraceMinutes = 360;
 
-    public function attendanceInsertcsv_txt($full_emp_id, $date_input, $timestamp, $date)
+    public function attendanceInsertcsv_txt($full_emp_id, $date_input, $timestamp, $date , $insert_type)
     {
         $lateAttendanceData = 0;
 
@@ -180,6 +180,7 @@ class AttendancePolicyService
             $Attendance->emp_id = $full_emp_id;
             $Attendance->timestamp = $timestamp;
             $Attendance->date = $attendance_date;
+            $Attendance->type = $insert_type;
             $Attendance->location = $employeeLocation;
             $Attendance->save();
 
@@ -271,6 +272,7 @@ class AttendancePolicyService
         $checkoutRecord->timestamp = $checkoutTimestamp;
         $checkoutRecord->date = $previous_day;
         $checkoutRecord->location = $employeeLocation;
+        $checkoutRecord->type = 1;
         $checkoutRecord->save();
 
         // 2. Current shift's checkin (attributed to date_input)
@@ -280,14 +282,20 @@ class AttendancePolicyService
         $checkinRecord->timestamp = $checkinTimestamp;
         $checkinRecord->date = $date_input;
         $checkinRecord->location = $employeeLocation;
+        $checkinRecord->type = 1;
         $checkinRecord->save();
     }
 
-    public function attendanceInsertsingle_dep($empid, $attendacetimestamp, $location, $attendacedate)
+    public function attendanceInsertsingle_dep($empid, $attendacetimestamp, $location, $attendacedate, $insert_type)
     {
         $lateAttendanceData = 0;
 
-        $datetime_parts = explode('T', $attendacetimestamp);
+        // Support both "Y-m-d H:i:s" and "Y-m-dTH:i:s"
+        $normalized = str_replace('T', ' ', $attendacetimestamp);
+        $datetime_parts = explode(' ', $normalized);
+
+        $timestampdate = $datetime_parts[0];
+        $time_part = isset($datetime_parts[1]) ? $datetime_parts[1] : '00:00:00';
 
         $timestampdate = $datetime_parts[0];
         $time_part = $datetime_parts[1];
@@ -444,7 +452,7 @@ class AttendancePolicyService
                 'timestamp' => $final_timestamp ?? $attendacetimestamp,
                 'date' => $attendance_date ?? $attendacedate,
                 'approved' => 0,
-                'type' => 255,
+                'type' => $insert_type,
                 'devicesno' => 0,
                 'location' => $location
             );

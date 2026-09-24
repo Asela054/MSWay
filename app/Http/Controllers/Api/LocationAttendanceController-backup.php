@@ -84,7 +84,6 @@ class LocationAttendanceController extends Controller
         $reason = $request->input('reason');
         $userID = $request->input('userID');
         $location_status = $request->input('location_status');
-        $insert_type = 4;
 
         if($location_status == 1){
 
@@ -110,11 +109,11 @@ class LocationAttendanceController extends Controller
             ->first();
 
             if ($on_time != '') {
-               $this->attendancePolicyService->attendanceInsertsingle_dep($empid, $on_time,$employees->location , $attendancedate, $insert_type);
+               $this->attendancePolicyService->attendanceInsertsingle_dep($empid, $on_time,$employees->location , $attendancedate);
             }
 
             if ($off_time != '') {
-                $this->attendancePolicyService->attendanceInsertsingle_dep($empid, $off_time,$employees->location , $attendancedate, $insert_type);
+                $this->attendancePolicyService->attendanceInsertsingle_dep($empid, $off_time,$employees->location , $attendancedate);
             
             }
 
@@ -392,9 +391,9 @@ class LocationAttendanceController extends Controller
 
                     if ($timestamp != '' && $location_status == 1) {
                         try {
-                            $insert_type = 4;
                             $this->attendancePolicyService->attendanceInsertsingle_dep(
-                                $empid, $timestamp, $employees->location, $attendancedate, $insert_type);
+                                $empid, $timestamp, $employees->location, $attendancedate
+                            );
                         } catch (\Exception $e) {
                             \Log::error('AttendancePolicyService error: ' . $e->getMessage());
                         }

@@ -189,6 +189,7 @@ class AttendanceSyncController extends Controller
             return response()->json(['error' => 'UnAuthorized'], 401);
         }
 
+        $insert_type = 1;
         ini_set('max_execution_time', 3000);
         //dd($request->device);
         $device = FingerprintDevice::where('ip', '=', $request->device)->get();
@@ -241,7 +242,7 @@ class AttendanceSyncController extends Controller
                 $time = Carbon::parse($link['timestamp'])->format('H:i:s');
 
                 if($companytype == 0){
-                         $this->attendancePolicyService->attendanceInsertcsv_txt( $full_emp_id,  $date_input, $time, $date );
+                         $this->attendancePolicyService->attendanceInsertcsv_txt( $full_emp_id,  $date_input, $time, $date, $insert_type );
                 }else{
 
                          // Create date objects for from and to dates
@@ -252,7 +253,7 @@ class AttendanceSyncController extends Controller
                         for ($current_date = $start_date; $current_date->lte($end_date); $current_date->addDay()) 
                             {
                                 $current_date_string = $current_date->format('Y-m-d');
-                                $this->attendancePolicyService->attendanceInsertcsv_txt($full_emp_id, $current_date_string, $time, $date);
+                                $this->attendancePolicyService->attendanceInsertcsv_txt($full_emp_id, $current_date_string, $time, $date, $insert_type);
                             }
                 }
             }
