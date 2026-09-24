@@ -202,6 +202,8 @@
                                     let totdoubleot = 0;
                                     let tottripleot = 0;
                                     let totlatemin = 0;
+                                    let totOtMinutes = 0;        
+                                    let totDoubleOtMinutes = 0;  
 
                                     html += '<table class="exporttable" style="border-collapse: collapse; font-size: 12px;" width="100%;">'
                                         // colspan=15 now - matches total data columns exactly
@@ -276,6 +278,13 @@
                                             tottripleot += objattendance[j].triple_ot;
                                             totlatemin += objattendance[j].late_min;
 
+                                            if (objattendance[j].ot_hours > 0) {
+                                                totOtMinutes += timeToMinutes(objattendance[j].duration_time);
+                                            }
+                                            if (objattendance[j].double_ot > 0) {
+                                                totDoubleOtMinutes += timeToMinutes(objattendance[j].duration_time);
+                                            }
+
                                             html += '<tr>'
                                                 + '<td>' + objattendance[j].in_date + '</td>'
                                                 + '<td>' + objattendance[j].shift + '</td>'
@@ -286,8 +295,9 @@
                                                 + '<td>' + (objattendance[j].in_time2 ?? '') + '</td>'
                                                 + '<td>' + (objattendance[j].out_time2 ?? '') + '</td>'
                                                 + '<td>' + objattendance[j].late_min + '</td>'
-                                                + '<td>' + objattendance[j].ot_hours + '</td>'
-                                                + '<td>' + objattendance[j].double_ot + '</td>'
+                                                + '<td>' + (objattendance[j].ot_hours > 0 ? trimSeconds(objattendance[j].duration_time) : '0') + '</td>'
+                                                + '<td>' + (objattendance[j].double_ot > 0 ? trimSeconds(objattendance[j].duration_time) : '0') + '</td>'
+                                                // + '<td>' + objattendance[j].double_ot + '</td>'
                                                 + '<td>' + (objattendance[j].days_pay ?? '0') + '</td>'
                                                 + '<td>' + (objattendance[j].cont24 ?? '0') + '</td>'
                                                 + '<td>' + objattendance[j].leave_type + '</td>'
@@ -300,8 +310,10 @@
                                     html += '<tr>'
                                         + '<td colspan="8">&nbsp;</td>'
                                         + '<td style="border-top: 1px solid black;border-bottom: 2px double black;">' + parseFloat(totlatemin).toFixed(2) + '</td>'
-                                        + '<td style="border-top: 1px solid black;border-bottom: 2px double black;">' + parseFloat(totot).toFixed(2) + '</td>'
-                                        + '<td style="border-top: 1px solid black;border-bottom: 2px double black;">' + parseFloat(totdoubleot).toFixed(2) + '</td>'
+                                        // + '<td style="border-top: 1px solid black;border-bottom: 2px double black;">' + parseFloat(totot).toFixed(2) + '</td>'
+                                        // + '<td style="border-top: 1px solid black;border-bottom: 2px double black;">' + parseFloat(totdoubleot).toFixed(2) + '</td>'
+                                        + '<td style="border-top: 1px solid black;border-bottom: 2px double black;">' + minutesToHM(totOtMinutes) + '</td>'
+                                        + '<td style="border-top: 1px solid black;border-bottom: 2px double black;">' + minutesToHM(totDoubleOtMinutes) + '</td>'
                                         + '<td colspan="4">&nbsp;</td>'
                                     + '</tr>';
                                     html += '</table>';
@@ -433,6 +445,29 @@
                 doc.save(doctitle + '.pdf');
             });
         }
+
+        // Helper: parse "HH:MM:SS" or "HH:MM" into total minutes
+        function timeToMinutes(timeStr) {
+            if (!timeStr) return 0;
+            var parts = timeStr.split(':');
+            var h = parseInt(parts[0], 10) || 0;
+            var m = parseInt(parts[1], 10) || 0;
+            return (h * 60) + m;
+        }
+
+        // Helper: format total minutes back into "HH:MM"
+        function minutesToHM(totalMinutes) {
+            var h = Math.floor(totalMinutes / 60);
+            var m = totalMinutes % 60;
+            return (h < 10 ? '0' + h : h) + ':' + (m < 10 ? '0' + m : m);
+        }
+
+        function trimSeconds(timeStr) {
+            if (!timeStr) return '0';
+            var parts = timeStr.split(':');
+            if (parts.length < 2) return timeStr; // not a time string, return as-is
+            return parts[0] + ':' + parts[1];
+        }   
 
     </script>
 
