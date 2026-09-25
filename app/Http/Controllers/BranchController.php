@@ -64,6 +64,8 @@ class BranchController extends Controller
             'contactno'    =>  'required|Numeric',
             'epf'    =>  'required',
             'etf'    =>  'required',
+            'latitude'    =>  'nullable|numeric|between:-90,90',
+            'longitude'    =>  'nullable|numeric|between:-180,180',
         );
 
         $error = Validator::make($request->all(), $rules);
@@ -80,7 +82,7 @@ class BranchController extends Controller
         $branch->contactno=$request->input('contactno');       
         $branch->epf=$request->input('epf');
         $branch->etf=$request->input('etf');
-        $branch->latitude=$request->input('altitude');
+        $branch->latitude=$request->input('latitude');
         $branch->longitude=$request->input('longitude');
         $branch->outside_location=$request->input('outside_location') ? 1 : 0;
         $branch->save();
@@ -137,7 +139,9 @@ class BranchController extends Controller
 
         $rules = array(
             'location'    =>  'required|String',
-            'contactno'    =>  'required|Numeric'
+            'contactno'    =>  'required|Numeric',
+            'latitude'    =>  'nullable|numeric|between:-90,90',
+            'longitude'    =>  'nullable|numeric|between:-180,180',
         );
 
         $error = Validator::make($request->all(), $rules);
@@ -152,7 +156,7 @@ class BranchController extends Controller
             'location'    =>  $request->location,
             'code'    =>  $request->code,
             'contactno'        =>  $request->contactno,
-            'latitude'        =>  $request->altitude,
+            'latitude'        =>  $request->latitude,
             'longitude'        =>  $request->longitude,
             'epf'        =>  $request->epf,
             'etf'        =>  $request->etf,

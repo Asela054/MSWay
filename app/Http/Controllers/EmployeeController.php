@@ -601,15 +601,17 @@ class EmployeeController extends Controller
         $mac_id = $request->input('mac_id');
 
         if ($mac_id) {
-             $employeeUser = DB::table('users')->where('emp_id', $emp_id)->first();
-             $userId = $employeeUser->id ?? null;
+            $employeeUser = DB::table('users')->where('emp_id', $emp_id)->first();
+            $userId = $employeeUser->id ?? null;
 
             $existingDevice = DB::table('employee_devices_mac_id')
                 ->where('emp_id', $emp_id)
+                ->where('status', 1)
+                ->latest('id')
                 ->first();
 
             if (!$existingDevice) {
-                // No record at all -> insert new
+                // No active record -> insert new
                 DB::table('employee_devices_mac_id')->insert([
                     'emp_id' => $emp_id,
                     'user_id' => $userId,
@@ -627,7 +629,7 @@ class EmployeeController extends Controller
                         'updated_at' => Carbon::now()->toDateTimeString(),
                     ]);
             } else {
-                // Different mac_id -> deactivate old record, insert new one
+                // Different mac_id -> deactivate the currently active record, insert new one
                 DB::table('employee_devices_mac_id')
                     ->where('id', $existingDevice->id)
                     ->update([
@@ -644,6 +646,14 @@ class EmployeeController extends Controller
                     'updated_at' => Carbon::now()->toDateTimeString(),
                 ]);
             }
+        } else {
+            // mac_id empty -> deactivate this employee's device record(s)
+            DB::table('employee_devices_mac_id')
+                ->where('emp_id', $emp_id)
+                ->update([
+                    'status' => 3,
+                    'updated_at' => Carbon::now()->toDateTimeString(),
+                ]);
         }
 
 
