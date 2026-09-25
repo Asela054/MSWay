@@ -115,7 +115,8 @@ class EmployeetimesheetContrller extends Controller
                             ROUND(COALESCE(leave_data.no_of_days, 0), 2) AS leave_days,
                             ROUND(COALESCE(ot.hours, 0) + COALESCE(ot.holiday_normal_hours, 0), 2) AS ot_hours,
                             ROUND(COALESCE(ot.double_hours, 0), 2) AS double_ot,
-                            ROUND(COALESCE(ot.triple_hours, 0), 2) AS triple_ot
+                            ROUND(COALESCE(ot.triple_hours, 0), 2) AS triple_ot,
+                            ot.duration_time
                         FROM (SELECT ? AS date) dr
                         LEFT JOIN employee_roster_details erd
                             ON erd.emp_id = ? AND erd.work_date = ?
@@ -129,7 +130,7 @@ class EmployeetimesheetContrller extends Controller
                             ON la.emp_id = ? AND la.attendance_date = ?
                         LEFT JOIN (
                             SELECT ot.emp_id, ot.date, ot.hours, ot.double_hours, ot.triple_hours, 
-                                ot.holiday_normal_hours
+                                ot.holiday_normal_hours, TIMEDIFF(ot.to, ot.from) AS duration_time
                             FROM ot_approved ot
                         ) ot ON ot.emp_id = ? AND ot.date = ?
                         LEFT JOIN (

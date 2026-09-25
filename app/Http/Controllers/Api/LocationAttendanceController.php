@@ -409,7 +409,7 @@ class LocationAttendanceController extends Controller
             }
         } catch (\Exception $e) {
             \Log::error('Singlelocationattendanceinsert error: ' . $e->getMessage());
-            return (new BaseController)->sendResponse(['status' => 'error'], 'Something went wrong. Please try again.');
+            return (new BaseController)->sendResponse(['status' => 'error'], $e->getMessage());
         }
     }
 
