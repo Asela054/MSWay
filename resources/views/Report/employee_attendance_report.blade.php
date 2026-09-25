@@ -277,7 +277,7 @@
                                             totot += objattendance[j].ot_hours;
                                             totdoubleot += objattendance[j].double_ot;
                                             tottripleot += objattendance[j].triple_ot;
-                                            totlatemin += objattendance[j].late_min;
+                                            totlatemin += timeToMinutes(objattendance[j].late_min);
 
                                             if (objattendance[j].ot_hours > 0) {
                                                 totOtMinutes += timeToMinutes(objattendance[j].duration_time);
@@ -295,7 +295,7 @@
                                                 + '<td>' + objattendance[j].out_time + '</td>'
                                                 + '<td>' + (objattendance[j].in_time2 ?? '') + '</td>'
                                                 + '<td>' + (objattendance[j].out_time2 ?? '') + '</td>'
-                                                + '<td>' + objattendance[j].late_min + '</td>'
+                                                + '<td>' + trimSeconds(objattendance[j].late_min) + '</td>'
                                                 + '<td>' + (objattendance[j].ot_hours > 0 ? trimSeconds(objattendance[j].duration_time) : '0') + '</td>'
                                                 + '<td>' + (objattendance[j].double_ot > 0 ? trimSeconds(objattendance[j].duration_time) : '0') + '</td>'
                                                 // + '<td>' + objattendance[j].double_ot + '</td>'
@@ -310,9 +310,10 @@
                                     // Total row - colspan=8 (Date..Out2) + 3 single (Late,OT,DOT) + colspan=4 (DaysPay..LeaveAmount) = 15
                                     html += '<tr>'
                                         + '<td colspan="8">&nbsp;</td>'
-                                        + '<td style="border-top: 1px solid black;border-bottom: 2px double black;">' + parseFloat(totlatemin).toFixed(2) + '</td>'
+                                        // + '<td style="border-top: 1px solid black;border-bottom: 2px double black;">' + parseFloat(totlatemin).toFixed(2) + '</td>'
                                         // + '<td style="border-top: 1px solid black;border-bottom: 2px double black;">' + parseFloat(totot).toFixed(2) + '</td>'
                                         // + '<td style="border-top: 1px solid black;border-bottom: 2px double black;">' + parseFloat(totdoubleot).toFixed(2) + '</td>'
+                                        + '<td style="border-top: 1px solid black;border-bottom: 2px double black;">' + minutesToHM(totlatemin) + '</td>'
                                         + '<td style="border-top: 1px solid black;border-bottom: 2px double black;">' + minutesToHM(totOtMinutes) + '</td>'
                                         + '<td style="border-top: 1px solid black;border-bottom: 2px double black;">' + minutesToHM(totDoubleOtMinutes) + '</td>'
                                         + '<td colspan="4">&nbsp;</td>'
