@@ -256,6 +256,7 @@ class LocationAttendanceController extends Controller
                                             ->select('emp_id', 'timestamp', 'date')
                                             ->where('emp_id', $empid)
                                             ->where('date', $date)
+                                            ->whereNull('deleted_at')
                                             ->first();
 
                                         if ($rawpunch) {
@@ -286,8 +287,9 @@ class LocationAttendanceController extends Controller
                                 ->select('emp_id', 'timestamp', 'date')
                                 ->where('emp_id', $empid)
                                 ->where('date', $date)
+                                ->whereNull('deleted_at')
                                 ->first();
-                                
+
                                 if ($rawpunch2) {
                                     $attendanceinsertstatus = 2;
                                 } else {
