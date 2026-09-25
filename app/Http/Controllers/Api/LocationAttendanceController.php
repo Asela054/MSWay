@@ -252,7 +252,18 @@ class LocationAttendanceController extends Controller
                                  $attendanceinsertstatus = 2;
                                  // attendancedate stays as $date
                              } else {
-                                 $attendanceinsertstatus = 1;
+                                        $rawpunch = DB::table('attendances')
+                                            ->select('emp_id', 'timestamp', 'date')
+                                            ->where('emp_id', $empid)
+                                            ->where('date', $date)
+                                            ->first();
+
+                                        if ($rawpunch) {
+                                            $attendanceinsertstatus = 2;
+                                            // attendancedate stays as $date
+                                        } else {
+                                            $attendanceinsertstatus = 1;
+                                        }
                              }
                          }
 
@@ -271,7 +282,17 @@ class LocationAttendanceController extends Controller
 
                             $attendanceinsertstatus = 2 ;
                          }else{
-                             $attendanceinsertstatus = 1 ;
+                             $rawpunch2 = DB::table('attendances')
+                                ->select('emp_id', 'timestamp', 'date')
+                                ->where('emp_id', $empid)
+                                ->where('date', $date)
+                                ->first();
+                                
+                                if ($rawpunch2) {
+                                    $attendanceinsertstatus = 2;
+                                } else {
+                                    $attendanceinsertstatus = 1 ;
+                                }
                          }
                     }
 

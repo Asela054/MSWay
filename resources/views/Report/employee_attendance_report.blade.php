@@ -241,6 +241,7 @@
                                     var objattendance = datalist[i].attendance;
 
                                     $.each(objattendance, function (j, item) {
+                                         var isManual = objattendance[j].attendance_type == 2;
                                         if (objattendance[j].in_time == null && objattendance[j].leave_type == '') {
                                             var status;
                                                 if (objattendance[j].day_type == 'Work') {
@@ -289,7 +290,7 @@
                                                 + '<td>' + objattendance[j].in_date + '</td>'
                                                 + '<td>' + objattendance[j].shift + '</td>'
                                                 + '<td>' + objattendance[j].day_type + '</td>'
-                                                + '<td>Present</td>'
+                                                + '<td>' + (isManual ? 'Manual Attendance' : 'Present') + '</td>'
                                                 + '<td>' + objattendance[j].in_time + '</td>'
                                                 + '<td>' + objattendance[j].out_time + '</td>'
                                                 + '<td>' + (objattendance[j].in_time2 ?? '') + '</td>'
