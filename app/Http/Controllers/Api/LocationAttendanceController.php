@@ -194,114 +194,127 @@ class LocationAttendanceController extends Controller
     public function Getattendanceshift(Request $request)
     {
 
-         $empid = $request->input('empid');
-         $date = $request->input('date');
+        $empid = $request->input('empid');
+        $date = $request->input('date');
 
         $attendanceinsertstatus = 1 ;
         $attendancedate =  $date;
 
-         $empshift = DB::table('employees')
+        $empshift = DB::table('employees')
             ->select('emp_id', 'emp_shift')
             ->where('emp_id', $empid)
             ->first();
 
-            if ($empshift) {
-              
-                $emprosterinfo = DB::table('employee_roster_details')
-                    ->select('emp_id', 'shift_id')
-                    ->where('emp_id', $empid)
-                    ->where('work_date', $date)
+        if ($empshift) {
+            $emprosterinfo = DB::table('employee_roster_details')
+                ->select('emp_id', 'shift_id')
+                ->where('emp_id', $empid)
+                ->where('work_date', $date)
+                ->first();
+
+            if ($emprosterinfo) {
+                $empshiftid = $emprosterinfo->shift_id;   
+            }
+            else {
+                $empshiftid = $empshift->emp_shift; 
+            }
+
+            $shift = DB::table('shift_types')
+                ->where('id', $empshiftid)
+                ->first();
+
+            if ($shift && $shift->off_next_day == '1') {
+                $previous_day = (new DateTime($date))->modify('-1 day')->format('Y-m-d');
+
+                $attendancecheckinfo = DB::table('job_attendance')
+                    ->select('on_time', 'off_time')
+                    ->where('employee_id', $empid)
+                    ->where('attendance_date', $previous_day)
+                    ->whereNotNull('on_time')
+                    ->whereNull('off_time')
+                    ->where('status', 1)
                     ->first();
 
-                if ($emprosterinfo) {
-                    $empshiftid = $emprosterinfo->shift_id;   
-                }
-                else {
-                    $empshiftid = $empshift->emp_shift; 
-                }
-
-                   $shift = DB::table('shift_types')
-                        ->where('id', $empshiftid)
+                if ($attendancecheckinfo && $attendancecheckinfo->on_time != '' && ($attendancecheckinfo->off_time === null || $attendancecheckinfo->off_time === '')) {
+                    $attendanceinsertstatus = 2 ;
+                    $attendancedate = $previous_day;
+                } else {
+                    $rawcheckattprev = DB::table('attendances')
+                        ->select('emp_id', 'timestamp', 'date')
+                        ->where('emp_id', $empid)
+                        ->where('date', $previous_day)
+                        ->whereNull('deleted_at')
                         ->first();
 
-                   if ($shift && $shift->off_next_day == '1') {
-                    $previous_day = (new DateTime($date))->modify('-1 day')->format('Y-m-d');
-
-                    $attendancecheckinfo = DB::table('job_attendance')
-                        ->select('*')
-                        ->where('employee_id', $empid)
-                        ->where('attendance_date', $previous_day)
-                        ->whereNotNull('on_time')
-                        ->whereNull('off_time')
-                        ->first();
-
-
-                         if ($attendancecheckinfo && $attendancecheckinfo->on_time != '' && ($attendancecheckinfo->off_time === null || $attendancecheckinfo->off_time === '')) {
-
-                            $attendanceinsertstatus = 2 ;
-                            $attendancedate = $previous_day;
-                         } else {
-                             // check on same day
-                             $samedaycheckinfo = DB::table('job_attendance')
-                                 ->where('employee_id', $empid)
-                                 ->where('attendance_date', $date)
-                                 ->whereNotNull('on_time')
-                                 ->whereNull('off_time')
-                                 ->first();
-                             if ($samedaycheckinfo) {
-                                 $attendanceinsertstatus = 2;
-                                 // attendancedate stays as $date
-                             } else {
-                                        $rawpunch = DB::table('attendances')
-                                            ->select('emp_id', 'timestamp', 'date')
-                                            ->where('emp_id', $empid)
-                                            ->where('date', $date)
-                                            ->first();
-
-                                        if ($rawpunch) {
-                                            $attendanceinsertstatus = 2;
-                                            // attendancedate stays as $date
-                                        } else {
-                                            $attendanceinsertstatus = 1;
-                                        }
-                             }
-                         }
-
-                    }else{
-
-                          $attendancecheckinfo = DB::table('job_attendance')
-                        ->select('*')
-                        ->where('employee_id', $empid)
-                        ->where('attendance_date', $date)
-                        ->whereNotNull('on_time')
-                        ->whereNull('off_time')
-                        ->first();
-
-
-                         if ($attendancecheckinfo && $attendancecheckinfo->on_time != '' && ($attendancecheckinfo->off_time === null || $attendancecheckinfo->off_time === '')) {
-
-                            $attendanceinsertstatus = 2 ;
-                         }else{
-                             $rawpunch2 = DB::table('attendances')
-                                ->select('emp_id', 'timestamp', 'date')
-                                ->where('emp_id', $empid)
-                                ->where('date', $date)
-                                ->first();
-                                
-                                if ($rawpunch2) {
-                                    $attendanceinsertstatus = 2;
-                                } else {
-                                    $attendanceinsertstatus = 1 ;
-                                }
-                         }
+                    if($rawcheckattprev){
+                        $attendanceinsertstatus = 2 ;
+                        $attendancedate = $previous_day;
                     }
+                    else{
+                        // check on same day
+                        $samedaycheckinfo = DB::table('job_attendance')
+                            ->select('on_time', 'off_time')
+                            ->where('employee_id', $empid)
+                            ->where('attendance_date', $date)
+                            ->whereNotNull('on_time')
+                            ->whereNull('off_time')
+                            ->where('status', 1)
+                            ->first();
+                        if ($samedaycheckinfo) {
+                            $attendanceinsertstatus = 2;
+                            // attendancedate stays as $date
+                        } else {
+                                $rawpunch = DB::table('attendances')
+                                    ->select('emp_id', 'timestamp', 'date')
+                                    ->where('emp_id', $empid)
+                                    ->where('date', $date)
+                                    ->whereNull('deleted_at')
+                                    ->first();
 
-                      $data = array(
-                            'attendaceshift' => $empshiftid,
-                            'attendancedate' => $attendancedate,
-                            'attendanceinserttype' => $attendanceinsertstatus
-                        );
+                                if ($rawpunch) {
+                                    $attendanceinsertstatus = 2;
+                                    // attendancedate stays as $date
+                                } else {
+                                    $attendanceinsertstatus = 1;
+                                }
+                        }
+                    }                     
+                }
+            }else{
+                $attendancecheckinfo = DB::table('job_attendance')
+                    ->select('on_time', 'off_time')
+                    ->where('employee_id', $empid)
+                    ->where('attendance_date', $date)
+                    ->whereNotNull('on_time')
+                    ->whereNull('off_time')
+                    ->where('status', 1)
+                    ->first();
+
+
+                    if ($attendancecheckinfo && $attendancecheckinfo->on_time != '' && ($attendancecheckinfo->off_time === null || $attendancecheckinfo->off_time === '')) {
+                        $attendanceinsertstatus = 2 ;
+                    }else{
+                        $rawpunch2 = DB::table('attendances')
+                            ->select('emp_id', 'timestamp', 'date')
+                            ->where('emp_id', $empid)
+                            ->where('date', $date)
+                            ->whereNull('deleted_at')
+                            ->first();
+                        
+                        if ($rawpunch2) {
+                            $attendanceinsertstatus = 2;
+                        } else {
+                            $attendanceinsertstatus = 1 ;
+                        }
+                    }
             }
+
+            $data = array(
+                'attendaceshift' => $empshiftid,
+                'attendancedate' => $attendancedate,
+                'attendanceinserttype' => $attendanceinsertstatus
+            );
+        }
 
         return (new BaseController)->sendResponse($data, 'attendaceshift','attendancedate','attendanceinserttype');
 
@@ -322,10 +335,9 @@ class LocationAttendanceController extends Controller
             $latitude = $request->input('latitude');
             $longitude = $request->input('longitude');
 
-          if (!array_key_exists('latitude', $request->all()) || !array_key_exists('longitude', $request->all())) {
+            if (!array_key_exists('latitude', $request->all()) || !array_key_exists('longitude', $request->all())) {
                 return (new BaseController)->sendResponse(['status' => 'error'], 'Please Update Your HRM Application');
             }
-
 
             $employees = DB::table('employees')
                 ->select('employees.emp_location as location')
@@ -343,10 +355,8 @@ class LocationAttendanceController extends Controller
             if ($fullDayLeave) {
                 return (new BaseController)->sendResponse(['status' => 'error'], 'Employee has an approved full day leave on this date');
             } else {
-
                 if (!empty($latitude) && !empty($longitude)) {
                     if ($attendanceinserttype == 1) {
-
                         $attendance = new Jobattendance();
                         $attendance->attendance_date = $attendancedate;
                         $attendance->employee_id = $empid;
@@ -373,15 +383,14 @@ class LocationAttendanceController extends Controller
                                 'updated_at' => date('Y-m-d H:i:s'),
                             ]);
                         }
-
                     } else {
-
                         $attendance = DB::table('job_attendance')
-                            ->select('*')
+                            ->select('id', 'location_status')
                             ->where('employee_id', $empid)
                             ->where('attendance_date', $attendancedate)
                             ->whereNotNull('on_time')
                             ->whereNull('off_time')
+                            ->where('status', 1)
                             ->first();
 
                         if ($attendance) {
@@ -409,6 +418,42 @@ class LocationAttendanceController extends Controller
                                 ]);
                             }
                         }
+                        else{
+                            $mainattdata = DB::table('attendances')
+                                ->select('emp_id', 'timestamp', 'date')
+                                ->where('emp_id', $empid)
+                                ->where('date', $attendancedate)
+                                ->whereNull('deleted_at')
+                                ->first();
+                            
+                            $attendance = new Jobattendance();
+                            $attendance->attendance_date = $attendancedate;
+                            $attendance->employee_id = $empid;
+                            $attendance->shift_id = $attendaceshift;
+                            $attendance->on_time = $mainattdata->timestamp;
+                            $attendance->off_time = $timestamp;
+                            $attendance->reason = '';
+                            $attendance->off_reason = $off_reason;
+                            $attendance->location_id = $location;
+                            $attendance->allocation_id = null;
+                            $attendance->status = '1';
+                            $attendance->location_status = $location_status;
+                            $attendance->approve_status = ($location_status == 1) ? '1' : '0';
+                            $attendance->created_by = $empid;
+                            $attendance->updated_by = '0';
+                            $attendance->save();
+                            $attendanceId = $attendance->id;
+
+                            if ($location_status == 2) {
+                                DB::table('job_attendance_locations')->insert([
+                                    'job_attendance_id' => $attendanceId,
+                                    'latitude' => $latitude,
+                                    'longitude' => $longitude,
+                                    'created_at' => date('Y-m-d H:i:s'),
+                                    'updated_at' => date('Y-m-d H:i:s'),
+                                ]);
+                            }
+                        }
                     }
 
                     if ($timestamp != '' && $location_status == 1) {
@@ -423,7 +468,6 @@ class LocationAttendanceController extends Controller
 
                     return (new BaseController)->sendResponse(['status' => 'ok'], 'Location Attendance Added Successfully');
                 } else {
-
                     return (new BaseController)->sendResponse(['status' => 'error'], 'Location Latitude Or Longitude Missing');
 
                 }
