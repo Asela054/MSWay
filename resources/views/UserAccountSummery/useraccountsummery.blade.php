@@ -395,42 +395,55 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div role="tabpanel" class="tab-pane" id="production"> 
+
+                                                <div role="tabpanel" class="tab-pane" id="production">   
                                                     <div class="card shadow-none bg-transparent">
                                                         <div class="card-body">
                                                             <div class="row">
                                                                 <div class="col-sm-12 col-md-6 col-lg-3 col-xl-3">
                                                                     <div class="form-group">
-                                                                        <label for="productionmonth" class="col-form-label col-form-label-sm font-weight-bold text-dark">Month</label>
-                                                                        <input type="month" class="form-control form-control-sm" id="productionmonth" name="productionmonth" value="{{ date('Y-m') }}" max="{{ date('Y-m') }}">
+                                                                        <label for="timesheetmonth" class="col-form-label col-form-label-sm font-weight-bold text-dark">Month</label>
+                                                                        <input type="month" class="form-control form-control-sm" id="timesheetmonth" name="timesheetmonth" value="{{ date('Y-m') }}" max="{{ date('Y-m') }}">
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                                <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
-                                                                    <hr>
-                                                                    <div class="center-block fix-width scroll-inner">
-                                                                        <table class="table table-striped table-sm small nowrap" style="width: 100%" id="productiondataTable">
-                                                                            <thead>
-                                                                                <tr>
-                                                                                    <th>EMPLOYEE</th>
-                                                                                    <th>DATE</th>
-                                                                                    <th>TARGET</th>
-                                                                                    <th>DAY PRODUCE</th>
-                                                                                    <th>PLUS/MINUS</th>
-                                                                                    <th>AVERAGE</th>
-                                                                                    <th>BONUS AMOUNT</th>
-                                                                                    <th>DAMAGE QTY</th>
-                                                                                </tr>
-                                                                            </thead>
-                                                                            <tbody>
-                                                                            </tbody>
-                                                                        </table>
-                                                                    </div>
+                                                            <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                                                                <hr>
+                                                                <div class="mb-2">
+                                                                    <span class="badge px-2 mb-2" style="background-color:#f8d7da;color:#842029;">&nbsp;</span> Not Approved
+                                                                    <span class="badge px-2 mb-2" style="background-color:#fff3cd;color:#664d03;">&nbsp;</span> Pending
                                                                 </div>
-
+                                                                <div class="center-block fix-width scroll-inner">
+                                                                    <table class="table table-striped table-sm small nowrap" style="width: 100%" id="productiontable">
+                                                                       <thead>
+                                                                            <tr>
+                                                                                <th>DATE</th>
+                                                                                <th>IN TIME</th>
+                                                                                <th>OUT TIME</th>
+                                                                                <th>LATE</th>
+                                                                                <th>MC NO</th>
+                                                                                <th>STYLE DETAILS</th>
+                                                                                <th>TARGET</th>
+                                                                                <th>PRODUCE</th>
+                                                                                <th>PLUS/MINUS</th>
+                                                                                <th>PRO AVG</th>
+                                                                                <th>WEIGHTED AVG</th>
+                                                                                <th>PRO INS</th>
+                                                                                <th>OT</th>
+                                                                                <th>TRP: ALL</th>
+                                                                                <th>ATT: ALL</th>
+                                                                                <th>NIG: ALL</th>
+                                                                                <th>TRG: BO</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody></tbody>
+                                                                        <tbody id="productionMissingTbody"></tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
                                                         </div>
-                                                    </div>  
-                                                </div> 
+                                                    </div>
+                                                </div>
                                                 <div role="tabpanel" class="tab-pane" id="markattendance">
                                                     <div class="card shadow-none bg-transparent">
                                                         <div class="card-body">
@@ -458,56 +471,45 @@
                                                                 </div>
                                                             </div>
                                                             <hr>
+                                                        </div>
                                                     </div>
                                                 </div>
+
                                                 <div role="tabpanel" class="tab-pane" id="attendancetimesheet">   
                                                     <div class="card shadow-none bg-transparent">
                                                         <div class="card-body">
-                                                            <div class="row">
-                                                                <div class="col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                                                                    <div class="form-group">
-                                                                        <label for="timesheetmonth" class="col-form-label col-form-label-sm font-weight-bold text-dark">Month</label>
-                                                                        <input type="month" class="form-control form-control-sm" id="timesheetmonth" name="timesheetmonth" value="{{ date('Y-m') }}" max="{{ date('Y-m') }}">
+                                                            <div class="row align-items-end">
+                                                                <div class="col-sm-12 col-md-3">
+                                                                    <div class="form-group mb-0">
+                                                                        <label for="ts_from_date" class="col-form-label col-form-label-sm font-weight-bold text-dark">From Date*</label>
+                                                                        <input type="date" id="ts_from_date" name="ts_from_date"
+                                                                            class="form-control form-control-sm" value="{{date('Y-m-d') }}" required>
                                                                     </div>
                                                                 </div>
+                                                                <div class="col-sm-12 col-md-3">
+                                                                    <div class="form-group mb-0">
+                                                                        <label for="ts_to_date" class="col-form-label col-form-label-sm font-weight-bold text-dark">To Date*</label>
+                                                                        <input type="date" id="ts_to_date" name="ts_to_date"
+                                                                            class="form-control form-control-sm" value="{{date('Y-m-d') }}" required>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-sm-12 col-md-4 d-flex align-items-end" style="gap:6px;">
+                                                                    <button type="button" id="ts_search_btn" class="btn btn-primary btn-sm px-3">
+                                                                        <i class="fas fa-search mr-1"></i> Search
+                                                                    </button>
+                                                                    <button type="button" id="ts_export_pdf_btn" class="btn btn-danger btn-sm px-3 d-none">
+                                                                        <i class="fas fa-file-pdf mr-1"></i> Export PDF
+                                                                    </button>
+                                                                </div>
                                                             </div>
-                                                            <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                                                            <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12 mt-3">
                                                                 <hr>
-                                                                <div class="mb-2">
-                                                                    <span class="badge px-2 mb-2" style="background-color:#f8d7da;color:#842029;">&nbsp;</span> Not Approved
-                                                                    <span class="badge px-2 mb-2" style="background-color:#fff3cd;color:#664d03;">&nbsp;</span> Pending
-                                                                </div>
-                                                                <div class="center-block fix-width scroll-inner">
-                                                                    <table class="table table-striped table-sm small nowrap" style="width: 100%" id="timesheettable">
-                                                                       <thead>
-                                                                            <tr>
-                                                                                <th>DATE</th>
-                                                                                <th>IN TIME</th>
-                                                                                <th>OUT TIME</th>
-                                                                                <th>LATE</th>
-                                                                                <th>MC NO</th>
-                                                                                <th>STYLE DETAILS</th>
-                                                                                <th>TARGET</th>
-                                                                                <th>PRODUCE</th>
-                                                                                <th>PRO AVG</th>
-                                                                                <th>WEIGHTED AVG</th>
-                                                                                <th>PRO INS</th>
-                                                                                <th>OT</th>
-                                                                                <th>TRP: ALL</th>
-                                                                                <th>ATT: ALL</th>
-                                                                                <th>NIG: ALL</th>
-                                                                                <th>TRG: BO</th>
-                                                                            </tr>
-                                                                        </thead>
-                                                                        <tbody></tbody>
-                                                                        <tbody id="timesheetMissingTbody"></tbody>
-                                                                    </table>
-                                                                </div>
+                                                                <div id="ts_employee_list"></div>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>  
-                                            </div>
+
                                             </div>
                                         </div>
                                     </div>      
@@ -849,13 +851,13 @@
 @section('script')
 <script>
     var empid = {{$emp_id}};
+    var emprecordid = {{$emprecordid}};
     var emp_name_with_initial = '{{$emp_name_with_initial}}';
     var calling_name = '{{$calling_name}}';
     $(document).ready(function () {
         $('#user_information_menu_link').addClass('active');
         $('#user_information_menu_link_icon').addClass('active');
         // $("#print_record").prop('disabled', true);
-        var emprecordid = {{$emprecordid}};
         var empcompany = {{$emp_company}};
         var emp_name_with_initial = '{{$emp_name_with_initial}}';
         var calling_name = '{{$calling_name}}';
@@ -1470,11 +1472,6 @@
         // Also run on page load
         fetchEmployeeData();
 
-        //Production Timesheet tab
-        $('#productionmonth').change(function () {
-            load_production_dt();
-        });
-
         $('#attendancemonth').change(function () {
             attendent_load_dt(empid);
         });
@@ -1484,98 +1481,19 @@
             load_timesheet(empid);
         });
 
-        $('#attendancetimesheet').insertAfter($('#markattendance'));
-
-        $('a[href="#attendancetimesheet"]').on('shown.bs.tab', function () {
+        $('a[href="#production"]').on('shown.bs.tab', function () {
             load_timesheet(empid);
         });
 
-
-        load_production_dt();
-
-        // load production datatable
-        function load_production_dt() {
-        var productionmonth = $('#productionmonth').val();
-        if ($.fn.DataTable.isDataTable('#productiondataTable')) {
-            $('#productiondataTable').DataTable().destroy();
-        }
-        $('#productiondataTable').DataTable({
-             "processing": true,
-                    "serverSide": true,
-                    dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
-                        "<'row'<'col-sm-5'i><'col-sm-7'p>>",
-                    "buttons": [{
-                            extend: 'csv',
-                            className: 'btn btn-success btn-sm',
-                            title: 'Employee Daily Production Summary Information',
-                            text: '<i class="fas fa-file-csv mr-2"></i> CSV',
-                        },
-                        { 
-                            extend: 'pdf', 
-                            className: 'btn btn-danger btn-sm', 
-                            title: 'Employee Daily Production Summary Information', 
-                            text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
-                            orientation: 'landscape', 
-                            pageSize: 'legal', 
-                            customize: function(doc) {
-                                doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
-                            }
-                        },
-                        {
-                            extend: 'print',
-                            title: 'Employee Daily Production Summary Information',
-                            className: 'btn btn-primary btn-sm',
-                            text: '<i class="fas fa-print mr-2"></i> Print',
-                            customize: function(win) {
-                                $(win.document.body).find('table')
-                                    .addClass('compact')
-                                    .css('font-size', 'inherit');
-                            },
-                        },
-                    ],
-                    "order": [
-                        [0, "desc"]
-                    ],
-                    ajax: {
-                         url: scripturl + '/Opma_Production/daily_employee_productionsummary_list.php',
-                         type: 'POST',
-                         data : 
-                            { employee :empid,
-                              productionmonth :productionmonth
-                            },
-                    },
-                    columns: [
-                        { data: 'emp_name', name: 'emp_name' },
-                        { data: 'date', name: 'date' },
-                        { data: 'target', name: 'target' },
-                        { data: 'produce', name: 'produce' },
-                        { data: 'difference', name: 'difference' },
-                        { 
-                            data: 'average_percentage',  // Now this exists in the server response
-                            name: 'average_percentage',
-                            render: function(data, type, row) {
-                                if (type === 'display' || type === 'filter') {
-                                    return parseFloat(data).toFixed(2) + '%';
-                                }
-                                return data;
-                            }
-                        },
-                       { 
-                            data: 'bonus', 
-                            name: 'bonus',
-                            render: function(data, type, row) {
-                                if (type === 'display' || type === 'filter') {
-                                    return parseFloat(data).toFixed(2);
-                                }
-                                return data;
-                            }
-                        },
-                          { data: 'damage', name: 'damage' }
-                    ],
-                    "bDestroy": true
+        // Time Sheet tab — search button
+        $('#ts_search_btn').on('click', function () {
+            loadMyTimesheet();
         });
-        } 
-        // end load_production_dt
+
+        // Auto-load when tab is first shown
+        $('a[href="#attendancetimesheet"]').one('shown.bs.tab', function () {
+            loadMyTimesheet();
+        });
 
 
 
@@ -1908,14 +1826,14 @@
         if (!month) return;
 
         // Clear missing rows from previous load immediately
-        $('#timesheetMissingTbody').empty();
+        $('#productionMissingTbody').empty();
 
-        if ($.fn.DataTable.isDataTable('#timesheettable')) {
-            $('#timesheettable').DataTable().destroy();
+        if ($.fn.DataTable.isDataTable('#productiontable')) {
+            $('#productiontable').DataTable().destroy();
         }
 
         $.ajax({
-            url: "{{ route('user_timesheet_data') }}",
+            url: "{{ route('user_production_data') }}",
             method: "POST",
             data: {
                 emp_id: emp_id,
@@ -1923,13 +1841,13 @@
                 _token: '{{ csrf_token() }}'
             },
             success: function(result) {
-                if ($.fn.DataTable.isDataTable('#timesheettable')) {
-                    $('#timesheettable').DataTable().destroy();
+                if ($.fn.DataTable.isDataTable('#productiontable')) {
+                    $('#productiontable').DataTable().destroy();
                 }
-                var tbody = $('#timesheettable tbody');
+                var tbody = $('#productiontable tbody');
                 tbody.empty();
 
-                $('#timesheettable').DataTable({
+                $('#productiontable').DataTable({
                     processing: false,
                     serverSide: false,          
                     data: result.data,          
@@ -1991,6 +1909,15 @@
                                     return data ? data.replace(/,/g, '<br>') : '';
                                 }
                             },
+                            {
+                                data: 'plus_minus',
+                                name: 'plus_minus',
+                                render: function(data) {
+                                    var val = parseFloat(data);
+                                    var color = val >= 0 ? 'green' : 'red';
+                                    return '<span style="color:' + color + ';font-weight:bold;">' + (val >= 0 ? '+' : '') + val + '</span>';
+                                }
+                            },
                             { 
                                 data: 'pro_avg',
                                 name: 'average',
@@ -2016,9 +1943,9 @@
                     // Re-attach the static missing-rows tbody after every DataTable draw,
                     // because DataTable.destroy() + re-init detaches it from the DOM.
                     initComplete: function() {
-                        var missingTbody = document.getElementById('timesheetMissingTbody');
+                        var missingTbody = document.getElementById('productionMissingTbody');
                         if (missingTbody) {
-                            document.getElementById('timesheettable').appendChild(missingTbody);
+                            document.getElementById('productiontable').appendChild(missingTbody);
                         }
                     }
                 });
@@ -2031,7 +1958,7 @@
 
                 var html = '';
                 // Separator row to visually separate approved from missing
-                html += '<tr><td colspan="16" style="border-top:2px dashed #dee2e6;padding:2px 0;"></td></tr>';
+                html += '<tr><td colspan="17" style="border-top:2px dashed #dee2e6;padding:2px 0;"></td></tr>';
 
                 // Today at midnight (local), for date comparisons
                 var today = new Date();
@@ -2060,7 +1987,7 @@
                                 '<td></td>' +
                                 '<td>' + (row.mc_no || '') + '</td>' +
                                 '<td>' + (row.style_details || '') + '</td>' +
-                                '<td colspan="10" class="text-center font-weight-bold" style="' + tdStyle + '">' +
+                                '<td colspan="11" class="text-center font-weight-bold" style="' + tdStyle + '">' +
                                     '<i class="fas ' + icon + ' mr-1"></i>' + label +
                                 '</td>' +
                             '</tr>';
@@ -2072,7 +1999,7 @@
                                 '<td></td>' +
                                 '<td>' + (row.mc_no || '') + '</td>' +
                                 '<td>' + (row.style_details || '') + '</td>' +
-                                '<td colspan="10" class="text-center font-weight-bold" style="' + tdStyle + '">' +
+                                '<td colspan="11" class="text-center font-weight-bold" style="' + tdStyle + '">' +
                                     '<i class="fas ' + icon + ' mr-1"></i>' + label +
                                 '</td>' +
                             '</tr>';
@@ -2081,17 +2008,17 @@
                         // not_allocated
                         html += '<tr>' +
                             '<td class="font-weight-bold" style="white-space:nowrap;">' + row.formatted_date + '</td>' +
-                            '<td colspan="15" class="text-center text-muted">' +
+                            '<td colspan="16" class="text-center text-muted">' +
                                 '<i class="fas fa-calendar-times mr-1"></i>Not Allocated' +
                             '</td>' +
                         '</tr>';
                     }
                 });
 
-                $('#timesheetMissingTbody').html(html);
+                $('#productionMissingTbody').html(html);
             },
             error: function() {
-                $('#timesheettable tbody').html('<tr><td colspan="16" class="text-center text-danger">Error loading data.</td></tr>');
+                $('#productiontable tbody').html('<tr><td colspan="17" class="text-center text-danger">Error loading data.</td></tr>');
             }
         });
     }
@@ -2658,6 +2585,268 @@
     });
 
     // END SALARY ADVANCE TAB
+
+    // TIME SHEET TAB — loads the logged-in employee's own attendance
+    // time sheet via the existing EmployeetimesheetContrller@generatereport
+    var ts_loading = false;
+
+    function ts_timeToMinutes(timeStr) {
+        if (!timeStr) return 0;
+        var parts = timeStr.split(':');
+        return (parseInt(parts[0], 10) || 0) * 60 + (parseInt(parts[1], 10) || 0);
+    }
+
+    function ts_minutesToHM(totalMinutes) {
+        var h = Math.floor(totalMinutes / 60);
+        var m = totalMinutes % 60;
+        return (h < 10 ? '0' + h : h) + ':' + (m < 10 ? '0' + m : m);
+    }
+
+    function ts_trimSeconds(timeStr) {
+        if (!timeStr) return '0';
+        var parts = timeStr.split(':');
+        if (parts.length < 2) return timeStr;
+        return parts[0] + ':' + parts[1];
+    }
+
+    function loadMyTimesheet() {
+        if (ts_loading) return;
+
+        var from_date = $('#ts_from_date').val();
+        var to_date   = $('#ts_to_date').val();
+
+        if (!from_date || !to_date) {
+            alert('Please select both From Date and To Date.');
+            return;
+        }
+
+        ts_loading = true;
+        $('#ts_search_btn').html('<i class="fa fa-spinner fa-spin mr-1"></i> Searching').prop('disabled', true);
+        $('#ts_export_pdf_btn').addClass('d-none');
+        $('#ts_employee_list').empty();
+
+        $.ajax({
+            url: "{{ route('employeetimesheetgenerate') }}",
+            method: 'POST',
+            data: {
+                department: {{ $employee->emp_department ?? 'null' }},
+                from_date:  from_date,
+                to_date:    to_date,
+                last_emp_id: 0,
+                _token: '{{ csrf_token() }}'
+            },
+            success: function (result) {
+                ts_loading = false;
+                $('#ts_search_btn').html('<i class="fas fa-search mr-1"></i> Search').prop('disabled', false);
+
+                if (!result || result.length === 0) {
+                    $('#ts_employee_list').html('<div class="alert alert-info">No timesheet data found for the selected date range.</div>');
+                    return;
+                }
+
+                var obj = JSON.parse(result);
+                var datalist = obj[0].data;
+
+                // Find only the logged-in employee's record
+                var myRecord = null;
+                $.each(datalist, function (i, item) {
+                    if (parseInt(item.id) === parseInt(emprecordid)) {
+                        myRecord = item;
+                        return false; // break
+                    }
+                });
+
+                if (!myRecord) {
+                    $('#ts_employee_list').html('<div class="alert alert-warning">No timesheet records found for your account in the selected date range. Please ensure your shift is configured.</div>');
+                    return;
+                }
+
+                var html = '';
+                var totlatemin = 0, totOtMinutes = 0, totDoubleOtMinutes = 0;
+
+                html += '<table class="ts_exporttable" style="border-collapse: collapse; font-size: 12px; width:100%;">';
+                // Employee header
+                html += '<tr><td colspan="15" style="padding-bottom:8px;"><strong>' + myRecord.companyname + '</strong></td></tr>';
+                html += '<tr><td colspan="15" style="border-bottom:1px solid #dee2e6;padding-bottom:8px;"><strong>Summarize Attendance</strong></td></tr>';
+                html += '<tr>';
+                html += '<td colspan="7" style="padding-top:8px;"><strong>Number - </strong>' + myRecord.emp_id + '</td>';
+                html += '<td colspan="8" style="padding-top:8px;"><strong>Division - </strong>' + myRecord.departmentname + '</td>';
+                html += '</tr>';
+                html += '<tr>';
+                html += '<td colspan="7"><strong>Name - </strong>' + myRecord.emp_fullname + '</td>';
+                html += '<td colspan="8"><strong>Designation - </strong>' + (myRecord.jobtitlename || '') + '</td>';
+                html += '</tr>';
+                html += '<tr style="border-bottom:1px solid #dee2e6;">';
+                html += '<td colspan="15" style="padding-bottom:8px;"><strong>Period: </strong>' + from_date + ' &nbsp;to&nbsp; ' + to_date + '</td>';
+                html += '</tr>';
+                // Column headers
+                html += '<tr>';
+                var cols = ['Date','Shift','Day','Remark','In','Out','In 2','Out 2','Late','OT','DOT','Days Pay','24Cont','Leave Type','Leave Amount'];
+                $.each(cols, function(i, c) {
+                    html += '<th style="padding:8px 6px;border-bottom:1px solid #333;white-space:nowrap;">' + c + '</th>';
+                });
+                html += '</tr>';
+
+                var attendance = myRecord.attendance;
+                $.each(attendance, function (j, att) {
+                    var isManual = att.attendance_type == 2;
+                    if (att.in_time == null && att.leave_type == '') {
+                        var status = 'OFF';
+                        if (att.day_type == 'Work') { status = 'Absent'; }
+                        else if (att.day_type == 'Saturday' && myRecord.is_sat_ot_type_as_act != 0) { status = 'Absent'; }
+                        else if (att.day_type == 'Sunday'   && myRecord.is_sun_ot_type_as_act == 2) { status = 'Absent'; }
+                        html += '<tr>';
+                        html += '<td>' + att.in_date + '</td>';
+                        html += '<td>' + att.shift   + '</td>';
+                        html += '<td>' + att.day_type + '</td>';
+                        html += '<td' + (status == 'Absent' ? ' style="color:red;"' : '') + '>' + status + '</td>';
+                        html += '<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>';
+                        html += '<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>';
+                        html += '<td>&nbsp;</td><td>&nbsp;</td>';
+                        html += '</tr>';
+                    } else if (att.in_time == null && att.leave_type != '') {
+                        html += '<tr>';
+                        html += '<td>' + att.in_date + '</td>';
+                        html += '<td>' + att.shift   + '</td>';
+                        html += '<td>' + att.day_type + '</td>';
+                        html += '<td>Leave</td>';
+                        html += '<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>';
+                        html += '<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>';
+                        html += '<td>' + att.leave_type + '</td>';
+                        html += '<td>' + att.leave_days + '</td>';
+                        html += '</tr>';
+                    } else {
+                        totlatemin += att.late_min ? parseFloat(att.late_min) : 0;
+                        if (att.ot_hours > 0)    totOtMinutes     += ts_timeToMinutes(att.duration_time);
+                        if (att.double_ot > 0)   totDoubleOtMinutes += ts_timeToMinutes(att.duration_time);
+
+                        html += '<tr>';
+                        html += '<td>' + att.in_date + '</td>';
+                        html += '<td>' + att.shift   + '</td>';
+                        html += '<td>' + att.day_type + '</td>';
+                        html += '<td>' + (isManual ? 'Manual' : 'Present') + '</td>';
+                        html += '<td>' + att.in_time  + '</td>';
+                        html += '<td>' + att.out_time + '</td>';
+                        html += '<td>' + (att.in_time2  || '') + '</td>';
+                        html += '<td>' + (att.out_time2 || '') + '</td>';
+                        html += '<td>' + att.late_min + '</td>';
+                        html += '<td>' + (att.ot_hours  > 0 ? ts_trimSeconds(att.duration_time) : '0') + '</td>';
+                        html += '<td>' + (att.double_ot > 0 ? ts_trimSeconds(att.duration_time) : '0') + '</td>';
+                        html += '<td>' + (att.days_pay  || '0') + '</td>';
+                        html += '<td>' + (att.cont24    || '0') + '</td>';
+                        html += '<td>' + att.leave_type + '</td>';
+                        html += '<td>' + att.leave_days + '</td>';
+                        html += '</tr>';
+                    }
+                });
+
+                // Totals row
+                html += '<tr style="font-weight:bold;border-top:2px solid #333;">';
+                html += '<td colspan="8">&nbsp;</td>';
+                html += '<td style="border-top:1px solid #333;border-bottom:2px double #333;">' + totlatemin.toFixed(2) + '</td>';
+                html += '<td style="border-top:1px solid #333;border-bottom:2px double #333;">' + ts_minutesToHM(totOtMinutes) + '</td>';
+                html += '<td style="border-top:1px solid #333;border-bottom:2px double #333;">' + ts_minutesToHM(totDoubleOtMinutes) + '</td>';
+                html += '<td colspan="4">&nbsp;</td>';
+                html += '</tr>';
+
+                html += '</table>';
+                $('#ts_employee_list').html(html);
+                $('#ts_export_pdf_btn').removeClass('d-none');
+            },
+            error: function () {
+                ts_loading = false;
+                $('#ts_search_btn').html('<i class="fas fa-search mr-1"></i> Search').prop('disabled', false);
+                $('#ts_employee_list').html('<div class="alert alert-danger">Error loading timesheet. Please try again.</div>');
+            }
+        });
+    }
+
+    // Export PDF — mirrors the Employee Attendance Time Sheet page
+    $('#ts_export_pdf_btn').on('click', function () {
+        var { jsPDF } = window.jspdf;
+        var doc = new jsPDF('l', 'pt', 'A4');
+        var pageWidth  = doc.internal.pageSize.getWidth();
+        var pageHeight = doc.internal.pageSize.getHeight();
+        var marginLeft = 25, marginRight = 25;
+
+        var table = document.querySelector('.ts_exporttable');
+        if (!table) return;
+
+        doc.autoTable({
+            html: table,
+            startY: 25,
+            margin: { top: 25, left: marginLeft, right: marginRight, bottom: 40 },
+            theme: 'plain',
+            tableWidth: 'auto',
+            styles: {
+                fontSize: 8,
+                cellPadding: { top: 4, bottom: 4, left: 4, right: 4 },
+                valign: 'middle',
+                overflow: 'linebreak',
+                lineColor: [0, 0, 0],
+                fillColor: [255, 255, 255],
+                textColor: [0, 0, 0],
+                lineWidth: 0
+            },
+            didParseCell: function (data) {
+                var rowIndex    = data.row.index;
+                var section     = data.section;
+                var totalBodyRows = data.table.body.length;
+
+                data.cell.styles.fillColor = [255, 255, 255];
+                data.cell.styles.textColor = [0, 0, 0];
+
+                if (section === 'body' && rowIndex === 0) {
+                    data.cell.styles.fontStyle  = 'bold';
+                    data.cell.styles.fontSize   = 13;
+                    data.cell.styles.lineWidth  = 0;
+                    data.cell.styles.cellPadding = { top: 6, bottom: 8, left: 4, right: 4 };
+                } else if (section === 'body' && rowIndex === 1) {
+                    data.cell.styles.fontStyle  = 'bold';
+                    data.cell.styles.fontSize   = 10;
+                    data.cell.styles.lineWidth  = { top: 0, right: 0, bottom: 1, left: 0 };
+                    data.cell.styles.cellPadding = { top: 2, bottom: 8, left: 4, right: 4 };
+                } else if (section === 'body' && (rowIndex === 2 || rowIndex === 3)) {
+                    data.cell.styles.fontSize   = 9;
+                    data.cell.styles.lineWidth  = 0;
+                    data.cell.styles.cellPadding = { top: 4, bottom: 4, left: 4, right: 4 };
+                } else if (section === 'body' && rowIndex === 4) {
+                    data.cell.styles.fontSize   = 9;
+                    data.cell.styles.lineWidth  = { top: 0, right: 0, bottom: 1, left: 0 };
+                    data.cell.styles.cellPadding = { top: 4, bottom: 10, left: 4, right: 4 };
+                } else if (section === 'head') {
+                    data.cell.styles.fontStyle  = 'bold';
+                    data.cell.styles.fontSize   = 8;
+                    data.cell.styles.lineWidth  = 0.5;
+                    data.cell.styles.halign     = 'center';
+                    data.cell.styles.cellPadding = { top: 8, bottom: 8, left: 3, right: 3 };
+                } else if (section === 'body' && rowIndex === totalBodyRows - 1) {
+                    data.cell.styles.fontStyle  = 'bold';
+                    data.cell.styles.lineWidth  = { top: 1, right: 0, bottom: 0, left: 0 };
+                    data.cell.styles.cellPadding = { top: 6, bottom: 6, left: 4, right: 4 };
+                } else if (section === 'body') {
+                    data.cell.styles.halign     = 'center';
+                    data.cell.styles.lineWidth  = 0.5;
+                    data.cell.styles.cellPadding = { top: 3, bottom: 3, left: 3, right: 3 };
+                }
+            }
+        });
+
+        // Footer line + page info
+        doc.setLineWidth(0.5);
+        doc.setDrawColor(0, 0, 0);
+        doc.line(marginLeft, pageHeight - 30, pageWidth - marginRight, pageHeight - 30);
+        doc.setFontSize(8);
+        doc.setFont(undefined, 'normal');
+        doc.text('Printed on: ' + new Date().toLocaleString(), marginLeft, pageHeight - 18);
+        doc.text('Page 1 of 1', pageWidth - marginRight, pageHeight - 18, { align: 'right' });
+
+        var from_date = $('#ts_from_date').val();
+        var to_date   = $('#ts_to_date').val();
+        doc.save('attendance_timesheet_from_' + from_date + '_to_' + to_date + '.pdf');
+    });
+
+    // END TIME SHEET TAB
 
 
 </script>
