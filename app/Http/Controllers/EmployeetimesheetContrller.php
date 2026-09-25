@@ -110,13 +110,14 @@ class EmployeetimesheetContrller extends Controller
                             COALESCE(roster_shift.shift_name, esd_shift.shift_name, st.shift_name) AS shift,
                             DATE_FORMAT(MIN(att.timestamp), '%h:%i %p') AS in_time, 
                             DATE_FORMAT(MAX(att.timestamp), '%h:%i %p') AS out_time,
-                            ROUND(COALESCE(la.minites_count, 0), 2) AS late_min, 
+                            SEC_TO_TIME(ROUND(COALESCE(la.minites_count, 0) * 60)) AS late_min,
                             COALESCE(leave_data.leavename, '') AS leave_type, 
                             ROUND(COALESCE(leave_data.no_of_days, 0), 2) AS leave_days,
                             ROUND(COALESCE(ot.hours, 0) + COALESCE(ot.holiday_normal_hours, 0), 2) AS ot_hours,
                             ROUND(COALESCE(ot.double_hours, 0), 2) AS double_ot,
                             ROUND(COALESCE(ot.triple_hours, 0), 2) AS triple_ot,
-                            ot.duration_time
+                            ot.duration_time,
+                            att.type AS attendance_type
                         FROM (SELECT ? AS date) dr
                         LEFT JOIN employee_roster_details erd
                             ON erd.emp_id = ? AND erd.work_date = ?
@@ -167,7 +168,8 @@ class EmployeetimesheetContrller extends Controller
                         'leave_days' => 0,
                         'ot_hours' => 0,
                         'double_ot' => 0,
-                        'triple_ot' => 0
+                        'triple_ot' => 0,
+                        'attendance_type' => '',
                     ];
                 }
 
@@ -183,7 +185,7 @@ class EmployeetimesheetContrller extends Controller
                     'emp_gender' => $employee->emp_gender,
                     'shiftname' => $employee->shiftname,
                     'is_sat_ot_type_as_act' => $employee->is_sat_ot_type_as_act,
-                     'is_sun_ot_type_as_act' => $employee->is_sun_ot_type_as_act,
+                    'is_sun_ot_type_as_act' => $employee->is_sun_ot_type_as_act,
                     'attendance' => $attendanceRecords
                 ];
 
