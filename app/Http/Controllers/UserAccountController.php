@@ -114,8 +114,8 @@ class UserAccountController extends Controller
         return view('UserAccountSummery.useraccountsummery',compact('emprecordid','emp_id','emp_location','employee','leavetype','emp_name_with_initial','calling_name','payment_period','employees', 'emp_company', 'branches'));
     }
 
-    // Get user attendance timesheet data
-    public function getUserTimesheetData(Request $request)
+    // Get user production data
+    public function getUserProductionData(Request $request)
     {
         $emp_id  = $request->input('emp_id');
         $month = $request->input('month');
@@ -172,6 +172,7 @@ class UserAccountController extends Controller
                 'style_details' => $styles,
                 'target' => $targets,
                 'produced' => $produced,
+                'plus_minus' => ($summary->daily_produce ?? 0) - ($summary->daily_target ?? 0),
                 'pro_avg' => $averages,
                 'weighted_avg' => number_format($summary->details->avg('average'), 2) . '%',
                 'pro_ins' => $summary->daily_average >= 70 ? 1 : 0,
