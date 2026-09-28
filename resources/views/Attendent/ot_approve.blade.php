@@ -54,6 +54,9 @@
                                         <th>DAY</th>
                                         <th>FROM</th>
                                         <th>TO</th>
+                                        <th class="">OT HOURS</th>
+                                        <th class="">D/OT HOURS</th>
+                                        <th class="">T/OT HOURS</th>
                                         <th>OT TIME</th>
                                         <th>D/OT TIME</th>
                                         <th>T/OT TIME</th>
@@ -164,7 +167,7 @@
 
              $('.response').html(
                 '<tr>' +
-                '<td colspan="14" class="text-center py-5">' +
+                '<td colspan="17" class="text-center py-5">' +
                 '<div class="d-flex flex-column align-items-center">' +
                 '<i class="fas fa-filter fa-3x text-muted mb-3"></i>' +
                 '<h4 class="text-muted mb-2">No Records Found</h4>' +
@@ -175,7 +178,7 @@
             );
 
             function load_table() {
-                 let company = $('#company').val();
+                let company = $('#company').val();
                 let department = $('#department').val();
                 let employee = $('#employee').val();
                 let location = $('#location').val();
@@ -223,6 +226,8 @@
                                  // If daily average is less than 50, override with red
                                let row_style = '';
 
+                               var diff = timeDiff(obj.from_24, obj.to_24);
+
                                 if(daily_average !== undefined && daily_average < 90 && daily_average > 0 ) {
                                     h_class = obj.is_morning ? 'bg-teal-light' : '';
                                     row_style = 'style="background-color: #ffd6d6;"';
@@ -250,6 +255,9 @@
                                 ot_data_html += '<td>'+obj.hours +'</td>';
                                 ot_data_html += '<td>'+obj.double_hours +'</td>';
                                 ot_data_html += '<td>'+obj.triple_hours+'</td>';
+                                ot_data_html += '<td>' + (obj.hours > 0 ? diff : '00:00') + '</td>';
+                                ot_data_html += '<td>' + (obj.double_hours > 0 ? diff : '00:00') + '</td>';
+                                ot_data_html += '<td>' + (obj.triple_hours > 0 ? diff : '00:00') + '</td>';
                                 ot_data_html += '<td>'+is_holiday+'</td>';
                                 ot_data_html += '<td>'+(daily_average !== undefined ? daily_average.toFixed(2)+'%' : 'N/A')+'</td>';
                                 ot_data_html += '</tr>';
@@ -353,14 +361,14 @@
                             let hours_cell = cb_obj.closest('tr').find('td:eq(8)');
                             let double_hours_cell = cb_obj.closest('tr').find('td:eq(9)');
                             let triple_hours_cell = cb_obj.closest('tr').find('td:eq(10)');
-                            let is_holiday_cell = cb_obj.closest('tr').find('td:eq(11)');
+                            let is_holiday_cell = cb_obj.closest('tr').find('td:eq(14)');
 
                             let from = from_cell.text();
                             let to = to_cell.text();
                             let hours = hours_cell.text();
                             let double_hours = double_hours_cell.text();
                             let triple_hours = triple_hours_cell.text();
-                            let is_holiday = cb_obj.parent().parent().find('td:nth-child(12)');
+                            let is_holiday = cb_obj.parent().parent().find('td:nth-child(15)');
 
                             let ot_data_obj = {
                                 emp_id: emp_id,
@@ -376,8 +384,8 @@
 
                             ot_data.push(ot_data_obj);
 
-                        }
-
+                        }                        
+                        
                     });
 
                     if (ot_data.length > 0) {
@@ -435,7 +443,21 @@
             });
         });
 
+    function timeDiff(from, to) {
+        if (!from || !to) return '';
 
+        // "2026-09-01 17:00" -> works in all browsers
+        var f = new Date(from.replace(' ', 'T'));
+        var t = new Date(to.replace(' ', 'T'));
+        if (isNaN(f) || isNaN(t)) return '';
+
+        var mins = Math.round((t - f) / 60000);
+        if (mins < 0) mins += 24 * 60;   // handles shifts passing midnight if only times are compared
+
+        var hh = String(Math.floor(mins / 60)).padStart(2, '0');
+        var mm = String(mins % 60).padStart(2, '0');
+        return hh + ':' + mm;
+    }
     </script>
 
 @endsection
