@@ -86,6 +86,20 @@
                                     </select>
                                 </div>
                             </li>
+                            <li class="mb-2">
+                                <div class="col-md-12">
+                                    <label class="small font-weight-bolder text-dark">Payroll type</label>
+                                    <select id="payroll_process_type_id" class="form-control form-control-sm"
+                                        name="payroll_process_type_id" required>
+                                        <option>Choose...</option>
+                                        @foreach($payroll_process_type as $payrollprocesstype)
+                                        <option value="{{$payrollprocesstype->id}}">
+                                            {{$payrollprocesstype->process_name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </li>
+
                            <li class="mb-2">
                                 <div class="col-md-12">
                                    <label class="small font-weight-bolder text-dark">From Date</label>
@@ -204,7 +218,7 @@ $(document).ready(function () {
 
    showInitialMessage();
 
-    function load_dt(company,department, fromdate, todate){
+    function load_dt(company,department, fromdate, todate,payroll_type_id){
         
         $('#attendtable').DataTable({
            "destroy": true,
@@ -246,7 +260,7 @@ $(document).ready(function () {
             ],
             ajax: {
                 "url": "{{url('/attendance_list_for_approve_st')}}",
-                "data": {'company':company, 'department':department, 'fromdate':fromdate, 'todate':todate},
+                "data": {'company':company, 'department':department, 'fromdate':fromdate, 'todate':todate, 'payroll_type_id':payroll_type_id},
             },
 
             columns: [
@@ -279,8 +293,9 @@ $(document).ready(function () {
         let company = $('#company').val();
         let fromdate = $('#fromdate').val();
         let todate = $('#todate').val();
+        let payroll_type_id = $('#payroll_process_type_id').val();
 
-        load_dt(company, department, fromdate, todate);
+        load_dt(company, department, fromdate, todate,payroll_type_id);
         closeOffcanvasSmoothly();
     });
 
@@ -290,6 +305,7 @@ $(document).ready(function () {
         let company = $('#company').val();
         let fromdate = $('#fromdate').val();
         let todate = $('#todate').val();
+        let payroll_type_id = $('#payroll_process_type_id').val();
 
          var r = await Otherconfirmation("You want to Edit this ? ");
 
@@ -303,6 +319,7 @@ $(document).ready(function () {
                     company: company,
                     fromdate: fromdate,
                     todate: todate,
+                    payroll_type_id: payroll_type_id,
                     _token: $('input[name=_token]').val(),
                 },
                 success: function (data) {
@@ -331,6 +348,29 @@ $(document).ready(function () {
                         const actionJSON = JSON.stringify(actionObj, null, 2);
                         actionreload(actionJSON);
                     }
+                },
+                error: function (xhr) {
+                    var msg = 'Attendance Approval Failed. Please Recheck Attendance Data.';
+
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        msg = xhr.responseJSON.message;
+                    } else if (xhr.status === 401) {
+                        msg = 'You are not authorized to approve attendance.';
+                    }
+
+                    const actionObj = {
+                        icon: 'fas fa-warning',
+                        title: '',
+                        message: msg,
+                        url: '',
+                        target: '_blank',
+                        type: 'danger'
+                    };
+                    const actionJSON = JSON.stringify(actionObj, null, 2);
+                    action(actionJSON);
+                },
+                complete: function () {
+                    $('#approve_att').html('Approve').prop('disabled', false);
                 }
             });
 

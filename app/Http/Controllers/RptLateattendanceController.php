@@ -140,8 +140,8 @@ class RptLateattendanceController extends Controller
         // Format data
         $data_arr = [];
         foreach ($records as $record) {
-            $check_in = $record->check_in_time ? date('G:i', strtotime($record->check_in_time)) : '--';
-            $check_out = $record->check_out_time ? date('G:i', strtotime($record->check_out_time)) : '--';
+            $check_in = $record->check_in_time ? date('H:i:s', strtotime($record->check_in_time)) : '--';
+            $check_out = $record->check_out_time ? date('H:i:s', strtotime($record->check_out_time)) : '--';
             
             // Calculate time differences
             $late_minutes = 0;

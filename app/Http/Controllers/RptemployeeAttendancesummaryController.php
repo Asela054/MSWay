@@ -65,6 +65,9 @@ class RptemployeeAttendancesummaryController extends Controller
                         END) AS lasttimestamp'),
                 'employees.emp_name_with_initial',
                 'employees.emp_location',
+                'employees.emp_join_date',
+                'employees.resignation_date',
+                'employees.is_resigned',
                 'branches.location',
                 'departments.name as dept_name'
             )
@@ -149,9 +152,61 @@ class RptemployeeAttendancesummaryController extends Controller
                 }
                 return 0;
             })
+            ->addColumn('pay_cut', function ($row) use ($month) {
+                return $this->getPayCutDays(
+                    $row->emp_join_date,
+                    $row->resignation_date,
+                    $row->is_resigned,
+                    $month
+                );
+            })
             
             ->rawColumns(['date'])
             ->make(true);
 
     }
+
+
+    private function getPayCutDays($joinDate, $resignDate, $isResigned, $month)
+    {
+        if (empty($month)) {
+            return 0;
+        }
+
+        $monthStart  = Carbon::parse($month . '-01')->startOfDay();
+        $monthEnd    = $monthStart->copy()->endOfMonth()->startOfDay();
+        $daysInMonth = $monthStart->daysInMonth;
+
+        $payCut = 0;
+
+        // Joined during the month: days before the join date
+        if (!empty($joinDate) && $joinDate != '0000-00-00') {
+            $join = Carbon::parse($joinDate)->startOfDay();
+
+            if ($join->gt($monthEnd)) {
+                return $daysInMonth; // joined after this month, whole month not payable
+            }
+            if ($join->gt($monthStart)) {
+                $payCut += $monthStart->diffInDays($join);
+            }
+        }
+
+        // Resigned before the month end: days after the resignation date
+        if ($isResigned == 1 && !empty($resignDate) && $resignDate != '0000-00-00') {
+            $resign = Carbon::parse($resignDate)->startOfDay();
+
+            if ($resign->lt($monthStart)) {
+                return $daysInMonth; // resigned before this month, whole month not payable
+            }
+            if ($resign->lt($monthEnd)) {
+                $payCut += $resign->diffInDays($monthEnd);
+            }
+        }
+
+        return min($payCut, $daysInMonth);
+    }
+
+
+
+
 }
