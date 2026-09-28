@@ -236,9 +236,9 @@ class LateAttendanceController extends Controller
                 'emp_name_with_initial' => $record->emp_name_with_initial,
                 'employee_display' => EmployeeHelper::getDisplayName($employeeObj),
                 'date' => $record->date,
-                'timestamp' => $first_checkin->format('H:i'),
-                'lasttimestamp' => $first_checkin->format('H:i') != $last_checkout->format('H:i') 
-                                ? $last_checkout->format('H:i') 
+                'timestamp' => $first_checkin->format('H:i:s'),
+                'lasttimestamp' => $first_checkin->format('H:i:s') != $last_checkout->format('H:i:s') 
+                                ? $last_checkout->format('H:i:s') 
                                 : '',
                 'workhours' => gmdate("H:i:s", $last_checkout->diffInSeconds($first_checkin)),
                 'dept_name' => $record->department_name,

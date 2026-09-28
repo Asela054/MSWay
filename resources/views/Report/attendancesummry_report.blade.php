@@ -51,6 +51,7 @@
                                     <th>DOUBLE OT</th>
                                     <th>LEAVE DAYS</th>
                                     <th>NO PAY DAYS</th>
+                                    <th>PAY CUT</th>
                                 </tr>
                                 </thead>
                                 <tbody class="response"></tbody>
@@ -229,6 +230,7 @@ $(document).ready(function () {
                 { data: 'double_ot', name: 'double_ot' },
                 { data: 'leave_days', name: 'leave_days' },
                 { data: 'no_pay_days', name: 'no_pay_days' },
+                { data: 'pay_cut', name: 'pay_cut' },
             ],
             "bDestroy": true,
             "order": [[ 0, "desc" ]],
@@ -282,7 +284,7 @@ $(document).ready(function () {
     function showInitialMessage() {
         $('.response').html(
             '<tr>' +
-            '<td colspan="10" class="text-center py-5">' + // Changed colspan to 9 to match your columns
+            '<td colspan="11" class="text-center py-5">' + // Changed colspan to 9 to match your columns
             '<div class="d-flex flex-column align-items-center">' +
             '<i class="fas fa-filter fa-3x text-muted mb-2"></i>' +
             '<h4 class="text-muted mb-2">No Records Found</h4>' +

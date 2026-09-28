@@ -333,6 +333,29 @@ $(document).ready(function () {
                         const actionJSON = JSON.stringify(actionObj, null, 2);
                         actionreload(actionJSON);
                     }
+                },
+                 error: function (xhr) {
+                    var msg = 'Attendance Approval Failed. Please Recheck Attendance Data.';
+
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        msg = xhr.responseJSON.message;
+                    } else if (xhr.status === 401) {
+                        msg = 'You are not authorized to approve attendance.';
+                    }
+
+                    const actionObj = {
+                        icon: 'fas fa-warning',
+                        title: '',
+                        message: msg,
+                        url: '',
+                        target: '_blank',
+                        type: 'danger'
+                    };
+                    const actionJSON = JSON.stringify(actionObj, null, 2);
+                    action(actionJSON);
+                },
+                complete: function () {
+                    $('#approve_att').html('Approve').prop('disabled', false);
                 }
             });
 
