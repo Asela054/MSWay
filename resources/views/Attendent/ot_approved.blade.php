@@ -191,6 +191,9 @@
                         '<th>DATE</th> ' +
                         '<th>FROM</th> ' +
                         '<th>TO</th>' +
+                        '<th>OT HOURS</th>' +
+                        '<th>D/OT HOURS</th> ' +
+                        '<th>T/OT HOURS</th> ' +
                         '<th>OT TIME</th>' +
                         '<th>D/OT TIME</th> ' +
                         '<th>T/OT TIME</th> ' +
@@ -300,6 +303,24 @@
                                         return parseFloat(data).toFixed(1);
                                 }
                             },
+                            {
+                                data: 'hours',
+                                render: function(data, type, row) {
+                                    return parseFloat(data) > 0 ? timeDiff(row.from, row.to) : '';
+                                }
+                            },
+                            {
+                                data: 'double_hours',
+                                render: function(data, type, row) {
+                                    return parseFloat(data) > 0 ? timeDiff(row.from, row.to) : '';
+                                }
+                            },
+                            {
+                                data: 'triple_hours',
+                                render: function(data, type, row) {
+                                    return parseFloat(data) > 0 ? timeDiff(row.from, row.to) : '';
+                                }
+                            },
                             { data: 'is_holiday' ,
                                 render: function(data, type, row) {
                                     if(data==1){
@@ -354,8 +375,8 @@
                         '<th>Work Days</th> ' +
                         '<th>Leave Days</th>' +
                         '<th>No Pay Days</th>' +
-                        '<th>O.T. Hours</th> ' +
-                        '<th>Double O.T. Hours</th> ' +
+                        '<th>OT HOURS</th> ' +
+                        '<th>D/OT HOURS</th> ' +
                         '<th>Location</th> ' +
                         '<th>Department</th> ' );
 
@@ -506,6 +527,20 @@
             });
 
         });
+
+        function timeDiff(from, to) {
+            if (!from || !to) return '';
+            var f = new Date(String(from).replace(' ', 'T'));
+            var t = new Date(String(to).replace(' ', 'T'));
+            if (isNaN(f) || isNaN(t)) return '';
+
+            var mins = Math.round((t - f) / 60000);
+            if (mins < 0) mins += 24 * 60;
+
+            var hh = String(Math.floor(mins / 60)).padStart(2, '0');
+            var mm = String(mins % 60).padStart(2, '0');
+            return hh + ':' + mm;
+        }
     </script>
 
 @endsection
