@@ -242,9 +242,21 @@
 
                                     $.each(objattendance, function (j, item) {
                                          var isManual = objattendance[j].attendance_type == 2;
+                                          var shiftId = Number(objattendance[j].shift_id);
+                                          var isDayOff = (shiftId === 100 || shiftId === 101);
+
                                         if (objattendance[j].in_time == null && objattendance[j].leave_type == '') {
                                             var status;
-                                                if (objattendance[j].day_type == 'Work') {
+
+                                             var dayType = objattendance[j].day_type;
+                                            var isHoliday = (dayType != 'Work' && dayType != 'Saturday' && dayType != 'Sunday');
+                                            var isAhaspokuna = (datalist[i].emp_companyid == 3);
+            
+                                                if (isDayOff) {
+                                                    status = 'OFF';
+                                                } else if (isHoliday) {
+                                                    status = isAhaspokuna ? 'Absent' : 'OFF';
+                                                } else if (objattendance[j].day_type == 'Work') {
                                                     status = 'Absent';
                                                 } else if (objattendance[j].day_type == 'Saturday' && datalist[i].is_sat_ot_type_as_act != 0) {
                                                     status = 'Absent';
@@ -255,7 +267,7 @@
                                                 }
                                             html += '<tr>'
                                                 + '<td>' + objattendance[j].in_date + '</td>'
-                                                + '<td>' + objattendance[j].shift + '</td>'
+                                                + '<td>' + (isDayOff ? 'Day Off' : objattendance[j].shift) + '</td>'
                                                 + '<td>' + objattendance[j].day_type + '</td>'
                                                 + '<td' + (status == 'Absent' ? ' style="color: red;"' : '') + '>' + status + '</td>'
                                                 + '<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>'

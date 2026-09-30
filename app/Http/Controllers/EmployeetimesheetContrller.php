@@ -34,7 +34,7 @@ class EmployeetimesheetContrller extends Controller
 
         // Step 1: Fetch Employee Data
          $employees = DB::select("
-            SELECT emp.id, emp.emp_id, emp.emp_etfno, emp.emp_fullname, emp.emp_gender, 
+            SELECT emp.id, emp.emp_id, emp.emp_etfno,emp.emp_company, emp.emp_fullname, emp.emp_gender, 
                 dept.name AS departmentname, cam.name AS companyname, job.title AS jobtitlename, emp.emp_shift, 
                 COALESCE(esd_shift.shift_name, st.shift_name) AS shiftname,
                 jc.is_sat_ot_type_as_act,
@@ -108,6 +108,7 @@ class EmployeetimesheetContrller extends Controller
                                 CASE WHEN WEEKDAY(?) IN (5,6) THEN DAYNAME(?) 
                                 ELSE 'Work' END) AS day_type,
                             COALESCE(roster_shift.shift_name, esd_shift.shift_name, st.shift_name) AS shift,
+                            erd.shift_id AS shift_id,
                             DATE_FORMAT(MIN(att.timestamp), '%h:%i %p') AS in_time, 
                             DATE_FORMAT(MAX(att.timestamp), '%h:%i %p') AS out_time,
                             SEC_TO_TIME(ROUND(COALESCE(la.minites_count, 0) * 60)) AS late_min,
@@ -161,6 +162,7 @@ class EmployeetimesheetContrller extends Controller
                         'out_date' => $date,
                         'day_type' => '',
                         'shift' => '',
+                        'shift_id' => null,
                         'in_time' => '',
                         'out_time' => '',
                         'late_min' => 0,
@@ -182,6 +184,7 @@ class EmployeetimesheetContrller extends Controller
                     'jobtitlename' => $employee->jobtitlename,
                     'departmentname' => $employee->departmentname,
                     'companyname' => $employee->companyname,
+                    'emp_companyid' => $employee->emp_company,
                     'emp_gender' => $employee->emp_gender,
                     'shiftname' => $employee->shiftname,
                     'is_sat_ot_type_as_act' => $employee->is_sat_ot_type_as_act,
