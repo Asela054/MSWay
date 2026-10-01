@@ -57,7 +57,7 @@ class UserHelper
         $userEmployee = \DB::table('users')
             ->join('employees', 'users.emp_id', '=', 'employees.emp_id')
             ->where('users.id', $userId)
-            ->whereNotNull('employees.hierarchy_id')
+            ->where('employees.hierarchy_id', '>', 0)
             ->first(['employees.hierarchy_id']);
         
         if ($userEmployee && $userEmployee->hierarchy_id) {
@@ -88,6 +88,7 @@ class UserHelper
         
         return $query->where(function($q) use ($userHierarchy) {
             $q->whereNull('employees.hierarchy_id')
+                ->orWhere('employees.hierarchy_id', 0)
                 ->orWhereIn('employees.hierarchy_id', function($subQuery) use ($userHierarchy) {
                     $subQuery->select('id')
                         ->from('company_hierarchies')
@@ -122,7 +123,7 @@ class UserHelper
         $userEmployee = \DB::table('users')
             ->join('employees', 'users.emp_id', '=', 'employees.emp_id')
             ->where('users.id', $userId)
-            ->whereNotNull('employees.hierarchy_id')
+            ->where('employees.hierarchy_id', '>', 0)
             ->first(['employees.hierarchy_id']);
         
         if ($userEmployee && $userEmployee->hierarchy_id) {
@@ -161,6 +162,7 @@ class UserHelper
             ->where('employees.deleted', 0)
             ->where(function($q) use ($userHierarchy) {
                 $q->whereNull('employees.hierarchy_id')
+                    ->orWhere('employees.hierarchy_id', 0)
                     ->orWhere('company_hierarchies.order_number', '>=', $userHierarchy->order_number);
             })
             ->pluck('employees.emp_id')
@@ -255,7 +257,7 @@ class UserHelper
                 SELECT e.hierarchy_id 
                 FROM users u
                 INNER JOIN employees e ON u.emp_id = e.emp_id
-                WHERE u.id = ? AND e.hierarchy_id IS NOT NULL
+                WHERE u.id = ? AND e.hierarchy_id > 0
                 LIMIT 1
             ");
             $stmt->bind_param("i", $userId);
@@ -287,7 +289,7 @@ class UserHelper
                         FROM employees e
                         LEFT JOIN company_hierarchies ch ON e.hierarchy_id = ch.id
                         WHERE e.deleted = 0 
-                        AND (e.hierarchy_id IS NULL OR ch.order_number >= ?)
+                        AND (e.hierarchy_id IS NULL OR e.hierarchy_id = 0 OR ch.order_number >= ?)
                     ");
                     $stmt->bind_param("i", $orderNumber);
                     $stmt->execute();

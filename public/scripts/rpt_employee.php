@@ -113,8 +113,12 @@ if ($userId) {
         $result = $stmt->get_result();
 
         while ($row = $result->fetch_assoc()) {
+            if (!empty($row['company_id'])) {
             $companyIds[] = $row['company_id'];
-            $branchIds[] = $row['branch_id'];
+            }
+            if (!empty($row['branch_id'])) {
+                $branchIds[] = $row['branch_id'];
+            }
         }
         $stmt->close();
     }
