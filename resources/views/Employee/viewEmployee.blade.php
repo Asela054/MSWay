@@ -22,14 +22,10 @@
 				<div class="row">
 					<div class="col-lg-9 col-md-12">
 						@if(session()->has('success'))
-							<div class="alert alert-success">
-								{{ session()->get('success') }}
-							</div>
+							<span id="flash-success" data-message="{{ session('success') }}" class="d-none"></span>
 						@endif
 						@if(session()->has('error'))
-							<div class="alert alert-danger">
-								{{ session()->get('error') }}
-							</div>
+							<span id="flash-error" data-message="{{ session('error') }}" class="d-none"></span>
 						@endif
 
 						<form id="PdetailsForm" class="form-horizontal" method="POST" action="{{ route('empoyeeUpdate') }}" enctype="multipart/form-data">
@@ -135,18 +131,6 @@
 											@endif
 										</div>
 										<div class="col-md-4 col-sm-6 col-12 mb-2">
-											<label class="small font-weight-bold text-dark">Mobile Device MAC ID</label>
-											<input type="text" name="mac_id" id="mac_id" value="{{ old('mac_id', $deviceCheck->mac_id ?? '') }}" class="form-control form-control-sm" />
-											@if ($errors->has('mac_id'))
-												<span class="help-block">
-													<strong>{{ $errors->first('mac_id') }}</strong>
-												</span>
-											@endif
-										</div>
-										
-									</div>
-									<div class="form-row mb-1">
-										<div class="col-md-4 col-sm-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">Office Extension</label>
 											<input type="text" name="emp_work_telephone" id="emp_work_telephone" value="{{$employee->emp_work_telephone}}" class="form-control form-control-sm {{ $errors->has('emp_work_telephone') ? ' has-error' : '' }}" />
 											@if ($errors->has('emp_work_telephone'))
@@ -155,6 +139,9 @@
 												</span>
 											@endif
 										</div>
+										
+									</div>
+									<div class="form-row mb-1">
 										<div class="col-md-4 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">Photograph</label>
 											<input type="file" data-preview="#preview" class="form-control form-control-sm {{ $errors->has('photograph') ? ' has-error' : '' }}" name="photograph" id="photograph">
@@ -162,6 +149,31 @@
 											@if ($errors->has('photograph'))
 												<span class="help-block">
 													<strong>{{ $errors->first('photograph') }}</strong>
+												</span>
+											@endif
+										</div>
+										<div class="col-md-4 col-sm-6 col-12 mb-2">
+											<label class="small font-weight-bold text-dark">Mobile Brand Name</label>
+											<input type="text" name="brand_name" id="brand_name" value="{{ old('brand_name', $deviceCheck ? $deviceCheck->brand_name . ' - ' . $deviceCheck->model_name : '') }}" class="form-control form-control-sm" readonly />
+											@if ($errors->has('brand_name'))
+												<span class="help-block">
+													<strong>{{ $errors->first('brand_name') }}</strong>
+												</span>
+											@endif
+										</div>
+										<div class="col-md-4 col-sm-6 col-12 mb-2">
+											<label class="small font-weight-bold text-dark">Mobile Device MAC ID</label>
+											<div class="input-group input-group-sm">
+												<input type="text" name="mac_id" id="mac_id" value="{{ old('mac_id', $deviceCheck->mac_id ?? '') }}" class="form-control form-control-sm" style="filter: blur(4px); transition: filter 0.2s; background-color: #e9ecef; user-select: none; -webkit-user-select: none;" readonly oncopy="return false;" oncut="return false;" onpaste="return false;" onselectstart="return false;" oncontextmenu="return false;" />
+												<div class="input-group-append">
+													<button type="button" id="deleteMacIdBtn" class="btn btn-danger btn-sm" title="Delete MAC ID" style="border-radius: 0 4px 4px 0;">
+														<i class="fa fa-trash"></i>
+													</button>
+												</div>
+											</div>
+											@if ($errors->has('mac_id'))
+												<span class="help-block">
+													<strong>{{ $errors->first('mac_id') }}</strong>
 												</span>
 											@endif
 										</div>
@@ -607,6 +619,48 @@
                 $('#preview').attr('src', e.target.result).show();
             }
             reader.readAsDataURL(this.files[0]);
+        });
+
+        // Session flash → SweetAlert toast (matches employeeAdd pattern)
+        var $flashSuccess = $('#flash-success');
+        var $flashError   = $('#flash-error');
+        if ($flashSuccess.length) {
+            const actionObj = {
+                icon: 'fas fa-check-circle',
+                title: '',
+                message: $flashSuccess.data('message'),
+                url: '',
+                target: '_blank',
+                type: 'success'
+            };
+            action(JSON.stringify(actionObj, null, 2));
+        }
+        if ($flashError.length) {
+            const actionObj = {
+                icon: 'fas fa-exclamation-circle',
+                title: '',
+                message: $flashError.data('message'),
+                url: '',
+                target: '_blank',
+                type: 'danger'
+            };
+            action(JSON.stringify(actionObj, null, 2));
+        }
+
+        // Delete MAC ID (client-side clear — status=3 set by controller on Update)
+        $('#deleteMacIdBtn').on('click', async function() {
+            var r = await Otherconfirmation('You want to delete the Mobile Device MAC ID?');
+            if (!r) return;
+            var $input = $('#mac_id');
+            $input.removeAttr('readonly');
+            $input.val('');
+            $input.attr('readonly', true);
+            $input.css({
+                'filter': 'none',
+                'background-color': '#fff3cd',
+                'border-color': '#ffc107'
+            });
+            $(this).prop('disabled', true).html('<i class="fa fa-check"></i>').attr('title', 'MAC ID cleared — click Update to save');
         });
     });
 </script>
