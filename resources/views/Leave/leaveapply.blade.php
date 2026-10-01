@@ -144,7 +144,7 @@
                                                     <td> <span id="med_available"></span> </td>
                                                 </tr>
                                                 <tr>
-                                                    <td> <span>Weekly</span> </td>
+                                                    <td> <span id="weekly_title"></span> </td>
                                                     <td> <span id="weekly_total"></span> </td>
                                                     <td> <span id="weekly_taken"></span> </td>
                                                     <td> <span id="weekly_available"></span> </td>
@@ -604,6 +604,8 @@
                         $('#weekly_taken').html(data.total_taken_weekly_leaves);
                         $('#weekly_available').html(data.available_no_of_weekly_leaves);
 
+                        $('#weekly_title').html(data.other_leaves_title);
+
                     }
                 });
             }
@@ -963,6 +965,8 @@
                                 $('#weekly_total').html(data.total_no_of_weekly_leaves);
                                 $('#weekly_taken').html(data.total_taken_weekly_leaves);
                                 $('#weekly_available').html(data.available_no_of_weekly_leaves);
+
+                                $('#weekly_title').html(data.other_leaves_title);
 
                             }
                         });
