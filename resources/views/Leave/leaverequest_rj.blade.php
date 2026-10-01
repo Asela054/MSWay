@@ -567,6 +567,41 @@
 
             $('#formTitle').on('submit', function (event) {
                 event.preventDefault();
+                // ---- Short leave duration validation ----
+                if ($('#half_short').val() === '0.25') {
+                    var fromTime = $('#from_time').val();
+                    var toTime   = $('#to_time').val();
+
+                    if (!fromTime || !toTime) {
+                        showError('Please select the From Time and To Time for the short leave.');
+                        return;
+                    }
+
+                    var fromParts = fromTime.split(':');
+                    var toParts   = toTime.split(':');
+                    var fromMins  = parseInt(fromParts[0], 10) * 60 + parseInt(fromParts[1], 10);
+                    var toMins    = parseInt(toParts[0], 10) * 60 + parseInt(toParts[1], 10);
+
+                    if (toMins <= fromMins) {
+                        showError('To Time must be later than From Time.');
+                        return;
+                    }
+
+                    var durationHours  = (toMins - fromMins) / 60;
+                    var availableHours = parseFloat($('#weekly_available').text());
+
+                    if (isNaN(availableHours)) {
+                        availableHours = 0;
+                    }
+
+                    if (durationHours > availableHours) {
+                        showError('Short leave duration (' + durationHours.toFixed(2) + ' hrs) exceeds your available short leave balance (' + availableHours.toFixed(2) + ' hrs).');
+                        return;
+                    }
+                }
+                // ---- end validation ----
+
+
                 var action_url = '';
 
                 if ($('#action').val() == 'Add') {
@@ -764,6 +799,18 @@
             }
         });
 
+
+        function showError(msg) {
+            var actionObj = {
+                icon: 'fas fa-warning',
+                title: '',
+                message: msg,
+                url: '',
+                target: '_blank',
+                type: 'danger'
+            };
+            action(JSON.stringify(actionObj, null, 2));
+        }
     </script>
 
 @endsection

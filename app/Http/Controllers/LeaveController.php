@@ -331,7 +331,6 @@ class LeaveController extends Controller
                 $month_from_date = Carbon::parse($fromdate)->startOfMonth()->format('Y-m-d');
                 $month_to_date = $todate;
             }
-            $current_weekly_taken = (new \App\Leave)->taken_weekly_leaves($empid, $month_from_date, $month_to_date);
 
             $leave_msg = '';
             $annualData = $this->leavePolicyService->calculateAnnualLeaves($employee->emp_join_date, $employee->emp_id, $job_categoryid);
@@ -343,10 +342,22 @@ class LeaveController extends Controller
 
              // medical leave calculation
             $medical_leaves = $this->leavePolicyService->getMedicalLeaves($employee->job_category_id);
-            $weekly_leaves = $this->leavePolicyService->getweeklyLeaves($employee->job_category_id);
+          
 
-              //dd($weekly_leaves);
+            $appName = config('app.name');
+            if($appName == 'RajapakshaElectricalHRM'){
+                $current_weekly_taken = (new \App\Leave)->taken_short_leaves($empid, $month_from_date, $month_to_date);
+                $weekly_leaves = $this->leavePolicyService->getshortLeaves($employee->job_category_id);
+                $other_leaves_title = "Short";
+            } else{
 
+                 $current_weekly_taken = (new \App\Leave)->taken_weekly_leaves($empid, $month_from_date, $month_to_date);
+                 $weekly_leaves = $this->leavePolicyService->getweeklyLeaves($employee->job_category_id);
+                 $other_leaves_title = "Weekly";
+
+            }
+
+           
             $total_no_of_annual_leaves = $annual_leaves;
             $total_no_of_casual_leaves = $casual_leaves;
             $total_no_of_med_leaves = $medical_leaves;
@@ -401,6 +412,7 @@ class LeaveController extends Controller
                 "available_no_of_casual_leaves" => $available_no_of_casual_leaves,
                 "available_no_of_med_leaves" => $available_no_of_med_leaves,
                 "available_no_of_weekly_leaves" => $available_no_of_weekly_leaves,
+                "other_leaves_title" => $other_leaves_title,
                 "leave_msg" => $leave_msg
             );
             return response()->json($results);
@@ -661,6 +673,12 @@ class LeaveController extends Controller
         $status = $request->status;
         $applevel = $request->app_level;
         
+        // Already rejected leave not reject again
+        if ($status == 'Rejected' && $leave->status == 'Rejected') {
+            return response()->json(['errors' => 'Leave is already rejected']);
+        }
+
+
         $current_date_time = Carbon::now()->toDateTimeString();
 
         if($applevel == 1){
@@ -670,6 +688,10 @@ class LeaveController extends Controller
                'approve_01_by' =>  Auth::id(),
              );
 
+            if ($status == 'Rejected') {
+                $form_data['status']  = $status;
+                $form_data['comment'] = $request->comment;
+            }
 
         }else if($applevel == 2){
 
@@ -689,57 +711,28 @@ class LeaveController extends Controller
         }
        
 
-        Leave::whereId($request->id)->update($form_data);
+        DB::transaction(function () use ($request, $form_data, $status, $leave) {
+            Leave::whereId($request->id)->update($form_data);
 
-         $leaves = DB::table('leaves')
-        ->where('id', $request->id)
-        ->get();
-
-
-        if ($request->status == 'Rejected') {
-
-            $leaves = DB::table('leaves')
-                ->where('id', $request->id)
-                ->get();
-
-            $to = \Carbon\Carbon::createFromFormat('Y-m-d', $leaves[0]->leave_from);
-            $from = \Carbon\Carbon::createFromFormat('Y-m-d', $leaves[0]->leave_to);
-            $diff_days = $to->diffInDays($from);
-
-            DB::table('leave_details')
-                ->where('emp_id', $leaves[0]->emp_id)
-                ->where('leave_type', $leaves[0]->leave_type)
-                ->increment('total_leave', $diff_days);
-
-            $smsResult = null;
-            if ($applevel != 1) {
-                $this->sendLeaveStatusSms($leaves[0], 'Rejected');
+            if ($status == 'Rejected') {
+                DB::table('leave_details')
+                    ->where('emp_id', $leave->emp_id)
+                    ->where('leave_type', $leave->leave_type)
+                    ->increment('total_leave', $leave->no_of_days);
             }
+        });
 
-             $response = ['success' => 'Leave Rejected'];
+        $response = ['success' => $status == 'Rejected' ? 'Leave Rejected' : 'Leave Approved'];
 
-            if ($smsResult && !$smsResult['success']) {
-                $response['sms_warning'] = 'SMS not sent: ' . $smsResult['message'];
+        // sms function for opma hrm
+        if (config('app.name') == 'OpmaHRM' && $applevel != 1) {
+            $smsResult = $this->sendLeaveStatusSms($leave->fresh(), $status == 'Rejected' ? 'Rejected' : 'Approved');
+            if (is_array($smsResult) && empty($smsResult['success'])) {
+                $response['sms_warning'] = 'SMS not sent: ' . (isset($smsResult['message']) ? $smsResult['message'] : '');
             }
-
-            return response()->json($response);
-
-        } else {
-            $smsResult = null;
-             // Only send "Approved" SMS on final approval level
-            if ($applevel != 1) {
-                $this->sendLeaveStatusSms($leaves[0], 'Approved');
-            }
-
-
-             $response = ['success' => 'Leave  Approved'];
-
-            if ($smsResult && !$smsResult['success']) {
-                $response['sms_warning'] = 'SMS not sent: ' . $smsResult['message'];
-            }
-
-            return response()->json($response);
         }
+
+        return response()->json($response);
     }
 
     /**

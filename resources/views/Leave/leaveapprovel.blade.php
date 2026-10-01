@@ -465,7 +465,7 @@ $(document).ready(function () {
                     const actionObj = {
                         icon: 'fas fa-warning',
                         title: '',
-                        message: 'Record Error',
+                        message:data.errors,
                         url: '',
                         target: '_blank',
                         type: 'danger'

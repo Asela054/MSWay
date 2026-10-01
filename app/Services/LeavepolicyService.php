@@ -240,4 +240,19 @@ class LeavepolicyService
         return $weekly_leaves;
     }
 
+      public function getshortLeaves($jobCategoryId)
+    {
+       $jobleaves = DB::table('job_category_leaves')->where('job_id', $jobCategoryId)->where('leave_id',8)->first();
+        if($jobleaves){
+            
+             $leavescount = DB::table('leave_types')->where('id', 8)->value('assigned_leave');
+
+             $short_leaves = $leavescount ?? 0;
+        }else{
+             $short_leaves = 0;
+        }
+        return $short_leaves;
+    }
+
+
 }

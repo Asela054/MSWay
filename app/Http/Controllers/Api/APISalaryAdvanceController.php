@@ -10,6 +10,7 @@ use App\SalaryAdvance;
 use Auth;
 use Carbon\Carbon;
 use App\Http\Controllers\SalaryAdvanceController;
+use App\Services\SalaryAdvancePolicyService;
 
 class APISalaryAdvanceController extends Controller
 {
@@ -131,7 +132,7 @@ class APISalaryAdvanceController extends Controller
         $employee = $request->input('emp_id');
         $date = $request->input('date');
 
-         $otherController = new SalaryAdvanceController();
+         $otherController = new SalaryAdvancePolicyService();
          $availableResponse = $otherController->getAvailableAmount($employee, $date);
          $availableData = json_decode($availableResponse->getContent(), true);
 

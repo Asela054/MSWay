@@ -24,7 +24,12 @@ class LeaverequestController extends Controller
         $leavetype = LeaveType::orderBy('id', 'asc')->get();
         $employee = Employee::orderBy('id', 'desc')->get();
 
-        return view('Leave.leaverequest', compact('leavetype', 'employee'));
+          $appName = config('app.name');
+            if($appName == 'RajapakshaElectricalHRM'){
+                return view('Leave.leaverequest_rj', compact('leavetype', 'employee'));
+            }else{
+                return view('Leave.leaverequest', compact('leavetype', 'employee'));
+            }
     }
 
     public function insert(Request $request){

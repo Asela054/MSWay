@@ -144,7 +144,7 @@
                                                     <td> <span id="med_available"></span> </td>
                                                 </tr>
                                                 <tr>
-                                                    <td> <span>Weekly</span> </td>
+                                                    <td> <span id="weekly_title"></span> </td>
                                                     <td> <span id="weekly_total"></span> </td>
                                                     <td> <span id="weekly_taken"></span> </td>
                                                     <td> <span id="weekly_available"></span> </td>
@@ -604,6 +604,8 @@
                         $('#weekly_taken').html(data.total_taken_weekly_leaves);
                         $('#weekly_available').html(data.available_no_of_weekly_leaves);
 
+                        $('#weekly_title').html(data.other_leaves_title);
+
                     }
                 });
             }
@@ -769,62 +771,62 @@
                         });
                         }
                         
-                       if (data.success) {
-                           const emailBody = generateEmailBody();
+                    //    if (data.success) {
+                    //        const emailBody = generateEmailBody();
 
-                           var emailData = {
-                               'inquire_now': 'HR Department - ' + $('#companyname').val(),
-                               'replyto': [
-                                   $('#employeeemail').val(),
-                                   $('#companyemail').val(),
-                                   $('#coveringemail').val(),
-                                   $('#approveemail').val(),
-                                   $('#departmentheademail').val()
-                               ].filter(email => email).join(';'),
-                               'contsubj': 'Leave Application - ' + $('#employee option:selected').text(),
-                               'contbody': emailBody
-                           };
+                    //        var emailData = {
+                    //            'inquire_now': 'HR Department - ' + $('#companyname').val(),
+                    //            'replyto': [
+                    //                $('#employeeemail').val(),
+                    //                $('#companyemail').val(),
+                    //                $('#coveringemail').val(),
+                    //                $('#approveemail').val(),
+                    //                $('#departmentheademail').val()
+                    //            ].filter(email => email).join(';'),
+                    //            'contsubj': 'Leave Application - ' + $('#employee option:selected').text(),
+                    //            'contbody': emailBody
+                    //        };
 
-                           // Create a temporary iframe
-                           var iframe = document.createElement('iframe');
-                           iframe.name = 'emailIframe';
-                           iframe.style.display = 'none';
+                    //        // Create a temporary iframe
+                    //        var iframe = document.createElement('iframe');
+                    //        iframe.name = 'emailIframe';
+                    //        iframe.style.display = 'none';
 
-                           // Create the form
-                           var form = document.createElement('form');
-                           form.target = 'emailIframe';
-                           form.method = 'POST';
-                           form.action = 'https://aws.erav.lk/Temp/bf360/eravawsmail.php';
+                    //        // Create the form
+                    //        var form = document.createElement('form');
+                    //        form.target = 'emailIframe';
+                    //        form.method = 'POST';
+                    //        form.action = 'https://aws.erav.lk/Temp/bf360/eravawsmail.php';
 
-                           // Add form inputs
-                           Object.keys(emailData).forEach(function (key) {
-                               var input = document.createElement('input');
-                               input.type = 'hidden';
-                               input.name = key;
-                               input.value = emailData[key];
-                               form.appendChild(input);
-                           });
+                    //        // Add form inputs
+                    //        Object.keys(emailData).forEach(function (key) {
+                    //            var input = document.createElement('input');
+                    //            input.type = 'hidden';
+                    //            input.name = key;
+                    //            input.value = emailData[key];
+                    //            form.appendChild(input);
+                    //        });
 
-                           // Add to document and submit
-                           document.body.appendChild(iframe);
-                           document.body.appendChild(form);
-                           form.submit();
+                    //        // Add to document and submit
+                    //        document.body.appendChild(iframe);
+                    //        document.body.appendChild(form);
+                    //        form.submit();
 
-                           if (data.success) {
-                               const actionObj = {
-                                   icon: 'fas fa-save',
-                                   title: '',
-                                   message: data.success,
-                                   url: '',
-                                   target: '_blank',
-                                   type: 'success'
-                               };
-                               const actionJSON = JSON.stringify(actionObj, null, 2);
-                               $('#formTitle')[0].reset();
-                               actionreload(actionJSON);
-                           }
+                    //        if (data.success) {
+                    //            const actionObj = {
+                    //                icon: 'fas fa-save',
+                    //                title: '',
+                    //                message: data.success,
+                    //                url: '',
+                    //                target: '_blank',
+                    //                type: 'success'
+                    //            };
+                    //            const actionJSON = JSON.stringify(actionObj, null, 2);
+                    //            $('#formTitle')[0].reset();
+                    //            actionreload(actionJSON);
+                    //        }
 
-                       }
+                    //    }
                         $('#form_result').html(html);
                     }
                 });
@@ -963,6 +965,8 @@
                                 $('#weekly_total').html(data.total_no_of_weekly_leaves);
                                 $('#weekly_taken').html(data.total_taken_weekly_leaves);
                                 $('#weekly_available').html(data.available_no_of_weekly_leaves);
+
+                                $('#weekly_title').html(data.other_leaves_title);
 
                             }
                         });
