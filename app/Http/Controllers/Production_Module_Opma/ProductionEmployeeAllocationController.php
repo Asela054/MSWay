@@ -34,6 +34,7 @@ class ProductionEmployeeAllocationController extends Controller
 
         $products = DB::table('opma_styles')
             ->select('id', 'title','code')
+            ->where('status', 1)
             ->get();
         $sizes = DB::table('opma_sizes')
             ->select('id', 'size')
@@ -474,6 +475,7 @@ class ProductionEmployeeAllocationController extends Controller
             ->get();
         $styles = DB::table('opma_styles')
             ->select('id', 'title', 'code')
+            ->where('status', 1)
             ->get();
 
             $html = '';

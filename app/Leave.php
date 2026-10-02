@@ -316,6 +316,7 @@ public function get_dayoff_leaves($emp_id, $month, $closedate)
         ->where('emp_id', $emp_id)
         ->where('leave_type', '8')
         ->whereBetween('leave_from', [$from_date, $to_date])
+        ->where('status', '=', 'Approved')
         ->count();
 
     }

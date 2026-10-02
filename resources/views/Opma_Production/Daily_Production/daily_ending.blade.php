@@ -444,6 +444,18 @@ $(document).ready(function(){
                     const actionJSON = JSON.stringify(actionObj, null, 2);
                     action(actionJSON);
                 }
+                 if (data.error) {
+                    const actionObj = {
+                        icon: 'fas fa-warning',
+                        title: '',
+                        message: data.error,
+                        url: '',
+                        target: '_blank',
+                        type: 'danger'
+                    };
+                    const actionJSON = JSON.stringify(actionObj, null, 2);
+                    action(actionJSON);
+                }
                 if (data.success) {
                     const actionObj = {
                         icon: 'fas fa-save',

@@ -13,6 +13,7 @@ $columns = array(
 	array( 'db' => '`u`.`code`', 'dt' => 'code', 'field' => 'code' ),
 	array( 'db' => '`u`.`from_date`', 'dt' => 'from_date', 'field' => 'from_date' ),
 	array( 'db' => '`u`.`to_date`', 'dt' => 'to_date', 'field' => 'to_date' ),
+	array( 'db' => '`u`.`request_qty_edited`', 'dt' => 'request_qty_edited', 'field' => 'request_qty_edited' ),
 );
 
 // SQL server connection information
@@ -34,7 +35,7 @@ require('../ssp.customized.class.php' );
 
 $joinQuery = "FROM `opma_styles` AS `u`";
 
-$extraWhere = "1=1";
+$extraWhere = "`status` = 1";
 
 echo json_encode(
 	SSP::simple( $_POST, $sql_details, $table, $primaryKey, $columns, $joinQuery, $extraWhere)

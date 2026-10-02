@@ -8,4 +8,14 @@ class Product extends Model
 {
     protected $table = 'opma_styles';
 
+    protected $fillable = [
+        'title',
+        'code',
+        'from_date',
+        'to_date',
+        'request_qty',
+        'request_qty_edited',
+        'status',
+    ];
+
 }

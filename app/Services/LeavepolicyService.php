@@ -178,15 +178,15 @@ class LeavepolicyService
                     $months_of_service = $interval->m;
                     
                     $today_date = Carbon::now();
-                    $employeejoin_date = Carbon::parse($empJoinDate);
+                    $join_date     = Carbon::parse($empJoinDate);
 
                     $currentdate = $today_date->toDateString(); // YYYY-MM-DD
-                    $join_year_end_date = $employeejoin_date->copy()->endOfYear()->toDateString(); 
-
-
+                    $join_year_end_date = $join_date->copy()->endOfYear()->toDateString(); 
 
                     // Casual leave calculation
-                    if ($currentdate <=  $join_year_end_date) {
+                    if ($months_of_service < 12) {
+                        $casual_leaves = round($months_of_service / 2, 2);
+                    } else  if ($currentdate <=  $join_year_end_date) {
                         $casual_leaves = number_format((6 / 12) * $months_of_service, 2);
                     }
                     else {
