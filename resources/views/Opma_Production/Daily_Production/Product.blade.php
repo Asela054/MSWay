@@ -36,6 +36,7 @@
                                     <th>CODE</th>
                                     <th>FROM DATE</th>
                                     <th>TO DATE</th>
+                                    <th>REQUEST QTY</th>
                                     <th class="text-right">ACTION</th>
                                 </tr>
                             </thead>
@@ -67,7 +68,7 @@
                             <form method="post" id="formTitle" class="form-horizontal">
                                 {{ csrf_field() }}	
                                 <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">Title</label>
+                                    <label class="small font-weight-bold text-dark">Title*</label>
                                     <input type="text" name="title" id="title" class="form-control form-control-sm"  required/>
                                 </div>
                                 <div class="form-group mb-1">
@@ -81,6 +82,10 @@
                                 <div class="form-group mb-1">
                                     <label class="small font-weight-bold text-dark">To Date</label>
                                     <input type="date" name="to_date" id="to_date" class="form-control form-control-sm" />
+                                </div>
+                                 <div class="form-group mb-1">
+                                    <label class="small font-weight-bold text-dark">Request QTY*</label>
+                                    <input type="number" name="request_qty" id="request_qty" class="form-control form-control-sm" step="any" required/>
                                 </div>
                                 <div class="form-group mb-1">
                                     <label class="small font-weight-bold text-dark">Applicable Sizes</label>
@@ -187,6 +192,10 @@ $(document).ready(function(){
                 data: 'to_date', 
                 name: 'to_date'
             },
+            { 
+                data: 'request_qty_edited', 
+                name: 'request_qty_edited'
+            },
             {
                 data: 'id',
                 name: 'action',
@@ -280,6 +289,7 @@ $(document).ready(function(){
                      $('#code').val(data.result.code);
                      $('#from_date').val(data.result.from_date);
                      $('#to_date').val(data.result.to_date);
+                    $('#request_qty').val(data.result.request_qty_edited);
 
                     if(data.sizes && data.sizes.length > 0) {
                         $('#sizes').val(data.sizes).trigger('change');

@@ -37,7 +37,8 @@ class ProductController extends Controller
         }
 
         $rules = array(
-            'title'    =>  'required'
+            'title'    =>  'required',
+            'request_qty'    =>  'required'
         );
         $error = Validator::make($request->all(), $rules);
         if($error->fails())
@@ -58,6 +59,9 @@ class ProductController extends Controller
         $product->code=$request->input('code');
         $product->from_date=$request->input('from_date');
         $product->to_date=$request->input('to_date');  
+        $product->request_qty=$request->input('request_qty'); 
+        $product->request_qty_edited=$request->input('request_qty'); 
+        $product->status=1;
         $product->save();
         $opma_style_id=$product->id;
 
@@ -97,7 +101,8 @@ class ProductController extends Controller
             return response()->json(['error' => 'UnAuthorized'], 401);
         }
         $rules = array(
-            'title'    =>  'required'
+            'title'    =>  'required',
+            'request_qty'    =>  'required'
         );
         $error = Validator::make($request->all(), $rules);
 
@@ -106,14 +111,20 @@ class ProductController extends Controller
             return response()->json(['errors' => $error->errors()->all()]);
         }
 
+        $product = Product::findOrFail($request->hidden_id);
+
         $form_data = array(
-            'title'   =>  $request->title,
-            'code' =>  $request->code,
-            'from_date' =>  $request->from_date,
-            'to_date' =>  $request->to_date
+            'title'     => $request->title,
+            'code'      => $request->code,
+            'from_date' => $request->from_date,
+            'to_date'   => $request->to_date,
+            'request_qty_edited' => $request->request_qty
         );
 
-        Product::whereId($request->hidden_id)->update($form_data);
+        if (is_null($product->request_qty)) {
+            $form_data['request_qty'] = $request->request_qty;
+        }
+        $product->update($form_data);
 
         $new_sizes = $request->input('sizes', []);
         $existing_sizes = ProductDetail::where('opma_style_id', $request->hidden_id)
@@ -151,7 +162,8 @@ class ProductController extends Controller
 
         $data = Product::findOrFail($id);
         ProductDetail::where('opma_style_id', $id)->delete();
-        $data->delete();
+        $data->status = 3;
+        $data->save();
         return response()->json(['success' => 'Data is successfully deleted']);
     }
 }

@@ -48,7 +48,6 @@ class ProductionEndingController extends Controller
 
         $completdate = Carbon::parse($completetime)->format('Y-m-d');
 
-
         $maindata = DB::table('opma_emp_product_allocation')
             ->select('opma_emp_product_allocation.*')
             ->where('opma_emp_product_allocation.id', $hidden_id)
@@ -58,6 +57,28 @@ class ProductionEndingController extends Controller
           $machine_id = $maindata->machine_id;
           $product_id = $maindata->product_id;
           $target = $maindata->target;
+
+          $style = DB::table('opma_styles')->where('id', $product_id)->first();
+            if (!$style) {
+                return response()->json(['error' => 'Style not found']);
+            }
+            $requested_qty = !empty($style->request_qty) ? $style->request_qty : 0;
+
+            $already_produced = DB::table('opma_emp_product_allocation')
+                ->where('product_id', $product_id)
+                ->where('date', '<=', $produtiondate)
+                ->where('id', '!=', $hidden_id)
+                ->sum('full_amount');
+
+            $total_produced = $already_produced + $quntity;
+
+            if ($total_produced > $requested_qty) {
+                $this->sendQtyExceedSms($style, $produtiondate, $total_produced, $requested_qty);
+
+                return response()->json([
+                    'error' => 'Total produced quantity (' . $total_produced . ') exceeds the requested quantity for this style.'
+                ]);
+            }
 
          $productioncomplete =0;
 
@@ -308,10 +329,47 @@ class ProductionEndingController extends Controller
 
         $products = DB::table('opma_styles')
             ->select('id', 'title','code')
+            ->where('status', 1)
             ->get();
 
         return view('Opma_Production.Daily_Production.employee_production', compact('machines', 'products'));
     }
 
 
+    private function sendQtyExceedSms($style, $produtiondate, $total_produced, $requested_qty)
+    {
+        $mobile = '0777474169';
+        $mobile = preg_replace('/[^0-9]/', '', $mobile);
+        if (strlen($mobile) == 10 && $mobile[0] == '0') {
+            $mobile = substr($mobile, 1);
+        } elseif (strlen($mobile) == 11 && substr($mobile, 0, 2) == '94') {
+            $mobile = substr($mobile, 2);
+        }
+
+        try {
+            $formattedDate = \Carbon\Carbon::parse($produtiondate)->format('d-m-Y');
+        } catch (\Exception $e) {
+            $formattedDate = $produtiondate;
+        }
+
+        $message = "Production Alert: Style " . $style->title
+            . " total produced qty (" . $total_produced . ") exceeds requested qty ("
+            . $requested_qty . ") as of " . $formattedDate . ".";
+
+        try {
+            $smsService = new \App\Services\Opma_Sms_policyService();
+            $result = $smsService->sendSms($mobile, $message);
+        } catch (\Exception $e) {
+            \Log::error('Qty exceed SMS failed', ['error' => $e->getMessage()]);
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+
+        \Log::info('eSMS qty exceed result', [
+            'style_id' => $style->id,
+            'mobile'   => $mobile,
+            'result'   => $result,
+        ]);
+
+        return $result;
+    }
 }
