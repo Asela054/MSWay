@@ -38,7 +38,10 @@ class EmployeetimesheetContrller extends Controller
                 dept.name AS departmentname, cam.name AS companyname, job.title AS jobtitlename, emp.emp_shift, 
                 COALESCE(esd_shift.shift_name, st.shift_name) AS shiftname,
                 jc.is_sat_ot_type_as_act,
-                jc.is_sun_ot_type_as_act
+                jc.is_sun_ot_type_as_act,
+                jc.full_day_work_hours,
+                st.onduty_time, st.offduty_time,
+                st.saturday_onduty_time, st.saturday_offduty_time
             FROM employees emp
             LEFT JOIN departments dept ON emp.emp_department = dept.id
             LEFT JOIN companies cam ON emp.emp_company = cam.id
@@ -96,6 +99,24 @@ class EmployeetimesheetContrller extends Controller
 
             if (!empty($hasShift)) {
                 // Initialize attendance records array
+                // Shift hours (get_work_days eke logic ma)
+                $expectedHours = 8;
+                $saturdayExpectedHours = 8;
+
+                if (!empty($employee->onduty_time) && !empty($employee->offduty_time)) {
+                    $expectedHours = Carbon::parse($employee->onduty_time)
+                        ->diffInHours(Carbon::parse($employee->offduty_time));
+                }
+                if (!empty($employee->saturday_onduty_time) && !empty($employee->saturday_offduty_time)) {
+                    $saturdayExpectedHours = Carbon::parse($employee->saturday_onduty_time)
+                        ->diffInHours(Carbon::parse($employee->saturday_offduty_time));
+                }
+
+                $full_day_work_hours = !empty($employee->full_day_work_hours) ? $employee->full_day_work_hours : 8;
+
+                $attendance_days = 0;
+                $work_days = 0;
+
                 $attendanceRecords = [];
                 
                 // Process each date in the range
@@ -111,6 +132,9 @@ class EmployeetimesheetContrller extends Controller
                             erd.shift_id AS shift_id,
                             DATE_FORMAT(MIN(att.timestamp), '%h:%i %p') AS in_time, 
                             DATE_FORMAT(MAX(att.timestamp), '%h:%i %p') AS out_time,
+                            MIN(att.timestamp) AS first_ts,
+                            MAX(att.timestamp) AS last_ts,
+                            h.work_level AS holiday_work_level,
                             SEC_TO_TIME(ROUND(COALESCE(la.minites_count, 0) * 60)) AS late_min,
                             COALESCE(leave_data.leavename, '') AS leave_type, 
                             ROUND(COALESCE(leave_data.no_of_days, 0), 2) AS leave_days,
@@ -157,23 +181,57 @@ class EmployeetimesheetContrller extends Controller
                     ]);
 
                     // Add the record
-                    $attendanceRecords[] = $record[0] ?? [
-                        'in_date' => $date,
-                        'out_date' => $date,
-                        'day_type' => '',
-                        'shift' => '',
-                        'shift_id' => null,
-                        'in_time' => '',
-                        'out_time' => '',
-                        'late_min' => 0,
-                        'leave_type' => '',
-                        'leave_days' => 0,
-                        'ot_hours' => 0,
-                        'double_ot' => 0,
-                        'triple_ot' => 0,
-                        'attendance_type' => '',
-                    ];
+                    $rec = isset($record[0]) ? $record[0] : null;
+
+                    if ($rec) {
+                        $attendanceRecords[] = $rec;
+                    } else {
+
+                        $attendanceRecords[] = $record[0] ?? [
+                            'in_date' => $date,
+                            'out_date' => $date,
+                            'day_type' => '',
+                            'shift' => '',
+                            'shift_id' => null,
+                            'in_time' => '',
+                            'out_time' => '',
+                            'first_ts' => null,
+                            'last_ts' => null,
+                            'holiday_work_level' => null,
+                            'late_min' => 0,
+                            'leave_type' => '',
+                            'leave_days' => 0,
+                            'ot_hours' => 0,
+                            'double_ot' => 0,
+                            'triple_ot' => 0,
+                            'attendance_type' => '',
+                        ];
+                    }
+
+                    // ---- Attendance days + Work days count ----
+                    if ($rec && !empty($rec->first_ts)) {
+
+                        // Attendance thiyena dawasak
+                        $attendance_days++;
+
+                        // work_level = 2 holiday nam work day ekakata ganne na
+                        if ((string)$rec->holiday_work_level !== '2') {
+
+                            $diff = round((strtotime($rec->last_ts) - strtotime($rec->first_ts)) / 3600, 1);
+
+                            $isSaturday = Carbon::parse($rec->first_ts)->isSaturday();
+                            $required_full_hours = $isSaturday ? $saturdayExpectedHours : $full_day_work_hours;
+
+                            if ($diff >= $required_full_hours) {
+                                $work_days += 1;
+                            } else {
+                                $work_days += 0.5;
+                            }
+                        }
+                    }
                 }
+               
+
 
                 // Store Employee Data
                 $employeeData[] = [
@@ -189,7 +247,9 @@ class EmployeetimesheetContrller extends Controller
                     'shiftname' => $employee->shiftname,
                     'is_sat_ot_type_as_act' => $employee->is_sat_ot_type_as_act,
                     'is_sun_ot_type_as_act' => $employee->is_sun_ot_type_as_act,
-                    'attendance' => $attendanceRecords
+                    'attendance' => $attendanceRecords,
+                    'attendance_days' => $attendance_days,
+                    'work_days' => $work_days
                 ];
 
                 // Update last loaded employee ID

@@ -45,6 +45,7 @@
                                     <th>EMPLOYEE NAME</th>
                                     <th>MONTH</th>
                                     <th>DEPARTMENT</th>
+                                    <th>ATTENDANCE DAYS</th>
                                     <th>WORKING DAYS</th>
                                     <th>WORKING HOURS</th>
                                     <th>NORMAL OT</th>
@@ -174,6 +175,8 @@ $(document).ready(function () {
 
    showInitialMessage();
 
+   let currentFilters = {};
+
     function load_dt(company,department, month, closedate){
         
         $('#attendtable').DataTable({
@@ -189,14 +192,10 @@ $(document).ready(function () {
                     text: '<i class="fas fa-file-csv mr-2"></i> CSV',
                 },
                 { 
-                    extend: 'pdf', 
                     className: 'btn btn-danger btn-sm', 
-                    title: 'Employee Attendance Summary Report', 
                     text: '<i class="fas fa-file-pdf mr-2"></i> PDF',
-                    orientation: 'landscape', 
-                    pageSize: 'legal', 
-                    customize: function(doc) {
-                        doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+                    action: function (e, dt, node, config) {
+                        generatePDF();
                     }
                 },
                 {
@@ -224,7 +223,8 @@ $(document).ready(function () {
                 { data: 'emp_name_with_initial', name: 'employees.emp_name_with_initial' },
                 { data: 'date', name: 'at1.date' },
                 { data: 'dept_name', name: 'departments.name' },
-                { data: 'work_days', name: 'work_days' },
+                { data: 'timestamp_days', name: 'timestamp_days' },
+                 { data: 'work_days', name: 'work_days' },
                 { data: 'working_hours', name: 'working_hours' },
                 { data: 'normal_ot', name: 'normal_ot' },
                 { data: 'double_ot', name: 'double_ot' },
@@ -284,7 +284,7 @@ $(document).ready(function () {
     function showInitialMessage() {
         $('.response').html(
             '<tr>' +
-            '<td colspan="11" class="text-center py-5">' + // Changed colspan to 9 to match your columns
+            '<td colspan="12" class="text-center py-5">' + // Changed colspan to 9 to match your columns
             '<div class="d-flex flex-column align-items-center">' +
             '<i class="fas fa-filter fa-3x text-muted mb-2"></i>' +
             '<h4 class="text-muted mb-2">No Records Found</h4>' +
@@ -352,6 +352,193 @@ $(document).ready(function () {
             closeDateInput.removeAttr('max');
             closeDateInput.attr('placeholder', 'Select month first');
         }
+    }
+
+    function generatePDF() {
+        const table = $('#attendtable').DataTable();
+        const params = $.extend({}, table.ajax.params(), { start: 0, length: -1 });
+
+        // Filter values for PDF header (ajax params walin)
+        const month = params.month || 'Not specified';
+        const closedate = params.closedate || 'Not specified';
+        const department = $('#department option:selected').text().trim() || 'All';
+        const company = $('#company option:selected').text().trim() || 'All';
+        const currentDate = new Date().toLocaleDateString();
+
+        $.ajax({
+            url: table.ajax.url(),
+            type: 'GET',
+            data: params,
+            success: function (response) {
+                buildAttendancePDF(response.data || [], {
+                    month: month,
+                    closedate: closedate,
+                    department: department,
+                    company: company,
+                    currentDate: currentDate
+                });
+            },
+            error: function () {
+                alert('Failed to load data for PDF export.');
+            }
+        });
+    }
+
+    function buildAttendancePDF(tableData, info) {
+        const currentDate = info.currentDate;
+
+        // Landscape A4
+        const doc = new jsPDF('l', 'mm', 'a4');
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const margin = 2;
+
+        // Title
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Employee Attendance Summary Report', pageWidth / 2, 15, { align: 'center' });
+
+        // Filter info
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+
+        let yPos = 25;
+        doc.text('Month: ' + info.month + '   |   Close Date: ' + info.closedate, 15, yPos);
+        doc.text('Generated on: ' + currentDate, pageWidth - 15, yPos, { align: 'right' });
+
+        yPos += 5;
+        doc.text('Company: ' + info.company + '   |   Department: ' + info.department, 15, yPos);
+
+        // Separator line
+        yPos += 8;
+        doc.setLineWidth(0.3);
+        doc.line(15, yPos, pageWidth - 15, yPos);
+        yPos += 5;
+
+        // Table headers
+        const headers = [[
+            'EMPID', 'EMPLOYEE NAME', 'MONTH', 'DEPARTMENT', 'ATTENDANCE DAYS',
+            'WORKING DAYS', 'WORKING HOURS', 'NORMAL OT', 'DOUBLE OT',
+            'LEAVE DAYS', 'NO PAY DAYS', 'PAY CUT'
+        ]];
+
+        // No data case
+        if (!tableData || tableData.length === 0) {
+            doc.setFontSize(8);
+            doc.setTextColor(255, 0, 0);
+            doc.text('No data available for the selected filters', pageWidth / 2, yPos + 20, { align: 'center' });
+            doc.save('Attendance_Report_No_Data.pdf');
+            return;
+        }
+
+        const body = [];
+        let rowCount = 0;
+
+        tableData.forEach(function (value) {
+            body.push([
+                value.uid || value.emp_id || '',
+                value.emp_name_with_initial || '',
+                value.date || '',
+                value.dept_name || '',
+                value.timestamp_days != null ? value.timestamp_days : 0,
+                value.work_days != null ? value.work_days : 0,
+                value.working_hours != null ? value.working_hours : 0,
+                value.normal_ot != null ? value.normal_ot : 0,
+                value.double_ot != null ? value.double_ot : 0,
+                value.leave_days != null ? value.leave_days : 0,
+                value.no_pay_days != null ? value.no_pay_days : 0,
+                value.pay_cut != null ? value.pay_cut : 0
+            ]);
+            rowCount++;
+        });
+
+        doc.autoTable({
+            startY: yPos,
+            head: headers,
+            body: body,
+            theme: 'grid',
+            styles: {
+                fontSize: 6,
+                cellPadding: 2,
+                overflow: 'linebreak',
+                valign: 'middle'
+            },
+            headStyles: {
+                fillColor: [41, 128, 185],
+                textColor: 255,
+                fontStyle: 'bold',
+                halign: 'center',
+                fontSize: 6,
+                cellPadding: 3
+            },
+            columnStyles: {
+                0: { cellWidth: 15, halign: 'center' },   // EMPID
+                1: { cellWidth: 50, halign: 'left' },     // EMPLOYEE NAME
+                2: { cellWidth: 18, halign: 'center' },   // MONTH
+                3: { cellWidth: 40, halign: 'left' },     // DEPARTMENT
+                4: { cellWidth: 20, halign: 'center' },   // ATTENDANCE DAYS
+                5: { cellWidth: 20, halign: 'center' },   // WORKING DAYS
+                6: { cellWidth: 22, halign: 'center' },   // WORKING HOURS
+                7: { cellWidth: 20, halign: 'center' },   // NORMAL OT
+                8: { cellWidth: 20, halign: 'center' },   // DOUBLE OT
+                9: { cellWidth: 20, halign: 'center' },   // LEAVE DAYS
+                10: { cellWidth: 20, halign: 'center' },  // NO PAY DAYS
+                11: { cellWidth: 20, halign: 'center' }   // PAY CUT
+            },
+            alternateRowStyles: {
+                fillColor: [245, 245, 245]
+            },
+            margin: { left: margin, right: margin },
+            pageBreak: 'auto',
+            tableWidth: 'auto',
+            showHead: 'everyPage',
+            willDrawPage: function (data) {
+                // Company name + page number on every page
+                const companyName = $('#company_name').val() || 'Company Name';
+                doc.setFontSize(7);
+                doc.setFont('helvetica', 'normal');
+                doc.text(companyName, margin, 10);
+                doc.text('Page ' + data.pageNumber, pageWidth - margin, 10, { align: 'right' });
+
+                if (data.pageNumber > 1) {
+                    doc.setFontSize(9);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('Employee Attendance Summary Report (Continued)', pageWidth / 2, 18, { align: 'center' });
+                }
+            }
+        });
+
+        // Summary + footer on last page
+        const totalPages = doc.internal.getNumberOfPages();
+        if (totalPages > 0) {
+            doc.setPage(totalPages);
+            const finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : 150;
+
+            if (finalY < doc.internal.pageSize.getHeight() - 40 && rowCount > 0) {
+                doc.setFontSize(8);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Report Summary:', margin, finalY);
+
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(7);
+                doc.text('Total Employees: ' + rowCount, margin, finalY + 7);
+            }
+
+            doc.setFontSize(6);
+            const generatedBy = $('#emp_name').val() || 'System User';
+            const companyName = $('#company_name').val() || 'Company Name';
+            const footerY = doc.internal.pageSize.getHeight() - 10;
+
+            if (footerY > 20) {
+                doc.text('Generated by: ' + generatedBy, margin, footerY);
+                doc.text('Date: ' + currentDate, pageWidth / 2, footerY, { align: 'center' });
+                doc.text(companyName, pageWidth - margin, footerY, { align: 'right' });
+            }
+        }
+
+        // Save
+        const safeDept = (info.department || 'Report').replace(/[^a-zA-Z0-9]/g, '_');
+        const safeMonth = (info.month || '').replace(/[^0-9]/g, '');
+        doc.save('Attendance_Report_' + safeDept + '_' + safeMonth + '.pdf');
     }
 </script>
 

@@ -205,7 +205,7 @@
                                     let totOtMinutes = 0;        
                                     let totDoubleOtMinutes = 0;  
 
-                                    html += '<table class="exporttable" style="border-collapse: collapse; font-size: 12px;" width="100%;">'
+                                    html += '<table class="exporttable" style="border-collapse: collapse; font-size: 12px; margin-bottom: 30px;" width="100%;">'
                                         // colspan=15 now - matches total data columns exactly
                                         + '<tr><td colspan="15" style="padding-bottom: 10px;"><strong>' + datalist[i].companyname + '</strong></td></tr>'
                                         + '<tr><td colspan="15" style="border-bottom: 1px solid black;padding-bottom: 10px;"><strong>Summarize Attendance</strong></td></tr>'
@@ -330,7 +330,13 @@
                                         + '<td style="border-top: 1px solid black;border-bottom: 2px double black;">' + minutesToHM(totDoubleOtMinutes) + '</td>'
                                         + '<td colspan="4">&nbsp;</td>'
                                     + '</tr>';
+                                    // Attendance days + Work days summary (total row ekata yatin)
+                                html += '<tr>'
+                                    + '<td colspan="4" style="padding-top: 10px;"><strong>Attendance Days -</strong> ' + (datalist[i].attendance_days ?? 0) + '</td>'
+                                    + '<td colspan="11" style="padding-top: 10px;"><strong>Work Days -</strong> ' + (datalist[i].work_days ?? 0) + '</td>'
+                                + '</tr>';
                                     html += '</table>';
+                                    html += '<div style="height: 30px;"></div>';
                                 }
                             });
 

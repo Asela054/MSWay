@@ -63,6 +63,7 @@ class RptemployeeAttendancesummaryController extends Controller
                         WHEN Min(at1.timestamp) = Max(at1.timestamp) THEN ""  
                         ELSE Max(at1.timestamp)
                         END) AS lasttimestamp'),
+                DB::raw('COUNT(DISTINCT CASE WHEN at1.timestamp IS NOT NULL THEN DATE(at1.timestamp) END) as timestamp_days'),
                 'employees.emp_name_with_initial',
                 'employees.emp_location',
                 'employees.emp_join_date',
