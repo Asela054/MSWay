@@ -1934,6 +1934,14 @@ Route::get('/Rptattendance_list' ,'RptemployeeAttendancesummaryController@attend
 Route::get('/Broadcastsms' ,'BroadcastmessageController@index')->name('Broadcastsms');
 Route::post('/broadcast_messages_send', 'BroadcastmessageController@sendsms')->name('broadcast_messages_send');
 
+// weekly roster routes 
+Route::get('/get-employees-roster-info-Weekly', 'EmployeeRosterWeeklyController@getRosterInfo');
+Route::get('get-roster-data-Weekly', 'EmployeeRosterWeeklyController@getRosterData');
+Route::get('get-view-roster-data-Weekly', 'EmployeeRosterWeeklyDetailsController@getViewRosterData');
+Route::post('colnerosterstoreWeekly', 'EmployeeRosterWeeklyDetailsController@colnerosterstore')->name('colnerosterstoreWeekly');
+
+
+
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');
     Artisan::call('config:clear');
