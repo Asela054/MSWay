@@ -2592,8 +2592,11 @@
     var ts_loading = false;
 
     function ts_timeToMinutes(timeStr) {
-        if (!timeStr) return 0;
-        var parts = timeStr.split(':');
+        if (!timeStr && timeStr !== 0) return 0;
+        var str = String(timeStr);
+        // If the server returned a plain number (no colon), treat it as total minutes
+        if (str.indexOf(':') === -1) return parseInt(str, 10) || 0;
+        var parts = str.split(':');
         return (parseInt(parts[0], 10) || 0) * 60 + (parseInt(parts[1], 10) || 0);
     }
 
@@ -2604,9 +2607,10 @@
     }
 
     function ts_trimSeconds(timeStr) {
-        if (!timeStr) return '0';
-        var parts = timeStr.split(':');
-        if (parts.length < 2) return timeStr;
+        if (!timeStr && timeStr !== 0) return '0';
+        var str = String(timeStr);
+        var parts = str.split(':');
+        if (parts.length < 2) return str;
         return parts[0] + ':' + parts[1];
     }
 
