@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+@php $myDepartment = $employee->emp_department ?? null; @endphp
 <main>
     <!-- <div class="page-header shadow">
         <div class="container-fluid">
@@ -2609,6 +2610,33 @@
         return parts[0] + ':' + parts[1];
     }
 
+    function ts_fetchMyRecord(from_date, to_date, lastEmpId, done, fail) {
+        $.ajax({
+            url: "{{ route('employeetimesheetgenerate') }}",
+            method: 'POST',
+            data: {
+                department: {{ $myDepartment ?? 'null' }},
+                from_date:  from_date,
+                to_date:    to_date,
+                last_emp_id: lastEmpId,
+                _token: '{{ csrf_token() }}'
+            },
+            success: function (result) {
+                var obj  = (typeof result === 'string') ? JSON.parse(result) : [result];
+                var list = (obj[0] && obj[0].data) ? obj[0].data : [];
+                var next = obj[0] ? obj[0].lastEmpId : null;
+
+                var mine = list.find(function (i) { return parseInt(i.emp_id) === parseInt(empid); });
+                if (mine) return done(mine);
+
+                // not found: stop if no more data, otherwise fetch the next batch
+                if (!list.length || !next || next <= lastEmpId) return done(null);
+                ts_fetchMyRecord(from_date, to_date, next, done, fail);
+            },
+            error: fail
+        });
+    }
+
     function loadMyTimesheet() {
         if (ts_loading) return;
 
@@ -2625,36 +2653,11 @@
         $('#ts_export_pdf_btn').addClass('d-none');
         $('#ts_employee_list').empty();
 
-        $.ajax({
-            url: "{{ route('employeetimesheetgenerate') }}",
-            method: 'POST',
-            data: {
-                department: {{ $employee->emp_department ?? 'null' }},
-                from_date:  from_date,
-                to_date:    to_date,
-                last_emp_id: 0,
-                _token: '{{ csrf_token() }}'
-            },
-            success: function (result) {
+        ts_fetchMyRecord(from_date, to_date, 0, function (myRecord) {
                 ts_loading = false;
                 $('#ts_search_btn').html('<i class="fas fa-search mr-1"></i> Search').prop('disabled', false);
 
-                if (!result || result.length === 0) {
-                    $('#ts_employee_list').html('<div class="alert alert-info">No timesheet data found for the selected date range.</div>');
-                    return;
-                }
-
-                var obj = JSON.parse(result);
-                var datalist = obj[0].data;
-
-                // Find only the logged-in employee's record
-                var myRecord = null;
-                $.each(datalist, function (i, item) {
-                    if (parseInt(item.id) === parseInt(emprecordid)) {
-                        myRecord = item;
-                        return false; // break
-                    }
-                });
+                
 
                 if (!myRecord) {
                     $('#ts_employee_list').html('<div class="alert alert-warning">No timesheet records found for your account in the selected date range. Please ensure your shift is configured.</div>');
@@ -2716,7 +2719,7 @@
                         html += '<td>' + att.leave_days + '</td>';
                         html += '</tr>';
                     } else {
-                        totlatemin += att.late_min ? parseFloat(att.late_min) : 0;
+                        totlatemin += ts_timeToMinutes(att.late_min);
                         if (att.ot_hours > 0)    totOtMinutes     += ts_timeToMinutes(att.duration_time);
                         if (att.double_ot > 0)   totDoubleOtMinutes += ts_timeToMinutes(att.duration_time);
 
@@ -2724,12 +2727,12 @@
                         html += '<td>' + att.in_date + '</td>';
                         html += '<td>' + att.shift   + '</td>';
                         html += '<td>' + att.day_type + '</td>';
-                        html += '<td>' + (isManual ? 'Manual' : 'Present') + '</td>';
+                        html += '<td>' + (isManual ? 'Manual Attendance' : 'Present') + '</td>';
                         html += '<td>' + att.in_time  + '</td>';
                         html += '<td>' + att.out_time + '</td>';
                         html += '<td>' + (att.in_time2  || '') + '</td>';
                         html += '<td>' + (att.out_time2 || '') + '</td>';
-                        html += '<td>' + att.late_min + '</td>';
+                        html += '<td>' + ts_trimSeconds(att.late_min) + '</td>';
                         html += '<td>' + (att.ot_hours  > 0 ? ts_trimSeconds(att.duration_time) : '0') + '</td>';
                         html += '<td>' + (att.double_ot > 0 ? ts_trimSeconds(att.duration_time) : '0') + '</td>';
                         html += '<td>' + (att.days_pay  || '0') + '</td>';
@@ -2743,7 +2746,7 @@
                 // Totals row
                 html += '<tr style="font-weight:bold;border-top:2px solid #333;">';
                 html += '<td colspan="8">&nbsp;</td>';
-                html += '<td style="border-top:1px solid #333;border-bottom:2px double #333;">' + totlatemin.toFixed(2) + '</td>';
+                html += '<td style="border-top:1px solid #333;border-bottom:2px double #333;">' + ts_minutesToHM(totlatemin) + '</td>';
                 html += '<td style="border-top:1px solid #333;border-bottom:2px double #333;">' + ts_minutesToHM(totOtMinutes) + '</td>';
                 html += '<td style="border-top:1px solid #333;border-bottom:2px double #333;">' + ts_minutesToHM(totDoubleOtMinutes) + '</td>';
                 html += '<td colspan="4">&nbsp;</td>';
@@ -2752,12 +2755,10 @@
                 html += '</table>';
                 $('#ts_employee_list').html(html);
                 $('#ts_export_pdf_btn').removeClass('d-none');
-            },
-            error: function () {
+            }, function () {
                 ts_loading = false;
                 $('#ts_search_btn').html('<i class="fas fa-search mr-1"></i> Search').prop('disabled', false);
                 $('#ts_employee_list').html('<div class="alert alert-danger">Error loading timesheet. Please try again.</div>');
-            }
         });
     }
 
