@@ -41,9 +41,16 @@ class EmployeeRosterController extends Controller
                 $currentMonth,
                 $currentMonth->copy()->addMonth(),
             ];
+        
+         $appName = config('app.name');
+        if($appName == 'VivoDistributionHRM'){
             
-            
-         return view('roster.monthlyemployeerosterfull', compact('months','currentMonth'));
+            return view('roster.monthlyemployeerosterfull_weekly', compact('months','currentMonth'));
+
+        }else{
+
+             return view('roster.monthlyemployeerosterfull', compact('months','currentMonth'));
+        }
     }
 
     // Load shift lidt for roster sheet 
@@ -258,7 +265,16 @@ class EmployeeRosterController extends Controller
                 $months[] = $currentMonth->copy()->subMonths($i);
             }
             
-         return view('roster.employeesrosterview', compact('months','currentMonth'));
+         $appName = config('app.name');
+        if($appName == 'VivoDistributionHRM'){
+            
+            return view('roster.employeesrosterview_weekly', compact('months','currentMonth'));
+
+        }else{
+
+            return view('roster.employeesrosterview', compact('months','currentMonth'));
+        }
+
     }
 
     public function rosterapproveView(Request $request){
