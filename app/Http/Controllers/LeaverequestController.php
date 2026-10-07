@@ -174,11 +174,21 @@ class LeaverequestController extends Controller
         $id = Request('id');
         if (request()->ajax()){
         $data = DB::table('leave_request')
-        ->join('employees as emp', 'leave_request.emp_id', '=', 'emp.emp_id')
-        ->select('leave_request.*','emp.emp_name_with_initial as emp_name')
-        ->where('leave_request.id', $id)
-        ->get(); 
-        return response() ->json(['result'=> $data[0]]);
+                ->join('employees as emp', 'leave_request.emp_id', '=', 'emp.emp_id')
+                ->leftJoin('departments as dep', 'emp.emp_department', '=', 'dep.id')
+                ->leftJoin('job_titles as jt', 'emp.emp_job_code', '=', 'jt.id')
+                ->leftJoin('branches as br', 'emp.emp_location', '=', 'br.id')
+                ->select(
+                    'leave_request.*',
+                    'emp.emp_name_with_initial as emp_name',
+                    'emp.emp_id as emp_no',
+                    'dep.name as dep_name',
+                    'jt.title as designation',
+                    'br.location as location'
+                )
+                ->where('leave_request.id', $id)
+                ->first();
+        return response() ->json(['result'=> $data]);
         }
     }
 
