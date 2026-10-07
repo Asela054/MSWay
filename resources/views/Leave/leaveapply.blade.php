@@ -1028,70 +1028,49 @@
     }
       
     function generateEmailBody() {
-            let body = "LEAVE APPLICATION DETAILS<br>";
-            body += "=========================<br><br>";
-            
-            // Employee details
-            const employeeName = $('#employee_f option:selected').text();
-            const employeeId = $('#employee_f').val();
-            if (employeeName) {
-                body += "EMPLOYEE: " + employeeName + "<br>";
-                body += "EMPLOYEE ID: " + (employeeId || 'N/A') + "<br>";
+            var employeeName    = $('#employee_f option:selected').text();
+            var employeeId      = $('#employee_f').val();
+            var leaveType       = $('#leavetype option:selected').text();
+            var fromDate        = $('#fromdate').val();
+            var toDate          = $('#todate').val();
+            var noOfDays        = $('#no_of_days').val();
+            var reason          = $('#reason').val() || $('#reson').val();   // supports both ids
+            var coveringEmp     = $('#coveringemployee option:selected').text();
+            var approvingPerson = $('#approveby option:selected').text();
+            var halfShort       = $('#half_short option:selected').text();
+
+            if (halfShort === 'Select') { halfShort = ''; }
+
+            var rowsData = [
+                ['Employee', employeeName],
+                ['Employee ID', employeeName ? (employeeId || 'N/A') : ''],
+                ['Leave Type', leaveType],
+                ['Leave Duration', halfShort],
+                ['From Date', fromDate],
+                ['To Date', toDate],
+                ['Number of Days', noOfDays],
+                ['Reason', reason],
+                ['Covering Employee', coveringEmp],
+                ['Approving Person', approvingPerson]
+            ];
+
+            var body = '<p>Dear Sir/Madam,</p>';
+            body += '<p>A leave application has been submitted with the following details:</p>';
+            body += '<table cellpadding="6" cellspacing="0" style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:14px;">';
+            for (var i = 0; i < rowsData.length; i++) {
+                if (!rowsData[i][1]) { continue; }
+                body += '<tr>' +
+                    '<td style="border:1px solid #ccc;background:#f5f5f5;"><b>' + rowsData[i][0] + '</b></td>' +
+                    '<td style="border:1px solid #ccc;">' + escHtml(rowsData[i][1]) + '</td>' +
+                    '</tr>';
             }
-            
-            // Leave type
-            const leaveType = $('#leavetype option:selected').text();
-            if (leaveType) {
-                body += "LEAVE TYPE: " + leaveType + "<br>";
-            }
-            
-            // Dates
-            const fromDate = $('#fromdate').val();
-            const toDate = $('#todate').val();
-            if (fromDate) {
-                body += "FROM DATE: " + fromDate + "<br>";
-            }
-            if (toDate) {
-                body += "TO DATE: " + toDate + "<br>";
-            }
-            
-            // Days
-            const noOfDays = $('#no_of_days').val();
-            if (noOfDays) {
-                body += "NUMBER OF DAYS: " + noOfDays + "<br>";
-            }
-            
-            // Reason
-            const reason = $('#reson').val();
-            if (reason) {
-                body += "REASON:" + reason + "<br>";
-            }
-            
-            // Covering employee
-            const coveringEmployee = $('#coveringemployee option:selected').text();
-            if (coveringEmployee) {
-                body += "COVERING EMPLOYEE:" + coveringEmployee + "<br>";
-            }
-            
-            // Approving person
-            const approvingPerson = $('#approveby option:selected').text();
-            if (approvingPerson) {
-                body += "APPROVING PERSON:" + approvingPerson + "<br>";
-            }
-            
-            // Half/Short leave type
-            const halfShort = $('#half_short option:selected').text();
-            if (halfShort && halfShort !== "Select") {
-                body += "LEAVE DURATION:" + halfShort + "<br>";
-            }
-            
-            // Add closing signature
-            body += "<br>Regards,<br>";
-            body += employeeName || "Employee";
-            
+            body += '</table>';
+            body += '<p>Please review this request in the HR system.</p>';
+            body += '<p>Regards,<br>' + escHtml(employeeName || 'Employee') + '</p>';
+
             $('#emailBody').val(body);
             return body;
-    }
+        }
 
     function show_no_of_days() {
         let from_date = $('#fromdate').val();
@@ -1120,6 +1099,9 @@
         }
     }
 
+    function escHtml(s) {
+    return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
     
     </script>
 
