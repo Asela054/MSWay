@@ -1519,6 +1519,7 @@ Route::get('/qr-download', 'QRController@downloadQR')->name('qr.download');
 Route::get('/qr-process', 'QRController@processQR')->name('qr.process');
 // For the alternative approach without AJAX
 Route::get('/qr-modal', 'QRController@generateQRModal')->name('qr.modal');
+Route::get('/qr-branch', 'QRController@generateBranchQR')->name('qr.branch');
 
 /*-- Training Management----*/
 /*-- Types----*/
