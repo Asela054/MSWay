@@ -14,6 +14,9 @@ $columns = array(
 	array( 'db' => '`u`.`from_date`', 'dt' => 'from_date', 'field' => 'from_date' ),
 	array( 'db' => '`u`.`to_date`', 'dt' => 'to_date', 'field' => 'to_date' ),
 	array( 'db' => '`u`.`request_qty_edited`', 'dt' => 'request_qty_edited', 'field' => 'request_qty_edited' ),
+	array( 'db' => '`u`.`currency_type`', 'dt' => 'currency_type', 'field' => 'currency_type' ),
+	array( 'db' => '`c`.`currency`', 'dt' => 'currency_name', 'field' => 'currency_name', 'as' => 'currency_name'),
+	array( 'db' => '`u`.`unit_price`', 'dt' => 'unit_price', 'field' => 'unit_price' ),
 );
 
 // SQL server connection information
@@ -33,7 +36,7 @@ $sql_details = array(
 // require( 'ssp.class.php' );
 require('../ssp.customized.class.php' );
 
-$joinQuery = "FROM `opma_styles` AS `u`";
+$joinQuery = "FROM `opma_styles` AS `u` LEFT JOIN `opma_currency_types` AS `c` ON `u`.`currency_type` = `c`.`id`";
 
 $extraWhere = "`status` = 1";
 

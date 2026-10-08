@@ -104,6 +104,9 @@ Route::post('/opma_attendanceproduction_generatereport' ,'Production_Module_Opma
 Route::get('opma_production_unlock', 'Production_Module_Opma\ProductionUnlockController@index')->name('opma_production_unlock');
 Route::post('opma_production_unlockdelete', 'Production_Module_Opma\ProductionUnlockController@delete')->name('opma_production_unlockdelete');
 
+
+Route::get('qty-approve/{id}/{expires}/{token}', 'Production_Module_Opma\ProductionEndingController@qtyApproveShow');
+Route::post('qty-approve/{id}/{expires}/{token}', 'Production_Module_Opma\ProductionEndingController@qtyApproveConfirm');
 // End of Opma Production Section Routes
 
 

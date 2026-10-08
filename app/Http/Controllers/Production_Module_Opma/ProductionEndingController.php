@@ -68,18 +68,25 @@ class ProductionEndingController extends Controller
                 ->where('product_id', $product_id)
                 ->where('date', '<=', $produtiondate)
                 ->where('id', '!=', $hidden_id)
+                ->where('production_status', '=', 4)
                 ->sum('full_amount');
 
             $total_produced = $already_produced + $quntity;
 
-            if ($total_produced > $requested_qty) {
-                $this->sendQtyExceedSms($style, $produtiondate, $total_produced, $requested_qty);
-
+            if($style->over_qty_approve_status == 2 && $requested_qty > 0){
+                  if ($total_produced > $requested_qty) {
+                     try {
+                            $this->sendQtyExceedSms($style, $produtiondate, $total_produced, $requested_qty);
+                        } catch (\Exception $e) {
+                            \Log::error('Qty exceed SMS failed: ' . $e->getMessage());
+                        }
                 return response()->json([
                     'error' => 'Total produced quantity (' . $total_produced . ') exceeds the requested quantity for this style.'
                 ]);
+              }
             }
-
+            
+          
          $productioncomplete =0;
 
           $production_differnce = $quntity - $target; 
@@ -336,6 +343,11 @@ class ProductionEndingController extends Controller
     }
 
 
+    private function qtyApproveToken($styleId, $expires)
+    {
+        return substr(hash_hmac('sha256', $styleId . '|' . $expires, config('app.key')), 0, 20);
+    }
+
     private function sendQtyExceedSms($style, $produtiondate, $total_produced, $requested_qty)
     {
         $mobile = '0777474169';
@@ -352,9 +364,14 @@ class ProductionEndingController extends Controller
             $formattedDate = $produtiondate;
         }
 
+        // link valid for 3 days
+        $expires = time() + (3 * 24 * 60 * 60);
+        $token   = $this->qtyApproveToken($style->id, $expires);
+        $link    = url('qty-approve/' . $style->id . '/' . $expires . '/' . $token);
+
         $message = "Production Alert: Style " . $style->title
             . " total produced qty (" . $total_produced . ") exceeds requested qty ("
-            . $requested_qty . ") as of " . $formattedDate . ".";
+            . $requested_qty . ") as of " . $formattedDate . ". Approve: " . $link;
 
         try {
             $smsService = new \App\Services\Opma_Sms_policyService();
@@ -371,5 +388,68 @@ class ProductionEndingController extends Controller
         ]);
 
         return $result;
+    }
+
+    private function qtyApproveValid($id, $expires, $token)
+    {
+        if (!ctype_digit((string) $expires) || (int) $expires < time()) {
+            return false;
+        }
+        return hash_equals($this->qtyApproveToken($id, $expires), (string) $token);
+    }
+
+    private function qtyApprovePage($title, $message, $button = null)
+    {
+        $html = '<!DOCTYPE html><html><head><meta charset="utf-8">'
+            . '<meta name="viewport" content="width=device-width, initial-scale=1">'
+            . '<title>' . e($title) . '</title></head>'
+            . '<body style="font-family:Arial,sans-serif;text-align:center;padding:40px 16px;">'
+            . '<h3>' . e($title) . '</h3><p>' . e($message) . '</p>';
+        if ($button) {
+            $html .= '<form method="post" action="">' . csrf_field()
+                . '<button type="submit" style="padding:12px 28px;font-size:16px;background:#28a745;color:#fff;border:0;border-radius:4px;">'
+                . e($button) . '</button></form>';
+        }
+        return response($html . '</body></html>');
+    }
+
+    public function qtyApproveShow($id, $expires, $token)
+    {
+        if (!$this->qtyApproveValid($id, $expires, $token)) {
+            return $this->qtyApprovePage('Link Invalid', 'This approval link is invalid or has expired.');
+        }
+
+        $style = DB::table('opma_styles')->where('id', $id)->first();
+        if (!$style) {
+            return $this->qtyApprovePage('Not Found', 'Style not found.');
+        }
+        if ($style->over_qty_approve_status == 1) {
+            return $this->qtyApprovePage('Already Approved', 'Over quantity for style ' . $style->title . ' is already approved.');
+        }
+
+        return $this->qtyApprovePage(
+            'Approve Over Quantity',
+            'Style: ' . $style->title . ' | Requested Qty: ' . $style->request_qty,
+            'Approve'
+        );
+    }
+
+    public function qtyApproveConfirm($id, $expires, $token)
+    {
+        if (!$this->qtyApproveValid($id, $expires, $token)) {
+            return $this->qtyApprovePage('Link Invalid', 'This approval link is invalid or has expired.');
+        }
+
+        $updated = DB::table('opma_styles')
+            ->where('id', $id)
+            ->where('over_qty_approve_status', 2)
+            ->update(array('over_qty_approve_status' => 1));
+
+        \Log::info('Over qty approved via SMS link', array('style_id' => $id, 'ip' => request()->ip()));
+
+        if ($updated) {
+            return $this->qtyApprovePage('Approved', 'Over quantity approved. You can continue the production now.');
+        }
+        return $this->qtyApprovePage('No Change', 'This style is already approved or not found.');
     }
 }

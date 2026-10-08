@@ -16,6 +16,9 @@ class Product extends Model
         'request_qty',
         'request_qty_edited',
         'status',
+        'over_qty_approve_status',
+        'currency_type',
+        'unit_price'
     ];
 
 }
