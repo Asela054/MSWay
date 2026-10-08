@@ -118,4 +118,13 @@ class Employeelateattenadnaceminites extends Model
 					];
 	}
 
+	public function get_latedayscount($emp_id, $month)
+	{
+		$lateDays = Employeelateattenadnaceminites::where('emp_id', $emp_id)
+			->where('attendance_date', 'like', $month . '%')
+			->where('minites_count', '>', 0)
+			->count();
+
+		return $lateDays;
+	}
 }
