@@ -113,6 +113,26 @@ class QRController extends Controller
     }
 
     /**
+     * Generate QR code for a branch location (lat,lon string)
+     */
+    public function generateBranchQR(Request $request)
+    {
+        $data = $request->input('data', '');
+
+        $qrCode = QrCode::size(250)
+            ->backgroundColor(255, 255, 255)
+            ->color(0, 0, 0)
+            ->generate($data);
+
+        // Return only the QR code SVG for AJAX requests
+        if (request()->ajax()) {
+            return $qrCode;
+        }
+
+        return $qrCode;
+    }
+
+    /**
      * Simple test method to verify encryption/decryption
      */
     public function testEncryption()
