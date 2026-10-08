@@ -588,39 +588,22 @@
 					// ══════════════════════════════════════════════════
 					case 'BOC':
 					// ══════════════════════════════════════════════════
-					// BOC format: one plain-text row per employee.
-					// Fields: RecType BankCode AccNo Name TrxCode Flag Amount
-					//         Currency PayBank PayBranch EmpBranch Company Ref Desc Date EndFlag
-					// (No header record, no footer record — BOC processes the list directly)
+					// BOC SLIPS format: one 150-char record per employee (built in controller as boc_line).
+					// No header, no footer, no TAB.
 					empTable.rows().every(function () {
 						var d = this.data();
-						if (!d || d.bank_format !== 'BOC') return;
-
-						var line =
-							d.boc_rec_type   +   // 0
-							d.boc_bank_code  +   // employee bank code (4 digits)
-							d.boc_acc_no     +   // account no (variable, no leading zeros)
-							'\t'             +   // TAB separator (as seen in BOC sample)
-							d.boc_emp_name   +   // 20-char padded name
-							d.boc_trx_code   +   // 23
-							d.boc_flag       +   // 0
-							d.boc_amount     +   // integer rupees
-							d.boc_currency   +   // SLR
-							d.boc_pay_bank   +   // 7010 (company debit bank)
-							d.boc_pay_branch +   // company branch code (3)
-							d.boc_other_br   +   // employee branch code (3)
-							d.boc_company    +   // company name (13 chars)
-							d.boc_ref        +   // reference (blank or custom)
-							d.boc_desc       +   // SAL MMM YY
-							d.boc_date       +   // YYMMDD
-							d.boc_end_flag;      // 0
-
-						retContent.push(line);
+						if (!d || d.bank_format !== 'BOC' || !d.boc_line) return;
+						retContent.push(d.boc_line);
 					});
+
+					if (retContent.length === 0) {
+						alert('No BOC records found to export.');
+						return; // prevent download
+					}
 
 					retString = retContent.join('\r\n');
 					btn.attr("href", URL.createObjectURL(new Blob([retString], { type: 'text/plain' })));
-					btn.prop("download", fromdate + ' - BOC_Salary.txt');
+					btn.prop("download", 'BOCSAL.txt');
 					break;
 
 					// ══════════════════════════════════════════════════

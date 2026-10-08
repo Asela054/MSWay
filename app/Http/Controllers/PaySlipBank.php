@@ -630,17 +630,27 @@ class PaySlipBank extends Controller
 			$boc_company_name = substr(str_pad(strtoupper($txt_acc_name), 13, ' '), 0, 13);
 			$boc_branch_code  = $txt_acc_br; // company's BOC branch code
 
+			//Seylan
+			$org_acc_name = strtoupper($company_acc_info->bank_account_name);//'RICH COMMERCIAL';
+			$pay_particulars = '';//salary, bonus, advance etc.
+			$pay_other_refs = '';//pay month in text
+			$value_date = '';
+			$occu_grade_seqno = 0;
+			//-
+
 			// ── Determine bank format label (returned to blade) ───
 			$bank_format_map = [
 				'7083' => 'HNB',
 				'7010' => 'BOC',
 				'7278' => 'SAMPATH',
 				'7021' => 'NTB',
+				'7287' => 'SEYLAN'
 			];
 			$bank_format = $bank_format_map[$company_bank_id] ?? 'UNKNOWN';
 
 			// ── SQL queries ───────────────────────────────────────
 			if (in_array($request->opt_rpt, ['1', '2', '3'])) {
+				$pay_particulars = 'Salary';
 
 				$paymentPeriod     = PaymentPeriod::find($request->period_filter_id);
 				$payment_period_id = $paymentPeriod->id;
@@ -711,6 +721,7 @@ class PaySlipBank extends Controller
 				]);
 
 			} elseif ($request->opt_rpt == '4') {
+				$pay_particulars = 'Advance';
 
 				$sqladvance = "SELECT drv_emp.emp_payslip_id, drv_emp.emp_epfno, drv_emp.disp_epfno,
 				drv_emp.emp_first_name, drv_emp.emp_national_id, drv_emp.emp_last_name,
@@ -760,8 +771,12 @@ class PaySlipBank extends Controller
 			// ── Date formatting ───────────────────────────────────
 			if (empty($request->salary_bank_date)) {
 				$formatted_date = Carbon::now()->format('ymd');
+				$pay_other_refs = Carbon::now()->format('F');//full month name
+				$value_date = $month.'/'.$date.'/'.$fullyr;//$date.'/'.$month.'/'.$fullyr;
 			} else {
 				$formatted_date = Carbon::parse($request->salary_bank_date)->format('ymd');
+				$pay_other_refs = Carbon::parse($request->salary_bank_date)->format('F');
+				$value_date = Carbon::parse($request->salary_bank_date)->format('m/d/Y');//format('d/m/Y');
 			}
 
 			$cont_period_fr = Carbon::parse($payment_period_fr)->format('Ym');
@@ -839,32 +854,81 @@ class PaySlipBank extends Controller
 						switch ($company_bank_id) {
 
 							// ────────────────────────────────────────
-							case '7010': // BOC
+							case '7010': // BOC (new SLIPS format, 150 chars)
 							// ────────────────────────────────────────
-								// Raw account number without leading zeros (BOC spec)
-								$boc_emp_accno = ltrim(preg_replace('/[-. ]/', '', $r->bank_ac_no), '0');
-								if (empty($boc_emp_accno)) $boc_emp_accno = '0';
 
-								// Amount: integer rupees, no decimal (per BOC sample)
-								$boc_amount = number_format((float) $net_payslip_fig_value, 0, '.', '');
+								// ── BOC originating (company) fields ──────────────────
+								// 74-76 originating branch (3 digits)
+								$boc_orig_branch = str_pad(substr(preg_replace('/\D/', '', $txt_acc_br), -3), 3, '0', STR_PAD_LEFT);
 
-								$employee_list[$cnt - 1]['boc_rec_type']   = '0000';
-								$employee_list[$cnt - 1]['boc_bank_code']  = $r->bank_code;      // employee's bank (4 digits)
-								$employee_list[$cnt - 1]['boc_branch_code']  = $r->branch_code;      // employee's bank (4 digits)
-								$employee_list[$cnt - 1]['boc_acc_no']     = $boc_emp_accno;      // employee account
-								$employee_list[$cnt - 1]['boc_emp_name']   = $accountname;         // 20 chars padded
-								$employee_list[$cnt - 1]['boc_trx_code']   = '23';                 // BOC uses 2 digits
-								$employee_list[$cnt - 1]['boc_flag']       = '000000000';
-								$employee_list[$cnt - 1]['boc_amount']     = $boc_amount;
-								$employee_list[$cnt - 1]['boc_currency']   = 'SLR';
-								$employee_list[$cnt - 1]['boc_pay_bank']   = $company_bank_id;    // 7010 (debit bank)
-								$employee_list[$cnt - 1]['boc_pay_branch'] = $boc_branch_code;    // company BOC branch
-								$employee_list[$cnt - 1]['boc_other_br']   = $r->branch_code;     // employee's branch
-								$employee_list[$cnt - 1]['boc_company']    = $boc_company_name;   // 13 chars
-								$employee_list[$cnt - 1]['boc_ref']        = '';
-								$employee_list[$cnt - 1]['boc_desc']       = 'SAL ' . Carbon::parse($payment_period_fr)->format('M y');
-								$employee_list[$cnt - 1]['boc_date']       = $formatted_date;     // YYMMDD
-								$employee_list[$cnt - 1]['boc_end_flag']   = '000000';
+								// 77-88 originating A/C no (12 digits, zero padded)
+								$boc_orig_acc    = substr(str_pad(preg_replace('/\D/', '', $txt_acc_number), 12, '0', STR_PAD_LEFT), -12);
+
+								// 89-108 originating A/C name (20 chars, uppercase, padded)
+								$boc_orig_name   = preg_replace('/[^A-Za-z0-9 ]/', '', $txt_acc_name);
+								$boc_orig_name   = strtoupper(preg_replace('/\s+/', ' ', trim($boc_orig_name)));
+								$boc_orig_name   = substr(str_pad($boc_orig_name, 20, ' '), 0, 20);
+
+								// Destination side
+								$boc_dest_bank   = str_pad(substr(preg_replace('/\D/', '', $r->bank_code), -4), 4, '0', STR_PAD_LEFT);   // 5-8
+								$boc_dest_branch = str_pad(substr(preg_replace('/\D/', '', $r->branch_code), -3), 3, '0', STR_PAD_LEFT); // 9-11
+								$boc_dest_acc    = substr(str_pad(preg_replace('/\D/', '', (string) $r->bank_ac_no), 12, '0', STR_PAD_LEFT), -12); // 12-23
+
+								// Amount: 12 digits, zero padded, last 2 digits are decimals (55-66)
+								$boc_amount = str_pad((string) (int) round($net_payslip_fig_value * 100), 12, '0', STR_PAD_LEFT);
+
+								// Particulars (15) and Reference (15)
+								$boc_particulars = substr(str_pad(strtoupper($pay_particulars), 15, ' '), 0, 15);   // SALARY / ADVANCE
+								$boc_ref_date    = ($request->opt_rpt == '4') ? Carbon::now() : Carbon::parse($payment_period_fr);
+								$boc_reference   = substr(str_pad(strtoupper(substr($pay_particulars, 0, 3)) . ' ' . strtoupper($boc_ref_date->format('M y')), 15, ' '), 0, 15); // e.g. "SAL MAR 26"
+
+								// Full 150-char record
+								$boc_line =
+									'0000'             .   // 01-04 filler
+									$boc_dest_bank     .   // 05-08 destination bank
+									$boc_dest_branch   .   // 09-11 destination branch
+									$boc_dest_acc      .   // 12-23 destination A/C no
+									$accountname       .   // 24-43 destination A/C name (20, already cleaned + padded)
+									'23'               .   // 44-45 transaction code
+									'00'               .   // 46-47 return code
+									'0'                .   // 48    filler
+									'000000'           .   // 49-54 filler
+									$boc_amount        .   // 55-66 amount
+									'SLR'              .   // 67-69 currency
+									'7010'             .   // 70-73 originating bank
+									$boc_orig_branch   .   // 74-76 originating branch
+									$boc_orig_acc      .   // 77-88 originating A/C no
+									$boc_orig_name     .   // 89-108 originating A/C name
+									$boc_particulars   .   // 109-123 particulars
+									$boc_reference     .   // 124-138 reference
+									$formatted_date    .   // 139-144 value date YYMMDD
+									'000000';              // 145-150 filler
+
+								// Whole record (used by the download in jQuery)
+								$employee_list[$cnt - 1]['boc_line']        = $boc_line;
+
+								// Individual fields (kept so the DataTable columns don't warn)
+								$employee_list[$cnt - 1]['boc_rec_type']    = '0000';
+								$employee_list[$cnt - 1]['boc_bank_code']   = $boc_dest_bank;
+								$employee_list[$cnt - 1]['boc_branch_code'] = $boc_dest_branch;
+								$employee_list[$cnt - 1]['boc_acc_no']      = $boc_dest_acc;
+								$employee_list[$cnt - 1]['boc_emp_name']    = $accountname;
+								$employee_list[$cnt - 1]['boc_trx_code']    = '23';
+								$employee_list[$cnt - 1]['boc_return_code'] = '00';
+								$employee_list[$cnt - 1]['boc_flag']        = '0000000';
+								$employee_list[$cnt - 1]['boc_amount']      = $boc_amount;
+								$employee_list[$cnt - 1]['boc_currency']    = 'SLR';
+								$employee_list[$cnt - 1]['boc_pay_bank']    = '7010';
+								$employee_list[$cnt - 1]['boc_pay_branch']  = $boc_orig_branch;
+								$employee_list[$cnt - 1]['boc_orig_acc']    = $boc_orig_acc;
+								$employee_list[$cnt - 1]['boc_orig_name']   = $boc_orig_name;
+								$employee_list[$cnt - 1]['boc_other_br']    = $boc_dest_branch;
+								$employee_list[$cnt - 1]['boc_company']     = $boc_orig_name;
+								$employee_list[$cnt - 1]['boc_particulars'] = $boc_particulars;
+								$employee_list[$cnt - 1]['boc_ref']         = $boc_reference;
+								$employee_list[$cnt - 1]['boc_desc']        = $boc_particulars;
+								$employee_list[$cnt - 1]['boc_date']        = $formatted_date;
+								$employee_list[$cnt - 1]['boc_end_flag']    = '000000';
 
 								$trx_code = '23';
 								break;
@@ -943,6 +1007,7 @@ class PaySlipBank extends Controller
 				'BASIC' => 0, 'BRA_I' => '0', 'add_bra2' => '0', 'NOPAY' => 0,
 				'tot_bnp' => 0, 'sal_arrears1' => 0, 'tot_fortax' => 0,
 				'ATTBONUS' => 0, 'ATTBONUS_W' => 0, 'INCNTV_EMP' => 0, 'INCNTV_DIR' => 0,
+				'TARGET_BONUS' => 0, 'Opma_Night_Alw' => 0, 
 				'add_transport' => 0, 'add_other' => 0, 'sal_arrears2' => 0,
 				'OTHRS1' => 0, 'OTHRS2' => 0, 'tot_earn' => 0,
 				'EPF8' => 0, 'EPF12' => 0, 'ETF3' => 0,
@@ -987,6 +1052,7 @@ class PaySlipBank extends Controller
 						'BASIC' => 0, 'BRA_I' => '0', 'add_bra2' => '0', 'NOPAY' => 0,
 						'tot_bnp' => 0, 'sal_arrears1' => 0, 'tot_fortax' => 0,
 						'ATTBONUS' => 0, 'ATTBONUS_W' => 0, 'INCNTV_EMP' => 0, 'INCNTV_DIR' => 0,
+						'TARGET_BONUS' => 0, 'Opma_Night_Alw' => 0, 
 						'add_transport' => 0, 'add_other' => 0, 'sal_arrears2' => 0,
 						'OTHRS1' => 0, 'OTHRS2' => 0, 'tot_earn' => 0,
 						'EPF8' => 0, 'EPF12' => 0, 'ETF3' => 0,
