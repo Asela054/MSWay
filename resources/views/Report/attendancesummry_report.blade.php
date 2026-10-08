@@ -33,9 +33,9 @@
                                  <div class="col-12">
                                     <hr class="border-dark">
                                 </div>
-                                <div class="col-12 text-right">
+                                {{-- <div class="col-12 text-right">
                                     <button id="approve_att" class="btn btn-primary btn-sm px-3"><i class="fa-light fa-light fa-clipboard-check"></i>&nbsp;Approve All</button>
-                                </div>
+                                </div> --}}
                             </div>
                         <div class="center-block fix-width scroll-inner">
                             <table class="table table-striped table-bordered table-sm small nowrap w-100" id="attendtable">

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\ProductionModule_Opma\Product;
 use App\ProductionModule_Opma\ProductDetail;
 use App\ProductionModule_Opma\Size;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Validator;
 
@@ -25,7 +26,8 @@ class ProductController extends Controller
         }
 
         $sizes= Size::orderBy('id', 'asc')->get();
-        return view('Opma_Production.Daily_Production.Product',compact('sizes'));
+        $currency = DB::table('opma_currency_types')->select('id', 'currency')->get();
+        return view('Opma_Production.Daily_Production.Product',compact('sizes', 'currency'));
     }
 
     public function store(Request $request)
@@ -61,7 +63,10 @@ class ProductController extends Controller
         $product->to_date=$request->input('to_date');  
         $product->request_qty=$request->input('request_qty'); 
         $product->request_qty_edited=$request->input('request_qty'); 
+        $product->currency_type=$request->input('currency'); 
+        $product->unit_price=$request->input('unit_price'); 
         $product->status=1;
+        $product->over_qty_approve_status=2;
         $product->save();
         $opma_style_id=$product->id;
 
@@ -118,7 +123,9 @@ class ProductController extends Controller
             'code'      => $request->code,
             'from_date' => $request->from_date,
             'to_date'   => $request->to_date,
-            'request_qty_edited' => $request->request_qty
+            'request_qty_edited' => $request->request_qty,
+            'currency_type' => $request->currency,
+            'unit_price' => $request->unit_price
         );
 
         if (is_null($product->request_qty)) {

@@ -37,6 +37,7 @@
                                     <th>FROM DATE</th>
                                     <th>TO DATE</th>
                                     <th>REQUEST QTY</th>
+                                    <th>UNIT PRICE</th>
                                     <th class="text-right">ACTION</th>
                                 </tr>
                             </thead>
@@ -86,6 +87,19 @@
                                  <div class="form-group mb-1">
                                     <label class="small font-weight-bold text-dark">Request QTY*</label>
                                     <input type="number" name="request_qty" id="request_qty" class="form-control form-control-sm" step="any" required/>
+                                </div>
+                                <div class="form-group mb-1">
+                                    <label class="small font-weight-bold text-dark">Currency Type</label>
+                                    <select class="form-control form-control-sm" id="currency" name="currency">
+                                        <option value=" ">Select Currency</option>
+                                        @foreach($currency as $curr)
+                                            <option value="{{ $curr->id }}">{{ $curr->currency }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group mb-1">
+                                    <label class="small font-weight-bold text-dark">Unit Price*</label>
+                                    <input type="number" name="unit_price" id="unit_price" class="form-control form-control-sm" step="any"/>
                                 </div>
                                 <div class="form-group mb-1">
                                     <label class="small font-weight-bold text-dark">Applicable Sizes</label>
@@ -196,6 +210,22 @@ $(document).ready(function(){
                 data: 'request_qty_edited', 
                 name: 'request_qty_edited'
             },
+            { 
+                data: 'unit_price', 
+                name: 'unit_price',
+                className: 'text-right',
+                render: function (data, type, row) {
+                    if (data === null || data === '') { return '-'; }
+                    if (type !== 'display') { return data; }
+
+                    var price = parseFloat(data).toLocaleString('en-US', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                    var currency = row.currency_name ? row.currency_name : '';
+                    return price + (currency ? ' ' + currency : '');
+                }
+            },
             {
                 data: 'id',
                 name: 'action',
@@ -290,6 +320,8 @@ $(document).ready(function(){
                      $('#from_date').val(data.result.from_date);
                      $('#to_date').val(data.result.to_date);
                     $('#request_qty').val(data.result.request_qty_edited);
+                    $('#unit_price').val(data.result.unit_price);
+                    $('#currency').val(data.result.currency_type);
 
                     if(data.sizes && data.sizes.length > 0) {
                         $('#sizes').val(data.sizes).trigger('change');
