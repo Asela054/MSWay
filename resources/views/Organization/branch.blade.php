@@ -141,6 +141,33 @@
             </div>
         </div>
     </div>
+    <!-- Branch QR Code Modal -->
+    <div class="modal fade" id="branchQrModal" tabindex="-1" role="dialog" aria-labelledby="branchQrModalLabel" aria-hidden="true">
+         <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header p-2">
+                    <h5 class="modal-title" id="branchQrModalLabel">Branch Location QR Code</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <div id="branchQrCodeContainer">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading QR Code...</p>
+                    </div>
+                    <p class="text-muted small mt-3" id="branchQrLabel"></p>
+                </div>
+                <div class="modal-footer p-2">
+                    <button type="button" id="printBranchQr" class="btn btn-dark btn-sm px-3">
+                        <i class="fas fa-print mr-1"></i> Print PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Modal Area End -->
 </main>
               
@@ -245,6 +272,8 @@ $(document).ready(function(){
                     var buttons = '';
 
                     buttons += '<button name="edit" id="'+row.id+'" class="edit btn btn-primary btn-sm mr-1" type="button" data-toggle="tooltip" title="Edit"><i class="fas fa-pencil-alt"></i></button>';
+
+                    buttons += '<button type="button" name="qrcode" class="qrcode btn btn-info btn-sm mr-1" data-lat="'+row.latitude+'" data-lng="'+row.longitude+'" data-location="'+row.location+'" data-toggle="tooltip" title="View QR Code"><i class="fas fa-qrcode"></i></button>';
 
                     buttons += '<button type="submit" name="delete" id="'+row.id+'" class="delete btn btn-danger btn-sm" data-toggle="tooltip" title="Remove"><i class="far fa-trash-alt"></i></button>';
 
@@ -366,6 +395,58 @@ $(document).ready(function(){
                 }
             })
         }
+    });
+
+    $(document).on('click', '.qrcode', function() {
+        var lat = $(this).data('lat');
+        var lng = $(this).data('lng');
+        var location = $(this).data('location');
+        var qrData = lat + ',' + lng;
+
+        $('#branchQrModalLabel').text('Branch Location QR Code');
+        $('#branchQrLabel').text(location + ' (' + qrData + ')');
+        $('#branchQrCodeContainer').html(
+            '<div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div>' +
+            '<p class="mt-2">Loading QR Code...</p>'
+        );
+        $('#branchQrModal').modal('show');
+
+        $.ajax({
+            url: '{{ route("qr.branch") }}',
+            type: 'GET',
+            data: { data: qrData },
+            success: function(response) {
+                $('#branchQrCodeContainer').html(response);
+            },
+            error: function() {
+                $('#branchQrCodeContainer').html('<div class="alert alert-danger p-2">Failed to load QR code. Please try again.</div>');
+            }
+        });
+    });
+
+    $('#printBranchQr').on('click', function() {
+        var qrSvg = $('#branchQrCodeContainer svg').prop('outerHTML');
+        var label  = $('#branchQrLabel').text();
+
+        if (!qrSvg) {
+            alert('QR code is not ready yet. Please wait for it to load.');
+            return;
+        }
+
+        var printWindow = window.open('', '_blank', 'width=450,height=550');
+        printWindow.document.write(
+            '<!DOCTYPE html><html><head><title>Branch QR Code</title>' +
+            '<style>' +
+            'body{margin:0;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;}' +
+            'svg{width:260px;height:260px;display:block;}' +
+            'p{margin-top:14px;font-size:13px;color:#555;text-align:center;}' +
+            '</style></head><body>' +
+            qrSvg +
+            '<p>' + label + '</p>' +
+            '<scr' + 'ipt>window.onload=function(){window.print();window.close();};<\/scr' + 'ipt>' +
+            '</body></html>'
+        );
+        printWindow.document.close();
     });
 });
 </script>
