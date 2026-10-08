@@ -332,8 +332,8 @@
                                     + '</tr>';
                                     // Attendance days + Work days summary (total row ekata yatin)
                                 html += '<tr>'
-                                    + '<td colspan="4" style="padding-top: 10px;"><strong>Attendance Days -</strong> ' + (datalist[i].attendance_days ?? 0) + '</td>'
-                                    + '<td colspan="11" style="padding-top: 10px;"><strong>Work Days -</strong> ' + (datalist[i].work_days ?? 0) + '</td>'
+                                    + '<td colspan="15" style="padding-top: 10px;"><strong>Attendance Days -</strong> ' + (datalist[i].attendance_days ?? 0) + '</td></tr>'
+                                    + '<tr><td colspan="15" style="padding-top: 10px;"><strong>Work Days -</strong> ' + (datalist[i].work_days ?? 0) + '</td>'
                                 + '</tr>';
                                     html += '</table>';
                                     html += '<div style="height: 30px;"></div>';
@@ -430,9 +430,12 @@
                                 data.cell.styles.lineWidth = 0.5;
                                 data.cell.styles.halign = 'center';
                                 data.cell.styles.cellPadding = { top: 8, bottom: 8, left: 3, right: 3 };
-                            } else if (section === 'body' && rowIndex === totalBodyRows - 1) {
+                            }  else if (section === 'body' && rowIndex >= totalBodyRows - 2) {
+                                // Attendance Days + Work Days rows - left aligned, no borders
+                                data.cell.styles.halign = 'left';
                                 data.cell.styles.fontStyle = 'bold';
-                                data.cell.styles.lineWidth = { top: 1, right: 0, bottom: 0, left: 0 };
+                                data.cell.styles.lineWidth = 0.5;
+                                data.cell.styles.lineColor = [0, 0, 0];
                                 data.cell.styles.cellPadding = { top: 6, bottom: 6, left: 4, right: 4 };
                             } else if (section === 'body') {
                                 data.cell.styles.halign = 'center';
