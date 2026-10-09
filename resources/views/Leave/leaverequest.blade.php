@@ -860,10 +860,11 @@
         var reqDate   = d.created_at ? d.created_at : new Date().toISOString();
         var days      = pdfLeaveDays(d.from_date, d.to_date, d.leave_category);
         var resume    = pdfAddDays(d.to_date, 1);
+        var companyName = d.company_name || 'AgroVentures Plantations (Pvt) Ltd';
 
         // ---------- header ----------
         // doc.addImage(LOGO_BASE64, 'PNG', 12, 8, 30, 18); // optional logo
-        center('AgroVentures Plantations (Pvt) Ltd', 0, 16, 210, true, 14);
+       center(companyName, 0, 16, 210, true, 14);
         center('Leave Application Form', 0, 23, 210, true, 11);
         center('Office Staff', 0, 28, 210, true, 9);
 
