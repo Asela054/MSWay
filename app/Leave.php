@@ -303,10 +303,7 @@ public function get_dayoff_leaves($emp_id, $month, $closedate)
         ->whereIn('work_date', $holidayDates)
         ->count();
 
-    return [
-        'days'  => $specialShiftCount,
-        'hours' => $specialShiftCount * 8,
-    ];
+    return $specialShiftCount;
 }
 
 // short leaves - apply for rajapaksha hrm
