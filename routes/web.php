@@ -1941,6 +1941,8 @@ Route::get('get-roster-data-Weekly', 'EmployeeRosterWeeklyController@getRosterDa
 Route::get('get-view-roster-data-Weekly', 'EmployeeRosterWeeklyDetailsController@getViewRosterData');
 Route::post('colnerosterstoreWeekly', 'EmployeeRosterWeeklyDetailsController@colnerosterstore')->name('colnerosterstoreWeekly');
 
+// Employee users details routes
+Route::get('/emp_users' ,'UserController@emp_users')->name('emp_users');
 
 
 Route::get('/clear-cache', function() {
