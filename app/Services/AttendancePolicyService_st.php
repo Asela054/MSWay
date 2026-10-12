@@ -15,6 +15,8 @@ class AttendancePolicyService
 
     public function attendanceInsertcsv_txt($full_emp_id, $date_input, $timestamp, $date)
     { 
+         $lateAttendanceData = 0;
+
          $empshift = DB::table('employees')
             ->select('emp_id', 'emp_shift','emp_location')
             ->where('emp_id', $full_emp_id)
@@ -114,6 +116,17 @@ class AttendancePolicyService
 
                 if($date == $date_input){
 
+                $existingTimestampCount = DB::table('attendances')
+                    ->where('emp_id', $full_emp_id)
+                    ->where('date', $attendance_date)
+                    ->whereNull('deleted_at')
+                    ->count();
+
+                if ($existingTimestampCount > 0) {
+                   $lateAttendanceData = 0;
+                }else{
+                    $lateAttendanceData = 1;
+                }
 
                  // last timestamp check - 1 min threshold
                 $lastAttendance = DB::table('attendances')
@@ -143,13 +156,18 @@ class AttendancePolicyService
 
                     $insertId = $Attendance->id;
 
-                return $this->checkAndInsertLateAttendance($full_emp_id, $attendance_date, $timestamp,$insertId);
+                      if($lateAttendanceData == 1){
+                         return $this->checkAndInsertLateAttendance($full_emp_id, $attendance_date, $timestamp,$insertId);
+                      }
+               
                 }           
                 return true;
     }
 
     public function attendanceInsertsingle_dep($empid, $attendacetimestamp, $location, $attendacedate)
     {  
+         $lateAttendanceData = 0;
+
             $datetime_parts = explode('T', $attendacetimestamp);
 
             $timestampdate = $datetime_parts[0];
@@ -248,6 +266,18 @@ class AttendancePolicyService
         }
 
         if($date_stamp == $attendacedate){
+            $existingTimestampCount = DB::table('attendances')
+                ->where('emp_id', $empid)
+                ->where('date', $attendance_date)
+                ->whereNull('deleted_at')
+                ->count();
+
+            if ($existingTimestampCount > 0) {
+                $lateAttendanceData = 0;
+            }else{
+                $lateAttendanceData = 1;
+            }
+
             $data = array(
                 'emp_id' => $empid,
                 'uid' => $empid,
@@ -262,7 +292,10 @@ class AttendancePolicyService
             
             $insertId = DB::table('attendances')->insertGetId($data);
 
-             return $this->checkAndInsertLateAttendance($empid, $attendacedate, $attendacetimestamp,$insertId);
+             if($lateAttendanceData == 1){
+                 return $this->checkAndInsertLateAttendance($empid, $attendacedate, $attendacetimestamp,$insertId);
+             }
+            
 
         }
         return true;
