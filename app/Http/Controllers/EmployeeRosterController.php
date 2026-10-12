@@ -157,6 +157,7 @@ class EmployeeRosterController extends Controller
         // Get employee IDs for this department first
         $employees = Employee::where('emp_department', $departmentId)
             ->where('deleted', 0)
+            ->where('is_resigned', 0)
             ->select('emp_id AS id', 'emp_name_with_initial AS fullname', 'calling_name AS callingname')
             ->get();
 
