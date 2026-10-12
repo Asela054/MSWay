@@ -703,6 +703,8 @@ class LeaveController extends Controller
                 'comment' => $request->comment
             );
 
+
+
         }else{
             $form_data = array(
                 'status' => $status,
@@ -721,6 +723,7 @@ class LeaveController extends Controller
                     ->increment('total_leave', $leave->no_of_days);
             }
         });
+        
 
         $response = ['success' => $status == 'Rejected' ? 'Leave Rejected' : 'Leave Approved'];
 
@@ -732,6 +735,13 @@ class LeaveController extends Controller
             }
         }
 
+        if ($applevel != 1) {
+            $response['mail'] = $this->buildLeaveMailData(
+                $leave->fresh(),
+                $status == 'Rejected' ? 'Rejected' : 'Approved',
+                $request->comment
+            );
+        }
         return response()->json($response);
     }
 
@@ -827,9 +837,20 @@ class LeaveController extends Controller
 
 
         }
+        $freshLeave = Leave::find($laeaveid);
+        if ($app_level != 1 && $freshLeave) {
+            $mails[] = $this->buildLeaveMailData(
+                $freshLeave,
+                $status == 'Rejected' ? 'Rejected' : 'Approved',
+                $comment
+            );
+        }
 
-        return response()->json([
-            'success' => $status == 'Rejected' ? 'Leave Rejected' : 'Leave Approved'
+
+
+       return response()->json([
+            'success' => $status == 'Rejected' ? 'Leave Rejected' : 'Leave Approved',
+            'mails'   => $mails
         ]);
     }
 
@@ -986,5 +1007,61 @@ class LeaveController extends Controller
         ]);
 
         return $result;
+    }
+
+    private function getCategoryResult($empId)
+    {
+        if (empty($empId)) {
+            return null;
+        }
+
+        $res  = $this->getEmployeeCategory(new Request(array('emp_id' => $empId)));
+        $data = method_exists($res, 'getData') ? $res->getData() : null;
+
+        return ($data && isset($data->result)) ? $data->result : null;
+    }
+
+    private function buildLeaveMailData($leave, $status, $comment)
+    {
+        $leaveTypeName = DB::table('leave_types')->where('id', $leave->leave_type)->value('leave_type');
+
+        $empName = function ($empId) {
+            if (empty($empId)) {
+                return '';
+            }
+            return (string) DB::table('employees')->where('emp_id', $empId)->value('emp_name_with_initial');
+        };
+
+        $emp = $this->getCategoryResult($leave->emp_id);
+        $cov = $this->getCategoryResult($leave->emp_covering);
+        $app = $this->getCategoryResult($leave->leave_approv_person);
+
+        $emails = array(
+            $emp ? $emp->employee_email : null,          // employee
+            $emp ? $emp->company_email : null,           // company
+            $cov ? $cov->employee_email : null,          // covering person
+            $app ? $app->employee_email : null,          // approve person
+            $emp ? $emp->department_head_email : null    // department head
+        );
+        $emails = array_values(array_unique(array_filter($emails)));
+
+        $companyName = $emp ? $emp->company_name : '';
+
+        return array(
+            'employee'     => $empName($leave->emp_id),
+            'employee_id'  => $leave->emp_id,
+            'leave_type'   => $leaveTypeName,
+            'half_short'   => $leave->half_short,
+            'from_date'    => $leave->leave_from,
+            'to_date'      => $leave->leave_to,
+            'no_of_days'   => $leave->no_of_days,
+            'reason'       => $leave->reson,
+            'covering'     => $empName($leave->emp_covering),
+            'approver'     => $empName($leave->leave_approv_person),
+            'status'       => $status,
+            'comment'      => $comment,
+            'company_name' => $companyName,
+            'emails'       => $emails,
+        );
     }
 }

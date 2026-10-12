@@ -162,6 +162,7 @@ class EmployeeAttedanceReportContrller extends Controller
         ->join('employees', 'ot_approved.emp_id', '=', 'employees.emp_id')
         ->leftJoin('departments', 'employees.emp_department', '=', 'departments.id')
         ->where('employees.deleted', 0)
+        ->where('ot_approved.status', '=', 1)  
         ->where('employees.emp_department', $department)
         ->whereBetween('ot_approved.date', [$from_date, $to_date])
         ->whereIn('employees.emp_id', $accessibleEmployeeIds)
