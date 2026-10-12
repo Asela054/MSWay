@@ -178,13 +178,15 @@ class LeaverequestController extends Controller
                 ->leftJoin('departments as dep', 'emp.emp_department', '=', 'dep.id')
                 ->leftJoin('job_titles as jt', 'emp.emp_job_code', '=', 'jt.id')
                 ->leftJoin('branches as br', 'emp.emp_location', '=', 'br.id')
+                ->leftJoin('companies as com', 'emp.emp_company', '=', 'com.id')
                 ->select(
                     'leave_request.*',
                     'emp.emp_name_with_initial as emp_name',
                     'emp.emp_id as emp_no',
                     'dep.name as dep_name',
                     'jt.title as designation',
-                    'br.location as location'
+                    'br.location as location',
+                    'com.name as company_name'
                 )
                 ->where('leave_request.id', $id)
                 ->first();
