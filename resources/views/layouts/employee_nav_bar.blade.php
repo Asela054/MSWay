@@ -40,6 +40,8 @@
         </ul>
   </div>
 
+  <a role="button" class="btn navbtncolor" href="{{ route('emp_users') }}" id="empusers">Employee Users <span class="caret"></span></a>
+
   {{--<div class="dropdown">
     <a role="button" data-toggle="dropdown" class="btn navbtncolor" href="#" id="performanceinformation">
       Performance Evaluation <span class="caret"></span></a>

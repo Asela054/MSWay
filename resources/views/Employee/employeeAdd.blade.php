@@ -499,6 +499,9 @@
                                 <input type="hidden" id="userlog_company" name="company_id">
                                 <input type="hidden" name="action" id="userlog_action" />
                                 <input type="hidden" name="hidden_id" id="userlog_hidden_id" />
+                                <input type="hidden" id="userlog_emp_email" />
+                                <input type="hidden" id="userlog_company_name" />
+                                <input type="hidden" id="userlog_company_email" />
                             </form>
                         </div>
                     </div>
@@ -1314,6 +1317,7 @@ $(document).ready(function () {
         var id          = $(this).attr('id');
         var name        = $(this).attr('name');
         var emp_company = $(this).attr('emp_company');
+        var _token      = $('input[name="_token"]').val();
 
         // Reset the form first
         $('#userlogform')[0].reset();
@@ -1322,10 +1326,28 @@ $(document).ready(function () {
         $('#userlog_password').val('');
         $('#password-confirm').val('');
         $('#userlog_hidden_id').val('');
+        $('#userlog_emp_email').val('');
 
         $('#userlog_userid').val(id);
         $('#userlog_name').val(name);
         $('#userlog_company').val(emp_company);
+
+        // Fetch the employee's recorded email (employees.emp_email) from the DB
+        $.ajax({
+            url: "getEmployeeCategory",
+            method: "POST",
+            dataType: 'json',
+            data: { emp_id: id, _token: _token },
+            success: function (catData) {
+                if (catData && catData.result && catData.result.employee_email) {
+                    $('#userlog_emp_email').val(catData.result.employee_email);
+                }
+                if (catData && catData.result) {
+                $('#userlog_company_name').val(catData.result.company_name);
+                $('#userlog_company_email').val(catData.result.company_email);
+                }
+            }
+        });
 
         // Check if a user account already exists for this employee
         $.ajax({
@@ -1518,11 +1540,60 @@ $(document).ready(function () {
                 if (data.success) {
                     html = '<div class="alert alert-success">' + data.success + '</div>';
                     $('#userlogform_result').html(html);
+
+                    // Send welcome email only when a NEW account is created
+                    if (action === 'Add') {
+                        // Prefer the employee's recorded DB email; fall back to the typed login email
+                        var typedEmail    = $('#email').val();
+                        var loginEmail    = $('#userlog_emp_email').val() || typedEmail;
+                        var plainPassword = $('#userlog_password').val();
+                        var empName       = $('#userlog_name').val();
+                        var currentUrl    = window.location.origin;
+
+                        var emailBody = generateUserLoginEmailBody(empName, typedEmail, plainPassword, currentUrl);
+                        var companyName = $('#userlog_company_name').val() || 'HRM System';
+
+                        var emailData = {
+                            'inquire_now': 'HR Department - ' + companyName,
+                            'replyto': loginEmail,
+                            'contsubj': 'User Account Created - ' + empName,
+                            'contbody': emailBody
+                        };
+
+                        // Submit via a hidden iframe so the page is not navigated away
+                        var iframe = document.createElement('iframe');
+                        iframe.name = 'userLoginEmailIframe';
+                        iframe.style.display = 'none';
+
+                        var form = document.createElement('form');
+                        form.target = 'userLoginEmailIframe';
+                        form.method = 'POST';
+                        form.action = 'https://aws.erav.lk/Temp/bf360/eravawsmail.php';
+
+                        Object.keys(emailData).forEach(function (key) {
+                            var input = document.createElement('input');
+                            input.type  = 'hidden';
+                            input.name  = key;
+                            input.value = emailData[key];
+                            form.appendChild(input);
+                        });
+
+                        document.body.appendChild(iframe);
+                        document.body.appendChild(form);
+                        form.submit();
+                        window.userMailSent = new Promise(function (res) {
+                            iframe.onload = res;
+                            setTimeout(res, 5000);
+                        });
+                    }
+
                     $('#userlogform')[0].reset();
-                    setTimeout(function() {
-                        $('#userlogModal').modal('hide');
-                        location.reload();
-                    }, 2000);
+                    Promise.all([window.userMailSent, new Promise(function (r) { setTimeout(r, 2000); })])
+                        .then(function () {
+                            window.userMailSent = null;
+                            $('#userlogModal').modal('hide');
+                            location.reload();
+                        });
                 }
             },
             error: function(xhr, status, error) {
@@ -1731,6 +1802,37 @@ $(document).ready(function () {
 
 
 });
+
+
+    //Helper: HTML-escape a value
+    function escHtml(s) {
+        return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // Generate the user-account welcome email body 
+    function generateUserLoginEmailBody(empName, typedEmail, password, currentUrl) {
+        var rows = [
+        ['Employee', empName],
+        ['Login Email', typedEmail],
+        ['Password', password],
+        ['System URL', currentUrl],
+        ['App', 'https://play.google.com/store/apps/details?id=com.shapeup.hr']
+    ];
+    var body = '<p>Dear ' + escHtml(empName || 'Sir/Madam') + ',</p>';
+    body += '<p>A user account has been created for you with the following details:</p>';
+    body += '<table cellpadding="6" cellspacing="0" style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:14px;">';
+    for (var i = 0; i < rows.length; i++) {
+        if (!rows[i][1]) { continue; }
+        body += '<tr>' +
+            '<td style="border:1px solid #ccc;background:#f5f5f5;"><b>' + rows[i][0] + '</b></td>' +
+            '<td style="border:1px solid #ccc;">' + escHtml(rows[i][1]) + '</td>' +
+            '</tr>';
+    }
+    body += '</table>';
+    body += '<p>Please change your password after your first login.</p>';
+    body += '<p>Regards,<br>System Administration Team</p>';
+    return body;
+    }
 
 
 </script>

@@ -229,4 +229,12 @@ class UserController extends Controller
 
         return response()->json(['success' => 'User successfully Updated']);
     }
+
+    // Employee Users
+    public function emp_users(Request $request)
+    {
+        $data = User::orderBy('emp_id','DESC')->get();
+        $roles = Role::pluck('name','name')->all();
+        return view('Employee.empUsers',compact('data','roles'));
+    }
 }
