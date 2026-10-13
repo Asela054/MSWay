@@ -471,8 +471,12 @@ $(document).ready(function () {
                         type: 'danger'
                     };
                     const actionJSON = JSON.stringify(actionObj, null, 2);
-                    action(actionJSON);
+                    actionreload(actionJSON);
                 }
+                if (data.mail) {
+                    sendLeaveStatusMail(data.mail);
+                }
+
                 if (data.success) {
                     const actionObj = {
                         icon: 'fas fa-save',
@@ -629,6 +633,11 @@ $(document).ready(function () {
                                 const actionJSON = JSON.stringify(actionObj, null, 2);
                                 actionreload(actionJSON);
                             }
+                            if (data.mails && data.mails.length) {
+                                data.mails.forEach(function (m, i) {
+                                    setTimeout(function () { sendLeaveStatusMail(m); }, i * 400);
+                                });
+                            }
                              location.reload()
 
                         }
@@ -652,6 +661,71 @@ $(document).ready(function () {
         });
 
 });
+
+function escHtml(s) {
+    return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function sendLeaveStatusMail(m) {
+    var halfShortMap = { '0.25': 'Short Leave', '0.5': 'Half Day', '0.50': 'Half Day', '1': 'Full Day', '1.00': 'Full Day' };
+    var duration = halfShortMap[String(m.half_short)] || '';
+
+    var rowsData = [
+        ['Employee', m.employee],
+        ['Employee ID', m.employee_id],
+        ['Leave Type', m.leave_type],
+        ['Leave Duration', duration],
+        ['From Date', m.from_date],
+        ['To Date', m.to_date],
+        ['Number of Days', m.no_of_days],
+        ['Reason', m.reason],
+        ['Covering Employee', m.covering],
+        ['Approving Person', m.approver],
+        ['Status', m.status],
+        ['Comment', m.comment]
+    ];
+
+    var body = '<p>Dear Sir/Madam,</p>';
+    body += '<p>The following leave application has been <b>' + escHtml(m.status) + '</b>:</p>';
+    body += '<table cellpadding="6" cellspacing="0" style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:14px;">';
+    for (var i = 0; i < rowsData.length; i++) {
+        if (!rowsData[i][1]) { continue; }
+        body += '<tr>' +
+            '<td style="border:1px solid #ccc;background:#f5f5f5;"><b>' + rowsData[i][0] + '</b></td>' +
+            '<td style="border:1px solid #ccc;">' + escHtml(rowsData[i][1]) + '</td>' +
+            '</tr>';
+    }
+    body += '</table>';
+    body += '<p>Regards,<br>HR Department</p>';
+
+    var emailData = {
+        'inquire_now': 'HR Department - ' + (m.company_name || ''),
+        'replyto': (m.emails || []).filter(function (e) { return e; }).join(';'),
+        'contsubj': 'Leave ' + m.status + ' - ' + m.employee,
+        'contbody': body
+    };
+
+    var iframe = document.createElement('iframe');
+    iframe.name = 'emailIframe';
+    iframe.style.display = 'none';
+
+    var form = document.createElement('form');
+    form.target = 'emailIframe';
+    form.method = 'POST';
+    form.action = 'https://aws.erav.lk/Temp/bf360/eravawsmail.php';
+
+    Object.keys(emailData).forEach(function (key) {
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = emailData[key];
+        form.appendChild(input);
+    });
+
+    document.body.appendChild(iframe);
+    document.body.appendChild(form);
+    form.submit();
+}
 </script>
 
 

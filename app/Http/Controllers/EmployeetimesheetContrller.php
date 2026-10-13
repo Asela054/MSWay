@@ -158,6 +158,7 @@ class EmployeetimesheetContrller extends Controller
                             SELECT ot.emp_id, ot.date, ot.hours, ot.double_hours, ot.triple_hours, 
                                 ot.holiday_normal_hours, TIMEDIFF(ot.to, ot.from) AS duration_time
                             FROM ot_approved ot
+                            WHERE ot.status = 1
                         ) ot ON ot.emp_id = ? AND ot.date = ?
                         LEFT JOIN (
                             SELECT l.emp_id, lt.leave_type AS leavename, l.no_of_days, l.leave_from, l.leave_to

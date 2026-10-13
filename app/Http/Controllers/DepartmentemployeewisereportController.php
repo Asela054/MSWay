@@ -315,18 +315,18 @@ class DepartmentemployeewisereportController extends Controller
             return response()->json(['html' => '']);
         }
 
-        // Query to get employee-wise OT details with month breakdown
-        $query = DB::table('ot_approved')
-            ->join('employees', 'ot_approved.emp_id', '=', 'employees.emp_id')
-            ->join('departments', 'employees.emp_department', '=', 'departments.id')
-            ->where('employees.deleted', 0)
-            ->whereIn('employees.emp_id', $accessibleEmployeeIds)
-            ->when(!empty($companyIds), function ($query) use ($companyIds) {
-                $query->whereIn('employees.emp_company', $companyIds);
-            })
-            ->when(!empty($branchIds), function ($query) use ($branchIds) {
-                $query->whereIn('employees.emp_location', $branchIds);
-            });
+       $query = DB::table('ot_approved')
+        ->join('employees', 'ot_approved.emp_id', '=', 'employees.emp_id')
+        ->join('departments', 'employees.emp_department', '=', 'departments.id')
+        ->where('employees.deleted', 0)
+        ->where('ot_approved.status', '=', 1)
+        ->whereIn('employees.emp_id', $accessibleEmployeeIds)
+        ->when(!empty($companyIds), function ($query) use ($companyIds) {
+            $query->whereIn('employees.emp_company', $companyIds);
+        })
+        ->when(!empty($branchIds), function ($query) use ($branchIds) {
+            $query->whereIn('employees.emp_location', $branchIds);
+        });
 
         // Filter by department if specified (not 'All')
         if ($department != 'All' && !empty($department)) {
@@ -349,11 +349,12 @@ class DepartmentemployeewisereportController extends Controller
             'employees.calling_name',
             'departments.name as dept_name',
             'departments.id as dept_id',
-            DB::raw('SUM(ot_approved.hours) as total_ot'),
-            DB::raw('SUM(ot_approved.double_hours) as total_double_ot'),
+            DB::raw('SUM(COALESCE(ot_approved.hours, 0) + COALESCE(ot_approved.holiday_normal_hours, 0)) as total_ot'),
+            DB::raw('SUM(COALESCE(ot_approved.double_hours, 0)) as total_double_ot'),
             DB::raw('YEAR(ot_approved.date) as year'),
             DB::raw('MONTH(ot_approved.date) as month')
         )
+
         ->groupBy(
             'employees.emp_id',
             'departments.id',
@@ -448,8 +449,8 @@ class DepartmentemployeewisereportController extends Controller
                 $monthlyTotals[$yearMonth]['normal_ot'] += $normal_ot;
                 $monthlyTotals[$yearMonth]['double_ot'] += $double_ot;
 
-                $table .= '<td class="align-middle">' . number_format($normal_ot, 2) . '</td>';
-                $table .= '<td class="align-middle">' . number_format($double_ot, 2) . '</td>';
+                $table .= '<td class="align-middle">' . $this->decimalToHm($normal_ot) . '</td>';
+                $table .= '<td class="align-middle">' . $this->decimalToHm($double_ot) . '</td>';
             } elseif ($reporttype == '2' && !empty($from_date) && !empty($to_date)) {
                 foreach ($monthsInRange as $month) {
                     $yearMonth = date('Y-m', strtotime($month));
@@ -460,8 +461,8 @@ class DepartmentemployeewisereportController extends Controller
                     $monthlyTotals[$month]['normal_ot'] += $normal_ot;
                     $monthlyTotals[$month]['double_ot'] += $double_ot;
 
-                    $table .= '<td class="align-middle">' . number_format($normal_ot, 2) . '</td>';
-                    $table .= '<td class="align-middle">' . number_format($double_ot, 2) . '</td>';
+                    $table .= '<td class="align-middle">' . $this->decimalToHm($normal_ot) . '</td>';
+                    $table .= '<td class="align-middle">' . $this->decimalToHm($double_ot) . '</td>';
                 }
             }
             
@@ -479,12 +480,12 @@ class DepartmentemployeewisereportController extends Controller
             
             if ($reporttype == '1' && !empty($selectedmonth)) {
                 $yearMonth = date('Y-m', strtotime($selectedmonth));
-                $table .= "<td class='text-center'><strong>" . number_format($monthlyTotals[$yearMonth]['normal_ot'], 2) . "</strong></td>";
-                $table .= "<td class='text-center'><strong>" . number_format($monthlyTotals[$yearMonth]['double_ot'], 2) . "</strong></td>";
+                $table .= "<td class='text-center'><strong>" . $this->decimalToHm($monthlyTotals[$yearMonth]['normal_ot']) . "</strong></td>";
+               $table .= "<td class='text-center'><strong>" . $this->decimalToHm($monthlyTotals[$yearMonth]['double_ot']) . "</strong></td>";
             } elseif ($reporttype == '2' && !empty($from_date) && !empty($to_date)) {
                 foreach ($monthsInRange as $month) {
-                    $table .= "<td class='text-center'><strong>" . number_format($monthlyTotals[$month]['normal_ot'], 2) . "</strong></td>";
-                    $table .= "<td class='text-center'><strong>" . number_format($monthlyTotals[$month]['double_ot'], 2) . "</strong></td>";
+                    $table .= "<td class='text-center'><strong>" . $this->decimalToHm($monthlyTotals[$yearMonth]['normal_ot']) . "</strong></td>";
+                    $table .= "<td class='text-center'><strong>" . $this->decimalToHm($monthlyTotals[$yearMonth]['double_ot']) . "</strong></td>";
                 }
             }
             $table .= "</tr>";
@@ -791,5 +792,10 @@ class DepartmentemployeewisereportController extends Controller
         return $months;
     }
 
-
+    
+    private function decimalToHm($hours)
+    {
+        $totalMinutes = (int) round($hours * 60);
+        return sprintf('%02d:%02d', floor($totalMinutes / 60), $totalMinutes % 60);
+    }
 }
