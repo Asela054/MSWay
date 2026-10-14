@@ -54,6 +54,12 @@ class OTApproveController extends Controller
         $from_date = $request->input('from_date');
         $to_date = $request->input('to_date');
 
+        $otskip_status = 0;
+
+        $appName = config('app.name');
+        if($appName == 'RajapakshaElectricalHRM'){
+            $otskip_status = 1;
+        }
 
         // Get accessible employee IDs based on user access rights
         $userId = Auth::id();
@@ -165,8 +171,13 @@ class OTApproveController extends Controller
                 ->where('employeeshifts.approval_status', 1)
                 ->get();
 
-                // Go to to roster / attendance-derived shift if no shift assignment found
+                // Go to to roster / attendance-derived shift if no shift assignment foun
             if ($shift_detail->isEmpty()) {
+
+            if ($otskip_status == 1) {
+                    continue;
+                }
+                
                 $roster_detail = DB::table('employee_roster_details')
                     ->join('shift_types', 'employee_roster_details.shift_id', '=', 'shift_types.id')
                     ->select('employee_roster_details.*', 'shift_types.onduty_time', 'shift_types.offduty_time', 'shift_types.id as shiftid')

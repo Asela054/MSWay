@@ -783,7 +783,7 @@
                                    $('#approveemail').val(),
                                    $('#departmentheademail').val()
                                ].filter(email => email).join(';'),
-                               'contsubj': 'Leave Application - ' + $('#employee option:selected').text(),
+                               'contsubj': 'Leave Application - ' + $('#employee_f option:selected').text(),
                                'contbody': emailBody
                            };
 
