@@ -118,7 +118,7 @@ LEFT JOIN `job_categories` AS `ub` ON `ub`.`id` = `u`.`job_id`
 LEFT JOIN `remunerations` AS `uc` ON `uc`.`id` = `u`.`remuneration_id`";
 
 // Apply employee filter only for adjustment_type = 1 (employee-wise)
-$extraWhere = "(`u`.`adjustment_type` != 1 OR (1=1 $employeeFilter))";
+$extraWhere = "(`u`.`adjustment_type` != 1 OR (`u`.`emp_id` != 0 AND `ua`.`is_resigned` = 0 $employeeFilter))";
 
 echo json_encode(
     SSP::simple($_POST, $sql_details, $table, $primaryKey, $columns, $joinQuery, $extraWhere)
