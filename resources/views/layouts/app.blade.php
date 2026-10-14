@@ -1006,7 +1006,8 @@
   <body class="nav-fixed">
     <div id="app">
         <nav class="topnav navbar navbar-expand shadow navbar-light topnavbarcolor" id="sidenavAccordion">
-            <a class="navbar-brand" href="{{ url('/home') }}" style="color: white">
+            <a class="navbar-brand" href="{{ url('/home') }}" style="color: white"
+               onclick="if(window.location.pathname === '/useraccountsummery') { return false; }">
                 <img class="img-fluid" src="{{ url('/public/images/toplogo.png') }}" alt="Employee Photo"/>
             </a>
             @unless(Auth::user()->hasRole('Employee'))
