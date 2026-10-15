@@ -1944,6 +1944,15 @@ Route::post('colnerosterstoreWeekly', 'EmployeeRosterWeeklyDetailsController@col
 // Employee users details routes
 Route::get('/emp_users' ,'UserController@emp_users')->name('emp_users');
 
+/*-- Activity Management----*/
+/*-- IOU Reasons----*/
+Route::resource('IOUReason', 'ActivityManagement/IOU/IOUReasonController');
+Route::get('IOUReason',['uses' => 'ActivityManagement/IOU/IOUReasonController@index', 'as' => 'IOUReason']); 
+Route::post('addIOUReason',['uses' => 'ActivityManagement/IOU/IOUReasonController@store', 'as' => 'addIOUReason']); 
+Route::post('IOUReason/update', 'ActivityManagement/IOU/IOUReasonController@update')->name('IOUReason.update');
+Route::get('IOUReason/destroy/{id}', 'ActivityManagement/IOU/IOUReasonController@destroy');
+/*-- IOU Reasons----*/
+
 
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');
