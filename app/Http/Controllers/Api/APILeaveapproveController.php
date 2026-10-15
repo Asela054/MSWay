@@ -50,7 +50,53 @@ class APILeaveapproveController extends Controller
             return (new BaseController())->sendError('Validation Error.', $validator->errors(), '400');
         }
 
-        $query = DB::table('leaves')
+        $appName = config('app.name');
+        if($appName == 'pmmgroup'){
+            $employee = $request->employee;
+
+            $query = DB::table('leaves')
+                ->leftjoin('leave_types', 'leaves.leave_type', '=', 'leave_types.id')
+                ->leftjoin('employees as ec', 'leaves.emp_covering', '=', 'ec.emp_id')
+                ->leftjoin('employees as e', 'leaves.emp_id', '=', 'e.emp_id')
+                ->leftjoin('branches', 'e.emp_location', '=', 'branches.id')
+                ->leftjoin('departments', 'e.emp_department', '=', 'departments.id')
+                ->select('leaves.*', 'ec.emp_name_with_initial as covering_emp', 'leave_types.leave_type', 'e.emp_name_with_initial as emp_name', 'departments.name as dep_name')
+                ->where(function ($q) use ($employee) {
+
+                    // Approve Person 1: approve_01 not has approved
+                    $q->where(function ($q1) use ($employee) {
+                        $q1->where('leaves.leave_approv_person', $employee)
+                        ->where(function ($q2) {
+                            $q2->whereNull('leaves.approve_01')
+                                ->orWhere('leaves.approve_01', '!=', 1);
+                        });
+                    });
+
+                    // Approve Person 2: approve_01 has approved, approve_02 not has approved
+                    $q->orWhere(function ($q1) use ($employee) {
+                        $q1->where('leaves.leave_approv_person_2', $employee)
+                        ->where('leaves.approve_01', 1)
+                        ->where(function ($q2) {
+                            $q2->whereNull('leaves.approve_02')
+                                ->orWhere('leaves.approve_02', '!=', 1);
+                        });
+                    });
+                })
+                ->get()
+                ->map(function ($row) {
+                    if ($row->half_short == 0.25) {
+                        $row->duration_type = 'Short Leave';
+                    } elseif ($row->half_short == 0.5) {
+                        $row->duration_type = 'Half Day';
+                    } elseif ($row->half_short == 1) {
+                        $row->duration_type = 'Full Day';
+                    }
+                    return $row;
+                });
+
+        }else{
+
+            $query = DB::table('leaves')
             ->join('leave_types', 'leaves.leave_type', '=', 'leave_types.id')
             ->join('employees as ec', 'leaves.emp_covering', '=', 'ec.emp_id')
             ->join('employees as e', 'leaves.emp_id', '=', 'e.emp_id')
@@ -69,6 +115,8 @@ class APILeaveapproveController extends Controller
                 }
                 return $row;
             });
+        }
+       
 
         $data = array(
             'applyleavelist' => $query
@@ -125,11 +173,5 @@ class APILeaveapproveController extends Controller
 
         return (new BaseController)->sendResponse($request->id, 'Leave Approved Updated');
     }
-
-    // public function leave_apply_approved_list(Request $request)
-    // {
-    //     $leave_list = \App\Leave::WHERE('status', 'approved')->get();
-    //     return (new BaseController)->sendResponse($leave_list, 'Leaves List');
-    // }
-
+    
 }

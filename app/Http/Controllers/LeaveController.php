@@ -45,7 +45,7 @@ class LeaveController extends Controller
 
        $leavetype = LeaveType::whereNotIn('id', [7])->orderBy('id', 'asc')->get();
        $employees = Employee::where('leave_approve_person', 1)->get();
-      $leaveemployees = DB::table('leave_request')
+       $leaveemployees = DB::table('leave_request')
                         ->select(
                             'employees.emp_id',
                             'employees.emp_name_with_initial',
@@ -61,7 +61,13 @@ class LeaveController extends Controller
                         ->distinct()
                         ->get();
 
-        return view('Leave.leaveapply', compact('leavetype', 'employees','leaveemployees'));
+         $appName = config('app.name');
+        if($appName == 'pmmgroup'){
+          return view('Leave.leaveapply_pmm', compact('leavetype', 'employees','leaveemployees'));
+        }else{
+
+           return view('Leave.leaveapply', compact('leavetype', 'employees','leaveemployees'));   
+        }
     }
 
     public function leave_list_dt(Request $request)
@@ -151,7 +157,13 @@ class LeaveController extends Controller
             abort(403);
         }
 
-        return view('Leave.leaveapprovel');
+        $appName = config('app.name');
+        if($appName == 'pmmgroup'){
+              return view('Leave.leaveapprovel_pmm');
+        }else{
+            return view('Leave.leaveapprovel');
+        }
+      
 
     }
 

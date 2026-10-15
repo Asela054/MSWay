@@ -1944,6 +1944,13 @@ Route::post('colnerosterstoreWeekly', 'EmployeeRosterWeeklyDetailsController@col
 // Employee users details routes
 Route::get('/emp_users' ,'UserController@emp_users')->name('emp_users');
 
+//PMM Leave controller routes 
+Route::post('getLastLeaveApprovers', 'LeaveController_pmm@getLastLeaveApprovers')->name('getLastLeaveApprovers');
+Route::post('PMMaddLeaveApply',['uses' => 'LeaveController_pmm@store', 'as' => 'PMMaddLeaveApply']); 
+Route::post('LeaveApply/update', 'LeaveController_pmm@update')->name('PMMLeaveApplyupdate');
+Route::get('LeaveApplyPmm/{id}/edit', 'LeaveController_pmm@edit')->name('LeaveApplyPmm.edit');
+Route::post('pmmapprovelupdate', 'LeaveController_pmm@approvelupdate')->name('pmmapprovelupdate');
+Route::post('pmmleaveapprove_batch', 'LeaveController_pmm@leave_approve_batch')->name('pmmleaveapprove_batch');
 
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');
