@@ -178,7 +178,7 @@
                                                 <li role="presentation"><a href="#leaveinfo" aria-controls="leaveinfo" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-calendar-week"></i></span>Leave Info</a><span class="bgcolor-major-gradient-overlay"></span></li>
                                                 <li role="presentation"><a href="#salaryadvance" aria-controls="salaryadvance" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-money-bill"></i></span>Salary Advance</a><span class="bgcolor-major-gradient-overlay"></span></li>
                                                 <li role="presentation"><a href="#salaryslip" aria-controls="salaryslip" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-receipt"></i></span>Salary Slips</a><span class="bgcolor-major-gradient-overlay"></span></li>
-                                                <li role="presentation"><a href="#production" aria-controls="production" role="tab" data-toggle="tab"><span class="icon"><i class="fa-light fa-ballot-check"></i></span>My Jobs</a><span class="bgcolor-major-gradient-overlay"></span></li>
+                                                {{--<li role="presentation"><a href="#production" aria-controls="production" role="tab" data-toggle="tab"><span class="icon"><i class="fa-light fa-ballot-check"></i></span>My Jobs</a><span class="bgcolor-major-gradient-overlay"></span></li>--}}
                                                 <li role="presentation"><a href="#markattendance" aria-controls="markattendance" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-clock"></i></span>Mark Attendance</a><span class="bgcolor-major-gradient-overlay"></span></li>
                                                 <li role="presentation"><a href="#attendancetimesheet" aria-controls="attendancetimesheet" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-file-contract"></i></span>Time Sheet</a><span class="bgcolor-major-gradient-overlay"></span></li>
                                             </ul>
@@ -1596,7 +1596,11 @@
                     if (row.approvestatus == 0 ) {
                         buttons += '<button name="edit" id="'+row.id+'" class="edit btn btn-primary btn-sm" style="margin:1px;" type="submit" data-toggle="tooltip" title="Edit"><i class="fas fa-pencil-alt"></i></button>';
                         buttons += '<button type="submit" name="delete" id="'+row.id+'" class="delete btn btn-danger btn-sm" style="margin:1px;" data-toggle="tooltip" title="Remove" ><i class="far fa-trash-alt"></i></button>';
-                    }                   
+                    }
+
+                    if (row.approvestatus != 0 && row.approvestatus != 2) {
+                        buttons += '<button type="button" id="'+row.id+'" class="leave-pdf-export btn btn-danger btn-sm" style="margin:1px;" data-toggle="tooltip" title="Export PDF"><i class="fas fa-file-pdf"></i></button>';
+                    }
 
                     return buttons;
                 }
@@ -1616,6 +1620,217 @@
                     }
         });
     }
+
+    // Leave PDF helpers
+    function leavePdfParts(str) {
+        if (!str) return ['', '', ''];
+        return str.substring(0, 10).split('-');
+    }
+
+    function leavePdfAddDays(str, n) {
+        var d = new Date(str.substring(0, 10) + 'T00:00:00');
+        d.setDate(d.getDate() + n);
+        var m = ('0' + (d.getMonth() + 1)).slice(-2);
+        var dd = ('0' + d.getDate()).slice(-2);
+        return d.getFullYear() + '-' + m + '-' + dd;
+    }
+
+    function leavePdfLeaveDays(from, to, category) {
+        var f = new Date(from.substring(0, 10) + 'T00:00:00');
+        var t = new Date(to.substring(0, 10) + 'T00:00:00');
+        var diff = Math.round((t - f) / 86400000) + 1;
+        return diff * parseFloat(category || 1);
+    }
+
+    function generateLeavePdfSummary(d, row) {
+        var jsPDFLib = (window.jspdf && window.jspdf.jsPDF) ? window.jspdf.jsPDF : window.jsPDF;
+        var doc = new jsPDFLib({ unit: 'mm', format: 'a4' });
+
+        var THIN = 0.2, THICK = 0.7;
+        var X0 = 10, X1 = 200;
+
+        function box(x, y, w, h) {
+            doc.setLineWidth(THIN);
+            doc.rect(x, y, w, h);
+        }
+        function thickLine(x1, y1, x2, y2) {
+            doc.setLineWidth(THICK);
+            doc.line(x1, y1, x2, y2);
+        }
+        function thickRect(x, y, w, h) {
+            doc.setLineWidth(THICK);
+            doc.rect(x, y, w, h);
+        }
+        function fitSize(t, maxW, size, bold, minSize) {
+            doc.setFont('helvetica', bold ? 'bold' : 'normal');
+            doc.setFontSize(size);
+            while (size > minSize && doc.getTextWidth(t) > maxW) {
+                size -= 0.5;
+                doc.setFontSize(size);
+            }
+            return size;
+        }
+        function label(t, x, y, h) {
+            t = String(t || '');
+            fitSize(t, 31, 9, true, 6);
+            doc.text(t, x + 2, y + h / 2, { baseline: 'middle' });
+        }
+        function cellText(t, x, y, w, h, size, bold) {
+            t = String(t === null || t === undefined ? '' : t);
+            var maxW = w - 3;
+            var s = fitSize(t, maxW, size || 9, bold, 6);
+            if (doc.getTextWidth(t) > maxW) {
+                var lines = doc.splitTextToSize(t, maxW);
+                var lh = s * 0.3528 * 1.15;
+                var startY = y + h / 2 - ((lines.length - 1) * lh) / 2;
+                doc.text(lines, x + w / 2, startY, { align: 'center', baseline: 'middle' });
+                return;
+            }
+            doc.text(t, x + w / 2, y + h / 2, { align: 'center', baseline: 'middle' });
+        }
+        function center(t, x, y, w, bold, size) {
+            doc.setFont('helvetica', bold ? 'bold' : 'normal');
+            doc.setFontSize(size || 9);
+            doc.text(t, x + w / 2, y, { align: 'center' });
+        }
+        function tick(cx, cy) {
+            doc.setLineWidth(0.6);
+            doc.line(cx - 2, cy, cx - 0.5, cy + 1.5);
+            doc.line(cx - 0.5, cy + 1.5, cx + 2.5, cy - 2);
+        }
+
+        var empName    = d.emp_name || row.employee_display || '';
+        var dept       = d.dep_name || row.dep_name || '';
+        var empNo      = d.emp_no || d.emp_id || '';
+        var desig      = d.designation || '';
+        var section    = d.section || '';
+        var location_  = d.location || '';
+        var reqDate    = d.created_at ? d.created_at : new Date().toISOString();
+        var days       = leavePdfLeaveDays(d.from_date, d.to_date, d.leave_category);
+        var resume     = leavePdfAddDays(d.to_date, 1);
+        var companyName = d.company_name || 'AgroVentures Plantations (Pvt) Ltd';
+
+        center(companyName, 0, 16, 210, true, 14);
+        center('Leave Application Form', 0, 23, 210, true, 11);
+        center('Office Staff', 0, 28, 210, true, 9);
+
+        var y = 32, h = 9;
+        var rows = [
+            ['Name:', empName, 'Department:', dept],
+            ['EMP No:', empNo, 'Section:', section],
+            ['Designation:', desig, 'Location:', location_]
+        ];
+        for (var i = 0; i < rows.length; i++) {
+            var ry = y + i * h;
+            box(X0, ry, 35, h);  label(rows[i][0], X0, ry, h);
+            box(45, ry, 90, h);  cellText(rows[i][1], 45, ry, 90, h);
+            box(135, ry, 25, h); label(rows[i][2], 135, ry, h);
+            box(160, ry, 40, h); cellText(rows[i][3], 160, ry, 40, h);
+        }
+
+        var ly = 59;
+        box(X0, ly, 35, h); label('No of Leave Days:', X0, ly, h);
+        box(45, ly, 35, h); cellText(days, 45, ly, 35, h);
+
+        function dateRow(text, dateStr, yy) {
+            var p = leavePdfParts(dateStr);
+            box(X0, yy, 35, h); label(text, X0, yy, h);
+            box(45, yy, 15, h); cellText(p[0], 45, yy, 15, h);
+            box(60, yy, 10, h); cellText(p[1], 60, yy, 10, h);
+            box(70, yy, 10, h); cellText(p[2], 70, yy, 10, h);
+        }
+        dateRow('Leave Request Date:', reqDate, 68);
+        dateRow('Leave Start Date:', d.from_date, 77);
+        dateRow('Date of Resuming Date:', resume, 86);
+
+        box(X0, 95, 35, 30); label('Reason for Leave:', X0, 95, 30);
+        box(45, 95, 35, 30);
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
+        var reasonLines = doc.splitTextToSize(d.reason || '', 31);
+        var lineH = 3.5;
+        var startY = 95 + 15 - ((reasonLines.length - 1) * lineH) / 2;
+        doc.text(reasonLines, 45 + 17.5, startY, { align: 'center', baseline: 'middle' });
+
+        box(80, 59, 120, 27);
+        box(80, 86, 120, 39);
+        doc.setFontSize(8); doc.setFont('helvetica', 'normal');
+        doc.text('.............................', 110, 78, { align: 'center' });
+        center('Applicant', 80, 83, 60, false, 8);
+        doc.text('...............................', 170, 78, { align: 'center' });
+        center('Section Head', 140, 83, 60, false, 8);
+        doc.text('.............................', 110, 118, { align: 'center' });
+        center('Head of Department', 80, 123, 60, false, 8);
+        doc.text('...............................', 170, 118, { align: 'center' });
+        center('Approved by CEO', 140, 123, 60, false, 8);
+
+        box(X0, 125, 190, 7);
+        center('HR Department', X0, 129.5, 190, true, 9);
+
+        var types = ['AL', 'CL', 'Sick', 'ML', 'Other', 'No Pay', ''];
+        var CW = 11;
+        box(X0, 132, 35, 16); cellText('Leave Type', X0, 132, 35, 16, 9, true);
+        for (var t = 0; t < types.length; t++) {
+            var tx = 45 + t * CW;
+            box(tx, 132, CW, 7); cellText(types[t], tx, 132, CW, 7, 8, true);
+            box(tx, 139, CW, 9);
+        }
+        var cmX = 45 + types.length * CW;
+        box(cmX, 132, X1 - cmX, 16);
+        doc.setTextColor(150);
+        cellText('More Comments', cmX, 132, X1 - cmX, 16, 8, false);
+        doc.setTextColor(0);
+
+        var lt = (row.leave_type || '').toLowerCase();
+        var idx = 4;
+        if (lt.indexOf('annual') > -1) idx = 0;
+        else if (lt.indexOf('casual') > -1) idx = 1;
+        else if (lt.indexOf('sick') > -1) idx = 2;
+        else if (lt.indexOf('medical') > -1) idx = 3;
+        else if (lt.indexOf('no pay') > -1 || lt.indexOf('nopay') > -1) idx = 5;
+        tick(45 + idx * CW + CW / 2, 143.5);
+
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
+        doc.text('...............................', 45, 160, { align: 'center' });
+        center('HR Manager', X0, 168, 70, false, 8);
+        center('Leave', 95, 159, 20, true, 10);
+        center('Updated By', 95, 165, 20, true, 10);
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
+        doc.text('...............................', 165, 160, { align: 'center' });
+        center('Payroll Officer', 130, 168, 70, false, 8);
+
+        thickRect(X0, 32, 190, 27);
+        thickLine(135, 32, 135, 59);
+        thickLine(X0, 59, X1, 59);
+        thickLine(80, 59, 80, 125);
+        thickLine(X1, 59, X1, 125);
+        thickLine(80, 86, X1, 86);
+        thickLine(X0, 59, X0, 125);
+        thickLine(X0, 125, X1, 125);
+        thickRect(X0, 125, 190, 7);
+        thickRect(X0, 152, 190, 20);
+        thickLine(X0, 132, X0, 148);
+        thickLine(X1, 132, X1, 148);
+        thickLine(X0, 148, X1, 148);
+
+        doc.save('Leave_Application_' + (empNo || d.emp_id) + '_' + d.from_date + '.pdf');
+    }
+
+    //  Leave PDF click handler (Leave Info tab) 
+    $(document).on('click', '.leave-pdf-export', function () {
+        var id = $(this).attr('id');
+        var row = $('#divicestable').DataTable().row($(this).closest('tr')).data();
+
+        $.ajax({
+            url: '{!! route("leaverequestedit") !!}',
+            type: 'POST',
+            dataType: 'json',
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+            data: { id: id },
+            success: function (data) {
+                generateLeavePdfSummary(data.result, row);
+            }
+        });
+    });
 
     function fetchEmployeeData() {
         var _token = $('input[name="_token"]').val();
