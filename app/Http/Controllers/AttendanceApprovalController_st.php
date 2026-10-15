@@ -157,7 +157,7 @@ class AttendanceApprovalController_st extends Controller
 
          DB::beginTransaction();
 
-    try {
+     try {
 
             $current_date_time = Carbon::now()->toDateTimeString();
 
@@ -267,7 +267,6 @@ class AttendanceApprovalController_st extends Controller
                 if(!empty($record->date)){
                     $year_rec = Carbon::createFromFormat('Y-m-d H:i:s', $record->date)->year;
                     $month_rec = Carbon::createFromFormat('Y-m-d H:i:s', $record->date)->month;
-
         
                     // Fetch employee job category and work hour data
                     $employee = DB::table('employees as e')
@@ -475,6 +474,7 @@ class AttendanceApprovalController_st extends Controller
                 }
             }
 
+            DB::commit();
             //return success msg json
             return response()->json(['success' => true, 'message' => 'Attendance Successfully  Approved']);
         } catch (\Exception $e) {
