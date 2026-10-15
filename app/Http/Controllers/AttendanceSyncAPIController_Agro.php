@@ -74,6 +74,7 @@ class AttendanceSyncAPIController_Agro extends Controller
             }
 
             $deviceInserted = 0;
+            $insert_type = 1;
 
             // 3. Loop each user, then each punch record
            foreach ($payload['attendance'] as $record) {
@@ -90,7 +91,8 @@ class AttendanceSyncAPIController_Agro extends Controller
                     $full_emp_id,
                     $date,
                     $time,
-                    $date
+                    $date,
+                    $insert_type
                 );
 
                 $deviceInserted++;

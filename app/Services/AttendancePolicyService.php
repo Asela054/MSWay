@@ -540,8 +540,8 @@ class AttendancePolicyService
 
             if ($isSaturday && $shiftType->saturday_onduty_time && $shiftType->saturday_offduty_time) {
 
-                $onDutyTime = Carbon::parse($shiftType->saturday_onduty_time);
-                $offDutyTime = Carbon::parse($shiftType->saturday_offduty_time);
+                 $onDutyTime  = Carbon::parse($date . ' ' . $shiftType->saturday_onduty_time);
+                 $offDutyTime = Carbon::parse($date . ' ' . $shiftType->saturday_offduty_time);
             } else {
                 $onDutyTime = Carbon::parse($shiftType->onduty_time);
                 $offDutyTime = Carbon::parse($shiftType->offduty_time);
