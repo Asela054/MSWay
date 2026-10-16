@@ -40,7 +40,6 @@ class AttendanceApprovalController_st extends Controller
 
         $query = DB::query()
             ->select('at1.id as attendance_id',
-                'at1.emp_id',
                 'at1.uid',
                 'at1.state',
                 'at1.timestamp',
@@ -56,7 +55,8 @@ class AttendanceApprovalController_st extends Controller
                 'employees.emp_name_with_initial',
                 'employees.emp_location',
                 'branches.location',
-                'departments.name as dept_name'
+                'departments.name as dept_name',
+                'employees.emp_id'
             )
             ->from('employees as employees')
             // ->leftJoin('attendances as at1', 'employees.emp_id', '=', 'at1.uid')
@@ -263,12 +263,7 @@ class AttendanceApprovalController_st extends Controller
                 // $normal_ot_hours_additional = (new \App\OtApproved)->get_ot_hours_monthly_ktClean($record->emp_id, $month, $closedate);
                 $normal_ot_hours_additional = 0;
                 
-                
-                if(!empty($record->date)){
-                    $year_rec = Carbon::createFromFormat('Y-m-d H:i:s', $record->date)->year;
-                    $month_rec = Carbon::createFromFormat('Y-m-d H:i:s', $record->date)->month;
-        
-                    // Fetch employee job category and work hour data
+                 // Fetch employee job category and work hour data
                     $employee = DB::table('employees as e')
                         ->join('job_categories as jc', 'e.job_category_id', '=', 'jc.id')
                         ->select('e.id as empid', 'e.emp_id', 'e.emp_status', 'jc.work_hour_date','jc.salary_without_attendace','jc.shift_hours')
@@ -276,16 +271,21 @@ class AttendanceApprovalController_st extends Controller
                         ->where('e.id', $record->emp_auto_id)
                         ->first();
         
+                    if (!$employee) {
+                        \Log::warning('No job category for emp ' . $record->emp_auto_id);
+                        continue;
+                    }
         
-                    if ($employee) {
                         $empoyeeId = $employee->empid;
                         $empId = $employee->emp_id;
                         $empstatus = $employee->emp_status;
                         $workHourDate = $employee->work_hour_date;
                         $salarystatus = $employee->salary_without_attendace;
                         $shift_hours = $employee->shift_hours;
-                    }
-        
+                    
+                if(!empty($record->date)){
+                    $year_rec = Carbon::createFromFormat('Y-m-d H:i:s', $record->date)->year;
+                    $month_rec = Carbon::createFromFormat('Y-m-d H:i:s', $record->date)->month;
 
                     $existingRecord = DB::table('employee_work_rates')
                         ->where('emp_id', $record->emp_auto_id)
@@ -471,6 +471,33 @@ class AttendanceApprovalController_st extends Controller
                             employeeWorkRate::create($data2);
                         }
                     }  
+                }else if(empty($record->date) && $salarystatus == 1)
+                {
+                    $year_rec  = Carbon::parse($todate)->year;
+                    $month_rec = Carbon::parse($todate)->month;
+
+                            $data4 = array(
+                                            'emp_id' => $record->emp_auto_id,
+                                            'emp_etfno' => $record->emp_id,
+                                            'work_year' => $year_rec,
+                                            'work_month' => $month_rec,
+                                            'work_days' => 0,
+                                            'working_week_days' => 0,
+                                            'work_hours' => 0,
+                                            'leave_days' => $leave_days,
+                                            'nopay_days' => $no_pay_days,
+                                            'normal_rate_otwork_hrs' => 0,
+                                            'double_rate_otwork_hrs' => 0,
+                                            'triple_rate_otwork_hrs' => 0,
+                                            'day_off' => 0,
+                                            'night_days' => 0,
+                                            'additional_OT' => 0,
+                                            'created_at' => date('Y-m-d H:i:s'),
+                                            'updated_at' => date('Y-m-d H:i:s')
+                                        );
+                            employeeWorkRate::create($data4);
+                }else {
+                    continue;
                 }
             }
 
