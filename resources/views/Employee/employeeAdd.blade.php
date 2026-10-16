@@ -1548,7 +1548,7 @@ $(document).ready(function () {
                         var loginEmail    = $('#userlog_emp_email').val() || typedEmail;
                         var plainPassword = $('#userlog_password').val();
                         var empName       = $('#userlog_name').val();
-                        var currentUrl    = window.location.origin;
+                        var currentUrl    = '{{ url('/') }}';
 
                         var emailBody = generateUserLoginEmailBody(empName, typedEmail, plainPassword, currentUrl);
                         var companyName = $('#userlog_company_name').val() || 'HRM System';
