@@ -353,34 +353,44 @@ class AttendanceApprovalController_st extends Controller
                                     $timestamps = $query->pluck('timestamp')->toArray();
                                     $count = count($timestamps);
 
+                                      $totalMinutes = 0;
+
                                     // skip if odd number of timestamps
                                         if ($count % 2 === 0) {
+                                             $in  = Carbon::parse($timestamps[0])->second(0);
+                                             $out = Carbon::parse($timestamps[$count - 1])->second(0);
                                             $totalMinutes = 0;
 
-                                            for ($i = 0; $i < $count; $i += 2) {
-                                            $in  = Carbon::parse($timestamps[$i])->second(0);
-                                            $out = Carbon::parse($timestamps[$i + 1])->second(0);
-
-                                                if ($in && $out && $in != $out) {
-                                                    $totalMinutes += $in->diffInMinutes($out);
+                                            if ($in && $out && $in != $out) {
+                                                    $totalMinutes = $in->diffInMinutes($out);
                                                 }
-                                            }
+                                           
+                                              // approved additional timestamps duration
+                                                $additionalDuration = DB::table('attendance_additional_timestamps')
+                                                    ->where('emp_id', $record->emp_id)
+                                                    ->whereDate('date', $todayDate)
+                                                    ->where('status', 1)
+                                                    ->sum('duration');
+
+                                                $additionalMinutes = (int) round(((float) $additionalDuration) * 60);
+
+                                                $totalMinutes -= $additionalMinutes;
+
+                                                if ($totalMinutes < 0) {
+                                                    $totalMinutes = 0;
+                                                }
 
                                             $totalworkHours += round($totalMinutes / 60, 2);
                                         }
                                 }
-        
                             }
                         }
 
-        
                         $totalregularweekworkshours = $totalworkHours -($normal_ot_hours + $double_ot_hours);
                         
                         // this use to add duty leaves hours count to day salaries 
                         $totalweekworkshours = $totalregularweekworkshours + ($shift_hours * $duty_leaves);
-
                         
-
                         if($salarystatus == 1 &&  $totalweekworkshours==0 && $empstatus == 1){
                             $data3 = array(
                                 'emp_id' => $record->emp_auto_id,
