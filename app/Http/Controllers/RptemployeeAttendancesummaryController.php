@@ -124,7 +124,8 @@ class RptemployeeAttendancesummaryController extends Controller
             })
             ->addColumn('working_hours', function ($row) use ($month, $closedate) {
                 if ($row->attendance_id) {
-                    return $working_hours  = (new \App\Attendance)->get_working_hours($row->emp_id, $month, $closedate);
+                    $working_hours  = (new \App\Attendance)->get_working_hours($row->emp_id, $month, $closedate);
+                    return $this->decimalToHHMM($working_hours);
                 }
                 return 0;
             })
@@ -143,13 +144,15 @@ class RptemployeeAttendancesummaryController extends Controller
             })
              ->addColumn('normal_ot', function ($row) use ($month, $closedate) {
                 if ($row->attendance_id) {
-                    return $normal_ot_hours = (new \App\OtApproved)->get_ot_hours_monthly($row->emp_id, $month, $closedate);
+                    $normal_ot_hours = (new \App\OtApproved)->get_ot_hours_monthly($row->emp_id, $month, $closedate);
+                    return $this->decimalToHHMM($normal_ot_hours);
                 }
                 return 0;
             })
              ->addColumn('double_ot', function ($row) use ($month, $closedate) {
                 if ($row->attendance_id) {
-                    return $double_ot_hours = (new \App\OtApproved)->get_double_ot_hours_monthly($row->emp_id, $month, $closedate);
+                    $double_ot_hours = (new \App\OtApproved)->get_double_ot_hours_monthly($row->emp_id, $month, $closedate);
+                    return $this->decimalToHHMM($double_ot_hours);
                 }
                 return 0;
             })
@@ -208,6 +211,21 @@ class RptemployeeAttendancesummaryController extends Controller
     }
 
 
+    private function decimalToHHMM($decimal)
+    {
+        $decimal = (float) $decimal;
+
+        if ($decimal == 0) {
+            return '00:00';
+        }
+
+        $sign = $decimal < 0 ? '-' : '';
+        $totalMinutes = (int) round(abs($decimal) * 60);
+        $hours = floor($totalMinutes / 60);
+        $minutes = $totalMinutes % 60;
+
+        return $sign . sprintf('%02d:%02d', $hours, $minutes);
+    }
 
 
 } 

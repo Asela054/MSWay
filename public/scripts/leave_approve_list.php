@@ -132,7 +132,7 @@ if ($userId) {
 
         if (!empty($branchIds)) {
             $branchIdsList = implode(',', array_map('intval', $branchIds));
-            $extraWhere .= " AND `sub`.`emp_location` IN ($branchIdsList)";
+            $extraWhere .= " AND `sub`.`location_id` IN ($branchIdsList)";
         }
     $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId, $mysqli);
 
