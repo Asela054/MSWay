@@ -25,7 +25,7 @@ class LateminitesApprovelController extends Controller
 
         $remunerations=DB::table('remunerations')->select('*')->where('remuneration_type', 'Deduction')->get();
 
-        return view('Attendent.lateminitesapprovel',compact('remunerations'));
+        return view('Attendent.lateminitesapprovel_st',compact('remunerations'));
     }
 
     public function generatelateminites(Request $request){
@@ -38,28 +38,16 @@ class LateminitesApprovelController extends Controller
         }
 
         $department = $request->get('department');
-        $month = $request->get('month');
-        $closedate = $request->get('closedate');
+        $fromdate = $request->get('fromdate');
+        $todate = $request->get('todate');
 
-        $selectedyear = substr($month, 0, 4);
-        $selectedmonth = substr($month, -2);
-        $startDate = new DateTime("$selectedyear-$selectedmonth-01");
-        $endDate = (clone $startDate)->modify('first day of next month');
-        
-        $closedateObj = new DateTime($closedate);
-        if ($endDate > $closedateObj) {
-            $endDate = $closedateObj;
-        }
+        $startDate = new DateTime($fromdate);
+        $endDate = new DateTime($todate);
 
         $dateRange = [];
         while ($startDate < $endDate) {
             $dateRange[] = $startDate->format('Y-m-d');
             $startDate->add(new DateInterval('P1D'));
-        }
-
-          // If $closedate is within the month, include it in the range
-          if ($closedateObj->format('Y-m-d') >= $startDate->format('Y-m-d')) {
-            $dateRange[] = $closedateObj->format('Y-m-d');
         }
 
         // Get accessible employee IDs based on user access rights
@@ -87,15 +75,14 @@ class LateminitesApprovelController extends Controller
                 'job_categories.late_deduct_calculation'                   
             )
             ->from('employees as employees')
-            ->leftJoin('attendances as at1', function ($join) use ($month) {
+            ->leftJoin('attendances as at1', function ($join) use ($fromdate, $todate) {
                 $join->on('employees.emp_id', '=', 'at1.uid')
                     ->whereNull('at1.deleted_at'); 
-                if (!empty($month)) {
-                    $m_str = $month . "%";
-                    $join->where('at1.date', 'like', $m_str); 
+                if (!empty($fromdate)) {
+                    $join->where('at1.date', '>=', $fromdate);
                 }
-                if (!empty($closedate)) {
-                    $join->where('at1.date', '<=', $closedate);
+                if (!empty($todate)) {
+                    $join->where('at1.date', '<=', $todate);
                 }
             })
             ->leftJoin('branches', 'at1.location', '=', 'branches.id')
@@ -118,6 +105,7 @@ class LateminitesApprovelController extends Controller
         $query->groupBy('employees.emp_id');
         $results = $query->get();
 
+       
 
         foreach ($results as $record) {
 
@@ -140,7 +128,7 @@ class LateminitesApprovelController extends Controller
 
             $employeeid =  $record->emp_id;
            
-            $late_days_total = (new \App\Employeelateattenadnaceminites)->get_latedayscount($employeeid, $month ,$closedate);
+            $late_days_total = (new \App\Employeelateattenadnaceminites)->get_latedayscount($employeeid, $fromdate ,$todate);
     
             if(!empty($late_days_total)){
                 $nopayAmount = 100;

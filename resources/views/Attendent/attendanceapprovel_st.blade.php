@@ -46,7 +46,7 @@
                                     <th>WORK MONTH</th>
                                     <th>DEPARTMENT</th>
                                     <th>COMPANY</th>
-                                    <th>WORKING WEEK DAYS</th>
+                                    <th>WORKING DAYS</th>
                                     <th>WORKING HOURS</th>
                                     <th>LEAVE DAYS</th>
                                     <th>NO PAY DAYS</th>
@@ -264,7 +264,7 @@ $(document).ready(function () {
             },
 
             columns: [
-                { data: 'uid', name: 'at1.uid' },
+                { data: 'emp_id', name: 'employees.emp_id' },
                 { data: 'emp_name_with_initial', name: 'employees.emp_name_with_initial' },
                 { data: 'date', name: 'at1.date' },
                 { data: 'dept_name', name: 'departments.name' },
