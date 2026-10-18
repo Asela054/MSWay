@@ -5,6 +5,7 @@ namespace App\Http\Controllers\ActivityManagement\IOU;
 use App\ActivityManagement\IOU\IOUReason;
 use Illuminate\Http\Request;
 use Validator;
+use App\Http\Controllers\Controller;
 
 class IOUReasonController extends Controller
 {
@@ -26,7 +27,9 @@ class IOUReasonController extends Controller
             abort(403);
         }
 
-        $iouReason = IOUReason::orderBy('id', 'asc')->get();
+        $iouReason = IOUReason::orderBy('id', 'asc')
+        ->where('status', '!=', 3)
+        ->get();
         return view('ActivityManagement.IOU.iouReason', compact('iouReason'));
     }
 
