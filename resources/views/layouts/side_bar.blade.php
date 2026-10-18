@@ -4,6 +4,7 @@
 
     $hasOrganizationPermissions = in_array('Access-Organization', $userPermissions);
     $hasEmployeeManagementPermissions = in_array('Access-Employee-Management', $userPermissions);
+    $hasActivityManagementPermissions = in_array('Access-Activity-Management', $userPermissions);
     $hasAttendanceLeavePermissions = in_array('Access-Attendance_Leave', $userPermissions);
     $hasShiftManagementPermissions = in_array('Access-Shift_Management', $userPermissions);
     $hasPayrollPermissions = in_array('Access-Payroll', $userPermissions);
@@ -45,6 +46,16 @@
                 <span class="links_name">Employee Management</span>
             </a>
             <span class="tooltip">Employee Management</span>
+        </li>
+        @endif
+
+        @if($hasActivityManagementPermissions)
+        <li>
+            <a href="{{ url('/activity_management_dashboard') }}" id="emp_activity_menu_link">
+                <i class="fa-light fa-clipboard-list-check"></i>
+                <span class="links_name">Activity Management</span>
+            </a>
+            <span class="tooltip">Activity Management</span>
         </li>
         @endif
 
