@@ -413,6 +413,7 @@ class EmployeeController extends Controller
         $policecontat = $request->policecontat;
         $hierarchy_id = $request->hierarchy_id;
         $financial_id = $request->financial_id;
+        $employee_r = $request->employee_r;
         $employee = Employee::find($id);
 
         if($jobstatus != 2){
@@ -485,6 +486,7 @@ class EmployeeController extends Controller
 
         $employee->hierarchy_id = $hierarchy_id;
         $employee->financial_id = $financial_id;
+        $employee->report_person_id = $employee_r;
         
         // backup data
         $originalEmployee = Employee::find($id);
@@ -515,6 +517,7 @@ class EmployeeController extends Controller
             'ot_applicable'          => ['old' => $originalEmployee->ot_applicable,           'new' => $ot_applicable],
             'hierarchy_id'          => ['old' => $originalEmployee->hierarchy_id,           'new' => $hierarchy_id],
             'financial_id'          => ['old' => $originalEmployee->financial_id,           'new' => $financial_id],
+            'report_person_id'      => ['old' => $originalEmployee->report_person_id,       'new' => $employee_r],
         ];
 
         $changedFields = [];
