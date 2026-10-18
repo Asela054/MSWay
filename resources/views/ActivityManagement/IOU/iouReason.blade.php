@@ -33,16 +33,18 @@
                                 <tr>
                                     <th>ID </th>
                                     <th>REASON</th>
+                                    <th>ESTIMATE AMOUNT</th>
                                     <th>REMARKS</th>
                                     <th class="text-right">ACTION</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($iouReasons as $reason)
+                                @foreach($iouReason as $reason)
                                 <tr>
                                     <td>{{$reason->id}}</td>
                                     <td>{{$reason->reason}}</td>
-                                    <td>{{$reason->remarks}}</td>
+                                    <td>{{$reason->estimate_amount}}</td>
+                                    <td>{{$reason->remark}}</td>
                                     <td class="text-right">
                                             <button name="edit" id="{{$reason->id}}" class="edit btn btn-primary btn-sm" type="submit"><i class="fas fa-pencil-alt"></i></button>
                                             <button type="submit" name="delete" id="{{$reason->id}}" class="delete btn btn-danger btn-sm"><i class="far fa-trash-alt"></i></button>
@@ -76,16 +78,16 @@
                             <form method="post" id="formTitle" class="form-horizontal">
                                 {{ csrf_field() }}	
                                 <div class="form-group mb-1">
-                                    <label class="small font-weight-bold text-dark">Reason</label>
+                                    <label class="small font-weight-bold text-dark">Reason*</label>
                                     <input type="text" name="reason" id="reason" class="form-control form-control-sm" required />
                                 </div>
                                 <div class="form-group mb-1">
                                     <label class="small font-weight-bold text-dark">Estimated Amount</label>
-                                    <input type="text" name="estimate_amount" id="estimate_amount" class="form-control form-control-sm" />
+                                    <input type="number" name="estimate_amount" id="estimate_amount" class="form-control form-control-sm" step="0.01" />
                                 </div>
                                 <div class="form-group mb-1">
                                     <label class="small font-weight-bold text-dark">Remarks</label>
-                                    <input type="text" name="remarks" id="remarks" class="form-control form-control-sm" />
+                                    <input type="text" name="remark" id="remark" class="form-control form-control-sm" />
                                 </div>
                                 <div class="form-group mt-3">
                                     <button type="submit" name="action_button" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-4"><i class="fas fa-plus"></i>&nbsp;Add</button>
@@ -239,7 +241,7 @@ $(document).ready(function(){
                 success: function (data) {
                     $('#reason').val(data.result.reason);
                     $('#estimate_amount').val(data.result.estimate_amount);
-                    $('#remarks').val(data.result.remarks);
+                    $('#remark').val(data.result.remark);
                     $('#hidden_id').val(id);
                     $('.modal-title').text('Edit IOU Reason');
                     $('#action_button').val('Edit');
