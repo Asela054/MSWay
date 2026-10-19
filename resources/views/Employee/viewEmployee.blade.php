@@ -187,18 +187,6 @@
 									<h6 class="title-style my-3"><span>Other Information</span></h6>
 									<div class="form-row mb-1">
 										<div class="col-md-4 col-sm-6 col-12 mb-2">
-											<label class="small font-weight-bold text-dark">Gender</label><br>
-											<div class="custom-control custom-radio custom-control-inline">
-												<input type="radio" id="gender1" name="gender" class="custom-control-input" value="Male"
-													{{ ($employee->emp_gender=="Male")? "checked" : "" }}>
-												<label class="custom-control-label" for="gender1">Male</label>
-											</div>
-											<div class="custom-control custom-radio custom-control-inline">
-												<input type="radio" id="gender2" name="gender" class="custom-control-input" value="Female" {{ ($employee->emp_gender=="Female")? "checked" : "" }}>
-												<label class="custom-control-label" for="gender2">Female</label>
-											</div>
-										</div>
-										<div class="col-md-4 col-sm-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">Marital Status</label>
 											<select id="marital_status" name="marital_status" class="form-control form-control-sm">
 												<option>Select</option>
@@ -213,6 +201,18 @@
 												<option value="Srilankan" {{$employee->emp_nationality == 'Srilankan'  ? 'selected' : ''}}>SRI LANKAN</option>
 											</select>
 										</div>
+										<div class="col-md-4 col-sm-6 col-12 mb-2">
+											<label class="small font-weight-bold text-dark">Gender</label><br>
+											<div class="custom-control custom-radio custom-control-inline">
+												<input type="radio" id="gender1" name="gender" class="custom-control-input" value="Male"
+													{{ ($employee->emp_gender=="Male")? "checked" : "" }}>
+												<label class="custom-control-label" for="gender1">Male</label>
+											</div>
+											<div class="custom-control custom-radio custom-control-inline">
+												<input type="radio" id="gender2" name="gender" class="custom-control-input" value="Female" {{ ($employee->emp_gender=="Female")? "checked" : "" }}>
+												<label class="custom-control-label" for="gender2">Female</label>
+											</div>
+										</div>
 									</div>
 									<div class="form-row mb-1">
 										<div class="col-md-3 col-sm-6 col-12 mb-2">
@@ -223,6 +223,14 @@
 													<strong>{{ $errors->first('nic_validation') }}</strong>
 												</span>
 											@endif
+										</div>
+										<div class="col-md-3 col-sm-6 col-12 mb-2">
+											<label class="small font-weight-bold text-dark">Driver's License Number</label>
+											<input type="text" class="form-control form-control-sm" id="licensenumber" name="licensenumber" value="{{$employee->emp_drive_license ? $employee->emp_drive_license : ''}}">
+										</div>
+										<div class="col-md-3 col-sm-6 col-12 mb-2">
+											<label class="small font-weight-bold text-dark">License Expiry Date</label>
+											<input type="date" class="form-control form-control-sm" id="licenseexpiredate" name="licenseexpiredate" value="{{$employee->emp_license_expire_date ? date('Y-m-d', strtotime($employee->emp_license_expire_date)) : ''}}">
 										</div>
 									</div>
 								</div>
@@ -258,20 +266,6 @@
 									</div>
 									<div class="form-row mb-1">
 										<div class="col-md-3 col-sm-6 col-12 mb-2">
-											<label class="small font-weight-bold text-dark">Driver's License Number</label>
-											<input type="text" class="form-control form-control-sm" id="licensenumber" name="licensenumber" value="{{$employee->emp_drive_license ? $employee->emp_drive_license : ''}}">
-										</div>
-										<div class="col-md-3 col-sm-6 col-12 mb-2">
-											<label class="small font-weight-bold text-dark">License Expiry Date</label>
-											<input type="date" class="form-control form-control-sm" id="licenseexpiredate" name="licenseexpiredate" value="{{$employee->emp_license_expire_date ? date('Y-m-d', strtotime($employee->emp_license_expire_date)) : ''}}">
-										</div>
-										<div class="col-md-3 col-sm-6 col-12 mb-2">
-											<label class="small font-weight-bold text-dark">Date Assigned</label>
-											<input type="date" class="form-control form-control-sm" id="dateassign" name="dateassign" value="{{$employee->emp_assign_date ? date('Y-m-d', strtotime($employee->emp_assign_date)) : ''}}">
-										</div>
-									</div>
-									<div class="form-row mb-1">
-										<div class="col-md-3 col-sm-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">Job Title</label>
 											<select id="jobtitle" class="form-control form-control-sm" name="jobtitle">
 												<option selected>Select</option>
@@ -295,16 +289,8 @@
 											</select>
 										</div>
 										<div class="col-md-3 col-sm-6 col-12 mb-2">
-											<label class="small font-weight-bold text-dark">Payroll type</label>
-											<select id="payroll_process_type_id" class="form-control form-control-sm" name="payroll_process_type_id">
-												<option selected>Choose...</option>
-												@foreach($payroll_process_type as $payrollprocesstype)
-													<option value="{{$payrollprocesstype->id}}"
-														{{$payrollprocesstype->id== $employee->payroll_process_type_id  ? 'selected' : ''}}>
-														{{$payrollprocesstype->process_name}}
-													</option>
-												@endforeach
-											</select>
+											<label class="small font-weight-bold text-dark">Date Assigned</label>
+											<input type="date" class="form-control form-control-sm" id="dateassign" name="dateassign" value="{{$employee->emp_assign_date ? date('Y-m-d', strtotime($employee->emp_assign_date)) : ''}}">
 										</div>
 									</div>
 									<div class="form-row mb-1">
@@ -331,6 +317,38 @@
 													</option>
 												@endforeach
 											</select>
+										</div>
+										<div class="col-md-3 col-sm-6 col-12 mb-2">
+											<label class="small font-weight-bold text-dark">Payroll type</label>
+											<select id="payroll_process_type_id" class="form-control form-control-sm" name="payroll_process_type_id">
+												<option selected>Choose...</option>
+												@foreach($payroll_process_type as $payrollprocesstype)
+													<option value="{{$payrollprocesstype->id}}"
+														{{$payrollprocesstype->id== $employee->payroll_process_type_id  ? 'selected' : ''}}>
+														{{$payrollprocesstype->process_name}}
+													</option>
+												@endforeach
+											</select>
+										</div>
+									</div>
+									<div class="form-row mb-1">
+										<div class="col-md-3 col-sm-6 col-12 mb-2">
+												<label class="small font-weight-bold text-dark">Report Employee</label>
+												<select name="employee_r" id="employee_r" class="form-control form-control-sm">
+													@if(!empty($employee->report_person_id))
+														@php
+															$reportPerson = DB::table('employees')
+																->where('emp_id', $employee->report_person_id)
+																->select('emp_id', 'emp_name_with_initial', 'calling_name')
+																->first();
+														@endphp
+														@if($reportPerson)
+															<option value="{{ $reportPerson->emp_id }}" selected>
+																{{ $reportPerson->emp_name_with_initial }} - {{ $reportPerson->calling_name }}
+															</option>
+														@endif
+													@endif
+												</select>
 										</div>
 										<div class="col-md-3 col-sm-6 col-12 mb-2">
 											<label class="small font-weight-bold text-dark">Leave Approval Person</label>
@@ -556,6 +574,7 @@
         let company = $('#company');
         let department = $('#department');
         let location = $('#location');
+		let employee_r = $('#employee_r');
 
         department.select2({
             placeholder: 'Select...',
@@ -598,6 +617,28 @@
             $('#department').val(null).trigger('change');
             $('#location').val(null).trigger('change');
         });
+
+		employee_r.select2({
+			placeholder: 'Select Employee',
+			width: '100%',
+			allowClear: true,
+			ajax: {
+				url: '{{url("employee_list_sel2")}}',
+				dataType: 'json',
+				data: function(params) {
+					return {
+						term: params.term || '',
+						page: params.page || 1
+					}
+				},
+				cache: true
+			}
+		});
+
+		// Pre-select the saved Report Employee value
+		@if(!empty($employee->report_person_id))
+		employee_r.val('{{ $employee->report_person_id }}').trigger('change');
+		@endif
 
         $('.num').keypress(function(event) {
             return isNumber(event, this);

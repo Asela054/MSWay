@@ -1951,13 +1951,16 @@ Route::post('LeaveApply/update', 'LeaveController_pmm@update')->name('PMMLeaveAp
 Route::get('LeaveApplyPmm/{id}/edit', 'LeaveController_pmm@edit')->name('LeaveApplyPmm.edit');
 Route::post('pmmapprovelupdate', 'LeaveController_pmm@approvelupdate')->name('pmmapprovelupdate');
 Route::post('pmmleaveapprove_batch', 'LeaveController_pmm@leave_approve_batch')->name('pmmleaveapprove_batch');
+
+
 /*-- Activity Management----*/
+Route::get('/activity_management_dashboard' ,'ActivityManagement\ActivityDashboardController@index')->name('activity_management_dashboard');
 /*-- IOU Reasons----*/
-Route::resource('IOUReason', 'ActivityManagement/IOU/IOUReasonController');
-Route::get('IOUReason',['uses' => 'ActivityManagement/IOU/IOUReasonController@index', 'as' => 'IOUReason']); 
-Route::post('addIOUReason',['uses' => 'ActivityManagement/IOU/IOUReasonController@store', 'as' => 'addIOUReason']); 
-Route::post('IOUReason/update', 'ActivityManagement/IOU/IOUReasonController@update')->name('IOUReason.update');
-Route::get('IOUReason/destroy/{id}', 'ActivityManagement/IOU/IOUReasonController@destroy');
+Route::resource('IOUReason', 'ActivityManagement\IOU\IOUReasonController');
+Route::get('IOUReason',['uses' => 'ActivityManagement\IOU\IOUReasonController@index', 'as' => 'IOUReason']); 
+Route::post('addIOUReason',['uses' => 'ActivityManagement\IOU\IOUReasonController@store', 'as' => 'addIOUReason']); 
+Route::post('IOUReason/update', 'ActivityManagement\IOU\IOUReasonController@update')->name('IOUReason.update');
+Route::get('IOUReason/destroy/{id}', 'ActivityManagement\IOU\IOUReasonController@destroy');
 /*-- IOU Reasons----*/
 
 
