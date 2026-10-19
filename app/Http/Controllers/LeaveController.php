@@ -549,8 +549,25 @@ class LeaveController extends Controller
                             ->value('emp_department');
 
         $appName = config('app.name');
-        if($appName == 'OpmaHRM' && $employeeDept == 4){
-            $this->sendAdminlevel_sms( $request->input('employee'), [$request->input('fromdate'), $request->input('todate')]);
+        if($appName == 'OpmaHRM'){
+             $dates = array_values(array_unique(array(
+                $request->input('fromdate'),
+                $request->input('todate')
+            )));
+
+            try {
+                if ($employeeDept == 4) {
+
+                     $this->sendAdminlevel_sms($request->input('employee'), $dates);
+                } else {
+                    $this->sendApproverSms($request->input('approveby'), $request->input('employee'), $dates);
+                }
+            } catch (\Exception $e) {
+                \Log::error('Leave apply SMS failed', array(
+                    'emp_id'  => $request->input('employee'),
+                    'message' => $e->getMessage()
+                ));
+            }
         }
         return response()->json(['success' => 'Leave Details Successfully Insert']);
 
@@ -976,7 +993,7 @@ class LeaveController extends Controller
     }
 
 
-     private function sendAdminlevel_sms($emp_id, $dates)
+    private function sendAdminlevel_sms($emp_id, $dates)
     {
         // Normalize to array — accepts either a single date string or an array of dates
         $dates = is_array($dates) ? $dates : [$dates];
@@ -1005,8 +1022,8 @@ class LeaveController extends Controller
 
         $dateWord = count($dates) > 1 ? 'on: ' : 'on ';
 
-        $message = "Leave request for " . $employeeName
-            . " " . $dateWord . $dateList . ".";
+        $message = "Leave Request for " . $employeeName
+            . " " . $dateWord . $dateList . "is waiting for your approval.";
 
         $smsService = new Opma_Sms_policyService();
         $result = $smsService->sendSms($mobile, $message);
@@ -1017,6 +1034,54 @@ class LeaveController extends Controller
             'dates'      => $dates,
             'result'     => $result,
         ]);
+
+        return $result;
+    }
+
+    private function sendApproverSms($approver_id, $emp_id, $dates)
+    {
+        $dates = is_array($dates) ? $dates : array($dates);
+
+        if (empty($approver_id)) {
+            \Log::warning('Approver SMS not sent: no approve person selected', array('emp_id' => $emp_id));
+            return array('success' => false, 'message' => 'No approve person selected');
+        }
+
+        $approver = DB::table('employees')
+            ->select('emp_id', 'calling_name', 'emp_mobile')
+            ->where('emp_id', $approver_id)
+            ->first();
+
+        if (!$approver || empty($approver->emp_mobile)) {
+            \Log::warning('Approver SMS not sent: approver or mobile not found', array('approver_id' => $approver_id));
+            return array('success' => false, 'message' => 'Approver mobile not found');
+        }
+
+        $employeeName = DB::table('employees')
+            ->where('emp_id', $emp_id)
+            ->value('emp_name_with_initial');
+
+        $mobile = preg_replace('/[^0-9]/', '', $approver->emp_mobile);
+        if (strlen($mobile) == 10 && $mobile[0] == '0') {
+            $mobile = substr($mobile, 1);
+        } elseif (strlen($mobile) == 11 && substr($mobile, 0, 2) == '94') {
+            $mobile = substr($mobile, 2);
+        }
+
+        $dateText = count($dates) > 1 ? 'from ' . $dates[0] . ' to ' . $dates[1] : 'on ' . $dates[0];
+
+        $message = "Dear " . $approver->calling_name . ", a leave request for "
+            . $employeeName . " " . $dateText . " is waiting for your approval.";
+
+        $smsService = new Opma_Sms_policyService();
+        $result = $smsService->sendSms($mobile, $message);
+
+        \Log::info('eSMS approver leave apply result', array(
+            'emp_id'      => $emp_id,
+            'approver_id' => $approver_id,
+            'mobile'      => $mobile,
+            'result'      => $result,
+        ));
 
         return $result;
     }

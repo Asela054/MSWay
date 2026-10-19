@@ -19,7 +19,7 @@ class Opma_Sms_policyService
     {
         $this->username      = 'OpmaEmbAPI';
         $this->password      = 'wpa#ZchuV2EWh#5';
-        $this->sourceAddress = 'OPM EMB';
+        $this->sourceAddress = 'OPMA EMB';
     }
 
     /**

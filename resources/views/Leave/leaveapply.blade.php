@@ -715,6 +715,8 @@
                 event.preventDefault();
                 var action_url = '';
 
+                 var $btn = $('#action_button');
+                 $btn.prop('disabled', true);
 
                 if ($('#action').val() == 'Add') {
                     action_url = "{{ route('addLeaveApply') }}";
@@ -722,8 +724,8 @@
 
 
                 if ($('#action').val() == 'Edit') {
-                    action_url = "{{ route('LeaveApply.update') }}";
-                }
+                        action_url = "{{ url('LeaveApply/update') }}";
+                    }
 
                 // Collect table data as array
                     var leaveBalanceData = [];
@@ -761,6 +763,7 @@
                     success: function (data) {
                            if (data.errors) {
                             const combinedErrors = data.errors.join('<br><br>');
+                             $btn.prop('disabled', false);  
 
                         Swal.fire({
                             icon: 'error',
@@ -825,9 +828,9 @@
                                $('#formTitle')[0].reset();
                                actionreload(actionJSON);
                            }
-
                        }
                         $('#form_result').html(html);
+                        
                     }
                 });
             });
