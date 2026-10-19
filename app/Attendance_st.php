@@ -63,6 +63,17 @@ class Attendance_st extends Model
         ";
         $attendance = \DB::select($query);
 
+        $ignore_dates = array();
+        $ignore_rows = DB::table('ignore_days')
+            ->whereDate('date', '>=', $fromdate)
+            ->whereDate('date', '<=', $todate)
+            ->pluck('date')
+            ->toArray();
+
+        foreach ($ignore_rows as $ignore_row) {
+            $ignore_dates[] = Carbon::parse($ignore_row)->format('Y-m-d');
+        }
+
         $work_days = 0;
         foreach ($attendance as $att) {
 
@@ -76,6 +87,10 @@ class Attendance_st extends Model
                 ->first();
 
             if(!EMPTY($holiday_check)){
+                continue;
+            }
+
+            if (in_array($s_date, $ignore_dates)) {
                 continue;
             }
 
