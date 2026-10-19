@@ -235,6 +235,8 @@ $(document).ready(function(){
                 render: function(data, type, row) {
                     var buttons = '';
 
+                    buttons += '<a href="StylePart/' + row.id + '" title="Parts" class="branches btn btn-info btn-sm mr-1" data-toggle="tooltip" title="Parts" ><i class="fas fa-building"></i></a>';
+                   
                     buttons += '<button name="edit" id="'+row.id+'" class="edit btn btn-primary btn-sm  mr-1" type="submit" data-toggle="tooltip" title="Edit"><i class="fas fa-pencil-alt"></i></button>';
 
                     buttons += '<button type="submit" name="delete" id="'+row.id+'" class="delete btn btn-danger btn-sm" data-toggle="tooltip" title="Remove"><i class="far fa-trash-alt"></i></button>';

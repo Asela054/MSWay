@@ -107,6 +107,16 @@ Route::post('opma_production_unlockdelete', 'Production_Module_Opma\ProductionUn
 
 Route::get('qty-approve/{id}/{expires}/{token}', 'Production_Module_Opma\ProductionEndingController@qtyApproveShow');
 Route::post('qty-approve/{id}/{expires}/{token}', 'Production_Module_Opma\ProductionEndingController@qtyApproveConfirm');
+
+// stle part controller routes
+Route::get('StylePart/{style_id}', 'Production_Module_Opma\StylePartController@index')->name('StylePart');
+Route::get('StylePartList/{style_id}', 'Production_Module_Opma\StylePartController@list');
+Route::post('StylePartStore', 'Production_Module_Opma\StylePartController@store');
+Route::get('StylePartEdit/{id}', 'Production_Module_Opma\StylePartController@edit');
+Route::post('StylePartUpdate', 'Production_Module_Opma\StylePartController@update');
+Route::get('StylePartDestroy/{id}', 'Production_Module_Opma\StylePartController@destroy');
+
+
 // End of Opma Production Section Routes
 
 
