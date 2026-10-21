@@ -98,9 +98,9 @@ class Attendance_st extends Model
             $diff = round((strtotime($last_time) - strtotime($first_time)) / 3600, 1);
 
                if ($date->isSaturday()) {
-                    $required_full_hours = $saturdayExpectedHours;
+                    $required_full_hours = $saturdayHalfDayHours;
                 } else {
-                    $required_full_hours = $full_day_work_hours;
+                    $required_full_hours = $halfDayHours;
                 }
                 
             if ($diff >= $required_full_hours) {
