@@ -176,6 +176,7 @@
                                                 <li class="active" role="presentation"><a href="#profileinfo" aria-controls="profileinfo" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-user"></i></span>Profile Info</a><span class="bgcolor-major-gradient-overlay"></span></li>
                                                 <li role="presentation"><a href="#attendanceinfo" aria-controls="attendanceinfo" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-calendar"></i></span>Attendance</a><span class="bgcolor-major-gradient-overlay"></span></li>
                                                 <li role="presentation"><a href="#leaveinfo" aria-controls="leaveinfo" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-calendar-week"></i></span>Leave Info</a><span class="bgcolor-major-gradient-overlay"></span></li>
+                                                <li role="presentation"><a href="#leaveapproval" aria-controls="leaveapproval" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-calendar-week"></i></span>Leave Approval</a><span class="bgcolor-major-gradient-overlay"></span></li>
                                                 <li role="presentation"><a href="#salaryadvance" aria-controls="salaryadvance" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-money-bill"></i></span>Salary Advance</a><span class="bgcolor-major-gradient-overlay"></span></li>
                                                 <li role="presentation"><a href="#salaryslip" aria-controls="salaryslip" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-receipt"></i></span>Salary Slips</a><span class="bgcolor-major-gradient-overlay"></span></li>
                                                 {{--<li role="presentation"><a href="#production" aria-controls="production" role="tab" data-toggle="tab"><span class="icon"><i class="fa-light fa-ballot-check"></i></span>My Jobs</a><span class="bgcolor-major-gradient-overlay"></span></li>--}}
@@ -302,6 +303,53 @@
                                                                                     <th class="text-right">ACTION</th>
                                                                                     <th class="d-none">empname</th>
                                                                                     <th class="d-none">empname</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>  
+                                                </div>         
+                                                <div role="tabpanel" class="tab-pane" id="leaveapproval"> 
+                                                    <div class="card shadow-none bg-transparent">
+                                                        <div class="card-body">
+                                                            <div class="row">
+                                                                <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox" class="form-check-input checkallocate" id="la_selectAll">
+                                                                            <label class="form-check-label" for="la_selectAll">Select All Records</label>
+                                                                        </div>
+                                                                </div>
+                                                                <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12 text-right">
+                                                                        <button id="la_allapproveel" class="btn btn-primary btn-sm px-3"><i
+                                                                                class="fa-light fa-light fa-clipboard-check"></i>&nbsp;Approve All
+                                                                            Leave</button>
+                                                                </div>
+                                                                <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                                                                    <hr>
+                                                                    <div class="center-block fix-width scroll-inner">
+                                                                        <table class="table table-striped table-sm small nowrap" style="width: 100%" id="leaveapprovaltable">
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    <th></th>
+                                                                                    <th>EMP ID</th>
+                                                                                    <th>NAME WITH INITIAL</th>
+                                                                                    <th>DEPARTMENT </th>
+                                                                                    <th>LEAVE TYPE</th>
+                                                                                    <th>LEAVE FROM</th>
+                                                                                    <th>LEAVE TO</th>
+                                                                                    <th class="nowrap">REASON</th>
+                                                                                    <th>COVERING BY</th>
+                                                                                    <th>STATUS</th>
+                                                                                    <th>APPROVAL STAGE</th>
+                                                                                    <th class="text-right">ACTION</th>
+                                                                                    <th class="d-none">ID</th>
+                                                                                    <th class="d-none">EMPNAME</th>
+                                                                                    <th class="d-none">CALLING</th>
                                                                                 </tr>
                                                                             </thead>
                                                                             <tbody>
@@ -524,163 +572,6 @@
     </div>
 </main>
 
-<!-- <div class="modal fade" id="formModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-    aria-labelledby="staticBackdropLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header p-2">
-                <h5 class="modal-title" id="staticBackdropLabel">Add Leave</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body" style="max-height: 40rem; overflow-y: auto;">
-                <div class="row">
-                    <div class="col">
-                        <span id="form_result"></span>
-                        <form method="post" id="formTitle" class="form-horizontal">
-                            {{ csrf_field() }}
-                            <div class="form-row mb-1">
-                                <div class="col">
-                                    <table class="table table-sm small" id="leavebalancetable">
-                                        <thead>
-                                            <tr>
-                                                <th>Leave Type</th>
-                                                <th>Total</th>
-                                                <th>Taken</th>
-                                                <th>Available</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td> <span> Annual </span> </td>
-                                                <td> <span id="annual_total"></span> </td>
-                                                <td> <span id="annual_taken"></span> </td>
-                                                <td> <span id="annual_available"></span> </td>
-                                            </tr>
-                                            <tr>
-                                                <td> <span> Casual </span> </td>
-                                                <td> <span id="casual_total"></span> </td>
-                                                <td> <span id="casual_taken"></span> </td>
-                                                <td> <span id="casual_available"></span> </td>
-                                            </tr>
-                                            <tr>
-                                                <td> <span>Medical</span> </td>
-                                                <td> <span id="med_total"></span> </td>
-                                                <td> <span id="med_taken"></span> </td>
-                                                <td> <span id="med_available"></span> </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                    <span id="leave_msg"></span>
-                                </div>
-
-                            </div>
-                            <div class="form-row mb-1">
-                                <div class="col">
-                                    <label class="small font-weight-bold text-dark">Leave Type</label>
-                                    <select name="leavetype" id="leavetype" class="form-control form-control-sm">
-                                        <option value="">Select</option>
-                                        @foreach($leavetype as $leavetypes)
-                                        <option value="{{$leavetypes->id}}">{{$leavetypes->leave_type}}
-                                        </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="col d-none">
-                                    <label class="small font-weight-bold text-dark">Select Employee</label>
-                                    <select name="employee" id="employee" class="form-control form-control-sm"
-                                        style="pointer-events: none;">
-                                        <option value="">Select</option>
-
-                                    </select>
-                                </div>
-
-                                <div class="col">
-                                    <label class="small font-weight-bold text-dark">Covering Employee</label>
-                                    <select name="coveringemployee" id="coveringemployee"
-                                        class="form-control form-control-sm">
-                                        <option value="">Select</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="form-row mb-1">
-                                <div class="col">
-                                    <label class="small font-weight-bold text-dark">From</label>
-                                    <input type="date" name="fromdate" id="fromdate"
-                                        class="form-control form-control-sm" placeholder="YYYY-MM-DD" />
-                                </div>
-                                <div class="col">
-                                    <label class="small font-weight-bold text-dark">To</label>
-                                    <input type="date" name="todate" id="todate" class="form-control form-control-sm"
-                                        placeholder="YYYY-MM-DD" />
-                                </div>
-                            </div>
-                            <div class="form-row mb-1">
-                                <div class="col">
-                                    <label class="small font-weight-bold text-dark">Half Day/ Short <span
-                                            id="half_short_span"></span> </label>
-                                    <select name="half_short" id="half_short" class="form-control form-control-sm">
-                                        <option value="0.00">Select</option>
-                                        <option value="0.25">Short Leave</option>
-                                        <option value="0.5">Half Day</option>
-                                        <option value="1.00">Full Day</option>
-                                    </select>
-                                </div>
-
-                                <div class="col">
-                                    <label class="small font-weight-bold text-dark">No of Days</label>
-                                    <input type="number" step="0.01" name="no_of_days" id="no_of_days"
-                                        class="form-control form-control-sm" required />
-                                </div>
-                            </div>
-                            <div class="form-row mb-1">
-                                <div class="col">
-                                    <label class="small font-weight-bold text-dark">Reason</label>
-                                    <input type="text" name="reson" id="reson" class="form-control form-control-sm" />
-                                </div>
-                            </div>
-                            <div class="form-row mb-1">
-                                <div class="col">
-                                    <label class="small font-weight-bold text-dark">Approve Person</label>
-                                    <select name="approveby" id="approveby" class="form-control form-control-sm">
-                                        <option value="">Select</option>
-                                        @foreach($employees as $employee)
-                                        <option value="{{$employee->emp_id}}">{{$employee->emp_name_with_initial}}
-                                        </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="form-group d-none">
-                                <label class="small font-weight-bold text-dark">Email Body</label>
-                                <textarea id="emailBody" class="form-control" rows="10"></textarea>
-                            </div>
-
-                            <div class="form-group mt-3">
-
-                                <input type="submit" id="action_button"
-                                    class="btn btn-outline-primary btn-sm fa-pull-right px-4" value="Add" />
-                            </div>
-                            <input type="hidden" name="companyemail" id="companyemail" />
-                            <input type="hidden" name="employeeemail" id="employeeemail" />
-                            <input type="hidden" name="coveringemail" id="coveringemail" />
-                            <input type="hidden" name="approveemail" id="approveemail" />
-                            <input type="hidden" name="companyname" id="companyname" />
-
-                            <input type="hidden" name="action" id="action" value="Add" />
-                            <input type="hidden" name="hidden_id" id="hidden_id" />
-                            <input type="hidden" name="request_id" id="request_id" />
-
-
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div> -->
 <!-- Modal Area Start -->
 <div class="modal fade" id="formModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
         aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -696,8 +587,58 @@
                 <div class="row">
                     <div class="col">
                         <span id="form_result"></span>
+                        <div class="col-sm-12 col-md-12 mb-2">
+                            <table class="table table-sm small">
+                                <thead>
+                                    <tr>
+                                        <th>Leave Type</th>
+                                        <th>Total</th>
+                                        <th>Taken</th>
+                                        <th>Available</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td> <span> Annual </span> </td>
+                                        <td> <span id="ua_annual_total"></span> </td>
+                                        <td> <span id="ua_annual_taken"></span> </td>
+                                        <td> <span id="ua_annual_available"></span> </td>
+                                    </tr>
+                                    <tr>
+                                        <td> <span> Casual </span> </td>
+                                        <td> <span id="ua_casual_total"></span> </td>
+                                        <td> <span id="ua_casual_taken"></span> </td>
+                                        <td> <span id="ua_casual_available"></span> </td>
+                                    </tr>
+                                    <tr>
+                                        <td> <span>Medical</span> </td>
+                                        <td> <span id="ua_med_total"></span> </td>
+                                        <td> <span id="ua_med_taken"></span> </td>
+                                        <td> <span id="ua_med_available"></span> </td>
+                                    </tr>
+                                    <tr>
+                                        <td> <span id="ua_weekly_title"></span> </td>
+                                        <td> <span id="ua_weekly_total"></span> </td>
+                                        <td> <span id="ua_weekly_taken"></span> </td>
+                                        <td> <span id="ua_weekly_available"></span> </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <span id="ua_leave_msg"></span>
+                        </div>
                         <form method="post" id="formTitle" class="form-horizontal">
                             {{ csrf_field() }}
+                            <div class="form-row mb-1">
+                                <div class="col-sm-12 col-md-12">
+                                    <label class="small font-weight-bolder text-dark">Leave Type</label>
+                                    <select name="leavetype" id="ua_leavetype" class="form-control form-control-sm">
+                                        <option value="">Select</option>
+                                        @foreach($leavetype as $leavetypes)
+                                        <option value="{{$leavetypes->id}}">{{$leavetypes->leave_type}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
                             <div class="form-row mb-1">
                                 <div class="col-sm-12 col-md-12">
                                     <label class="small font-weight-bolder text-dark">Select Employee*</label>
@@ -847,6 +788,72 @@
     </div>
 </div>
 <!-- ========== END SALARY ADVANCE MODAL ========== -->
+
+<!-- ========== LEAVE APPROVAL MODALS ========== -->
+<!-- Single record approval -->
+<div class="modal fade" id="la_confirmModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+    aria-labelledby="la_confirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header p-2">
+                <h5 class="modal-title" id="la_confirmModalLabel">Approval Confirmation</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <span id="la_form_result"></span>
+                <div class="form-group">
+                    <label class="small font-weight-bolder text-dark">Comment</label>
+                    <textarea class="form-control form-control-sm" id="la_comment" name="la_comment" rows="3"></textarea>
+                </div>
+                <div class="radio">
+                    <label><input type="radio" name="la_status" value="Approved"> Approve</label>
+                </div>
+                <div class="radio">
+                    <label><input type="radio" name="la_status" value="Rejected"> Reject</label>
+                </div>
+                <input type="hidden" id="la_id" />
+                <input type="hidden" id="la_emp_id" />
+                <input type="hidden" id="la_app_level" value="1" />
+            </div>
+            <div class="modal-footer p-2">
+                <button type="button" class="btn btn-primary px-3 btn-sm" id="la_approve"><i class="fas fa-check mr-1"></i>Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Approve-All confirmation -->
+<div class="modal fade" id="la_approveconfirmModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+    aria-labelledby="la_approveconfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header p-2">
+                <h5 class="modal-title" id="la_approveconfirmModalLabel">All Approval Confirmation</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <span id="la_all_form_result"></span>
+                <div class="form-group">
+                    <label class="small font-weight-bolder text-dark">Comment</label>
+                    <textarea class="form-control form-control-sm" id="la_allcomment" name="la_allcomment" rows="3"></textarea>
+                </div>
+                <div class="radio">
+                    <label><input type="radio" name="la_allstatus" value="Approved"> Approve</label>
+                </div>
+                <div class="radio">
+                    <label><input type="radio" name="la_allstatus" value="Rejected"> Reject</label>
+                </div>
+            </div>
+            <div class="modal-footer p-2">
+                <button type="button" class="btn btn-primary px-3 btn-sm" id="la_approveall"><i class="fas fa-check mr-1"></i>Confirm All</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ========== END LEAVE APPROVAL MODALS ========== -->
 
 @endsection
 @section('script')
@@ -1152,6 +1159,50 @@
 
         });
         
+        // Function to load leave balance for the fixed employee
+        function loadUaLeaveStatus() {
+            var _token = $('meta[name="csrf-token"]').attr('content');
+            var leavetype = $('#ua_leavetype').val();
+            var fromdate = $('#fromdate').val();
+            var todate = $('#todate').val();
+
+            $.ajax({
+                url: "{{ url('getEmployeeLeaveStatus') }}",
+                method: "POST",
+                data: {
+                    emp_id: empid,
+                    leavetype: leavetype,
+                    fromdate: fromdate,
+                    todate: todate,
+                    _token: _token
+                },
+                success: function (data) {
+                    $('#ua_annual_total').html(data.total_no_of_annual_leaves);
+                    $('#ua_annual_taken').html(data.total_taken_annual_leaves);
+                    $('#ua_annual_available').html(data.available_no_of_annual_leaves);
+
+                    $('#ua_casual_total').html(data.total_no_of_casual_leaves);
+                    $('#ua_casual_taken').html(data.total_taken_casual_leaves);
+                    $('#ua_casual_available').html(data.available_no_of_casual_leaves);
+
+                    $('#ua_med_total').html(data.total_no_of_med_leaves);
+                    $('#ua_med_taken').html(data.total_taken_med_leaves);
+                    $('#ua_med_available').html(data.available_no_of_med_leaves);
+
+                    $('#ua_weekly_total').html(data.total_no_of_weekly_leaves);
+                    $('#ua_weekly_taken').html(data.total_taken_weekly_leaves);
+                    $('#ua_weekly_available').html(data.available_no_of_weekly_leaves);
+
+                    $('#ua_weekly_title').html(data.other_leaves_title);
+
+                    $('#ua_leave_msg').html('');
+                    if (data.leave_msg && data.leave_msg != '') {
+                        $('#ua_leave_msg').html('<div class="alert alert-warning text-sm" style="padding: 3px;">' + data.leave_msg + '</div>');
+                    }
+                }
+            });
+        }
+
         $('#create_record').click(function () {
             // $('.modal-title').text('Apply Leave');
             // $('#action_button').val('Add');
@@ -1159,129 +1210,19 @@
             // $('#form_result').html('');
 
             $('#formModal').modal('show');
+            loadUaLeaveStatus();
         });
 
-        // $('#formTitle').on('submit', function (event) {
-        //     event.preventDefault();
-        //     var action_url = '';
+        // Reload leave balance when leave type changes
+        $('#ua_leavetype').on('change', function () {
+            loadUaLeaveStatus();
+        });
 
+        // Reload leave balance when to-date changes
+        $('#todate').on('change', function () {
+            loadUaLeaveStatus();
+        });
 
-        //     if ($('#action').val() == 'Add') {
-        //         action_url = "{{ route('addLeaveApply') }}";
-        //     }
-
-
-        //     if ($('#action').val() == 'Edit') {
-        //         action_url = "{{ route('LeaveApply.update') }}";
-        //     }
-
-        //      // Collect table data as array
-        //             var leaveBalanceData = [];
-                    
-        //             // Get all rows from the table body
-        //             $('#leavebalancetable tbody tr').each(function() {
-        //                 var row = $(this);
-        //                 var leaveType = row.find('td:first span').text().trim();
-        //                 var total = row.find('td:nth-child(2) span').text().trim();
-        //                 var taken = row.find('td:nth-child(3) span').text().trim();
-        //                 var available = row.find('td:nth-child(4) span').text().trim();
-                        
-        //                 leaveBalanceData.push({
-        //                     leave_type: leaveType,
-        //                     total: total,
-        //                     taken: taken,
-        //                     available: available
-        //                 });
-        //             });
-
-        //             // Get form data
-        //             var formData = $(this).serializeArray();
-                    
-        //             // Add table data to form data
-        //             formData.push({
-        //                 name: 'leave_balance_data',
-        //                 value: JSON.stringify(leaveBalanceData)
-        //             });
-
-
-        //     $.ajax({
-        //         url: action_url,
-        //         method: "POST",
-        //         data: $(this).serialize(),
-        //         dataType: "json",
-        //         success: function (data) {
-
-        //             var html = '';
-        //             if (data.errors) {
-        //                 const combinedErrors = data.errors.join('<br><br>');
-
-        //                 Swal.fire({
-        //                     icon: 'error',
-        //                     title: 'Leave Balance Errors',
-        //                     html: combinedErrors,
-        //                     confirmButtonText: 'OK',
-        //                     confirmButtonColor: '#d33'
-        //                 });
-        //             }
-        //             if (data.success) {
-        //                 const emailBody = generateEmailBody();
-
-        //                 var emailData = {
-        //                     'inquire_now': 'HR Department - ' + $('#companyname').val(),
-        //                     'replyto': [
-        //                         $('#employeeemail').val(),
-        //                         $('#companyemail').val(),
-        //                         $('#coveringemail').val(),
-        //                         $('#approveemail').val()
-        //                     ].filter(email => email).join(';'),
-        //                     'contsubj': 'Leave Application - ' + $(
-        //                         '#employee option:selected').text(),
-        //                     'contbody': emailBody
-        //                 };
-
-        //                 // Create a temporary iframe
-        //                 var iframe = document.createElement('iframe');
-        //                 iframe.name = 'emailIframe';
-        //                 iframe.style.display = 'none';
-
-        //                 // Create the form
-        //                 var form = document.createElement('form');
-        //                 form.target = 'emailIframe';
-        //                 form.method = 'POST';
-        //                 form.action = 'https://aws.erav.lk/Temp/bf360/eravawsmail.php';
-
-        //                 // Add form inputs
-        //                 Object.keys(emailData).forEach(function (key) {
-        //                     var input = document.createElement('input');
-        //                     input.type = 'hidden';
-        //                     input.name = key;
-        //                     input.value = emailData[key];
-        //                     form.appendChild(input);
-        //                 });
-
-        //                 // First show the initial success message
-        //                 var html = '<div class="alert alert-success">' + data.success +
-        //                     '</div>';
-        //                 $('#form_result').html(html).show();
-        //                 $('#formTitle')[0].reset();
-
-        //                 // Add to document and submit
-        //                 document.body.appendChild(iframe);
-        //                 document.body.appendChild(form);
-        //                 form.submit();
-
-        //                 html = '<div class="alert alert-success">' + data.success +
-        //                 '</div>';
-        //                 $('#formTitle')[0].reset();
-        //                 setTimeout(function () {
-        //                     $('#formModal').modal('hide');
-        //                 }, 1000);
-
-        //             }
-        //             $('#form_result').html(html);
-        //         }
-        //     });
-        // });
         $('#formTitle').on('submit', function (event) {
             event.preventDefault();
             var action_url = '';
@@ -1496,7 +1437,10 @@
             loadMyTimesheet();
         });
 
-
+        // Leave Approval tab — lazy-load on first open
+        $('a[href="#leaveapproval"]').one('shown.bs.tab', function () {
+            load_leave_approval_dt(empid);
+        });
 
     });
 
@@ -3067,6 +3011,326 @@
     });
 
     // END TIME SHEET TAB
+
+
+    // LEAVE APPROVAL TAB
+
+    function load_leave_approval_dt(approverEmpId) {
+        if ($.fn.DataTable.isDataTable('#leaveapprovaltable')) {
+            $('#leaveapprovaltable').DataTable().destroy();
+        }
+        $('#leaveapprovaltable').DataTable({
+            destroy: true,
+            processing: true,
+            serverSide: true,
+            dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" +
+                 "<'row'<'col-sm-12'tr>>" +
+                 "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+            buttons: [
+                { extend: 'csv',   className: 'btn btn-success btn-sm', title: 'Leave Approve Details', text: '<i class="fas fa-file-csv mr-2"></i> CSV' },
+                { extend: 'pdf',   className: 'btn btn-danger btn-sm',  title: 'Leave Approve Details', text: '<i class="fas fa-file-pdf mr-2"></i> PDF', orientation: 'landscape', pageSize: 'legal', customize: function(doc) { doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split(''); } },
+                { extend: 'print', className: 'btn btn-primary btn-sm', title: 'Leave Approve Details', text: '<i class="fas fa-print mr-2"></i> Print', customize: function(win) { $(win.document.body).find('table').addClass('compact').css('font-size', 'inherit'); } }
+            ],
+            ajax: {
+                url: scripturl + '/user_leave_approve_list.php',
+                type: 'POST',
+                // Pass the logged-in user's emp_id as the approver filter.
+                // leave_approv_person / leave_approv_person_2 to match.
+                data: { approver: approverEmpId }
+            },
+            columns: [
+                {
+                    data: 'status',
+                    name: 'status',
+                    render: function(data) {
+                        if (data === 'Approved') {
+                            return '<i class="fas fa-check-circle text-success"></i>';
+                        } else if (data === 'Rejected') {
+                            return '<i class="fas fa-times-circle text-danger"></i>';
+                        } else {
+                            return '<input type="checkbox" class="la-row-checkbox selectCheck removeIt">';
+                        }
+                    },
+                    orderable: false, searchable: false
+                },
+                { data: 'emp_id',          name: 'emp_id' },
+                { data: 'employee_display', name: 'employee_display' },
+                { data: 'dep_name',        name: 'dep_name' },
+                { data: 'leave_type',      name: 'leave_type' },
+                { data: 'leave_from',      name: 'leave_from' },
+                { data: 'leave_to',        name: 'leave_to' },
+                { data: 'reson',           name: 'reson' },
+                { data: 'covering_emp',    name: 'covering_emp' },
+                {
+                    data: 'status',
+                    name: 'status_badge',
+                    render: function(data) {
+                        if (data === 'Pending')  return '<span class="badge badge-primary">Pending</span>';
+                        if (data === 'Approved') return '<span class="badge badge-success">Approved</span>';
+                        if (data === 'Rejected') return '<span class="badge badge-danger">Rejected</span>';
+                        return '';
+                    },
+                    orderable: false, searchable: false
+                },
+                {
+                    data: 'status',
+                    name: 'approve_level',
+                    className: 'text-dark',
+                    render: function(data, type, row) {
+                        if (row.approve_01 == 1 && row.approve_02 == 0) {
+                            return '<i style="color:#f4a100" class="fas fa-level-up-alt"></i>&nbsp;&nbsp;2nd Approval';
+                        } else if (row.approve_01 == 1 && row.approve_02 == 1) {
+                            return '<i style="color:green" class="fas fa-check"></i>&nbsp;&nbsp;All Approved';
+                        } else {
+                            return '<i style="color:red" class="fas fa-level-up-alt"></i>&nbsp;&nbsp;1st Approval';
+                        }
+                    }
+                },
+                {
+                    data: null,
+                    name: 'action',
+                    className: 'text-right',
+                    render: function(data, type, row) {
+                        if (row.status === 'Pending' || row.status === 'Approved' || row.status === 'Rejected') {
+                            if (row.approve_01 == 0) {
+                                return '<button name="la_appL1" data-id="' + row.id + '" data-empid="' + row.emp_id + '" class="la_appL1 btn btn-danger btn-sm" type="button"><i class="fas fa-level-up-alt"></i></button>';
+                            } else if (row.approve_01 == 1 && row.approve_02 == 0) {
+                                return '<button name="la_appL2" data-id="' + row.id + '" data-empid="' + row.emp_id + '" class="la_appL2 btn btn-warning btn-sm" type="button"><i class="fas fa-level-up-alt"></i></button>';
+                            } else {
+                                return '<button data-id="' + row.id + '" data-empid="' + row.emp_id + '" class="la_view btn btn-primary btn-sm" type="button" data-toggle="tooltip" title="View/Approve"><i class="fas fa-pencil-alt"></i></button>';
+                            }
+                        }
+                        return '';
+                    },
+                    orderable: false, searchable: false
+                },
+                { data: 'id',                   name: 'id',                   visible: false },
+                { data: 'emp_name_with_initial', name: 'emp_name_with_initial', visible: false },
+                { data: 'calling_name',          name: 'calling_name',          visible: false },
+                { data: 'leave_approv_person_2', name: 'leave_approv_person_2', visible: false }
+            ],
+            order: [[6, 'desc']],
+            drawCallback: function() {
+                $('[data-toggle="tooltip"]').tooltip();
+            }
+        });
+    }
+
+    // Level 1 Approval
+    $(document).on('click', '.la_appL1', function() {
+        var rowData = $('#leaveapprovaltable').DataTable().row($(this).closest('tr')).data();
+        var hasSecondApprover = rowData && rowData.leave_approv_person_2 && rowData.leave_approv_person_2 != '0';
+        $('#la_id').val($(this).data('id'));
+        $('#la_emp_id').val($(this).data('empid'));
+        // If there is no second approver, this Level-1 click is the final approval.
+        // Send app_level=2 so the controller treats it as final and sends the email.
+        $('#la_app_level').val(hasSecondApprover ? 1 : 2);
+        $('input[name="la_status"]').prop('checked', false);
+        $('#la_comment').val('');
+        $('#la_form_result').html('');
+        $('#la_confirmModal').modal('show');
+    });
+
+    // Level 2 Approval
+    $(document).on('click', '.la_appL2', function() {
+        $('#la_id').val($(this).data('id'));
+        $('#la_emp_id').val($(this).data('empid'));
+        $('#la_app_level').val(2);
+        $('input[name="la_status"]').prop('checked', false);
+        $('#la_comment').val('');
+        $('#la_form_result').html('');
+        $('#la_confirmModal').modal('show');
+    });
+
+    //View/Edit (already fully approved)
+    $(document).on('click', '.la_view', function() {
+        $('#la_id').val($(this).data('id'));
+        $('#la_emp_id').val($(this).data('empid'));
+        $('#la_app_level').val(2);
+        $('input[name="la_status"]').prop('checked', false);
+        $('#la_comment').val('');
+        $('#la_form_result').html('');
+        $('#la_confirmModal').modal('show');
+    });
+
+    // Confirm single approval
+    $(document).on('click', '#la_approve', function() {
+        var id        = $('#la_id').val();
+        var emp_id    = $('#la_emp_id').val();
+        var app_level = $('#la_app_level').val();
+        var status    = $('input[name="la_status"]:checked').val();
+        var comment   = $('#la_comment').val();
+
+        $.ajax({
+            url: "{{ route('approvelupdate') }}",
+            type: 'POST',
+            data: {
+                id:        id,
+                emp_id:    emp_id,
+                status:    status,
+                comment:   comment,
+                app_level: app_level,
+                _token:    "{{ csrf_token() }}"
+            },
+            success: function(data) {
+                $('#la_confirmModal').modal('hide');
+                $('#leaveapprovaltable').DataTable().ajax.reload(null, false);
+                if (data.errors) {
+                    const obj = { icon: 'fas fa-warning', title: '', message: data.errors, url: '', target: '_blank', type: 'danger' };
+                    action(JSON.stringify(obj));
+                }
+                if (data.mail) { sendLeaveStatusMail(data.mail); }
+                if (data.success) {
+                    const obj = { icon: 'fas fa-save', title: '', message: data.success, url: '', target: '_blank', type: 'success' };
+                    action(JSON.stringify(obj));
+                }
+                if (data.sms_warning) {
+                    const obj = { icon: 'fas fa-warning', title: '', message: data.sms_warning, url: '', target: '_blank', type: 'warning' };
+                    action(JSON.stringify(obj));
+                }
+            },
+            error: function(xhr) {
+                console.error(xhr.responseText);
+                $('#la_confirmModal').modal('hide');
+                action(JSON.stringify({ icon: 'fas fa-warning', title: '', message: 'Approval failed', url: '', target: '_blank', type: 'danger' }));
+            }
+        });
+    });
+
+    // Select All checkbox (Leave Approval tab) ---
+    $(document).on('change', '#la_selectAll', function() {
+        $('#leaveapprovaltable tbody input[type="checkbox"]').prop('checked', this.checked);
+    });
+
+    // Approve All button
+    $('#la_allapproveel').on('click', async function() {
+        var r = await Otherconfirmation('You want to Approve selected records?');
+        if (r === true) {
+            $('#la_allcomment').val('');
+            $('input[name="la_allstatus"]').prop('checked', false);
+            $('#la_approveconfirmModal').modal('show');
+        }
+    });
+
+    // Confirm Approve All
+    $(document).on('click', '#la_approveall', function() {
+        var selectedRows = [];
+        $('#leaveapprovaltable tbody .selectCheck:checked').each(function() {
+            var rowData = $('#leaveapprovaltable').DataTable().row($(this).closest('tr')).data();
+            if (rowData) {
+                var appLevel = 1;
+                if (rowData.approve_01 == 1 && rowData.approve_02 == 0)  appLevel = 2;
+                else if (rowData.approve_01 == 1 && rowData.approve_02 == 1) appLevel = 3;
+                selectedRows.push({
+                    empid:    rowData.emp_id,
+                    emp_name: rowData.employee_display,
+                    laeaveid: rowData.id,
+                    app_level: appLevel
+                });
+            }
+        });
+
+        if (selectedRows.length === 0) {
+            Swal.fire({ position: 'top-end', icon: 'warning', title: 'Select Rows to Approve!', showConfirmButton: false, timer: 2500 });
+            return;
+        }
+
+        var comment = $('#la_allcomment').val();
+        var status  = $('input[name="la_allstatus"]:checked').val();
+
+        $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') } });
+        $.ajax({
+            url: '{!! route("leaveapprove_batch") !!}',
+            type: 'POST',
+            dataType: 'json',
+            data: { dataarry: selectedRows, comment: comment, status: status },
+            success: function(data) {
+                $('#la_approveconfirmModal').modal('hide');
+                $('#la_selectAll').prop('checked', false);
+                $('#leaveapprovaltable').DataTable().ajax.reload(null, false);
+                if (data.errors) {
+                    const obj = { icon: 'fas fa-warning', title: '', message: 'Record Error', url: '', target: '_blank', type: 'danger' };
+                    action(JSON.stringify(obj));
+                }
+                if (data.success) {
+                    const obj = { icon: 'fas fa-save', title: '', message: data.success, url: '', target: '_blank', type: 'success' };
+                    action(JSON.stringify(obj));
+                }
+                if (data.mails && data.mails.length) {
+                    data.mails.forEach(function(m, i) {
+                        setTimeout(function() { sendLeaveStatusMail(m); }, i * 400);
+                    });
+                }
+            }
+        });
+    });
+
+    function escHtml(s) {
+        return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function sendLeaveStatusMail(m) {
+        var halfShortMap = { '0.25': 'Short Leave', '0.5': 'Half Day', '0.50': 'Half Day', '1': 'Full Day', '1.00': 'Full Day' };
+        var duration = halfShortMap[String(m.half_short)] || '';
+
+        var rowsData = [
+            ['Employee', m.employee],
+            ['Employee ID', m.employee_id],
+            ['Leave Type', m.leave_type],
+            ['Leave Duration', duration],
+            ['From Date', m.from_date],
+            ['To Date', m.to_date],
+            ['Number of Days', m.no_of_days],
+            ['Reason', m.reason],
+            ['Covering Employee', m.covering],
+            ['Approving Person', m.approver],
+            ['Status', m.status],
+            ['Comment', m.comment]
+        ];
+
+        var body = '<p>Dear Sir/Madam,</p>';
+        body += '<p>The following leave application has been <b>' + escHtml(m.status) + '</b>:</p>';
+        body += '<table cellpadding="6" cellspacing="0" style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:14px;">';
+        for (var i = 0; i < rowsData.length; i++) {
+            if (!rowsData[i][1]) { continue; }
+            body += '<tr>' +
+                '<td style="border:1px solid #ccc;background:#f5f5f5;"><b>' + rowsData[i][0] + '</b></td>' +
+                '<td style="border:1px solid #ccc;">' + escHtml(rowsData[i][1]) + '</td>' +
+                '</tr>';
+        }
+        body += '</table>';
+        body += '<p>Regards,<br>HR Department</p>';
+
+        var emailData = {
+            'inquire_now': 'HR Department - ' + (m.company_name || ''),
+            'replyto': (m.emails || []).filter(function (e) { return e; }).join(';'),
+            'contsubj': 'Leave ' + m.status + ' - ' + m.employee,
+            'contbody': body
+        };
+
+        var iframe = document.createElement('iframe');
+        iframe.name = 'emailIframe';
+        iframe.style.display = 'none';
+
+        var form = document.createElement('form');
+        form.target = 'emailIframe';
+        form.method = 'POST';
+        form.action = 'https://aws.erav.lk/Temp/bf360/eravawsmail.php';
+
+        Object.keys(emailData).forEach(function (key) {
+            var input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            input.value = emailData[key];
+            form.appendChild(input);
+        });
+
+        document.body.appendChild(iframe);
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    // END LEAVE APPROVAL TAB
 
 
 </script>
