@@ -155,6 +155,7 @@ class MainController extends Controller
             'half_short' => 'required',
             'coveringemployee' => 'required',
             'approveby' => 'required',
+            'approveby_2' => 'required',
         ]);
 
         if($validator->fails()){
@@ -177,7 +178,7 @@ class MainController extends Controller
         $leave->comment = $request->input('comment');
         $leave->emp_covering = $request->input('coveringemployee');
         $leave->leave_approv_person = $request->input('approveby');
-        $leave->request_id = $request->input('leaverequest_id');
+        $leave->leave_approv_person_2 = $request->input('approveby_2');
         $leave->status = 'Pending';
         $leave->save();
 
@@ -201,11 +202,156 @@ class MainController extends Controller
                 ->decrement('total_leave', $diff_days);
         }
 
+        try {
+            (new \App\Http\Controllers\Api\ApiLeaveEmailController)->sendLeaveApplyEmail($leave);
+        } catch (\Exception $e) {
+            \Log::error('ApplyLeave email error: ' . $e->getMessage());
+        }
 
-        return (new BaseController)->sendResponse($leave, 'Success!');
+        return (new BaseController)->sendResponse($leave, 'Leave Details Successfully Insert!');
     }
 
- 
+      public function getLastLeaveApprovers(Request $request)
+    {
+        $empId = $request->input('employee');
 
+        if (empty($empId)) {
+            return response()->json(['found' => false]);
+        }
+
+        $leave = DB::table('leaves')
+            ->select('leave_approv_person', 'leave_approv_person_2')
+            ->where('emp_id', $empId)
+            ->orderBy('id', 'desc')
+            ->first();
+
+        if (!$leave) {
+            $data = $this->getReportPersonApprovers($empId);
+            return (new BaseController)->sendResponse($data, 'Report Persons Loaded');
+        }
+
+        $data = array(
+            'leave_approv_person'   => (int) $leave->leave_approv_person,
+            'leave_approv_person_2' => (int) $leave->leave_approv_person_2,
+        );
+         return (new BaseController)->sendResponse($data, 'Leave Approvers Found');
+    }
+
+        public function getReportPersonApprovers($empId)
+    {
+        $approver1 = '';
+        $approver2 = '';
+
+        $first = DB::table('employees')
+            ->where('emp_id', $empId)
+            ->value('report_person_id');
+
+        if (!empty($first)) {
+            $approver1 = (string) $first;
+
+            $second = DB::table('employees')
+                ->where('emp_id', $approver1)
+                ->value('report_person_id');
+
+            if (!empty($second)) {
+                $approver2 = (string) $second;
+            }
+        }
+
+        // Loop wenna epa
+        if ($approver2 === (string) $empId || $approver2 === $approver1) {
+            $approver2 = '';
+        }
+
+        return array(
+            'leave_approv_person'   => $approver1,
+            'leave_approv_person_2' => $approver2,
+        );
+    }
+
+    public function editLeave(Request $request)
+    {
+        $validator = \Validator::make($request->all(), [
+            'id' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return (new BaseController())->sendError('Validation Error.', $validator->errors(), '400');
+        }
+
+        $leaves = Leave::with('employee')
+            ->with(array(
+                'employee' => function ($query) {
+                    $query->select('emp_id', 'emp_name_with_initial', 'calling_name');
+                },
+                'covering_employee' => function ($query) {
+                    $query->select('emp_id', 'emp_name_with_initial', 'calling_name');
+                },
+                'approve_by' => function ($query) {
+                    $query->select('emp_id', 'emp_name_with_initial', 'calling_name');
+                },
+                'approve2_by' => function ($query) {
+                    $query->select('emp_id', 'emp_name_with_initial', 'calling_name');
+                },
+            ))
+            ->findOrFail($request->id);
+        $data = array(
+            'leave_info' => $leaves
+        );
+
+        return (new BaseController)->sendResponse($data, 'leave_info');
+    }
+
+    public function UpdateLeave(Request $request)
+    {
+        $validator = \Validator::make($request->all(), [
+            'id' => 'required',
+            'employee' => 'required',
+            'leavetype' => 'required',
+            'fromdate' => 'required',
+            'todate' => 'required',
+            'reson' => 'required',
+            'no_of_days' => 'required',
+            'half_short' => 'required',
+            'coveringemployee' => 'required',
+            'approveby' => 'required',
+            'approveby_2' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return (new BaseController())->sendError('Validation Error.', $validator->errors(), '400');
+        }
+
+        $leave = Leave::find($request->input('id'));
+
+        if (!$leave) {
+            return (new BaseController())->sendError('Leave Not Found.', array(), '404');
+        }
+
+        if ($leave->status !== 'Pending' || $leave->approve_01 == 1 || $leave->approve_02 == 1) {
+            return (new BaseController())->sendError('This leave is already processed and cannot be edited.', array(), '400');
+        }
+
+        $leave->emp_id = $request->input('employee');
+        $leave->leave_type = $request->input('leavetype');
+        $leave->leave_from = $request->input('fromdate');
+        $leave->leave_to = $request->input('todate');
+        $leave->no_of_days = $request->input('no_of_days');
+        $leave->half_short = $request->input('half_short');
+        $leave->reson = $request->input('reson');
+        $leave->comment = $request->input('comment');
+        $leave->emp_covering = $request->input('coveringemployee');
+        $leave->leave_approv_person = $request->input('approveby');
+        $leave->leave_approv_person_2 = $request->input('approveby_2');
+        $leave->save();
+
+        try {
+            (new \App\Http\Controllers\Api\ApiLeaveEmailController)->sendLeaveApplyEmail($leave);
+        } catch (\Exception $e) {
+            \Log::error('ApplyLeave email error: ' . $e->getMessage());
+        }
+
+        return (new BaseController)->sendResponse($leave, 'Leave Details Successfully Updated!');
+    }
 
 }

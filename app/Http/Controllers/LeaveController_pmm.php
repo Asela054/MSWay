@@ -400,30 +400,7 @@ class LeaveController_pmm extends Controller
         ]);
     }
 
-    public function getLastLeaveApprovers(Request $request)
-    {
-        $empId = $request->input('emp_id');
-
-        if (empty($empId)) {
-            return response()->json(['found' => false]);
-        }
-
-        $leave = DB::table('leaves')
-            ->select('leave_approv_person', 'leave_approv_person_2')
-            ->where('emp_id', $empId)
-            ->orderBy('id', 'desc')
-            ->first();
-
-        if (!$leave) {
-            return response()->json(['found' => false]);
-        }
-
-        return response()->json([
-            'found'                 => true,
-            'leave_approv_person'   => $leave->leave_approv_person,
-            'leave_approv_person_2' => $leave->leave_approv_person_2,
-        ]);
-    }
+  
 
     public function getEmployeeCategory(Request $request)
     {

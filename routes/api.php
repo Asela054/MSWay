@@ -73,7 +73,6 @@ Route::middleware('auth:api')->group(function () {
     Route::post('v1/AttendanceStore', ['uses' => '\App\Http\Controllers\Api\MainController@attendanceStore', 'as' => 'AttendanceStore']);
     Route::post('v1/GetEmployeeInfo', ['uses' => '\App\Http\Controllers\Api\MainController@getEmployeeInfo', 'as' => 'GetEmployeeInfo']);
     Route::post('v1/GetLeavesList', ['uses' => '\App\Http\Controllers\Api\MainController@GetLeavesList', 'as' => 'GetLeavesList']);
-    Route::post('v1/ApplyLeave', ['uses' => '\App\Http\Controllers\Api\MainController@ApplyLeave', 'as' => 'ApplyLeave']);
     Route::post('v3/SaveEmoji', ['uses' => '\App\Http\Controllers\Api\V3MainController@SaveEmoji', 'as' => 'SaveEmoji']);
     Route::post('v3/GetEmojies', ['uses' => '\App\Http\Controllers\Api\V3MainController@GetEmojies', 'as' => 'GetEmojies']);
     Route::post('v3/BusLogin', ['uses' => '\App\Http\Controllers\Api\V3MainController@BusLogin', 'as' => 'BusLogin']);
@@ -93,6 +92,7 @@ Route::post('v1/leaverequest_list', ['uses' => '\App\Http\Controllers\Api\APILea
 Route::post('v1/Leaverequestdetails', ['uses' => '\App\Http\Controllers\Api\APILeaveController@getemployeeleaverequest', 'as' => 'Leaverequestdetails']); 
 Route::post('v1/leaverequestinsert', ['uses' => '\App\Http\Controllers\Api\APILeaveController@leaverequestinsert', 'as' => 'leaverequestinsert']); 
 Route::post('v1/leaverequestdelete', ['uses' => '\App\Http\Controllers\Api\APILeaveController@leaverequestdelete', 'as' => 'leaverequestdelete']); 
+Route::post('v1/leaverequestupdate', ['uses' => '\App\Http\Controllers\Api\APILeaveController@leaverequestupdate', 'as' => 'leaverequestupdate']); 
 
 // Employee API List
 Route::post('v1/GetEmployeeProfileDetails', ['uses' => '\App\Http\Controllers\Api\APIEmployeeController@GetEmployeeProfileDetails', 'as' => 'GetEmployeeProfileDetails']);
@@ -157,6 +157,10 @@ Route::post('v1/get_available_amount', ['uses' => '\App\Http\Controllers\Api\API
 Route::post('v1/salary_advance_create', ['uses' => '\App\Http\Controllers\Api\APISalaryAdvanceController@salary_advance_create', 'as' => 'salary_advance_create']);
 Route::post('v1/get_salary_advance_list', ['uses' => '\App\Http\Controllers\Api\APISalaryAdvanceController@Getsalaryadvancelist', 'as' => 'get_salary_advance_list']);
 
+Route::post('v1/ApplyLeave', ['uses' => '\App\Http\Controllers\Api\MainController@ApplyLeave', 'as' => 'ApplyLeave']);
+Route::post('v1/getLeaveApprovers', ['uses' => '\App\Http\Controllers\Api\MainController@getLastLeaveApprovers', 'as' => 'getLeaveApprovers']);
+Route::post('v1/editLeave', ['uses' => '\App\Http\Controllers\Api\MainController@editLeave', 'as' => 'editLeave']);
+Route::post('v1/UpdateLeave', ['uses' => '\App\Http\Controllers\Api\MainController@UpdateLeave', 'as' => 'UpdateLeave']);
 
 Route::get('/download-pdf/{pdfId}', function($pdfId) {
     $pdfData = session()->get($pdfId);

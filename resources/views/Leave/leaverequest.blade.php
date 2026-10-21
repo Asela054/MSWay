@@ -189,7 +189,15 @@
                                             <input type="text" name="reason" id="reason" class="form-control form-control-sm"/>
                                         </div>
                                     </div>
-                                    
+                                    <div class="form-row mb-1">
+                                    <div class="col-sm-12 col-md-12">
+                                        <label class="small font-weight-bolder text-dark">Covering Employee</label>
+                                        <select name="coveringemployee" id="coveringemployee"
+                                            class="form-control form-control-sm">
+                                            <option value="">Select</option>
+                                        </select>
+                                    </div>
+                                </div>
                                     <div class="form-group mt-3">
                                         <input type="submit" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-3" value="Add"/>
                                     </div>
@@ -320,11 +328,31 @@
                 }
             });
 
+            let c_employee = $('#coveringemployee');
+            c_employee.select2({
+                placeholder: 'Select...',
+                width: '100%',
+                allowClear: true,
+                parent: '#formModal',
+                ajax: {
+                    url: '{{url("employee_list_sel2")}}',
+                    dataType: 'json',
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1
+                        }
+                    },
+                    cache: true
+                }
+            });
+
             function load_dt(department, employee, from_date, to_date){
                 $('#divicestable').DataTable({
                         destroy: true,
                         processing: true,
                         serverSide: true,
+                        
                         dom: "<'row'<'col-sm-4 mb-sm-0 mb-2'B><'col-sm-2'l><'col-sm-6'f>>" + "<'row'<'col-sm-12'tr>>" +
                             "<'row'<'col-sm-5'i><'col-sm-7'p>>",
                         buttons: [{
@@ -645,6 +673,10 @@
                             $('#leavetype').val(data.result.leave_type);
                             $('#from_time').val(data.result.from_time);
                             $('#to_time').val(data.result.to_time);
+                            
+                            let covempOption = $("<option selected></option>").val(data.result.covering_emp).text(data.result.covering_emp_name);
+                            $('#coveringemployee').append(covempOption).trigger('change');
+                            $('#coveringemployee').val(data.result.covering_emp);
 
                            setTimeout(function() {
                                document.getElementById('half_short').dispatchEvent(new Event('change'));

@@ -213,11 +213,23 @@
                                 </div>
                                  <div class="form-row mb-1">
                                     <div class="col-sm-12 col-md-12">
-                                        <label class="small font-weight-bolder text-dark">Approve Person</label>
+                                        <label class="small font-weight-bolder text-dark">Approve Person Level 1</label>
                                         <select name="approveby" id="approveby" class="form-control form-control-sm">
                                             <option value="">Select</option>
                                             @foreach($employees as $employee)
                                             <option value="{{$employee->emp_id}}">{{$employee->emp_name_with_initial}}
+                                            </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                 </div>
+                                 <div class="form-row mb-1">
+                                    <div class="col-sm-12 col-md-12">
+                                        <label class="small font-weight-bolder text-dark">Approve Person Level 2</label>
+                                        <select name="approveby2" id="approveby2" class="form-control form-control-sm">
+                                            <option value="">Select</option>
+                                            @foreach($employees as $employee2)
+                                            <option value="{{$employee2->emp_id}}">{{$employee2->emp_name_with_initial}}
                                             </option>
                                             @endforeach
                                         </select>
@@ -236,6 +248,7 @@
                                 <input type="hidden" name="employeeemail" id="employeeemail"/>
                                 <input type="hidden" name="coveringemail" id="coveringemail"/>
                                 <input type="hidden" name="approveemail" id="approveemail"/>
+                                <input type="hidden" name="approveemail2" id="approveemail2"/>
                                 <input type="hidden" name="companyname" id="companyname"/>
                                 <input type="hidden" name="departmentheademail" id="departmentheademail"/>
 
@@ -299,8 +312,6 @@
 
     <script>
         $(document).ready(function () {
-            
-
             $('#attendant_menu_link').addClass('active');
             $('#attendant_menu_link_icon').addClass('active');
             $('#leavemaster').addClass('navbtnactive');
@@ -562,12 +573,6 @@
                 var millisecondsPerDay = 24 * 60 * 60 * 1000;
                 return (treatAsUTC(endDate) - treatAsUTC(startDate)) / millisecondsPerDay;
             }
-
-
-             // Bind the function to all relevant fields
-            $('#approveby').change(function() {
-                generateEmailBody();
-            });
             
         });
 
@@ -671,7 +676,24 @@
                     }
                 });
             }
+        });
 
+           // Get approve person Email address
+        $('#approveby2').change(function () {
+            var _token = $('input[name="_token"]').val();
+            var emp_id = $('#approveby2').val();
+
+            if (emp_id != '') {
+                $.ajax({
+                    url: "getEmployeeCategory",
+                    method: "POST",
+                    dataType: 'json',
+                    data: { emp_id: emp_id, _token: _token},
+                    success: function (data) {
+                    $('#approveemail2').val(data.result.employee_email);
+                    }
+                });
+            }
         });
 
         $('#todate').change(function () {
@@ -714,18 +736,17 @@
             $('#formTitle').on('submit', function (event) {
                 event.preventDefault();
                 var action_url = '';
-
-                 var $btn = $('#action_button');
+                var $btn = $('#action_button');
                  $btn.prop('disabled', true);
 
+                 generateEmailBody();
                 if ($('#action').val() == 'Add') {
                     action_url = "{{ route('addLeaveApply') }}";
                 }
 
-
                 if ($('#action').val() == 'Edit') {
-                        action_url = "{{ url('LeaveApply/update') }}";
-                    }
+                    action_url = "{{ url('LeaveApply/update') }}";
+                }
 
                 // Collect table data as array
                     var leaveBalanceData = [];
@@ -763,7 +784,7 @@
                     success: function (data) {
                            if (data.errors) {
                             const combinedErrors = data.errors.join('<br><br>');
-                             $btn.prop('disabled', false);  
+                            $btn.prop('disabled', false); 
 
                         Swal.fire({
                             icon: 'error',
@@ -828,9 +849,9 @@
                                $('#formTitle')[0].reset();
                                actionreload(actionJSON);
                            }
+
                        }
                         $('#form_result').html(html);
-                        
                     }
                 });
             });
@@ -865,6 +886,7 @@
                             $('#comment').val(data.result.comment);
                             $('#coveringemployee').val(data.result.emp_covering);
                             $('#approveby').val(data.result.leave_approv_person);
+                            $('#approveby2').val(data.result.leave_approv_person_2);
                             $('#available_leave').val(data.result.total_leave);
                             $('#assign_leave').val(data.result.assigned_leave);
                             $('#leavecat').val(data.result.leave_category);
@@ -976,6 +998,7 @@
                     }
 
                     show_no_of_days();
+                    loadLastApprovers(data.result.emp_id);
 
                     $('#formModal').modal('show');
                      $('#formModalleaverequests').modal('hide');
@@ -1040,6 +1063,7 @@
             var reason          = $('#reason').val() || $('#reson').val();   // supports both ids
             var coveringEmp     = $('#coveringemployee option:selected').text();
             var approvingPerson = $('#approveby option:selected').text();
+            var approvingPerson2 = $('#approveby2 option:selected').text();
             var halfShort       = $('#half_short option:selected').text();
 
             if (halfShort === 'Select') { halfShort = ''; }
@@ -1054,7 +1078,8 @@
                 ['Number of Days', noOfDays],
                 ['Reason', reason],
                 ['Covering Employee', coveringEmp],
-                ['Approving Person', approvingPerson]
+                ['Approving Person', approvingPerson],
+                ['Approving Person 2', approvingPerson2]
             ];
 
             var body = '<p>Dear Sir/Madam,</p>';
@@ -1073,7 +1098,7 @@
 
             $('#emailBody').val(body);
             return body;
-        }
+    }
 
     function show_no_of_days() {
         let from_date = $('#fromdate').val();
@@ -1103,8 +1128,35 @@
     }
 
     function escHtml(s) {
-    return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
+     return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function loadLastApprovers(empId) {
+        if (!empId) { return; }
+
+        $.ajax({
+            url: '{!! route("getLastLeaveApprovers") !!}',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                emp_id: empId,
+                _token: $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function (res) {
+                if (!res.found) { return; }
+
+                if (res.leave_approv_person) {
+                    $('#approveby').val(res.leave_approv_person).trigger('change');
+                }
+                if (res.leave_approv_person_2) {
+                    $('#approveby2').val(res.leave_approv_person_2).trigger('change');
+                }
+            },
+            error: function (xhr) {
+                console.error(xhr.responseText);
+            }
+        });
+    }
     
     </script>
 

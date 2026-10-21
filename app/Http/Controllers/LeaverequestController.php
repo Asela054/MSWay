@@ -47,6 +47,7 @@ class LeaverequestController extends Controller
         $leavetype  = $request->input('leavetype');
         $from_time  = $request->input('from_time');
         $to_time    = $request->input('to_time');
+        $coveringemployee   = $request->input('coveringemployee');
 
         $settings = DB::table('hrm_general_settings as settings')
             ->join('hrm_general_settings_key_list as key_list', 'settings.key_id', '=', 'key_list.id')
@@ -155,6 +156,7 @@ class LeaverequestController extends Controller
             $leaveRequest->updated_by = '0';
             $leaveRequest->approve_status = '0';
             $leaveRequest->request_approve_status = '0';
+            $leaveRequest->covering_emp = $coveringemployee;
             $leaveRequest->save();
 
         }
@@ -174,7 +176,8 @@ class LeaverequestController extends Controller
         $id = Request('id');
         if (request()->ajax()){
         $data = DB::table('leave_request')
-                ->join('employees as emp', 'leave_request.emp_id', '=', 'emp.emp_id')
+                ->leftJoin('employees as emp', 'leave_request.emp_id', '=', 'emp.emp_id')
+                ->leftJoin('employees as cov_emp', 'leave_request.covering_emp', '=', 'cov_emp.emp_id')
                 ->leftJoin('departments as dep', 'emp.emp_department', '=', 'dep.id')
                 ->leftJoin('job_titles as jt', 'emp.emp_job_code', '=', 'jt.id')
                 ->leftJoin('branches as br', 'emp.emp_location', '=', 'br.id')
@@ -182,6 +185,7 @@ class LeaverequestController extends Controller
                 ->select(
                     'leave_request.*',
                     'emp.emp_name_with_initial as emp_name',
+                    'cov_emp.emp_name_with_initial as covering_emp_name',
                     'emp.emp_id as emp_no',
                     'dep.name as dep_name',
                     'jt.title as designation',
@@ -209,6 +213,7 @@ class LeaverequestController extends Controller
         $leavetype=$request->input('leavetype');
         $from_time=$request->input('from_time');
         $to_time=$request->input('to_time');
+        $coveringemployee   = $request->input('coveringemployee');
 
         $hidden_id=$request->input('hidden_id');
 
@@ -298,6 +303,7 @@ class LeaverequestController extends Controller
                 'to_time' => $to_time,
                 'request_approve_status' => 0,
                 'updated_by' => Auth::id(),
+                'covering_emp' => $coveringemployee
             );
 
             LeaveRequest::where('id', $hidden_id)
@@ -315,6 +321,7 @@ class LeaverequestController extends Controller
                 'from_time' => $from_time,
                 'to_time' => $to_time,
                 'request_approve_status' => 0,
+                'covering_emp' => $coveringemployee,
                 'updated_by' => Auth::id(),
             );
 

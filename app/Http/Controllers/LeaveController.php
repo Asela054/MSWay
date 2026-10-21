@@ -61,13 +61,7 @@ class LeaveController extends Controller
                         ->distinct()
                         ->get();
 
-         $appName = config('app.name');
-        if($appName == 'pmmgroup'){
-          return view('Leave.leaveapply_pmm', compact('leavetype', 'employees','leaveemployees'));
-        }else{
-
            return view('Leave.leaveapply', compact('leavetype', 'employees','leaveemployees'));   
-        }
     }
 
     public function leave_list_dt(Request $request)
@@ -452,6 +446,7 @@ class LeaveController extends Controller
             'todate' => '',
             'reson' => '',
             'approveby' => '',
+             'approveby2' => '',
 
         );
 
@@ -470,7 +465,7 @@ class LeaveController extends Controller
             $leaveBalanceData = [];
             $balanceErrors = [];
 
-            if ($request->has('leave_balance_data')) {
+        if ($request->has('leave_balance_data')) {
                 $leaveBalanceData = json_decode($request->leave_balance_data, true);
                 
                 // Validate if the applied leave doesn't exceed available balance
@@ -491,7 +486,7 @@ class LeaveController extends Controller
                             }
                         }
                 
-           } 
+                    } 
         }
 
             if (!empty($balanceErrors)) {
@@ -509,6 +504,7 @@ class LeaveController extends Controller
         $leave->comment = $request->input('comment');
         $leave->emp_covering = $request->input('coveringemployee');
         $leave->leave_approv_person = $request->input('approveby');
+        $leave->leave_approv_person_2 = $request->input('approveby2');
         $leave->leave_category = $request->input('leavecat');
         $leave->status = 'Pending';
         $leave->request_id = $request->input('request_id');
@@ -597,16 +593,10 @@ class LeaveController extends Controller
             return response()->json(['error' => 'UnAuthorized'], 401);
         }
         if (request()->ajax()) {
-            //$data = Leave::findOrFail($id);
-            /* $data = DB::table('leaves')
-             ->leftjoin('leave_details', 'leaves.emp_id', '=', 'leave_details.emp_id')
-             ->join('leave_types', 'leave_details.leave_type', '=', 'leave_types.id')
-             ->select('leaves.*', 'leave_details.total_leave', 'leave_types.assigned_leave')
-             ->where('leaves.id' , $id)
-             ->get()->toarray();*/
             $data = Leave::with('employee')
                 ->with('covering_employee')
                 ->with('approve_by')
+                ->with('approve2_by')
                 ->findOrFail($id);
             return response()->json(['result' => $data]);
         }
@@ -655,6 +645,7 @@ class LeaveController extends Controller
             'reson' => $request->reson,
             'emp_covering' => $request->coveringemployee,
             'leave_approv_person' => $request->approveby,
+            'leave_approv_person_2' => $request->approveby2,
             'leave_category' => $request->leavecat,
             'status' => 'Pending'
 
@@ -1139,6 +1130,72 @@ class LeaveController extends Controller
             'comment'      => $comment,
             'company_name' => $companyName,
             'emails'       => $emails,
+        );
+    }
+
+      public function getLastLeaveApprovers(Request $request)
+    {
+        $empId = $request->input('emp_id');
+
+        if (empty($empId)) {
+            return response()->json(['found' => false]);
+        }
+
+        $leave = DB::table('leaves')
+            ->select('leave_approv_person', 'leave_approv_person_2')
+            ->where('emp_id', $empId)
+            ->orderBy('id', 'desc')
+            ->first();
+
+        if (!$leave) {
+            $data = $this->getReportPersonApprovers($empId);
+            if ($data['leave_approv_person'] === '' && $data['leave_approv_person_2'] === '') {
+                return response()->json(['found' => false]);
+            }
+
+            return response()->json([
+                'found'                 => true,
+                'leave_approv_person'   => $data['leave_approv_person'],
+                'leave_approv_person_2' => $data['leave_approv_person_2'],
+            ]);
+        }
+
+        return response()->json([
+            'found'                 => true,
+            'leave_approv_person'   => $leave->leave_approv_person,
+            'leave_approv_person_2' => $leave->leave_approv_person_2,
+        ]);
+    }
+
+    public function getReportPersonApprovers($empId)
+    {
+        $approver1 = '';
+        $approver2 = '';
+
+        $first = DB::table('employees')
+            ->where('emp_id', $empId)
+            ->value('report_person_id');
+
+        if (!empty($first)) {
+            $approver1 = (string) $first;
+
+            $second = DB::table('employees')
+                ->where('emp_id', $approver1)
+                ->value('report_person_id');
+
+            if (!empty($second)) {
+                $approver2 = (string) $second;
+            }
+        }
+
+        // Loop wenna epa
+        if ($approver2 === (string) $empId || $approver2 === $approver1) {
+            $approver2 = '';
+        }
+
+        return array(
+            'leave_approv_person'   => $approver1,
+            'leave_approv_person_2' => $approver2,
         );
     }
 }
