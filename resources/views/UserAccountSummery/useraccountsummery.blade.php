@@ -677,6 +677,15 @@
                                     <input type="text" name="reason" id="reason" class="form-control form-control-sm"/>
                                 </div>
                             </div>
+                            <div class="form-row mb-1">
+                                <div class="col-sm-12 col-md-12">
+                                    <label class="small font-weight-bolder text-dark">Covering Employee</label>
+                                    <select name="coveringemployee" id="coveringemployee"
+                                        class="form-control form-control-sm">
+                                        <option value="">Select</option>
+                                    </select>
+                                </div>
+                            </div>
                             
                             <div class="form-group mt-3">
                                 <input type="submit" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-3" value="Add"/>
@@ -1336,6 +1345,11 @@
                         $('#todate').val(data.result.to_date);
                         $('#half_short').val(data.result.leave_category);
                         $('#reason').val(data.result.reason);
+
+                        let covempOption = $("<option selected></option>").val(data.result.covering_emp).text(data.result.covering_emp_name);
+                        $('#coveringemployee').append(covempOption).trigger('change');
+                        $('#coveringemployee').val(data.result.covering_emp);
+
                         $('#hidden_id').val(id);
                         $('.modal-title').text('Edit Leave Request');
                         $('#action_button').val('Edit');
