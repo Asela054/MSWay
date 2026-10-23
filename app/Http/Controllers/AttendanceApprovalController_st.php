@@ -486,13 +486,22 @@ class AttendanceApprovalController_st extends Controller
                     $year_rec  = Carbon::parse($todate)->year;
                     $month_rec = Carbon::parse($todate)->month;
 
+                    // Sat & Sun nethuwa from date - to date athara days count eka
+                    $weekdaysCount = 0;
+                    foreach ($dateRange as $d) {
+                        $dayOfWeek = date('N', strtotime($d)); // 1 (Mon) - 7 (Sun)
+                        if ($dayOfWeek < 6) {
+                            $weekdaysCount++;
+                        }
+                    }
+
                             $data4 = array(
                                             'emp_id' => $record->emp_auto_id,
                                             'emp_etfno' => $record->emp_id,
                                             'work_year' => $year_rec,
                                             'work_month' => $month_rec,
-                                            'work_days' => 0,
-                                            'working_week_days' => 0,
+                                            'work_days' => $weekdaysCount,
+                                            'working_week_days' => $weekdaysCount,
                                             'work_hours' => 0,
                                             'leave_days' => $leave_days,
                                             'nopay_days' => $no_pay_days,

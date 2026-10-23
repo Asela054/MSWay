@@ -21,8 +21,8 @@ class LeaverequestController extends Controller
         if (!$permission) {
             abort(403);
         }
-        $leavetype = LeaveType::orderBy('id', 'asc')->get();
-        $employee = Employee::orderBy('id', 'desc')->get();
+       $leavetype = LeaveType::where('id', '!=', 7)->orderBy('id', 'asc')->get();
+       $employee = Employee::orderBy('id', 'desc')->get();
 
           $appName = config('app.name');
             if($appName == 'RajapakshaElectricalHRM'){

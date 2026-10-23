@@ -55,6 +55,7 @@ class OtApproved extends Model
     public function is_exists_in_ot_approved($emp_id, $date, $OTfrom){
         $date = Carbon::parse($date);
         $date = $date->format('Y-m-d');
+        
         $ot = OtApproved::where('emp_id', $emp_id)
             ->where('date', '=', $date)
             ->where('from', '=', $OTfrom)

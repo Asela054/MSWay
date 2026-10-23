@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Helpers\EmployeeHelper;
 use App\Helpers\UserHelper;
 use App\OtApproved;
-use App\Services\Opma_Daily_approvePolicy_Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -16,14 +15,6 @@ use DateTime;
 
 class OTApproveController extends Controller
 {
-     protected $Opma_Daily_approvePolicy_Service;
-
-    public function __construct(Opma_Daily_approvePolicy_Service $Opma_Daily_approvePolicy_Service)
-    {
-        $this->Opma_Daily_approvePolicy_Service = $Opma_Daily_approvePolicy_Service;
-    }
-
-
      public function ot_approve(Request $request)
     {
         $permission = Auth::user()->can('ot-approve');
@@ -53,13 +44,6 @@ class OTApproveController extends Controller
         $location = $request->input('location');
         $from_date = $request->input('from_date');
         $to_date = $request->input('to_date');
-
-        // $otskip_status = 0;
-
-        // $appName = config('app.name');
-        // if($appName == 'RajapakshaElectricalHRM'){
-        //     $otskip_status = 1;
-        // }
 
         // Get accessible employee IDs based on user access rights
         $userId = Auth::id();
@@ -173,10 +157,6 @@ class OTApproveController extends Controller
 
                 // Go to to roster / attendance-derived shift if no shift assignment foun
             if ($shift_detail->isEmpty()) {
-
-                // if ($otskip_status == 1) {
-                //         continue;
-                //     }
                 
                 $roster_detail = DB::table('employee_roster_details')
                     ->join('shift_types', 'employee_roster_details.shift_id', '=', 'shift_types.id')
@@ -220,27 +200,55 @@ class OTApproveController extends Controller
             $sorted_punches = $day_punches->sort()->values();
 
             foreach ($sorted_shifts as $index =>  $shift_details) {
-                $on_duty_time = $shift_details->onduty_time;
+                $on_duty_time  = $shift_details->onduty_time;
                 $off_duty_time = $shift_details->offduty_time;
-                $emp_shift_id = $shift_details->shiftid;
-                $shift_until_time = $shift_details->until_time ?? null;
+                $emp_shift_id  = $shift_details->shiftid;
+                $shift_until_time = isset($shift_details->until_time) ? $shift_details->until_time : null;
 
                 if (empty($on_duty_time) || empty($off_duty_time)) {
-                    continue; // can't match punches without a shift window
+                    continue;
                 }
-            
-               // Take punches 2 at a time: shift 0 -> punches[0],[1], shift 1 -> punches[2],[3], etc.
-               $first_checkin = $sorted_punches->get($index * 2);
-               $lasttimestamp = $sorted_punches->get($index * 2 + 1);
+
+                $shiftStart = Carbon::parse($date_only . ' ' . $on_duty_time);
+                $shiftEnd   = Carbon::parse($date_only . ' ' . $off_duty_time);
+                if ($shiftEnd->lte($shiftStart)) {
+                    $shiftEnd->addDay(); // night shift
+                }
+
+                // Window: shift start - 3h  ->  shift end + 5h (adjust to your policy)
+                $windowStart = $shiftStart->copy()->subHours(3);
+                $windowEnd   = $shiftEnd->copy()->addHours(5);
+
+                // Next shift start ekata paradila nowenna cap karanna
+                if (isset($sorted_shifts[$index + 1])) {
+                    $nextStart = Carbon::parse($date_only . ' ' . $sorted_shifts[$index + 1]->onduty_time)->subHours(1);
+                    if ($nextStart->lt($windowEnd) && $nextStart->gt($shiftStart)) {
+                        $windowEnd = $nextStart;
+                    }
+                }
+
+                $shift_punches = $sorted_punches->filter(function ($p) use ($windowStart, $windowEnd) {
+                    $t = Carbon::parse($p);
+                    return $t->gte($windowStart) && $t->lte($windowEnd);
+                })->values();
+
+                if ($shift_punches->count() < 2) {
+                    continue; // IN/OUT pair nehe
+                }
+
+                $first_checkin = $shift_punches->first();  // earliest punch in window
+                $lasttimestamp = $shift_punches->last();   // latest punch in window
 
                 if (empty($first_checkin) || empty($lasttimestamp)) {
                         continue; // not enough punches for this shift
                     }
 
+        
+
                 $ot_hours = (new \App\Attendance)->get_ot_hours_by_date(
                     $emp_id, 
-                     $lasttimestamp,
-                     $first_checkin,
+                    $lasttimestamp,
+                    $first_checkin,
                     $date,  
                     $on_duty_time, 
                     $off_duty_time, 
@@ -320,15 +328,6 @@ class OTApproveController extends Controller
                 'updated_at' => date('Y-m-d H:i:s')
             );
             OtApproved::query()->insert($data);
-
-            $emp_id = $ch['emp_id'];
-            $date = $ch['date'];
-            $hours = $ch['hours'];
-            $double_hours = $ch['double_hours'];
-            $triple_hours = $ch['triple_hours'];
-
-            $this->Opma_Daily_approvePolicy_Service->OT_LatestoreDailyApprove($emp_id, $date, $hours, $double_hours, $triple_hours);
-
         }
 
         return response()->json(['success' => 'OT Approved']);

@@ -54,6 +54,7 @@
                                     <th>EMP ID</th>
                                     <th>NAME WITH INITIAL</th>
                                     <th>DEPARTMENT </th>
+                                    <th>DESIGNATION</th>
                                     <th>LEAVE TYPE</th>
                                     <th>LEAVE FROM</th>
                                     <th>LEAVE TO</th>
@@ -310,6 +311,7 @@
                     { data: 'emp_id', name: 'emp_id' },
                     { data: 'employee_display', name: 'employee_display' },
                     { data: 'dep_name', name: 'emp_name' },
+                    { data: 'title', name: 'title' },
                     { data: 'leave_type', name: 'leave_type' },
                     { data: 'leave_from', name: 'leave_from' },
                     { data: 'leave_to', name: 'leave_to' },

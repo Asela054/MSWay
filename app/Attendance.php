@@ -2395,59 +2395,20 @@ class Attendance extends Model
 
     }
 
-    public function get_ot_hours_approved($emp_id, $month){
-
-        $month = $month . '%';
-
-        $normal_rate_otwork_hrs = 0;
-        $double_rate_otwork_hrs = 0;
-
-        $att_query = 'SELECT at1.*, 
-                Max(at1.timestamp) as lasttimestamp,
-                Min(at1.timestamp) as firsttimestamp,
-                employees.emp_shift,  
-                employees.id as emp_auto_id,
-                employees.emp_name_with_initial,
-                employees.emp_department,
-                shift_types.onduty_time, 
-                shift_types.offduty_time
-                FROM `attendances`  as `at1`
-                join `employees` on `employees`.`emp_id` = `at1`.`uid` 
-                left join shift_types ON employees.emp_shift = shift_types.id 
-                WHERE at1.emp_id = '.$emp_id.' AND date LIKE  "'.$month.'"
-                AND at1.deleted_at IS NULL
-                 group by at1.uid, at1.date
-                ';
-
-        $att_query = 'SELECT ot_approved.*,  
-                employees.emp_shift,  
-                employees.id as emp_auto_id,
-                employees.emp_name_with_initial,
-                employees.emp_department, 
-                branches.location as b_location,
-                departments.name as dept_name 
-                FROM ot_approved
-                join `employees` on `employees`.`emp_id` = ot_approved.emp_id
-                left join shift_types ON employees.emp_shift = shift_types.id  
-                left join departments ON employees.emp_department = departments.id 
-                left join branches ON employees.emp_location = branches.id 
-                WHERE ot_approved.emp_id = '.$emp_id.' AND ot_approved.date LIKE  "'.$month.' AND ot_approved.status = 1"
-                ';
-
-        $att_records = DB::select($att_query);
-
-        foreach ($att_records as $att_record) {
-            $normal_rate_otwork_hrs += $att_record->hours ?? 0;
-            $double_rate_otwork_hrs += $att_record->double_hours ?? 0;
-        }
-
-        $data = array(
-            'normal_rate_otwork_hrs' => $normal_rate_otwork_hrs,
-            'double_rate_otwork_hrs' => $double_rate_otwork_hrs,
+    public function get_ot_hours_approved($emp_id, $month)
+    {
+        $row = DB::selectOne(
+            'SELECT COALESCE(SUM(hours), 0) AS normal_hrs,
+                    COALESCE(SUM(double_hours), 0) AS double_hrs
+            FROM ot_approved
+            WHERE emp_id = ? AND date LIKE ? AND status = 1',
+            [$emp_id, $month . '%']
         );
 
-        return $data;
-
+        return array(
+            'normal_rate_otwork_hrs' => (float) $row->normal_hrs,
+            'double_rate_otwork_hrs' => (float) $row->double_hrs,
+        );
     }
 
     public function get_ot_hours_by_date_morning_evening($emp_id, $off_time, $on_time, $record_date, $shift_start_, $shift_end_, $emp_department ){

@@ -300,7 +300,6 @@ class RptOTController extends Controller
             })
             ->addColumn('normal_rate_otwork_hrs', function ($row) use ($month) {
                 $ot_hours = (new \App\Attendance)->get_ot_hours_approved($row->emp_id, $month);
-                
                 $normal_ot_hours = $ot_hours['normal_rate_otwork_hrs'];
 
                 return number_format($normal_ot_hours, 2);

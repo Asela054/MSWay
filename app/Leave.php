@@ -38,7 +38,7 @@ class Leave extends Model
             ->where('status', 'Approved' )
             ->where('leave_from', 'like',  $month . '%')
             ->where('leave_from', '<=', $closedate)
-            ->whereNotIn('leave_type', [7, 3]);
+            ->whereNotIn('leave_type', [7, 3, 8]);
         $leave_days_data = $query->get();
         $leave_days = (!empty($leave_days_data[0]->total)) ? $leave_days_data[0]->total : 0;
 
@@ -320,5 +320,45 @@ public function get_dayoff_leaves($emp_id, $month, $closedate)
         ->where('status', '=', 'Approved')
         ->count();
 
+    }
+
+    // short leaves - apply for rajapaksha hrm
+  public function taken_official_leaves($emp_id,$from_date,$to_date)
+    {
+        return DB::table('leaves')
+        ->where('emp_id', $emp_id)
+        ->where('leave_type', '9')
+        ->whereBetween('leave_from', [$from_date, $to_date])
+        ->where('status', '=', 'Approved')
+        ->count();
+
+    }
+
+        // Anith leave types walata taken count (weekly / short / official wage)
+    public function taken_other_leaves($emp_id, $leave_type, $from_date, $to_date)
+    {
+        $leaves = DB::table('leaves')
+            ->where('emp_id', $emp_id)
+            ->where('leave_type', $leave_type)
+            ->where('status', '=', 'Approved')
+            ->whereBetween('leave_from', [$from_date, $to_date])
+            ->get();
+
+        $total_days = 0;
+
+        foreach ($leaves as $leave) {
+            $leave_from = Carbon::parse($leave->leave_from);
+            $leave_to = Carbon::parse($leave->leave_to);
+
+            if ($leave_from->month != $leave_to->month || $leave_from->year != $leave_to->year) {
+                // month 2k athare yana leave ekak nam, e month eke days witharak ganna
+                $end_of_month = Carbon::parse($from_date)->endOfMonth();
+                $total_days += $leave_from->diffInDays($end_of_month) + 1;
+            } else {
+                $total_days += $leave->no_of_days;
+            }
+        }
+
+        return $total_days;
     }
 }
