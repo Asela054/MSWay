@@ -602,6 +602,7 @@ class V1MainController extends Controller
         ->join('leave_types', 'leaves.leave_type', '=', 'leave_types.id') 
         ->select('leaves.*', 'leave_types.leave_type as leave_type_name')
         ->where('leaves.status', $request->status)
+        ->where('leaves.emp_id', $request->employee_id)
         ->get();
 
         if(EMPTY($leaves)){
