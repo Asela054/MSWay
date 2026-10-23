@@ -45,6 +45,7 @@
                                     <th>ID</th>
                                     <th>EMPLOYEE</th>
                                     <th>DEPARTMENT</th>
+                                    <th>DESIGNATION</th>
                                     <th>REQUEST LEAVE</th>
                                     <th>LEAVE FROM</th>
                                     <th>LEAVE TO</th>
@@ -97,30 +98,25 @@
                                             </thead>
                                             <tbody>
                                                 <tr>
-                                                    <td> <span> Annual </span> </td>
-                                                    <td> <span id="annual_total"></span> </td>
-                                                    <td> <span id="annual_taken"></span> </td>
-                                                    <td> <span id="annual_available"></span> </td>
+                                                    <td><span>Annual</span></td>
+                                                    <td><span id="annual_total"></span></td>
+                                                    <td><span id="annual_taken"></span></td>
+                                                    <td><span id="annual_available"></span></td>
                                                 </tr>
                                                 <tr>
-                                                    <td> <span> Casual </span> </td>
-                                                    <td> <span id="casual_total"></span> </td>
-                                                    <td> <span id="casual_taken"></span> </td>
-                                                    <td> <span id="casual_available"></span> </td>
+                                                    <td><span>Casual</span></td>
+                                                    <td><span id="casual_total"></span></td>
+                                                    <td><span id="casual_taken"></span></td>
+                                                    <td><span id="casual_available"></span></td>
                                                 </tr>
                                                 <tr>
-                                                    <td> <span>Medical</span> </td>
-                                                    <td> <span id="med_total"></span> </td>
-                                                    <td> <span id="med_taken"></span> </td>
-                                                    <td> <span id="med_available"></span> </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> <span id="weekly_title"></span> </td>
-                                                    <td> <span id="weekly_total"></span> </td>
-                                                    <td> <span id="weekly_taken"></span> </td>
-                                                    <td> <span id="weekly_available"></span> </td>
+                                                    <td><span>Medical</span></td>
+                                                    <td><span id="med_total"></span></td>
+                                                    <td><span id="med_taken"></span></td>
+                                                    <td><span id="med_available"></span></td>
                                                 </tr>
                                             </tbody>
+                                            <tbody id="other_leaves_body"></tbody>
                                         </table>
                                         <span id="leave_msg"></span>
                                     </div>
@@ -189,7 +185,15 @@
                                             <input type="text" name="reason" id="reason" class="form-control form-control-sm"/>
                                         </div>
                                     </div>
-                                    
+                                     <div class="form-row mb-1">
+                                        <div class="col-sm-12 col-md-12">
+                                            <label class="small font-weight-bolder text-dark">Covering Employee</label>
+                                            <select name="coveringemployee" id="coveringemployee"
+                                                class="form-control form-control-sm">
+                                                <option value="">Select</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                     <div class="form-group mt-3">
                                         <input type="submit" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-3" value="Add"/>
                                     </div>
@@ -215,8 +219,6 @@
 
     <script>
         $(document).ready(function () {
-
-
             $('#attendant_menu_link').addClass('active');
             $('#attendant_menu_link_icon').addClass('active');
             $('#leavemaster').addClass('navbtnactive');
@@ -301,24 +303,43 @@
             });
 
             let employee_f = $('#employee_f');
-            employee_f.select2({
-                placeholder: 'Select...',
-                width: '100%',
-                allowClear: true,
-                ajax: {
-                    url: '{{url("employee_list_sel2")}}',
-                    dataType: 'json',
-                    data: function(params) {
-                        return {
-                            term: params.term || '',
-                            page: params.page || 1,
-                            company: company_f.val(),
-                            department: department_f.val()
-                        }
-                    },
-                    cache: true
-                }
-            });
+                employee_f.select2({
+                    placeholder: 'Select...',
+                    width: '100%',
+                    allowClear: true,
+                    ajax: {
+                        url: '{{url("employee_list_sel2")}}',
+                        dataType: 'json',
+                        data: function(params) {
+                            return {
+                                term: params.term || '',
+                                page: params.page || 1,
+                                company: company_f.val(),
+                                department: department_f.val()
+                            }
+                        },
+                        cache: true
+                    }
+                });
+
+            let c_employee = $('#coveringemployee');
+                c_employee.select2({
+                    placeholder: 'Select...',
+                    width: '100%',
+                    allowClear: true,
+                    parent: '#formModal',
+                    ajax: {
+                        url: '{{url("employee_list_sel2")}}',
+                        dataType: 'json',
+                        data: function(params) {
+                            return {
+                                term: params.term || '',
+                                page: params.page || 1
+                            }
+                        },
+                        cache: true
+                    }
+                });
 
             function load_dt(department, employee, from_date, to_date){
                 $('#divicestable').DataTable({
@@ -365,6 +386,7 @@
                         { data: 'id', name: 'id' },
                         { data: 'employee_display', name: 'employee_display' },
                         { data: 'dep_name', name: 'dep_name' },
+                        { data: 'title', name: 'title' },
                         { 
                             data: 'leave_category', name: 'leave_category', render: function(data, type, row) {
                                 if (data == 1) {
@@ -495,12 +517,15 @@
                               $('#med_taken').html(data.total_taken_med_leaves);
                               $('#med_available').html(data.available_no_of_med_leaves);
 
-                              $('#weekly_total').html(data.total_no_of_weekly_leaves);
-                              $('#weekly_taken').html(data.total_taken_weekly_leaves);
-                              $('#weekly_available').html(data.available_no_of_weekly_leaves);
-
-                              $('#weekly_title').html(data.other_leaves_title);
-
+                             var $body = $('#other_leaves_body').empty();
+                                $.each(data.other_leaves, function (i, l) {
+                                    var $tr = $('<tr>').attr('data-leave-id', l.id);
+                                    $('<td>').text(l.name).appendTo($tr);
+                                    $('<td>').attr('id', 'other_total_' + l.id).text(l.total).appendTo($tr);
+                                    $('<td>').attr('id', 'other_taken_' + l.id).text(l.taken).appendTo($tr);
+                                    $('<td>').attr('id', 'other_available_' + l.id).text(l.available).appendTo($tr);
+                                    $body.append($tr);
+                                });
                           }
                       });
                   }
@@ -528,26 +553,29 @@
                             fromdate: fromdate,
                             todate: todate
                         },
-                        success: function (data) {
-                            $('#annual_total').html(data.total_no_of_annual_leaves);
-                            $('#annual_taken').html(data.total_taken_annual_leaves);
-                            $('#annual_available').html(data.available_no_of_annual_leaves);
+                       success: function (data) {
+                              $('#annual_total').html(data.total_no_of_annual_leaves);
+                              $('#annual_taken').html(data.total_taken_annual_leaves);
+                              $('#annual_available').html(data.available_no_of_annual_leaves);
 
-                            $('#casual_total').html(data.total_no_of_casual_leaves);
-                            $('#casual_taken').html(data.total_taken_casual_leaves);
-                            $('#casual_available').html(data.available_no_of_casual_leaves);
+                              $('#casual_total').html(data.total_no_of_casual_leaves);
+                              $('#casual_taken').html(data.total_taken_casual_leaves);
+                              $('#casual_available').html(data.available_no_of_casual_leaves);
 
-                            $('#med_total').html(data.total_no_of_med_leaves);
-                            $('#med_taken').html(data.total_taken_med_leaves);
-                            $('#med_available').html(data.available_no_of_med_leaves);
+                              $('#med_total').html(data.total_no_of_med_leaves);
+                              $('#med_taken').html(data.total_taken_med_leaves);
+                              $('#med_available').html(data.available_no_of_med_leaves);
 
-                            $('#weekly_total').html(data.total_no_of_weekly_leaves);
-                            $('#weekly_taken').html(data.total_taken_weekly_leaves);
-                            $('#weekly_available').html(data.available_no_of_weekly_leaves);
-
-                            $('#weekly_title').html(data.other_leaves_title);
-
-                        }
+                             var $body = $('#other_leaves_body').empty();
+                                $.each(data.other_leaves, function (i, l) {
+                                    var $tr = $('<tr>').attr('data-leave-id', l.id);
+                                    $('<td>').text(l.name).appendTo($tr);
+                                    $('<td>').attr('id', 'other_total_' + l.id).text(l.total).appendTo($tr);
+                                    $('<td>').attr('id', 'other_taken_' + l.id).text(l.taken).appendTo($tr);
+                                    $('<td>').attr('id', 'other_available_' + l.id).text(l.available).appendTo($tr);
+                                    $body.append($tr);
+                                });
+                          }
                     });
                 }
             });
@@ -567,7 +595,9 @@
 
             $('#formTitle').on('submit', function (event) {
                 event.preventDefault();
-                // ---- Short leave duration validation ----
+               // ---- Short leave duration validation ----
+                var SHORT_LEAVE_TYPE_ID = 8;
+
                 if ($('#half_short').val() === '0.25') {
                     var fromTime = $('#from_time').val();
                     var toTime   = $('#to_time').val();
@@ -588,7 +618,7 @@
                     }
 
                     var durationHours  = (toMins - fromMins) / 60;
-                    var availableHours = parseFloat($('#weekly_available').text());
+                    var availableHours = parseFloat($('#other_available_' + SHORT_LEAVE_TYPE_ID).text());
 
                     if (isNaN(availableHours)) {
                         availableHours = 0;
@@ -677,11 +707,14 @@
                             $('#from_time').val(data.result.from_time);
                             $('#to_time').val(data.result.to_time);
 
+                            let covempOption = $("<option selected></option>").val(data.result.covering_emp).text(data.result.covering_emp_name);
+                            $('#coveringemployee').append(covempOption).trigger('change');
+                            $('#coveringemployee').val(data.result.covering_emp);
+
                            setTimeout(function() {
                                document.getElementById('half_short').dispatchEvent(new Event('change'));
                                 $('#employee_f').trigger('change');
                             }, 100);
-
 
                             $('#hidden_id').val(id);
                             $('.modal-title').text('Edit Leave Request');

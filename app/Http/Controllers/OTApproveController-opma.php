@@ -1,0 +1,609 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Helpers\EmployeeHelper;
+use App\Helpers\UserHelper;
+use App\OtApproved;
+use App\Services\Opma_Daily_approvePolicy_Service;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Yajra\Datatables\Datatables;
+use Carbon\Carbon;
+use DateInterval;
+use DateTime;
+
+class OTApproveController extends Controller
+{
+     protected $Opma_Daily_approvePolicy_Service;
+
+    public function __construct(Opma_Daily_approvePolicy_Service $Opma_Daily_approvePolicy_Service)
+    {
+        $this->Opma_Daily_approvePolicy_Service = $Opma_Daily_approvePolicy_Service;
+    }
+
+
+     public function ot_approve(Request $request)
+    {
+        $permission = Auth::user()->can('ot-approve');
+        if(!$permission){
+            abort(403);
+        }
+
+        $appName = config('app.name');
+        if($appName == 'Kaosis'){
+            return view('Kosis_OTapproval.ot_approve');
+        }else{
+            return view('Attendent.ot_approve');
+        }
+        
+    }
+
+    public function get_ot_details(Request $request)
+    {
+        $permission = Auth::user()->can('ot-approve');
+        if(!$permission){
+            return response()->json(['error' => 'UnAuthorized'], 401);
+        }
+
+        $company = $request->input('company');
+        $department = $request->input('department');
+        $employee = $request->input('employee');
+        $location = $request->input('location');
+        $from_date = $request->input('from_date');
+        $to_date = $request->input('to_date');
+
+        // Get accessible employee IDs based on user access rights
+        $userId = Auth::id();
+        $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
+        
+
+        // Return empty data if no accessible employees
+        if (empty($accessibleEmployeeIds)) {
+            return response()->json(['ot_data' => []]);
+        }
+
+         $userCompanyIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('company_id')
+            ->toArray();
+
+        $userBranchIds = DB::table('user_has_companies')
+            ->where('user_id', $userId)
+            ->pluck('branch_id')
+            ->toArray();
+        
+         $query = DB::table('attendances as at1')
+        ->select(
+            'at1.*',
+            DB::raw('MIN(at1.timestamp) as first_checkin'),
+            DB::raw('MAX(at1.timestamp) as lasttimestamp'),
+            'employees.emp_shift',
+            'employees.id as emp_auto_id',
+            'employees.emp_name_with_initial',
+            'employees.emp_department',
+            'employees.emp_company',
+            'employees.calling_name',
+            'employees.emp_id',
+            'shift_types.onduty_time',
+            'shift_types.offduty_time',
+            'shift_types.saturday_onduty_time',
+            'shift_types.saturday_offduty_time',
+            'shift_types.shift_name',
+            'shift_types.id as shift_id',
+            'branches.location as b_location',
+            'departments.name as dept_name'
+        )
+        ->join('employees', 'employees.emp_id', '=', 'at1.uid')
+        ->leftJoin('shift_types', 'employees.emp_shift', '=', 'shift_types.id')
+        ->leftJoin('branches', 'at1.location', '=', 'branches.id')
+        ->leftJoin('departments', 'employees.emp_department', '=', 'departments.id')
+        ->whereNull('at1.deleted_at')
+        ->where('employees.ot_applicable', 1)
+        ->whereIn('employees.emp_id', $accessibleEmployeeIds); 
+            // Apply filters
+            if (!empty($department)) {
+                $query->where('employees.emp_department', $department);
+            }
+
+            if ($company) {
+                $query->where('employees.emp_company', $company);
+            } else if ($userCompanyIds) {
+                $query->whereIn('employees.emp_company', $userCompanyIds);
+            }
+
+            if (!empty($employee)) {
+                $query->where('employees.emp_id', $employee);
+            }
+
+            if (!empty($location)) {
+                $query->where('at1.location', $location);
+
+            }
+            if (!empty($userBranchIds)){
+                $query->whereIn('at1.location', $userBranchIds);
+            }
+
+            if (!empty($from_date)) {
+                $query->whereDate('at1.date', '>=', $from_date);
+            }
+
+            if (!empty($to_date)) {
+                $query->whereDate('at1.date', '<=', $to_date);
+            }
+
+            $query->groupBy('at1.uid', 'at1.date')->orderBy('at1.date');
+
+            $attendance_data = $query->get();
+
+        $ot_data = array();
+
+        foreach ($attendance_data as $att) {
+
+             $employeeObj = (object)[
+                'emp_id' => $att->emp_id,
+                'emp_name_with_initial' => $att->emp_name_with_initial,
+                'calling_name' => $att->calling_name
+            ];
+
+            $emp_id = $att->uid;
+            $date = $att->date;
+
+            // Check if date is Saturday (Carbon::SATURDAY = 6)
+            $isSaturday = Carbon::parse($date)->isSaturday();
+
+            $shift_detail = DB::table('employeeshiftdetails')
+                ->leftJoin('shift_types', 'employeeshiftdetails.shift_id', '=', 'shift_types.id')
+                ->leftJoin('employeeshifts', 'employeeshiftdetails.employeeshift_id', '=', 'employeeshifts.id')
+                ->select('employeeshiftdetails.*', 'shift_types.onduty_time', 'shift_types.offduty_time','shift_types.id as shiftid') 
+                ->where('employeeshiftdetails.emp_id', $emp_id)
+                ->whereDate('employeeshiftdetails.date_from', '<=', $date)
+                ->whereDate('employeeshiftdetails.until_time', '>=', $date)
+                ->where('employeeshiftdetails.status', 1)
+                ->where('employeeshifts.approval_status', 1)
+                ->get();
+
+                // Go to to roster / attendance-derived shift if no shift assignment foun
+            if ($shift_detail->isEmpty()) {
+                
+                $roster_detail = DB::table('employee_roster_details')
+                    ->join('shift_types', 'employee_roster_details.shift_id', '=', 'shift_types.id')
+                    ->select('employee_roster_details.*', 'shift_types.onduty_time', 'shift_types.offduty_time', 'shift_types.id as shiftid')
+                    ->where('employee_roster_details.emp_id', $emp_id)
+                    ->where('employee_roster_details.work_date', $date)
+                    ->first();
+
+                if ($roster_detail) {
+                    $shift_detail = collect([(object)[
+                        'onduty_time' => $roster_detail->onduty_time,
+                        'offduty_time' => $roster_detail->offduty_time,
+                        'shiftid' => $roster_detail->shiftid,
+                        'until_time' => null,
+                    ]]);
+                } else {
+                    $shift_detail = collect([(object)[
+                        'onduty_time' => $att->onduty_time,
+                        'offduty_time' => $att->offduty_time,
+                        'shiftid' => $att->shift_id,
+                        'until_time' => null,
+                    ]]);
+                }
+            }
+
+             $day_punches = DB::table('attendances')
+                            ->whereNull('deleted_at')
+                            ->where('uid', $emp_id)
+                            ->whereDate('date', $date)
+                            ->orderBy('timestamp')
+                            ->pluck('timestamp');
+            // Extract just the date part before concatenating with time strings
+                $date_only = Carbon::parse($date)->format('Y-m-d');
+
+                // Sort shifts chronologically by onduty_time
+                $sorted_shifts = $shift_detail->sortBy(function ($s) use ($date_only) {
+                    return Carbon::parse($date_only . ' ' . $s->onduty_time)->timestamp;
+                })->values();
+
+            // Sort punches chronologically (should already be sorted from the query, but just in case)
+            $sorted_punches = $day_punches->sort()->values();
+
+            foreach ($sorted_shifts as $index =>  $shift_details) {
+                $on_duty_time  = $shift_details->onduty_time;
+                $off_duty_time = $shift_details->offduty_time;
+                $emp_shift_id  = $shift_details->shiftid;
+                $shift_until_time = isset($shift_details->until_time) ? $shift_details->until_time : null;
+
+                if (empty($on_duty_time) || empty($off_duty_time)) {
+                    continue;
+                }
+
+                $shiftStart = Carbon::parse($date_only . ' ' . $on_duty_time);
+                $shiftEnd   = Carbon::parse($date_only . ' ' . $off_duty_time);
+                if ($shiftEnd->lte($shiftStart)) {
+                    $shiftEnd->addDay(); // night shift
+                }
+
+                // Window: shift start - 3h  ->  shift end + 5h (adjust to your policy)
+                $windowStart = $shiftStart->copy()->subHours(3);
+                $windowEnd   = $shiftEnd->copy()->addHours(5);
+
+                // Next shift start ekata paradila nowenna cap karanna
+                if (isset($sorted_shifts[$index + 1])) {
+                    $nextStart = Carbon::parse($date_only . ' ' . $sorted_shifts[$index + 1]->onduty_time)->subHours(1);
+                    if ($nextStart->lt($windowEnd) && $nextStart->gt($shiftStart)) {
+                        $windowEnd = $nextStart;
+                    }
+                }
+
+                $shift_punches = $sorted_punches->filter(function ($p) use ($windowStart, $windowEnd) {
+                    $t = Carbon::parse($p);
+                    return $t->gte($windowStart) && $t->lte($windowEnd);
+                })->values();
+
+                if ($shift_punches->count() < 2) {
+                    continue; // IN/OUT pair nehe
+                }
+
+                $first_checkin = $shift_punches->first();  // earliest punch in window
+                $lasttimestamp = $shift_punches->last();   // latest punch in window
+
+                if (empty($first_checkin) || empty($lasttimestamp)) {
+                        continue; // not enough punches for this shift
+                    }
+
+        
+
+                $ot_hours = (new \App\Attendance)->get_ot_hours_by_date(
+                    $emp_id, 
+                    $lasttimestamp,
+                    $first_checkin,
+                    $date,  
+                    $on_duty_time, 
+                    $off_duty_time, 
+                    $att->emp_department,
+                    $emp_shift_id ,
+                    $shift_until_time);
+            
+
+                if(empty($ot_hours['ot_breakdown'])) {
+                    continue;
+                }
+
+                if(count($ot_hours['ot_breakdown']) == 2) {
+                    $OTmorningfrom = Carbon::parse($ot_hours['ot_breakdown'][0]['from_24']);
+                    $OTeveningfrom = Carbon::parse($ot_hours['ot_breakdown'][1]['from_24']);
+                    $is_approved_morning = (new \App\OtApproved)->is_exists_in_ot_approved($emp_id, $date, $OTmorningfrom);
+                    $is_approved_evening = (new \App\OtApproved)->is_exists_in_ot_approved($emp_id, $date, $OTeveningfrom);
+                } else {
+                    $OTeveningfrom = Carbon::parse($ot_hours['ot_breakdown'][0]['from_24']);
+                    $is_approved_evening = (new \App\OtApproved)->is_exists_in_ot_approved($emp_id, $date, $OTeveningfrom);
+                }
+
+                //if ot_breakdown is a key in the array
+                if (array_key_exists('ot_breakdown', $ot_hours)) {
+                    if(count($ot_hours['ot_breakdown']) == 2) {
+                        $ot_breakdown_morning = array('ot_breakdown'=> $ot_hours['ot_breakdown'][0], 'is_approved' => $is_approved_morning);
+                        $ot_breakdown_evening = array('ot_breakdown'=> $ot_hours['ot_breakdown'][1], 'is_approved' => $is_approved_evening);
+                    } else {
+                        $ot_breakdown_evening = array('ot_breakdown'=> $ot_hours['ot_breakdown'][0], 'is_approved' => $is_approved_evening);
+                    }
+                    
+                    $normal_rate_otwork_hrs = $ot_hours['normal_rate_otwork_hrs'];
+                    $double_rate_otwork_hrs = $ot_hours['double_rate_otwork_hrs'];
+
+                    if(count($ot_hours['ot_breakdown']) == 2) {
+                        //push ot_breakdown to ot_data
+                        if (!empty($ot_breakdown_morning)) {
+                            array_push($ot_data, $ot_breakdown_morning);
+                        }
+                        if (!empty($ot_breakdown_evening)) {
+                            array_push($ot_data, $ot_breakdown_evening);
+                        }
+                    }
+                    else {
+                        //push ot_breakdown to ot_data
+                        if (!empty($ot_breakdown_evening)) {
+                            array_push($ot_data, $ot_breakdown_evening);
+                        }
+                    }
+                }
+            }
+        }
+        return response()->json(['ot_data' => $ot_data]);
+    }
+	
+    public function ot_approve_post(Request $request)
+    {
+        $permission = Auth::user()->can('ot-approve');
+        if(!$permission){
+            return response()->json(['error' => 'UnAuthorized'], 401);
+        }
+
+        $checked = $request->ot_data;
+
+        foreach ($checked as $ch) {
+            $data = array(
+                'emp_id' => $ch['emp_id'],
+                'date' => $ch['date'],
+                'from' => $ch['from'],
+                'to' => $ch['to'],
+                'hours' => $ch['hours'],
+                'double_hours' => $ch['double_hours'],
+                'triple_hours' => $ch['triple_hours'],
+                'is_holiday' => $ch['is_holiday'],
+                'status' => 1,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            );
+            OtApproved::query()->insert($data);
+
+            $emp_id = $ch['emp_id'];
+            $date = $ch['date'];
+            $hours = $ch['hours'];
+            $double_hours = $ch['double_hours'];
+            $triple_hours = $ch['triple_hours'];
+
+            $this->Opma_Daily_approvePolicy_Service->OT_LatestoreDailyApprove($emp_id, $date, $hours, $double_hours, $triple_hours);
+
+        }
+
+        return response()->json(['success' => 'OT Approved']);
+
+    }
+
+    public function ot_approved()
+    {
+        $permission = Auth::user()->can('ot-list');
+        if(!$permission){
+            abort(403);
+        }
+        return view('Attendent.ot_approved');
+    }
+
+    public function ot_approved_list(Request $request)
+    {
+        $permission = Auth::user()->can('ot-list');
+        if(!$permission){
+            return response()->json(['error' => 'UnAuthorized'], 401);
+        }
+        $department = $request->get('department');
+        $employee = $request->get('employee');
+        $location = $request->get('location');
+        $from_date = $request->get('from_date');
+        $to_date = $request->get('to_date');
+        $type = $request->get('type');
+
+           // Get accessible employee IDs based on user access rights
+        $userId = Auth::id();
+        $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
+        
+        // Return empty HTML if no accessible employees
+        if (empty($accessibleEmployeeIds)) {
+            return response()->json(['html' => '']);
+        }
+
+        $att_query = 'SELECT ot_approved.*,  
+                employees.emp_shift,  
+                employees.id as emp_auto_id,
+                employees.emp_name_with_initial,
+                employees.calling_name,
+                employees.emp_department, 
+                branches.location as b_location,
+                departments.name as dept_name 
+                FROM ot_approved
+                left join `employees` on `employees`.`emp_id` = ot_approved.emp_id
+                left join shift_types ON employees.emp_shift = shift_types.id  
+                left join departments ON employees.emp_department = departments.id 
+                left join branches ON employees.emp_location = branches.id 
+                WHERE employees.deleted = 0 AND employees.is_resigned = 0 AND ot_approved.status != 3
+                ';
+
+        if (!empty($accessibleEmployeeIds)) {
+            $ids = implode('","', $accessibleEmployeeIds);
+            $att_query .= 'AND employees.emp_id IN ("' . $ids . '") ';
+        }
+
+        if ($department != '') {
+            $att_query .= ' AND employees.emp_department = ' . $department;
+        }
+
+        if ($employee != '') {
+            $att_query .= ' AND employees.emp_id = ' . $employee;
+        }
+
+        if ($location != '') {
+            $att_query .= ' AND employees.emp_location = ' . $location;
+        }
+
+        if ($from_date != '' && $to_date != '') {
+           $att_query .= ' AND ot_approved.date BETWEEN "' . $from_date . '" AND "' . $to_date . '"';
+        }
+
+        $data = DB::select($att_query);
+
+        return Datatables::of($data)
+            ->addIndexColumn()
+            ->addColumn('action', function ($row) {
+                $btn = '';
+                $permission = Auth::user()->can('ot-delete');
+                if($permission){
+                    $btn = '<a href="javascript:void(0)" data-toggle="tooltip" data-id="' . $row->id . '" data-original-title="Delete" class="delete_btn btn btn-danger btn-sm"><i class="fa fa-trash"></i> </a>';
+                }
+                return $btn;
+            })
+            //is_holiday
+            ->addColumn('is_holiday', function ($row) {
+                if ($row->is_holiday == 1) {
+                    return 'Yes';
+                } else {
+                    return 'No';
+                }
+            })
+            //form
+            ->addColumn('from', function ($row) {
+                return date('Y-m-d H:i', strtotime($row->from));
+            })
+            //to
+            ->addColumn('to', function ($row) {
+                return date('Y-m-d H:i', strtotime($row->to));
+            })
+             ->addColumn('employee_display', function ($row) {
+                   return EmployeeHelper::getDisplayName($row);
+                   
+            })
+            ->filterColumn('employee_display', function($query, $keyword) {
+                $query->where(function($q) use ($keyword) {
+                    $q->where('employees.emp_name_with_initial', 'like', "%{$keyword}%")
+                    ->orWhere('employees.calling_name', 'like', "%{$keyword}%")
+                    ->orWhere('employees.emp_id', 'like', "%{$keyword}%");
+                });
+            })
+            ->rawColumns(['action'])
+            ->make(true);
+    }
+
+    public function ot_approved_list_monthly(Request $request)
+    {
+        $permission = Auth::user()->can('ot-list');
+        if(!$permission){
+            return response()->json(['error' => 'UnAuthorized'], 401);
+        }
+        $department = $request->get('department');
+        $employee = $request->get('employee');
+        $location = $request->get('location');
+        $from_date = $request->get('from_date');
+        $to_date = $request->get('to_date');
+        $type = $request->get('type');
+
+        $att_query = 'SELECT ot_approved.*,  
+                employees.emp_shift,  
+                employees.id as emp_auto_id,
+                employees.emp_name_with_initial,
+                employees.emp_department, 
+                branches.location as b_location,
+                departments.name as dept_name 
+                FROM ot_approved
+                join `employees` on `employees`.`emp_id` = ot_approved.emp_id
+                left join shift_types ON employees.emp_shift = shift_types.id  
+                left join departments ON employees.emp_department = departments.id 
+                left join branches ON employees.emp_location = branches.id 
+                WHERE 1 = 1
+                ';
+
+        if ($department != '') {
+            $att_query .= ' AND employees.emp_department = ' . $department;
+        }
+
+        if ($employee != '') {
+            $att_query .= ' AND employees.emp_id = ' . $employee;
+        }
+
+        if ($location != '') {
+            $att_query .= ' AND employees.emp_location = ' . $location;
+        }
+
+        if ($from_date != '' && $to_date != '') {
+            $att_query .= ' AND ot_approved.date BETWEEN "' . $from_date . '" AND "' . $to_date . '"';
+        }
+
+        $data = DB::select($att_query);
+
+        return Datatables::of($data)
+            ->addIndexColumn()
+            ->addColumn('action', function ($row) {
+                $btn = '';
+                $permission = Auth::user()->can('ot-delete');
+                if($permission){
+                    $btn = '<a href="javascript:void(0)" data-toggle="tooltip" data-id="' . $row->id . '" data-original-title="Delete" class="delete_btn btn btn-danger btn-sm"><i class="fa fa-trash"></i> </a>';
+                }
+                return $btn;
+            })
+            //is_holiday
+            ->addColumn('is_holiday', function ($row) {
+                if ($row->is_holiday == 1) {
+                    return 'Yes';
+                } else {
+                    return 'No';
+                }
+            })
+            //form
+            ->addColumn('from', function ($row) {
+                return date('Y-m-d h:i A', strtotime($row->from));
+            })
+            //to
+            ->addColumn('to', function ($row) {
+                return date('Y-m-d h:i A', strtotime($row->to));
+            })
+            ->rawColumns(['action'])
+            ->make(true);
+    }
+
+    public function ot_approved_delete(Request $request)
+    {
+        $permission = Auth::user()->can('ot-delete');
+        if(!$permission){
+            return response()->json(['error' => 'UnAuthorized'], 401);
+        }
+
+        $id = $request->get('id');
+
+         $otRecord = DB::table('ot_approved')
+            ->where('id', $id)
+            ->first();
+
+        OtApproved::query()->where('id', $id)->update(['status' => 3]);
+
+       $smsResult = null;
+        if ($otRecord) {
+            $smsResult = $this->sendOtDeleteSms($otRecord);
+        }
+
+        $response = [
+            'success' => true,
+            'msg' => 'Deleted'
+        ];
+
+        if ($smsResult && !$smsResult['success']) {
+            $response['sms_warning'] = 'SMS not sent: ' . $smsResult['message'];
+        }
+
+        return response()->json($response);
+    }
+
+    private function sendOtDeleteSms($otRecord)
+    {
+        $employee = DB::table('employees')
+            ->where('emp_id', $otRecord->emp_id)
+            ->first();
+
+        if (!$employee) {
+            \Log::warning('OT delete SMS not sent: employee not found', ['emp_id' => $otRecord->emp_id]);
+            return ['success' => false, 'message' => 'Employee not found'];
+        }
+
+        $mobile = '777474169';
+
+        $mobile = preg_replace('/[^0-9]/', '', $mobile);
+        if (strlen($mobile) == 10 && $mobile[0] == '0') {
+            $mobile = substr($mobile, 1);
+        } elseif (strlen($mobile) == 11 && substr($mobile, 0, 2) == '94') {
+            $mobile = substr($mobile, 2);
+        }
+
+        $message = "Dear " . $employee->emp_name_with_initial . ",Empoloyee OT record for "
+            . $otRecord->date . " has been deleted.";
+
+        $smsService = new \App\Services\Opma_Sms_policyService();
+        $result = $smsService->sendSms($mobile, $message);
+
+        \Log::info('eSMS OT delete result', [
+            'emp_id' => $otRecord->emp_id,
+            'mobile' => $mobile,
+            'result' => $result,
+        ]);
+
+        return $result;
+    }
+
+}

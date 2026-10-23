@@ -226,33 +226,30 @@ class LeavepolicyService
         return $leaves ? $leaves->medical_leaves : 0;
     }
 
-      public function getweeklyLeaves($jobCategoryId)
+    public function getOtherLeaveTypes($jobCategoryId)
     {
-       $jobleaves = DB::table('job_category_leaves')->where('job_id', $jobCategoryId)->where('leave_id',8)->first();
-        if($jobleaves){
-            
-             $leavescount = DB::table('leave_types')->where('id', 8)->value('assigned_leave');
-
-             $weekly_leaves = $leavescount ?? 0;
-        }else{
-             $weekly_leaves = 0;
-        }
-        return $weekly_leaves;
+        return DB::table('job_category_leaves')
+            ->join('leave_types', 'leave_types.id', '=', 'job_category_leaves.leave_id')
+            ->where('job_category_leaves.job_id', $jobCategoryId)
+            ->whereNotIn('leave_types.id', array(1, 2, 3, 4, 6, 7)) // annual, casual, no pay, medical, duty, etc.
+            ->select('leave_types.id', 'leave_types.leave_type', 'leave_types.assigned_leave')
+            ->orderBy('leave_types.id')
+            ->get();
     }
 
-      public function getshortLeaves($jobCategoryId)
+    public function getOtherLeaves($jobCategoryId, $leaveTypeId)
     {
-       $jobleaves = DB::table('job_category_leaves')->where('job_id', $jobCategoryId)->where('leave_id',8)->first();
-        if($jobleaves){
-            
-             $leavescount = DB::table('leave_types')->where('id', 8)->value('assigned_leave');
+        $jobleaves = DB::table('job_category_leaves')
+            ->where('job_id', $jobCategoryId)
+            ->where('leave_id', $leaveTypeId)
+            ->first();
 
-             $short_leaves = $leavescount ?? 0;
-        }else{
-             $short_leaves = 0;
+        if ($jobleaves) {
+            $leavescount = DB::table('leave_types')->where('id', $leaveTypeId)->value('assigned_leave');
+            return $leavescount ? $leavescount : 0;
         }
-        return $short_leaves;
-    }
 
+        return 0;
+    }
 
 }

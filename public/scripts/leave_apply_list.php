@@ -28,6 +28,7 @@ $columns = array(
     array('db' => '`u`.`no_of_days`', 'dt' => 'no_of_days', 'field' => 'no_of_days'),
     array('db' => '`u`.`status`', 'dt' => 'status', 'field' => 'status'),
     array('db' => '`u`.`reson`', 'dt' => 'reson', 'field' => 'reson'),
+    array('db' => '`u`.`title`', 'dt' => 'title', 'field' => 'title'),
     array('db' => '`u`.`emp_id`', 'dt' => 'employee_display', 'field' => 'emp_id', 
           'formatter' => function($d, $row) {
               $employee = (object)[
@@ -69,13 +70,15 @@ require('ssp.customized.class.php' );
         `leaves`.`half_short`,
         `leaves`.`no_of_days`,
         `leaves`.`status`,
-        `leaves`.`reson`
+        `leaves`.`reson`,
+        `job_titles`.`title`
     FROM `leaves`
     JOIN `leave_types` ON `leaves`.`leave_type` = `leave_types`.`id`
     LEFT JOIN `employees` AS `ec` ON `leaves`.`emp_covering` = `ec`.`emp_id`
     LEFT JOIN `employees` AS `e` ON `leaves`.`emp_id` = `e`.`emp_id`
     LEFT JOIN `branches` ON `e`.`emp_location` = `branches`.`id`
     LEFT JOIN `departments` ON `e`.`emp_department` = `departments`.`id`
+    LEFT JOIN `job_titles` ON `e`.`emp_job_code` = `job_titles`.`id`
     WHERE 1=1";
 
     if (!empty($_POST['department'])) {

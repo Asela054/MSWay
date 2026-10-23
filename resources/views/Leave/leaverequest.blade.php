@@ -45,6 +45,7 @@
                                     <th>ID</th>
                                     <th>EMPLOYEE</th>
                                     <th>DEPARTMENT</th>
+                                    <th>DESIGNATION</th>
                                     <th>REQUEST LEAVE</th>
                                     <th>LEAVE FROM</th>
                                     <th>LEAVE TO</th>
@@ -97,30 +98,25 @@
                                             </thead>
                                             <tbody>
                                                 <tr>
-                                                    <td> <span> Annual </span> </td>
-                                                    <td> <span id="annual_total"></span> </td>
-                                                    <td> <span id="annual_taken"></span> </td>
-                                                    <td> <span id="annual_available"></span> </td>
+                                                    <td><span>Annual</span></td>
+                                                    <td><span id="annual_total"></span></td>
+                                                    <td><span id="annual_taken"></span></td>
+                                                    <td><span id="annual_available"></span></td>
                                                 </tr>
                                                 <tr>
-                                                    <td> <span> Casual </span> </td>
-                                                    <td> <span id="casual_total"></span> </td>
-                                                    <td> <span id="casual_taken"></span> </td>
-                                                    <td> <span id="casual_available"></span> </td>
+                                                    <td><span>Casual</span></td>
+                                                    <td><span id="casual_total"></span></td>
+                                                    <td><span id="casual_taken"></span></td>
+                                                    <td><span id="casual_available"></span></td>
                                                 </tr>
                                                 <tr>
-                                                    <td> <span>Medical</span> </td>
-                                                    <td> <span id="med_total"></span> </td>
-                                                    <td> <span id="med_taken"></span> </td>
-                                                    <td> <span id="med_available"></span> </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> <span id="weekly_title"></span> </td>
-                                                    <td> <span id="weekly_total"></span> </td>
-                                                    <td> <span id="weekly_taken"></span> </td>
-                                                    <td> <span id="weekly_available"></span> </td>
+                                                    <td><span>Medical</span></td>
+                                                    <td><span id="med_total"></span></td>
+                                                    <td><span id="med_taken"></span></td>
+                                                    <td><span id="med_available"></span></td>
                                                 </tr>
                                             </tbody>
+                                            <tbody id="other_leaves_body"></tbody>
                                         </table>
                                         <span id="leave_msg"></span>
                                     </div>
@@ -190,14 +186,14 @@
                                         </div>
                                     </div>
                                     <div class="form-row mb-1">
-                                    <div class="col-sm-12 col-md-12">
-                                        <label class="small font-weight-bolder text-dark">Covering Employee</label>
-                                        <select name="coveringemployee" id="coveringemployee"
-                                            class="form-control form-control-sm">
-                                            <option value="">Select</option>
-                                        </select>
+                                        <div class="col-sm-12 col-md-12">
+                                            <label class="small font-weight-bolder text-dark">Covering Employee</label>
+                                            <select name="coveringemployee" id="coveringemployee"
+                                                class="form-control form-control-sm">
+                                                <option value="">Select</option>
+                                            </select>
+                                        </div>
                                     </div>
-                                </div>
                                     <div class="form-group mt-3">
                                         <input type="submit" id="action_button" class="btn btn-primary btn-sm fa-pull-right px-3" value="Add"/>
                                     </div>
@@ -223,8 +219,6 @@
 
     <script>
         $(document).ready(function () {
-
-
             $('#attendant_menu_link').addClass('active');
             $('#attendant_menu_link_icon').addClass('active');
             $('#leavemaster').addClass('navbtnactive');
@@ -233,7 +227,6 @@
             let department_f = $('#department');
             let employee = $('#employee');
             let location = $('#location');
-
 
             company_f.select2({
                 placeholder: 'Select...',
@@ -393,6 +386,7 @@
                         { data: 'id', name: 'id' },
                         { data: 'employee_display', name: 'employee_display' },
                         { data: 'dep_name', name: 'dep_name' },
+                        { data: 'title', name: 'title' },
                         { 
                             data: 'leave_category', name: 'leave_category', render: function(data, type, row) {
                                 if (data == 1) {
@@ -514,26 +508,29 @@
                               fromdate: fromdate,
                               todate: todate
                           },
-                          success: function (data) {
-                              $('#annual_total').html(data.total_no_of_annual_leaves);
-                              $('#annual_taken').html(data.total_taken_annual_leaves);
-                              $('#annual_available').html(data.available_no_of_annual_leaves);
+                            success: function (data) {
+                                $('#annual_total').html(data.total_no_of_annual_leaves);
+                                $('#annual_taken').html(data.total_taken_annual_leaves);
+                                $('#annual_available').html(data.available_no_of_annual_leaves);
 
-                              $('#casual_total').html(data.total_no_of_casual_leaves);
-                              $('#casual_taken').html(data.total_taken_casual_leaves);
-                              $('#casual_available').html(data.available_no_of_casual_leaves);
+                                $('#casual_total').html(data.total_no_of_casual_leaves);
+                                $('#casual_taken').html(data.total_taken_casual_leaves);
+                                $('#casual_available').html(data.available_no_of_casual_leaves);
 
-                              $('#med_total').html(data.total_no_of_med_leaves);
-                              $('#med_taken').html(data.total_taken_med_leaves);
-                              $('#med_available').html(data.available_no_of_med_leaves);
+                                $('#med_total').html(data.total_no_of_med_leaves);
+                                $('#med_taken').html(data.total_taken_med_leaves);
+                                $('#med_available').html(data.available_no_of_med_leaves);
 
-                              $('#weekly_total').html(data.total_no_of_weekly_leaves);
-                              $('#weekly_taken').html(data.total_taken_weekly_leaves);
-                              $('#weekly_available').html(data.available_no_of_weekly_leaves);
-
-                              $('#weekly_title').html(data.other_leaves_title);
-
-                          }
+                                var $body = $('#other_leaves_body').empty();
+                                    $.each(data.other_leaves, function (i, l) {
+                                        var $tr = $('<tr>');
+                                        $('<td>').text(l.name).appendTo($tr);
+                                        $('<td>').text(l.total).appendTo($tr);
+                                        $('<td>').text(l.taken).appendTo($tr);
+                                        $('<td>').text(l.available).appendTo($tr);
+                                        $body.append($tr);
+                                    });
+                            }
                       });
                   }
 
@@ -560,32 +557,34 @@
                             fromdate: fromdate,
                             todate: todate
                         },
-                        success: function (data) {
-                            $('#annual_total').html(data.total_no_of_annual_leaves);
-                            $('#annual_taken').html(data.total_taken_annual_leaves);
-                            $('#annual_available').html(data.available_no_of_annual_leaves);
+                       success: function (data) {
+                              $('#annual_total').html(data.total_no_of_annual_leaves);
+                              $('#annual_taken').html(data.total_taken_annual_leaves);
+                              $('#annual_available').html(data.available_no_of_annual_leaves);
 
-                            $('#casual_total').html(data.total_no_of_casual_leaves);
-                            $('#casual_taken').html(data.total_taken_casual_leaves);
-                            $('#casual_available').html(data.available_no_of_casual_leaves);
+                              $('#casual_total').html(data.total_no_of_casual_leaves);
+                              $('#casual_taken').html(data.total_taken_casual_leaves);
+                              $('#casual_available').html(data.available_no_of_casual_leaves);
 
-                            $('#med_total').html(data.total_no_of_med_leaves);
-                            $('#med_taken').html(data.total_taken_med_leaves);
-                            $('#med_available').html(data.available_no_of_med_leaves);
+                              $('#med_total').html(data.total_no_of_med_leaves);
+                              $('#med_taken').html(data.total_taken_med_leaves);
+                              $('#med_available').html(data.available_no_of_med_leaves);
 
-                            $('#weekly_total').html(data.total_no_of_weekly_leaves);
-                            $('#weekly_taken').html(data.total_taken_weekly_leaves);
-                            $('#weekly_available').html(data.available_no_of_weekly_leaves);
-
-                            $('#weekly_title').html(data.other_leaves_title);
-
-                        }
+                              var $body = $('#other_leaves_body').empty();
+                                $.each(data.other_leaves, function (i, l) {
+                                    var $tr = $('<tr>');
+                                    $('<td>').text(l.name).appendTo($tr);
+                                    $('<td>').text(l.total).appendTo($tr);
+                                    $('<td>').text(l.taken).appendTo($tr);
+                                    $('<td>').text(l.available).appendTo($tr);
+                                    $body.append($tr);
+                                });
+                          }
                     });
                 }
             });
 
         });
-
 
 
         $(document).ready(function () {
@@ -892,7 +891,7 @@
         var reqDate   = d.created_at ? d.created_at : new Date().toISOString();
         var days      = pdfLeaveDays(d.from_date, d.to_date, d.leave_category);
         var resume    = pdfAddDays(d.to_date, 1);
-        var companyName = d.company_name || 'AgroVentures Plantations (Pvt) Ltd';
+        var companyName = d.company_name || 'Erav Technologies (Pvt) Ltd';
 
         // ---------- header ----------
         // doc.addImage(LOGO_BASE64, 'PNG', 12, 8, 30, 18); // optional logo

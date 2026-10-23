@@ -319,9 +319,7 @@ class LeaveController extends Controller
             $formated_fromto_date = date('Y').'-12-31';
 
             $current_year_taken_a_l = (new \App\Leave)->taken_annual_leaves($empid, $formated_from_date, $formated_fromto_date);
-
             $current_year_taken_c_l = (new \App\Leave)->taken_casual_leaves($empid, $formated_from_date, $formated_fromto_date);
-
             $current_year_taken_med = (new \App\Leave)->taken_medical_leaves($empid, $formated_from_date, $formated_fromto_date);
 
 
@@ -339,6 +337,7 @@ class LeaveController extends Controller
             }
 
             $leave_msg = '';
+
             $annualData = $this->leavePolicyService->calculateAnnualLeaves($employee->emp_join_date, $employee->emp_id, $job_categoryid);
             $annual_leaves = $annualData['annual_leaves'];
             $leave_msg = $annualData['leave_msg'];
@@ -350,29 +349,31 @@ class LeaveController extends Controller
             $medical_leaves = $this->leavePolicyService->getMedicalLeaves($employee->job_category_id);
           
 
-            $appName = config('app.name');
-            if($appName == 'RajapakshaElectricalHRM'){
-                $current_weekly_taken = (new \App\Leave)->taken_short_leaves($empid, $month_from_date, $month_to_date);
-                $weekly_leaves = $this->leavePolicyService->getshortLeaves($employee->job_category_id);
-                $other_leaves_title = "Short";
-            } else{
+            // Weekly / Short / Official wage project walata anuwa wenas wena leaves
+            $other_leaves = array();
+            $other_types = $this->leavePolicyService->getOtherLeaveTypes($job_categoryid);
 
-                 $current_weekly_taken = (new \App\Leave)->taken_weekly_leaves($empid, $month_from_date, $month_to_date);
-                 $weekly_leaves = $this->leavePolicyService->getweeklyLeaves($employee->job_category_id);
-                 $other_leaves_title = "Weekly";
+            foreach ($other_types as $lt) {
+                $other_total = $this->leavePolicyService->getOtherLeaves($job_categoryid, $lt->id);
+                $other_taken = (new \App\Leave)->taken_other_leaves($empid, $lt->id, $month_from_date, $month_to_date);
 
+                $other_leaves[] = array(
+                    'id'        => $lt->id,
+                    'name'      => $lt->leave_type,
+                    'total'     => $other_total,
+                    'taken'     => $other_taken,
+                    'available' => $other_total - $other_taken,
+                );
             }
 
            
             $total_no_of_annual_leaves = $annual_leaves;
             $total_no_of_casual_leaves = $casual_leaves;
             $total_no_of_med_leaves = $medical_leaves;
-            $total_no_of_weekly_leaves = $weekly_leaves;
-
+        
             $available_no_of_casual_leaves = $total_no_of_casual_leaves - $current_year_taken_c_l;
             $available_no_of_med_leaves = $total_no_of_med_leaves - $current_year_taken_med;
-            $available_no_of_weekly_leaves = $total_no_of_weekly_leaves - $current_weekly_taken;
-
+           
 
             $settings = DB::table('hrm_general_settings as settings')
                     ->join('hrm_general_settings_key_list as key_list', 'settings.key_id', '=', 'key_list.id')
@@ -398,27 +399,26 @@ class LeaveController extends Controller
             }else{
                   $available_no_of_annual_leaves = $total_no_of_annual_leaves - $current_year_taken_a_l;
             }
-          
 
             if($employee->emp_status != 1){
                 $emp_status = DB::table('employment_statuses')->where('id', $employee->emp_status)->first();
                 $leave_msg = 'Casual Leaves - '.$emp_status->emp_status.' Employee can have only a half day per month (Not a permanent employee)';
             }
 
-            $results = array(
+             $results = array(
                 "total_no_of_annual_leaves" => $total_no_of_annual_leaves,
                 "total_no_of_casual_leaves" => $total_no_of_casual_leaves,
                 "total_no_of_med_leaves" => $total_no_of_med_leaves,
-                "total_no_of_weekly_leaves" => $total_no_of_weekly_leaves,
+
                 "total_taken_annual_leaves" => $current_year_taken_a_l,
                 "total_taken_casual_leaves" => $current_year_taken_c_l,
                 "total_taken_med_leaves" => $current_year_taken_med,
-                "total_taken_weekly_leaves" => $current_weekly_taken,
+
                 "available_no_of_annual_leaves" => $available_no_of_annual_leaves,
                 "available_no_of_casual_leaves" => $available_no_of_casual_leaves,
                 "available_no_of_med_leaves" => $available_no_of_med_leaves,
-                "available_no_of_weekly_leaves" => $available_no_of_weekly_leaves,
-                "other_leaves_title" => $other_leaves_title,
+
+                "other_leaves" => $other_leaves,
                 "leave_msg" => $leave_msg
             );
             return response()->json($results);
@@ -843,16 +843,20 @@ class LeaveController extends Controller
     
                       $smsResult = null;
 
-                 if ($app_level != 1) {
-                    $this->sendLeaveStatusSms($leaves[0], 'Rejected');
+                if (config('app.name') == 'OpmaHRM' && $app_level != 1) {
+                      if ($app_level != 1) {
+                            $this->sendLeaveStatusSms($leaves[0], 'Rejected');
+                        }
                 }
                 
             }else{
                   $smsResult = null;
                   // Only send "Approved" SMS on final approval level
-                if ($app_level != 1) {
-                    $this->sendLeaveStatusSms($leaves[0], 'Approved');
-                }
+                    if (config('app.name') == 'OpmaHRM' && $app_level != 1) {
+                         if ($app_level != 1) {
+                            $this->sendLeaveStatusSms($leaves[0], 'Approved');
+                        }
+                    }
             }
 
 

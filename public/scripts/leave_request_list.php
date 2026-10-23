@@ -28,6 +28,7 @@ $primaryKey = 'id';
         array('db' => '`u`.`leave_category`', 'dt' => 'leave_category', 'field' => 'leave_category'),
         array('db' => '`u`.`reason`', 'dt' => 'reason', 'field' => 'reason'),
         array( 'db' => '`u`.`calling_name`', 'dt' => 'calling_name', 'field' => 'calling_name','visible' => false ),
+        array('db' => '`u`.`title`', 'dt' => 'title', 'field' => 'title'),
         array('db' => '`u`.`emp_id`', 'dt' => 'employee_display', 'field' => 'emp_id', 
           'formatter' => function($d, $row) {
               $employee = (object)[
@@ -67,12 +68,14 @@ require('ssp.customized.class.php');
         `leave_request`.`leave_category`,
         `leave_request`.`reason`,
         `leaves`.`half_short`,
-        `leaves`.`status`
+        `leaves`.`status`,
+        `job_titles`.`title`
     FROM `leave_request`
     JOIN `employees` AS `emp` ON `leave_request`.`emp_id` = `emp`.`emp_id`
     LEFT JOIN `departments` ON `emp`.`emp_department` = `departments`.`id`
     LEFT JOIN `leaves` ON `leave_request`.`id` = `leaves`.`request_id`
     LEFT JOIN `leave_types` ON `leaves`.`leave_type` = `leave_types`.`id`
+    LEFT JOIN `job_titles` ON `emp`.`emp_job_code` = `job_titles`.`id`
     WHERE `leave_request`.`status` != 3";
 
     if (!empty($_REQUEST['department'])) {
