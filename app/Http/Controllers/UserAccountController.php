@@ -1227,7 +1227,26 @@ class UserAccountController extends Controller
                 ->addColumn('double_hours', function ($row) {
                     return $row->double_hours ?? '0';
                 })
-               
+                // filterColumn: tell Yajra which real DB expression to use for search
+                // on computed/virtual columns so it doesn't build invalid LOWER() SQL
+                ->filterColumn('formatted_date', function ($query, $keyword) {
+                    $query->where('at1.date', 'like', "%{$keyword}%");
+                })
+                ->filterColumn('first_time_stamp', function ($query, $keyword) {
+                    $query->havingRaw('MIN(at1.timestamp) like ?', ["%{$keyword}%"]);
+                })
+                ->filterColumn('last_time_stamp', function ($query, $keyword) {
+                    $query->havingRaw('MAX(at1.timestamp) like ?', ["%{$keyword}%"]);
+                })
+                ->filterColumn('late_minites', function ($query, $keyword) {
+                    $query->where('late_minites.minites_count', 'like', "%{$keyword}%");
+                })
+                ->filterColumn('ot_hours', function ($query, $keyword) {
+                    $query->where('ot_approved.hours', 'like', "%{$keyword}%");
+                })
+                ->filterColumn('double_hours', function ($query, $keyword) {
+                    $query->where('ot_approved.double_hours', 'like', "%{$keyword}%");
+                })
                 ->rawColumns(['action',
                     'emp_name_with_initial',
                     'location',
