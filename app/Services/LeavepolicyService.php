@@ -164,21 +164,15 @@ class LeavepolicyService
                     ->where('settings.status', 1)
                     ->select('settings.config_value' )
                     ->first(); 
-        
+
          if($settings &&  $settings->config_value == 1){
 
           // calculte casual leaves based on joining date
 
              if($jobleaves && $leaves->casual_leaves > 0){
-                    $join_date = new DateTime($empJoinDate);
-                    $current_date = new DateTime();
-                    $interval = $join_date->diff($current_date);
-                    
-                    $years_of_service = $interval->y;
-                    $months_of_service = $interval->m;
-                    
                     $today_date = Carbon::now();
                     $join_date     = Carbon::parse($empJoinDate);
+                    $months_of_service = $join_date->diffInMonths($today_date);
 
                     $currentdate = $today_date->toDateString(); // YYYY-MM-DD
                     $join_year_end_date = $join_date->copy()->endOfYear()->toDateString(); 
@@ -195,6 +189,8 @@ class LeavepolicyService
             }else{
                 $casual_leaves = 0;
             }
+
+           
          } 
          elseif ($settings && $settings->config_value == 2){
                 // rturn full casual leaves without considering joining date
