@@ -56,7 +56,8 @@ class AttendanceApprovalController_st extends Controller
                 'employees.emp_location',
                 'branches.location',
                 'departments.name as dept_name',
-                'employees.emp_id'
+                'employees.emp_id',
+                'job_categories.salary_without_attendace'
             )
             ->from('employees as employees')
             // ->leftJoin('attendances as at1', 'employees.emp_id', '=', 'at1.uid')
@@ -71,7 +72,8 @@ class AttendanceApprovalController_st extends Controller
                 }
             })
             ->leftJoin('branches', 'at1.location', '=', 'branches.id')
-            ->leftJoin('departments', 'departments.id', '=', 'employees.emp_department');
+            ->leftJoin('departments', 'departments.id', '=', 'employees.emp_department')
+            ->leftJoin('job_categories', 'job_categories.id', '=', 'employees.job_category_id'); ;
 
         // Apply user access rights filter
         if (!empty($accessibleEmployeeIds)) {
@@ -93,17 +95,23 @@ class AttendanceApprovalController_st extends Controller
 
         return Datatables::of($query)
             ->addIndexColumn()
-            ->editColumn('date', function ($row) {
+            ->editColumn('date', function ($row) use ($todate) {
                 if ($row->date) {
                     $rec_date = Carbon::parse($row->date)->toDateString();
                     $date_c = Carbon::createFromFormat('Y-m-d', $rec_date);
                     return $date_c->format('Y-m');
                 }
+                if (!empty($todate)) {
+                    return Carbon::parse($todate)->format('Y-m');
+                }
                 return '-';
             })
             ->addColumn('work_days', function ($row) use ($fromdate, $todate) {
                 if ($row->attendance_id) {
-                    return $work_days = (new \App\Attendance_st)->get_work_days($row->emp_id, $fromdate, $todate);
+                     return (new \App\Attendance_st)->get_work_days($row->emp_id, $fromdate, $todate);
+                }
+                if ($row->salary_without_attendace == 1) {
+                    return $this->countWeekdays($fromdate, $todate);
                 }
                 return 0;
             })
@@ -112,6 +120,9 @@ class AttendanceApprovalController_st extends Controller
                     $working_week_days_arr = (new \App\Attendance_st)->get_working_week_days($row->emp_id, $fromdate, $todate);
                     return $working_week_days_arr['no_of_working_workdays'];
                 }
+                if ($row->salary_without_attendace == 1) {
+                        return $this->countWeekdays($fromdate, $todate);
+                    }
                 return 0;
                 
             })
@@ -486,6 +497,12 @@ class AttendanceApprovalController_st extends Controller
                     $year_rec  = Carbon::parse($todate)->year;
                     $month_rec = Carbon::parse($todate)->month;
 
+                     DB::table('employee_work_rates')
+                        ->where('emp_id', $record->emp_auto_id)
+                        ->where('work_year', $year_rec)
+                        ->where('work_month', $month_rec)
+                        ->delete();
+
                     // Sat & Sun nethuwa from date - to date athara days count eka
                     $weekdaysCount = 0;
                     foreach ($dateRange as $d) {
@@ -542,5 +559,24 @@ class AttendanceApprovalController_st extends Controller
         }
     }
 
+    private function countWeekdays($fromdate, $todate)
+    {
+        if (empty($fromdate) || empty($todate)) {
+            return 0;
+        }
+
+        $start = new \DateTime($fromdate);
+        $end   = new \DateTime($todate);
+        $count = 0;
+
+        while ($start <= $end) {
+            if ($start->format('N') < 6) { // 1 (Mon) - 5 (Fri)
+                $count++;
+            }
+            $start->modify('+1 day');
+        }
+
+        return $count;
+    }
 
 }
