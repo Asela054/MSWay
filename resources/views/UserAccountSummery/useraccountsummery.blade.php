@@ -1955,11 +1955,11 @@
             },
             columns: [{
                     data: 'emp_name_with_initial',
-                    name: 'emp_name_with_initial'
+                    name: 'employees.emp_name_with_initial'
                 },
                 {
                     data: 'location',
-                    name: 'location'
+                    name: 'branches.location'
                 },
                 {
                     data: 'formatted_date',
