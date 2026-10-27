@@ -5,6 +5,7 @@
         <ul class="dropdown-menu multi-level dropdownmenucolor" role="menu" aria-labelledby="dropdownMenu">
 
         <li><a class="dropdown-item" href="{{ route('IOUReason')}}">IOU Reason</a></li>
+        <li><a class="dropdown-item" href="{{ route('IOURequest')}}">IOU Request</a></li>
         </ul>
     </div>
   <!-- <div class="dropdown">
