@@ -1969,6 +1969,13 @@ Route::post('addIOURequest',['uses' => 'ActivityManagement\IOU\IOURequestControl
 Route::post('IOURequest/update', 'ActivityManagement\IOU\IOURequestController@update')->name('IOURequest.update');
 Route::get('IOURequest/destroy/{id}', 'ActivityManagement\IOU\IOURequestController@destroy');
 /*-- IOU Requests----*/
+/*-- Visit Places----*/
+Route::resource('VisitPlace', 'ActivityManagement\VisitPlaceController');
+Route::get('VisitPlace',['uses' => 'ActivityManagement\VisitPlaceController@index', 'as' => 'VisitPlace']); 
+Route::post('addVisitPlace',['uses' => 'ActivityManagement\VisitPlaceController@store', 'as' => 'addVisitPlace']); 
+Route::post('VisitPlace/update', 'ActivityManagement\VisitPlaceController@update')->name('VisitPlace.update');
+Route::get('VisitPlace/destroy/{id}', 'ActivityManagement\VisitPlaceController@destroy');
+/*-- Visit Places----*/
 
 
 Route::get('/clear-cache', function() {
