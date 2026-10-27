@@ -1962,6 +1962,13 @@ Route::post('addIOUReason',['uses' => 'ActivityManagement\IOU\IOUReasonControlle
 Route::post('IOUReason/update', 'ActivityManagement\IOU\IOUReasonController@update')->name('IOUReason.update');
 Route::get('IOUReason/destroy/{id}', 'ActivityManagement\IOU\IOUReasonController@destroy');
 /*-- IOU Reasons----*/
+/*-- IOU Requests----*/
+Route::resource('IOURequest', 'ActivityManagement\IOU\IOURequestController');
+Route::get('IOURequest',['uses' => 'ActivityManagement\IOU\IOURequestController@index', 'as' => 'IOURequest']); 
+Route::post('addIOURequest',['uses' => 'ActivityManagement\IOU\IOURequestController@store', 'as' => 'addIOURequest']); 
+Route::post('IOURequest/update', 'ActivityManagement\IOU\IOURequestController@update')->name('IOURequest.update');
+Route::get('IOURequest/destroy/{id}', 'ActivityManagement\IOU\IOURequestController@destroy');
+/*-- IOU Requests----*/
 
 
 Route::get('/clear-cache', function() {
