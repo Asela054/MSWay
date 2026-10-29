@@ -1962,7 +1962,28 @@ Route::post('addIOUReason',['uses' => 'ActivityManagement\IOU\IOUReasonControlle
 Route::post('IOUReason/update', 'ActivityManagement\IOU\IOUReasonController@update')->name('IOUReason.update');
 Route::get('IOUReason/destroy/{id}', 'ActivityManagement\IOU\IOUReasonController@destroy');
 /*-- IOU Reasons----*/
-
+/*-- IOU Requests----*/
+Route::resource('IOURequest', 'ActivityManagement\IOU\IOURequestController');
+Route::get('IOURequest',['uses' => 'ActivityManagement\IOU\IOURequestController@index', 'as' => 'IOURequest']); 
+Route::post('addIOURequest',['uses' => 'ActivityManagement\IOU\IOURequestController@store', 'as' => 'addIOURequest']); 
+Route::post('IOURequest/update', 'ActivityManagement\IOU\IOURequestController@update')->name('IOURequest.update');
+Route::get('IOURequest/destroy/{id}', 'ActivityManagement\IOU\IOURequestController@destroy');
+/*-- IOU Requests----*/
+/*-- Visit Places----*/
+Route::resource('VisitPlace', 'ActivityManagement\VisitPlaceController');
+Route::get('VisitPlace',['uses' => 'ActivityManagement\VisitPlaceController@index', 'as' => 'VisitPlace']); 
+Route::post('addVisitPlace',['uses' => 'ActivityManagement\VisitPlaceController@store', 'as' => 'addVisitPlace']); 
+Route::post('VisitPlace/update', 'ActivityManagement\VisitPlaceController@update')->name('VisitPlace.update');
+Route::get('VisitPlace/destroy/{id}', 'ActivityManagement\VisitPlaceController@destroy');
+/*-- Visit Places----*/
+/*-- Emp Calendar----*/
+Route::resource('EmpCalendar', 'ActivityManagement\EmpCalendarController');
+Route::get('EmpCalendar',['uses' => 'ActivityManagement\EmpCalendarController@index', 'as' => 'EmpCalendar']); 
+Route::post('addEmpCalendar',['uses' => 'ActivityManagement\EmpCalendarController@store', 'as' => 'addEmpCalendar']); 
+Route::post('EmpCalendar/update', 'ActivityManagement\EmpCalendarController@update')->name('EmpCalendar.update');
+Route::get('EmpCalendar/destroy/{id}', 'ActivityManagement\EmpCalendarController@destroy');
+/*-- Emp Calendar----*/
+/*-- Activity Management----*/
 
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');
