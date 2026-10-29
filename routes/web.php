@@ -1976,7 +1976,14 @@ Route::post('addVisitPlace',['uses' => 'ActivityManagement\VisitPlaceController@
 Route::post('VisitPlace/update', 'ActivityManagement\VisitPlaceController@update')->name('VisitPlace.update');
 Route::get('VisitPlace/destroy/{id}', 'ActivityManagement\VisitPlaceController@destroy');
 /*-- Visit Places----*/
-
+/*-- Emp Calendar----*/
+Route::resource('EmpCalendar', 'ActivityManagement\EmpCalendarController');
+Route::get('EmpCalendar',['uses' => 'ActivityManagement\EmpCalendarController@index', 'as' => 'EmpCalendar']); 
+Route::post('addEmpCalendar',['uses' => 'ActivityManagement\EmpCalendarController@store', 'as' => 'addEmpCalendar']); 
+Route::post('EmpCalendar/update', 'ActivityManagement\EmpCalendarController@update')->name('EmpCalendar.update');
+Route::get('EmpCalendar/destroy/{id}', 'ActivityManagement\EmpCalendarController@destroy');
+/*-- Emp Calendar----*/
+/*-- Activity Management----*/
 
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');
