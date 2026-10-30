@@ -10,5 +10,7 @@
     </div>
 
     <a role="button" class="btn navbtncolor" href="{{ route('VisitPlace') }}" id="visitplace">Visit Places <span class="caret"></span></a>
+
+    <a role="button" class="btn navbtncolor" href="{{ route('EmpCalendar') }}" id="empcalendar">Employee Calendar <span class="caret"></span></a>
   
 </div>
