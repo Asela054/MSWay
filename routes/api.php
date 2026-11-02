@@ -162,6 +162,10 @@ Route::post('v1/getLeaveApprovers', ['uses' => '\App\Http\Controllers\Api\MainCo
 Route::post('v1/editLeave', ['uses' => '\App\Http\Controllers\Api\MainController@editLeave', 'as' => 'editLeave']);
 Route::post('v1/UpdateLeave', ['uses' => '\App\Http\Controllers\Api\MainController@UpdateLeave', 'as' => 'UpdateLeave']);
 
+//agroventures api list for attendance and company list
+Route::get('ListCompany', ['uses' => '\App\Http\Controllers\Api\Agro_Ventures\ApiAgoventuresController@Getcompanylist', 'as' => 'ListCompany']);
+Route::post('ListAttendance', ['uses' => '\App\Http\Controllers\Api\Agro_Ventures\ApiAgoventuresController@attendance_list_for_month_edit', 'as' => 'ListAttendance']);
+
 Route::get('/download-pdf/{pdfId}', function($pdfId) {
     $pdfData = session()->get($pdfId);
     
