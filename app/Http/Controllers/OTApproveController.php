@@ -182,6 +182,7 @@ class OTApproveController extends Controller
                 }
             }
 
+            
              $day_punches = DB::table('attendances')
                             ->whereNull('deleted_at')
                             ->where('uid', $emp_id)
@@ -199,6 +200,7 @@ class OTApproveController extends Controller
             // Sort punches chronologically (should already be sorted from the query, but just in case)
             $sorted_punches = $day_punches->sort()->values();
 
+        
             foreach ($sorted_shifts as $index =>  $shift_details) {
                 $on_duty_time  = $shift_details->onduty_time;
                 $off_duty_time = $shift_details->offduty_time;
@@ -227,18 +229,20 @@ class OTApproveController extends Controller
                     }
                 }
 
-                $shift_punches = $sorted_punches->filter(function ($p) use ($windowStart, $windowEnd) {
-                    $t = Carbon::parse($p);
-                    return $t->gte($windowStart) && $t->lte($windowEnd);
-                })->values();
+                // $shift_punches = $sorted_punches->filter(function ($p) use ($windowStart, $windowEnd) {
+                //     $t = Carbon::parse($p);
+                //     return $t->gte($windowStart) && $t->lte($windowEnd);
+                // })->values();
 
-                if ($shift_punches->count() < 2) {
-                    continue; // IN/OUT pair nehe
-                }
+                // if ($shift_punches->count() < 2) {
+                //     continue; // IN/OUT pair nehe
+                // }
 
-                $first_checkin = $shift_punches->first();  // earliest punch in window
-                $lasttimestamp = $shift_punches->last();   // latest punch in window
 
+                $first_checkin = $att->first_checkin;  // earliest punch in window
+                $lasttimestamp =  $att->lasttimestamp;   // latest punch in window
+
+                
                 if (empty($first_checkin) || empty($lasttimestamp)) {
                         continue; // not enough punches for this shift
                     }

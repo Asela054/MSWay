@@ -190,6 +190,7 @@ $(document).ready(function () {
                     <th>EMP ID</th>
                     <th>NAME</th>
                     <th>DEPARTMENT</th>
+                    <th>DESIGNATION</th>
                     <th>DATE</th>
                     <th>DATE TYPE</th>
                     <th>CHECK IN</th>
@@ -226,6 +227,7 @@ $(document).ready(function () {
                     html += `<td>${emp_data.emp_id}</td>`;
                     html += `<td>${emp_data.emp_name_with_initial} - ${emp_data.calling_name}</td>`;
                     html += `<td>${emp_data.dept_name}</td>`;
+                    html += `<td>${emp_data.title}</td>`;
                     html += `<td>${emp_data.date}</td>`;
                     html += `<td>${emp_data.day_type}</td>`;
                     html += `<td>${checkInTime}</td>`;

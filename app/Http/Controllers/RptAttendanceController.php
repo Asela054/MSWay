@@ -397,10 +397,12 @@ class RptAttendanceController extends Controller
                         'employees.emp_location', 
                         'branches.location as b_location',
                         'departments.name as dept_name',
-                        'departments.id as dept_id'
+                        'departments.id as dept_id',
+                        'job_titles.title as designation'
                     )
                     ->leftJoin('branches', 'employees.emp_location', '=', 'branches.id')
                     ->leftJoin('departments', 'employees.emp_department', '=', 'departments.id')
+                    ->leftJoin('job_titles', 'employees.emp_job_code', '=', 'job_titles.id')
                     ->where('employees.deleted', 0)
                     ->where('employees.is_resigned', 0)
                     ->where('departments.id', $department_->id)
@@ -447,6 +449,18 @@ class RptAttendanceController extends Controller
 
                     $attendances = DB::select($sql);
 
+                     if ($record->dept_name == null) {
+                            $record->dept_name = '-';
+                        }
+
+                        if ($record->designation == null) {
+                            $record->designation = '-';
+                        }
+
+                        if ($record->b_location == null) {
+                            $record->b_location = '-';
+                        }
+
                     if (!empty($attendances)) {
                         $to = \Carbon\Carbon::parse($attendances[0]->lasttimestamp);
                         $from = \Carbon\Carbon::parse($attendances[0]->timestamp);
@@ -471,9 +485,7 @@ class RptAttendanceController extends Controller
                             $last_time_stamp = \Carbon\Carbon::parse($last_time_stamp)->format('H:i');
                         }
 
-                        if ($record->dept_name == null) {
-                            $record->dept_name = '-';
-                        }
+                       
 
                         $objattendance = new stdClass();
                         $objattendance->emp_id = $record->emp_id;
@@ -489,6 +501,7 @@ class RptAttendanceController extends Controller
                         $objattendance->workhours = $workhours;
                         $objattendance->location = $record->b_location;
                         $objattendance->day_type = $day_type;
+                        $objattendance->title = $record->designation;
 
                         array_push($atte_arr, $objattendance);
                     } else {
@@ -506,6 +519,7 @@ class RptAttendanceController extends Controller
                         $objattendance->workhours = '-';
                         $objattendance->location = $record->b_location;
                         $objattendance->day_type = $day_type;
+                        $objattendance->title = $record->designation;
 
                         array_push($atte_arr, $objattendance);
                         $not_att_count++;
