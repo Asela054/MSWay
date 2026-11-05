@@ -1548,6 +1548,25 @@ class AttendanceController extends Controller
     }
 
     $employeeName = $empshift->emp_name_with_initial;
+     $jobTitle = '';
+    try {
+        $jobRow = \DB::table('employees')
+            ->leftJoin('job_titles', 'job_titles.id', '=', 'employees.emp_job_code')
+            ->where('employees.emp_id', $empshift->emp_id)
+            ->select('job_titles.title')
+            ->first();
+
+        if ($jobRow && !empty($jobRow->title)) {
+            $jobTitle = $jobRow->title;
+        }
+    } catch (\Exception $e) {
+        \Log::warning('Attendance edit SMS: job title lookup failed', [
+            'emp_id' => $empshift->emp_id,
+            'error'  => $e->getMessage(),
+        ]);
+    }
+    $employeeLabel = $employeeName . ($jobTitle !== '' ? ' (' . $jobTitle . ')' : '');
+
     $dateList = implode(', ', $formattedDates);
     $dateWord = count($formattedDates) > 1 ? 'on: ' : 'on ';
 
@@ -1593,7 +1612,7 @@ class AttendanceController extends Controller
         }
     }
 
-    $message = $employeeName . "'s Attendance Record Updated " . $dateWord . $dateList . $changeText . ".";
+    $message = $employeeLabel . "'s Attendance Record Updated " . $dateWord . $dateList . $changeText . ".";
 
     $smsService = new \App\Services\Opma_Sms_policyService();
     $result = $smsService->sendSms($mobile, $message);
