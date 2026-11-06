@@ -947,6 +947,24 @@ class LeaveController extends Controller
     /**
      * Send leave status SMS to the employee
     */
+    private function getEmployeeJobTitle($emp_id)
+    {
+        try {
+            $title = DB::table('employees')
+                ->leftJoin('job_titles', 'job_titles.id', '=', 'employees.emp_job_code')
+                ->where('employees.emp_id', $emp_id)
+                ->value('job_titles.title');
+
+            return !empty($title) ? $title : '';
+        } catch (\Exception $e) {
+            \Log::warning('Job title lookup failed', array(
+                'emp_id' => $emp_id,
+                'error'  => $e->getMessage(),
+            ));
+            return '';
+        }
+    }
+
 
     private function sendLeaveStatusSms($leave, $status)
     {
@@ -973,8 +991,11 @@ class LeaveController extends Controller
         } elseif (strlen($mobile) == 11 && substr($mobile, 0, 2) == '94') {
             $mobile = substr($mobile, 2);
         }
+        $jobTitle = $this->getEmployeeJobTitle($leave->emp_id);
+        $employeeLabel = $employee->calling_name . ($jobTitle !== '' ? ' (' . $jobTitle . ')' : '');
 
-        $message = "Dear " . $employee->calling_name . ", your leave request ("
+
+        $message = "Dear " . $employeeLabel . ", your leave request ("
             . $leave->leave_from . " to " . $leave->leave_to . ") has been " . $status . ".";
 
         $smsService = new \App\Services\Opma_Sms_policyService();
@@ -1012,12 +1033,14 @@ class LeaveController extends Controller
             $mobile = substr($mobile, 2);
         }
 
-        $employeeName = $employee->emp_name_with_initial;
+        $jobTitle = $this->getEmployeeJobTitle($emp_id);
+        $employeeLabel = $employee->emp_name_with_initial . ($jobTitle !== '' ? ' (' . $jobTitle . ')' : '');
+
         $dateList = implode(', ', $dates);
 
         $dateWord = count($dates) > 1 ? 'on: ' : 'on ';
 
-        $message = "Leave Request for " . $employeeName
+        $message = "Leave Request for " . $employeeLabel
             . " " . $dateWord . $dateList . "is waiting for your approval.";
 
         $smsService = new Opma_Sms_policyService();
@@ -1056,6 +1079,10 @@ class LeaveController extends Controller
             ->where('emp_id', $emp_id)
             ->value('emp_name_with_initial');
 
+         $jobTitle = $this->getEmployeeJobTitle($emp_id);
+         $employeeLabel = $employeeName . ($jobTitle !== '' ? ' (' . $jobTitle . ')' : '');
+ 
+
         $mobile = preg_replace('/[^0-9]/', '', $approver->emp_mobile);
         if (strlen($mobile) == 10 && $mobile[0] == '0') {
             $mobile = substr($mobile, 1);
@@ -1066,7 +1093,7 @@ class LeaveController extends Controller
         $dateText = count($dates) > 1 ? 'from ' . $dates[0] . ' to ' . $dates[1] : 'on ' . $dates[0];
 
         $message = "Dear " . $approver->calling_name . ", a leave request for "
-            . $employeeName . " " . $dateText . " is waiting for your approval.";
+            . $employeeLabel . " " . $dateText . " is waiting for your approval.";
 
         $smsService = new Opma_Sms_policyService();
         $result = $smsService->sendSms($mobile, $message);
