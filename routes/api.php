@@ -166,6 +166,28 @@ Route::post('v1/UpdateLeave', ['uses' => '\App\Http\Controllers\Api\MainControll
 Route::get('ListCompany', ['uses' => '\App\Http\Controllers\Api\Agro_Ventures\ApiAgoventuresController@Getcompanylist', 'as' => 'ListCompany']);
 Route::post('ListAttendance', ['uses' => '\App\Http\Controllers\Api\Agro_Ventures\ApiAgoventuresController@attendance_list_for_month_edit', 'as' => 'ListAttendance']);
 
+//employee calendar / schedule api list
+Route::get('ListSchedule', ['uses' => '\App\Http\Controllers\Api\ActivityManagement\CalanderAPIController@GetScheduleList', 'as' => 'ListSchedule']);
+Route::post('StoreSchedule', ['uses' => '\App\Http\Controllers\Api\ActivityManagement\CalanderAPIController@StoreSchedule', 'as' => 'StoreSchedule']);
+Route::post('GetSchedule', ['uses' => '\App\Http\Controllers\Api\ActivityManagement\CalanderAPIController@GetSchedule', 'as' => 'GetSchedule']);
+Route::post('UpdateSchedule', ['uses' => '\App\Http\Controllers\Api\ActivityManagement\CalanderAPIController@UpdateSchedule', 'as' => 'UpdateSchedule']);
+Route::post('DeleteSchedule', ['uses' => '\App\Http\Controllers\Api\ActivityManagement\CalanderAPIController@DeleteSchedule', 'as' => 'DeleteSchedule']);
+
+//visit place api list
+Route::get('ListVisitPlace', ['uses' => '\App\Http\Controllers\Api\ActivityManagement\VistplaceAPIController@GetVisitPlaceList', 'as' => 'ListVisitPlace']);
+Route::post('StoreVisitPlace', ['uses' => '\App\Http\Controllers\Api\ActivityManagement\VistplaceAPIController@StoreVisitPlace', 'as' => 'StoreVisitPlace']);
+Route::post('GetVisitPlace', ['uses' => '\App\Http\Controllers\Api\ActivityManagement\VistplaceAPIController@GetVisitPlace', 'as' => 'GetVisitPlace']);
+Route::post('UpdateVisitPlace', ['uses' => '\App\Http\Controllers\Api\ActivityManagement\VistplaceAPIController@UpdateVisitPlace', 'as' => 'UpdateVisitPlace']);
+Route::post('DeleteVisitPlace', ['uses' => '\App\Http\Controllers\Api\ActivityManagement\VistplaceAPIController@DeleteVisitPlace', 'as' => 'DeleteVisitPlace']);
+
+//iou request api list
+Route::get('ListIOURequest', ['uses' => '\App\Http\Controllers\Api\ActivityManagement\IOUAPIController@GetIOURequestList', 'as' => 'ListIOURequest']);
+Route::post('StoreIOURequest', ['uses' => '\App\Http\Controllers\Api\ActivityManagement\IOUAPIController@StoreIOURequest', 'as' => 'StoreIOURequest']);
+Route::post('GetIOURequest', ['uses' => '\App\Http\Controllers\Api\ActivityManagement\IOUAPIController@GetIOURequest', 'as' => 'GetIOURequest']);
+Route::post('UpdateIOURequest', ['uses' => '\App\Http\Controllers\Api\ActivityManagement\IOUAPIController@UpdateIOURequest', 'as' => 'UpdateIOURequest']);
+Route::post('DeleteIOURequest', ['uses' => '\App\Http\Controllers\Api\ActivityManagement\IOUAPIController@DeleteIOURequest', 'as' => 'DeleteIOURequest']);
+Route::get('getAllReasons', ['uses' => '\App\Http\Controllers\Api\ActivityManagement\IOUAPIController@getAllReasons', 'as' => 'getAllReasons']);
+
 Route::get('/download-pdf/{pdfId}', function($pdfId) {
     $pdfData = session()->get($pdfId);
     
