@@ -206,7 +206,7 @@ class IncompleteAttendanceController extends Controller
                     }
 
                     $first_time = date('H:i:s', strtotime($attendance['timestamp']));
-                    $last_time = date('H:i:s', strtotime($attendance['lasttimestamp']));
+                    $last_time = $attendance['lasttimestamp'];
 
                     $html .= '<td>' . $attendance['emp_id'] . '</td>';
                     $html .= '<td>' . $attendance['employee_display'] . '</td>';

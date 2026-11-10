@@ -139,6 +139,7 @@ class OTApproveController extends Controller
 
         $ot_data = array();
 
+        //   dd($attendance_data);
         foreach ($attendance_data as $att) {
 
              $employeeObj = (object)[
@@ -252,7 +253,6 @@ class OTApproveController extends Controller
                         continue; // not enough punches for this shift
                     }
 
-        
 
                 $ot_hours = (new \App\Attendance)->get_ot_hours_by_date(
                     $emp_id, 
