@@ -86,7 +86,7 @@ class OpmaAttendance extends Model
                 ->where('date', $s_date)
                 ->first();
 
-            if ($dailyApproval && $dailyApproval->daily_average <= 50) {
+            if ($dailyApproval && $dailyApproval->daily_target !== null  && $dailyApproval->daily_average !== null && $dailyApproval->daily_average <= 50) {
                 continue;
             }
           
@@ -181,8 +181,7 @@ class OpmaAttendance extends Model
                 ->where('emp_id', $emp_id)
                 ->where('date', $s_date)
                 ->first();
-
-            if ($dailyApproval && $dailyApproval->daily_average <= 70) {
+            if ($dailyApproval && $dailyApproval->daily_target !== null  && $dailyApproval->daily_average !== null && $dailyApproval->daily_average <= 70) {
                 continue;
             }
             

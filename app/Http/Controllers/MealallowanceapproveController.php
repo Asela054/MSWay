@@ -119,7 +119,7 @@ class MealallowanceapproveController extends Controller
                 $allowance = DB::table('salary_adjustments')
                     ->select('salary_adjustments.*')
                     ->where('emp_id', $empId)
-                    // ->where('job_id', $jobCategoryId)
+                    //->where('job_id', $jobCategoryId)
                     ->where('remuneration_id', $remunerationtype)
                     ->where('approved_status', 1)
                     ->first();
@@ -146,6 +146,7 @@ class MealallowanceapproveController extends Controller
                     }
 
                 }
+                
                 
                 //check meal allowance approved on given date range
                 // $approvedallowance = DB::table('meal_allowances_approved')
@@ -363,14 +364,18 @@ class MealallowanceapproveController extends Controller
                                     ->whereRaw('DATE(a.date) = erd.work_date')
                                     ->whereNull('a.deleted_at'); 
                             })
-                            ->whereExists(function ($query) use ($empId) {
+                            ->whereNotExists(function ($query) use ($empId) {
                                 $query->select(DB::raw(1))
                                     ->from('opma_daily_approval_summary as das')
                                     ->whereRaw('das.emp_id = erd.emp_id')
                                     ->whereRaw('das.date = erd.work_date')
+                                     ->whereNotNull('das.daily_target')
+                                    ->whereNotNull('das.daily_produce')
+                                    ->whereNotNull('das.daily_average')
                                     ->where('das.daily_average', '>=', 60);
                             })
                             ->count();
+
                         $totalWorkingDays = $count;
                         $totalamount = $count * $allowanceamount;
                         $monthlyremain = $totalamount;
