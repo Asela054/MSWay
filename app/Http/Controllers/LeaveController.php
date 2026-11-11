@@ -671,10 +671,11 @@ class LeaveController extends Controller
 
         $user = Auth::user();
         $users_id = $user->emp_id;
+        
 
         $isAdmin = Auth::user()->hasRole('Admin');
-        $isApprover = ($leave->leave_approv_person == $users_id);
-
+        $isApprover = ($leave->leave_approv_person == $users_id || $leave->leave_approv_person_2 == $users_id);
+        
         if (!($isApprover || $isAdmin)) {
             return response()->json(['error' => 'UnAuthorized. Only the assigned approver or admin can approve this leave.'], 401);
         }
