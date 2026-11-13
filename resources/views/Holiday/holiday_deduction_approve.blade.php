@@ -51,6 +51,8 @@
                                             <th></th>
                                             <th>EMP ID </th>
                                             <th>EMPLOYEE NAME</th>
+                                            <th>PAYROLL DAYS</th>
+                                            <th>WORK DAYS</th>
                                             <th>TOTAL ABSENT DAYS</th>
                                             <th>AMOUNT</th>
                                             <th>REMAINING AMOUNT</th>
@@ -264,6 +266,8 @@
                                         </td>
                                         <td>${item.empid}</td>
                                         <td>${item.emp_name}</td>
+                                        <td>${item.payrollworkdays}</td>
+                                        <td>${item.workdays}</td>
                                         <td>${item.absent_Days}</td>
                                         <td>${item.total_amount}</td>
                                         <td>${item.monthly_remain}</td>
@@ -330,10 +334,12 @@
                             empid: rowData[1],
                             emp_name: rowData[2],
                             Absent_Days: rowData[3],
-                            total_amount: rowData[4],
-                            monthly_remain: rowData[5],
-                            payroll_Profile: rowData[6],
-                            remuneration_id: rowData[7]
+                            payrollworkdays: rowData[4],
+                            workdays: rowData[5],
+                            total_amount: rowData[6],
+                            monthly_remain: rowData[7],
+                            payroll_Profile: rowData[8],
+                            remuneration_id: rowData[9]
                         });
                     }
                 });
@@ -440,7 +446,7 @@
     function showInitialMessage() {
         $('#dataTable tbody').html(
             '<tr>' +
-            '<td colspan="8" class="text-center py-5">' + // Changed colspan to 9 to match your columns
+            '<td colspan="10" class="text-center py-5">' + // Changed colspan to 9 to match your columns
             '<div class="d-flex flex-column align-items-center">' +
             '<i class="fas fa-filter fa-3x text-muted mb-2"></i>' +
             '<h4 class="text-muted mb-2">No Records Found</h4>' +
