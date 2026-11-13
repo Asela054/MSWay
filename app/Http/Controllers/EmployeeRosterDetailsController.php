@@ -120,10 +120,16 @@ class EmployeeRosterDetailsController extends Controller
             // Entries with shift_id = null are deletion-only sentinels (all shifts removed).
             $newShiftMap    = []; // emp+date → [shift_ids]  (only real shifts)
             $deletionOnly   = []; // emp+date combos where user cleared all shifts
+            $today = Carbon::today()->toDateString(); 
 
             foreach ($rosterData as $row) {
                 $empId    = $row['emp_id'];
                 $workDate = $row['work_date'];
+
+                // Skip previous dates, they cannot be changed
+                if (Carbon::parse($workDate)->toDateString() < $today) {
+                    continue;
+                }
 
                 if (is_null($row['shift_id'])) {
                     // Sentinel: user removed all shifts for this emp+date

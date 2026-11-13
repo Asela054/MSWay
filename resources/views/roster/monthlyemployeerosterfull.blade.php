@@ -31,6 +31,10 @@
                     </div>
                 </div>
                 <div id="info_msg"></div>
+                <div id="past-roster-notice" class="alert alert-warning py-2 small d-none" role="alert">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    <strong>Note:</strong> Rosters for previous dates cannot be changed.
+                </div>
                 <form id="shiftForm">
                     <!-- <div class="center-block fix-width scroll-inner my-2"> -->
                         <div id="viewroster"></div>
@@ -185,6 +189,7 @@
                             $('#viewroster').html(data);
                             initializeNewSelect2();
                             $('#save-roster').removeClass('d-none');
+                            $('#past-roster-notice').removeClass('d-none');
                         },
                         error: function () {
                             Swal.close();
