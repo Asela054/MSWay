@@ -42,14 +42,14 @@ class LoginController extends Controller
                 'company_address'       => $employeeData->company_address,
             ]);
 
-            
+            // Create a bridge token for standalone PHP scripts
+            $this->createBridgeToken($request, $employeeData->id);
         }
-        // Create a bridge token for standalone PHP scripts
-        $this->createBridgeToken($request, $employeeData->id);
 
         return $user->hasRole('Employee')
             ? redirect('/useraccountsummery')
             : redirect('/home');
+
     }
 
     /**
@@ -118,7 +118,11 @@ class LoginController extends Controller
 
     protected function redirectTo()
     {
-        return Auth::user()->hasRole('Employee') ? '/useraccountsummery' : '/home';
+        $user = Auth::user();
+        if ($user && $user->hasRole('Employee')) {
+            return '/useraccountsummery';
+        }
+        return '/home';
     }
 
     public function __construct()

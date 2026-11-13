@@ -98,7 +98,7 @@ class ShiftTypeController extends Controller
     //    $shifttype->ending_checkout=$request->input('endingcheckout');   
     //    $shifttype->must_checkin=$request->input('mustcheckin');    
     //    $shifttype->must_checkout=$request->input('mustcheckout');    
-    //    $shifttype->color=$request->input('color'); 
+       $shifttype->color=$request->input('color'); 
        $shifttype->save();
 
        
@@ -197,7 +197,7 @@ class ShiftTypeController extends Controller
             'shift_end_time'        =>  $request->shift_end_time,
             // 'must_checkin'        =>  $request->mustcheckin, 
             // 'must_checkout'        =>  $request->mustcheckout,          
-            // 'color'        =>  $request->color  
+            'color'        =>  $request->color,  
             
         );
 
