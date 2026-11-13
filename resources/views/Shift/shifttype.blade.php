@@ -351,7 +351,14 @@ $(document).ready(function(){
             },
             { 
                 data: 'shift_name', 
-                name: 'shift_name'
+                name: 'shift_name',
+                render: function(data, type, row) {
+                    if (type === 'display') {
+                        var color = row.color || '#6c757d';
+                        return '<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background-color:' + color + ';margin-right:6px;vertical-align:middle;border:1px solid rgba(0,0,0,0.15);"></span>' + data;
+                    }
+                    return data;
+                }
             },
             { 
                 data: 'shift_code', 
