@@ -84,7 +84,7 @@ class HomeController extends Controller
 
 
         $today = Carbon::now()->format('Y-m-d');
-        $empcount = DB::table('employees')->where('deleted', 0)->where('is_resigned', 0)->count();
+        $empcount = count($accessibleEmployeeIds);
 
         $yesterdayDate = Carbon::now()->subDay()->format('Y-m-d');
 
@@ -233,36 +233,64 @@ class HomeController extends Controller
         $nextMonthYear = Carbon::now()->addMonth()->year;
 
         // Today's Birthday Count
-        $todayBirthdayCount = DB::table('employees')
-            ->where('deleted', 0)
-            ->where('is_resigned', 0)
-            ->whereMonth('emp_birthday', $currentMonth)
-            ->whereDay('emp_birthday', $currentDay)
-            ->count();
+       $todayBirthdayQuery = DB::table('employees')
+                ->where('deleted', 0)
+                ->where('is_resigned', 0)
+                ->whereMonth('emp_birthday', $currentMonth)
+                ->whereDay('emp_birthday', $currentDay);
+
+            if (!empty($userCompanyIds)) {
+                $todayBirthdayQuery->whereIn('emp_company', $userCompanyIds);
+            }
+            if (!empty($userBranchIds)) {
+                $todayBirthdayQuery->whereIn('emp_location', $userBranchIds);
+            }
+            $todayBirthdayCount = $todayBirthdayQuery->count();
 
         // This Week's Birthday Count
-        $thisweekBirthdayCount = DB::table('employees')
+        $thisweekBirthdayQuery = DB::table('employees')
             ->where('deleted', 0)
             ->where('is_resigned', 0)
             ->whereBetween(DB::raw('DATE_FORMAT(emp_birthday, "%m-%d")'), [
                 Carbon::now()->startOfWeek()->format('m-d'),
                 Carbon::now()->endOfWeek()->format('m-d'),
-            ])
-            ->count();
+            ]);
+
+        if (!empty($userCompanyIds)) {
+            $thisweekBirthdayQuery->whereIn('emp_company', $userCompanyIds);
+        }
+        if (!empty($userBranchIds)) {
+            $thisweekBirthdayQuery->whereIn('emp_location', $userBranchIds);
+        }
+        $thisweekBirthdayCount = $thisweekBirthdayQuery->count();
 
         // This Month's Birthday Count
-        $thismonthBirthdayCount = DB::table('employees')
+       $thismonthBirthdayQuery = DB::table('employees')
             ->where('deleted', 0)
             ->where('is_resigned', 0)
-            ->whereMonth('emp_birthday', $currentMonth)
-            ->count();
+            ->whereMonth('emp_birthday', $currentMonth);
+
+        if (!empty($userCompanyIds)) {
+            $thismonthBirthdayQuery->whereIn('emp_company', $userCompanyIds);
+        }
+        if (!empty($userBranchIds)) {
+            $thismonthBirthdayQuery->whereIn('emp_location', $userBranchIds);
+        }
+        $thismonthBirthdayCount = $thismonthBirthdayQuery->count();
 
         // Next Month's Birthday Count
-        $nextmonthBirthdayCount = DB::table('employees')
-            ->where('deleted', 0)
-            ->where('is_resigned', 0)
-            ->whereMonth('emp_birthday', $nextMonth)
-            ->count();
+        $nextmonthBirthdayQuery = DB::table('employees')
+                ->where('deleted', 0)
+                ->where('is_resigned', 0)
+                ->whereMonth('emp_birthday', $nextMonth);
+
+            if (!empty($userCompanyIds)) {
+                $nextmonthBirthdayQuery->whereIn('emp_company', $userCompanyIds);
+            }
+            if (!empty($userBranchIds)) {
+                $nextmonthBirthdayQuery->whereIn('emp_location', $userBranchIds);
+            }
+            $nextmonthBirthdayCount = $nextmonthBirthdayQuery->count();
 
         $currentMonth = Carbon::now()->month;
         $currentYear = Carbon::now()->year;
@@ -304,8 +332,14 @@ class HomeController extends Controller
             ->select('emp_name_with_initial', 'emp_birthday')
             ->where('is_resigned', 0)
             ->where('deleted', 0)
-            ->whereNotNull('emp_birthday')
-            ->get();
+            ->whereNotNull('emp_birthday');
+            if (!empty($userCompanyIds)) {
+            $employeesbday->whereIn('emp_company', $userCompanyIds);
+        }
+        if (!empty($userBranchIds)) {
+            $employeesbday->whereIn('emp_location', $userBranchIds);
+        }
+        $employeesbday = $employeesbday->get();
 
         $holidays = DB::table('holidays')
             ->select('holiday_name', 'date')
