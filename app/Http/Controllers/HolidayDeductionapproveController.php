@@ -106,7 +106,7 @@ class HolidayDeductionapproveController extends Controller
                 $totalAmount = 0;
                 $deductionamount = 0;
                 $daycount = 0;
-                
+               
                 $emp = DB::table('employees')
                     ->leftJoin('job_categories', 'job_categories.id' , '=', 'employees.job_category_id')
                     ->select('job_categories.id as job_categoryid','job_categories.emp_payroll_workdays as workingdays')
@@ -146,15 +146,14 @@ class HolidayDeductionapproveController extends Controller
                     ->where('job_id', $jobCategoryId)
                     ->where('remuneration_id', $remunerationtype)
                     ->first();
-                
+          
                 if($leavededutionamount){
                     $monthlytotal = $leavededutionamount->amount;
                     $daycount = $leavededutionamount->day_count;
 
                     if ($work_days < $payroll_workingdays) {
 
-                    $shortfall_days = $payroll_workingdays - $work_days;
-
+                     $shortfall_days = round($payroll_workingdays - $work_days, 2);
                          $leavededuction = DB::table('holiday_deductions')
                             ->select('*')
                             ->where('job_id', $jobCategoryId)
@@ -173,12 +172,13 @@ class HolidayDeductionapproveController extends Controller
                                         $deductionamount = $dataleavededuction->amount;
                                         break;
                                     }
-                                    if($dataleavededuction->day_count == $shortfall_days){
+                                    if($dataleavededuction->day_count <= $shortfall_days){
                                         $totalAmount     = $monthlytotal - $dataleavededuction->amount;
                                         $deductionamount = $dataleavededuction->amount;
                                         break;
                                     }
-                                }
+                                }     
+                               
                     }
                 }
                 
