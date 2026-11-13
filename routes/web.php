@@ -1985,6 +1985,13 @@ Route::get('EmpCalendar/destroy/{id}', 'ActivityManagement\EmpCalendarController
 /*-- Emp Calendar----*/
 /*-- Activity Management----*/
 
+
+//Agroventures carder Report
+Route::get('Rptemployeecarder', 'RptEmployeeCarderReportController@index')->name('Rptemployeecarder');
+Route::post('employeecarderreportpdf', 'RptEmployeeCarderReportController@generatePdf');
+Route::post('employeecarderreportexcel', 'RptEmployeeCarderReportController@generateExcel');
+
+
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');
     Artisan::call('config:clear');

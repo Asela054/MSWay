@@ -80,16 +80,16 @@ class OpmaAttendance extends Model
                 continue;
             }
 
-            // ---- NEW: daily_average check from opma_daily_approval_summary ----
+            //daily_average check from opma_daily_approval_summary
             $dailyApproval = DB::table('opma_daily_approval_summary')
                 ->where('emp_id', $emp_id)
                 ->where('date', $s_date)
                 ->first();
 
-            if (!$dailyApproval || $dailyApproval->daily_average <= 50) {
+            if ($dailyApproval && $dailyApproval->daily_target !== null  && $dailyApproval->daily_average !== null && $dailyApproval->daily_average <= 50) {
                 continue;
             }
-            // ---------------------------------------------------------------
+          
 
             $diff = round((strtotime($last_time) - strtotime($first_time)) / 3600, 1);
 
@@ -176,16 +176,15 @@ class OpmaAttendance extends Model
                 continue;
             }
 
-            // ---- NEW: daily_average check from opma_daily_approval_summary ----
+            //daily_average check from opma_daily_approval_summary
             $dailyApproval = DB::table('opma_daily_approval_summary')
                 ->where('emp_id', $emp_id)
                 ->where('date', $s_date)
                 ->first();
-
-            if (!$dailyApproval || $dailyApproval->daily_average <= 70) {
+            if ($dailyApproval && $dailyApproval->daily_target !== null  && $dailyApproval->daily_average !== null && $dailyApproval->daily_average <= 70) {
                 continue;
             }
-            // ---------------------------------------------------------------
+            
 
             $diff = round((strtotime($last_time) - strtotime($first_time)) / 3600, 1);
 
