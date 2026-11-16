@@ -31,6 +31,7 @@ $primaryKey = 'id';
 $columns = array(
 	array( 'db' => '`s`.`id`', 'dt' => 'id', 'field' => 'id' ),
 	array( 'db' => '`s`.`shift_name`', 'dt' => 'shift_name', 'field' => 'shift_name' ),
+	array( 'db' => '`s`.`color`', 'dt' => 'color', 'field' => 'color' ),
 	array( 'db' => '`s`.`shift_code`', 'dt' => 'shift_code', 'field' => 'shift_code' ),
 	array( 'db' => '`s`.`offduty_day`', 'dt' => 'offduty_day', 'field' => 'offduty_day' ),
 	array( 'db' => '`s`.`onduty_time`', 'dt' => 'onduty_time', 'field' => 'onduty_time' ),

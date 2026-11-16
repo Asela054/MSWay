@@ -162,7 +162,11 @@
                                     <div class="col">
                                         <label class="small font-weight-bold text-dark">Shift End Time</label>
                                         <input type="time" name="shift_end_time" id="shift_end_time" class="form-control form-control-sm"/>
-                                    </div>                                
+                                    </div>   
+                                    <div class="col">
+                                        <label class="small font-weight-bold text-dark">Shift Color</label>
+                                        <input type="color" name="color" id="color" class="form-control form-control-sm" required/>
+                                    </div>                             
                                 </div>
                                 {{--<div class="form-row mb-1">
                                     <div class="col">
@@ -204,10 +208,7 @@
                                             </label>
                                         </div>
                                     </div>--}}
-                                    {{-- <div class="col">
-                                        <label class="small font-weight-bold text-dark">Color</label>
-                                        <input type="color" name="color" id="color" class="form-control form-control-sm" required/>
-                                    </div>     --}}
+                                    
                                 </div>
 
                                 <div class="form-row mb-1">
@@ -350,7 +351,14 @@ $(document).ready(function(){
             },
             { 
                 data: 'shift_name', 
-                name: 'shift_name'
+                name: 'shift_name',
+                render: function(data, type, row) {
+                    if (type === 'display') {
+                        var color = row.color || '#6c757d';
+                        return '<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background-color:' + color + ';margin-right:6px;vertical-align:middle;border:1px solid rgba(0,0,0,0.15);"></span>' + data;
+                    }
+                    return data;
+                }
             },
             { 
                 data: 'shift_code', 
@@ -551,7 +559,7 @@ $(document).ready(function(){
                 //     $('#mustcheckout').prop( "checked", false );
                 // }
 
-               // $('#color').val(data.result.color);
+               $('#color').val(data.result.color);
 
                 $('#hidden_id').val(id);
                 $('.modal-title').text('Edit  Work Shift');
