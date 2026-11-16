@@ -2031,7 +2031,7 @@ class EmployeePayslipController extends Controller
 		$pdf = \PDF::loadHTML($css . $html)
           ->setPaper([0, 0, 396.85, 595.28], 'portrait');
 
-		return $pdf->stream('salary-list.pdf');
+		return $pdf->download('salary-list.pdf');
 
     }
 }
