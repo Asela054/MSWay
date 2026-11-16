@@ -93,7 +93,6 @@ class HolidayDeductionapproveController extends Controller
                 ];
 
                 
-                // $absentdaycount = (new \App\Holidaydiductionapproved)->absentdayscounts($empId, $firstDate, $lastDate);
                 $totalDays = DB::table('leaves')
                     ->select(DB::raw('IFNULL(SUM(no_of_days), 0) as total_days'))
                     ->whereBetween('leave_from', [$firstDate, $lastDate])
@@ -106,6 +105,7 @@ class HolidayDeductionapproveController extends Controller
                 $totalAmount = 0;
                 $deductionamount = 0;
                 $daycount = 0;
+                $shortfall_days = 0; 
                
                 $emp = DB::table('employees')
                     ->leftJoin('job_categories', 'job_categories.id' , '=', 'employees.job_category_id')
@@ -124,6 +124,7 @@ class HolidayDeductionapproveController extends Controller
                 $month = Carbon::parse($firstDate)->format('Y-m');
 
                 $work_days = (new \App\Attendance)->get_work_days($empId, $month, $lastDate);
+                $shortfall_days = ($work_days < $payroll_workingdays) ? round($payroll_workingdays - $work_days, 2) : 0;
                 
                 //check holiday deductions approved on given date range
                 $approveholidayductions = DB::table('holiday_deductions_approved')
@@ -151,9 +152,8 @@ class HolidayDeductionapproveController extends Controller
                     $monthlytotal = $leavededutionamount->amount;
                     $daycount = $leavededutionamount->day_count;
 
-                    if ($work_days < $payroll_workingdays) {
+                    if ($shortfall_days > 0) {
 
-                     $shortfall_days = round($payroll_workingdays - $work_days, 2);
                          $leavededuction = DB::table('holiday_deductions')
                             ->select('*')
                             ->where('job_id', $jobCategoryId)
@@ -182,7 +182,7 @@ class HolidayDeductionapproveController extends Controller
                     }
                 }
                 
-                if($totalAmount==0 && $totalDays->total_days==0){
+                if($totalAmount==0 && $shortfall_days==0){
                     $totalAmount = $monthlytotal;
                 }
 
@@ -191,10 +191,12 @@ class HolidayDeductionapproveController extends Controller
                     'empid' => $empId,
                     'emp_name' =>  EmployeeHelper::getDisplayName($employeeObj),
                     'payroll_Profile' => $payrollProfileId,
-                    'absent_Days' => $totalDays->total_days,
+                    'absent_Days' => $shortfall_days,
                     'remuneration_id' => $remunerationtype,
                     'total_amount' => number_format($deductionamount, 2),
-                    'monthly_remain' => number_format($totalAmount, 2)  
+                    'monthly_remain' => number_format($totalAmount, 2),
+                    'payrollworkdays' => $payroll_workingdays,
+                    'workdays' => $work_days,  
                 ];  
             // } 
         }
