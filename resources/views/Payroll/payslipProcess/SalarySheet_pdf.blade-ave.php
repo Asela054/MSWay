@@ -25,6 +25,14 @@
             text-align: center;
             margin-bottom: 8px;
         }
+        .header .logo {
+            text-align: center;
+            margin: 0 0 2px 0;
+        }
+        .header .logo img {
+            width: 55px;
+            height: auto;
+        }
         .header .company {
             font-size: 16px;
             font-weight: bold;
@@ -64,6 +72,12 @@
             margin-top: 4px;
             text-align: right;
         }
+        .slip-page {
+            page-break-after: always;
+        }
+        .slip-page.last {
+            page-break-after: auto;
+        }
     </style>
 </head>
 
@@ -74,6 +88,10 @@
         $fmt = function ($v) {
             return number_format((float)$v, 2, '.', ',');
         };
+        $logoPath = public_path('/public/images/avemarialogo.jpeg');
+        $logoSrc = file_exists($logoPath)
+            ? 'data:image/jpeg;base64,' . base64_encode(file_get_contents($logoPath))
+            : '';
     @endphp
 
     @for ($slipcnt = 0; $slipcnt < count($emp_array); $slipcnt++)
@@ -88,8 +106,8 @@
             @endphp
 
             <div class="header">
-                @if (!empty($row['companylogo']))
-                    <img src="{{ $row['companylogo'] }}" width="60" height="60" alt="">
+                @if (!empty($logoSrc))
+                    <div class="logo"><img src="{{ $logoSrc }}" alt=""></div>
                 @endif
                 <p class="company">{{ $company_name }}</p>
                 <p class="addr">{{ $company_addr }}</p>
