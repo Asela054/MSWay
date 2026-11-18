@@ -32,7 +32,12 @@ class HomeController extends Controller
 
     public function index()
     {
-
+        
+        $user = Auth::user();
+        $permission = $user->can('unauthorized-access-home');
+        if($permission) {
+            return view('homeEmpty');
+        }
        
         $userId = Auth::id();
         $user = DB::table('users')
