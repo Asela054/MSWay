@@ -272,6 +272,9 @@ class EmployeeRosterController extends Controller
             
             return view('roster.employeesrosterview_weekly', compact('months','currentMonth'));
 
+        }else if($appName == 'OpmaHRM'){
+
+            return view('roster.employeesrosterview_opma', compact('months','currentMonth'));
         }else{
 
             return view('roster.employeesrosterview', compact('months','currentMonth'));

@@ -66,6 +66,7 @@
           <li><a class="dropdown-item" id="resignation_report_link" href="{{ route('reportemployeeproduction') }}">Employee Production Report</a></li>
           <li><a class="dropdown-item" id="resignation_report_link" href="{{ route('opma_reportemployeeproduction') }}">Employee Production Report (Opma)</a></li>
           <li><a class="dropdown-item" id="resignation_report_link" href="{{ route('opma_reportemployeeproductiondailyreport') }}">Employee Daily Production Summary Report (Opma)</a></li>
+            <li><a class="dropdown-item" id="resignation_report_link" href="{{ route('reportemployeeshiftmachine') }}">Employee Shift Machine Report (Opma)</a></li>
         </ul>
   </div>
 </div>

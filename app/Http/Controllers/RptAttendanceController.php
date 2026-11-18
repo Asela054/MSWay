@@ -424,6 +424,25 @@ class RptAttendanceController extends Controller
 
                 $employees = $query->get();
 
+                $lateRows = DB::table('employee_late_attendance_minites')
+                    ->whereBetween('attendance_date', [$from_date, $to_date])
+                    ->whereIn('emp_id', $employees->pluck('emp_id')->all())
+                    ->select('emp_id', 'attendance_date', DB::raw('SUM(minites_count) as total_minites'))
+                    ->groupBy('emp_id', 'attendance_date')
+                    ->get();
+
+                $lateMap = [];
+                foreach ($lateRows as $row) {
+                    $lateMap[$row->emp_id . '|' . $row->attendance_date] = (int) $row->total_minites;
+                }
+
+                $formatLate = function ($minutes) {
+                    $minutes = (int) $minutes;
+                    if ($minutes <= 0) {
+                        return '-';
+                    }
+                    return sprintf('%02d:%02d', floor($minutes / 60), $minutes % 60);
+                };
            
 
             foreach ($employees as $record) {
@@ -460,6 +479,9 @@ class RptAttendanceController extends Controller
                         if ($record->b_location == null) {
                             $record->b_location = '-';
                         }
+
+                       $late_minutes = isset($lateMap[$record->emp_id . '|' . $f_date]) ? $lateMap[$record->emp_id . '|' . $f_date] : 0;
+                       $late_hours = $formatLate($late_minutes);
 
                     if (!empty($attendances)) {
                         $to = \Carbon\Carbon::parse($attendances[0]->lasttimestamp);
@@ -502,6 +524,7 @@ class RptAttendanceController extends Controller
                         $objattendance->location = $record->b_location;
                         $objattendance->day_type = $day_type;
                         $objattendance->title = $record->designation;
+                        $objattendance->late_hours = $late_hours;
 
                         array_push($atte_arr, $objattendance);
                     } else {
@@ -520,6 +543,7 @@ class RptAttendanceController extends Controller
                         $objattendance->location = $record->b_location;
                         $objattendance->day_type = $day_type;
                         $objattendance->title = $record->designation;
+                        $objattendance->late_hours = $late_hours;
 
                         array_push($atte_arr, $objattendance);
                         $not_att_count++;
