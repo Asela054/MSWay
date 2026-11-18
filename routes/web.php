@@ -1991,6 +1991,8 @@ Route::get('Rptemployeecarder', 'RptEmployeeCarderReportController@index')->name
 Route::post('employeecarderreportpdf', 'RptEmployeeCarderReportController@generatePdf');
 Route::post('employeecarderreportexcel', 'RptEmployeeCarderReportController@generateExcel');
 
+// opma Production reports
+Route::get('/reportemployeeshiftmachine' ,'Production_Module_Opma\RptOpmaProductionController@index')->name('reportemployeeshiftmachine');
 
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');
