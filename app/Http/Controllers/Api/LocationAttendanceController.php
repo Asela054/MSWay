@@ -61,9 +61,7 @@ class LocationAttendanceController extends Controller
 
     public function GetShiftType(Request $request)
     {
-        $q = "
-        SELECT * FROM `shift_types` 
-        ";
+        $q = " SELECT * FROM `shift_types` WHERE `deleted` = 0";
 
         $data = DB::select($q);
 

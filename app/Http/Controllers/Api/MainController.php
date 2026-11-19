@@ -219,6 +219,22 @@ class MainController extends Controller
             return response()->json(['found' => false]);
         }
 
+        $jobCategory = DB::table('employees')
+            ->leftJoin('job_categories', 'employees.job_category_id', '=', 'job_categories.id')
+            ->where('employees.emp_id', $empId)
+            ->select(
+                'job_categories.is_sat_ot_type_as_act',
+                'job_categories.is_sun_ot_type_as_act'
+            )
+            ->first();
+        $otTypes = array(
+                'is_sat_ot_type_as_act' => ($jobCategory && $jobCategory->is_sat_ot_type_as_act !== null)
+                    ? (int) $jobCategory->is_sat_ot_type_as_act : null,
+                'is_sun_ot_type_as_act' => ($jobCategory && $jobCategory->is_sun_ot_type_as_act !== null)
+                    ? (int) $jobCategory->is_sun_ot_type_as_act : null,
+            );
+
+
         $leave = DB::table('leaves')
             ->select('leave_approv_person', 'leave_approv_person_2')
             ->where('emp_id', $empId)
@@ -230,10 +246,10 @@ class MainController extends Controller
             return (new BaseController)->sendResponse($data, 'Report Persons Loaded');
         }
 
-        $data = array(
+       $data = array_merge(array(
             'leave_approv_person'   => (int) $leave->leave_approv_person,
             'leave_approv_person_2' => (int) $leave->leave_approv_person_2,
-        );
+        ), $otTypes);
          return (new BaseController)->sendResponse($data, 'Leave Approvers Found');
     }
 

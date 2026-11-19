@@ -145,13 +145,6 @@ Route::post('v1/Getdepartmentlist', ['uses' => '\App\Http\Controllers\Api\APIEmp
 
 Route::get('/attendancesyncAPI_agro', ['uses' => '\App\Http\Controllers\AttendanceSyncAPIController_Agro@index', 'as' => 'attendancesyncAPI_agro']);
 
-
-// Opma production API
-Route::get('GetEmployees', ['uses' => '\App\Http\Controllers\Api\Opma_production\CommenrecordController@Getemployees', 'as' => 'GetEmployees']);
-Route::get('GetCompanyList', ['uses' => '\App\Http\Controllers\Api\Opma_production\CommenrecordController@Getcompanylist', 'as' => 'GetCompanyList']);
-Route::post('GetDepartmentList', ['uses' => '\App\Http\Controllers\Api\Opma_production\CommenrecordController@Getdepartmentlist', 'as' => 'GetDepartmentList']);
-Route::post('ApproveDailySummary', ['uses' => '\App\Http\Controllers\Api\Opma_production\OpmaDailyProductionController@approvedailysummary', 'as' => 'ApproveDailySummary']);
-
 // Salary Advance API
 Route::post('v1/get_available_amount', ['uses' => '\App\Http\Controllers\Api\APISalaryAdvanceController@getAvailableAmount', 'as' => 'get_available_amount']);
 Route::post('v1/salary_advance_create', ['uses' => '\App\Http\Controllers\Api\APISalaryAdvanceController@salary_advance_create', 'as' => 'salary_advance_create']);
@@ -187,6 +180,16 @@ Route::post('GetIOURequest', ['uses' => '\App\Http\Controllers\Api\ActivityManag
 Route::post('UpdateIOURequest', ['uses' => '\App\Http\Controllers\Api\ActivityManagement\IOUAPIController@UpdateIOURequest', 'as' => 'UpdateIOURequest']);
 Route::post('DeleteIOURequest', ['uses' => '\App\Http\Controllers\Api\ActivityManagement\IOUAPIController@DeleteIOURequest', 'as' => 'DeleteIOURequest']);
 Route::get('getAllReasons', ['uses' => '\App\Http\Controllers\Api\ActivityManagement\IOUAPIController@getAllReasons', 'as' => 'getAllReasons']);
+
+
+// Opma production API
+Route::get('GetEmployees', ['uses' => '\App\Http\Controllers\Api\Opma_production\CommenrecordController@Getemployees', 'as' => 'GetEmployees']);
+Route::get('GetCompanyList', ['uses' => '\App\Http\Controllers\Api\Opma_production\CommenrecordController@Getcompanylist', 'as' => 'GetCompanyList']);
+Route::post('GetDepartmentList', ['uses' => '\App\Http\Controllers\Api\Opma_production\CommenrecordController@Getdepartmentlist', 'as' => 'GetDepartmentList']);
+Route::post('ApproveDailySummary', ['uses' => '\App\Http\Controllers\Api\Opma_production\OpmaDailyProductionController@approvedailysummary', 'as' => 'ApproveDailySummary']);
+Route::post('Productionfinish', ['uses' => '\App\Http\Controllers\Api\Opma_production\OpmaDailyProductionController@Productionfinish', 'as' => 'Productionfinish']);
+
+
 
 Route::get('/download-pdf/{pdfId}', function($pdfId) {
     $pdfData = session()->get($pdfId);
