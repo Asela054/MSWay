@@ -42,6 +42,7 @@
       <li><a class="dropdown-item" href="{{ url('SalaryReconciliation') }}" id="salaryreconslationreport">Salary Reconciliation</a></li>
       <li><a class="dropdown-item" href="{{ url('salaryAdvanceReport') }}" id="salaryadvancereport">Salary Advance Report</a></li>
       <li><a class="dropdown-item" href="{{ url('salaryIncentiveReport') }}" id="salaryincentivereport">Salary Incentive Report</a></li>
+      <li><a class="dropdown-item" href="{{ route('GratuityProvision')}}" id="gratuityprovision_link">Gratuity Provision</a></li>
     </ul>
   </div>
   <div class="dropdown">
