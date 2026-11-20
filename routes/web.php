@@ -1674,6 +1674,9 @@ Route::post('/employeetimesheetgenerate' ,'EmployeetimesheetContrller@generatere
 Route::get('SalaryReconciliation',['uses' => 'LocationPayrollReport@reportSalaryReconciliation', 'as' => 'SalaryReconciliation']);
 Route::post('/checkPaySummary', 'LocationPayrollReport@checkPaySummary');
 
+Route::get('GratuityProvision',['uses' => 'LocationPayrollReport@reportGratuityProvision', 'as' => 'GratuityProvision']);
+Route::post('/checkEmpGratuity', 'LocationPayrollReport@checkEmpGratuity');
+
 // RPT Clearance Report Controller routes
 Route::get('/clearanceReport', 'RptClearanceController@clearanceReport')->name('clearanceReport'); 
 Route::get('/clearance_report_list', 'RptClearanceController@clearance_report_list')->name('clearance_report_list');
@@ -1993,6 +1996,7 @@ Route::post('employeecarderreportexcel', 'RptEmployeeCarderReportController@gene
 
 // opma Production reports
 Route::get('/reportemployeeshiftmachine' ,'Production_Module_Opma\RptOpmaProductionController@index')->name('reportemployeeshiftmachine');
+
 
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');
