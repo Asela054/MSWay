@@ -192,8 +192,8 @@ class LocationPayrollReport extends Controller
 	
 	public function reportGratuityProvision()
     {
-		$branch=DB::select("select id, name as location from areas");// Branch::orderBy('id', 'asc')->get();
-		$department=DB::select("select id, area_id as company_id, location as name from branches");//DB::select("select id, company_id, name from departments");
+		$branch=Branch::orderBy('id', 'asc')->get();
+		$department=DB::select("select id, company_id, name from departments");
 		$payroll_process_type=PayrollProcessType::orderBy('id', 'asc')->get();
 		$payment_period=array();//PaymentPeriod::orderBy('id', 'desc')->get();
 		$rpt_title='Gratuity Provision';

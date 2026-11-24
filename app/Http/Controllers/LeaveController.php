@@ -61,7 +61,13 @@ class LeaveController extends Controller
                         ->distinct()
                         ->get();
 
-           return view('Leave.leaveapply', compact('leavetype', 'employees','leaveemployees'));   
+        $appName = config('app.name');
+        if($appName == 'OpmaHRM'){
+             return view('Leave.leaveapply_opma', compact('leavetype', 'employees','leaveemployees')); 
+        }else{
+             return view('Leave.leaveapply', compact('leavetype', 'employees','leaveemployees')); 
+        }
+          
     }
 
     public function leave_list_dt(Request $request)
@@ -154,9 +160,12 @@ class LeaveController extends Controller
         $appName = config('app.name');
         if($appName == 'pmmgroup'){
               return view('Leave.leaveapprovel_pmm');
+        }elseif($appName == 'OpmaHRM'){
+              return view('Leave.leaveapprovel_opma');
         }else{
             return view('Leave.leaveapprovel');
         }
+      
       
 
     }
@@ -546,6 +555,18 @@ class LeaveController extends Controller
 
         $appName = config('app.name');
         if($appName == 'OpmaHRM'){
+             $sequenceApprovers = array();
+
+           // save leave approval sequence
+            try {
+                 $sequenceApprovers = $this->saveLeaveApprovalSequence($leave->id, $request->input('approvers_data'),false);
+            } catch (\Exception $e) {
+                \Log::error('Leave approval sequence save failed', array(
+                    'leave_id' => $leave->id,
+                    'message'  => $e->getMessage()
+                ));
+            }
+
              $dates = array_values(array_unique(array(
                 $request->input('fromdate'),
                 $request->input('todate')
@@ -554,9 +575,27 @@ class LeaveController extends Controller
             try {
                 if ($employeeDept == 4) {
 
-                     $this->sendAdminlevel_sms($request->input('employee'), $dates);
+                    $this->sendAdminlevel_sms($request->input('employee'), $dates);
                 } else {
-                    $this->sendApproverSms($request->input('approveby'), $request->input('employee'), $dates);
+
+                    $smsRecipients = array_merge(
+                        array($request->input('approveby')),
+                        $sequenceApprovers
+                    );
+                    $smsRecipients = array_values(array_unique(array_filter(array_map('strval', $smsRecipients))));
+
+                    // Eka eka kenekta wenama try/catch, ekak fail unath anith ayata yanna
+                    foreach ($smsRecipients as $approverId) {
+                        try {
+                            $this->sendApproverSms($approverId, $request->input('employee'), $dates);
+                        } catch (\Exception $e) {
+                            \Log::error('Leave apply SMS failed', array(
+                                'emp_id'      => $request->input('employee'),
+                                'approver_id' => $approverId,
+                                'message'     => $e->getMessage()
+                            ));
+                        }
+                    }
                 }
             } catch (\Exception $e) {
                 \Log::error('Leave apply SMS failed', array(
@@ -567,6 +606,97 @@ class LeaveController extends Controller
         }
         return response()->json(['success' => 'Leave Details Successfully Insert']);
 
+    }
+
+
+      private function saveLeaveApprovalSequence($leaveId, $approversJson,$replaceExisting = false)
+    {
+        if (empty($approversJson)) {
+            return array();
+        }
+
+        $approvers = json_decode($approversJson, true);
+        if (!is_array($approvers) || empty($approvers)) {
+            return array();
+        }
+
+        // Check 1: emp_id nathi ewa ain karanawa
+        $empIds = array();
+        foreach ($approvers as $a) {
+            if (is_array($a) && !empty($a['emp_id'])) {
+                $empIds[] = (string) $a['emp_id'];
+            }
+        }
+        if (empty($empIds)) {
+            return array();
+        }
+
+        // Check 2: employees table eke thiyena emp_ids withrai (yawapu data tamper wenawanam ain wenawa)
+        $validEmpIds = array_map('strval', DB::table('employees')
+            ->whereIn('emp_id', $empIds)
+            ->pluck('emp_id')
+            ->toArray());
+
+        $now    = \Carbon\Carbon::now();
+        $userId = Auth::id();
+        $rows   = array();
+        $savedEmpIds = array();
+        $position = 0;
+
+        foreach ($approvers as $a) {
+            $position++;
+
+            if (!is_array($a) || empty($a['emp_id'])) {
+                continue;
+            }
+            if (!in_array((string) $a['emp_id'], $validEmpIds, true)) {
+                continue;
+            }
+
+            $rows[] = array(
+                'leave_id'        => $leaveId,
+                'approver_emp_id' => $a['emp_id'],
+                // approval_level nathnam array eke position eka
+                'approval_level'  => (isset($a['approval_level']) && $a['approval_level'] !== null)
+                                        ? (int) $a['approval_level']
+                                        : $position,
+                'approval_status' => 'Pending',
+                'user_id'         => $userId,
+                'created_at'      => $now,
+                'updated_at'      => $now,
+            );
+            $savedEmpIds[] = (string) $a['emp_id'];
+        }
+         if (!empty($rows)) {
+
+            $distinctLevels = array_values(array_unique(array_column($rows, 'approval_level')));
+            sort($distinctLevels);
+            $stepByLevel = array_flip($distinctLevels);
+
+            foreach ($rows as $i => $r) {
+                $rows[$i]['approval_level'] = $stepByLevel[$r['approval_level']] + 1;
+            }
+
+             DB::transaction(function () use ($rows, $leaveId, $distinctLevels, $replaceExisting) {
+
+                if ($replaceExisting) {
+                    DB::table('leave_approval_sequence')
+                        ->where('leave_id', $leaveId)
+                        ->delete();
+                }
+
+                DB::table('leave_approval_sequence')->insert($rows);
+
+                DB::table('leaves')
+                    ->where('id', $leaveId)
+                    ->update(array(
+                        'approve_level' => 1,
+                        'approve_total' => count($distinctLevels),
+                    ));
+            });
+        }
+
+        return $savedEmpIds;
     }
 
     /**
@@ -586,19 +716,39 @@ class LeaveController extends Controller
      * @param \App\Leave $leave
      * @return \Illuminate\Http\Response
      */
+
     public function edit($id)
     {
-         $permission = Auth::user()->can('leave-edit');
+        $permission = Auth::user()->can('leave-edit');
         if (!$permission) {
             return response()->json(['error' => 'UnAuthorized'], 401);
         }
         if (request()->ajax()) {
+            $isOpma = config('app.name') === 'OpmaHRM';
+
             $data = Leave::with('employee')
                 ->with('covering_employee')
                 ->with('approve_by')
                 ->with('approve2_by')
                 ->findOrFail($id);
-            return response()->json(['result' => $data]);
+
+            $response = ['result' => $data];
+
+            if ($isOpma) {
+                $response['approvers'] = DB::table('leave_approval_sequence as las')
+                    ->leftJoin('employees as e', 'e.emp_id', '=', 'las.approver_emp_id')
+                    ->where('las.leave_id', $data->id)
+                    ->orderBy('las.approval_level')
+                    ->select(
+                        'las.approval_level',
+                        'las.approver_emp_id as emp_id',
+                        'las.approval_status',
+                        'e.emp_name_with_initial'
+                    )
+                    ->get();
+            }
+
+            return response()->json($response);
         }
     }
 
@@ -611,16 +761,16 @@ class LeaveController extends Controller
      */
     public function update(Request $request, Leave $leave)
     {
-         $permission = Auth::user()->can('leave-edit');
+        $permission = Auth::user()->can('leave-edit');
         if (!$permission) {
             return response()->json(['error' => 'UnAuthorized'], 401);
         }
         $rules = array(
             'hidden_id' => 'required',
             'leavetype' => 'required',
-            'fromdate' => 'required',
-            'todate' => 'required',
-            'reson' => 'required',
+            'fromdate'  => 'required',
+            'todate'    => 'required',
+            'reson'     => 'required',
         );
 
         $error = Validator::make($request->all(), $rules);
@@ -636,22 +786,38 @@ class LeaveController extends Controller
 
         $no_of_days = $request->no_of_days;
 
-        $form_data = array(
-            'leave_type' => $request->leavetype,
-            'leave_from' => $request->fromdate,
-            'leave_to' => $request->todate,
-            'no_of_days' => $no_of_days,
-            'half_short' => $half_short,
-            'reson' => $request->reson,
-            'emp_covering' => $request->coveringemployee,
-            'leave_approv_person' => $request->approveby,
-            'leave_approv_person_2' => $request->approveby2,
-            'leave_category' => $request->leavecat,
-            'status' => 'Pending'
+        $appName = config('app.name');
+        $isOpma  = ($appName == 'OpmaHRM');
 
+        $form_data = array(
+            'leave_type'     => $request->leavetype,
+            'leave_from'     => $request->fromdate,
+            'leave_to'       => $request->todate,
+            'no_of_days'     => $no_of_days,
+            'half_short'     => $half_short,
+            'reson'          => $request->reson,
+            'emp_covering'   => $request->coveringemployee,
+            'leave_category' => $request->leavecat,
+            'status'         => 'Pending'
         );
 
+        if ($isOpma) {
+            $form_data['leave_approv_person']   = $request->approveby;
+            $form_data['leave_approv_person_2'] = $request->approveby2;
+        }
+
         Leave::whereId($request->hidden_id)->update($form_data);
+
+        if ($isOpma) {
+            try {
+                $this->saveLeaveApprovalSequence($request->hidden_id, $request->input('approvers_data'), true);
+            } catch (\Exception $e) {
+                \Log::error('Leave approval sequence update failed', array(
+                    'leave_id' => $request->hidden_id,
+                    'message'  => $e->getMessage()
+                ));
+            }
+        }
 
         return response()->json(['success' => 'Leave Details Successfully Updated']);
     }
@@ -667,6 +833,10 @@ class LeaveController extends Controller
 
         if (!$leave) {
             return response()->json(['error' => 'Leave record not found'], 404);
+        }
+
+        if (config('app.name') == 'OpmaHRM') {
+            return $this->approveBySequence($request, $leave);
         }
 
         $user = Auth::user();
@@ -765,6 +935,135 @@ class LeaveController extends Controller
         }
         return response()->json($response);
     }
+
+
+     private function approveBySequence(Request $request, $leave)
+    {
+        $user    = Auth::user();
+        $empId   = $user->emp_id;
+        $isAdmin = $user->hasRole('Admin');
+
+        $rules = array(
+            'status' => 'required',
+            'emp_id' => 'required'
+        );
+
+        $error = Validator::make($request->all(), $rules);
+        if ($error->fails()) {
+            return response()->json(['errors' => $error->errors()->all()]);
+        }
+
+        $status = $request->status;
+        $total  = (int) $leave->approve_total;
+        $step   = (int) $leave->approve_level;
+
+        if ($leave->status == 'Rejected') {
+            return response()->json(['errors' => 'Leave is already rejected']);
+        }
+
+        // Dan inna step eke approvers
+        $stepRows = DB::table('leave_approval_sequence')
+            ->where('leave_id', $leave->id)
+            ->where('approval_level', $step)
+            ->get();
+
+        $myRow = null;
+        foreach ($stepRows as $r) {
+            if ((string) $r->approver_emp_id === (string) $empId) {
+                $myRow = $r;
+                break;
+            }
+        }
+
+        // Dan inna step eke approver kenek, nathnam Admin kenek withrai
+        if (!$myRow && !$isAdmin) {
+            return response()->json(['errors' => 'UnAuthorized. Only the approver of the current level or admin can approve this leave.'], 401);
+        }
+
+        $now     = Carbon::now()->toDateTimeString();
+        $isFinal = ($status == 'Approved' && $step >= $total);
+
+        // leaves table eke update wena data
+        $form_data = array();
+
+        if ($status == 'Rejected') {
+            $form_data['status']  = 'Rejected';
+            $form_data['comment'] = $request->comment;
+            $form_data['approve_level'] = $step;
+        } else {
+            $form_data['approve_level'] = $step + 1;
+
+            if ($step == 1) {
+                $form_data['approve_01']      = 1;
+                $form_data['approve_01_time'] = $now;
+                $form_data['approve_01_by']   = Auth::id();
+            }
+            if ($step == 2) {
+                $form_data['approve_02']      = 1;
+                $form_data['approve_02_time'] = $now;
+                $form_data['approve_02_by']   = Auth::id();
+            }
+
+            if ($isFinal) {
+                $form_data['status']          = 'Approved';
+                $form_data['comment']         = $request->comment;
+            }
+        }
+
+        DB::transaction(function () use ($leave, $form_data, $status, $step, $myRow, $now) {
+            DB::table('leaves')->whereId($leave->id)->update($form_data);
+
+            // Sequence eke e step eke row eka update karanawa
+            $seqQuery = DB::table('leave_approval_sequence')
+                ->where('leave_id', $leave->id)
+                ->where('approval_level', $step);
+
+            // Approver kenek nam eyage row eka withrai, Admin (sequence eke naththa kenek) nam e step eke okkoma rows
+            if ($myRow) {
+                $seqQuery->where('id', $myRow->id);
+            }
+
+            $seqQuery->update(array(
+                'approval_status' => $status,
+                'user_id'     => Auth::id(),
+                'updated_at'      => $now,
+            ));
+
+            if ($status == 'Rejected') {
+                DB::table('leave_details')
+                    ->where('emp_id', $leave->emp_id)
+                    ->where('leave_type', $leave->leave_type)
+                    ->increment('total_leave', $leave->no_of_days);
+            }
+        });
+
+        if ($status == 'Rejected') {
+            $response = array('success' => 'Leave Rejected');
+        } elseif ($isFinal) {
+            $response = array('success' => 'Leave Approved');
+        } else {
+            $response = array('success' => 'Level ' . $step . ' of ' . $total . ' Approved');
+        }
+
+        // Final approve ekedi hari, reject ekedi hari withrai employee ta SMS / mail
+        if ($status == 'Rejected' || $isFinal) {
+            $finalStatus = ($status == 'Rejected') ? 'Rejected' : 'Approved';
+
+            $smsResult = $this->sendLeaveStatusSms($leave->fresh(), $finalStatus);
+            if (is_array($smsResult) && empty($smsResult['success'])) {
+                $response['sms_warning'] = 'SMS not sent: ' . (isset($smsResult['message']) ? $smsResult['message'] : '');
+            }
+
+            $response['mail'] = $this->buildLeaveMailData(
+                $leave->fresh(),
+                $finalStatus,
+                $request->comment
+            );
+        }
+
+        return response()->json($response);
+    }
+
 
     /**
      * Remove the specified resource from storage.
@@ -1165,7 +1464,7 @@ class LeaveController extends Controller
         );
     }
 
-      public function getLastLeaveApprovers(Request $request)
+   public function getLastLeaveApprovers(Request $request)
     {
         $empId = $request->input('emp_id');
 
@@ -1173,6 +1472,133 @@ class LeaveController extends Controller
             return response()->json(['found' => false]);
         }
 
+        $appName = config('app.name');
+
+        if ($appName != 'OpmaHRM') {
+            return $this->getFallbackLeaveApprovers($empId);
+        }
+
+
+        // Step 1: employee ge basic values
+        $employee = DB::table('employees')
+            ->select('id', 'emp_id', 'emp_department', 'emp_job_code')
+            ->where('emp_id', $empId)
+            ->first();
+
+        if (!$employee) {
+            return response()->json(['found' => false]);
+        }
+
+        // Step 2a: employee ge approval level eka (department + title match)
+        $myLevelRow = DB::table('leave_approval_hierarchy')
+            ->select('approval_level')
+            ->where('department_id', $employee->emp_department)
+            ->where('title_id', $employee->emp_job_code)
+            ->first();
+
+        // Employee hierarchy eke naha nam $myLevel = null (department eke okkoma levels ganna)
+        $myLevel = $myLevelRow ? (int) $myLevelRow->approval_level : null;
+
+        // Step 2b: title ids (ascending level order)
+        $approverQuery = DB::table('leave_approval_hierarchy')
+            ->select('title_id', 'approval_level')
+            ->where('department_id', $employee->emp_department);
+
+        // Employee hierarchy eke inna nam withrai wadi levels walata filter karanne
+        if ($myLevel !== null) {
+            $approverQuery->where('approval_level', '>', $myLevel);
+        }
+
+        $approverRows = $approverQuery
+            ->orderBy('approval_level', 'asc')
+            ->get();
+        
+
+        $levelByTitle = array();
+        $titleIds = array();
+        foreach ($approverRows as $row) {
+            $levelByTitle[$row->title_id] = (int) $row->approval_level;
+            $titleIds[] = $row->title_id;
+        }
+
+        $titleIdStrings = array_map('strval', $titleIds);
+
+        // Step 3: eka department eke, ekata adala title thiyena employees
+        $candidates = DB::table('employees')
+            ->select(
+                'id',
+                'emp_id',
+                'emp_name_with_initial',
+                'calling_name',
+                'emp_mobile',
+                'emp_department',
+                'emp_job_code'
+            )
+            ->where('emp_id', '!=', $employee->emp_id)
+            //->where('emp_department', '=', $employee->emp_department)
+            ->whereIn('emp_job_code', $titleIdStrings)
+            ->groupBy('emp_job_code')
+            ->get();
+
+        $byTitle = array();
+            foreach ($candidates as $c) {
+                $byTitle[$c->emp_job_code][] = $c;
+            }
+
+            $approverEmployees = array();
+            foreach ($byTitle as $titleKey => $list) {
+                $sameDept = array();
+                foreach ($list as $c) {
+                    if ((string) $c->emp_department === (string) $employee->emp_department) {
+                        $sameDept[] = $c;
+                    }
+                }
+                $chosen = !empty($sameDept) ? $sameDept : $list;
+                foreach ($chosen as $c) {
+                    $approverEmployees[] = $c;
+                }
+            }
+
+        // Approval level eka ekathu karala sort karanawa
+        $approvers = array();
+        foreach ($approverEmployees as $emp) {
+            $emp->approval_level = isset($levelByTitle[$emp->emp_job_code])
+                ? $levelByTitle[$emp->emp_job_code]
+                : null;
+            $approvers[] = $emp;
+        }
+
+
+        usort($approvers, function ($a, $b) {
+            if ($a->approval_level == $b->approval_level) {
+                return $a->id - $b->id;
+            }
+            return $a->approval_level - $b->approval_level;
+        });
+
+        $approver1 = isset($approvers[0]) ? $approvers[0]->emp_id : '';
+        $approver2 = isset($approvers[1]) ? $approvers[1]->emp_id : '';
+        $approver3 = isset($approvers[2]) ? $approvers[2]->emp_id : '';
+        $approver4 = isset($approvers[3]) ? $approvers[3]->emp_id : '';
+
+        return response()->json([
+            'found'                 => true,
+            'leave_approv_person'   => $approver1,
+            'leave_approv_person_2' => $approver2,
+            'leave_approv_person_3' => $approver3,
+            'leave_approv_person_4' => $approver4,
+            'my_level'              => $myLevel,
+            'approvers'             => $approvers,
+        ]);
+    }
+
+    /**
+     * Kalin hadapu widiyata approvers hoyana logic eka:
+     * 1) employee ge last leave eke approvers
+     * 2) leave nathnam report persons
+     */
+    private function getFallbackLeaveApprovers($empId)
+    {
         $leave = DB::table('leaves')
             ->select('leave_approv_person', 'leave_approv_person_2')
             ->where('emp_id', $empId)
@@ -1181,6 +1607,7 @@ class LeaveController extends Controller
 
         if (!$leave) {
             $data = $this->getReportPersonApprovers($empId);
+
             if ($data['leave_approv_person'] === '' && $data['leave_approv_person_2'] === '') {
                 return response()->json(['found' => false]);
             }
