@@ -24,6 +24,8 @@
         
         <a role="button" class="btn navbtncolor" href="{{ route('rosterapproveView') }}" id="monthlyshifts_approve_view">Month Rooster Approve <span class="caret"></span></a>
 
+        <a role="button" class="btn navbtncolor" href="{{ route('avemaria_rosterattendacechange') }}" id="monthlyshifts_change_view">Rooster Change <span class="caret"></span></a>
+
        
       </div>
 

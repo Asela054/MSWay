@@ -1998,6 +1998,13 @@ Route::post('employeecarderreportexcel', 'RptEmployeeCarderReportController@gene
 Route::get('/reportemployeeshiftmachine' ,'Production_Module_Opma\RptOpmaProductionController@index')->name('reportemployeeshiftmachine');
 
 
+// Avemaria roster attendace transfer  controller routes
+Route::get('/avemaria_rosterattendacechange' ,'Avemaria\RosterAttendanceTransferController@index')->name('avemaria_rosterattendacechange');
+Route::get('roster_attendance_transfer/{id}/edit', 'Avemaria\RosterAttendanceTransferController@edit');
+Route::post('roster_attendance_transfer/update', 'Avemaria\RosterAttendanceTransferController@update')->name('rosterAttendanceTransfer.update');
+Route::get('roster_attendance_transfer/fetch', 'Avemaria\RosterAttendanceTransferController@fetch')->name('rosterAttendanceTransfer.fetch');
+Route::post('roster_attendance_transfer/store', 'Avemaria\RosterAttendanceTransferController@store')->name('rosterAttendanceTransfer.store');
+
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');
     Artisan::call('config:clear');

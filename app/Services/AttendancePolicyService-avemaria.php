@@ -500,7 +500,7 @@ class AttendancePolicyService
     }
 
 
-    private function checkAndInsertLateAttendance($empId, $date, $firstCheckin, $attendanceId)
+    public function checkAndInsertLateAttendance($empId, $date, $firstCheckin, $attendanceId)
     {
 
    
