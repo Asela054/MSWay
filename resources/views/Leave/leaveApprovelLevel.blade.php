@@ -184,6 +184,9 @@ $(document).ready(function () {
             data: { department_id: deptId },
             dataType: 'json',
             success: function (data) {
+                if (data.company_id && data.company_name) {
+                    $company.append(new Option(data.company_name, data.company_id, true, true)).trigger('change');
+                }
                 $('#emplistbody').empty();
                 rowIndex = 0;
 
@@ -389,6 +392,7 @@ $(document).ready(function () {
 
         // Reset department select2
         $department.val(null).trigger('change');
+        $company.val(null).trigger('change');
     }
 
     // Edit button — load existing rows for that department
@@ -419,6 +423,10 @@ $(document).ready(function () {
                 var deptName = $('button.edit[data-dept="' + deptId + '"]')
                                    .closest('tr')
                                    .find('td:eq(1)').text().trim();
+
+                if (data.company_id && data.company_name) {
+                    $company.append(new Option(data.company_name, data.company_id, true, true)).trigger('change');
+                }
 
                 if (deptId && deptName) {
                     var deptOption = new Option(deptName, deptId, true, true);
