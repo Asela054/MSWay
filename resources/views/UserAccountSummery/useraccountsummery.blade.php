@@ -1,6 +1,17 @@
 @extends('layouts.app')
 
 @section('content')
+<style>
+@media (max-width: 991.98px) {
+    /* tabs: one swipeable row instead of wrapping */
+    /* tighter padding inside tab panes */
+    .tab-pane .card-body { padding:.5rem; }
+    /* full-width action buttons */
+    #create_record, #create_record_advance { float:none !important; width:100%; margin-bottom:.5rem; }
+    #ts_search_btn, #ts_export_pdf_btn { flex:1 1 0; }
+    .dataTables_wrapper .dt-buttons { display:flex; flex-wrap:wrap; gap:4px; }
+}
+</style>
 @php $myDepartment = $employee->emp_department ?? null; @endphp
 <main>
     <!-- <div class="page-header shadow">
@@ -26,7 +37,7 @@
         </div>
     </div> -->
 
-    <div class="container-fluid mt-4">
+    <div class="container-fluid px-2 px-md-3 mt-3 mt-md-4">
         <div class="row">
             <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
                 @php
@@ -43,7 +54,7 @@
                 }
                 @endphp
                 <div class="row">
-                    <div class="col-sm-12 col-md-6 col-lg-3 col-xl-3">
+                    <div class="col-12 col-lg-3">
                         <div class="card-profile">
                             <div class="image">
                                 <img src="{{ $imagePath }}"  id="profileImagePreview" alt="" class="profile-image">
@@ -78,8 +89,12 @@
                                 </span>
                             </div>
                             <div class="row">
-                                <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12 mt-3 small">
-                                    <h6 class="font-weight-bold">Basic Information</h6>
+                                <div class="col-12 mt-3 small">
+                                    <button type="button" class="btn btn-light btn-sm btn-block text-left d-lg-none" data-toggle="collapse" data-target="#basicInfoCollapse" aria-expanded="false" aria-controls="basicInfoCollapse">
+                                        <i class="fas fa-user-circle mr-2"></i>Basic Information <i class="fas fa-chevron-down float-right mt-1"></i>
+                                    </button>
+                                    <h6 class="font-weight-bold d-none d-lg-block">Basic Information</h6>
+                                    <div id="basicInfoCollapse" class="collapse d-lg-block">
                                     <div class="phone-display mt-2">
                                         <div class="phone-icon">
                                             <i class="fas fa-file"></i>
@@ -160,29 +175,42 @@
                                             <span class="phone-label">Department</span>
                                             <span class="phone-number">{{$employee->departmentname}}</span>
                                         </div>
-                                    </div>                                        
+                                    </div>
+                                    </div><!-- /#basicInfoCollapse -->                                        
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-sm-12 col-md-6 col-lg-9 col-xl-9">
-                        <div class="card mt-sm-0 mt-4">
+                    <div class="col-12 col-lg-9">
+                        <div class="card mt-3 mt-lg-0">
                             <div class="card-body">
                                 <div class="tabbed-about-us tabbed-about-us-v2">
                                     <div class="row">
                                         <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
-                                                <!-- ========== NAV TABS ========== -->
-                                            <ul class="tabs-nav" role="tablist">
-                                                <li class="active" role="presentation"><a href="#profileinfo" aria-controls="profileinfo" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-user"></i></span>Profile Info</a><span class="bgcolor-major-gradient-overlay"></span></li>
-                                                <li role="presentation"><a href="#attendanceinfo" aria-controls="attendanceinfo" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-calendar"></i></span>Attendance</a><span class="bgcolor-major-gradient-overlay"></span></li>
-                                                <li role="presentation"><a href="#leaveinfo" aria-controls="leaveinfo" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-calendar-week"></i></span>Leave Info</a><span class="bgcolor-major-gradient-overlay"></span></li>
-                                                <li role="presentation"><a href="#leaveapproval" aria-controls="leaveapproval" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-calendar-week"></i></span>Leave Approval</a><span class="bgcolor-major-gradient-overlay"></span></li>
-                                                <li role="presentation"><a href="#salaryadvance" aria-controls="salaryadvance" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-money-bill"></i></span>Salary Advance</a><span class="bgcolor-major-gradient-overlay"></span></li>
-                                                <li role="presentation"><a href="#salaryslip" aria-controls="salaryslip" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-receipt"></i></span>Salary Slips</a><span class="bgcolor-major-gradient-overlay"></span></li>
-                                                {{--<li role="presentation"><a href="#production" aria-controls="production" role="tab" data-toggle="tab"><span class="icon"><i class="fa-light fa-ballot-check"></i></span>My Jobs</a><span class="bgcolor-major-gradient-overlay"></span></li>--}}
-                                                <li role="presentation"><a href="#markattendance" aria-controls="markattendance" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-clock"></i></span>Mark Attendance</a><span class="bgcolor-major-gradient-overlay"></span></li>
-                                                <li role="presentation"><a href="#attendancetimesheet" aria-controls="attendancetimesheet" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-file-contract"></i></span>Time Sheet</a><span class="bgcolor-major-gradient-overlay"></span></li>
+                                                 <!-- ========== NAV TABS ========== -->
+                                            <ul class="nav nav-pills flex-nowrap overflow-auto bg-light rounded p-1 mb-2 d-lg-none" role="tablist" style="-webkit-overflow-scrolling:touch;">
+                                                <li class="nav-item"><a class="nav-link active text-center small px-3" href="#profileinfo" role="tab" data-toggle="tab"><i class="fas fa-user d-block mb-1"></i>Profile</a></li>
+                                                <li class="nav-item"><a class="nav-link text-center small px-3" href="#attendanceinfo" role="tab" data-toggle="tab"><i class="fas fa-calendar d-block mb-1"></i>Attendance</a></li>
+                                                <li class="nav-item"><a class="nav-link text-center small px-3" href="#leaveinfo" role="tab" data-toggle="tab"><i class="fas fa-calendar-week d-block mb-1"></i>Leave</a></li>
+                                                <li class="nav-item"><a class="nav-link text-center small px-3" href="#leaveapproval" role="tab" data-toggle="tab"><i class="fas fa-check-double d-block mb-1"></i>Approval</a></li>
+                                                <li class="nav-item"><a class="nav-link text-center small px-3" href="#salaryadvance" role="tab" data-toggle="tab"><i class="fas fa-money-bill d-block mb-1"></i>Advance</a></li>
+                                                <li class="nav-item"><a class="nav-link text-center small px-3" href="#salaryslip" role="tab" data-toggle="tab"><i class="fas fa-receipt d-block mb-1"></i>Payslip</a></li>
+                                                <li class="nav-item"><a class="nav-link text-center small px-3" href="#markattendance" role="tab" data-toggle="tab"><i class="fas fa-clock d-block mb-1"></i>Clock</a></li>
+                                                <li class="nav-item"><a class="nav-link text-center small px-3" href="#attendancetimesheet" role="tab" data-toggle="tab"><i class="fas fa-file-contract d-block mb-1"></i>Timesheet</a></li>
                                             </ul>
+                                            <div class="d-none d-lg-block">
+                                                <ul class="tabs-nav" role="tablist">
+                                                    <li class="active" role="presentation"><a href="#profileinfo" aria-controls="profileinfo" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-user"></i></span>Profile Info</a><span class="bgcolor-major-gradient-overlay"></span></li>
+                                                    <li role="presentation"><a href="#attendanceinfo" aria-controls="attendanceinfo" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-calendar"></i></span>Attendance</a><span class="bgcolor-major-gradient-overlay"></span></li>
+                                                    <li role="presentation"><a href="#leaveinfo" aria-controls="leaveinfo" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-calendar-week"></i></span>Leave Info</a><span class="bgcolor-major-gradient-overlay"></span></li>
+                                                    <li role="presentation"><a href="#leaveapproval" aria-controls="leaveapproval" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-calendar-week"></i></span>Leave Approval</a><span class="bgcolor-major-gradient-overlay"></span></li>
+                                                    <li role="presentation"><a href="#salaryadvance" aria-controls="salaryadvance" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-money-bill"></i></span>Salary Advance</a><span class="bgcolor-major-gradient-overlay"></span></li>
+                                                    <li role="presentation"><a href="#salaryslip" aria-controls="salaryslip" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-receipt"></i></span>Salary Slips</a><span class="bgcolor-major-gradient-overlay"></span></li>
+                                                    {{--<li role="presentation"><a href="#production" aria-controls="production" role="tab" data-toggle="tab"><span class="icon"><i class="fa-light fa-ballot-check"></i></span>My Jobs</a><span class="bgcolor-major-gradient-overlay"></span></li>--}}
+                                                    <li role="presentation"><a href="#markattendance" aria-controls="markattendance" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-clock"></i></span>Mark Attendance</a><span class="bgcolor-major-gradient-overlay"></span></li>
+                                                    <li role="presentation"><a href="#attendancetimesheet" aria-controls="attendancetimesheet" role="tab" data-toggle="tab"><span class="icon"><i class="fas fa-file-contract"></i></span>Time Sheet</a><span class="bgcolor-major-gradient-overlay"></span></li>
+                                                </ul>
+                                            </div>
                                         </div>
                                         <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
                                             <div class="tab-content">
@@ -255,7 +283,7 @@
                                                             </div>
                                                             <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
                                                                 <hr>
-                                                                <div class="center-block fix-width scroll-inner">
+                                                                <div class="center-block fix-width scroll-inner table-responsive">
                                                                     <table class="table table-striped table-sm small nowrap" style="width: 100%" id="attendtable">
                                                                         <thead>
                                                                             <tr>
@@ -285,7 +313,7 @@
                                                                 </div>
                                                                 <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
                                                                     <hr>
-                                                                    <div class="center-block fix-width scroll-inner">
+                                                                    <div class="center-block fix-width scroll-inner table-responsive">
                                                                         <table class="table table-striped table-sm small nowrap" style="width: 100%" id="divicestable">
                                                                             <thead>
                                                                                 <tr>
@@ -331,7 +359,7 @@
                                                                 </div>
                                                                 <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
                                                                     <hr>
-                                                                    <div class="center-block fix-width scroll-inner">
+                                                                    <div class="center-block fix-width scroll-inner table-responsive">
                                                                         <table class="table table-striped table-sm small nowrap" style="width: 100%" id="leaveapprovaltable">
                                                                             <thead>
                                                                                 <tr>
@@ -350,6 +378,7 @@
                                                                                     <th class="d-none">ID</th>
                                                                                     <th class="d-none">EMPNAME</th>
                                                                                     <th class="d-none">CALLING</th>
+                                                                                    <th class="d-none">APPROVER 2</th> 
                                                                                 </tr>
                                                                             </thead>
                                                                             <tbody>
@@ -370,7 +399,7 @@
                                                                 </div>
                                                                 <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
                                                                     <hr>
-                                                                    <div class="center-block fix-width scroll-inner">
+                                                                    <div class="center-block fix-width scroll-inner table-responsive">
                                                                         <table class="table table-striped table-sm small nowrap" style="width: 100%" id="salaryadvancetable">
                                                                             <thead>
                                                                                 <tr>
@@ -416,7 +445,7 @@
                                                                     </select>
                                                                 </div>
                                                                 <div class="col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                                                                    <label for="selectedmonth"  class="col-form-label col-form-label-sm font-weight-bold text-dark">&nbsp;</label><br>
+                                                                    <label for="selectedmonth" class="col-form-label col-form-label-sm d-none d-md-block">&nbsp;</label>
                                                                     <form id="frmExport" method="post" target="_blank" action="{{ url('get_employee_salarysheet') }}">
                                                                         {{ csrf_field() }}
 
@@ -429,14 +458,14 @@
                                                                         <input type="hidden" name="rpt_period_id" id="rpt_period_id" value="" />
                                                                         <input type="hidden" name="rpt_emp_id" id="rpt_emp_id" value="" />
 
-                                                                        <button type="submit" id="print_record" class="btn btn-sm btn-success" disabled>Download PaySlip</button>
+                                                                        <button type="submit" id="print_record" class="btn btn-sm btn-success btn-block" disabled>Download PaySlip</button>
                                                                     </form>
                                                                 </div>
                                                             </div>
                                                             <div class="row">
                                                                 <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
                                                                     <hr>
-                                                                    <div class="center-block fix-width scroll-inner">
+                                                                    <div class="center-block fix-width scroll-inner table-responsive">
                                                                         <div id="salaryinfo"></div>
                                                                     </div>
                                                                 </div>
@@ -462,7 +491,7 @@
                                                                     <span class="badge px-2 mb-2" style="background-color:#f8d7da;color:#842029;">&nbsp;</span> Not Approved
                                                                     <span class="badge px-2 mb-2" style="background-color:#fff3cd;color:#664d03;">&nbsp;</span> Pending
                                                                 </div>
-                                                                <div class="center-block fix-width scroll-inner">
+                                                                <div class="center-block fix-width scroll-inner table-responsive">
                                                                     <table class="table table-striped table-sm small nowrap" style="width: 100%" id="productiontable">
                                                                        <thead>
                                                                             <tr>
@@ -510,12 +539,16 @@
                                                                         <button type="button" id="submitReasonBtn" class="btn btn-primary btn-sm btn-block mt-2">Submit with Reason</button>
                                                                     </div>
                                                                 </div>
-                                                                <div class="col-12 col-md-8 mt-2">
-                                                                    <div class="d-flex align-items-center flex-wrap">
-                                                                        <button type="button" id="clockBtn" class="btn btn-success btn-sm px-4 flex-shrink-0" disabled>
-                                                                            <i class="fas fa-clock mr-1"></i><span id="clockBtnText">Clock In</span>
-                                                                        </button>
-                                                                        <span id="clock_status" class="ml-2 font-weight-bold small" style="word-break:break-word;min-width:0;"></span>
+                                                                <div class="col-12 col-md-8 mt-3 mt-md-2">
+                                                                    <div class="row align-items-center">
+                                                                        <div class="col-12 col-md-auto">
+                                                                            <button type="button" id="clockBtn" class="btn btn-success btn-lg btn-block px-4" disabled>
+                                                                                <i class="fas fa-clock mr-1"></i><span id="clockBtnText">Clock In</span>
+                                                                            </button>
+                                                                        </div>
+                                                                        <div class="col-12 col-md">
+                                                                            <span id="clock_status" class="d-block mt-2 mt-md-0 font-weight-bold small" style="word-break:break-word;"></span>
+                                                                        </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -528,21 +561,21 @@
                                                     <div class="card shadow-none bg-transparent">
                                                         <div class="card-body">
                                                             <div class="row align-items-end">
-                                                                <div class="col-sm-12 col-md-3">
+                                                                <div class="col-12 col-md-3 mb-2 mb-md-0">
                                                                     <div class="form-group mb-0">
                                                                         <label for="ts_from_date" class="col-form-label col-form-label-sm font-weight-bold text-dark">From Date*</label>
                                                                         <input type="date" id="ts_from_date" name="ts_from_date"
                                                                             class="form-control form-control-sm" value="{{date('Y-m-d') }}" required>
                                                                     </div>
                                                                 </div>
-                                                                <div class="col-sm-12 col-md-3">
+                                                                <div class="col-12 col-md-3 mb-2 mb-md-0">
                                                                     <div class="form-group mb-0">
                                                                         <label for="ts_to_date" class="col-form-label col-form-label-sm font-weight-bold text-dark">To Date*</label>
                                                                         <input type="date" id="ts_to_date" name="ts_to_date"
                                                                             class="form-control form-control-sm" value="{{date('Y-m-d') }}" required>
                                                                     </div>
                                                                 </div>
-                                                                <div class="col-sm-12 col-md-4 d-flex align-items-end" style="gap:6px;">
+                                                                <div class="col-12 col-md-4 d-flex align-items-end mt-2 mt-md-0" style="gap:6px;">
                                                                     <button type="button" id="ts_search_btn" class="btn btn-primary btn-sm px-3">
                                                                         <i class="fas fa-search mr-1"></i> Search
                                                                     </button>
@@ -553,7 +586,7 @@
                                                             </div>
                                                             <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12 mt-3">
                                                                 <hr>
-                                                                <div id="ts_employee_list"></div>
+                                                                <div id="ts_employee_list" class="table-responsive"></div>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -587,7 +620,7 @@
                 <div class="row">
                     <div class="col">
                         <span id="form_result"></span>
-                        <div class="col-sm-12 col-md-12 mb-2">
+                        <div class="col-12 mb-2 table-responsive">
                             <table class="table table-sm small">
                                 <thead>
                                     <tr>
@@ -867,6 +900,7 @@
 @endsection
 @section('script')
 <script>
+    var isMobile = window.innerWidth < 768;
     var empid = {{$emp_id}};
     var emprecordid = {{$emprecordid}};
     var emp_name_with_initial = '{{$emp_name_with_initial}}';
@@ -1500,9 +1534,9 @@
                 data : {'employee':empid},
             },
             columns: [
-                { data: 'id', name: 'id' },
-                { data: 'employee_display', name: 'employee_display' },
-                { data: 'dep_name', name: 'dep_name' },
+                { data: 'id', name: 'id', visible: !isMobile },
+                { data: 'employee_display', name: 'employee_display', visible: !isMobile },
+                { data: 'dep_name', name: 'dep_name', visible: !isMobile },
                 { 
                     data: 'leave_category', name: 'leave_category', render: function(data, type, row) {
                         if (data == 1) {
@@ -1518,7 +1552,7 @@
                 },
                 { data: 'from_date', name: 'from_date' },
                 { data: 'to_date', name: 'to_date' },
-                { data: 'reason', name: 'reason'},
+                { data: 'reason', name: 'reason', visible: !isMobile },
                 { 
                     data: 'approvestatus', name: 'approvestatus', render: function(data, type, row) {
                         if (data == 0) {
@@ -1530,7 +1564,7 @@
                 },
                 { data: 'leave_type', name: 'leave_type' },
                 { 
-                    data: 'half_short', name: 'half_short', render: function(data, type, row) {
+                    data: 'half_short', name: 'half_short', visible: !isMobile, render: function(data, type, row) {
                         if (data == 1) {
                             return "Full Day";
                         } else if (data == 0.50) {
@@ -1542,7 +1576,7 @@
                         }
                     }
                 },
-                { data: 'leave_status', name: 'leave_status' },
+                { data: 'leave_status', name: 'leave_status', visible: !isMobile },
                     {
                 data: 'id',
                 name: 'action',
@@ -1955,11 +1989,13 @@
             },
             columns: [{
                     data: 'emp_name_with_initial',
-                    name: 'employees.emp_name_with_initial'
+                    name: 'employees.emp_name_with_initial',
+                    visible: !isMobile
                 },
                 {
                     data: 'location',
-                    name: 'branches.location'
+                    name: 'branches.location',
+                    visible: !isMobile
                 },
                 {
                     data: 'formatted_date',
@@ -1983,7 +2019,8 @@
                 },
                 {
                     data: 'double_hours',
-                    name: 'double_hours'
+                    name: 'double_hours',
+                    visible: !isMobile
                 },
 
             ],
@@ -2586,9 +2623,9 @@
                 data: { employee: empid }
             },
             columns: [
-                { data: 'emp_id',           name: 'emp_id' },
-                { data: 'employee_display', name: 'employee_display' },
-                { data: 'department_name',  name: 'department_name' },
+                { data: 'emp_id',           name: 'emp_id', visible: !isMobile },
+                { data: 'employee_display', name: 'employee_display', visible: !isMobile },
+                { data: 'department_name',  name: 'department_name', visible: !isMobile },
                 { data: 'date',             name: 'date' },
                 { data: 'request_amount',   name: 'request_amount' },
                 { data: 'paid_amount',      name: 'paid_amount' },
@@ -3067,14 +3104,14 @@
                     },
                     orderable: false, searchable: false
                 },
-                { data: 'emp_id',          name: 'emp_id' },
+                { data: 'emp_id',          name: 'emp_id', visible: !isMobile },
                 { data: 'employee_display', name: 'employee_display' },
-                { data: 'dep_name',        name: 'dep_name' },
+                { data: 'dep_name',        name: 'dep_name', visible: !isMobile },
                 { data: 'leave_type',      name: 'leave_type' },
                 { data: 'leave_from',      name: 'leave_from' },
                 { data: 'leave_to',        name: 'leave_to' },
-                { data: 'reson',           name: 'reson' },
-                { data: 'covering_emp',    name: 'covering_emp' },
+                { data: 'reson',           name: 'reson', visible: !isMobile },
+                { data: 'covering_emp',    name: 'covering_emp', visible: !isMobile },
                 {
                     data: 'status',
                     name: 'status_badge',
@@ -3089,6 +3126,7 @@
                 {
                     data: 'status',
                     name: 'approve_level',
+                    visible: !isMobile,
                     className: 'text-dark',
                     render: function(data, type, row) {
                         if (row.approve_01 == 1 && row.approve_02 == 0) {

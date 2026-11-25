@@ -64,12 +64,19 @@ class EmployeeBankController extends Controller
         //$emp_id = DB::table('employees')->where('id', $request->input('emp_id') )->value('emp_id');
 
         $emp_id = $request->input('emp_id');
-        $employeebank = new EmployeeBank;
-        $employeebank->emp_id = $request->input('emp_id');
-        $employeebank->branch_code = $branch_code;
-        $employeebank->bank_code = $request->input('bank_code');
-        $employeebank->bank_ac_no = $request->input('bank_ac_no');
-        $employeebank->save();
+
+        DB::transaction(function () use ($request, $branch_code, $emp_id) {
+            // Only one active account allowed: deactivate all existing ones
+            EmployeeBank::where('emp_id', $emp_id)->update(['status' => 2]);
+
+            $employeebank = new EmployeeBank;
+            $employeebank->emp_id = $emp_id;
+            $employeebank->branch_code = $branch_code;
+            $employeebank->bank_code = $request->input('bank_code');
+            $employeebank->bank_ac_no = $request->input('bank_ac_no');
+            $employeebank->status = 1;
+            $employeebank->save();
+        });
 
         Session::flash('message', 'The Bank Details Successfully Saved');
         Session::flash('alert-class', 'alert-success');
@@ -349,13 +356,31 @@ class EmployeeBankController extends Controller
         if (!$permission) {
             return response()->json(['error' => 'UnAuthorized'], 401);
         }
+
         $bank = EmployeeBank::findOrFail($request->id);
-        $bank->status = ($bank->status == 1) ? 2 : 1;
-        $bank->save();
+        $deactivatedIds = [];
+
+        DB::transaction(function () use ($bank, &$deactivatedIds) {
+            if ($bank->status == 1) {
+                $bank->status = 2;
+            } else {
+                // Activating: deactivate all other active accounts of this employee
+                $deactivatedIds = EmployeeBank::where('emp_id', $bank->emp_id)
+                    ->where('id', '!=', $bank->id)
+                    ->where('status', 1)
+                    ->pluck('id')
+                    ->toArray();
+
+                EmployeeBank::whereIn('id', $deactivatedIds)->update(['status' => 2]);
+                $bank->status = 1;
+            }
+            $bank->save();
+        });
 
         return response()->json([
             'success' => true,
-            'new_status' => $bank->status
+            'new_status' => $bank->status,
+            'deactivated_ids' => $deactivatedIds
         ]);
     }
 

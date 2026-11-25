@@ -294,54 +294,93 @@
 
 
             let status = 0;
-            $(document).on('click', '.btn-status', function () {
-                status = $(this).data('id');
-                $('#statusModal').modal('show');
-            });
 
-            $('#status_ok_button').click(function () {
+                $(document).on('click', '.btn-status', async function () {
+                let id = $(this).data('id');
+
+                var r = await Otherconfirmation('You want to change the Bank status?');
+                if (!r) return;
+
                 $.ajax({
                     url: "{{ url('bankAccountStatusUpdate') }}",
                     method: "POST",
                     data: {
-                        id: status,
+                        id: id,
                         _token: '{{ csrf_token() }}'
                     },
                     success: function (response) {
                         if (response.success) {
-                            let button = $('.btn-status[data-id="' + status + '"]');
+                            let button = $('.btn-status[data-id="' + id + '"]');
                             if (response.new_status == 1) {
                                 button.removeClass('btn-secondary').addClass('btn-success').text('Active');
                             } else {
                                 button.removeClass('btn-success').addClass('btn-secondary').text('Deactive');
                             }
-                            $('#statusModal').modal('hide');
+
+                            // Reflect other accounts that were auto-deactivated
+                            (response.deactivated_ids || []).forEach(function (otherId) {
+                                $('.btn-status[data-id="' + otherId + '"]')
+                                    .removeClass('btn-success').addClass('btn-secondary').text('Deactive');
+                            });
+
+                            action(JSON.stringify({
+                                icon: 'fas fa-check-circle',
+                                title: '',
+                                message: response.new_status == 1 ? 'Bank account activated' : 'Bank account deactivated',
+                                url: '',
+                                target: '_blank',
+                                type: 'success'
+                            }, null, 2));
                         }
+                    },
+                    error: function () {
+                        action(JSON.stringify({
+                            icon: 'fas fa-exclamation-circle',
+                            title: '',
+                            message: 'Failed to update bank status',
+                            url: '',
+                            target: '_blank',
+                            type: 'danger'
+                        }, null, 2));
                     }
                 });
             });
 
             var user_id;
 
-            $(document).on('click', '.delete', function () {
-                user_id = $(this).attr('id');
-                $('#confirmModal').modal('show');
-            });
+                $(document).on('click', '.delete', async function () {
+                let id = $(this).attr('id');
 
-            $('#ok_button').click(function () {
+                var r = await Otherconfirmation('You want to remove this bank account?');
+                if (!r) return;
+
                 $.ajax({
-                    url: "../empBank/destroy/" + user_id,
-                    beforeSend: function () {
-                        $('#ok_button').text('Deleting...');
-                    },
+                    url: "../empBank/destroy/" + id,
                     success: function (data) {
+                        action(JSON.stringify({
+                            icon: 'fas fa-check-circle',
+                            title: '',
+                            message: 'Bank account deleted',
+                            url: '',
+                            target: '_blank',
+                            type: 'success'
+                        }, null, 2));
+
                         setTimeout(function () {
-                            $('#confirmModal').modal('hide');
-                            alert('Data Deleted');
-                        }, 2000);
-                        location.reload();
+                            location.reload();
+                        }, 1000);
+                    },
+                    error: function () {
+                        action(JSON.stringify({
+                            icon: 'fas fa-exclamation-circle',
+                            title: '',
+                            message: 'Failed to delete bank account',
+                            url: '',
+                            target: '_blank',
+                            type: 'danger'
+                        }, null, 2));
                     }
-                })
+                });
             });
 
         });
