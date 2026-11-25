@@ -1,0 +1,164 @@
+<?php
+session_start();
+// Include the EmployeeHelper class
+use App\Helpers\EmployeeHelper;
+use App\Helpers\UserHelper;
+
+// Correct path resolution for Laravel - use base path or proper autoloading
+require_once __DIR__ . '/../../app/Helpers/EmployeeHelper.php';
+require_once __DIR__ . '/../../app/Helpers/UserHelper.php';
+
+$table = 'leaves';
+$primaryKey = 'id';
+
+$columns = array(
+    array('db' => '`sub`.`id`', 'dt' => 'id', 'field' => 'id'),
+    array('db' => '`sub`.`emp_id`', 'dt' => 'emp_id', 'field' => 'emp_id', 'visible' => false),
+    array('db' => '`sub`.`emp_name_with_initial`', 'dt' => 'emp_name_with_initial', 'field' => 'emp_name_with_initial', 'visible' => false),
+    array('db' => '`sub`.`calling_name`', 'dt' => 'calling_name', 'field' => 'calling_name', 'visible' => false),
+    array('db' => '`sub`.`leave_type`', 'dt' => 'leave_type', 'field' => 'leave_type'),
+    array('db' => '`sub`.`covering_emp_name`', 'dt' => 'covering_emp', 'field' => 'covering_emp_name'),
+    array('db' => '`sub`.`dep_name`', 'dt' => 'dep_name', 'field' => 'dep_name'),
+    array('db' => '`sub`.`leave_from`', 'dt' => 'leave_from', 'field' => 'leave_from'),
+    array('db' => '`sub`.`leave_to`', 'dt' => 'leave_to', 'field' => 'leave_to'),
+    array('db' => '`sub`.`half_short`', 'dt' => 'half_short', 'field' => 'half_short'),
+    array('db' => '`sub`.`status`', 'dt' => 'status', 'field' => 'status'),
+    array('db' => '`sub`.`reson`', 'dt' => 'reson', 'field' => 'reson'),
+    array('db' => '`sub`.`approve_01`', 'dt' => 'approve_01', 'field' => 'approve_01' ),
+	array('db' => '`sub`.`approve_02`', 'dt' => 'approve_02', 'field' => 'approve_02' ),
+    array('db' => '`sub`.`approve_level`', 'dt' => 'approve_level', 'field' => 'approve_level'),
+    array('db' => '`sub`.`approve_total`', 'dt' => 'approve_total', 'field' => 'approve_total'),
+    array('db' => '`sub`.`title`', 'dt' => 'title', 'field' => 'title'),
+    array('db' => '`sub`.`emp_id`', 'dt' => 'employee_display', 'field' => 'emp_id', 
+          'formatter' => function($d, $row) {
+              $employee = (object)[
+                  'emp_name_with_initial' => $row['emp_name_with_initial'],
+                  'calling_name' => $row['calling_name'],
+                  'emp_id' => $row['emp_id']
+              ];
+              
+              return EmployeeHelper::getDisplayName($employee);
+          }
+    )
+);
+
+require('config.php');
+
+$sql_details = array(
+    'user' => $db_username,
+    'pass' => $db_password,
+    'db'   => $db_name,
+    'host' => $db_host
+);
+
+require('ssp.customized.class.php');
+
+$extraWhere = "1=1";
+
+if (!empty($_POST['department'])) {
+    $department = $_POST['department'];
+    $extraWhere .= " AND `sub`.`dep_id` = '$department'";
+}
+if (!empty($_POST['employee'])) {
+    $employee = $_POST['employee'];
+    $extraWhere .= " AND `sub`.`emp_id` = '$employee'";
+}
+if (!empty($_POST['location'])) {
+    $location = $_POST['location'];
+    $extraWhere .= " AND `sub`.`location_id` = '$location'";
+}
+if (!empty($_POST['from_date']) && !empty($_POST['to_date'])) {
+    $from_date = $_POST['from_date'];
+    $to_date = $_POST['to_date'];
+    $extraWhere .= " AND `sub`.`leave_from` BETWEEN '$from_date' AND '$to_date'";
+}
+
+$joinQuery = "FROM (
+    SELECT 
+        `leaves`.`id`,
+        `leaves`.`emp_id`,
+        `e`.`emp_name_with_initial`,
+        `e`.`calling_name`,
+        `e`.`emp_company`,
+        `e`.`emp_department` AS `dep_id`,
+        `e`.`emp_location` AS `location_id`,
+        `leave_types`.`leave_type`,
+        `ec`.`emp_name_with_initial` AS `covering_emp_name`,
+        `departments`.`name` AS `dep_name`,
+        `leaves`.`leave_from`,
+        `leaves`.`leave_to`,
+        `leaves`.`half_short`,
+        `leaves`.`status`,
+        `leaves`.`reson`,
+        `leaves`.`approve_01`,
+        `leaves`.`approve_02`,
+        `leaves`.`approve_level`,
+        `leaves`.`approve_total`,
+        `job_titles`.`title`
+    FROM `leaves`
+    LEFT JOIN `leave_types` ON `leaves`.`leave_type` = `leave_types`.`id`
+    LEFT JOIN `employees` AS `ec` ON `leaves`.`emp_covering` = `ec`.`emp_id`
+    LEFT JOIN `employees` AS `e` ON `leaves`.`emp_id` = `e`.`emp_id`
+    LEFT JOIN `branches` ON `e`.`emp_location` = `branches`.`id`
+    LEFT JOIN `departments` ON `e`.`emp_department` = `departments`.`id`
+    LEFT JOIN `job_titles` ON `e`.`emp_job_code` = `job_titles`.`id`
+) AS `sub`";
+
+// new filter based on user access rights
+$userId = UserHelper::getLoggedInUserId();
+if ($userId) {
+    $mysqli = new mysqli($db_host, $db_username, $db_password, $db_name);
+    
+    if ($mysqli->connect_error) {
+        echo json_encode(['error' => 'Database connection failed']);
+        exit;
+    }
+    
+      $companyIds = [];
+       $branchIds = [];
+        $companyQuery = "SELECT company_id, branch_id FROM user_has_companies WHERE user_id = ?";
+        $stmt = $mysqli->prepare($companyQuery);
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        while ($row = $result->fetch_assoc()) {
+               if (!empty($row['company_id'])) {
+                $companyIds[] = $row['company_id'];
+                }
+                if (!empty($row['branch_id'])) {
+                    $branchIds[] = $row['branch_id'];
+                }
+            }
+        $stmt->close();
+        
+        if (!empty($companyIds)) {
+            $companyIdsList = implode(',', array_map('intval', $companyIds));
+            $extraWhere .= " AND `sub`.`emp_company` IN ($companyIdsList)";
+        }
+
+        if (!empty($branchIds)) {
+            $branchIdsList = implode(',', array_map('intval', $branchIds));
+            $extraWhere .= " AND `sub`.`location_id` IN ($branchIdsList)";
+        }
+    $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId, $mysqli);
+
+    if (!empty($accessibleEmployeeIds)) {
+        $empIds = implode(',', array_map('intval', $accessibleEmployeeIds));
+        $extraWhere .= " AND sub.emp_id IN ($empIds)";
+    } else {
+        $extraWhere .= " AND 1 = 0";
+    }
+    $mysqli->close();
+}
+// end of new filter
+
+try {
+    echo json_encode(
+        SSP::simple($_POST, $sql_details, $table, $primaryKey, $columns, $joinQuery, $extraWhere)
+    );
+} catch (Exception $e) {
+    echo json_encode(['error' => $e->getMessage()]);
+}
+
+?>
