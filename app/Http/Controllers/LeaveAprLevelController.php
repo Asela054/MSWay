@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class LeaveAprLevelController extends Controller
 {
@@ -334,12 +335,22 @@ class LeaveAprLevelController extends Controller
             return response()->json(['rows' => []]);
         }
 
+        $department = DB::table('departments as d')
+            ->leftJoin('companies as c', 'd.company_id', '=', 'c.id')
+            ->where('d.id', $department_id)
+            ->select('d.company_id', 'c.name as company_name')
+            ->first();
+
         $rows = DB::table('leave_approval_hierarchy as lah')
             ->join('job_titles as jt', 'lah.title_id', '=', 'jt.id')
             ->where('lah.department_id', $department_id)
             ->select('lah.id', 'lah.title_id', 'jt.title as title_text', 'lah.approval_level')
             ->get();
 
-        return response()->json(['rows' => $rows]);
+        return response()->json([
+            'rows'         => $rows,
+            'company_id'   => $department->company_id ?? null,
+            'company_name' => $department->company_name ?? null,
+        ]);
     }
 }
