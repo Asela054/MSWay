@@ -380,24 +380,26 @@
       @endhasanyrole
 </main>
 
-
 <div class="modal fade" id="attendanceformModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
     aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header p-2">
-                <h5 class="modal-title" id="staticBackdropLabel">Department Wise Attendance (<?php echo date('Y-m-d') ?>)</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <h5 class="modal-title" id="staticBackdropLabel">Department Wise Attendance (<span id="attendance_date"><?php echo date('Y-m-d') ?></span>)</h5>
+                <button type="button" class="close ml-0" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body" style="max-height: 40rem; overflow-y: auto;">
-                <div class="row">
-                    <div class="col">
-                        <div id="attandancetable"></div>
-                    </div>
+           <div class="modal-body" style="max-height: 40rem; overflow-y: auto;">
+            <div class="text-right mb-2">
+                <button type="button" id="export_attendance_pdf" class="btn btn-danger btn-sm">Export PDF</button>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div id="attandancetable"></div>
                 </div>
             </div>
+        </div>
         </div>
     </div>
 </div>
@@ -406,12 +408,15 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header p-2">
-                <h5 class="modal-title" id="staticBackdropLabel">Late Attendance (<?php echo date('Y-m-d') ?>)</h5>
+                <h5 class="modal-title">Late Attendance (<span id="late_date"><?php echo date('Y-m-d') ?></span>)</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body" style="max-height: 40rem; overflow-y: auto;">
+                <div class="text-right mb-2">
+                    <button type="button" id="export_late_pdf" class="btn btn-danger btn-sm">Export PDF</button>
+                </div>
                 <div class="row">
                     <div class="col">
                         <div id="lateattandancetable"></div>
@@ -421,17 +426,21 @@
         </div>
     </div>
 </div>
+
 <div class="modal fade" id="absentformModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
     aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header p-2">
-                <h5 class="modal-title" id="staticBackdropLabel">Department Wise Absent (<?php echo date('Y-m-d') ?>)</h5>
+                <h5 class="modal-title">Department Wise Absent (<span id="absent_date"><?php echo date('Y-m-d') ?></span>)</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body" style="max-height: 40rem; overflow-y: auto;">
+                <div class="text-right mb-2">
+                    <button type="button" id="export_absent_pdf" class="btn btn-danger btn-sm">Export PDF</button>
+                </div>
                 <div class="row">
                     <div class="col">
                         <div id="absenttable"></div>
@@ -442,17 +451,19 @@
     </div>
 </div>
 
-<div class="modal fade" id="yesterdayattendanceformModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+<div class="modal fade" id="yesterdayattendanceformModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header p-2">
-                <h5 class="modal-title" id="staticBackdropLabel">Yesterday Attendance (<?php echo date('Y-m-d', strtotime('-1 day')); ?>)</h5>
+                <h5 class="modal-title">Yesterday Attendance (<span id="yesterdayattendance_date"><?php echo date('Y-m-d', strtotime('-1 day')); ?></span>)</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body" style="max-height: 40rem; overflow-y: auto;">
+                <div class="text-right mb-2">
+                    <button type="button" id="export_yesterday_pdf" class="btn btn-danger btn-sm">Export PDF</button>
+                </div>
                 <div class="row">
                     <div class="col">
                         <div id="yesterdayattandancetable"></div>
@@ -462,17 +473,20 @@
         </div>
     </div>
 </div>
-<div class="modal fade" id="yesterdaylateattendanceformModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+
+<div class="modal fade" id="yesterdaylateattendanceformModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header p-2">
-                <h5 class="modal-title" id="staticBackdropLabel">Yesterday Late Attendance (<?php echo date('Y-m-d', strtotime('-1 day')); ?>)</h5>
+                <h5 class="modal-title">Yesterday Late Attendance (<span id="yesterdaylate_date"><?php echo date('Y-m-d', strtotime('-1 day')); ?></span>)</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body" style="max-height: 40rem; overflow-y: auto;">
+                <div class="text-right mb-2">
+                    <button type="button" id="export_yesterday_late_pdf" class="btn btn-danger btn-sm">Export PDF</button>
+                </div>
                 <div class="row">
                     <div class="col">
                         <div id="yesterdaylateattandancetable"></div>
@@ -483,17 +497,19 @@
     </div>
 </div>
 
-<div class="modal fade" id="yesterdayabsentformModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+<div class="modal fade" id="yesterdayabsentformModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header p-2">
-                <h5 class="modal-title" id="staticBackdropLabel">Yesterday Absent (<?php echo date('Y-m-d', strtotime('-1 day')); ?>)</h5>
+                <h5 class="modal-title">Yesterday Absent (<span id="yesterdayabsent_date"><?php echo date('Y-m-d', strtotime('-1 day')); ?></span>)</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body" style="max-height: 40rem; overflow-y: auto;">
+                <div class="text-right mb-2">
+                    <button type="button" id="export_yesterday_absent_pdf" class="btn btn-danger btn-sm">Export PDF</button>
+                </div>
                 <div class="row">
                     <div class="col">
                         <div id="yesterdayabsenttable"></div>
@@ -812,9 +828,13 @@ $(document).ready( function () {
     // getattend_linechart();
     loadMachineChart();
     // today part
-      $('.attendance-btn').click(function() {
+      $('.attendance-btn').click(function () {
         var companyId = $(this).data('company-id');
-        
+
+        // parana data export wena eka nawaththanna
+        $('#attandancetable').html('<p>Loading...</p>');
+        $('#export_attendance_pdf').prop('disabled', true);
+
         $.ajax({
             url: "{{ route('getdashboard_department_attendance') }}",
             method: "POST",
@@ -823,62 +843,76 @@ $(document).ready( function () {
                 _token: "{{ csrf_token() }}"
             },
             dataType: "json",
-            success: function(data) {
+            success: function (data) {
                 $('#attandancetable').html(data.result);
-
+                if (data.date) {
+                    $('#attendance_date').text(data.date);
+                }
+                $('#export_attendance_pdf').prop('disabled', $('#attandancetable table').length === 0);
             },
-            error: function(xhr, status, error) {
+            error: function (xhr, status, error) {
                 console.error('Error:', error);
+                $('#attandancetable').empty();
                 alert('Failed to load attendance data');
             }
         });
         $('#attendanceformModal').modal('show');
     });
 
-    $('.lateattendancebtn').click(function() {
+    $('#export_attendance_pdf').click(function () {
+        generateDepartmentAttendancePDF();
+    });
+ 
+    $('.lateattendancebtn').click(function () {
         var companyId = $(this).data('company-id');
-        
+
+        $('#lateattandancetable').html('<p>Loading...</p>');
+
         $.ajax({
             url: "{{ route('getdashboard_department_lateattendance') }}",
             method: "POST",
-            data: {
-                company_id: companyId,
-                _token: "{{ csrf_token() }}"
-            },
+            data: { company_id: companyId, _token: "{{ csrf_token() }}" },
             dataType: "json",
-            success: function(data) {
+            success: function (data) {
                 $('#lateattandancetable').html(data.result);
-
             },
-            error: function(xhr, status, error) {
+            error: function (xhr, status, error) {
                 console.error('Error:', error);
+                $('#lateattandancetable').empty();
                 alert('Failed to load attendance data');
             }
         });
         $('#lateattendanceformModal').modal('show');
     });
 
-    $('.absentbtn').click(function() {
+    $('.absentbtn').click(function () {
         var companyId = $(this).data('company-id');
-        
+
+        $('#absenttable').html('<p>Loading...</p>');
+
         $.ajax({
             url: "{{ route('getdashboard_department_absent') }}",
             method: "POST",
-            data: {
-                company_id: companyId,
-                _token: "{{ csrf_token() }}"
-            },
+            data: { company_id: companyId, _token: "{{ csrf_token() }}" },
             dataType: "json",
-            success: function(data) {
+            success: function (data) {
                 $('#absenttable').html(data.result);
-
             },
-            error: function(xhr, status, error) {
+            error: function (xhr, status, error) {
                 console.error('Error:', error);
+                $('#absenttable').empty();
                 alert('Failed to load attendance data');
             }
         });
         $('#absentformModal').modal('show');
+    });
+
+    $('#export_late_pdf').click(function () {
+        generateLateAttendancePDF();
+    });
+
+    $('#export_absent_pdf').click(function () {
+        generateAbsentPDF();
     });
 
 
@@ -1430,6 +1464,393 @@ $(document).ready( function () {
 
 
 } );
+
+    function generateDepartmentAttendancePDF() {
+        var departments = [];
+
+        $('#attandancetable table').each(function () {
+            var $table = $(this);
+            var rows = [];
+
+            $table.find('tr').each(function () {
+                var $cells = $(this).find('td');
+                if ($cells.length < 5) {
+                    return; // header row
+                }
+
+                // $cells.eq(1) = photo column, PDF ekata ganne na
+                rows.push({
+                    no: $cells.eq(0).text().trim(),
+                    empId: $cells.eq(2).text().trim(),
+                    name: $cells.eq(3).text().trim(),
+                    inTime: $cells.eq(4).text().trim(),
+                    offNextDay: $(this).hasClass('table-warning')
+                });
+            });
+
+            departments.push({
+                name: $table.prevAll('h5').first().text().trim(),
+                rows: rows
+            });
+        });
+
+        var date = $('#attendance_date').text().trim();
+        var doc = new jsPDF('p', 'mm', 'a4');
+        var pageWidth = doc.internal.pageSize.getWidth();
+        var pageHeight = doc.internal.pageSize.getHeight();
+        var margin = 10;
+        var total = departments.reduce(function (sum, d) { return sum + d.rows.length; }, 0);
+
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Department Wise Attendance', pageWidth / 2, 15, { align: 'center' });
+
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Date: ' + date, margin, 23);
+        doc.text('Total Present: ' + total, pageWidth - margin, 23, { align: 'right' });
+
+        var startY = 28;
+
+        departments.forEach(function (department) {
+            // page eke yata heading eka witharak thani wena eka nawaththanna
+            if (startY > pageHeight - 45) {
+                doc.addPage();
+                startY = 15;
+            }
+
+            doc.autoTable({
+                startY: startY,
+                margin: { left: margin, right: margin, top: 15, bottom: 15 },
+                theme: 'grid',
+                head: [
+                    [{
+                        content: department.name + ' (' + department.rows.length + ')',
+                        colSpan: 4,
+                        styles: { halign: 'left', fillColor: [230, 242, 255], textColor: [41, 128, 185] }
+                    }],
+                    ['#', 'Employee ID', 'Employee Name with Initial', 'In Time']
+                ],
+                body: department.rows.map(function (r) {
+                    return [r.no, r.empId, r.name, r.inTime];
+                }),
+                styles: { fontSize: 8, valign: 'middle', halign: 'center', lineWidth: 0.1, lineColor: [200, 200, 200] },
+                headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: 'bold' },
+                bodyStyles: { textColor: [0, 0, 0] },
+                columnStyles: {
+                    0: { cellWidth: 15 },
+                    1: { cellWidth: 35 },
+                    2: { cellWidth: 110, halign: 'left' },
+                    3: { cellWidth: 30 }
+                },
+                rowPageBreak: 'avoid',
+                showHead: 'everyPage',
+                didParseCell: function (data) {
+                    // off_next_day = 1 rows kaha paatin
+                    if (data.section === 'body' && department.rows[data.row.index].offNextDay) {
+                        data.cell.styles.fillColor = [255, 238, 186];
+                    }
+                }
+            });
+
+            startY = doc.lastAutoTable.finalY + 6;
+        });
+
+        var pages = doc.internal.getNumberOfPages();
+        for (var i = 1; i <= pages; i++) {
+            doc.setPage(i);
+            doc.setFontSize(7);
+            doc.setTextColor(100, 100, 100);
+            doc.text('Page ' + i + ' of ' + pages, pageWidth - margin, pageHeight - 7, { align: 'right' });
+        }
+
+        doc.save('Department_Attendance_' + date + '.pdf');
+    }
+
+    function generateLateAttendancePDF() {
+        exportDepartmentTablesPDF({
+            container: '#lateattandancetable',
+            title: 'Late Attendance',
+            date: $('#late_date').text().trim(),
+            totalLabel: 'Total Late',
+            fileName: 'Late_Attendance',
+            head: ['#', 'Employee ID', 'Employee Name with Initial', 'Shift On Time', 'In Time'],
+            cells: [0, 2, 3, 4, 5], // 1 = photo, PDF ekata ganne na
+            columnStyles: {
+                0: { cellWidth: 12 },
+                1: { cellWidth: 30 },
+                2: { cellWidth: 98, halign: 'left' },
+                3: { cellWidth: 28 },
+                4: { cellWidth: 22 }
+            }
+        });
+    }
+
+    function generateAbsentPDF() {
+        exportDepartmentTablesPDF({
+            container: '#absenttable',
+            title: 'Department Wise Absent',
+            date: $('#absent_date').text().trim(),
+            totalLabel: 'Total Absent',
+            fileName: 'Department_Absent',
+            head: ['#', 'Employee ID', 'Employee Name with Initial'],
+            cells: [0, 2, 3],
+            columnStyles: {
+                0: { cellWidth: 15 },
+                1: { cellWidth: 40 },
+                2: { cellWidth: 135, halign: 'left' }
+            }
+        });
+    }
+
+    // report dekatama podu PDF kotasa
+    function exportDepartmentTablesPDF(options) {
+        var departments = [];
+
+        $(options.container).find('table').each(function () {
+            var $table = $(this);
+            var rows = [];
+
+            $table.find('tr').each(function () {
+                var $cells = $(this).find('td');
+                if ($cells.length === 0) {
+                    return; // header row
+                }
+                rows.push({
+                    values: options.cells.map(function (i) { return $cells.eq(i).text().trim(); }),
+                    offNextDay: $(this).hasClass('table-warning')
+                });
+            });
+
+            departments.push({
+                name: $table.prevAll('h5').first().text().trim(),
+                rows: rows
+            });
+        });
+
+        if (departments.length === 0) {
+            alert('No data to export');
+            return;
+        }
+
+        var doc = new jsPDF('p', 'mm', 'a4');
+        var pageWidth = doc.internal.pageSize.getWidth();
+        var pageHeight = doc.internal.pageSize.getHeight();
+        var margin = 10;
+        var total = departments.reduce(function (sum, d) { return sum + d.rows.length; }, 0);
+
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text(options.title, pageWidth / 2, 15, { align: 'center' });
+
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Date: ' + options.date, margin, 23);
+        doc.text(options.totalLabel + ': ' + total, pageWidth - margin, 23, { align: 'right' });
+
+        var startY = 28;
+
+        departments.forEach(function (department) {
+            if (startY > pageHeight - 45) {
+                doc.addPage();
+                startY = 15;
+            }
+
+            doc.autoTable({
+                startY: startY,
+                margin: { left: margin, right: margin, top: 15, bottom: 15 },
+                theme: 'grid',
+                head: [
+                    [{
+                        content: department.name + ' (' + department.rows.length + ')',
+                        colSpan: options.head.length,
+                        styles: { halign: 'left', fillColor: [230, 242, 255], textColor: [41, 128, 185] }
+                    }],
+                    options.head
+                ],
+                body: department.rows.map(function (r) { return r.values; }),
+                styles: { fontSize: 8, valign: 'middle', halign: 'center', lineWidth: 0.1, lineColor: [200, 200, 200] },
+                headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: 'bold' },
+                bodyStyles: { textColor: [0, 0, 0] },
+                columnStyles: options.columnStyles,
+                rowPageBreak: 'avoid',
+                showHead: 'everyPage',
+                didParseCell: function (data) {
+                    if (data.section === 'body' && department.rows[data.row.index].offNextDay) {
+                        data.cell.styles.fillColor = [255, 238, 186];
+                    }
+                }
+            });
+
+            startY = doc.lastAutoTable.finalY + 6;
+        });
+
+        var pages = doc.internal.getNumberOfPages();
+        for (var i = 1; i <= pages; i++) {
+            doc.setPage(i);
+            doc.setFontSize(7);
+            doc.setTextColor(100, 100, 100);
+            doc.text('Page ' + i + ' of ' + pages, pageWidth - margin, pageHeight - 7, { align: 'right' });
+        }
+
+        doc.save(options.fileName + '_' + options.date + '.pdf');
+    }
+
+function getModalDate(container) {
+    var title = $(container).closest('.modal').find('.modal-title').text();
+    var match = title.match(/\d{4}-\d{2}-\d{2}/);
+    return match ? match[0] : '';
+}
+
+// table eke <th> walin columns gannawa (Photo column eka ain karala)
+function exportFromTableHeaders(container, title, date, totalLabel, fileName) {
+    var head = [];
+    var cells = [];
+    var columnStyles = {};
+
+    $(container).find('table').first().find('th').each(function (index) {
+        var text = $(this).text().trim();
+        if (text.toLowerCase() === 'photo') {
+            return;
+        }
+        if (text === '#') {
+            columnStyles[head.length] = { cellWidth: 12 };
+        } else if (text.indexOf('Name') !== -1) {
+            columnStyles[head.length] = { halign: 'left' };
+        }
+        head.push(text);
+        cells.push(index);
+    });
+
+    exportDepartmentTablesPDF({
+        container: container,
+        title: title,
+        date: date,
+        totalLabel: totalLabel,
+        fileName: fileName,
+        head: head,
+        cells: cells,
+        columnStyles: columnStyles
+    });
+}
+
+function generateYesterdayAttendancePDF() {
+    exportFromTableHeaders('#yesterdayattandancetable', 'Yesterday Attendance', getModalDate('#yesterdayattandancetable'), 'Total Present', 'Yesterday_Attendance');
+}
+
+$('#export_yesterday_pdf').click(function () {
+    generateYesterdayAttendancePDF();
+});
+
+function generateYesterdayLatePDF() {
+    exportFromTableHeaders('#yesterdaylateattandancetable', 'Yesterday Late Attendance', getModalDate('#yesterdaylateattandancetable'), 'Total Late', 'Yesterday_Late_Attendance');
+}
+
+$('#export_yesterday_late_pdf').click(function () {
+    generateYesterdayLatePDF();
+});
+
+function generateYesterdayAbsentPDF() {
+    exportFromTableHeaders('#yesterdayabsenttable', 'Yesterday Absent', getModalDate('#yesterdayabsenttable'), 'Total Absent', 'Yesterday_Absent');
+}
+
+$('#export_yesterday_absent_pdf').click(function () {
+    generateYesterdayAbsentPDF();
+});
+
+// reports walata podu PDF kotasa
+function exportDepartmentTablesPDF(options) {
+    var departments = [];
+
+    $(options.container).find('table').each(function () {
+        var $table = $(this);
+        var rows = [];
+
+        $table.find('tr').each(function () {
+            var $cells = $(this).find('td');
+            if ($cells.length === 0) {
+                return; // header row
+            }
+            rows.push({
+                values: options.cells.map(function (i) { return $cells.eq(i).text().trim(); }),
+                offNextDay: $(this).hasClass('table-warning')
+            });
+        });
+
+        departments.push({
+            name: $table.prevAll('h5').first().text().trim(),
+            rows: rows
+        });
+    });
+
+    if (departments.length === 0) {
+        alert('No data to export');
+        return;
+    }
+
+    var doc = new jsPDF('p', 'mm', 'a4');
+    var pageWidth = doc.internal.pageSize.getWidth();
+    var pageHeight = doc.internal.pageSize.getHeight();
+    var margin = 10;
+    var total = departments.reduce(function (sum, d) { return sum + d.rows.length; }, 0);
+
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text(options.title, pageWidth / 2, 15, { align: 'center' });
+
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Date: ' + options.date, margin, 23);
+    doc.text(options.totalLabel + ': ' + total, pageWidth - margin, 23, { align: 'right' });
+
+    var startY = 28;
+
+    departments.forEach(function (department) {
+        if (startY > pageHeight - 45) {
+            doc.addPage();
+            startY = 15;
+        }
+
+        doc.autoTable({
+            startY: startY,
+            margin: { left: margin, right: margin, top: 15, bottom: 15 },
+            theme: 'grid',
+            head: [
+                [{
+                    content: department.name + ' (' + department.rows.length + ')',
+                    colSpan: options.head.length,
+                    styles: { halign: 'left', fillColor: [230, 242, 255], textColor: [41, 128, 185] }
+                }],
+                options.head
+            ],
+            body: department.rows.map(function (r) { return r.values; }),
+            styles: { fontSize: 8, valign: 'middle', halign: 'center', lineWidth: 0.1, lineColor: [200, 200, 200] },
+            headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: 'bold' },
+            bodyStyles: { textColor: [0, 0, 0] },
+            columnStyles: options.columnStyles,
+            rowPageBreak: 'avoid',
+            showHead: 'everyPage',
+            didParseCell: function (data) {
+                if (data.section === 'body' && department.rows[data.row.index].offNextDay) {
+                    data.cell.styles.fillColor = [255, 238, 186];
+                }
+            }
+        });
+
+        startY = doc.lastAutoTable.finalY + 6;
+    });
+
+    var pages = doc.internal.getNumberOfPages();
+    for (var i = 1; i <= pages; i++) {
+        doc.setPage(i);
+        doc.setFontSize(7);
+        doc.setTextColor(100, 100, 100);
+        doc.text('Page ' + i + ' of ' + pages, pageWidth - margin, pageHeight - 7, { align: 'right' });
+    }
+
+    doc.save(options.fileName + '_' + options.date + '.pdf');
+}
+
 </script>
 
 @endsection

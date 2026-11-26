@@ -12,19 +12,18 @@ class OpmaDashdoardController extends Controller
     public function machinechart(Request $request)
 {
     $today = Carbon::today()->toDateString();
-    $devices = DB::table('assigned_devices')
-        ->select('id', 'device_name','remarks')
-        ->where('id', '>=', 15)
+    $devices = DB::table('opma_machines')
+        ->select('id', 'machine')
+        ->where('status', 1)
         ->get();
 
     $chartData = [];
 
     
     foreach ($devices as $device) {
-        $employeedevices = DB::table('employee_assigned_devices')
+        $employeedevices = DB::table('opma_machine_employees')
             ->select('id', 'emp_id')
-            ->where('device_type', '=', $device->id)
-            ->where('status', '=', 1)
+            ->where('opma_machine_id', '=', $device->id)
             ->get();
 
         $dayShiftEmps   = [];
@@ -101,8 +100,7 @@ class OpmaDashdoardController extends Controller
 
         $chartData[] = [
             'device_id'   => $device->id,
-            'device_name' => $device->device_name,
-            'remarks'     => $device->remarks,
+            'device_name' => $device->machine,
             'day'         => $dayShiftEmps,
             'night'       => $nightShiftEmps,
             'qa'          => $qaEmp,
@@ -122,7 +120,7 @@ class OpmaDashdoardController extends Controller
               </thead><tbody>';
 
     foreach ($chartData as $machine) {
-        $deviceName = $machine['device_name'] . '<br><small>' . $machine['remarks'] . '</small>';
+        $deviceName = $machine['device_name'] . '<br>';
         $day        = $machine['day'];
         $night      = $machine['night'];
         $qa         = $machine['qa'];

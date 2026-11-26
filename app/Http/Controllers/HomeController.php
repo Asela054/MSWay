@@ -529,6 +529,7 @@ class HomeController extends Controller
 
 
         $today = Carbon::now()->format('Y-m-d');
+        
 
         $departmentdata = DB::table('departments')
                 ->select('id', 'name'); 
@@ -609,9 +610,9 @@ class HomeController extends Controller
 
                 foreach ($employeesByDepartment as $departmentName => $employees) {
                     $count=1;
-                    $htmlTables .= '<table class="table table-striped table-bordered table-sm small">';
 
                     $htmlTables .= '<h5>' . $departmentName . '</h5>';
+                     $htmlTables .= '<table class="table table-striped table-bordered table-sm small">';
                     $htmlTables .= '<tr><th>#</th><th>Photo</th><th>Employee ID</th><th>Employee Name with Initial</th><th>In Time</th></tr>';
                 
                     foreach ($employees as $employee) {
@@ -647,7 +648,7 @@ class HomeController extends Controller
             }
 
         
-        return response() ->json(['result'=>  $htmlTables]);
+        return response() ->json(['result'=>  $htmlTables, 'date' => $today]);
 
     }
 
@@ -1239,7 +1240,6 @@ class HomeController extends Controller
 
     public function department_yesterdayabsent(Request $request){
         $yesterdayDate = Carbon::now()->subDay()->format('Y-m-d');
-        
         $userId = Auth::id();
         $accessibleEmployeeIds = UserHelper::getAccessibleEmployeeIds($userId);
         
