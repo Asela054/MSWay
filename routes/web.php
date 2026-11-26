@@ -2004,6 +2004,17 @@ Route::get('roster_attendance_transfer/{id}/edit', 'Avemaria\RosterAttendanceTra
 Route::post('roster_attendance_transfer/update', 'Avemaria\RosterAttendanceTransferController@update')->name('rosterAttendanceTransfer.update');
 Route::get('roster_attendance_transfer/fetch', 'Avemaria\RosterAttendanceTransferController@fetch')->name('rosterAttendanceTransfer.fetch');
 Route::post('roster_attendance_transfer/store', 'Avemaria\RosterAttendanceTransferController@store')->name('rosterAttendanceTransfer.store');
+/*-- Leave approval levels----*/
+Route::get('ApprovalLevel',['uses' => 'LeaveAprLevelController@index', 'as' => 'ApprovalLevel']);
+Route::post('addApprovalLevel',['uses' => 'LeaveAprLevelController@store', 'as' => 'addApprovalLevel']);
+Route::post('ApprovalLevel/update', 'LeaveAprLevelController@update')->name('ApprovalLevel.update');
+Route::get('ApprovalLevel/destroy/{id}', 'LeaveAprLevelController@destroy');
+Route::get('ApprovalLevel/{id}/edit', 'LeaveAprLevelController@edit')->name('ApprovalLevel.edit');
+Route::post('ApprovalLevel/list', 'LeaveAprLevelController@list')->name('ApprovalLevel.list');
+Route::get('jobTitle_list', 'LeaveAprLevelController@jobTitle_list');
+Route::get('apLevel_list2', 'LeaveAprLevelController@apLevel_list2');
+Route::get('ApprovalLevel/department-hierarchy', 'LeaveAprLevelController@getDepartmentHierarchy')->name('ApprovalLevel.departmentHierarchy');
+/*-- End Leave approval levels----*/
 
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');

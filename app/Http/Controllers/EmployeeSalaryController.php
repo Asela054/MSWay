@@ -53,7 +53,7 @@ class EmployeeSalaryController extends Controller
      */
     public function show($id)
     {
-        $permission = Auth::user()->can('employee-list');
+        $permission = Auth::user()->can('employee-salary-view');
         if (!$permission) {
             abort(403);
         }

@@ -61,6 +61,8 @@
             <li><a class="dropdown-item" href="{{ route('LeaveApply')}}">Leave Apply</a></li>
         
             <li><a class="dropdown-item" href="{{ route('LeaveType')}}">Leave Type</a></li>
+
+            <li><a class="dropdown-item" href="{{ route('ApprovalLevel')}}">Approval Levels</a></li>
          
             <li><a class="dropdown-item" href="{{ route('LeaveApprovel')}}">Leave Approvals</a></li>
          
