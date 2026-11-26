@@ -1438,7 +1438,7 @@ class AttendanceController extends Controller
     }
 
 
-        public function updateTimestamps(Request $request)
+    public function updateTimestamps(Request $request)
     {
         $timestamps = $request->input('timestamps');
 
