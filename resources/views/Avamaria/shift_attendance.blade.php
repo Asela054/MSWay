@@ -102,7 +102,7 @@
 
                                     <div class="col-sm-12 col-md-6">
                                         <label class="small font-weight-bold text-dark">Out Time*</label>
-                                        <input type="datetime-local" name="out_time_s" id="out_time_s" class="form-control form-control-sm" placeholder="YYYY-MM-DD HH:MM" required/>
+                                        <input type="datetime-local" name="out_time_s" id="out_time_s" class="form-control form-control-sm" placeholder="YYYY-MM-DD HH:MM"/>
                                     </div>
                                 </div>
                                 <div class="form-group mt-3">
@@ -228,7 +228,13 @@ $(document).ready(function(){
             { data: 'emp_name_with_initial', name: 'emp_name_with_initial' },
             { data: 'dep_name', name: 'dep_name' },
             { data: 'date', name: 'date' },
-            { data: 'shift_name', name: 'shift_name' },
+            {
+                data: 'shift_name',
+                name: 'shift_name',
+                render: function (data, type, row) {
+                    return [data, row.shift_code].filter(Boolean).join(' - ');
+                }
+            },
             { data: 'on_timestamp', name: 'on_timestamp' },
             { data: 'off_timestamp', name: 'off_timestamp' },
             {

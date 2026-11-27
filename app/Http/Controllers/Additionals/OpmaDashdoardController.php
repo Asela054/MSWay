@@ -11,7 +11,8 @@ class OpmaDashdoardController extends Controller
 {
     public function machinechart(Request $request)
 {
-    $today = Carbon::today()->toDateString();
+    //$today = Carbon::today()->toDateString();
+    $today = '2026-11-10';
     $devices = DB::table('opma_machines')
         ->select('id', 'machine')
         ->where('status', 1)
@@ -19,6 +20,7 @@ class OpmaDashdoardController extends Controller
 
     $chartData = [];
 
+    
     
     foreach ($devices as $device) {
         $employeedevices = DB::table('opma_machine_employees')
@@ -38,7 +40,7 @@ class OpmaDashdoardController extends Controller
                 ->select('employees.emp_id', 'emp_name_with_initial', 'emp_shift','job_titles.title as job_title','emp_job_code','employee_pictures.emp_pic_filename')
                 ->leftJoin('job_titles', 'employees.emp_job_code', '=', 'job_titles.id')
                 ->leftJoin('employee_pictures', 'employee_pictures.emp_id', '=', 'employees.id')
-                ->where('employees.id', '=', $empid)
+                ->where('employees.emp_id', '=', $empid)
                 ->first();
 
             if (!$employee) continue;

@@ -656,15 +656,15 @@ class AttendancePolicyService
     }
 
 
-    /**
+       /**
      * Punch ekata attendance date eka return karanawa.
      * Roster shift window ekakata gelapenne nathnam unmatched_punches ekata dala null return karanawa.
      */
     private function resolvePunchDate($empId, $punchTs)
     {
-        $early = 120; // on-time  (min)
+        $early = 60; // on-time  (min)
         $after = 0;   // window end 
-        $sessionHours = 16; // එකම row එකට ගන්න on_timestamp එකෙන් පස්සේ උපරිම පැය ගණන
+        $sessionHours = 16; 
 
         $punch     = Carbon::parse($punchTs);
         $today     = $punch->format('Y-m-d');
@@ -734,11 +734,53 @@ class AttendancePolicyService
 
         $punchStr = $punch->format('Y-m-d H:i:s');
 
+        // danatamath save wela thiyena punch ekak aye awoth ema date ekama denna
+        $same = DB::table('attendances')
+            ->where('emp_id', $empId)
+            ->where('timestamp', $punchStr)
+            ->whereNull('deleted_at')
+            ->first();
+
+        if ($same) {
+            return date('Y-m-d', strtotime($same->date));
+        }
+
+        // paya 16k athulatha off nathi on punch ekak thiyenawada
+        $sessionFrom = $punch->copy()->subHours($sessionHours)->format('Y-m-d H:i:s');
+
+        $recent = DB::table('attendances')
+            ->where('emp_id', $empId)
+            ->whereNull('deleted_at')
+            ->where('timestamp', '<', $punchStr)
+            ->where('timestamp', '>=', $sessionFrom)
+            ->orderBy('timestamp', 'desc')
+            ->first();
+
+        if ($recent) {
+            $sessionDate = date('Y-m-d', strtotime($recent->date));
+
+            $punches = DB::table('attendances')
+                ->where('emp_id', $empId)
+                ->whereDate('date', $sessionDate)
+                ->whereNull('deleted_at')
+                ->orderBy('timestamp')
+                ->get();
+
+            $first = $punches->first();
+            $last  = $punches->last();
+
+            // vinadi 10k athulatha punches okkoma on punch ekama widiyata ganna
+            if ($first->timestamp >= $sessionFrom
+                && strtotime($last->timestamp) - strtotime($first->timestamp) <= 600) {
+                return $sessionDate;
+            }
+        }
+
         $row = DB::table('attendance_unmatch')
             ->where('emp_id', $empId)
             ->where('approve_status', 0)
             ->where('on_timestamp', '<=', $punchStr)
-            ->where('on_timestamp', '>=', $punch->copy()->subHours($sessionHours)->format('Y-m-d H:i:s'))
+            ->where('on_timestamp', '>=', $sessionFrom)
             ->orderBy('on_timestamp', 'desc')
             ->first();
 
@@ -766,5 +808,4 @@ class AttendancePolicyService
 
         return null;
     }
-
 }

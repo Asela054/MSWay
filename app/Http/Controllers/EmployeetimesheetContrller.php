@@ -28,12 +28,22 @@ class EmployeetimesheetContrller extends Controller
         $department = $request->get('department');
         $from_date = $request->get('from_date');
         $to_date = $request->get('to_date');
+        $employeeID = $request->get('employeeID');
         $lastEmpId = $request->get('last_emp_id', 0);
 
         $limit = 100;
 
         // Step 1: Fetch Employee Data
-         $employees = DB::select("
+
+        if (!empty($employeeID)) {
+            $filterSql = "AND emp.emp_id = ?";
+            $filterValue = $employeeID;
+        } else {
+            $filterSql = "AND emp.emp_department = ?";
+            $filterValue = $department;
+        }
+
+        $employees = DB::select("
             SELECT emp.id, emp.emp_id, emp.emp_etfno,emp.emp_company, emp.emp_fullname, emp.emp_gender, 
                 dept.name AS departmentname, cam.name AS companyname, job.title AS jobtitlename, emp.emp_shift, 
                 COALESCE(esd_shift.shift_name, st.shift_name) AS shiftname,
@@ -53,11 +63,11 @@ class EmployeetimesheetContrller extends Controller
             LEFT JOIN shift_types esd_shift ON esd.shift_id = esd_shift.id
             WHERE emp.deleted = 0
             AND emp.is_resigned = 0
-            AND emp.emp_department = ? 
+            {$filterSql}
             AND emp.id > ?
             ORDER BY emp.id ASC 
             LIMIT ?",
-            [$department, $lastEmpId, $limit]
+            [$filterValue, $lastEmpId, $limit]
         );
 
         if (empty($employees)) {

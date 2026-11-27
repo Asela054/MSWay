@@ -77,6 +77,13 @@
                             </div>
                         </li>
                         <li class="mb-2">
+                                  <div class="col-md-12">
+                                      <label class="small font-weight-bolder text-dark">Employee*</label>
+                                      <select name="employee" id="employee" class="form-control form-control-sm">
+                                      </select>
+                                  </div>
+                              </li>
+                        <li class="mb-2">
                             <div class="col-md-12">
                                 <label class="small font-weight-bolder text-dark"> From Date* </label>
                                 <input type="date" id="from_date" name="from_date"
@@ -128,6 +135,7 @@
 
             let company = $('#company');
             let department = $('#department');
+            let employee = $('#employee');
 
             company.select2({
                 placeholder: 'Select...',
@@ -164,6 +172,25 @@
                 }
             });
 
+            employee.select2({
+                placeholder: 'Select...',
+                width: '100%',
+                allowClear: true,
+                ajax: {
+                    url: '{{url("employee_list_sel2")}}',
+                    dataType: 'json',
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1,
+                            company: company.val(),
+                            department: department.val()
+                        }
+                    },
+                    cache: true
+                }
+            });
+
             var loading = false;
             var lastEmpId = 0;
 
@@ -172,7 +199,8 @@
                 loading = true;
                 var departmentID = $('#department').val();
                 var from_date = $('#from_date').val();
-                var to_date = $('#to_date').val();            
+                var to_date = $('#to_date').val();   
+                var employeeID = $('#employee').val();         
 
                 closeOffcanvasSmoothly();
 
@@ -184,6 +212,7 @@
                         department: departmentID,
                         from_date: from_date,
                         to_date: to_date,
+                        employeeID: employeeID,
                         last_emp_id: lastEmpId,
                         _token: '{{csrf_token()}}'
                     },

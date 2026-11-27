@@ -76,7 +76,7 @@ class RosterAttendanceTransferController extends Controller
             'hidden_id'  => 'required|integer',
             'shift'      => 'nullable|integer|exists:shift_types,id',
             'in_time_s'  => 'required|date_format:Y-m-d\TH:i',
-            'out_time_s' => 'required|date_format:Y-m-d\TH:i|after:in_time_s',
+            'out_time_s' => 'nullable|date_format:Y-m-d\TH:i|after:in_time_s',
         ]);
 
         if ($validator->fails()) {
@@ -92,7 +92,7 @@ class RosterAttendanceTransferController extends Controller
 
         $shiftId  = $request->input('shift') ?: null;
         $onTime   = date('Y-m-d H:i:s', strtotime($request->input('in_time_s')));
-        $offTime  = date('Y-m-d H:i:s', strtotime($request->input('out_time_s')));
+        $offTime = $request->input('out_time_s') ? date('Y-m-d H:i:s', strtotime($request->input('out_time_s'))) : null;
         $workDate = date('Y-m-d', strtotime($row->date));
         $now      = date('Y-m-d H:i:s');
 
@@ -148,7 +148,10 @@ class RosterAttendanceTransferController extends Controller
                 $this->attendancePolicyService->checkAndInsertLateAttendance($row->emp_id,$workDate,$onTime,$onId);
             }
 
-             $this->saveAttendance($row->emp_id, $offTime, $workDate, $now);
+            if(!empty($offTime)){
+                 $this->saveAttendance($row->emp_id, $offTime, $workDate, $now);
+            }
+            
         });
 
 
