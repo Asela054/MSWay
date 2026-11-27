@@ -573,11 +573,7 @@ class LeaveController extends Controller
             )));
 
             try {
-                if ($employeeDept == 4) {
-
-                    $this->sendAdminlevel_sms($request->input('employee'), $dates);
-                } else {
-
+                 
                     $smsRecipients = array_merge(
                         array($request->input('approveby')),
                         $sequenceApprovers
@@ -596,7 +592,10 @@ class LeaveController extends Controller
                             ));
                         }
                     }
-                }
+
+                    if ($employeeDept == 4) {
+                            $this->sendAdminlevel_sms($request->input('employee'), $dates);
+                    }
             } catch (\Exception $e) {
                 \Log::error('Leave apply SMS failed', array(
                     'emp_id'  => $request->input('employee'),
