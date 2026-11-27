@@ -49,91 +49,107 @@ class OpmaDailyProductionController extends Controller
         $this->Opma_Daily_approvePolicy_Service = $Opma_Daily_approvePolicy_Service;
     }
 
-      public function Productionfinish(Request $request)
+    public function Productionfinish(Request $request)
     {
+        $current_date_time = Carbon::now()->toDateTimeString();
 
-         $current_date_time = Carbon::now()->toDateTimeString();
+        $shift_id       = $request->input('shift_id');
+        $production_id  = $request->input('production_id');
+        $loged_user_id  = $request->input('user_id');
+        $produtiondate  = $request->input('production_date');
+        $target         = $request->input('target_quantity');
+        $quntity        = $request->input('produce_quantity');
+        $damage_qty     = $request->input('damage_qty', 0);
+        $machine_id     = $request->input('machine_id');
+        $machine_name   = $request->input('machine_name');
+        $product_id     = $request->input('style_id');
+        $product_name   = $request->input('style_name');
 
-          $emp_id = $request->input('emp_id');
-          $production_id = $request->input('production_id');
-          $loged_user_id = $request->input('user_id');
-          $produtiondate = $request->input('production_date');
-          $target = $request->input('target_quantity');
-          $quntity = $request->input('produce_quantity');
-          $damage_qty = $request->input('damage_qty');
-          $machine_id = $request->input('machine_id');
-          $machine_name = $request->input('machine_name');
-          $product_id = $request->input('style_id');
-          $product_name = $request->input('style_name');
-          
+        // Machine ekata allocate karala, e dawase e shift eke roster wela inna employees
+        $employees = DB::table('opma_machine_employees as me')
+            ->leftjoin('employee_roster_details as r', 'r.emp_id', '=', 'me.emp_id')
+            ->leftjoin('employees as e', 'e.emp_id', '=', 'me.emp_id')
+            ->where('me.opma_machine_id', $machine_id)
+            ->where('r.shift_id', $shift_id)
+            ->whereDate('r.work_date', '=', $produtiondate)
+            ->select('me.emp_id', 'e.emp_department', 'e.emp_job_code')
+            ->distinct()
+            ->get();
 
-          // calculate the production precentage for bonus and performance
-          $production_differnce = $quntity - $target; 
-          $produced_percentage = ($target > 0) ? round(($quntity / $target) * 100, 2) : 0;
+        if ($employees->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No employees rostered for this machine, shift and date'
+            ], 404);
+        }
 
-          $performance = ($target > 0) ? round((($quntity - $damage_qty) / $target) * 100) : 0;
+        $production_differnce = $quntity - $target;
+        $produced_percentage  = ($target > 0) ? round(($quntity / $target) * 100, 2) : 0;
+        $performance          = ($target > 0) ? round((($quntity - $damage_qty) / $target) * 100) : 0;
 
-          // get production bonus according to the employee department and job title if the produced percentage is greater than 90%
-                if($produced_percentage > 90){
-                      $employeedetails = DB::table('employees')
-                        ->where('emp_id', $emp_id)
-                        ->select('emp_department','emp_job_code')
-                        ->first();
-                    
-                    $empdepartment = $employeedetails->emp_department;
-                    $emp_jobtitle = $employeedetails->emp_job_code;
+        $emp_ids = [];
 
+        DB::beginTransaction();
+
+        try {
+            foreach ($employees as $employee) {
+                $employee_amount = 0;
+
+                if ($produced_percentage > 90) {
                     $amountData = DB::table('opma_production_amount')
-                            ->where('department_id',$empdepartment )
-                            ->where('jobtitle',$emp_jobtitle )
-                            ->first();
+                        ->where('department_id', $employee->emp_department)
+                        ->where('jobtitle', $employee->emp_job_code)
+                        ->first();
 
                     $employee_amount = $amountData ? $amountData->amount : 0;
-
-                }else{
-                    $employee_amount = 0;
                 }
 
+                $data = [
+                    'allocation_id'     => $production_id,
+                    'emp_id'            => $employee->emp_id,
+                    'date'              => $produtiondate,
+                    'machine_id'        => $machine_id,
+                    'product_id'        => $product_id,
+                    'target'            => $target,
+                    'Produce_qty'       => $quntity,
+                    'difference'        => $production_differnce,
+                    'precentage'        => $produced_percentage,
+                    'amount'            => $employee_amount,
+                    'description'       => '',
+                    'damage_precentage' => '',
+                    'damage_qty'        => $damage_qty,
+                    'perfomance'        => $performance,
+                    'mchine_name'       => $machine_name,
+                    'product_name'      => $product_name,
+                    'shift_id'      => $shift_id,
+                    'status'            => 1,
+                    'updated_at'        => $current_date_time
+                ];
 
                 $existingRecord = EmployeeProduction::where('allocation_id', $production_id)
-                                            ->where('emp_id', $emp_id)
-                                            ->where('date', $produtiondate)
-                                            ->first();
+                    ->where('emp_id', $employee->emp_id)
+                    ->where('date', $produtiondate)
+                    ->first();
 
+                if ($existingRecord) {
+                    $data['updated_by'] = $loged_user_id;
+                    $existingRecord->update($data);
+                } else {
+                    $data['created_by'] = $loged_user_id;
+                    $data['created_at'] = $current_date_time;
+                    EmployeeProduction::create($data);
+                }
 
-                $data = [
-                'allocation_id' => $production_id,
-                'emp_id' => $emp_id,
-                'date' => $produtiondate,
-                'machine_id' => $machine_id,
-                'product_id' => $product_id,
-                'target' => $target,
-                'Produce_qty' => $quntity,
-                'difference' => $production_differnce,
-                'precentage' => $produced_percentage,
-                'amount' => $employee_amount,
-                'description' => '',
-                'damage_precentage' => '',
-                'damage_qty' => $damage_qty,
-                'perfomance' => $performance,
-                'mchine_name' => $machine_name,
-                'product_name' => $product_name,
-                'status' => 1,
-                'created_by' => $loged_user_id,
-                'updated_at' => $current_date_time
-                 ];
+                $emp_ids[] = $employee->emp_id;
+            }
 
-                    if ($existingRecord) {
-                        $existingRecord->update($data);
-                    } else {
-                        $data['updated_by'] = $loged_user_id;
-                        $data['created_at'] = $current_date_time;
-                        EmployeeProduction::create($data);
-                    }
-            
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
 
-        
-        return (new BaseController)->sendResponse($emp_id, 'Production Finishing is successfully Saved');
+        return (new BaseController)->sendResponse($emp_ids, 'Production Finishing is successfully Saved');
     }
 
     public function approvedailysummary(Request $request)
